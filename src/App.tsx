@@ -3,6 +3,7 @@ import './App.css';
 import {BrowserRouter as Router, Routes, Route, useParams} from 'react-router-dom';
 import SchoolBoxLayout from './layouts/SchoolBoxLayout';
 import PageNotFound from './components/PageNotFound';
+import StudentReport from './pages/studentReport/StudentReport';
 
 const SchoolBoxRouter = () => {
   const {code} = useParams();
@@ -18,17 +19,12 @@ const SchoolBoxRouter = () => {
   }
 }
 
-const Test = () => {
-  return <h2>Student Report</h2>;
-}
-
-
 const App = () => {
   return (
     <Router>
       <Routes>
         <Route path="/modules/remote/" element={<SchoolBoxLayout />}>
-          <Route path=":code" element={<Test />} />
+          <Route path=":code" element={<StudentReport />} />
         </Route>
         <Route path="*" element={<PageNotFound />} />
       </Routes>
