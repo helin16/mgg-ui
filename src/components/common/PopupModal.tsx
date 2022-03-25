@@ -2,7 +2,7 @@ import React from 'react';
 import {Modal} from 'react-bootstrap';
 
 const PopupModal = ({handleClose, size, footer, body, header, title, ...props}: any) => {
-console.log(props.show);
+
   const getHeader = () => {
     if (!header && !title) {
       return null;
@@ -37,7 +37,7 @@ console.log(props.show);
   }
 
   return (
-    <Modal onHide={handleClose} {...props}>
+    <Modal onHide={handleClose} {...props} className={'PopupModal'}>
       {getHeader()}
       {getBody()}
       {getFooter()}

@@ -1,34 +1,22 @@
 import React from 'react';
 import './App.css';
-import {BrowserRouter as Router, Routes, Route, useParams} from 'react-router-dom';
+import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import SchoolBoxLayout from './layouts/SchoolBoxLayout';
 import PageNotFound from './components/PageNotFound';
-import StudentReport from './pages/studentReport/StudentReport';
-
-const SchoolBoxRouter = () => {
-  const {code} = useParams();
-  const remoteUrl = document.getElementById("mgg-root")?.getAttribute('data-url') || atob(code || '');
-  try {
-    // @ts-ignore
-    const url = new URL(remoteUrl);
-    const newPath = url.pathname.replace('/3rdPartyAuth/', '');
-    const finalPath = atob(newPath || '');
-    return <div><div>remoteUrl: {remoteUrl}</div><div>finalPath: '{finalPath}'</div></div>;
-  } catch (e) {
-    return <div>Error: can't get the url.</div>
-  }
-}
+import {Provider} from 'react-redux';
+import store from './redux/makeReduxStore';
 
 const App = () => {
   return (
-    <Router>
-      <Routes>
-        <Route path="/modules/remote/" element={<SchoolBoxLayout />}>
-          <Route path=":code" element={<StudentReport />} />
-        </Route>
-        <Route path="*" element={<PageNotFound />} />
-      </Routes>
-    </Router>
+    <Provider store={store}>
+      <Router>
+        <Routes>
+          <Route path="/modules/remote/:code" element={<SchoolBoxLayout />}>
+          </Route>
+          <Route path="*" element={<PageNotFound />} />
+        </Routes>
+      </Router>
+    </Provider>
   );
 }
 

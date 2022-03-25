@@ -14,27 +14,10 @@ const removeToken = () => {
   return localStorage.removeItem(getTokenName());
 };
 
-const getCompanyIdName = () => {
-  return process.env.REACT_APP_LOCAL_COMPANY_ID_NAME || 'companyId';
-};
-
-const getCompanyId = () => {
-  return localStorage.getItem(getCompanyIdName());
-};
-
-const setCompanyId = (newToken: string) => {
-  return localStorage.setItem(getCompanyIdName(), newToken);
-};
-
-const removeCompanyId = () => {
-  return localStorage.removeItem(getCompanyIdName());
-};
-
-export default {
+const LocalStorageService = {
   getToken,
   setToken,
   removeToken,
-  getCompanyId,
-  setCompanyId,
-  removeCompanyId,
 };
+
+export default LocalStorageService;

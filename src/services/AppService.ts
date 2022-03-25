@@ -1,7 +1,7 @@
 import axios from 'axios';
 import LocalStorageService from './LocalStorageService';
 
-type iConfigParams = {
+export type iConfigParams = {
   [key: string]: string;
 };
 type iParams = {
@@ -58,10 +58,6 @@ const getUploadHeaders = () => {
   if (!token || token === '') {
     return undefined;
   }
-  const companyId = LocalStorageService.getCompanyId();
-  if (!companyId || companyId === '') {
-    return undefined;
-  }
   return {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -73,10 +69,12 @@ const uploadImage = (url: string, params: FormData) => {
   return axios.post(getEndPointUrl(url), params, getUploadHeaders());
 };
 
-export default {
+const AppService = {
   get,
   post,
   put,
   delete: remove,
   uploadImage,
 };
+
+export default AppService;
