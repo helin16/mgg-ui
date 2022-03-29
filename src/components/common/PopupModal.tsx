@@ -1,7 +1,7 @@
 import React from 'react';
 import {Modal} from 'react-bootstrap';
 
-const PopupModal = ({handleClose, size, footer, body, header, title, ...props}: any) => {
+const PopupModal = ({handleClose, footer, body, header, title, children, ...props}: any) => {
 
   const getHeader = () => {
     if (!header && !title) {
@@ -15,12 +15,12 @@ const PopupModal = ({handleClose, size, footer, body, header, title, ...props}: 
   }
 
   const getBody = () => {
-    if (!body) {
+    if (!children) {
       return null;
     }
     return (
       <Modal.Body>
-        {body}
+        {children}
       </Modal.Body>
     )
   }

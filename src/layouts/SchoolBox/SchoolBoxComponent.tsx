@@ -5,41 +5,56 @@ import SchoolBoxRouter from './SchoolBoxRouter';
 import {Spinner} from 'react-bootstrap';
 import AuthService from '../../services/AuthService';
 import LocalStorageService from '../../services/LocalStorageService';
-import {userAuthenticated} from '../../redux/reduxers/auth.slice';
+import {removedAuthentication, userAuthenticated} from '../../redux/reduxers/auth.slice';
 import {useDispatch} from 'react-redux';
 
-const SchoolBoxComponent = ({path, remoteUrl}: {path: string; remoteUrl: string} ) => {
+type iSchoolBoxComponent = {
+  path: string;
+  remoteUrl: string;
+  id: string | null,
+  user: string | null;
+  time: string | null;
+  sbKey: string | null
+};
+
+const SchoolBoxComponent = ({path, remoteUrl, id = null, user = null, time = null, sbKey = null}: iSchoolBoxComponent) => {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
 
   const [searchParams] = useSearchParams();
-  const synId = searchParams.get('id');
-  const schoolBoxUser = searchParams.get('user');
-  const time = searchParams.get('time');
-  const key = searchParams.get('key');
+  const synId = id === null ? searchParams.get('id') : id;
+  const schoolBoxUser = user === null ? searchParams.get('user') : user;
+  const authTime = time === null ? searchParams.get('time') : time;
+  const authKey = sbKey === null ? searchParams.get('key') : time;
 
   useEffect(() => {
     let isCancelled = false;
     if (loading !== true) { return }
     if (synId === null || `${synId}`.trim() === '') { return }
     if (schoolBoxUser === null || `${schoolBoxUser}`.trim() === '') { return }
-    if (time === null || `${time}`.trim() === '') { return }
-    if (key === null || `${key}`.trim() === '') { return }
+    if (authTime === null || `${authTime}`.trim() === '') { return }
+    if (authKey === null || `${authKey}`.trim() === '') { return }
 
-    AuthService.authSchoolBox(synId, schoolBoxUser, Number(time), key)
+    AuthService.authSchoolBox(synId, schoolBoxUser, Number(authTime), authKey)
       .then(resp => {
         if (isCancelled) {return}
         LocalStorageService.setToken(resp.token);
         dispatch(userAuthenticated({user: resp.user}));
         setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        LocalStorageService.removeToken();
+        dispatch(removedAuthentication());
+        setLoading(false);
       });
     return () => {
       isCancelled = true;
     }
-  }, [synId, schoolBoxUser, time, key, loading]);
+  }, [synId, schoolBoxUser, authKey, authTime, loading, dispatch]);
 
   if (loading === true) {
-    return <Spinner animation={'border'}/>
+    return <div><Spinner animation={'border'}/>Authenticating ...</div>
   }
 
   return (

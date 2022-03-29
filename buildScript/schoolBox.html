@@ -10,11 +10,12 @@
 
       const manifest = document.createElement('link');
       manifest.ref = "manifest";
-      manifest.href = `${schoolBoxStaticUrl}manifest.json`;
+      manifest.href = `${schoolBoxStaticUrl}/manifest.json`;
       header.appendChild(manifest);
 
       const mainCss = document.createElement('link');
-      mainCss.ref = "stylesheet";
+      mainCss.rel = "stylesheet";
+      mainCss.type = "text/css";
       mainCss.href = `${schoolBoxStaticUrl}%MAIN_CSS%`;
       header.appendChild(mainCss);
 

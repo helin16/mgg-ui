@@ -45,9 +45,10 @@ const ContactSupportPopupBtn = ({children}: {children: React.ReactNode}) => {
       title={'Contact Support'}
       show={showingPopup}
       handleClose={closePopup}
-      body={getContactForm()}
       footer={getFooter()}
-    />
+    >
+      {getContactForm()}
+    </PopupModal>
   </>
 };
 

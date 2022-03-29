@@ -4,7 +4,7 @@ import PageNotFound from '../../components/PageNotFound';
 
 const SchoolBoxRouter = ({path}: {path: string}) => {
   switch (path) {
-    case '/report/student': {
+    case '/reports/student': {
       return <StudentReport />;
     }
     default: {

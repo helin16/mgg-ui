@@ -2,7 +2,7 @@ import moment from 'moment';
 import * as fs from 'fs';
 import { Client } from 'node-scp'
 
-const schoolBoxStaticAssetUrlPath = '/static/mggs/';
+const schoolBoxStaticAssetUrlPath = '/static/mggs';
 const SCHOOLBOX_DEV_HOST = 'mconnectdev.mentonegirls.vic.edu.au';
 const SCHOOLBOX_DEV_PORT = 22;
 const SCHOOLBOX_DEV_STATIC_ASSET_FOLDER = '/usr/share/schoolbox/www/';
@@ -39,7 +39,7 @@ const uploadAssets = async () => {
       privateKey: fs.readFileSync(SCHOOLBOX_DEV_PRIRVATE_KEY_FILE),
       // passphrase: 'your key passphrase',
     })
-    await client.uploadDir(`${getBuildFolder()}`, `${SCHOOLBOX_DEV_STATIC_ASSET_FOLDER}${schoolBoxStaticAssetUrlPath}`);
+    await client.uploadDir(`${getBuildFolder()}`, `${SCHOOLBOX_DEV_STATIC_ASSET_FOLDER}${schoolBoxStaticAssetUrlPath}/`);
     await client.uploadFile(`${getBuildFolder()}/schoolBox.html`, SCHOOLBOX_DEV_IFRAME_HTML_FILE);
     client.close() // remember to close connection after you finish
   } catch (e) {
@@ -48,7 +48,6 @@ const uploadAssets = async () => {
 }
 
 const PromoteToSchoolBox = async () => {
-  console.log(`PromoteToSchoolBox: ${moment()}`);
   const {files} = await readManifestJson();
   const mainCssPath = files['main.css'];
   const mainJsPath = files['main.js'];
