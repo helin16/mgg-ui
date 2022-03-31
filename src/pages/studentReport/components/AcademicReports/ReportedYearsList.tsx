@@ -1,5 +1,5 @@
 import iVStudent from '../../../../types/student/iVStudent';
-import {Col, Image, Row, Spinner, Button} from 'react-bootstrap';
+import {Image, Spinner} from 'react-bootstrap';
 import React, {useEffect, useState} from 'react';
 import StudentReportService from '../../../../services/StudentReportService';
 import iStudentReportYear from '../../../../types/student/iStudentReportYear';
@@ -21,12 +21,12 @@ const ReportedYearsList = ({student, onSelect}: {student: iVStudent, onSelect: (
             return reportYear1.FileYear > reportYear2.FileYear && reportYear1.FileSemester > reportYear2.FileSemester ? -1 : 1
           })
           .reduce((map, reportYear) => {
-          return {
-            ...map,
-            // @ts-ignore
-            [reportYear.FileYear]: [...(reportYear.FileYear in map ? map[reportYear.FileYear] : []), reportYear],
-          }
-        }, {});
+            return {
+              ...map,
+              // @ts-ignore
+              [reportYear.FileYear]: [...(reportYear.FileYear in map ? map[reportYear.FileYear] : []), reportYear],
+            }
+          }, {});
         setReportList(listMap);
         setIsLoading(false);
       });
@@ -56,7 +56,7 @@ const ReportedYearsList = ({student, onSelect}: {student: iVStudent, onSelect: (
     if (Object.keys(reportList).length <= 0) {
       return null;
     }
-
+    console.log(reportList);
     return Object.keys(reportList).map(fileYear => {
       return (
         <SectionDiv key={fileYear}>
@@ -66,7 +66,7 @@ const ReportedYearsList = ({student, onSelect}: {student: iVStudent, onSelect: (
             return (
               <div key={studentReport.ID}>
                 <LinkBtn onClick={() => onSelect(studentReport)}>
-                  {studentReport.FileYear} Semester {studentReport.FileSemester} Academic Report {getStaffOnlyFlag(studentReport)}
+                  {studentReport.FileYear} Semester {studentReport.FileSemester / 2} Academic Report {getStaffOnlyFlag(studentReport)}
                 </LinkBtn>
               </div>
             );

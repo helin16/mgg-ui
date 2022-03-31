@@ -1,6 +1,6 @@
 import iVStudent from '../../../../types/student/iVStudent';
 import iStudentReportYear from '../../../../types/student/iStudentReportYear';
-import CoverLetter from './DetailsComponents/pages/CoverLetter';
+import CoverLetterPage from './DetailsComponents/pages/CoverLetterPage';
 import {Col, Row} from 'react-bootstrap';
 import StudentAcademicReportMenu from './DetailsComponents/StudentAcademicReportMenu';
 import {useEffect, useState} from 'react';
@@ -8,8 +8,9 @@ import iStudentReportResult, {
   STUDENT_REPORT_SUBJECT_NAME_COMPARATIVE_ANALYSIS
 } from '../../../../types/student/iStudentReportResult';
 import StudentReportService from '../../../../services/StudentReportService';
-import StudentAcademicSubjectDetails from './DetailsComponents/StudentAcademicSubjectDetails';
-import ComparativeAnalysis from './DetailsComponents/pages/ComparativeAnalysis';
+import StudentAcademicSubjectPage from './DetailsComponents/pages/StudentAcademicSubjectPage';
+import ComparativeAnalysisPage from './DetailsComponents/pages/ComparativeAnalysisPage';
+import HomeGroupPage from './DetailsComponents/pages/HomeGroupPage';
 
 export type StudentAcademicReportDetailsProps = {
   student: iVStudent,
@@ -58,14 +59,14 @@ const StudentAcademicReportDetails = ({
     return () => {
       isCanceled = true;
     }
-  }, [JSON.stringify(student), JSON.stringify(studentReportYear)]);
+  }, [student, studentReportYear]);
 
 
   const getSpecialPage = () => {
     if (selectedClassCode === STUDENT_REPORT_SUBJECT_NAME_COMPARATIVE_ANALYSIS) {
-      return <ComparativeAnalysis student={student} studentReportYear={studentReportYear} studentReportResult={studentReportResult}/>
+      return <ComparativeAnalysisPage student={student} studentReportYear={studentReportYear} studentReportResult={studentReportResult}/>
     }
-    return <CoverLetter student={student} studentReportYear={studentReportYear} />;
+    return <CoverLetterPage student={student} studentReportYear={studentReportYear} studentReportResult={studentReportResult} />;
   }
 
   const getDetailsPanel = () => {
@@ -73,7 +74,15 @@ const StudentAcademicReportDetails = ({
       return getSpecialPage();
     }
 
-    return <StudentAcademicSubjectDetails
+    if (studentReportResultMap[selectedClassCode][0].isHomeGroup === true) {
+      return <HomeGroupPage
+        student={student}
+        studentReportYear={studentReportYear}
+        selectedReportResults={studentReportResultMap[selectedClassCode] || []}
+      />
+    }
+
+    return <StudentAcademicSubjectPage
       student={student}
       studentReportYear={studentReportYear}
       selectedReportResults={studentReportResultMap[selectedClassCode] || []}

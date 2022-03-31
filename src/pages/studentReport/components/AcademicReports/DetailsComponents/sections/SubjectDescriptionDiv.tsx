@@ -6,12 +6,8 @@ const SubjectDescriptionDiv = ({result}: {result: iStudentReportResult}) => {
   const [description, setDescription] = useState('');
 
   useEffect(() => {
-    let isCancelled = false;
     setDescription(`${result.AssessOverview || ''}`);
-    return () => {
-      isCancelled = true
-    };
-  }, [JSON.stringify(result)]);
+  }, [result]);
 
 
   if (description.trim() === '') {

@@ -16,15 +16,10 @@ const AchievementStandardsDiv = ({results}: {results: iStudentReportResult[]}) =
   const [aSResults, setASResults] = useState<iStudentReportResult[]>([]);
 
   useEffect(() => {
-    let isCancelled = false;
     setASResults(
       results
         .filter(result => result.AssessAreaResultType === STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_ACHIEVEMENT_STANDARDS)
     )
-
-    return () => {
-      isCancelled = true;
-    };
   }, [results]);
 
   return <GraphTable

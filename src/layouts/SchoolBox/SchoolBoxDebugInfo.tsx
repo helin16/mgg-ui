@@ -1,5 +1,5 @@
-import React from 'react';
-import {Alert} from 'react-bootstrap';
+// import React from 'react';
+// import {Alert} from 'react-bootstrap';
 
 const SchoolBoxDebugInfo = ({remoteUrl, path}: {remoteUrl: string; path: string}) => {
   return null;

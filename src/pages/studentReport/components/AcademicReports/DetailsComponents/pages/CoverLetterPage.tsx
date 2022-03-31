@@ -3,10 +3,23 @@ import {StudentAcademicReportDetailsProps} from '../../StudentAcademicReportDeta
 import React from 'react';
 import PanelTitle from '../../../../../../components/PanelTitle';
 import SectionDiv from '../sections/SectionDiv';
+import styled from 'styled-components';
+import iStudentReportResult from '../../../../../../types/student/iStudentReportResult';
 
-const CoverLetter = ({student, studentReportYear}: StudentAcademicReportDetailsProps) => {
+const Wrapper = styled.div`
+  .cover-letter {
+    table {
+      td {
+        border: 1px solid;
+        padding: 0px;
+      }
+    }
+  }
+`
+
+const CoverLetterPage = ({student, studentReportYear, studentReportResult}: StudentAcademicReportDetailsProps & {studentReportResult: iStudentReportResult | null}) => {
   return (
-    <div className={'cover-letter-wrapper'}>
+    <Wrapper className={'cover-letter-wrapper'}>
       <Row>
         <Col>
           <h3>Academic Reports</h3>
@@ -22,20 +35,20 @@ const CoverLetter = ({student, studentReportYear}: StudentAcademicReportDetailsP
             House: {student.StudentHouseDescription}
           </Col>
           <Col className={'text-right'}>
-            {student.StudentForm}
+            {studentReportResult?.StudentForm || ''}
           </Col>
         </Row>
       </PanelTitle>
 
-      <SectionDiv>
+      <SectionDiv className={'cover-letter'}>
         <Image
           src={student.profileUrl}
           rounded
           className={'pull-right'} />
         <div dangerouslySetInnerHTML={{__html: studentReportYear.LetterOfExplanation || ''}} />
       </SectionDiv>
-    </div>
+    </Wrapper>
   )
 };
 
-export default CoverLetter;
+export default CoverLetterPage;

@@ -12,7 +12,6 @@ const Wrapper = styled.div`
 
 const StudentAcademicEmailPopup = ({
   student,
-  studentReportYear,
   onClose
 }: StudentAcademicReportDetailsProps & { onClose: () => void } ) => {
   const {user} = useSelector((state: RootState) => state.auth);
@@ -63,8 +62,9 @@ const StudentAcademicEmailPopup = ({
         <h6 className="text-danger"><i>Having Trouble Viewing The PDF File?</i></h6>
         <ul>
           <li>Please ensure you have the latest version of Adobe Acrobat Reader installed on your computer.</li>
-          <li>Adobe Acrobat Reader can be downloaded from: <a href="https://get.adobe.com/reader/"
-                                                              target="_blank">https://get.adobe.com/reader/</a></li>
+          <li>Adobe Acrobat Reader can be downloaded from:
+            <a href="https://get.adobe.com/reader/" target="_blank">https://get.adobe.com/reader/</a>
+          </li>
         </ul>
       </Wrapper>
     </PopupModal>

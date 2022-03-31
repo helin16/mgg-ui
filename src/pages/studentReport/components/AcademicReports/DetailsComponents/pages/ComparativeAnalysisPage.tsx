@@ -29,7 +29,7 @@ const Wrapper = styled.div`
   }
 `;
 
-const ComparativeAnalysis = ({
+const ComparativeAnalysisPage = ({
   student, studentReportYear, studentReportResult
 }: StudentAcademicReportDetailsProps & {studentReportResult: iStudentReportResult | null}) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -47,7 +47,7 @@ const ComparativeAnalysis = ({
     return () => {
       isCancelled = true;
     };
-  }, [JSON.stringify(student), JSON.stringify(studentReportYear)]);
+  }, [student, studentReportYear]);
 
   if (studentReportResult === null) {
     return null;
@@ -66,9 +66,9 @@ const ComparativeAnalysis = ({
             .sort((code1, code2) => code1 > code2 ? 1 : -1)
             .map((code) => {
               return (
-                <div className={'result-row'}>
+                <div className={'result-row'} key={code}>
                   <div>The expected standards were {row[code].name}</div>
-                  <div>{MathHelper.mul(MathHelper.div(row[code].count, row[code].total), 100)} %</div>
+                  <div>{MathHelper.mul(MathHelper.div(row[code].count, row[code].total), 100).toFixed(2)} %</div>
                 </div>
               )
             })
@@ -81,16 +81,17 @@ const ComparativeAnalysis = ({
     if (isLoading === true) {
       return <Spinner animation={'border'} />
     }
+
     return Object.keys(comparativeResults)
       .sort((res1, res2) => res1 > res2 ? 1 : -1)
       .map(assessHeading => {
         return getComparativeResultTable(assessHeading, comparativeResults[assessHeading])
-      })
+      });
   }
 
 
   return (
-    <Wrapper className={'cover-letter-wrapper'}>
+    <Wrapper className={'comparative-analysis-wrapper'}>
       <Row>
         <Col>
           <h3>Comparative Analysis</h3>
@@ -108,8 +109,8 @@ const ComparativeAnalysis = ({
           The information provided on this page is designed to give you an understanding of your daughter's performance
           relative to her cohort in the key learning areas of English,
           Humanities, Languages, Mathematics, Science and The Arts.
-          The tables below indicate the percentage of students in Year {studentReportResult.StudentYearLevelDescription} who were awarded
-          the various levels on our five point scale for overall progress in relation to standards.
+          The tables below indicate the percentage of students in Year {studentReportResult.StudentYearLevelDescription}
+          who were awarded the various levels on our five point scale for overall progress in relation to standards.
         </p>
       </div>
 
@@ -133,4 +134,4 @@ const ComparativeAnalysis = ({
   )
 };
 
-export default ComparativeAnalysis;
+export default ComparativeAnalysisPage;

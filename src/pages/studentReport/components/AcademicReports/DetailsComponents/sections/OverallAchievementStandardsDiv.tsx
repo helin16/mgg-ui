@@ -35,15 +35,10 @@ const translateOverallResult = (result: string) => {
 const OverallAchievementStandardsDiv = ({results}: {results: iStudentReportResult[]}) => {
   const [resultList, setResultList] = useState<iStudentReportResult[]>([]);
   useEffect(() => {
-    let isCancelled = false;
     setResultList(
       results
         .filter(result => result.AssessAreaResultType === STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_OVERALL_ASSESSMENT_JNR)
     )
-
-    return () => {
-      isCancelled = true;
-    };
   }, [results]);
 
   if (resultList.length <= 0) {

@@ -15,14 +15,10 @@ const ApproachesToLearningDiv = ({results}: {results: iStudentReportResult[]}) =
   const [resultList, setResultList] = useState<iStudentReportResult[]>([]);
 
   useEffect(() => {
-    let isCancelled = false;
     setResultList(
       results
         .filter(result => result.AssessAreaResultType === STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_APPROACHES_TO_LEARNING)
     )
-    return () => {
-      isCancelled = true;
-    };
   }, [results]);
 
   return (

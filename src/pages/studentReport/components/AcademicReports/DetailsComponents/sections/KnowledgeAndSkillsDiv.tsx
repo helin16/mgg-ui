@@ -2,7 +2,7 @@ import iStudentReportResult, {
   STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_KNOWLEDGE_AND_SKILLS
 } from '../../../../../../types/student/iStudentReportResult';
 import {useEffect, useState} from 'react';
-import GraphTable, {iResultTranslateMap} from './GraphTable';
+import GraphTable from './GraphTable';
 
 const resultTranslateMap = {
   '1': {name: 'Well Below', width: 8},
@@ -16,15 +16,10 @@ const KnowledgeAndSkillsDiv = ({results}: {results: iStudentReportResult[]}) => 
   const [resultList, setResultList] = useState<iStudentReportResult[]>([]);
 
   useEffect(() => {
-    let isCancelled = false;
     setResultList(
       results
         .filter(result => result.AssessAreaResultType === STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_KNOWLEDGE_AND_SKILLS)
     )
-
-    return () => {
-      isCancelled = true;
-    };
   }, [results]);
 
   return <GraphTable

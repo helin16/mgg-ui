@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import {InputGroup, FormControl, ListGroup, Badge} from 'react-bootstrap';
+import React, {useEffect, useRef, useState} from 'react';
+import {InputGroup, FormControl} from 'react-bootstrap';
 import {Search} from 'react-bootstrap-icons';
 import LoadingBtn from '../../../components/common/LoadingBtn';
 import StudentService from '../../../services/StudentService';
@@ -26,9 +26,13 @@ const Wrapper = styled.div`
   }
 `
 const SearchPage = ({onSelect}: {onSelect: (student: iVStudent) => void}) => {
+  const innerRef = useRef();
   const [searchTxt, setSearchTxt] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [students, setStudents] = useState<iVStudent[]>([]);
+
+  // @ts-ignore
+  useEffect(() => innerRef.current && innerRef.current.focus());
 
   const onSearch = () => {
     if (`${searchTxt}`.trim() === '') {
@@ -59,7 +63,8 @@ const SearchPage = ({onSelect}: {onSelect: (student: iVStudent) => void}) => {
     }
     return (
       <div className={'student-search-result'}>
-        <p>Click on any of the students listed below to view their academic reports.</p>
+        {/*// @ts-ignore*/}
+        <p ref={innerRef}>Click on any of the students listed below to view their academic reports.</p>
         <PanelTitle>Search Result</PanelTitle>
         <div className={'search-result'}>
           {students.map(student => (

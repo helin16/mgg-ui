@@ -6,7 +6,7 @@ import SectionDiv from './SectionDiv';
 const Wrapper = styled.div`
   .result-row {
     display: flex;
-    padding: 0.2rem 0;
+    padding: 2px 0;
     justify-content: space-between;
     align-items: baseline;
     

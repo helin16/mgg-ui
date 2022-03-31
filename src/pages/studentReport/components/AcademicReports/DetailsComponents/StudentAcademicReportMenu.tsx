@@ -6,11 +6,10 @@ import * as Icon from 'react-bootstrap-icons';
 import {iStudentAcademicReportResultMap, StudentAcademicReportDetailsProps} from '../StudentAcademicReportDetails';
 import {useEffect, useState} from 'react';
 import StudentAcademicEmailPopup from './StudentAcademicEmailPopup';
-import {
+import iStudentReportResult, {
   STUDENT_REPORT_RESULT_FILE_TYPE_ACADEMIC, STUDENT_REPORT_SUBJECT_NAME_COMPARATIVE_ANALYSIS
 } from '../../../../../types/student/iStudentReportResult';
 import LinkBtn from '../../../../../components/common/LinkBtn';
-import {getStudentReportClassname} from './Helpers/AcademicReportHelper';
 
 const Wrapper = styled.div`
   margin-bottom: 0.4rem;
@@ -35,6 +34,7 @@ const StudentAcademicReportMenu = ({
   onSelectedCourse: (classCode: string) => void
 }) => {
   const [showingEmailPopup, setShowingEmailPopup] = useState(false);
+  const [homeGroupCourseMap, setHomeGroupCourseMap] = useState({});
   const [academicCourseMap, setAcademicCourseMap] = useState({});
   const [otherCourseMap, setOtherCourseMap] = useState({});
 
@@ -43,23 +43,25 @@ const StudentAcademicReportMenu = ({
       .sort((reprt1, reprt2) => {
         return reprt1.AssessHeading > reprt2.AssessHeading ? 1 : -1;
       });
-    setAcademicCourseMap(sortedCourses
-      .filter(course => course.FileType === STUDENT_REPORT_RESULT_FILE_TYPE_ACADEMIC)
-      .reduce((map, studentReportResult) => {
-        return {
-          ...map,
-          [studentReportResult.ClassCode]: studentReportResult,
-        };
-    }, {}))
-    setOtherCourseMap(sortedCourses
-      .filter(course => course.FileType !== STUDENT_REPORT_RESULT_FILE_TYPE_ACADEMIC)
-      .reduce((map, studentReportResult) => {
-        return {
-          ...map,
-          [studentReportResult.ClassCode]: studentReportResult,
-        };
-      }, {}))
-  }, [JSON.stringify(studentReportResultMap)])
+
+    const setCourseMap = (
+      courseList: iStudentReportResult[],
+      setFn: (data: any) => void,
+      filterFn: (course: iStudentReportResult) => boolean
+    ) => {
+      setFn(courseList
+        .filter(filterFn)
+        .reduce((map, studentReportResult) => {
+          return {
+            ...map,
+            [studentReportResult.ClassCode]: studentReportResult,
+          };
+        }, {}));
+    }
+    setCourseMap(sortedCourses, setHomeGroupCourseMap, course => course.isHomeGroup === true);
+    setCourseMap(sortedCourses, setAcademicCourseMap, course => course.isHomeGroup === false && course.FileType === STUDENT_REPORT_RESULT_FILE_TYPE_ACADEMIC);
+    setCourseMap(sortedCourses, setOtherCourseMap, course => course.isHomeGroup === false && course.FileType !== STUDENT_REPORT_RESULT_FILE_TYPE_ACADEMIC);
+  }, [studentReportResultMap])
 
   const getEmailPopup = () => {
     if (showingEmailPopup !== true) {
@@ -91,6 +93,24 @@ const StudentAcademicReportMenu = ({
     )
   }
 
+  const getListOfCourseNames = (courseMap: {[key: string]: iStudentReportResult[]}) => {
+    const courseCodes = Object.keys(courseMap);
+    if (courseCodes.length <= 0) {
+      return null;
+    }
+    return courseCodes.map(courseCode => {
+      if (!(courseCode in courseMap)) {
+        return null;
+      }
+      return (
+        <li key={courseCode}>
+          {/*// @ts-ignore*/}
+          <LinkBtn className={getItemClassName(courseCode)} onClick={() => onSelectedCourse(courseCode)}>{courseMap[courseCode].AssessHeading || ''}</LinkBtn>
+        </li>
+      );
+    })
+  }
+
   const getCourseList = () => {
     return (
       <div className={'course-list'}>
@@ -100,23 +120,12 @@ const StudentAcademicReportMenu = ({
               Explanation of Results
             </LinkBtn>
           </li>
+          {getListOfCourseNames(homeGroupCourseMap)}
+
           {getComparativeCourse()}
-          {Object.keys(academicCourseMap).map(courseCode => {
-            return (
-              <li key={courseCode}>
-                {/*// @ts-ignore*/}
-                <LinkBtn className={getItemClassName(courseCode)} onClick={() => onSelectedCourse(courseCode)}>{academicCourseMap[courseCode].AssessHeading}</LinkBtn>
-              </li>
-            );
-          })}
-          {Object.keys(otherCourseMap).map(courseCode => {
-            return (
-              <li key={courseCode}>
-                {/*// @ts-ignore*/}
-                <LinkBtn className={getItemClassName(courseCode)} onClick={() => onSelectedCourse(courseCode)}>{getStudentReportClassname(otherCourseMap[courseCode])}</LinkBtn>
-              </li>
-            );
-          })}
+
+          {getListOfCourseNames(academicCourseMap)}
+          {getListOfCourseNames(otherCourseMap)}
         </ul>
       </div>
     )
