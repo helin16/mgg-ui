@@ -6,7 +6,7 @@ import SectionDiv from './SectionDiv';
 const Wrapper = styled.div`
   .result-row {
     display: flex;
-    padding: 2px 0;
+    //padding: 2px 0;
     justify-content: space-between;
     align-items: baseline;
     
@@ -68,7 +68,7 @@ const GraphTable = ({
               }
             </div>
           </div>
-          <div className={resultTextClassName}><b>Result</b></div>
+          <div className={resultTextClassName}>Result</div>
         </div>
 
         {results.map(result => {

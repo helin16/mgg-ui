@@ -1,5 +1,5 @@
 import iVStudent from '../../../../types/student/iVStudent';
-import iStudentReportYear from '../../../../types/student/iStudentReportYear';
+import iStudentReportYear, {STUDENT_REPORT_YEAR_STYLE_JNR_GRAPH} from '../../../../types/student/iStudentReportYear';
 import CoverLetterPage from './DetailsComponents/pages/CoverLetterPage';
 import {Col, Row} from 'react-bootstrap';
 import StudentAcademicReportMenu from './DetailsComponents/StudentAcademicReportMenu';
@@ -11,6 +11,7 @@ import StudentReportService from '../../../../services/StudentReportService';
 import StudentAcademicSubjectPage from './DetailsComponents/pages/StudentAcademicSubjectPage';
 import ComparativeAnalysisPage from './DetailsComponents/pages/ComparativeAnalysisPage';
 import HomeGroupPage from './DetailsComponents/pages/HomeGroupPage';
+import JnrGraphHomeGroupPage from './DetailsComponents/pages/JnrGraphHomeGroupPage';
 
 export type StudentAcademicReportDetailsProps = {
   student: iVStudent,
@@ -69,17 +70,29 @@ const StudentAcademicReportDetails = ({
     return <CoverLetterPage student={student} studentReportYear={studentReportYear} studentReportResult={studentReportResult} />;
   }
 
+  const getHomeGroupPage = () => {
+    if (studentReportYear.styleCode === STUDENT_REPORT_YEAR_STYLE_JNR_GRAPH) {
+      return <JnrGraphHomeGroupPage
+        student={student}
+        studentReportYear={studentReportYear}
+        selectedClassCode={selectedClassCode || ''}
+        studentReportResultMap={studentReportResultMap || {}}
+      />
+    }
+    return <HomeGroupPage
+      student={student}
+      studentReportYear={studentReportYear}
+      selectedReportResults={studentReportResultMap[selectedClassCode] || []}
+    />
+  }
+
   const getDetailsPanel = () => {
     if (!studentReportResultMap[selectedClassCode] || studentReportResultMap[selectedClassCode].length <= 0) {
       return getSpecialPage();
     }
 
     if (studentReportResultMap[selectedClassCode][0].isHomeGroup === true) {
-      return <HomeGroupPage
-        student={student}
-        studentReportYear={studentReportYear}
-        selectedReportResults={studentReportResultMap[selectedClassCode] || []}
-      />
+      return getHomeGroupPage();
     }
 
     return <StudentAcademicSubjectPage

@@ -2,7 +2,7 @@ import iStudentReportResult from '../../../../../../types/student/iStudentReport
 import SectionDiv from './SectionDiv';
 import {useEffect, useState} from 'react';
 
-const CommentsDiv = ({result}: {result: iStudentReportResult}) => {
+const CommentsDiv = ({result, title = 'Comments'}: {result: iStudentReportResult; title?: string}) => {
   const [comments, setComments] = useState('');
 
   useEffect(() => {
@@ -16,7 +16,7 @@ const CommentsDiv = ({result}: {result: iStudentReportResult}) => {
 
   return (
     <SectionDiv>
-      <h3 className={'text-danger'}><i>Comments</i></h3>
+      <h3 className={'text-danger'}><i>{title}</i></h3>
       <p>{comments}</p>
     </SectionDiv>
   )

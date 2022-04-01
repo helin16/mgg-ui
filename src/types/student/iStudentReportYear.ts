@@ -1,3 +1,5 @@
+export const STUDENT_REPORT_YEAR_STYLE_JNR_GRAPH = 'JUNIOR_GRH';
+
 type iStudentReportYear = {
   ID: number;
   FileYear: number;

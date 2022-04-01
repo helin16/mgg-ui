@@ -93,10 +93,20 @@ const StudentAcademicReportMenu = ({
     )
   }
 
-  const getListOfCourseNames = (courseMap: {[key: string]: iStudentReportResult[]}) => {
+  const getListOfCourseNames = (courseMap: {[key: string]: iStudentReportResult}, contactNames: boolean = false) => {
     const courseCodes = Object.keys(courseMap);
     if (courseCodes.length <= 0) {
       return null;
+    }
+
+    const getCourseName = (courseCode: string) => {
+      if (!(courseCode in courseMap)) {
+        return '';
+      }
+      if (contactNames === true) {
+        return `${courseMap[courseCode].AssessHeading || ''} ${courseMap[courseCode].ClassDescription}`
+      }
+      return `${courseMap[courseCode].AssessHeading || ''}`
     }
     return courseCodes.map(courseCode => {
       if (!(courseCode in courseMap)) {
@@ -105,7 +115,7 @@ const StudentAcademicReportMenu = ({
       return (
         <li key={courseCode}>
           {/*// @ts-ignore*/}
-          <LinkBtn className={getItemClassName(courseCode)} onClick={() => onSelectedCourse(courseCode)}>{courseMap[courseCode].AssessHeading || ''}</LinkBtn>
+          <LinkBtn className={getItemClassName(courseCode)} onClick={() => onSelectedCourse(courseCode)}>{getCourseName(courseCode)}</LinkBtn>
         </li>
       );
     })
@@ -125,7 +135,7 @@ const StudentAcademicReportMenu = ({
           {getComparativeCourse()}
 
           {getListOfCourseNames(academicCourseMap)}
-          {getListOfCourseNames(otherCourseMap)}
+          {getListOfCourseNames(otherCourseMap, true)}
         </ul>
       </div>
     )
@@ -155,8 +165,8 @@ const StudentAcademicReportMenu = ({
 
   return (
     <Wrapper>
-      <h3>Available Reports</h3>
-      <PanelTitle>{studentReportYear.FileYear} Semester {studentReportYear.FileSemester} Academic Report</PanelTitle>
+      <h4>Available Reports</h4>
+      <PanelTitle>{studentReportYear.FileYear} Semester {studentReportYear.FileSemester / 2} Report</PanelTitle>
       {getContent()}
     </Wrapper>
   )

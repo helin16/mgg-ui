@@ -2,8 +2,6 @@ import React from 'react';
 import styled from 'styled-components';
 import {StudentAcademicReportDetailsProps} from '../../StudentAcademicReportDetails';
 import iStudentReportResult from '../../../../../../types/student/iStudentReportResult';
-import {Col, Row} from 'react-bootstrap';
-import PanelTitle from '../../../../../../components/PanelTitle';
 import AchievementStandardsDiv from '../sections/AchievementStandardsDiv';
 import OverallAchievementStandardsDiv from '../sections/OverallAchievementStandardsDiv';
 import ApproachesToLearningDiv from '../sections/ApproachesToLearningDiv';
@@ -13,6 +11,7 @@ import KnowledgeAndSkillsDiv from '../sections/KnowledgeAndSkillsDiv';
 import AttitudeAndManagementDiv from '../sections/AttitudeAndManagementDiv';
 import CommentsDiv from '../sections/CommentsDiv';
 import SubjectDescriptionDiv from '../sections/SubjectDescriptionDiv';
+import PageTitleDivider from '../sections/PageTitleDivider';
 
 export const SubjectPageWrapper = styled.div`
   .d-table {
@@ -24,23 +23,14 @@ export type iSubjectPageParams = StudentAcademicReportDetailsProps & {selectedRe
 export const StudentAcademicSubjectPageHeader = ({student, selectedReportResults}: iSubjectPageParams) => {
   return (
     <>
-      <h3 className={'d-table'}>
+      <h4 className={'d-table'}>
         {getStudentReportClassname(selectedReportResults[0])}
         <div className={'pull-right d-table-cell'}>
           {student.StudentGiven1} {student.StudentSurname}
         </div>
-      </h3>
+      </h4>
 
-      <PanelTitle>
-        <Row>
-          <Col>
-            House: {student.StudentHouseDescription}
-          </Col>
-          <Col className={'text-right'}>
-            {selectedReportResults[0].StudentForm}
-          </Col>
-        </Row>
-      </PanelTitle>
+      <PageTitleDivider student={student} studentReportResult={selectedReportResults[0]} />
 
       <SubjectDescriptionDiv result={selectedReportResults[0]} />
     </>

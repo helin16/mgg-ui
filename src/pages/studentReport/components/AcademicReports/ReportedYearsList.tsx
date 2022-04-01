@@ -56,7 +56,6 @@ const ReportedYearsList = ({student, onSelect}: {student: iVStudent, onSelect: (
     if (Object.keys(reportList).length <= 0) {
       return null;
     }
-    console.log(reportList);
     return Object.keys(reportList).map(fileYear => {
       return (
         <SectionDiv key={fileYear}>

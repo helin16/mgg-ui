@@ -1,12 +1,15 @@
-import {Col, Image, Row} from 'react-bootstrap';
+import {Image} from 'react-bootstrap';
 import {StudentAcademicReportDetailsProps} from '../../StudentAcademicReportDetails';
 import React from 'react';
-import PanelTitle from '../../../../../../components/PanelTitle';
 import SectionDiv from '../sections/SectionDiv';
 import styled from 'styled-components';
 import iStudentReportResult from '../../../../../../types/student/iStudentReportResult';
+import PageTitleDivider from '../sections/PageTitleDivider';
 
 const Wrapper = styled.div`
+  .d-table {
+    width: 100%;
+  }
   .cover-letter {
     table {
       td {
@@ -20,25 +23,14 @@ const Wrapper = styled.div`
 const CoverLetterPage = ({student, studentReportYear, studentReportResult}: StudentAcademicReportDetailsProps & {studentReportResult: iStudentReportResult | null}) => {
   return (
     <Wrapper className={'cover-letter-wrapper'}>
-      <Row>
-        <Col>
-          <h3>Academic Reports</h3>
-        </Col>
-        <Col className={'text-right'}>
-          <h3>{student.StudentGiven1} {student.StudentSurname}</h3>
-        </Col>
-      </Row>
+      <h4 className={'d-table'}>
+        Academic Reports
+        <div className={'pull-right d-table-cell'}>
+          {student.StudentGiven1} {student.StudentSurname}
+        </div>
+      </h4>
 
-      <PanelTitle>
-        <Row>
-          <Col>
-            House: {student.StudentHouseDescription}
-          </Col>
-          <Col className={'text-right'}>
-            {studentReportResult?.StudentForm || ''}
-          </Col>
-        </Row>
-      </PanelTitle>
+      <PageTitleDivider student={student} studentReportResult={studentReportResult} />
 
       <SectionDiv className={'cover-letter'}>
         <Image
