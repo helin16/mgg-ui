@@ -30,7 +30,7 @@ const SearchPage = ({onSelect}: {onSelect: (student: iVStudent) => void}) => {
   const innerRef = useRef();
   const [searchTxt, setSearchTxt] = useState('');
   const [isSearching, setIsSearching] = useState(false);
-  const [students, setStudents] = useState<iVStudent[]>([]);
+  const [students, setStudents] = useState<iVStudent[] | undefined>(undefined);
 
   // @ts-ignore
   useEffect(() => innerRef.current && innerRef.current.focus());
@@ -59,7 +59,7 @@ const SearchPage = ({onSelect}: {onSelect: (student: iVStudent) => void}) => {
   }
 
   const getStudentSearchResults = () => {
-    if (`${searchTxt}`.trim() === '') {
+    if (students === undefined) {
       return null;
     }
     if (students.length <= 0) {
@@ -101,10 +101,9 @@ const SearchPage = ({onSelect}: {onSelect: (student: iVStudent) => void}) => {
         <InputGroup className="mb-3">
           <FormControl
             disabled={isSearching === true}
-            placeholder="Name of student, homeroom (e.g. 'Amanda', '9C') or Synergetic ID..."
+            placeholder="Name of student, homeroom (e.g. 'Amanda', '9C') or Student ID..."
             value={searchTxt}
             onChange={(event) => setSearchTxt(event.target.value)}
-            onBlur={() => onSearch() }
             onKeyUp={(event) => search(event)}
           />
           <LoadingBtn variant={'primary'} isLoading={isSearching} onClick={() => onSearch()}><Search /></LoadingBtn>

@@ -36,10 +36,6 @@ const AppWrapper = styled.div`
   a {
     text-decoration: none !important;
   }
-  
-  .btn {
-    background-color: inherit !important;
-  }
 
   .btn-primary {
     background-color: #337ab7 !important;
@@ -59,6 +55,10 @@ const AppWrapper = styled.div`
   ul {
     padding-left: 4px !important;
     margin-left: 18px;
+  }
+  
+  .form-control {
+    border: 1px solid #ced4da;
   }
 `
 export default AppWrapper;
