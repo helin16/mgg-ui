@@ -36,6 +36,10 @@ const AppWrapper = styled.div`
   a {
     text-decoration: none !important;
   }
+  
+  .btn {
+    background-color: inherit !important;
+  }
 
   .btn-primary {
     background-color: #337ab7 !important;
