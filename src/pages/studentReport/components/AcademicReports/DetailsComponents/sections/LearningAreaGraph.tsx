@@ -31,7 +31,7 @@ const posXC = cellWidth;
 const posXD = 0;
 const posXE = MathHelper.sub(0, cellWidth);
 const posXF = MathHelper.sub(0, MathHelper.mul(cellWidth, 2));
-const posXH = MathHelper.sub(0, MathHelper.mul(cellWidth, 3));
+const posXG = MathHelper.sub(0, MathHelper.mul(cellWidth, 3));
 const Wrapper = styled.div`
   .header-row {
     text-align: center;
@@ -91,7 +91,7 @@ const Wrapper = styled.div`
           left: ${MathHelper.sub(posXF, halfDotWidth)}px;
         }
         &.F {
-          left: ${MathHelper.sub(posXH, halfDotWidth)}px;
+          left: ${MathHelper.sub(posXG, halfDotWidth)}px;
         }
       }
     }
@@ -104,7 +104,7 @@ const Wrapper = styled.div`
       position: absolute;
       width: auto;
       &.f-F {
-        left: ${posXH}px;
+        left: ${posXG}px;
         &.t-A {
           width: ${MathHelper.mul(cellWidth, 6)}px;
         }
@@ -318,9 +318,9 @@ const LearningAreaGraph = ({student, currentStudentReportYear, studentReportResu
     );
   }
 
-  const getTableTr = (result: iStudentReportResult | null = null, isHeader = false) => {
+  const getTableTr = (key: string, result: iStudentReportResult | null = null, isHeader = false) => {
     return (
-      <tr className={isHeader === true ? 'header-row' : 'data-row'}>
+      <tr className={isHeader === true ? 'header-row' : 'data-row'} key={key}>
         { isHeader === true ? <th className={'title-col'}></th> : <td className={'title-col'}>{result?.AssessUnitName}</td> }
         { isHeader === true ?
           // @ts-ignore
@@ -348,13 +348,13 @@ const LearningAreaGraph = ({student, currentStudentReportYear, studentReportResu
     <Wrapper>
       <SectionDiv className={'table-responsive'}>
         <h3 className={'text-danger'}><i>{title}</i></h3>
-        <table className={'table table-bordered table-condensed table-striped'}>
+        <table className={'table table-bordered table-condensed table-striped table-hover'}>
           <thead>
-            {getTableTr(null, true)}
+            {getTableTr('', null, true)}
           </thead>
           <tbody>
-            {resultList.map(result => {
-              return getTableTr(result)
+            {resultList.map((result, index) => {
+              return getTableTr(`data-row-${index}`, result)
             })}
           </tbody>
         </table>

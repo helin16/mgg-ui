@@ -1,7 +1,10 @@
 import React from 'react';
-import {Button, Spinner} from 'react-bootstrap';
+import {Button, ButtonProps, Spinner} from 'react-bootstrap';
 
-const LoadingBtn = ({isLoading, children, ...props}: any) => {
+type iLoadingBtn = {
+  isLoading: boolean;
+} & ButtonProps
+const LoadingBtn = ({isLoading = false, children, ...props}: iLoadingBtn) => {
   return (
     <Button
       disabled={isLoading}

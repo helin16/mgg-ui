@@ -10,7 +10,6 @@ import {
 import iStudentReportComparativeResultMap from '../../../../../../types/student/iStudentReportComparativeResult';
 import StudentReportService from '../../../../../../services/StudentReportService';
 import styled from 'styled-components';
-import MathHelper from '../../../../../../helper/MathHelper';
 
 
 const Wrapper = styled.div`
@@ -68,7 +67,7 @@ const ComparativeAnalysisPage = ({
               return (
                 <div className={'result-row'} key={code}>
                   <div>The expected standards were {row[code].name}</div>
-                  <div>{MathHelper.mul(MathHelper.div(row[code].count, row[code].total), 100).toFixed(2)} %</div>
+                  <div>{row[code].percentage} %</div>
                 </div>
               )
             })

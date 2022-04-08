@@ -58,7 +58,7 @@ const StudentDetailsPage = ({student ,onClearSelectedStudent}: {student: iVStude
               {student.StudentGiven1} {' '}
               {student.StudentSurname} {' '}
               ({student.StudentID}) {' '}
-              {student.StudentForm}
+              {student.StudentFormHomeRoom}
             </h3>
           }
         >

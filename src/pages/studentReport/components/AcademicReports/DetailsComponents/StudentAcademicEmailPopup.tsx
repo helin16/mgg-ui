@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import {Button, Col, Form, Row} from 'react-bootstrap';
+import {Button, Form} from 'react-bootstrap';
 import {StudentAcademicReportDetailsProps} from '../StudentAcademicReportDetails';
 import React, {ChangeEvent, useState} from 'react';
 import PopupModal from '../../../../../components/common/PopupModal';
@@ -37,11 +37,8 @@ const StudentAcademicEmailPopup = ({
       centered
       handleClose={ () => onClose() }
       footer={getFooter()}
+      header={<h5>Email PDF Report for: {student.StudentGiven1} {student.StudentSurname}</h5>}
     >
-      <Row>
-        <Col><h4>Email PDF Report</h4></Col>
-        <Col className={'text-right'}>{student.StudentGiven1} {student.StudentSurname}</Col>
-      </Row>
       <Form.Group className="mb-3" controlId="formBasicEmail">
         <Form.Label><small>Please enter the email address you want to send the report to below.</small></Form.Label>
         <Form.Control type="email" placeholder="The email address that the report will be sent to"
@@ -63,7 +60,7 @@ const StudentAcademicEmailPopup = ({
         <ul>
           <li>Please ensure you have the latest version of Adobe Acrobat Reader installed on your computer.</li>
           <li>Adobe Acrobat Reader can be downloaded from:
-            <a href="https://get.adobe.com/reader/" target="_blank">https://get.adobe.com/reader/</a>
+            <a href="https://get.adobe.com/reader/" target={'__BLANK'}>https://get.adobe.com/reader/</a>
           </li>
         </ul>
       </Wrapper>

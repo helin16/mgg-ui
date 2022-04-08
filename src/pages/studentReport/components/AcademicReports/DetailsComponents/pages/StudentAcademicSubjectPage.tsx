@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import {StudentAcademicReportDetailsProps} from '../../StudentAcademicReportDetails';
 import iStudentReportResult from '../../../../../../types/student/iStudentReportResult';
 import AchievementStandardsDiv from '../sections/AchievementStandardsDiv';
-import OverallAchievementStandardsDiv from '../sections/OverallAchievementStandardsDiv';
 import ApproachesToLearningDiv from '../sections/ApproachesToLearningDiv';
 import TeachersDiv from '../sections/TeacherDiv';
 import {getStudentReportClassname} from '../Helpers/AcademicReportHelper';
@@ -12,6 +11,8 @@ import AttitudeAndManagementDiv from '../sections/AttitudeAndManagementDiv';
 import CommentsDiv from '../sections/CommentsDiv';
 import SubjectDescriptionDiv from '../sections/SubjectDescriptionDiv';
 import PageTitleDivider from '../sections/PageTitleDivider';
+import LearningBehavioursDiv from '../sections/LearningBehavioursDiv';
+import AssessmentTasksDiv from '../sections/AssessmentTasksDiv';
 
 export const SubjectPageWrapper = styled.div`
   .d-table {
@@ -41,22 +42,28 @@ const StudentAcademicSubjectPage = ({
    student, studentReportYear, selectedReportResults
   }: iSubjectPageParams
 ) => {
+  const selectedReportResultList = selectedReportResults.sort((res1, res2) => {
+    return res1.AssessmentCode > res2.AssessmentCode ? 1 : -1;
+  });
+
   return (
     <SubjectPageWrapper>
       <StudentAcademicSubjectPageHeader
         student={student}
         studentReportYear={studentReportYear}
-        selectedReportResults={selectedReportResults}
+        selectedReportResults={selectedReportResultList}
       />
 
-      <AchievementStandardsDiv results={selectedReportResults} />
-      <OverallAchievementStandardsDiv results={selectedReportResults} />
-      <ApproachesToLearningDiv results={selectedReportResults} />
-      <KnowledgeAndSkillsDiv results={selectedReportResults} />
-      <AttitudeAndManagementDiv results={selectedReportResults} />
+      <AssessmentTasksDiv results={selectedReportResultList}/>
+      <AchievementStandardsDiv results={selectedReportResultList} />
 
-      <CommentsDiv result={selectedReportResults[0]} />
-      <TeachersDiv results={selectedReportResults} />
+      <ApproachesToLearningDiv results={selectedReportResultList} />
+      <KnowledgeAndSkillsDiv results={selectedReportResultList} />
+      <AttitudeAndManagementDiv results={selectedReportResultList} />
+      <LearningBehavioursDiv results={selectedReportResultList} />
+
+      <CommentsDiv result={selectedReportResultList[0]} />
+      <TeachersDiv results={selectedReportResultList} />
 
     </SubjectPageWrapper>
   )

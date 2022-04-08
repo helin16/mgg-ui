@@ -1,6 +1,5 @@
 import iStudentReportResult, {
-  STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_OVERALL_GRADE,
-  STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_OVERALL_GRADE_JNR
+  STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_MARKS,
 } from '../../../../../../types/student/iStudentReportResult';
 import {useEffect, useState} from 'react';
 import styled from 'styled-components';
@@ -23,8 +22,7 @@ const OverallAchievementStandardsDiv = ({results}: {results: iStudentReportResul
       results
         .filter(result => {
           return [
-            STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_OVERALL_GRADE_JNR,
-            STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_OVERALL_GRADE,
+            STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_MARKS,
           ].indexOf(result.AssessAreaResultType) >= 0
         })
     )
@@ -36,8 +34,8 @@ const OverallAchievementStandardsDiv = ({results}: {results: iStudentReportResul
 
   return (
     <Wrapper>
-      <div>OVERALL ACHIEVEMENT IN RELATION TO STANDARDS</div>
-      <div>{resultList[0].overallAchievementText}</div>
+      <div>OVERALL GRADE</div>
+      <div>{resultList[0].overallGradeText}</div>
     </Wrapper>
   )
 };

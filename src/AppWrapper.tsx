@@ -37,7 +37,7 @@ const AppWrapper = styled.div`
     text-decoration: none !important;
   }
 
-  .btn.btn-primary {
+  .btn-primary {
     background-color: #337ab7 !important;
     border-color: #2e6da4 !important;
   }

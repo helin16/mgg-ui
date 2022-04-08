@@ -1,5 +1,6 @@
 import React from 'react';
 import {Modal} from 'react-bootstrap';
+import AppWrapper from '../../AppWrapper';
 
 const PopupModal = ({handleClose, footer, body, header, title, children, ...props}: any) => {
 
@@ -9,7 +10,7 @@ const PopupModal = ({handleClose, footer, body, header, title, children, ...prop
     }
     return (
       <Modal.Header closeButton={handleClose !== undefined}>
-        {title ? <Modal.Title>{title}</Modal.Title> : body}
+        {title ? <Modal.Title>{title}</Modal.Title> : header}
       </Modal.Header>
     )
   }
@@ -38,9 +39,11 @@ const PopupModal = ({handleClose, footer, body, header, title, children, ...prop
 
   return (
     <Modal onHide={handleClose} {...props} className={'PopupModal'}>
-      {getHeader()}
-      {getBody()}
-      {getFooter()}
+      <AppWrapper>
+        {getHeader()}
+        {getBody()}
+        {getFooter()}
+      </AppWrapper>
     </Modal>
   )
 };

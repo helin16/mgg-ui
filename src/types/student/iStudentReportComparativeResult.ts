@@ -14,6 +14,7 @@ export type iStudentReportComparativeResultMapRow = {
     name: string;
     count: number;
     total: number;
+    percentage: number;
   }
 }
 

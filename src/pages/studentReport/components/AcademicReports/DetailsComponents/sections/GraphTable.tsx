@@ -30,7 +30,7 @@ export type iResultTranslateMap = {[key: string | number]: iResultTranslateResul
 export type iGraphTable = {
   title: string;
   results: iStudentReportResult[],
-  resultTranslateMap: iResultTranslateMap,
+  resultTranslateMap?: iResultTranslateMap,
   resultTranslateFn?: (result: string | null, map: iResultTranslateMap) => undefined | iResultTranslateResult;
 }
 const defaultResultTranslateFn = (result: string | null, map: iResultTranslateMap) => {
@@ -48,30 +48,49 @@ const GraphTable = ({
 
   if (results.length <= 0) {
     return null;
-  };
+  }
 
   const resultTableClassName = 'text-right d-none d-xl-block d-xxl-block';
   const resultTextClassName = 'text-right d-block d-xl-none d-xxl-none';
   const resultTranslateFunction = resultTranslateFn || defaultResultTranslateFn;
+
+  const getResultColTitle = () => {
+    if (!resultTranslateMap) {
+      return <div className={'text-right'}>Result</div>
+    }
+    return (
+      <>
+        <div className={resultTableClassName}>
+          <div className={'result-table'}>
+            {
+              Object.values(resultTranslateMap).map(titleObj => {
+                return <div key={titleObj.name} className={'text-center cell'}>{titleObj.name}</div>
+              })
+            }
+          </div>
+        </div>
+        <div className={resultTextClassName}>Result</div>
+      </>
+    )
+  }
 
   return (
     <SectionDiv>
       <Wrapper>
         <div className={'result-row title-row'}>
           <div>{title}</div>
-          <div className={resultTableClassName}>
-            <div className={'result-table'}>
-              {
-                Object.values(resultTranslateMap).map(titleObj => {
-                  return <div key={titleObj.name} className={'text-center cell'}>{titleObj.name}</div>
-                })
-              }
-            </div>
-          </div>
-          <div className={resultTextClassName}>Result</div>
+          {getResultColTitle()}
         </div>
-
         {results.map(result => {
+          if (!resultTranslateMap) {
+            return (
+              <div key={result.AssessAreaHeading} className={'result-row'}>
+                <div>{result.AssessAreaHeading}</div>
+                <div className={'text-right'}>{result.isNA === true ? <i>Not Assessed</i> : result.AssessResultsResult}</div>
+              </div>
+            );
+          }
+
           const resultObj = resultTranslateFunction(result.AssessResultsResult, resultTranslateMap);
           if (!resultObj) {
             return null;

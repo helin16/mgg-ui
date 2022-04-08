@@ -10,6 +10,7 @@ import iStudentReportResult, {
   STUDENT_REPORT_RESULT_FILE_TYPE_ACADEMIC, STUDENT_REPORT_SUBJECT_NAME_COMPARATIVE_ANALYSIS
 } from '../../../../../types/student/iStudentReportResult';
 import LinkBtn from '../../../../../components/common/LinkBtn';
+import StudentReportDownloadBtn from './Helpers/StudentReportDownloadBtn';
 
 const Wrapper = styled.div`
   margin-bottom: 0.4rem;
@@ -149,7 +150,7 @@ const StudentAcademicReportMenu = ({
       <div>
         {getCourseList()}
         <div className="d-grid gap-2">
-          <Button variant={'info'}><Icon.CloudArrowDown /> Download PDF Report</Button>
+          <StudentReportDownloadBtn student={student} studentReportYear={studentReportYear} />
           <Button variant={'danger'} onClick={() => setShowingEmailPopup(true)}><Icon.Envelope /> Email PDF Report</Button>
           <Button variant={'danger'} onClick={() => onClearReportYear ? onClearReportYear() : null }>
             <Icon.ListUl /> All {student.StudentGiven1}'s Reports

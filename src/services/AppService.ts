@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, {AxiosRequestConfig} from 'axios';
 import LocalStorageService from './LocalStorageService';
 
 export type iConfigParams = {
@@ -32,25 +32,37 @@ const getUrlParams = (params: iConfigParams = {}) => {
   return paramString === '' ? '' : `?${paramString}`;
 };
 
-const get = (url: string, params: iConfigParams = {}) => {
+const get = (url: string, params: iConfigParams = {}, config: AxiosRequestConfig = {}) => {
   return axios.get(
     `${getEndPointUrl(url)}${getUrlParams(params)}`,
-    getHeaders(),
+    {
+      ...config,
+      ...getHeaders()
+    },
   );
 };
 
-const post = (url: string, params: iParams) => {
-  return axios.post(getEndPointUrl(url), params, getHeaders());
+const post = (url: string, params: iParams, config: AxiosRequestConfig = {}) => {
+  return axios.post(getEndPointUrl(url), params, {
+    ...config,
+    ...getHeaders()
+  });
 };
 
-const put = (url: string, params: iConfigParams) => {
-  return axios.put(getEndPointUrl(url), params, getHeaders());
+const put = (url: string, params: iConfigParams, config: AxiosRequestConfig = {}) => {
+  return axios.put(getEndPointUrl(url), params, {
+    ...config,
+    ...getHeaders()
+  });
 };
 
-const remove = (url: string, params: iConfigParams = {}) => {
+const remove = (url: string, params: iConfigParams = {}, config: AxiosRequestConfig = {}) => {
   return axios.delete(
     `${getEndPointUrl(url)}${getUrlParams(params)}`,
-    getHeaders(),
+    {
+      ...config,
+      ...getHeaders()
+    }
   );
 };
 const getUploadHeaders = () => {
@@ -65,8 +77,11 @@ const getUploadHeaders = () => {
     },
   };
 };
-const uploadImage = (url: string, params: FormData) => {
-  return axios.post(getEndPointUrl(url), params, getUploadHeaders());
+const uploadImage = (url: string, params: FormData, config: AxiosRequestConfig = {}) => {
+  return axios.post(getEndPointUrl(url), params, {
+    ...config,
+    ...getUploadHeaders()
+  });
 };
 
 const AppService = {

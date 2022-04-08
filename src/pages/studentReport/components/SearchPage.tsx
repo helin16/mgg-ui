@@ -6,6 +6,7 @@ import StudentService from '../../../services/StudentService';
 import iVStudent from '../../../types/student/iVStudent';
 import styled from 'styled-components';
 import PanelTitle from '../../../components/PanelTitle';
+import EmptyState from '../../../components/common/EmptyState';
 
 
 const Wrapper = styled.div`
@@ -58,8 +59,15 @@ const SearchPage = ({onSelect}: {onSelect: (student: iVStudent) => void}) => {
   }
 
   const getStudentSearchResults = () => {
-    if (students.length <= 0) {
+    if (`${searchTxt}`.trim() === '') {
       return null;
+    }
+    if (students.length <= 0) {
+      return <EmptyState
+        title={'No Students found'}
+        description={'Please refine your search and try again.'}
+        hideLogo
+      />;
     }
     return (
       <div className={'student-search-result'}>

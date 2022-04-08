@@ -1,8 +1,9 @@
 import iStudentReportResult, {
   STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_ACHIEVEMENT_STANDARDS
 } from '../../../../../../types/student/iStudentReportResult';
-import {useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import GraphTable from './GraphTable';
+import OverallAchievementStandardsDiv from './OverallAchievementStandardsDiv';
 
 const resultTranslateMap = {
   '1': {name: 'Well Below', width: 8},
@@ -22,11 +23,21 @@ const AchievementStandardsDiv = ({results}: {results: iStudentReportResult[]}) =
     )
   }, [results]);
 
-  return <GraphTable
-    results={aSResults}
-    title={'Achievement Standards'}
-    resultTranslateMap={resultTranslateMap}
-  />;
+  if (aSResults.length <= 0) {
+    return null;
+  }
+
+  return (
+    <>
+      <GraphTable
+        results={aSResults}
+        title={'Achievement Standards'}
+        resultTranslateMap={resultTranslateMap}
+      />
+
+      <OverallAchievementStandardsDiv results={results} />
+    </>
+  );
 };
 
 export default AchievementStandardsDiv;
