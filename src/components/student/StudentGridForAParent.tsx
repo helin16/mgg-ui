@@ -21,6 +21,7 @@ const Wrapper = styled.div`
       border: 1px solid #ccc;
       border-radius: 6px;
       cursor: pointer;
+      box-shadow: 3px 3px 20px 2px #dedede;
     }
     
     .title-div {

@@ -5,6 +5,7 @@ import PageNotFound from './components/PageNotFound';
 import {Provider} from 'react-redux';
 import store from './redux/makeReduxStore';
 import AppWrapper from './AppWrapper';
+import './App.css';
 
 const App = () => {
   return (
