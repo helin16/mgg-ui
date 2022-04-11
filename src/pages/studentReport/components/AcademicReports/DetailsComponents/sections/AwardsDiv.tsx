@@ -2,7 +2,7 @@ import SectionDiv from './SectionDiv';
 import {useEffect, useState} from 'react';
 import iVStudent from '../../../../../../types/student/iVStudent';
 import iStudentReportYear from '../../../../../../types/student/iStudentReportYear';
-import StudentReportService from '../../../../../../services/StudentReportService';
+import StudentReportService from '../../../../../../services/Synergetic/StudentReportService';
 import {Spinner} from 'react-bootstrap';
 import iStudentReportAward from '../../../../../../types/student/iStudentReportAward';
 

@@ -1,7 +1,7 @@
 import iVStudent from '../../../../types/student/iVStudent';
 import {Image, Spinner} from 'react-bootstrap';
 import React, {useEffect, useState} from 'react';
-import StudentReportService from '../../../../services/StudentReportService';
+import StudentReportService from '../../../../services/Synergetic/StudentReportService';
 import iStudentReportYear from '../../../../types/student/iStudentReportYear';
 import LinkBtn from '../../../../components/common/LinkBtn';
 import SectionDiv from './DetailsComponents/sections/SectionDiv';

@@ -8,11 +8,11 @@ import styled from 'styled-components';
 import SectionDiv from './SectionDiv';
 import iStudentReportYear from '../../../../../../types/student/iStudentReportYear';
 import iVStudent from '../../../../../../types/student/iVStudent';
-import YearLevelService from '../../../../../../services/YearLevelService';
+import YearLevelService from '../../../../../../services/Synergetic/YearLevelService';
 import {Spinner} from 'react-bootstrap';
 import iYearLevel, {YEAR_LEVEL_CAMPUS_CODE_JUNIOR} from '../../../../../../types/community/iYearLevel';
 import MathHelper from '../../../../../../helper/MathHelper';
-import StudentReportService from '../../../../../../services/StudentReportService';
+import StudentReportService from '../../../../../../services/Synergetic/StudentReportService';
 import {OP_NOT} from '../../../../../../helper/ServiceHelper';
 
 type iLearningAreaGraph = {

@@ -10,6 +10,9 @@ type iUser = iBaseType & {
   schoolBoxId: number;
   synergyId: number;
   SynCommunity?: iSynCommunity;
+  isStaff?: boolean;
+  isParent?: boolean;
+  isStudent?: boolean;
 };
 
 export default iUser;

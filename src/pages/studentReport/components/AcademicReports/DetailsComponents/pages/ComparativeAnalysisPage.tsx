@@ -8,7 +8,7 @@ import {
   iStudentReportComparativeResultMapRow
 } from '../../../../../../types/student/iStudentReportComparativeResult';
 import iStudentReportComparativeResultMap from '../../../../../../types/student/iStudentReportComparativeResult';
-import StudentReportService from '../../../../../../services/StudentReportService';
+import StudentReportService from '../../../../../../services/Synergetic/StudentReportService';
 import styled from 'styled-components';
 
 

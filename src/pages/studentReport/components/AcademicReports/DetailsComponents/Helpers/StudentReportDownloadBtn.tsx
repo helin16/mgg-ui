@@ -3,7 +3,7 @@ import LoadingBtn from '../../../../../../components/common/LoadingBtn';
 import iVStudent from '../../../../../../types/student/iVStudent';
 import iStudentReportYear from '../../../../../../types/student/iStudentReportYear';
 import {useState} from 'react';
-import StudentReportService from '../../../../../../services/StudentReportService';
+import StudentReportService from '../../../../../../services/Synergetic/StudentReportService';
 
 type iStudentReportDownloadBtn = {
   student: iVStudent,

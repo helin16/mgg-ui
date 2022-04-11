@@ -7,6 +7,8 @@ import * as Icon from 'react-bootstrap-icons';
 import iStudentReportYear from '../../../types/student/iStudentReportYear';
 import ReportedYearsList from './AcademicReports/ReportedYearsList';
 import StudentAcademicReportDetails from './AcademicReports/StudentAcademicReportDetails';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../../redux/makeReduxStore';
 
 const TAB_ACADEMIC_REPORTS = 'academicReports';
 const TAB_STUDENT_PARTICIPATION = 'studentParticipation';
@@ -35,6 +37,7 @@ const Wrapper = styled.div`
 `
 
 const StudentDetailsPage = ({student ,onClearSelectedStudent}: {student: iVStudent; onClearSelectedStudent: () => void}) => {
+  const {user} = useSelector((state: RootState) => state.auth);
   const [selectedTab] = useState(TAB_ACADEMIC_REPORTS);
   const [selectedStudentReportYear, setSelectedStudentReportYear] = useState<iStudentReportYear | null>(null);
 
@@ -50,6 +53,17 @@ const StudentDetailsPage = ({student ,onClearSelectedStudent}: {student: iVStude
       );
     }
 
+    const getBackToMainBtn = () => {
+      if (user?.isStudent === true) {
+        return null;
+      }
+      return (
+        <Button variant={'link'} title={'back to search'} size={'sm'} onClick={() => onClearSelectedStudent()}>
+          <Icon.ArrowLeft />
+        </Button>
+      )
+    }
+
     return (
       <>
         <PageTitle
@@ -63,9 +77,7 @@ const StudentDetailsPage = ({student ,onClearSelectedStudent}: {student: iVStude
           }
         >
           <h3>
-            <Button variant={'link'} title={'back to search'} size={'sm'} onClick={() => onClearSelectedStudent()}>
-              <Icon.ArrowLeft />
-            </Button>
+            {getBackToMainBtn()}
             Reports
           </h3>
         </PageTitle>

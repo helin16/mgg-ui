@@ -1,10 +1,13 @@
 import styled from 'styled-components';
-import {Button, Form} from 'react-bootstrap';
+import {Alert, Button, Form} from 'react-bootstrap';
 import {StudentAcademicReportDetailsProps} from '../StudentAcademicReportDetails';
 import React, {ChangeEvent, useState} from 'react';
 import PopupModal from '../../../../../components/common/PopupModal';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../../../redux/makeReduxStore';
+import StudentReportService from '../../../../../services/Synergetic/StudentReportService';
+import LoadingBtn from '../../../../../components/common/LoadingBtn';
+import iAsset from '../../../../../types/asset/iAsset';
 
 const Wrapper = styled.div`
   font-size: 12px;
@@ -12,22 +15,70 @@ const Wrapper = styled.div`
 
 const StudentAcademicEmailPopup = ({
   student,
+  studentReportYear,
   onClose
 }: StudentAcademicReportDetailsProps & { onClose: () => void } ) => {
   const {user} = useSelector((state: RootState) => state.auth);
   const [email, setEmail] = useState(user?.SynCommunity?.Email || '')
+  const [isLoading, setIsLoading] = useState(false);
+  const [downloadableAsset, setDownloadableAsset] = useState<iAsset | null>(null);
+
+  const sendEmail = () => {
+    setIsLoading(true);
+    StudentReportService.emailStudentReportPDF(student.ID, studentReportYear.ID, { email })
+      .then(resp => {
+        setDownloadableAsset(resp);
+        setIsLoading(true);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      })
+  }
 
   const getFooter = () => {
+    if (downloadableAsset === null) {
+      return (
+        <>
+          {isLoading === true ? null : <Button variant="link" onClick={() => onClose()}>Cancel</Button>}
+          <LoadingBtn
+            variant="primary"
+            isLoading={isLoading}
+            disabled={`${email || ''}`.trim() === ''}
+            onClick={() => sendEmail()}
+          >
+            Email
+          </LoadingBtn>
+        </>
+      )
+    }
     return (
-      <>
-        <Button variant="link" onClick={() => onClose()}>Cancel</Button>
-        <Button variant="primary" disabled={`${email || ''}`.trim() === ''}>Email</Button>
-      </>
+      <Button variant="primary" onClick={() => onClose()}>OK</Button>
     )
   }
 
   const changeEmail = (event: ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value);
+  }
+
+  const getForm = () => {
+    if (downloadableAsset === null) {
+      return (
+        <Form.Group className="mb-3" controlId="formBasicEmail">
+          <Form.Label><small>Please enter the email address you want to send the report to below.</small></Form.Label>
+          <Form.Control
+            type="email" placeholder="The email address that the report will be sent to"
+            value={email}
+            onChange={changeEmail}
+          />
+        </Form.Group>
+      )
+    }
+    return (
+      <Alert variant={'success'}>
+        <h5>Email successfully queued.</h5>
+        <p>Please allow up to 5 minutes for your report to be received.</p>
+      </Alert>
+    );
   }
 
   return (
@@ -39,13 +90,7 @@ const StudentAcademicEmailPopup = ({
       footer={getFooter()}
       header={<h5>Email PDF Report for: {student.StudentGiven1} {student.StudentSurname}</h5>}
     >
-      <Form.Group className="mb-3" controlId="formBasicEmail">
-        <Form.Label><small>Please enter the email address you want to send the report to below.</small></Form.Label>
-        <Form.Control type="email" placeholder="The email address that the report will be sent to"
-          value={email}
-          onChange={changeEmail}
-        />
-      </Form.Group>
+      {getForm()}
 
       <Wrapper className="email-explanation-panel">
         <h6 className="text-danger"><i>Not Receiving The Report Email?</i></h6>

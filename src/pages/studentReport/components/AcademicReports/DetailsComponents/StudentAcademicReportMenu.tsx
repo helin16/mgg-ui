@@ -11,6 +11,8 @@ import iStudentReportResult, {
 } from '../../../../../types/student/iStudentReportResult';
 import LinkBtn from '../../../../../components/common/LinkBtn';
 import StudentReportDownloadBtn from './Helpers/StudentReportDownloadBtn';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../../../../redux/makeReduxStore';
 
 const Wrapper = styled.div`
   margin-bottom: 0.4rem;
@@ -34,6 +36,7 @@ const StudentAcademicReportMenu = ({
   selectedCourseCode?: string;
   onSelectedCourse: (classCode: string) => void
 }) => {
+  const {user} = useSelector((state: RootState) => state.auth);
   const [showingEmailPopup, setShowingEmailPopup] = useState(false);
   const [homeGroupCourseMap, setHomeGroupCourseMap] = useState({});
   const [academicCourseMap, setAcademicCourseMap] = useState({});
@@ -142,6 +145,17 @@ const StudentAcademicReportMenu = ({
     )
   }
 
+  const getBackToHomePage = () => {
+    if (user?.isStudent === true) {
+      return null;
+    }
+    return (
+      <Button variant={'danger'} onClick={() => onClearSelectedStudent ? onClearSelectedStudent() : null }>
+        <Icon.Search /> Back to Search
+      </Button>
+    )
+  }
+
   const getContent = () => {
     if (isLoading === true) {
       return <Spinner animation={'border'} />
@@ -155,9 +169,7 @@ const StudentAcademicReportMenu = ({
           <Button variant={'danger'} onClick={() => onClearReportYear ? onClearReportYear() : null }>
             <Icon.ListUl /> All {student.StudentGiven1}'s Reports
           </Button>
-          <Button variant={'danger'} onClick={() => onClearSelectedStudent ? onClearSelectedStudent() : null }>
-            <Icon.Search /> Back to Search
-          </Button>
+          {getBackToHomePage()}
         </div>
         {getEmailPopup()}
       </div>

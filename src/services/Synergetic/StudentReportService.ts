@@ -1,10 +1,10 @@
-import AppService, {iConfigParams} from './AppService';
-import iStudentReportYear from '../types/student/iStudentReportYear';
-import iStudentReportResult from '../types/student/iStudentReportResult';
-import iStudentReportComparativeResultMap from '../types/student/iStudentReportComparativeResult';
-import iStudentReportCoCurricular from '../types/student/iStudentReportCoCurricular';
-import iStudentReportAward from '../types/student/iStudentReportAward';
-import iAsset from '../types/asset/iAsset';
+import AppService, {iConfigParams} from '../AppService';
+import iStudentReportYear from '../../types/student/iStudentReportYear';
+import iStudentReportResult from '../../types/student/iStudentReportResult';
+import iStudentReportComparativeResultMap from '../../types/student/iStudentReportComparativeResult';
+import iStudentReportCoCurricular from '../../types/student/iStudentReportCoCurricular';
+import iStudentReportAward from '../../types/student/iStudentReportAward';
+import iAsset from '../../types/asset/iAsset';
 
 const baseEndPoint = '/studentReport';
 const getStudentReportYears = (params: iConfigParams = {}): Promise<iStudentReportYear[]> => {
@@ -32,7 +32,11 @@ const getStudentReportAwardsForAStudent = (studentId: string | number, reportYea
 };
 
 const getStudentReportDownloadPDF = (studentId: string | number, reportYearId: string | number, params: iConfigParams = {}): Promise<iAsset> => {
-  return AppService.get(`${baseEndPoint}/download/${studentId}/${reportYearId}`, params).then(resp => resp.data);
+  return AppService.post(`${baseEndPoint}/download/${studentId}/${reportYearId}`, params).then(resp => resp.data);
+};
+
+const emailStudentReportPDF = (studentId: string | number, reportYearId: string | number, params: iConfigParams = {}): Promise<iAsset> => {
+  return AppService.post(`${baseEndPoint}/email/${studentId}/${reportYearId}`, params).then(resp => resp.data);
 };
 
 const StudentReportService = {
@@ -43,6 +47,7 @@ const StudentReportService = {
   getStudentReportCoCurricularForAStudent,
   getStudentReportAwardsForAStudent,
   getStudentReportDownloadPDF,
+  emailStudentReportPDF,
 }
 
 export default StudentReportService;

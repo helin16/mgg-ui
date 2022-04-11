@@ -6,7 +6,7 @@ import iSchoolManagementTeam, {
   SMT_SCHOOL_ROL_CODE_HEAD_OF_JUNIOR_SCHOOL,
   SMT_SCHOOL_ROL_CODE_HEAD_OF_SENIOR_SCHOOL, SMT_SCHOOL_ROL_CODE_HEAD_OF_YEAR
 } from '../../../../../../types/SMT/iSchoolManagementTeam';
-import SchoolManagementTeamService from '../../../../../../services/SchoolManagementTeamService';
+import SchoolManagementTeamService from '../../../../../../services/Synergetic/SchoolManagementTeamService';
 import {OP_OR} from '../../../../../../helper/ServiceHelper';
 import {Spinner} from 'react-bootstrap';
 
