@@ -1,7 +1,8 @@
 import AppService, {iConfigParams} from '../AppService';
 import iStudentContact from '../../types/student/iStudentContact';
+import iPaginatedResult from '../../types/iPaginatedResult';
 
-const getStudentContacts = (params: iConfigParams = {}): Promise<iStudentContact[]> => {
+const getStudentContacts = (params: iConfigParams = {}): Promise<iPaginatedResult<iStudentContact>> => {
   return AppService.get(`/studentContact`, params).then(resp => resp.data);
 };
 

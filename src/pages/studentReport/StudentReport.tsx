@@ -20,7 +20,7 @@ const StudentReport = () => {
       return;
     }
     setIsLoading(true);
-    VStudentService.getVStudent(user?.synergyId)
+    VStudentService.getCurrentVStudent(user?.synergyId)
       .then(resp => {
         if (isCancelled) { return }
         setSelectedStudent(resp);

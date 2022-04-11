@@ -146,14 +146,21 @@ const StudentAcademicReportMenu = ({
   }
 
   const getBackToHomePage = () => {
-    if (user?.isStudent === true) {
-      return null;
+    if (user?.isStaff === true) {
+      return (
+        <Button variant={'danger'} onClick={() => onClearSelectedStudent ? onClearSelectedStudent() : null }>
+          <Icon.Search /> Back to Search
+        </Button>
+      )
     }
-    return (
-      <Button variant={'danger'} onClick={() => onClearSelectedStudent ? onClearSelectedStudent() : null }>
-        <Icon.Search /> Back to Search
-      </Button>
-    )
+    if (user?.isParent === true) {
+      return (
+        <Button variant={'danger'} onClick={() => onClearSelectedStudent ? onClearSelectedStudent() : null }>
+          <Icon.Diagram2 /> Back to my children list
+        </Button>
+      )
+    }
+    return null;
   }
 
   const getContent = () => {
