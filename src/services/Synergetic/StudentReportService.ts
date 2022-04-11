@@ -5,6 +5,7 @@ import iStudentReportComparativeResultMap from '../../types/student/iStudentRepo
 import iStudentReportCoCurricular from '../../types/student/iStudentReportCoCurricular';
 import iStudentReportAward from '../../types/student/iStudentReportAward';
 import iAsset from '../../types/asset/iAsset';
+import {iPowerBiReportMap} from '../../types/student/iPowerBIReports';
 
 const baseEndPoint = '/studentReport';
 const getStudentReportYears = (params: iConfigParams = {}): Promise<iStudentReportYear[]> => {
@@ -39,6 +40,10 @@ const emailStudentReportPDF = (studentId: string | number, reportYearId: string 
   return AppService.post(`${baseEndPoint}/email/${studentId}/${reportYearId}`, params).then(resp => resp.data);
 };
 
+const getPowerBIReports = (studentId: string | number, params: iConfigParams = {}): Promise<iPowerBiReportMap> => {
+  return AppService.get(`${baseEndPoint}/getPowerBIReportIds/${studentId}`, params).then(resp => resp.data);
+};
+
 const StudentReportService = {
   getStudentReportYears,
   getStudentReportYearsForAStudent,
@@ -48,6 +53,7 @@ const StudentReportService = {
   getStudentReportAwardsForAStudent,
   getStudentReportDownloadPDF,
   emailStudentReportPDF,
+  getPowerBIReports,
 }
 
 export default StudentReportService;

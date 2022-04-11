@@ -1,7 +1,7 @@
 import iVStudent from '../../../types/student/iVStudent';
 import PageTitle from '../../../components/PageTitle';
-import {Button, Tab, Tabs} from 'react-bootstrap';
-import {useState} from 'react';
+import {Button, Spinner, Tab, Tabs} from 'react-bootstrap';
+import {useEffect, useState} from 'react';
 import styled from 'styled-components';
 import * as Icon from 'react-bootstrap-icons';
 import iStudentReportYear from '../../../types/student/iStudentReportYear';
@@ -9,6 +9,8 @@ import ReportedYearsList from './AcademicReports/ReportedYearsList';
 import StudentAcademicReportDetails from './AcademicReports/StudentAcademicReportDetails';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../redux/makeReduxStore';
+import StudentReportService from '../../../services/Synergetic/StudentReportService';
+import {iPowerBiReportMap} from '../../../types/student/iPowerBIReports';
 
 const TAB_ACADEMIC_REPORTS = 'academicReports';
 const TAB_STUDENT_PARTICIPATION = 'studentParticipation';
@@ -34,14 +36,70 @@ const Wrapper = styled.div`
       }
     }
   }
-`
+`;
+
 
 const StudentDetailsPage = ({student ,onClearSelectedStudent}: {student: iVStudent; onClearSelectedStudent: () => void}) => {
   const {user} = useSelector((state: RootState) => state.auth);
-  const [selectedTab] = useState(TAB_ACADEMIC_REPORTS);
+  const [selectedTab, setSelectedTab] = useState(TAB_ACADEMIC_REPORTS);
   const [selectedStudentReportYear, setSelectedStudentReportYear] = useState<iStudentReportYear | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [powerBIReports, setPowerBIReports] = useState<iPowerBiReportMap>({});
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    setIsLoading(true)
+    StudentReportService.getPowerBIReports(student.StudentID)
+      .then(resp => {
+        if (isCancelled === true) { return; }
+        setPowerBIReports(resp);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+
+    return () => {
+      isCancelled = true;
+    }
+  }, [student]);
+
+  const getTabs = () => {
+    const reportKeys = Object.keys(powerBIReports);
+    return (
+      <Tabs defaultActiveKey={selectedTab}
+        className={'main-tabs'}
+        activeKey={selectedTab}
+        onSelect={(tabKey) => setSelectedTab(`${tabKey}`)}
+      >
+        <Tab eventKey={TAB_ACADEMIC_REPORTS} title={'Academic Reports'} />
+        {reportKeys.map(reportKey => {
+          return <Tab key={reportKey} eventKey={reportKey} title={powerBIReports[reportKey].name} />
+        })}
+      </Tabs>
+    )
+  }
+
+  const getTabContent = () => {
+    if (selectedTab === TAB_STUDENT_PARTICIPATION) {
+      return <div>Student Participation</div>
+    }
+    if (selectedTab === TAB_STANDARDISED_TESTS) {
+      return <div>Standardised Tests</div>
+    }
+    if (selectedTab === TAB_SCHOOL_BASED_ASSESSMENTS) {
+      return <div>School-based Assessments</div>
+    }
+    if (selectedTab === TAB_WELL_BEING) {
+      return <div>wellBeing(Staff Only)</div>
+    }
+    return <ReportedYearsList student={student} onSelect={(studentReportYear) => setSelectedStudentReportYear(studentReportYear)}/>
+  }
 
   const getContent = () => {
+    if (isLoading === true) {
+      return <Spinner animation={'border'} />;
+    }
     if (selectedStudentReportYear !== null) {
       return (
         <StudentAcademicReportDetails
@@ -82,23 +140,8 @@ const StudentDetailsPage = ({student ,onClearSelectedStudent}: {student: iVStude
           </h3>
         </PageTitle>
 
-        <Tabs defaultActiveKey={selectedTab} className={'main-tabs'}>
-          <Tab eventKey={TAB_ACADEMIC_REPORTS} title={'Academic Reports'} >
-            <ReportedYearsList student={student} onSelect={(studentReportYear) => setSelectedStudentReportYear(studentReportYear)}/>
-          </Tab>
-          <Tab eventKey={TAB_STUDENT_PARTICIPATION} title={'Student Participation'}>
-            Student Participation
-          </Tab>
-          <Tab eventKey={TAB_STANDARDISED_TESTS} title={'Standardised Tests'}>
-            standardisedTests
-          </Tab>
-          <Tab eventKey={TAB_SCHOOL_BASED_ASSESSMENTS} title={'School-based Assessments'}>
-            School-based Assessments
-          </Tab>
-          <Tab eventKey={TAB_WELL_BEING} title={'wellBeing(Staff Only)'}>
-            WellBeing (Staff Only)
-          </Tab>
-        </Tabs>
+        {getTabs()}
+        {getTabContent()}
       </>
     )
   }

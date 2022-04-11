@@ -111,7 +111,7 @@ const StudentGridForAParent = ({
 
   const getStudentProfileDiv = (student: iVStudent) => {
     return (
-      <div className={'student-div'} onClick={() => onSelect && onSelect(student)}>
+      <div className={'student-div'} key={student.StudentID} onClick={() => onSelect && onSelect(student)}>
         <Image src={student.profileUrl} />
         <div className={'title-div'}>
           <div><b>{student.StudentGiven1} {student.StudentSurname}</b></div>
