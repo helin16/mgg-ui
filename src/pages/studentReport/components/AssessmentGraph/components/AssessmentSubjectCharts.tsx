@@ -20,7 +20,7 @@ const Wrapper = styled.div``;
 const colors = ['#C13D01', '#11356B', '#3182B9', '#0E8131', '#FA7F0F', '#700f74', '#B90d19'];
 
 export type iGradeMap = {
-  [key: string]: {lower: number; higher?: number};
+  [key: string]: {lower: number; higher: number};
 }
 const getGradeMap = (grades: iSBSubmissionGrade[]): iGradeMap => {
   const map = {};
