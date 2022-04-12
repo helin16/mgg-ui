@@ -1,0 +1,18 @@
+type iSBSubmissionReturn = {
+  id: number;
+  box_id: number;
+  marker: number;
+  owner: number;
+  review_route: string;
+  student_submission_id: number | null;
+  comment: string;
+  mark: string;
+  norm_mark: number;
+  resubmission_required: boolean;
+  created_at: Date;
+  published_at: Date | null,
+  updated_at: Date;
+  deleted_at: Date | null;
+};
+
+export default iSBSubmissionReturn

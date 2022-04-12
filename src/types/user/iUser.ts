@@ -2,6 +2,7 @@
 
 import iBaseType from '../iBaseType';
 import iSynCommunity from '../community/iSynCommunity';
+import iSynFileSemester from '../community/iSynFileSemester';
 
 type iUser = iBaseType & {
   firstName: string;
@@ -10,6 +11,7 @@ type iUser = iBaseType & {
   schoolBoxId: number;
   synergyId: number;
   SynCommunity?: iSynCommunity;
+  SynCurrentFileSemester?: iSynFileSemester;
   isStaff?: boolean;
   isParent?: boolean;
   isStudent?: boolean;

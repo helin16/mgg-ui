@@ -11,12 +11,17 @@ import {useSelector} from 'react-redux';
 import {RootState} from '../../../redux/makeReduxStore';
 import StudentReportService from '../../../services/Synergetic/StudentReportService';
 import {iPowerBiReportMap} from '../../../types/student/iPowerBIReports';
+import PowerBIReportViewer from '../../../components/powerBI/PowerBIReportViewer';
+import AssessmentGraph from './AssessmentGraph/AssessmentGraph';
 
 const TAB_ACADEMIC_REPORTS = 'academicReports';
 const TAB_STUDENT_PARTICIPATION = 'studentParticipation';
 const TAB_STANDARDISED_TESTS = 'standardisedTests';
 const TAB_SCHOOL_BASED_ASSESSMENTS = 'schoolBasedAssessments';
 const TAB_WELL_BEING = 'wellBeing';
+
+const REPORT_ID_ASSESSMENT_GRAPH = 'ASSESSMENT_GRAPH';
+
 
 const Wrapper = styled.div`
   font-size: 14px;
@@ -82,16 +87,19 @@ const StudentDetailsPage = ({student ,onClearSelectedStudent}: {student: iVStude
 
   const getTabContent = () => {
     if (selectedTab === TAB_STUDENT_PARTICIPATION) {
-      return <div>Student Participation</div>
+      return <PowerBIReportViewer reportId={powerBIReports[selectedTab].reportId || ''} student={student}/>
     }
     if (selectedTab === TAB_STANDARDISED_TESTS) {
-      return <div>Standardised Tests</div>
+      return <PowerBIReportViewer reportId={powerBIReports[selectedTab].reportId || ''} student={student}/>
     }
     if (selectedTab === TAB_SCHOOL_BASED_ASSESSMENTS) {
-      return <div>School-based Assessments</div>
+      if (powerBIReports[selectedTab].reportId === REPORT_ID_ASSESSMENT_GRAPH) {
+        return <AssessmentGraph student={student} />
+      }
+      return <PowerBIReportViewer reportId={powerBIReports[selectedTab].reportId || ''} student={student}/>
     }
     if (selectedTab === TAB_WELL_BEING) {
-      return <div>wellBeing(Staff Only)</div>
+      return <PowerBIReportViewer reportId={powerBIReports[selectedTab].reportId || ''} student={student}/>
     }
     return <ReportedYearsList student={student} onSelect={(studentReportYear) => setSelectedStudentReportYear(studentReportYear)}/>
   }
