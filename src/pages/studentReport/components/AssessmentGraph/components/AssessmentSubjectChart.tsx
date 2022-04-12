@@ -108,8 +108,6 @@ const AssessmentSubjectChart = ({
         // @ts-ignore
         formatter: function() {
           // @ts-ignore
-          console.log(this.point)
-          // @ts-ignore
           return `${this.point.data.SubmissionBox.name || ''}: ${this.point.grade}`;
         }
       }
