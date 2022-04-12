@@ -1,5 +1,4 @@
 import AppService, {iConfigParams} from '../AppService';
-import iVStudent from '../../types/student/iVStudent';
 import iYearLevel from '../../types/community/iYearLevel';
 
 const getAllYearLevels = (params: iConfigParams = {}): Promise<iYearLevel[]> => {

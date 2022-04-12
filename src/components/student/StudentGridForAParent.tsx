@@ -56,6 +56,7 @@ const StudentGridForAParent = ({
         const parentIds: number[] = [];
         resp.data.map(community => { // @ts-ignore
           parentIds.push(Number(community.ID)); parentIds.push(Number(community.SpouseID));
+          return null;
         });
         setParentIds(_.uniq(parentIds));
       })
@@ -99,6 +100,7 @@ const StudentGridForAParent = ({
         return VStudentService.getCurrentVStudent(studentId)
       }))
       .then(resp => {
+        if (isCancelled === true) { return }
         setStudents(resp);
       })
       .finally(() => {

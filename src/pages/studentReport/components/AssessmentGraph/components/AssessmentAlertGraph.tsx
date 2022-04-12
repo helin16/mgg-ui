@@ -6,14 +6,34 @@ import iSBSubmissionReturn from '../../../../../types/SBSubmission/iSBSubmission
 import SBSubmissionReturnService from '../../../../../services/SchoolBox/SBSubmissionReturnService';
 import {Spinner} from 'react-bootstrap';
 import MathHelper from '../../../../../helper/MathHelper';
-import {OP_AND, OP_GTE, OP_LIKE, OP_LT} from '../../../../../helper/ServiceHelper';
+import {OP_AND, OP_GTE, OP_LT} from '../../../../../helper/ServiceHelper';
+import HighchartsReact from 'highcharts-react-official';
+import Highcharts from 'highcharts'
 
 type iAssessmentAlertGraph = {
   student: iVStudent
 }
 
-const getAlertMap = (submissionReturns: iSBSubmissionReturn[]) => {
-  const map = {};
+const seriesColors = ['#B90d19', '#990000', '#700f74', '#c13c01'];
+
+type iSubmissionReturnsMap = {
+  'Not Assessed': number;
+  'Not Satisfactory': number;
+  'Absent': number;
+  'Not Submitted': number;
+  'Submitted': number;
+}
+
+const defaultSubmissionReturnsMap: iSubmissionReturnsMap = {
+  'Absent': 0,
+  'Not Assessed': 0,
+  'Not Satisfactory': 0,
+  'Not Submitted': 0,
+  'Submitted': 0,
+}
+
+const getAlertMap = (submissionReturns: iSBSubmissionReturn[]): iSubmissionReturnsMap => {
+  const map = {...defaultSubmissionReturnsMap};
   submissionReturns.map(submissionReturn => {
     const mark = `${submissionReturn.mark || ''}`.trim();
     if (mark === '') {
@@ -39,16 +59,17 @@ const getAlertMap = (submissionReturns: iSBSubmissionReturn[]) => {
     // @ts-ignore
     map[key] = MathHelper.add(map[key], 1);
   })
+  // @ts-ignore
   return map;
 }
 
 const AssessmentAlertGraph = ({student}: iAssessmentAlertGraph) => {
   const {user} = useSelector((state: RootState) => state.auth);
-  const [submissionReturnsMap, setSubmissionReturnsMap] = useState<any>({});
+  const [submissionReturnsMap, setSubmissionReturnsMap] = useState<iSubmissionReturnsMap | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    let isCancelled = true;
+    let isCancelled = false;
     setIsLoading(true);
 
     SBSubmissionReturnService.getSubmissionReturns({
@@ -66,6 +87,7 @@ const AssessmentAlertGraph = ({student}: iAssessmentAlertGraph) => {
         }),
       })
       .then(res => {
+        if (isCancelled === true) { return }
         setSubmissionReturnsMap(getAlertMap(res.data));
       })
       .finally(() => {
@@ -80,8 +102,83 @@ const AssessmentAlertGraph = ({student}: iAssessmentAlertGraph) => {
   if (isLoading === true) {
     return <Spinner animation={'border'} />
   }
+  if (submissionReturnsMap === null) {
+    return null;
+  }
 
-  return <div><b>{user?.SynCurrentFileSemester?.FileYear} Assessment Alerts</b></div>;
+
+  const getSeriesData = () => {
+    return Object.keys(submissionReturnsMap).map((name, index) => {
+      return {
+        // @ts-ignore
+        y: parseInt(submissionReturnsMap[name] || 0, 10),
+        name: name.replace(' ', '<br />'),
+        color: seriesColors[index]
+      };
+    });
+  }
+
+  return (
+    <div>
+      <HighchartsReact
+        highcharts={Highcharts}
+        options={{
+          chart: {
+            plotBackgroundColor: null,
+            plotBorderWidth: 0,
+            plotShadow: false,
+            height: 250
+          },
+          title: {
+            text: `${user?.SynCurrentFileSemester?.FileYear} Assessment Alerts`,
+            style: {
+              fontSize: '14px',
+              fontWeight: 'bold',
+            }
+          },
+          credits: { enabled:false},
+          xAxis: {
+            categories: [],
+            visible: false
+          },
+          yAxis: {
+            title: { text: null }
+          },
+          plotOptions: {
+            pie: {
+              showInLegend: true,
+              dataLabels: {
+                enabled: true,
+                distance: -50,
+                style: {
+                  color: 'white'
+                },
+                // @ts-ignore
+                formatter: function () {
+                  // @ts-ignore
+                  return this.point.y;
+                }
+              }
+            }
+          },
+          series: [{
+            'name': '',
+            type: 'pie',
+            innerSize: '50%',
+            'data': getSeriesData()
+          }],
+          legend: {
+            enabled: true,
+            align:'right',
+            layout: 'vertical',
+            itemStyle: {
+              fontWeight: '200'
+            }
+          }
+        }}
+      />
+    </div>
+  );
 }
 
 export default AssessmentAlertGraph;

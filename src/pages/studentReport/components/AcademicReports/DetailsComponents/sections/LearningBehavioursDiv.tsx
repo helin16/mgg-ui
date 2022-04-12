@@ -1,5 +1,4 @@
 import iStudentReportResult, {
-  STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_ATTITUDE_AND_MANAGEMENT,
   STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_LEARNING_BEHAVIORS,
 } from '../../../../../../types/student/iStudentReportResult';
 import {useEffect, useState} from 'react';
