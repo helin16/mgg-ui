@@ -1,8 +1,8 @@
 /* eslint-disable import/no-cycle */
 
 import iBaseType from '../iBaseType';
-import iSynCommunity from '../community/iSynCommunity';
-import iSynFileSemester from '../community/iSynFileSemester';
+import iSynCommunity from '../Synergetic/iSynCommunity';
+import iSynFileSemester from '../Synergetic/iSynFileSemester';
 
 type iUser = iBaseType & {
   firstName: string;

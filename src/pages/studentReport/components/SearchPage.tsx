@@ -3,7 +3,7 @@ import {InputGroup, FormControl} from 'react-bootstrap';
 import {Search} from 'react-bootstrap-icons';
 import LoadingBtn from '../../../components/common/LoadingBtn';
 import VStudentService from '../../../services/Synergetic/VStudentService';
-import iVStudent from '../../../types/student/iVStudent';
+import iVStudent from '../../../types/Synergetic/iVStudent';
 import styled from 'styled-components';
 import PanelTitle from '../../../components/PanelTitle';
 import EmptyState from '../../../components/common/EmptyState';

@@ -1,5 +1,5 @@
 import AppService, {iConfigParams} from '../AppService';
-import iSynCommunity from '../../types/community/iSynCommunity';
+import iSynCommunity from '../../types/Synergetic/iSynCommunity';
 import iPaginatedResult from '../../types/iPaginatedResult';
 
 const getCommunityProfiles = (params: iConfigParams = {}): Promise<iPaginatedResult<iSynCommunity>> => {

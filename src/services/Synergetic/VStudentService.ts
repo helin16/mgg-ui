@@ -1,5 +1,5 @@
 import AppService, {iConfigParams} from '../AppService';
-import iVStudent from '../../types/student/iVStudent';
+import iVStudent from '../../types/Synergetic/iVStudent';
 
 const searchVStudents = (searchTxt: string, params: iConfigParams = {}): Promise<iVStudent[]> => {
   return AppService.get(`/vStudent`, {...params, searchTxt}).then(resp => resp.data);

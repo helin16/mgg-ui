@@ -1,12 +1,12 @@
-import iVStudent from '../../../../types/student/iVStudent';
-import iStudentReportYear, {STUDENT_REPORT_YEAR_STYLE_JNR_GRAPH} from '../../../../types/student/iStudentReportYear';
+import iVStudent from '../../../../types/Synergetic/iVStudent';
+import iStudentReportYear, {STUDENT_REPORT_YEAR_STYLE_JNR_GRAPH} from '../../../../types/Synergetic/iStudentReportYear';
 import CoverLetterPage from './DetailsComponents/pages/CoverLetterPage';
 import {Col, Row} from 'react-bootstrap';
 import StudentAcademicReportMenu from './DetailsComponents/StudentAcademicReportMenu';
 import {useEffect, useState} from 'react';
 import iStudentReportResult, {
   STUDENT_REPORT_SUBJECT_NAME_COMPARATIVE_ANALYSIS
-} from '../../../../types/student/iStudentReportResult';
+} from '../../../../types/Synergetic/iStudentReportResult';
 import StudentReportService from '../../../../services/Synergetic/StudentReportService';
 import StudentAcademicSubjectPage from './DetailsComponents/pages/StudentAcademicSubjectPage';
 import ComparativeAnalysisPage from './DetailsComponents/pages/ComparativeAnalysisPage';

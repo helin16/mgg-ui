@@ -3,14 +3,14 @@ import * as _ from 'lodash';
 import iStudentReportResult, {
   STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_OVERALL_GRADE,
   STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_OVERALL_GRADE_JNR
-} from '../../../../../../types/student/iStudentReportResult';
+} from '../../../../../../types/Synergetic/iStudentReportResult';
 import styled from 'styled-components';
 import SectionDiv from './SectionDiv';
-import iStudentReportYear from '../../../../../../types/student/iStudentReportYear';
-import iVStudent from '../../../../../../types/student/iVStudent';
+import iStudentReportYear from '../../../../../../types/Synergetic/iStudentReportYear';
+import iVStudent from '../../../../../../types/Synergetic/iVStudent';
 import YearLevelService from '../../../../../../services/Synergetic/YearLevelService';
 import {Spinner} from 'react-bootstrap';
-import iYearLevel, {YEAR_LEVEL_CAMPUS_CODE_JUNIOR} from '../../../../../../types/community/iYearLevel';
+import iYearLevel, {YEAR_LEVEL_CAMPUS_CODE_JUNIOR} from '../../../../../../types/Synergetic/iYearLevel';
 import MathHelper from '../../../../../../helper/MathHelper';
 import StudentReportService from '../../../../../../services/Synergetic/StudentReportService';
 import {OP_NOT} from '../../../../../../helper/ServiceHelper';

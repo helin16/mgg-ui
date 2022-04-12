@@ -1,11 +1,11 @@
-import iStudentReportResult from '../../../../../../types/student/iStudentReportResult';
+import iStudentReportResult from '../../../../../../types/Synergetic/iStudentReportResult';
 import React, {useEffect, useState} from 'react';
 import SectionDiv from './SectionDiv';
 import styled from 'styled-components';
 import iSchoolManagementTeam, {
   SMT_SCHOOL_ROL_CODE_HEAD_OF_JUNIOR_SCHOOL,
   SMT_SCHOOL_ROL_CODE_HEAD_OF_SENIOR_SCHOOL, SMT_SCHOOL_ROL_CODE_HEAD_OF_YEAR
-} from '../../../../../../types/SMT/iSchoolManagementTeam';
+} from '../../../../../../types/Synergetic/iSchoolManagementTeam';
 import SchoolManagementTeamService from '../../../../../../services/Synergetic/SchoolManagementTeamService';
 import {OP_OR} from '../../../../../../helper/ServiceHelper';
 import {Spinner} from 'react-bootstrap';

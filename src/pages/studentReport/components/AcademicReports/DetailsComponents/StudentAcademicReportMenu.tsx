@@ -8,7 +8,7 @@ import {useEffect, useState} from 'react';
 import StudentAcademicEmailPopup from './StudentAcademicEmailPopup';
 import iStudentReportResult, {
   STUDENT_REPORT_RESULT_FILE_TYPE_ACADEMIC, STUDENT_REPORT_SUBJECT_NAME_COMPARATIVE_ANALYSIS
-} from '../../../../../types/student/iStudentReportResult';
+} from '../../../../../types/Synergetic/iStudentReportResult';
 import LinkBtn from '../../../../../components/common/LinkBtn';
 import StudentReportDownloadBtn from './Helpers/StudentReportDownloadBtn';
 import {useSelector} from 'react-redux';

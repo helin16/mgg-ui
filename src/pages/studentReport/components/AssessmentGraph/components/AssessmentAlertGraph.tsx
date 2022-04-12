@@ -1,8 +1,8 @@
-import iVStudent from '../../../../../types/student/iVStudent';
+import iVStudent from '../../../../../types/Synergetic/iVStudent';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../../../redux/makeReduxStore';
 import {useEffect, useState} from 'react';
-import iSBSubmissionReturn from '../../../../../types/SBSubmission/iSBSubmissionReturn';
+import iSBSubmissionReturn from '../../../../../types/SchoolBox/iSBSubmissionReturn';
 import SBSubmissionReturnService from '../../../../../services/SchoolBox/SBSubmissionReturnService';
 import {Spinner} from 'react-bootstrap';
 import MathHelper from '../../../../../helper/MathHelper';

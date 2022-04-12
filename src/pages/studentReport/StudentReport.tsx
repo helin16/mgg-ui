@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import SearchPage from './components/SearchPage';
-import iVStudent from '../../types/student/iVStudent';
+import iVStudent from '../../types/Synergetic/iVStudent';
 import StudentDetailsPage from './components/StudentDetailsPage';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../redux/makeReduxStore';

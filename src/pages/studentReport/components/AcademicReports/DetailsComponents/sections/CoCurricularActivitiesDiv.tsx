@@ -1,8 +1,8 @@
 import SectionDiv from './SectionDiv';
 import {useEffect, useState} from 'react';
-import iVStudent from '../../../../../../types/student/iVStudent';
-import iStudentReportYear from '../../../../../../types/student/iStudentReportYear';
-import iStudentReportCoCurricular from '../../../../../../types/student/iStudentReportCoCurricular';
+import iVStudent from '../../../../../../types/Synergetic/iVStudent';
+import iStudentReportYear from '../../../../../../types/Synergetic/iStudentReportYear';
+import iStudentReportCoCurricular from '../../../../../../types/Synergetic/iStudentReportCoCurricular';
 import StudentReportService from '../../../../../../services/Synergetic/StudentReportService';
 import {Spinner} from 'react-bootstrap';
 

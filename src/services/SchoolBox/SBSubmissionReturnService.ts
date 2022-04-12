@@ -1,6 +1,6 @@
 import AppService, {iConfigParams} from '../AppService';
 import iPaginatedResult from '../../types/iPaginatedResult';
-import iSBSubmissionReturn from '../../types/SBSubmission/iSBSubmissionReturn';
+import iSBSubmissionReturn from '../../types/SchoolBox/iSBSubmissionReturn';
 
 const endPoint = `/sb/submissionReturn`;
 

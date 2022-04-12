@@ -1,6 +1,6 @@
 import iStudentReportResult, {
   STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_REFLECT
-} from '../../../../../../types/student/iStudentReportResult';
+} from '../../../../../../types/Synergetic/iStudentReportResult';
 import SectionDiv from './SectionDiv';
 import {useEffect, useState} from 'react';
 

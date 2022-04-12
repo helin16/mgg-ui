@@ -3,7 +3,7 @@ import {StudentAcademicReportDetailsProps} from '../../StudentAcademicReportDeta
 import React from 'react';
 import SectionDiv from '../sections/SectionDiv';
 import styled from 'styled-components';
-import iStudentReportResult from '../../../../../../types/student/iStudentReportResult';
+import iStudentReportResult from '../../../../../../types/Synergetic/iStudentReportResult';
 import PageTitleDivider from '../sections/PageTitleDivider';
 
 const Wrapper = styled.div`

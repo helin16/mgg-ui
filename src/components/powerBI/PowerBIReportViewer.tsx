@@ -3,7 +3,7 @@ import PowerBIService from '../../services/PowerBIService';
 import {Spinner} from 'react-bootstrap';
 import {PowerBIEmbed} from 'powerbi-client-react';
 import { models } from 'powerbi-client';
-import iVStudent from '../../types/student/iVStudent';
+import iVStudent from '../../types/Synergetic/iVStudent';
 import styled from 'styled-components';
 
 const Wrapper = styled.div`

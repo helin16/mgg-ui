@@ -1,9 +1,9 @@
 import AppService, {iConfigParams} from '../AppService';
-import iStudentReportYear from '../../types/student/iStudentReportYear';
-import iStudentReportResult from '../../types/student/iStudentReportResult';
-import iStudentReportComparativeResultMap from '../../types/student/iStudentReportComparativeResult';
-import iStudentReportCoCurricular from '../../types/student/iStudentReportCoCurricular';
-import iStudentReportAward from '../../types/student/iStudentReportAward';
+import iStudentReportYear from '../../types/Synergetic/iStudentReportYear';
+import iStudentReportResult from '../../types/Synergetic/iStudentReportResult';
+import iStudentReportComparativeResultMap from '../../types/Synergetic/iStudentReportComparativeResult';
+import iStudentReportCoCurricular from '../../types/Synergetic/iStudentReportCoCurricular';
+import iStudentReportAward from '../../types/Synergetic/iStudentReportAward';
 import iAsset from '../../types/asset/iAsset';
 import {iPowerBiReportMap} from '../../types/student/iPowerBIReports';
 

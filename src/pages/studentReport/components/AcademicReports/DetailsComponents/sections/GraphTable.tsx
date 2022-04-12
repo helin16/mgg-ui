@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import iStudentReportResult from '../../../../../../types/student/iStudentReportResult';
+import iStudentReportResult from '../../../../../../types/Synergetic/iStudentReportResult';
 import {ProgressBar} from 'react-bootstrap';
 import SectionDiv from './SectionDiv';
 

@@ -1,6 +1,6 @@
 import iStudentReportResult, {
   STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_MARKS,
-} from '../../../../../../types/student/iStudentReportResult';
+} from '../../../../../../types/Synergetic/iStudentReportResult';
 import {useEffect, useState} from 'react';
 import styled from 'styled-components';
 

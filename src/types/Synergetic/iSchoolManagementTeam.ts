@@ -1,4 +1,4 @@
-import iSynCommunity from '../community/iSynCommunity';
+import iSynCommunity from './iSynCommunity';
 
 export const SMT_SCHOOL_ROL_CODE_HEAD_OF_YEAR = 'HOY';
 export const SMT_SCHOOL_ROL_CODE_HEAD_OF_JUNIOR_SCHOOL = 'HOJS';

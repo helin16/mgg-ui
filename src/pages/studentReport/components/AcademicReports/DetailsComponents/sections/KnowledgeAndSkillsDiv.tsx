@@ -1,6 +1,6 @@
 import iStudentReportResult, {
   STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_KNOWLEDGE_AND_SKILLS
-} from '../../../../../../types/student/iStudentReportResult';
+} from '../../../../../../types/Synergetic/iStudentReportResult';
 import {useEffect, useState} from 'react';
 import GraphTable from './GraphTable';
 
