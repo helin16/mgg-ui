@@ -101,12 +101,15 @@ const SearchPage = ({onSelect}: {onSelect: (student: iVStudent) => void}) => {
         <InputGroup className="mb-3">
           <FormControl
             disabled={isSearching === true}
-            placeholder="Name of student, homeroom (e.g. 'Amanda', '9C') or Student ID..."
+            placeholder={`Student Name, HomeRoom or Student ID (e.g. Amanda, 9C) ...`}
             value={searchTxt}
             onChange={(event) => setSearchTxt(event.target.value)}
             onKeyUp={(event) => search(event)}
           />
-          <LoadingBtn variant={'primary'} isLoading={isSearching} onClick={() => onSearch()}><Search /></LoadingBtn>
+          <LoadingBtn variant={'primary'} isLoading={isSearching} onClick={() => onSearch()}>
+            <Search />{' '}
+            <div className={'d-none d-sm-inline-block'}>Search</div>
+          </LoadingBtn>
         </InputGroup>
       </div>
       {getStudentSearchResults()}

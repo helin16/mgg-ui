@@ -1,9 +1,9 @@
 import styled from 'styled-components';
+import {mainBlue} from '../AppWrapper';
 
 const Wrapper = styled.div`
   color: #fff;
-  background-color: #337ab7;
-  border-color: #337ab7;
+  background-color: ${mainBlue};
   padding: 10px 15px;
   border-radius: 4px;
 `

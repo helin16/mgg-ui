@@ -1,10 +1,13 @@
 import styled from 'styled-components';
 
+export const mainBlue = `#0066b0`;
+export const mainRed = `#a50000`;
+
 const AppWrapper = styled.div`
   font-size: 13px;
 
   .btn-primary {
-    background-color: #337ab7;
+    background-color: ${mainBlue};
     border-color: #2e6da4;
   }
   .text-left {
@@ -22,7 +25,7 @@ const AppWrapper = styled.div`
   }
 
   .text-danger {
-    color: #a94442 !important;
+    color: ${mainRed} !important;
   }
 
   .pull-left {
@@ -37,14 +40,9 @@ const AppWrapper = styled.div`
     text-decoration: none !important;
   }
 
-  .btn-primary {
-    background-color: #337ab7 !important;
-    border-color: #2e6da4 !important;
-  }
-
   .btn-link {
     text-decoration: none !important;
-    color: #337ab7 !important;
+    color: ${mainBlue} !important;
   }
 
   .btn-link:focus {

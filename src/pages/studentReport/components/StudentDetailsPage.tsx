@@ -13,6 +13,7 @@ import StudentReportService from '../../../services/Synergetic/StudentReportServ
 import {iPowerBiReportMap} from '../../../types/student/iPowerBIReports';
 import PowerBIReportViewer from '../../../components/powerBI/PowerBIReportViewer';
 import AssessmentGraph from './AssessmentGraph/AssessmentGraph';
+import {mainBlue} from '../../../AppWrapper';
 
 const TAB_ACADEMIC_REPORTS = 'academicReports';
 const TAB_STUDENT_PARTICIPATION = 'studentParticipation';
@@ -27,8 +28,7 @@ const Wrapper = styled.div`
   font-size: 14px;
   .main-tabs {
     color: #fff;
-    background-color: #337ab7;
-    border-color: #2e6da4;
+    background-color: ${mainBlue};
     border-radius: 4px;
     margin-bottom: 20px;
     margin-left: 0px;

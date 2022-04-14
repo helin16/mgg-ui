@@ -135,16 +135,17 @@ const SemesterOverallScoresChart = ({student}: iSemesterOverallScoresChart) => {
         if (!(semesterName in info)) { return null; }
         if (info[semesterName].length <= 0) { return null; }
 
-        const result = info[semesterName][0];
-        const sumResult = info[semesterName].reduce((sum, result) => {
-          return MathHelper.add(sum, Number(result.AssessResultsResult));
+        // @ts-ignore
+        const filteredResults = info[semesterName].filter(result => !isNaN(`${result.AssessResultsResult || ''}`))
+        const sumResult = filteredResults.reduce((sum, result) => {
+          return MathHelper.add(Number(sum), Number(result.AssessResultsResult));
         }, 0);
-        const averageResult = MathHelper.div(sumResult, info[semesterName].length);
+        const averageResult = MathHelper.div(sumResult, filteredResults.length);
         data.push({
           y: parseInt(`${averageResult}`, 10),
           data: {
-            ...result,
-            AssessResultsResult: averageResult,
+            ...info[semesterName][0],
+            AssessResultsResult: averageResult.toFixed(1),
           },
           x: index,
         });
