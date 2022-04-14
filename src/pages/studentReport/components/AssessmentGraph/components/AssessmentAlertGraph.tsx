@@ -37,7 +37,7 @@ const getAlertMap = (submissionReturns: iSBSubmissionReturn[]): iSubmissionRetur
   submissionReturns.map(submissionReturn => {
     const mark = `${submissionReturn.mark || ''}`.trim();
     if (mark === '') {
-      return;
+      return null;
     }
     let key = '';
     switch (mark.toLowerCase()) {
@@ -58,7 +58,8 @@ const getAlertMap = (submissionReturns: iSBSubmissionReturn[]): iSubmissionRetur
     }
     // @ts-ignore
     map[key] = MathHelper.add(map[key], 1);
-  })
+    return null;
+  });
   // @ts-ignore
   return map;
 }

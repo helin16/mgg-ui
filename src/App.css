@@ -1,3 +1,7 @@
 a {
     text-decoration: none !important;
 }
+
+.left-off-canvas-menu .left-submenu {
+    padding-left: 0px;
+}

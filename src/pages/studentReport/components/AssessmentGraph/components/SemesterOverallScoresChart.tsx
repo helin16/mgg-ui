@@ -42,6 +42,7 @@ const getResultMap = (currentResults: iStudentReportResult[], previousResults: i
     }
     // @ts-ignore
     map[key][semesterKey].push(result);
+    return null;
   });
   return {
     map,
@@ -67,7 +68,7 @@ const SemesterOverallScoresChart = ({student}: iSemesterOverallScoresChart) => {
       .then(resp => {
         if (isCancelled === true) { return }
         const sortedReportedYears = resp.sort((res1, res2) => {
-          return res1.FileYear > res1.FileYear && res1.FileSemester > res1.FileSemester ? 1 : -1
+          return res1.FileYear > res2.FileYear && res1.FileSemester > res2.FileSemester ? 1 : -1
         })
         setCurrentStudentReportYear(sortedReportedYears.length > 0 ? sortedReportedYears[0] : null);
         setPreviousStudentReportYear(sortedReportedYears.length > 1 ? sortedReportedYears[1] : null);
@@ -119,7 +120,7 @@ const SemesterOverallScoresChart = ({student}: iSemesterOverallScoresChart) => {
     return () => {
       isCancelled = true;
     }
-  }, [currentStudentReportYear, previousStudentReportYear]);
+  }, [student, currentStudentReportYear, previousStudentReportYear]);
 
   useEffect(() => {
     const subjectNames = Object.keys(resultMap);
@@ -131,8 +132,8 @@ const SemesterOverallScoresChart = ({student}: iSemesterOverallScoresChart) => {
       const info = resultMap[name];
       const data: any[] = [];
       semesterNames.map((semesterName, index) => {
-        if (!(semesterName in info)) { return; }
-        if (info[semesterName].length <= 0) { return; }
+        if (!(semesterName in info)) { return null; }
+        if (info[semesterName].length <= 0) { return null; }
 
         const result = info[semesterName][0];
         const sumResult = info[semesterName].reduce((sum, result) => {
@@ -146,9 +147,11 @@ const SemesterOverallScoresChart = ({student}: iSemesterOverallScoresChart) => {
             AssessResultsResult: averageResult,
           },
           x: index,
-        })
+        });
+        return null;
       });
       returnArr.push({ name, data, showInLegend: false });
+      return null;
     });
     setChartData(returnArr);
   }, [semesterNames, resultMap]);
@@ -205,6 +208,7 @@ const SemesterOverallScoresChart = ({student}: iSemesterOverallScoresChart) => {
           })
         }
       })
+      return null;
     });
   }
 

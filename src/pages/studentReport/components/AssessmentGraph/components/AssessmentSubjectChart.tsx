@@ -46,6 +46,7 @@ const AssessmentSubjectChart = ({
           y = index;
           grade = yName;
         }
+        return null;
       })
       return {y, grade};
     }
@@ -54,7 +55,7 @@ const AssessmentSubjectChart = ({
         return {data: submissionReturn, color: colorCode, ...translateMarkToScale(submissionReturn)}
       })
     )
-  }, [submissionReturns, gradeMap, showGroupedScale])
+  }, [submissionReturns, gradeMap, showGroupedScale, colorCode])
 
   if (seriesData.length <= 0 || xAxisNames.length <= 0) {
     return null;
