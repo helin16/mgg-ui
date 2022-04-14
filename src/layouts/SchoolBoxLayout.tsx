@@ -1,11 +1,12 @@
 import React from 'react';
 import {useParams} from 'react-router-dom';
-import {Alert, Container} from 'react-bootstrap';
+import {Alert} from 'react-bootstrap';
 import SchoolBoxComponent from './SchoolBox/SchoolBoxComponent';
 
 import styled from 'styled-components';
 
 const SchoolBoxWrapper = styled.div`
+  padding: 10px; 
   .input-group {
     .btn {
       height: 100% !important;
@@ -18,9 +19,7 @@ const SchoolBoxLayout = () => {
   const getWrapper = (children: any) => {
     return (
       <SchoolBoxWrapper>
-        <Container fluid>
-          {children}
-        </Container>
+        {children}
       </SchoolBoxWrapper>
     )
   }

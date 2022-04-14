@@ -11,6 +11,7 @@ import iSBSubmissionGrade from '../../../../../types/SchoolBox/iSBSubmissionGrad
 import styled from 'styled-components';
 import iSBSubmissionReturn from '../../../../../types/SchoolBox/iSBSubmissionReturn';
 import AssessmentSubjectChart from './AssessmentSubjectChart';
+import {Row, Col} from 'react-bootstrap';
 
 type iAssessmentSubjectCharts = {
   student: iVStudent
@@ -120,18 +121,20 @@ const AssessmentSubjectCharts = ({student}: iAssessmentSubjectCharts) => {
   return (
     <Wrapper>
       <div className={'text-center'}><b>{currentFileYear} Assessment Grades</b></div>
-      <div className={'graphs-wrapper'}>
+      <Row className={'graphs-wrapper'}>
         {Object.values(submissionReturnsMap).map((submissionReturnsMapRow, index) => {
           return (
-            <AssessmentSubjectChart
-              key={index}
-              submissionReturns={submissionReturnsMapRow}
-              gradeMap={gradeMap}
-              colorCode={colors[index]}
-            />
+            <Col key={index} md={6} lg={4}>
+              <AssessmentSubjectChart
+
+                submissionReturns={submissionReturnsMapRow}
+                gradeMap={gradeMap}
+                colorCode={colors[index]}
+              />
+            </Col>
           );
         })}
-      </div>
+      </Row>
     </Wrapper>
   );
 }

@@ -1,3 +1,5 @@
+export const REPORTING_FILE_SEMESTERS = ['2', '4'];
+
 type iSynFileSemester = {
   FileYear: number;
   FileSemester: number;
