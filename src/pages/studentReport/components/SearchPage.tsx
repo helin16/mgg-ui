@@ -7,6 +7,8 @@ import iVStudent from '../../../types/Synergetic/iVStudent';
 import styled from 'styled-components';
 import PanelTitle from '../../../components/PanelTitle';
 import EmptyState from '../../../components/common/EmptyState';
+import AdminBtn from './Admin/AdminBtn';
+import AdminPage from '../AdminPage';
 
 
 const Wrapper = styled.div`
@@ -31,6 +33,7 @@ const SearchPage = ({onSelect}: {onSelect: (student: iVStudent) => void}) => {
   const [searchTxt, setSearchTxt] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [students, setStudents] = useState<iVStudent[] | undefined>(undefined);
+  const [isShowAdminPage, setIsShowAdminPage] = useState(false);
 
   // @ts-ignore
   useEffect(() => innerRef.current && innerRef.current.focus());
@@ -93,9 +96,18 @@ const SearchPage = ({onSelect}: {onSelect: (student: iVStudent) => void}) => {
     );
   }
 
+  if (isShowAdminPage === true) {
+    return <AdminPage backToReportFn={() => setIsShowAdminPage(false)}/>;
+  }
+
   return (
     <Wrapper className={'search-box-wrapper'}>
-      <h3>Student Report</h3>
+      <h3>
+        Student Report
+        <span className={'pull-right'} >
+          <AdminBtn onClick={() => setIsShowAdminPage(true)}/>
+        </span>
+      </h3>
       <p>Welcome to the student academic report viewer. Type the homeroom or name of the student you want to locate below.</p>
       <div className={'search-bar'}>
         <InputGroup className="mb-3">

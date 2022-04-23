@@ -8,9 +8,10 @@ import styled from 'styled-components';
 import SectionDiv from './SectionDiv';
 import iStudentReportYear from '../../../../../../types/Synergetic/iStudentReportYear';
 import iVStudent from '../../../../../../types/Synergetic/iVStudent';
-import YearLevelService from '../../../../../../services/Synergetic/YearLevelService';
+import SynLuYearLevelService from '../../../../../../services/Synergetic/SynLuYearLevelService';
 import {Spinner} from 'react-bootstrap';
-import iYearLevel, {YEAR_LEVEL_CAMPUS_CODE_JUNIOR} from '../../../../../../types/Synergetic/iYearLevel';
+import ILuYearLevel from '../../../../../../types/Synergetic/iLuYearLevel';
+import {CAMPUS_CODE_JUNIOR} from '../../../../../../types/Synergetic/iLuCampus';
 import MathHelper from '../../../../../../helper/MathHelper';
 import StudentReportService from '../../../../../../services/Synergetic/StudentReportService';
 import {OP_NOT} from '../../../../../../helper/ServiceHelper';
@@ -196,7 +197,7 @@ const AssessAreaResultTypes = [
 const LearningAreaGraph = ({student, currentStudentReportYear, studentReportResults, title = 'Learning Area'}: iLearningAreaGraph) => {
   const [isLoading, setIsLoading] = useState(false);
   const [resultList, setResultList] = useState<iStudentReportResult[]>([]);
-  const [yearLevelMap, setYearLevelMap] = useState<{ [key: number]: iYearLevel }>({});
+  const [yearLevelMap, setYearLevelMap] = useState<{ [key: number]: ILuYearLevel }>({});
   const [previousStudentReportYear, setPreviousStudentReportYear] = useState<iStudentReportYear | null>(null);
   const [previousStudentReportResultMap, setPreviousStudentReportResultMap] = useState<{ [key: string]: iStudentReportResult }>({});
 
@@ -217,9 +218,9 @@ const LearningAreaGraph = ({student, currentStudentReportYear, studentReportResu
     let isCancelled = false;
     setIsLoading(true);
     Promise.all([
-        YearLevelService.getAllYearLevels({
+        SynLuYearLevelService.getAllYearLevels({
           where: JSON.stringify({
-            Campus: [YEAR_LEVEL_CAMPUS_CODE_JUNIOR]
+            Campus: [CAMPUS_CODE_JUNIOR],
           })
         }),
         StudentReportService.getStudentReportYearsForAStudent(student.ID)

@@ -11,6 +11,9 @@ const baseEndPoint = '/studentReport';
 const getStudentReportYears = (params: iConfigParams = {}): Promise<iStudentReportYear[]> => {
   return AppService.get(baseEndPoint, params).then(resp => resp.data);
 };
+const deleteStudentReportYear = (id: string | number, params: iConfigParams = {}): Promise<iStudentReportYear> => {
+  return AppService.delete(`${baseEndPoint}/${id}`, params).then(resp => resp.data);
+};
 
 const getStudentReportYearsForAStudent = (studentId: string | number, params: iConfigParams = {}): Promise<iStudentReportYear[]> => {
   return AppService.get(`${baseEndPoint}/reportedYears/${studentId}`, params).then(resp => resp.data);
@@ -46,6 +49,7 @@ const getPowerBIReports = (studentId: string | number, params: iConfigParams = {
 
 const StudentReportService = {
   getStudentReportYears,
+  deleteStudentReportYear,
   getStudentReportYearsForAStudent,
   getStudentReportResultForAStudent,
   getStudentReportComparativeResultForAStudent,
