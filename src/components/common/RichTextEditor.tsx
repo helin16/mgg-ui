@@ -8,7 +8,7 @@ const RichTextEditor = ({value}: iRichTextEditor) => {
     <Editor
       // onInit={(evt, editor) => editorRef.current = editor}
       initialValue={value || ''}
-      apiKey={'zvty66lu5oa806yvitzq0vno4jc5482kl8x22baopup3z4xg'}
+      apiKey={process.env.REACT_APP_TINYMCE_API_KEY || ''}
       init={{
         height: 500,
         menubar: false,
