@@ -1,7 +1,7 @@
 export const STUDENT_REPORT_YEAR_STYLE_JNR_GRAPH = 'JUNIOR_GRH';
 
 type iStudentReportYear = {
-  ID: number;
+  ID?: number;
   FileYear: number;
   FileSemester: number;
   Name: string;
@@ -24,5 +24,29 @@ type iStudentReportYear = {
   isReleasedToAll: boolean;
   isReleasedToStaff: boolean;
 };
+
+export const getDataForClone = (oldReportYear: iStudentReportYear) => {
+  const newRepYear = {...oldReportYear};
+  delete newRepYear.ID;
+  // @ts-ignore
+  delete newRepYear.Active;
+  // @ts-ignore
+  delete newRepYear.CreatedAt;
+  // @ts-ignore
+  delete newRepYear.UpdatedAt;
+  // @ts-ignore
+  delete newRepYear.CreatedById;
+  // @ts-ignore
+  delete newRepYear.UpdatedById;
+  // @ts-ignore
+  delete newRepYear.createdAt;
+  // @ts-ignore
+  delete newRepYear.updatedAt;
+  // @ts-ignore
+  delete newRepYear.createdById;
+  // @ts-ignore
+  delete newRepYear.updatedById;
+  return newRepYear;
+}
 
 export default iStudentReportYear;

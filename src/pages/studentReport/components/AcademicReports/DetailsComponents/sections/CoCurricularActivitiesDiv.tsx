@@ -16,7 +16,7 @@ const CoCurricularActivitiesDiv = ({student, studentReportYear}: {
   useEffect(() => {
     let isCancelled = false;
 
-    StudentReportService.getStudentReportCoCurricularForAStudent(student.ID, studentReportYear.ID)
+    StudentReportService.getStudentReportCoCurricularForAStudent(student.ID, studentReportYear.ID || '')
       .then(resp => {
         if (isCancelled === true) { return }
         setResultList(resp

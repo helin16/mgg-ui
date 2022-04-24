@@ -1,5 +1,5 @@
 import React, {ChangeEvent, useEffect, useState} from 'react';
-import iStudentReportYear from '../../../../types/Synergetic/iStudentReportYear';
+import iStudentReportYear, {getDataForClone} from '../../../../types/Synergetic/iStudentReportYear';
 import {Button, Col, Form, Row, Spinner, Table} from 'react-bootstrap';
 import styled from 'styled-components';
 import StudentReportService from '../../../../services/Synergetic/StudentReportService';
@@ -109,7 +109,7 @@ const AdminReportList = ({ onSelected }: iAdminReportList) => {
   }
 
   const getDeleteReportFn = (report: iStudentReportYear) => {
-    return StudentReportService.deleteStudentReportYear(report.ID)
+    return StudentReportService.deleteStudentReportYear(report.ID || '')
       .then(resp => {
         if (resp.Active === false) {
           setReportList(reportList.filter(res => res.ID !== report.ID));
@@ -141,8 +141,9 @@ const AdminReportList = ({ onSelected }: iAdminReportList) => {
             <th>Release To Staff</th>
             <th>Release To All</th>
             <th className={'text-right'}>
-              <Button variant={'success'} size={'sm'} onClick={() => onSelected(null)}>
+              <Button variant={'success'} size={'sm'} className={'flexbox-inline flexbox-align-items-center'} onClick={() => onSelected(null)}>
                 <Icons.PlusLg />
+                <span className={'d-none d-lg-block'}> New</span>
               </Button>
             </th>
           </tr>
@@ -157,14 +158,27 @@ const AdminReportList = ({ onSelected }: iAdminReportList) => {
                <td>{report.CampusCode}</td>
                <td>{report.YearLevelCode}</td>
                <td>{moment(report.ReleaseToStaffDate).format('lll')}</td>
-               <td>{moment(report.ReleaseToAllDate).format('lll')}</td>
+               <td>{report.ReleaseToAllDate && moment(report.ReleaseToAllDate).format('lll')}</td>
                <td className={'text-right'}>
+                 <Button
+                   variant={'secondary'}
+                   title={'clone'}
+                   size={'sm'}
+                   className={'flexbox-inline flexbox-align-items-center'}
+                   onClick={() => onSelected(getDataForClone(report))}
+                   >
+                   <Icons.Files />
+                   <span className={'d-none d-lg-block'}> Clone</span>
+                 </Button> {' '}
                  <DeleteConfirmPopupBtn
+                   title={'Delete'}
+                   className={'flexbox-inline flexbox-align-items-center'}
                    deletingFn={() => getDeleteReportFn(report)} confirmString={`${report.ID}`}
                    size={'sm'}
                    description={<>Are you sure you want to delete <b>{report.Name}</b>? </>}
                    variant={'danger'}>
                    <Icons.Trash />
+                   <span className={'d-none d-lg-block'}> Delete</span>
                  </DeleteConfirmPopupBtn>
                </td>
              </tr>

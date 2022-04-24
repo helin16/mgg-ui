@@ -1,13 +1,14 @@
-import Select from 'react-select';
+import SelectBox from '../common/SelectBox';
 
 type iFileSemesterSelector = {
   value?: number;
   onSelect?: (semester: number | null) => void;
   allowClear?: boolean;
   showIndicator?: boolean;
+  className?: string;
 };
 
-const FileSemesterSelector = ({value, onSelect, allowClear, showIndicator = true}: iFileSemesterSelector) => {
+const FileSemesterSelector = ({value, onSelect, allowClear, className, showIndicator = true}: iFileSemesterSelector) => {
   const options = [2, 4].map(semester => ({value: semester, label: semester}));
 
   const getSelectedOption = () => {
@@ -17,12 +18,13 @@ const FileSemesterSelector = ({value, onSelect, allowClear, showIndicator = true
     return {label: value, value}
   }
   return (
-    <Select
+    <SelectBox
       options={options}
+      className={className}
       onChange={(option) => onSelect && onSelect(option === null ? null : option.value)}
       value={getSelectedOption()}
       isClearable={allowClear}
-      components={showIndicator === true ? undefined : { DropdownIndicator:() => null, IndicatorSeparator:() => null }}
+      showDropdownIndicator={showIndicator}
     />
   )
 };

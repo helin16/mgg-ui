@@ -252,7 +252,7 @@ const LearningAreaGraph = ({student, currentStudentReportYear, studentReportResu
     if (previousStudentReportYear === null) { return }
     let isCancelled = false;
     setIsLoading(true);
-    StudentReportService.getStudentReportResultForAStudent(student.ID, previousStudentReportYear.ID, {
+    StudentReportService.getStudentReportResultForAStudent(student.ID, previousStudentReportYear.ID || '', {
         where: JSON.stringify({
           AssessAreaResultType: AssessAreaResultTypes,
           AssessResultsResult: {

@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import moment from 'moment';
-import Select from 'react-select';
+import SelectBox from '../common/SelectBox';
 
 type iFileYearSelector = {
   min?: number;
@@ -9,9 +9,10 @@ type iFileYearSelector = {
   onSelect?: (year: number | null) => void;
   allowClear?: boolean;
   showIndicator?: boolean;
+  className?: string;
 };
 
-const FileYearSelector = ({min, max, value, onSelect, allowClear, showIndicator = true}: iFileYearSelector) => {
+const FileYearSelector = ({min, max, value, onSelect, allowClear, className, showIndicator = true}: iFileYearSelector) => {
   const minYear = Number(min || moment().subtract(20, 'year').format('YYYY'));
   const maxYear = Number(max || moment().add(20, 'year').format('YYYY'));
   const options = _.range(minYear, maxYear, 1).map(year => ({value: year, label: `${year}`}));
@@ -24,13 +25,14 @@ const FileYearSelector = ({min, max, value, onSelect, allowClear, showIndicator 
   }
 
   return (
-    <Select
+    <SelectBox
       // @ts-ignore
       options={options}
+      className={className}
       onChange={(option) => onSelect && onSelect(option === null ? null : option.value)}
       value={getSelectedOption()}
       isClearable={allowClear}
-      components={showIndicator === true ? undefined : { DropdownIndicator:() => null, IndicatorSeparator:() => null }}
+      showDropdownIndicator={showIndicator}
     />
   )
 };

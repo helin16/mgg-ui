@@ -25,7 +25,7 @@ const StudentAcademicEmailPopup = ({
 
   const sendEmail = () => {
     setIsLoading(true);
-    StudentReportService.emailStudentReportPDF(student.ID, studentReportYear.ID, { email })
+    StudentReportService.emailStudentReportPDF(student.ID, studentReportYear.ID || '', { email })
       .then(resp => {
         setDownloadableAsset(resp);
         setIsLoading(true);

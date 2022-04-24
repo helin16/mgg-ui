@@ -1,22 +1,23 @@
-import Select from 'react-select';
 import {iAutoCompleteSingle} from '../common/AutoComplete';
 import {useEffect, useState} from 'react';
 import SynLuCampusService from '../../services/Synergetic/SynLuCampusService';
 import {Spinner} from 'react-bootstrap';
 import iLuCampus from '../../types/Synergetic/iLuCampus';
+import SelectBox from '../common/SelectBox';
 
 type iCampusSelector = {
   values?: iAutoCompleteSingle[] | string[];
   onSelect?: (campus: iAutoCompleteSingle | null) => void;
   allowClear?: boolean;
   showIndicator?: boolean;
+  className?: string;
 };
 
 export const translateCampusToOption = (campus: iLuCampus) => {
   return {value: campus.Code, data: campus, label: campus.Description}
 }
 
-const CampusSelector = ({values, onSelect, allowClear, showIndicator = true}: iCampusSelector) => {
+const CampusSelector = ({values, onSelect, allowClear, className, showIndicator = true}: iCampusSelector) => {
   const [optionMap, setOptionMap] = useState<{ [key: string]: iAutoCompleteSingle }>({});
   const [isLoading, setIsLoading] = useState(false);
 
@@ -65,14 +66,13 @@ const CampusSelector = ({values, onSelect, allowClear, showIndicator = true}: iC
     return <Spinner animation={'border'} />;
   }
   return (
-    <Select
-      // @ts-ignore
+    <SelectBox
       options={Object.values(optionMap)}
-      // @ts-ignore
+      className={className}
       onChange={onSelect}
       value={getSelectedValues()}
       isClearable={allowClear}
-      components={showIndicator === true ? undefined : { DropdownIndicator:() => null, IndicatorSeparator:() => null }}
+      showDropdownIndicator={showIndicator}
     />
   )
 };

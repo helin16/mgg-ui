@@ -14,7 +14,7 @@ const StudentReportDownloadBtn = ({student, studentReportYear}: iStudentReportDo
 
   const downloadReport = () => {
     setIsLoading(true);
-    StudentReportService.getStudentReportDownloadPDF(student.StudentID, studentReportYear.ID)
+    StudentReportService.getStudentReportDownloadPDF(student.StudentID, studentReportYear.ID || '')
       .then(res => {
         window.location.href = res.downloadUrl;
       })

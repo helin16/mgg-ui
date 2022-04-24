@@ -19,7 +19,7 @@ const Wrapper = styled.div`
 
 type iEmptyState = {
   title: string;
-  description?: string;
+  description?: any;
   hideLogo?: boolean;
   mainBtn?: any;
   secondaryBtn?: any;

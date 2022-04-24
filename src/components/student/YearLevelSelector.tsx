@@ -1,9 +1,9 @@
-import Select from 'react-select';
 import {iAutoCompleteSingle} from '../common/AutoComplete';
 import {useEffect, useState} from 'react';
 import {Spinner} from 'react-bootstrap';
 import SynLuYearLevelService from '../../services/Synergetic/SynLuYearLevelService';
 import iLuYearLevel from '../../types/Synergetic/iLuYearLevel';
+import SelectBox from '../common/SelectBox';
 
 type iYearLevelSelector = {
   values?: iAutoCompleteSingle[] | string[];
@@ -65,19 +65,30 @@ const YearLevelSelector = ({values, onSelect, allowClear, campusCodes, showIndic
       return [];
     }
     return values.map(value => {
-      if(typeof value === 'string') {
+      if(typeof value === 'string' || typeof value === 'number') {
         return (value in optionsMap ? optionsMap[value] : {value, label: value, data: null})
       }
       return value;
     })
   }
+
+  const getOptions = () => {
+    return Object.values(optionsMap)
+      .sort((opt1, opt2) => {
+        if (!opt1.data || !opt2.data) {
+          return 1;
+        }
+        return opt1.data.YearLevelSort > opt2.data.YearLevelSort ? 1 : -1;
+      })
+  }
+
   return (
-    <Select
-      options={Object.values(optionsMap)}
+    <SelectBox
+      options={getOptions()}
       onChange={onSelect}
       value={getSelectedValues()}
       isClearable={allowClear}
-      components={showIndicator === true ? undefined : { DropdownIndicator:() => null, IndicatorSeparator:() => null }}
+      showDropdownIndicator={showIndicator}
     />
   )
 };

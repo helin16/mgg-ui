@@ -91,14 +91,14 @@ const SemesterOverallScoresChart = ({student}: iSemesterOverallScoresChart) => {
       FileType: STUDENT_REPORT_RESULT_FILE_TYPE_ACADEMIC,
     }
     Promise.all([
-        StudentReportService.getStudentReportResultForAStudent(student.StudentID, currentStudentReportYear.ID, {
+        StudentReportService.getStudentReportResultForAStudent(student.StudentID, currentStudentReportYear.ID || '', {
             where: JSON.stringify({
               ...where,
               FileYear: currentStudentReportYear.FileYear,
               FileSemester: currentStudentReportYear.FileSemester,
             })
         }),
-        StudentReportService.getStudentReportResultForAStudent(student.StudentID, previousStudentReportYear.ID, {
+        StudentReportService.getStudentReportResultForAStudent(student.StudentID, previousStudentReportYear.ID || '', {
           where: JSON.stringify({
             ...where,
             FileYear: previousStudentReportYear.FileYear,

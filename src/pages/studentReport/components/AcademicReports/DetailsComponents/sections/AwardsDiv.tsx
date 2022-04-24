@@ -16,7 +16,7 @@ const AwardsDiv = ({student, studentReportYear}: {
   useEffect(() => {
     let isCancelled = false;
 
-    StudentReportService.getStudentReportAwardsForAStudent(student.ID, studentReportYear.ID)
+    StudentReportService.getStudentReportAwardsForAStudent(student.ID, studentReportYear.ID || '')
       .then(resp => {
         if (isCancelled === true) { return }
         setResultList(resp

@@ -5,6 +5,18 @@ export const mainRed = `#a50000`;
 
 const AppWrapper = styled.div`
   font-size: 13px;
+  
+  .flexbox {
+    display: flex;
+  }
+
+  .flexbox-inline {
+    display: inline-flex;
+  }
+
+  .flexbox-align-items-center {
+    align-items: center;
+  }
 
   .btn-primary {
     background-color: ${mainBlue};
