@@ -1,5 +1,6 @@
 import iVStudent from '../../../../types/Synergetic/iVStudent';
-import iStudentReportYear, {STUDENT_REPORT_YEAR_STYLE_JNR_GRAPH} from '../../../../types/Synergetic/iStudentReportYear';
+import iStudentReportYear from '../../../../types/Synergetic/iStudentReportYear';
+import {STUDENT_REPORT_YEAR_STYLE_JNR_GRAPH} from '../../../../types/Synergetic/iStudentReportStyle';
 import CoverLetterPage from './DetailsComponents/pages/CoverLetterPage';
 import {Col, Row} from 'react-bootstrap';
 import StudentAcademicReportMenu from './DetailsComponents/StudentAcademicReportMenu';

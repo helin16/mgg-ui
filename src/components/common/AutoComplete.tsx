@@ -1,7 +1,7 @@
 import AsyncSelect from 'react-select/async';
 
 export type iAutoCompleteSingle = {
-  label: string;
+  label: any;
   value: string | number;
   data?: any;
 }

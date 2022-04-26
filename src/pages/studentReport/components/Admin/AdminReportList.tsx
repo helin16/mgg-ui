@@ -14,7 +14,8 @@ import CampusSelector, {translateCampusToOption} from '../../../../components/st
 import YearLevelSelector, {translateYearLevelToOption} from '../../../../components/student/YearLevelSelector';
 import iLuCampus, {CAMPUS_CODE_ELC, CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR} from '../../../../types/Synergetic/iLuCampus';
 import iLuYearLevel from '../../../../types/Synergetic/iLuYearLevel';
-import ReportStyleSelector from './ReportStyleSelector';
+import ReportStyleSelector, {translateReportStyleToOption} from './ReportStyleSelector';
+import iStudentReportStyle from '../../../../types/Synergetic/iStudentReportStyle';
 
 const Wrapper = styled.div`
   .result-wrapper {
@@ -25,7 +26,7 @@ type iQuery = {
   name?: string;
   campus?: iLuCampus;
   yearLevel?: iLuYearLevel;
-  style?: string;
+  style?: iStudentReportStyle;
   fileYear?: number;
   fileSemester?: number;
 }
@@ -95,8 +96,8 @@ const AdminReportList = ({ onSelected }: iAdminReportList) => {
         if(query.yearLevel) {
           foundYearLevel = `${report.YearLevelCode || ''}`.trim().toLowerCase() === `${query.yearLevel?.Code}`.trim().toLowerCase();
         }
-        if(`${query.style || ''}`.trim() !== '') {
-          foundStyle = `${report.styleCode || ''}`.trim().toLowerCase() === `${query.style || ''}`.trim().toLowerCase();
+        if(query.style) {
+          foundStyle = `${report.styleCode || ''}`.trim().toLowerCase() === `${query.style.code || ''}`.trim().toLowerCase();
         }
         if(`${query.fileYear || ''}`.trim() !== '') {
           foundFileYear = `${report.FileYear}`.trim() === `${query.fileYear}`.trim();
@@ -234,8 +235,8 @@ const AdminReportList = ({ onSelected }: iAdminReportList) => {
                 <ReportStyleSelector
                   allowClear={true}
                   showIndicator={false}
-                  value={query.style}
-                  onSelect={(style) => onChangeFilter(style === null ? null : style, 'style')}
+                  values={query.style ? [translateReportStyleToOption(query.style)] : undefined}
+                  onSelect={(style) => onChangeFilter(style === null ? null : style.data, 'style')}
                 />
               </div>
             </Form.Group>

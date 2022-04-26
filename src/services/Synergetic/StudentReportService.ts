@@ -6,10 +6,14 @@ import iStudentReportCoCurricular from '../../types/Synergetic/iStudentReportCoC
 import iStudentReportAward from '../../types/Synergetic/iStudentReportAward';
 import iAsset from '../../types/asset/iAsset';
 import {iPowerBiReportMap} from '../../types/student/iPowerBIReports';
+import iStudentReportStyle from '../../types/Synergetic/iStudentReportStyle';
 
 const baseEndPoint = '/studentReport';
 const getStudentReportYears = (params: iConfigParams = {}): Promise<iStudentReportYear[]> => {
   return AppService.get(baseEndPoint, params).then(resp => resp.data);
+};
+const getStudentReportStyles = (params: iConfigParams = {}): Promise<iStudentReportStyle[]> => {
+  return AppService.get(`${baseEndPoint}/styles`, params).then(resp => resp.data);
 };
 const deleteStudentReportYear = (id: string | number, params: iConfigParams = {}): Promise<iStudentReportYear> => {
   return AppService.delete(`${baseEndPoint}/${id}`, params).then(resp => resp.data);
@@ -54,6 +58,7 @@ const getPowerBIReports = (studentId: string | number, params: iConfigParams = {
 };
 
 const StudentReportService = {
+  getStudentReportStyles,
   getStudentReportYears,
   createStudentReportYear,
   updateStudentReportYear,

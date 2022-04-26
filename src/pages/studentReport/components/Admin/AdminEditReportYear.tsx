@@ -208,8 +208,8 @@ const AdminEditReportYear = ({reportYear, onCancel, onSaved}: iAdminEditReportYe
               <ReportStyleSelector
                 className={`form-control ${getErrorClassName('styleCode')}`}
                 showIndicator={false}
-                value={editingReportYear?.styleCode || undefined}
-                onSelect={(styleCode) => changeField('styleCode', styleCode)}
+                values={editingReportYear?.styleCode ? [editingReportYear?.styleCode] : undefined}
+                onSelect={(style) => changeField('styleCode', style?.value || '')}
               />
               {getErrorMsg('styleCode')}
             </Form.Group>
