@@ -1,14 +1,14 @@
-import Select, {ActionMeta, MultiValue, SingleValue} from 'react-select';
 import {iAutoCompleteSingle} from '../common/AutoComplete';
 import {useEffect, useState} from 'react';
 import {Spinner} from 'react-bootstrap';
 import SynLearningAreaService from '../../services/Synergetic/SynLearningAreaService';
 import iSynLearningArea from '../../types/Synergetic/iSynLearningArea';
+import SelectBox from '../common/SelectBox';
 
 type iSynLearningAreaSelector = {
   values?: iAutoCompleteSingle[] | string[];
   fileTypes?: string[];
-  onSelect?: (newValue: MultiValue<iAutoCompleteSingle> | SingleValue<iAutoCompleteSingle>, actionMeta: ActionMeta<iAutoCompleteSingle>) => void;
+  onSelect?: (newValue: any) => void;
   allowClear?: boolean;
   showIndicator?: boolean;
   isMulti?: boolean;
@@ -72,13 +72,14 @@ const LearningAreaSelector = ({values, onSelect, allowClear, fileTypes, isMulti,
     })
   }
   return (
-    <Select
+    <SelectBox
       isMulti={isMulti}
       options={Object.values(optionsMap).sort((option1, option2) => option1.label > option2.label ? 1 : -1)}
       onChange={onSelect}
       value={getSelectedValues()}
       isClearable={allowClear}
-      components={showIndicator === true ? undefined : { DropdownIndicator:() => null, IndicatorSeparator:() => null }}
+      showDropdownIndicator={false}
+      showIndicatorSeparator={false}
     />
   )
 };

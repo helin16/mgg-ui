@@ -30,7 +30,6 @@ const ReportStyleSelector = ({ values, className, allowClear, onSelect, showIndi
     // @ts-ignore
     StudentReportService.getStudentReportStyles()
       .then(resp => {
-        console.log(resp);
         if (isCancelled === true) { return }
         setOptionsMap(resp.reduce((map, style) => {
           return {

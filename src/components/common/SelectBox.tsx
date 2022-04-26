@@ -2,6 +2,7 @@ import Select from 'react-select';
 import styled from 'styled-components';
 
 type iSelectBox = {
+  isMulti?: boolean;
   className?: string;
   options: any;
   onChange?: (options: any) => void;
@@ -12,6 +13,11 @@ type iSelectBox = {
 }
 
 const Wrapper = styled.div`
+  input[id^='react-select-'][id$='-input'] {
+    min-height: 0px;
+    height: auto;
+  }
+  
   .form-control {
     padding: 0px;
     &.is-invalid {
@@ -31,7 +37,7 @@ const Wrapper = styled.div`
 `
 
 const SelectBox = ({
-  className, options, onChange, value, isClearable, showDropdownIndicator = true, showIndicatorSeparator = true
+  className, options, onChange, value, isClearable, isMulti, showDropdownIndicator = true, showIndicatorSeparator = true
 }: iSelectBox) => {
   const getComponents = () => {
     if (showDropdownIndicator === false) {
@@ -53,6 +59,7 @@ const SelectBox = ({
   return (
     <Wrapper>
       <Select
+        isMulti={isMulti}
         className={className}
         options={options}
         onChange={onChange}

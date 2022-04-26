@@ -31,6 +31,7 @@ const Wrapper = styled.div`
   
   input {
     font-size: 0.8rem !important;
+    margin: 0px;
   }
   .clear-btn {
     color: hsl(0, 0%, 80%);
@@ -52,6 +53,7 @@ const Wrapper = styled.div`
       line-height: 1;
       stroke: currentColor;
       stroke-width: 0;
+      background-color: white;
     }
   }
 `

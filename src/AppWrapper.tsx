@@ -22,12 +22,15 @@ const AppWrapper = styled.div`
     background-color: ${mainBlue};
     border-color: #2e6da4;
   }
+  
   .text-left {
     text-align: left;
   }
+  
   .text-right {
     text-align: right;
   }
+  
   .text-center {
     text-align: center;
   }
@@ -50,6 +53,13 @@ const AppWrapper = styled.div`
 
   a {
     text-decoration: none !important;
+  }
+  
+  button {
+    min-height: auto;
+    &.btn-link:hover {
+      background-color: transparent;
+    }
   }
 
   .btn-link {
