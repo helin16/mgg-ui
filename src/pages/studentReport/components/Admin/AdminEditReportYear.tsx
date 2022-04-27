@@ -260,7 +260,7 @@ const AdminEditReportYear = ({reportYear, onCancel, onSaved}: iAdminEditReportYe
 
           <Row>
             <Form.Group as={Col} md={2} sm={6} className={'form-field'}>
-              <Form.Label>Release to Staff Date <small className={'text-danger'}>*</small></Form.Label>
+              <Form.Label>Release to Staff Date<small className={'text-danger'}>*</small></Form.Label>
               <DateTimePicker
                 className={`form-control ${getErrorClassName('ReleaseToStaffDate')}`}
                 value={editingReportYear?.ReleaseToStaffDate}

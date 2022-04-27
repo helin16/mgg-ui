@@ -1,4 +1,5 @@
 import AsyncSelect from 'react-select/async';
+import styled from 'styled-components';
 
 export type iAutoCompleteSingle = {
   label: any;
@@ -13,6 +14,13 @@ type iAutoComplete = {
   renderOptionItemFn: (option: any) => iAutoCompleteSingle[];
   onSelected?: (option: iAutoCompleteSingle | null) => void;
 }
+
+const Wrapper = styled.div`
+  input[id^='react-select-'][id$='-input'] {
+    min-height: 0px;
+    height: auto;
+  }
+`;
 
 const AutoComplete = ({
     placeholder, handleSearchFn, renderOptionItemFn, onSelected
@@ -29,13 +37,15 @@ const AutoComplete = ({
   }
 
   return (
-    <AsyncSelect
-      placeholder={placeholder}
-      onChange={onChange}
-      cacheOptions
-      defaultOptions={false}
-      loadOptions={loadOptions}
-    />
+    <Wrapper>
+      <AsyncSelect
+        placeholder={placeholder}
+        onChange={onChange}
+        cacheOptions
+        defaultOptions={false}
+        loadOptions={loadOptions}
+      />
+    </Wrapper>
   );
 }
 
