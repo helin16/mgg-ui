@@ -86,6 +86,7 @@ const DateTimePicker = ({
   return (
     <Wrapper className={className}>
       <Datetime
+        inputProps={{placeholder: 'Pick a date and time...'}}
         className={'datetime-picker'}
         onChange={onChange}
         value={getValue()}

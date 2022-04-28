@@ -293,7 +293,7 @@ const AdminEditReportYear = ({reportYear, onCancel, onSaved}: iAdminEditReportYe
 
             <Form.Group as={Col} md={1} sm={2} xs={4} className={'form-field'}>
               <Form.Label>
-                <span>Show HG:</span>{' '}<ExplanationTooltip placement={'top'} description={<div>Show Home Group Page in Report</div>} />
+                <span>Sh. HG:</span>{' '}<ExplanationTooltip placement={'top'} description={<div>Show Home Group Page in Report</div>} />
               </Form.Label>
               <div>
                 <ToggleBtn
@@ -323,7 +323,7 @@ const AdminEditReportYear = ({reportYear, onCancel, onSaved}: iAdminEditReportYe
 
             <Form.Group as={Col} md={1} sm={2} xs={4} className={'form-field'}>
               <Form.Label>
-                <span>Show Com.:</span>{' '}<ExplanationTooltip placement={'top'} description={<div>Show Comparative Page in Report</div>} />
+                <span>Sh. Co.:</span>{' '}<ExplanationTooltip placement={'top'} description={<div>Show Comparative Page in Report</div>} />
               </Form.Label>
               <div>
                 <ToggleBtn
