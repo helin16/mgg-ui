@@ -27,6 +27,10 @@ export const getDataForClone = (oldReportYear: iStudentReportYear) => {
   const newRepYear = {...oldReportYear};
   delete newRepYear.ID;
   // @ts-ignore
+  delete newRepYear.FileYear;
+  // @ts-ignore
+  delete newRepYear.FileSemester;
+  // @ts-ignore
   delete newRepYear.Active;
   // @ts-ignore
   delete newRepYear.CreatedAt;
