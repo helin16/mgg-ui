@@ -25,7 +25,7 @@ const SchoolBoxComponent = ({path, remoteUrl, id = null, user = null, time = nul
   const synId = id === null ? searchParams.get('id') : id;
   const schoolBoxUser = user === null ? searchParams.get('user') : user;
   const authTime = time === null ? searchParams.get('time') : time;
-  const authKey = sbKey === null ? searchParams.get('key') : time;
+  const authKey = sbKey === null ? searchParams.get('key') : sbKey;
 
   useEffect(() => {
     let isCancelled = false;
@@ -40,12 +40,15 @@ const SchoolBoxComponent = ({path, remoteUrl, id = null, user = null, time = nul
         if (isCancelled) {return}
         LocalStorageService.setToken(resp.token);
         dispatch(userAuthenticated({user: resp.user}));
-        setLoading(false);
       })
       .catch(err => {
+        if (isCancelled) {return}
         console.error(err);
         LocalStorageService.removeToken();
         dispatch(removedAuthentication());
+      })
+      .finally(() => {
+        if (isCancelled) {return}
         setLoading(false);
       });
     return () => {
@@ -59,7 +62,7 @@ const SchoolBoxComponent = ({path, remoteUrl, id = null, user = null, time = nul
 
   return (
     <div className={'school-box-layout'}>
-      <SchoolBoxDebugInfo remoteUrl={remoteUrl} path={path}/>
+      <SchoolBoxDebugInfo remoteUrl={remoteUrl} path={path} searchParams={{synId, schoolBoxUser, authTime, authKey}}/>
       <SchoolBoxRouter path={path} />
     </div>
   )
