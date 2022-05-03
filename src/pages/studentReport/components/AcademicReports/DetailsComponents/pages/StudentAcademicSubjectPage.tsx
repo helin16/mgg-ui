@@ -13,6 +13,8 @@ import SubjectDescriptionDiv from '../sections/SubjectDescriptionDiv';
 import PageTitleDivider from '../sections/PageTitleDivider';
 import LearningBehavioursDiv from '../sections/LearningBehavioursDiv';
 import AssessmentTasksDiv from '../sections/AssessmentTasksDiv';
+import OutcomesDiv from '../sections/OutcomesDiv';
+import ReflectionDiv from '../sections/RefelectionDiv';
 
 export const SubjectPageWrapper = styled.div`
   .d-table {
@@ -54,6 +56,7 @@ const StudentAcademicSubjectPage = ({
         selectedReportResults={selectedReportResultList}
       />
 
+      <OutcomesDiv results={selectedReportResultList}/>
       <AssessmentTasksDiv results={selectedReportResultList}/>
       <AchievementStandardsDiv results={selectedReportResultList} />
 
@@ -62,6 +65,7 @@ const StudentAcademicSubjectPage = ({
       <AttitudeAndManagementDiv results={selectedReportResultList} />
       <LearningBehavioursDiv results={selectedReportResultList} />
 
+      <ReflectionDiv results={selectedReportResultList} title={'Student Reflection'}/>
       <CommentsDiv result={selectedReportResultList[0]} />
       <TeachersDiv results={selectedReportResultList} />
 

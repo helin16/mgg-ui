@@ -25,14 +25,14 @@ const OverallAchievementStandardsDiv = ({results}: {results: iStudentReportResul
           return [
             STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_OVERALL_GRADE_JNR,
             STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_OVERALL_GRADE,
-          ].indexOf(result.AssessAreaResultType) >= 0
+          ].indexOf(result.AssessAreaResultType) >= 0 && result.overallAchievementText !== ''
         })
     )
   }, [results]);
 
   if (resultList.length <= 0) {
     return null;
-  };
+  }
 
   return (
     <Wrapper>

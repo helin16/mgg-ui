@@ -35,7 +35,9 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "promote:test": "ts-node buildScript/promoteToSchoolBoxDev.ts",
-    "promote:prod": "ts-node buildScript/promoteToSchoolBox.ts"
+    "promote:prod": "ts-node buildScript/promoteToSchoolBox.ts",
+    "deploy:test": "yarn build; yarn promote:test",
+    "deploy:prod": "yarn build; yarn promote:prod"
   },
   "eslintConfig": {
     "extends": [

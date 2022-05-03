@@ -1,6 +1,7 @@
 export const STUDENT_REPORT_SUBJECT_NAME_COMPARATIVE_ANALYSIS = 'Comparative Analysis';
 
 export const STUDENT_REPORT_RESULT_FILE_TYPE_ACADEMIC = 'A';
+export const STUDENT_REPORT_RESULT_FILE_TYPE_MUSIC = 'M';
 
 export const STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_KNOWLEDGE_AND_SKILLS = 'KS';
 export const STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_INDIVIDUAL_GOALS = 'GOAL';
@@ -15,12 +16,15 @@ export const STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_LEARNING_BEHAVIORS = 'LRNBEH
 export const STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_ATTITUDE_AND_MANAGEMENT = 'ATTITUDE';
 export const STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_REFLECT = 'REFLECT';
 export const STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_ASSESSMENT_TASK = 'ASSTASK';
+export const STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_OUTCOMES = 'S/N';
 
 type iStudentReportResult = {
   overallGradeText: string;
   overallAchievementText: string;
   isHomeGroup: boolean;
   isNA: boolean;
+  teacherTitlePrefix: string;
+  reflectionText: string | null;
 
   FileType: string;
   FileYear: number;

@@ -11,6 +11,8 @@ import ApproachesToLearningDiv from '../sections/ApproachesToLearningDiv';
 const HomeGroupPage = ({
   student, studentReportYear, selectedReportResults
 }: iSubjectPageParams) => {
+
+  console.log(selectedReportResults);
   return (
     <SubjectPageWrapper className={'home-group-wrapper'}>
       <StudentAcademicSubjectPageHeader
@@ -32,7 +34,7 @@ const HomeGroupPage = ({
         results={selectedReportResults}
         showHeadOfSchool={true}
         showHeadOfYear={true}
-        teacherTitle={'Home Group Teacher'}
+        teacherTitle={`${selectedReportResults[0].teacherTitlePrefix} Teacher`}
       />
     </SubjectPageWrapper>
   )

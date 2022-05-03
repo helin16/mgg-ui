@@ -1,10 +1,10 @@
 import iStudentReportResult, {
-  STUDENT_REPORT_RESULT_FILE_TYPE_ACADEMIC
+  STUDENT_REPORT_RESULT_FILE_TYPE_MUSIC
 } from '../../../../../../types/Synergetic/iStudentReportResult';
 
 export const getStudentReportClassname = (result: iStudentReportResult) => {
-  if (result.AssessAreaResultType === STUDENT_REPORT_RESULT_FILE_TYPE_ACADEMIC) {
-    return result.AssessHeading;
+  if (result.AssessAreaResultType === STUDENT_REPORT_RESULT_FILE_TYPE_MUSIC) {
+    return `${result.AssessHeading} ${result.ClassDescription}`;
   }
-  return `${result.AssessHeading} ${result.ClassDescription}`;
+  return result.AssessHeading;
 }

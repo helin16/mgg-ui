@@ -17,20 +17,21 @@ const Wrapper = styled.div`
 
 const OverallAchievementStandardsDiv = ({results}: {results: iStudentReportResult[]}) => {
   const [resultList, setResultList] = useState<iStudentReportResult[]>([]);
+
   useEffect(() => {
     setResultList(
       results
         .filter(result => {
           return [
             STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_MARKS,
-          ].indexOf(result.AssessAreaResultType) >= 0
+          ].indexOf(result.AssessAreaResultType) >= 0 && result.overallGradeText !== ''
         })
     )
   }, [results]);
 
   if (resultList.length <= 0) {
     return null;
-  };
+  }
 
   return (
     <Wrapper>

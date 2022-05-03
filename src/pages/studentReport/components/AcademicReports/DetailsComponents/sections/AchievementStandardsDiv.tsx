@@ -20,6 +20,7 @@ const AchievementStandardsDiv = ({results}: {results: iStudentReportResult[]}) =
     setASResults(
       results
         .filter(result => result.AssessAreaResultType === STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_ACHIEVEMENT_STANDARDS)
+        .sort((result1, result2) => result1.AssessAreaSeq > result2.AssessAreaSeq ? 1 : -1)
     )
   }, [results]);
 

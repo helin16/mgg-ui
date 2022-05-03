@@ -48,7 +48,7 @@ const SearchPage = ({onSelect}: {onSelect: (student: iVStudent) => void}) => {
         setIsSearching(false);
         setStudents(resp
           .sort((stu1, stu2) => {
-            return (stu1.StudentSurname > stu2.StudentSurname) ? 1 : -1
+            return (stu1.StudentGiven1 > stu2.StudentGiven1) ? 1 : -1
           })
         )
       })

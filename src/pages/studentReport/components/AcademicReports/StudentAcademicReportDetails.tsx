@@ -105,7 +105,7 @@ const StudentAcademicReportDetails = ({
 
   return (
     <Row>
-      <Col md={3} lg={{order: 'last', span: 3}}>
+      <Col md={3} lg={{order: 'last', span: 2}}>
         <StudentAcademicReportMenu
           isLoading={isLoading}
           student={student}

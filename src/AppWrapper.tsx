@@ -4,6 +4,22 @@ export const mainBlue = `#0066b0`;
 export const mainRed = `#a50000`;
 
 const AppWrapper = styled.div`
+  &.test-app {
+    background-color: rgba(0, 0, 0, 0.1);
+    :before {
+      z-index: 999999;
+      display: inline-block;
+      content: 'Test Mode';
+      position: fixed;
+      right: 0px;
+      bottom: 0px;
+      background-color: ${mainRed};
+      opacity: 70%;
+      color: white;
+      padding: 8px;
+    }
+  }
+  
   font-size: 13px;
   
   .flexbox {
