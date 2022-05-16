@@ -5,7 +5,6 @@ import {useEffect, useState} from 'react';
 const ReflectionDiv = ({results, title = 'Reflection'}: {results: iStudentReportResult[]; title?: string}) => {
   const [resultList, setResultList] = useState<iStudentReportResult[]>([]);
 
-console.log(results);
   useEffect(() => {
     setResultList(
       results

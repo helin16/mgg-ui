@@ -21,6 +21,10 @@ const ApproachesToLearningDiv = ({results}: {results: iStudentReportResult[]}) =
     )
   }, [results]);
 
+  if (resultList.length < 0) {
+    return null;
+  }
+  console.log(resultList)
   return (
     <GraphTable
       results={resultList}
