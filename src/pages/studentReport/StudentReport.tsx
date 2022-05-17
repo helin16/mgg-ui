@@ -4,13 +4,15 @@ import iVStudent from '../../types/Synergetic/iVStudent';
 import StudentDetailsPage from './components/StudentDetailsPage';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../redux/makeReduxStore';
-import VStudentService from '../../services/Synergetic/VStudentService';
-import {Spinner} from 'react-bootstrap';
+import SynVStudentService from '../../services/Synergetic/SynVStudentService';
+import {Button, Spinner} from 'react-bootstrap';
 import Page401 from '../../components/Page401';
 import StudentGridForAParent from '../../components/student/StudentGridForAParent';
 import AuthService from '../../services/AuthService';
 import {MODULE_ID_STUDENT_REPORT} from '../../types/modules/iModuleUser';
 import {ROLE_ID_ADMIN} from '../../types/modules/iRole';
+import PageNotFound from '../../components/PageNotFound';
+import ContactSupportPopupBtn from '../../components/support/ContactSupportPopupBtn';
 
 const StudentReport = () => {
   const {user} = useSelector((state: RootState) => state.auth);
@@ -24,7 +26,7 @@ const StudentReport = () => {
       return;
     }
     setIsLoading(true);
-    VStudentService.getCurrentVStudent(user?.synergyId)
+    SynVStudentService.getCurrentVStudent(user?.synergyId)
       .then(resp => {
         if (isCancelled) { return }
         setSelectedStudent(resp);
@@ -74,6 +76,24 @@ const StudentReport = () => {
     if (user?.isTeacher === true || isAdminUser === true) {
       return <SearchPage onSelect={(student) => setSelectedStudent(student)}/>;
     }
+    if (user?.isStudent === true && !selectedStudent) {
+      return <PageNotFound
+        title={`Opps, we can NOT find your profile.`}
+        description={
+          <span>
+            Sorry we can't find your profile as a current student. <br />
+            This may be caused by your session timed out, please try to refresh this page to reconnect <br />
+            If you believe there is an issue, please report this to the School.
+          </span>
+        }
+        secondaryBtn={
+          <ContactSupportPopupBtn>
+            <Button variant="link">Report this issue</Button>
+          </ContactSupportPopupBtn>
+        }
+      />
+    }
+
     return <Page401 />;
   }
 

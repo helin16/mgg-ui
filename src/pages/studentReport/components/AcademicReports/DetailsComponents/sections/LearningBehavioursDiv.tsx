@@ -18,6 +18,7 @@ const LearningBehavioursDiv = ({results}: {results: iStudentReportResult[]}) => 
     setResultList(
       results
         .filter(result => result.AssessAreaResultType === STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_LEARNING_BEHAVIORS)
+        .sort((result1, result2) => result1.AssessAreaSeq > result2.AssessAreaSeq ? 1 : -1)
     )
   }, [results]);
 

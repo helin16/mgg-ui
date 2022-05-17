@@ -6,7 +6,7 @@ import {Image, Spinner} from 'react-bootstrap';
 import CommunityService from '../../services/Synergetic/CommunityService';
 import {OP_OR} from '../../helper/ServiceHelper';
 import * as _ from 'lodash';
-import VStudentService from '../../services/Synergetic/VStudentService';
+import SynVStudentService from '../../services/Synergetic/SynVStudentService';
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
@@ -97,7 +97,7 @@ const StudentGridForAParent = ({
 
     setIsLoadingStudents(true);
     Promise.all(studentIds.map(studentId => {
-        return VStudentService.getCurrentVStudent(studentId)
+        return SynVStudentService.getCurrentVStudent(studentId)
       }))
       .then(resp => {
         if (isCancelled === true) { return }
@@ -129,6 +129,7 @@ const StudentGridForAParent = ({
 
   return (
     <Wrapper>
+      <h4>Please select one of your daughter's profile below: </h4>
       {students.map(student => getStudentProfileDiv(student))}
     </Wrapper>
   );

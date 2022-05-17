@@ -9,6 +9,7 @@
     "big.js": "^6.1.1",
     "bootstrap": "5.1.3",
     "bootstrap-switch-button-react": "^1.2.0",
+    "env-cmd": "^10.1.0",
     "highcharts": "^10.0.0",
     "highcharts-react-official": "^3.1.0",
     "lodash": "^4.17.21",
@@ -35,12 +36,12 @@
     "build": "yarn install; react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "promote:test": "ts-node buildScript/promoteToSchoolBoxDev.ts",
-    "promote:prod": "ts-node buildScript/promoteToSchoolBox.ts",
     "install:test": "yarn install:prod",
     "install:prod": "rm -rf ./node_modules/; yarn install --production",
-    "deploy:test": "yarn install:test; yarn build; yarn promote:test;",
-    "deploy:prod": "yarn install:prod; yarn build; yarn promote:prod;"
+    "promote:test": "ts-node buildScript/promoteToSchoolBoxDev.ts",
+    "promote:prod": "ts-node buildScript/promoteToSchoolBox.ts",
+    "deploy:test": "yarn install:test; ./node_modules/.bin/env-cmd -f ./.env.development yarn build; yarn promote:test;",
+    "deploy:prod": "yarn install:prod; ./node_modules/.bin/env-cmd -f ./.env.production yarn build; yarn promote:prod;"
   },
   "eslintConfig": {
     "extends": [

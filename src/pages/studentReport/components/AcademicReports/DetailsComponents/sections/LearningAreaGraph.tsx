@@ -300,8 +300,10 @@ const LearningAreaGraph = ({student, currentStudentReportYear, studentReportResu
     const sameYearAndSemester = isSameYearAndSemester(yearLevelCode, fileSemester, result);
     const previousResult = (result.ClassLearningAreaCode in previousStudentReportResultMap) ? previousStudentReportResultMap[result.ClassLearningAreaCode] : null;
     return (
-      <td key={`${yearLevelCode}-${fileSemester}`}
-          className={`data-col ${sameYearAndSemester === true ? 'active' : ''}`}>
+      <td
+        key={`${yearLevelCode}-${fileSemester}`}
+        className={`data-col ${sameYearAndSemester === true ? 'active' : ''}`}
+      >
         {sameYearAndSemester === true ? (
           <>
             <div className={`dot ${result.AssessResultsResult?.trim().toUpperCase()}`} />
@@ -322,7 +324,7 @@ const LearningAreaGraph = ({student, currentStudentReportYear, studentReportResu
   const getTableTr = (key: string, result: iStudentReportResult | null = null, isHeader = false) => {
     return (
       <tr className={isHeader === true ? 'header-row' : 'data-row'} key={key}>
-        { isHeader === true ? <th className={'title-col'}></th> : <td className={'title-col'}>{result?.AssessUnitName}</td> }
+        { isHeader === true ? <th className={'title-col'} key={'title-col'}></th> : <td className={'title-col'} key={'title-col'}>{result?.AssessUnitName}</td> }
         { isHeader === true ?
           // @ts-ignore
           <th key={'elc'} colSpan={2}>ELC</th> :
@@ -351,7 +353,7 @@ const LearningAreaGraph = ({student, currentStudentReportYear, studentReportResu
         <h3 className={'text-danger'}><i>{title}</i></h3>
         <table className={'table table-bordered table-condensed table-striped table-hover'}>
           <thead>
-            {getTableTr('', null, true)}
+            {getTableTr('tbl-head', null, true)}
           </thead>
           <tbody>
             {resultList.map((result, index) => {

@@ -7,12 +7,12 @@ import CoCurricularActivitiesDiv from '../sections/CoCurricularActivitiesDiv';
 import AwardsDiv from '../sections/AwardsDiv';
 import TeachersDiv from '../sections/TeacherDiv';
 import ApproachesToLearningDiv from '../sections/ApproachesToLearningDiv';
+import LearningAgencyDiv from '../sections/LearningAgencyDiv';
 
 const HomeGroupPage = ({
   student, studentReportYear, selectedReportResults
 }: iSubjectPageParams) => {
 
-  console.log(selectedReportResults);
   return (
     <SubjectPageWrapper className={'home-group-wrapper'}>
       <StudentAcademicSubjectPageHeader
@@ -22,6 +22,7 @@ const HomeGroupPage = ({
       />
 
       <AttitudeAndManagementDiv results={selectedReportResults} />
+      <LearningAgencyDiv results={selectedReportResults} />
       <ApproachesToLearningDiv results={selectedReportResults} />
       <ReflectionDiv results={selectedReportResults} />
 

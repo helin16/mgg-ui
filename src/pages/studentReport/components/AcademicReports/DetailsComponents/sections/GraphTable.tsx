@@ -78,7 +78,7 @@ const GraphTable = ({
     <SectionDiv>
       <Wrapper>
         <div className={'result-row title-row'}>
-          <div>{title}</div>
+          <div className={'text-uppercase'}>{title}</div>
           {getResultColTitle()}
         </div>
         {results.map(result => {

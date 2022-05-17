@@ -23,23 +23,30 @@ const reloadPage = () => {
   window.location.reload();
 };
 
-
-const PageNotFound = () => {
+type iPageNotFound = {
+  title?: string | React.ReactElement;
+  description?: string | React.ReactElement;
+  secondaryBtn?: React.ReactElement;
+}
+const PageNotFound = ({title, description, secondaryBtn}: iPageNotFound) => {
   return <Wrapper>
     <div className={'logo'}>
       <SchoolLogo />
     </div>
     <div className={'description'}>
-      <h4>Opps, requested page can't be found.</h4>
+      <h4 className={'title'}>{title || 'Requested page can\'t be found.'}</h4>
       <p>
-        This page might have been removed or temporarily unavailable.
+        {description || `This page might have been removed or temporarily unavailable.`}
       </p>
     </div>
     <div className={'actions'}>
       <Button variant={'primary'} size="sm" onClick={() => reloadPage()}>Reload Page</Button>
-      <ContactSupportPopupBtn>
-        <Button variant="link">Support</Button>
-      </ContactSupportPopupBtn>
+      {
+        secondaryBtn ||
+        <ContactSupportPopupBtn>
+          <Button variant="link">Support</Button>
+        </ContactSupportPopupBtn>
+      }
     </div>
   </Wrapper>
 };

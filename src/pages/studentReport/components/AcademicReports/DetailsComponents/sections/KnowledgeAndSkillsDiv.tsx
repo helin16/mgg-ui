@@ -19,6 +19,7 @@ const KnowledgeAndSkillsDiv = ({results}: {results: iStudentReportResult[]}) => 
     setResultList(
       results
         .filter(result => result.AssessAreaResultType === STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_KNOWLEDGE_AND_SKILLS)
+        .sort((result1, result2) => result1.AssessAreaSeq > result2.AssessAreaSeq ? 1 : -1)
     )
   }, [results]);
 

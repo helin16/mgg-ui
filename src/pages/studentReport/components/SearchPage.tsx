@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import {InputGroup, FormControl} from 'react-bootstrap';
 import {Search} from 'react-bootstrap-icons';
 import LoadingBtn from '../../../components/common/LoadingBtn';
-import VStudentService from '../../../services/Synergetic/VStudentService';
+import SynVStudentService from '../../../services/Synergetic/SynVStudentService';
 import iVStudent from '../../../types/Synergetic/iVStudent';
 import styled from 'styled-components';
 import PanelTitle from '../../../components/PanelTitle';
@@ -48,7 +48,7 @@ const SearchPage = ({onSelect}: {onSelect: (student: iVStudent) => void}) => {
       return;
     }
     setIsSearching(true);
-    VStudentService.searchVStudents(searchTxt)
+    SynVStudentService.searchVStudents(searchTxt)
       .then(resp => {
         setIsSearching(false);
         setStudents(resp

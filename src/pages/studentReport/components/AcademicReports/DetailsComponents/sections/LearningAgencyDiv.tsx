@@ -1,5 +1,5 @@
 import iStudentReportResult, {
-  STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_APPROACHES_TO_LEARNING
+  STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_LEARNING_AGENCY
 } from '../../../../../../types/Synergetic/iStudentReportResult';
 import {useEffect, useState} from 'react';
 import GraphTable from './GraphTable';
@@ -11,13 +11,13 @@ const resultTranslateMap = {
   'C': {name: 'Consistently', width: 100},
 }
 
-const ApproachesToLearningDiv = ({results}: {results: iStudentReportResult[]}) => {
+const LearningAgencyDiv = ({results}: {results: iStudentReportResult[]}) => {
   const [resultList, setResultList] = useState<iStudentReportResult[]>([]);
 
   useEffect(() => {
     setResultList(
       results
-        .filter(result => result.AssessAreaResultType === STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_APPROACHES_TO_LEARNING)
+        .filter(result => result.AssessAreaResultType === STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_LEARNING_AGENCY)
         .sort((result1, result2) => result1.AssessAreaSeq > result2.AssessAreaSeq ? 1 : -1)
     )
   }, [results]);
@@ -29,10 +29,10 @@ const ApproachesToLearningDiv = ({results}: {results: iStudentReportResult[]}) =
   return (
     <GraphTable
       results={resultList}
-      title={'Learning Agency1'}
+      title={'Learning Agency'}
       resultTranslateMap={resultTranslateMap}
     />
   )
 };
 
-export default ApproachesToLearningDiv;
+export default LearningAgencyDiv;

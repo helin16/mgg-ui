@@ -6,6 +6,7 @@ export const mainRed = `#a50000`;
 const AppWrapper = styled.div`
   &.test-app {
     background-color: rgba(0, 0, 0, 0.1);
+    min-height: 100vh;
     :before {
       z-index: 999999;
       display: inline-block;
@@ -37,6 +38,10 @@ const AppWrapper = styled.div`
   .btn-primary {
     background-color: ${mainBlue};
     border-color: #2e6da4;
+  }
+
+  .text-uppercase {
+    text-transform: uppercase;
   }
   
   .text-left {
