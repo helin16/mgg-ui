@@ -14,6 +14,7 @@
     "lodash": "^4.17.21",
     "moment": "^2.29.2",
     "moment-timezone": "^0.5.34",
+    "node-scp": "^0.0.17",
     "powerbi-client-react": "^1.3.3",
     "react": "^17.0.2",
     "react-bootstrap": "^2.2.3",
@@ -30,14 +31,16 @@
     "web-vitals": "^2.1.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "yarn install; react-scripts start",
+    "build": "yarn install; react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "promote:test": "ts-node buildScript/promoteToSchoolBoxDev.ts",
     "promote:prod": "ts-node buildScript/promoteToSchoolBox.ts",
-    "deploy:test": "yarn build; yarn promote:test",
-    "deploy:prod": "yarn build; yarn promote:prod"
+    "install:test": "yarn install:prod",
+    "install:prod": "rm -rf ./node_modules/; yarn install --production",
+    "deploy:test": "yarn install:test; yarn build; yarn promote:test;",
+    "deploy:prod": "yarn install:prod; yarn build; yarn promote:prod;"
   },
   "eslintConfig": {
     "extends": [
@@ -71,7 +74,6 @@
     "@types/react-redux": "^7.1.23",
     "@types/redux": "^3.6.0",
     "@types/styled-components": "^5.1.25",
-    "node-scp": "^0.0.17",
     "ts-node": "^10.7.0",
     "typescript": "^4.6.3"
   }

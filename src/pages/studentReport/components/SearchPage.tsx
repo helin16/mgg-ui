@@ -12,6 +12,11 @@ import AdminPage from '../AdminPage';
 
 
 const Wrapper = styled.div`
+  .search-btn {
+    @media only print, screen and (max-width: 40em) {
+     max-width: 45px;
+    }
+  }
   .search-result {
     .search-result-item {
       border-bottom: 1px solid #ddd !important;
@@ -118,7 +123,7 @@ const SearchPage = ({onSelect}: {onSelect: (student: iVStudent) => void}) => {
             onChange={(event) => setSearchTxt(event.target.value)}
             onKeyUp={(event) => search(event)}
           />
-          <LoadingBtn variant={'primary'} isLoading={isSearching} onClick={() => onSearch()}>
+          <LoadingBtn variant={'primary'} isLoading={isSearching} onClick={() => onSearch()} className={'search-btn'}>
             <Search />{' '}
             <div className={'d-none d-sm-inline-block'}>Search</div>
           </LoadingBtn>
