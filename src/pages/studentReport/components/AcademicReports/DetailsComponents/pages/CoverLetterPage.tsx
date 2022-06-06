@@ -26,7 +26,7 @@ const CoverLetterPage = ({student, studentReportYear, studentReportResult}: Stud
       <h4 className={'d-table'}>
         Academic Reports
         <div className={'pull-right d-table-cell'}>
-          {student.StudentGiven1} {student.StudentSurname}
+          {student.StudentGiven1} {student.StudentSurname} ({student.StudentID})
         </div>
       </h4>
 

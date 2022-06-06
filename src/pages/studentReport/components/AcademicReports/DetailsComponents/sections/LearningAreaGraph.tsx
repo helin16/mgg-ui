@@ -240,7 +240,8 @@ const LearningAreaGraph = ({student, currentStudentReportYear, studentReportResu
         });
         const currentReportYearIndex = _.findIndex(sortedReportYears, (reportYear: iStudentReportYear) => reportYear.ID === currentStudentReportYear.ID);
         if (currentReportYearIndex >= 0 && currentReportYearIndex < sortedReportYears.length) {
-          setPreviousStudentReportYear(sortedReportYears[currentReportYearIndex + 1])
+          // set to show previous Report year only for Semester 2
+          setPreviousStudentReportYear(currentStudentReportYear.FileSemester <= 2 ? null : sortedReportYears[currentReportYearIndex + 1])
         }
       })
     return () => {
@@ -299,19 +300,23 @@ const LearningAreaGraph = ({student, currentStudentReportYear, studentReportResu
     }
     const sameYearAndSemester = isSameYearAndSemester(yearLevelCode, fileSemester, result);
     const previousResult = (result.ClassLearningAreaCode in previousStudentReportResultMap) ? previousStudentReportResultMap[result.ClassLearningAreaCode] : null;
+
+    const resultString = `${result.AssessResultsResult?.trim().toUpperCase() || ''}`.trim();
+    const previousResultString = `${previousResult?.AssessResultsResult?.trim().toUpperCase() || ''}`.trim();
+
     return (
       <td
         key={`${yearLevelCode}-${fileSemester}`}
         className={`data-col ${sameYearAndSemester === true ? 'active' : ''}`}
       >
-        {sameYearAndSemester === true ? (
+        {sameYearAndSemester === true && resultString !== '' ? (
           <>
-            <div className={`dot ${result.AssessResultsResult?.trim().toUpperCase()}`} />
+            <div className={`dot ${resultString}`} />
             {
-              previousResult === null ? null : (
+              previousResult === null || previousResultString === '' ? null : (
                 <>
-                  <div className={`dot-transit f-${previousResult.AssessResultsResult?.trim().toUpperCase()} t-${result.AssessResultsResult?.trim().toUpperCase()}`} />
-                  <div className={`dot previous ${previousResult.AssessResultsResult?.trim().toUpperCase()}`} />
+                  <div className={`dot-transit f-${previousResultString} t-${resultString}`} />
+                  <div className={`dot previous ${previousResultString}`} />
                 </>
               )
             }

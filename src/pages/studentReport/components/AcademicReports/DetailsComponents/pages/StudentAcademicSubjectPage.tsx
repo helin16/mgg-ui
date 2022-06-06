@@ -29,7 +29,7 @@ export const StudentAcademicSubjectPageHeader = ({student, selectedReportResults
       <h4 className={'d-table'}>
         {getStudentReportClassname(selectedReportResults[0])}
         <div className={'pull-right d-table-cell'}>
-          {student.StudentGiven1} {student.StudentSurname}
+          {student.StudentGiven1} {student.StudentSurname} ({student.StudentID})
         </div>
       </h4>
 

@@ -96,7 +96,7 @@ const ComparativeAnalysisPage = ({
           <h4>Comparative Analysis</h4>
         </Col>
         <Col className={'text-right'}>
-          <h4>{student.StudentGiven1} {student.StudentSurname}</h4>
+          <h4>{student.StudentGiven1} {student.StudentSurname} ({student.StudentID})</h4>
         </Col>
       </Row>
 
