@@ -167,6 +167,22 @@ const StudentAcademicReportMenu = ({
     if (isLoading === true) {
       return <Spinner animation={'border'} />
     }
+
+    if (studentReportYear.HideResults === true) {
+      return (
+        <div>
+          <div className="d-grid gap-2" style={{marginTop: '1rem'}}>
+            <Button variant={'danger'} onClick={() => onClearReportYear ? onClearReportYear() : null }>
+              <Icon.ListUl /> All {student.StudentGiven1}'s Reports
+            </Button>
+            <div className="d-grid gap-2">
+              {getBackToHomePage()}
+            </div>
+          </div>
+        </div>
+      )
+    }
+
     return (
       <div>
         {getCourseList()}

@@ -93,10 +93,10 @@ const ComparativeAnalysisPage = ({
     <Wrapper className={'comparative-analysis-wrapper'}>
       <Row>
         <Col>
-          <h3>Comparative Analysis</h3>
+          <h4>Comparative Analysis</h4>
         </Col>
         <Col className={'text-right'}>
-          <h3>{student.StudentGiven1} {student.StudentSurname}</h3>
+          <h4>{student.StudentGiven1} {student.StudentSurname}</h4>
         </Col>
       </Row>
 

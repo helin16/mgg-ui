@@ -21,6 +21,7 @@ type iStudentReportYear = {
   IncludeComparative: boolean;
   isReleasedToAll: boolean;
   isReleasedToStaff: boolean;
+  HideResults: boolean;
 };
 
 export const getDataForClone = (oldReportYear: iStudentReportYear) => {
