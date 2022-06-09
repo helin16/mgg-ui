@@ -29,7 +29,7 @@ const ApproachesToLearningDiv = ({results}: {results: iStudentReportResult[]}) =
   return (
     <GraphTable
       results={resultList}
-      title={'Learning Agency1'}
+      title={'Approaches To Learning'}
       resultTranslateMap={resultTranslateMap}
     />
   )

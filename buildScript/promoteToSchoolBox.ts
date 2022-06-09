@@ -2,7 +2,8 @@ import * as fs from 'fs';
 import { Client } from 'node-scp'
 
 const schoolBoxStaticAssetUrlPath = '/static/mggs';
-const SCHOOLBOX_HOST = 'mconnect.mentonegirls.vic.edu.au';
+// const SCHOOLBOX_HOST = 'mconnect.mentonegirls.vic.edu.au';
+const SCHOOLBOX_HOST = '10.114.37.24';
 const SCHOOLBOX_PORT = 22;
 const SCHOOLBOX_STATIC_ASSET_FOLDER = '/usr/share/schoolbox/www/';
 const SCHOOLBOX_USERNAME = 'alaress';
