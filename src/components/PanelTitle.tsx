@@ -7,10 +7,10 @@ const Wrapper = styled.div`
   padding: 10px 15px;
   border-radius: 4px;
 `
-
-const PanelTitle = ({children}: {children: any}) => {
+type iPanelTitle = {children: any, className?: string};
+const PanelTitle = ({children, className}: iPanelTitle) => {
   return (
-    <Wrapper>{children}</Wrapper>
+    <Wrapper className={className}>{children}</Wrapper>
   )
 };
 

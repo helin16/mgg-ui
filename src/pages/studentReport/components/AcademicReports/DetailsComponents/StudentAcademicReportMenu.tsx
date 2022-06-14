@@ -201,8 +201,10 @@ const StudentAcademicReportMenu = ({
 
   return (
     <Wrapper>
-      <h4>Available Reports</h4>
-      <PanelTitle>{studentReportYear.FileYear} Semester {studentReportYear.FileSemester / 2} Report</PanelTitle>
+      <h4 className={'ellipsis'}>Available Reports</h4>
+      <PanelTitle className={'ellipsis'}>
+        {studentReportYear.FileYear} Semester {studentReportYear.FileSemester / 2} Report
+      </PanelTitle>
       {getContent()}
     </Wrapper>
   )

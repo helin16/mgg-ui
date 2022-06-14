@@ -25,11 +25,12 @@ type iDeleteConfirmPopupBtnProps = ButtonProps & {
   deletingFn: () => Promise<any>;
   deletedCallbackFn?: (resp: any) => void;
   confirmString: string;
+  confirmBtnString?: string;
   title?: any;
   description?: any;
 }
 
-const DeleteConfirmPopupBtn = ({children, closePopup, title, description, confirmString, deletingFn, deletedCallbackFn, ...props}: iDeleteConfirmPopupBtnProps) => {
+const DeleteConfirmPopupBtn = ({children, closePopup, title, description, confirmString, deletingFn, deletedCallbackFn, confirmBtnString = 'Delete', ...props}: iDeleteConfirmPopupBtnProps) => {
   const [isShowingPopup, setIsShowingPopup] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -68,7 +69,7 @@ const DeleteConfirmPopupBtn = ({children, closePopup, title, description, confir
               disabled={isConfirmed !== true}
               variant={'danger'}
               onClick={() => submitDeletion()}>
-              Delete
+              {confirmBtnString}
             </LoadingBtn>
           </>
         }
@@ -79,7 +80,7 @@ const DeleteConfirmPopupBtn = ({children, closePopup, title, description, confir
           </div>
           <FormControl type={'text'} placeholder={confirmString} onChange={handleConfirmedText}/>
           <div className={'confirm-text-wrapper'}>
-            Please type in <span className={'confirm-text'}>{confirmString}</span> into above text box to confirm deletion.
+            Please type in <span className={'confirm-text'}>{confirmString}</span> into above text box to confirm.
           </div>
         </Wrapper>
       </PopupModal>
