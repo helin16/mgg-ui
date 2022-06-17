@@ -37,7 +37,7 @@ const AssetPickupConfirm = ({selectedProfile, clearSelectedProfile}: iAssetPicku
       return null;
     }
     return (
-      <><Button variant={'light'} onClick={() => clearSelectedProfile()}>Cancel</Button> {' '}</>
+      <><Button variant={'link'} onClick={() => clearSelectedProfile()}>Cancel</Button> {' '}</>
     )
   }
 

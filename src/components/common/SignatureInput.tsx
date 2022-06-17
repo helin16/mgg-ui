@@ -40,7 +40,7 @@ const SignatureInput = ({canvasProps, className, setSignatureInputPad}: iSignatu
       <SignatureCanvas
         penColor='black'
         ref={(ref) => { setSignaturePad(ref) }}
-        canvasProps={{width: 500, height: 200, className: 'signature-input', ...canvasProps}} />
+        canvasProps={{width: 420, height: 200, className: 'signature-input', ...canvasProps}} />
     </Wrapper>
   );
 }
