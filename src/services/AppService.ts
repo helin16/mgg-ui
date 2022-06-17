@@ -14,12 +14,11 @@ const getEndPointUrl = (url: string) => {
 
 const getHeaders = () => {
   const token = LocalStorageService.getToken();
-  if (!token || token === '') {
-    return undefined;
-  }
+  const authHeader = (!token || token === '') ? {} : {Authorization: `Bearer ${token}`};
   return {
     headers: {
-      Authorization: `Bearer ${token}`,
+      'X-MGGS-TOKEN': `${process.env.REACT_APP_TOKEN || ''}`,
+      ...authHeader,
     },
   };
 };
@@ -35,6 +34,7 @@ const getUrlParams = (params: iConfigParams = {}) => {
 const get = (url: string, params: iConfigParams = {}, config: AxiosRequestConfig = {}) => {
   return axios.get(
     `${getEndPointUrl(url)}${getUrlParams(params)}`,
+    // @ts-ignore
     {
       ...config,
       ...getHeaders()
@@ -43,6 +43,7 @@ const get = (url: string, params: iConfigParams = {}, config: AxiosRequestConfig
 };
 
 const post = (url: string, params: iParams, config: AxiosRequestConfig = {}) => {
+  // @ts-ignore
   return axios.post(getEndPointUrl(url), params, {
     ...config,
     ...getHeaders()
@@ -50,6 +51,7 @@ const post = (url: string, params: iParams, config: AxiosRequestConfig = {}) => 
 };
 
 const put = (url: string, params: iConfigParams, config: AxiosRequestConfig = {}) => {
+  // @ts-ignore
   return axios.put(getEndPointUrl(url), params, {
     ...config,
     ...getHeaders()
@@ -59,6 +61,7 @@ const put = (url: string, params: iConfigParams, config: AxiosRequestConfig = {}
 const remove = (url: string, params: iConfigParams = {}, config: AxiosRequestConfig = {}) => {
   return axios.delete(
     `${getEndPointUrl(url)}${getUrlParams(params)}`,
+    // @ts-ignore
     {
       ...config,
       ...getHeaders()
@@ -66,18 +69,16 @@ const remove = (url: string, params: iConfigParams = {}, config: AxiosRequestCon
   );
 };
 const getUploadHeaders = () => {
-  const token = LocalStorageService.getToken();
-  if (!token || token === '') {
-    return undefined;
-  }
+  const headers = getHeaders();
   return {
     headers: {
-      Authorization: `Bearer ${token}`,
+      ...headers,
       'Content-Type': 'multipart/form-data',
     },
   };
 };
 const uploadImage = (url: string, params: FormData, config: AxiosRequestConfig = {}) => {
+  // @ts-ignore
   return axios.post(getEndPointUrl(url), params, {
     ...config,
     ...getUploadHeaders()

@@ -6,6 +6,7 @@ import {Provider, useSelector} from 'react-redux';
 import store, {RootState} from './redux/makeReduxStore';
 import AppWrapper from './AppWrapper';
 import './App.css';
+import AssetPickupPage from './pages/assets/AssetPickupPage';
 
 const Router = () => {
   const {isProd} = useSelector((state: RootState) => state.app);
@@ -13,8 +14,8 @@ const Router = () => {
     <AppWrapper className={isProd !== true ? 'test-app' : ''}>
       <BrowserRouter>
         <Routes>
-          <Route path="/modules/remote/:code" element={<SchoolBoxLayout />}>
-          </Route>
+          <Route path="/asset/pickup" element={<AssetPickupPage />} />
+          <Route path="/modules/remote/:code" element={<SchoolBoxLayout />} />
           <Route path="*" element={<PageNotFound />} />
         </Routes>
       </BrowserRouter>

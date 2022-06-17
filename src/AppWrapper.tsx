@@ -2,6 +2,7 @@ import styled from 'styled-components';
 
 export const mainBlue = `#0066b0`;
 export const mainRed = `#a50000`;
+export const mainGapInPx = 10;
 
 const AppWrapper = styled.div`
   &.test-app {
@@ -25,6 +26,14 @@ const AppWrapper = styled.div`
   
   .flexbox {
     display: flex;
+    
+    &.space-between{
+      justify-content: space-between;
+    }
+    
+    &.align-items-stretch {
+      align-items: stretch;
+    }
   }
 
   .flexbox-inline {
@@ -101,5 +110,20 @@ const AppWrapper = styled.div`
   .form-control {
     border: 1px solid #ced4da;
   }
+  
+  .space {
+    &.bottom {
+      margin-bottom: ${mainGapInPx}px;
+    }
+
+    &.top {
+      margin-top: ${mainGapInPx}px;
+    }
+  }
+  
+  .cursor {
+    cursor: pointer;
+  }
+  
 `
 export default AppWrapper;
