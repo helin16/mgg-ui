@@ -34,7 +34,7 @@
   },
   "scripts": {
     "start": "yarn install; react-scripts start",
-    "build": "yarn install; react-scripts build",
+    "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "install:test": "yarn install:prod",

@@ -29,7 +29,7 @@ const AssetPickupConfirm = ({selectedProfile, clearSelectedProfile}: iAssetPicku
     if (preSubmit() !== true) {
       return;
     }
-    
+
   }
 
   const getCancelBtn = () => {
