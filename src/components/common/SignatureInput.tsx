@@ -25,7 +25,7 @@ const SignatureInput = ({canvasProps, className, setSignatureInputPad}: iSignatu
 
   useEffect(() => {
     setSignatureInputPad(signaturePad)
-  }, [signaturePad])
+  }, [signaturePad, setSignatureInputPad])
 
   const getClearBtn = () => {
     if (!signaturePad) {
