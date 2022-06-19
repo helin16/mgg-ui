@@ -16,6 +16,7 @@ const Wrapper = styled.div`
   .details {
     text-align: left;
     width: 75%;
+    padding-left: 10px;
   }
 `
 const PickupPageLayout = ({communityProfile, children, actionBtns}: iPickupPageLayout) => {

@@ -27,8 +27,9 @@ type iPageNotFound = {
   title?: string | React.ReactElement;
   description?: string | React.ReactElement;
   secondaryBtn?: React.ReactElement;
+  primaryBtn?: React.ReactElement
 }
-const PageNotFound = ({title, description, secondaryBtn}: iPageNotFound) => {
+const PageNotFound = ({title, description, primaryBtn, secondaryBtn}: iPageNotFound) => {
   return <Wrapper>
     <div className={'logo'}>
       <SchoolLogo />
@@ -40,7 +41,7 @@ const PageNotFound = ({title, description, secondaryBtn}: iPageNotFound) => {
       </p>
     </div>
     <div className={'actions'}>
-      <Button variant={'primary'} size="sm" onClick={() => reloadPage()}>Reload Page</Button>
+      { primaryBtn || <Button variant={'primary'} size="sm" onClick={() => reloadPage()}>Reload Page</Button>}
       {
         secondaryBtn ||
         <ContactSupportPopupBtn>
