@@ -23,7 +23,7 @@ const Router = () => {
       .catch(() => {
         dispatch(setIsProd({isProd: false}));
       })
-  }, [])
+  }, [dispatch])
   return (
     <AppWrapper className={isProd !== true ? 'test-app' : ''}>
       <BrowserRouter>
