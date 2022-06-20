@@ -1,4 +1,4 @@
-import {Button, Form, Spinner, Alert, Table} from 'react-bootstrap';
+import {Button, Form, Spinner, Alert} from 'react-bootstrap';
 import SignatureInput from '../../../components/common/SignatureInput';
 import PickupPageLayout from './PickupPageLayout';
 import React, {useEffect, useState} from 'react';

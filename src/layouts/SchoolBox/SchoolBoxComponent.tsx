@@ -5,7 +5,6 @@ import SchoolBoxRouter from './SchoolBoxRouter';
 import {Spinner} from 'react-bootstrap';
 import AuthService from '../../services/AuthService';
 import LocalStorageService from '../../services/LocalStorageService';
-import {setIsProd} from '../../redux/reduxers/app.slice';
 import {removedAuthentication, userAuthenticated} from '../../redux/reduxers/auth.slice';
 import {useDispatch} from 'react-redux';
 
@@ -41,14 +40,12 @@ const SchoolBoxComponent = ({path, remoteUrl, id = null, user = null, time = nul
         if (isCancelled) {return}
         LocalStorageService.setToken(resp.token);
         dispatch(userAuthenticated({user: resp.user}));
-        dispatch(setIsProd({isProd: resp.user.is_prod === true}));
       })
       .catch(err => {
         if (isCancelled) {return}
         console.error(err);
         LocalStorageService.removeToken();
         dispatch(removedAuthentication());
-        dispatch(setIsProd({isProd: false}));
       })
       .finally(() => {
         if (isCancelled) {return}

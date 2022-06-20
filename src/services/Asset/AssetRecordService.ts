@@ -1,5 +1,4 @@
 import AppService, {iConfigParams} from '../AppService';
-import iSynCommunity from '../../types/Synergetic/iSynCommunity';
 import iPaginatedResult from '../../types/iPaginatedResult';
 import iAssetRecord from '../../types/asset/iAssetRecord';
 
