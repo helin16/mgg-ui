@@ -1,4 +1,4 @@
-import {Button, Form, Spinner, Alert} from 'react-bootstrap';
+import {Form, Spinner, Alert, Button} from 'react-bootstrap';
 import SignatureInput from '../../../components/common/SignatureInput';
 import PickupPageLayout from './PickupPageLayout';
 import React, {useEffect, useState} from 'react';
@@ -8,6 +8,7 @@ import FormErrorDisplay, {iErrorMap} from '../../../components/form/FormErrorDis
 import iPaginatedResult from '../../../types/iPaginatedResult';
 import iAssetRecord from '../../../types/asset/iAssetRecord';
 import AssetRecordService from '../../../services/Asset/AssetRecordService';
+import LoadingBtn from '../../../components/common/LoadingBtn';
 
 type iAssetPickupConfirm = {
   selectedProfile: iSynCommunity;
@@ -15,10 +16,12 @@ type iAssetPickupConfirm = {
 }
 const AssetPickupConfirm = ({selectedProfile, clearSelectedProfile}: iAssetPickupConfirm) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [signaturePad, setSignaturePad] = useState<SignatureCanvas | null>(null);
   const [errors, setErrors] = useState<iErrorMap>({});
   const [assetRecords, setAssetRecords] = useState<iPaginatedResult<iAssetRecord> | null>(null);
   const [selectedAssetRecordIds, setSelectedAssetRecordIds] = useState<string[]>([]);
+  const [isPickedSuccess, setIsPickedSuccess] = useState(false);
 
   useEffect(() => {
     if(!selectedProfile.ID || `${selectedProfile.ID || ''}`.trim() === '') { return }
@@ -55,13 +58,19 @@ const AssetPickupConfirm = ({selectedProfile, clearSelectedProfile}: iAssetPicku
     if (preSubmit() !== true) {
       return;
     }
-    const data = {
-      synId: selectedProfile.ID,
-      signatureImg: signaturePad?.toDataURL(),
-      selectedAssetRecordIds,
-    }
-    console.log(data);
-    return;
+    setIsSaving(true);
+    Promise.all(selectedAssetRecordIds.map(selectedAssetRecordId => {
+      return AssetRecordService.pickup(selectedAssetRecordId, {
+        synId: selectedProfile.ID,
+        signatureImg: signaturePad?.toDataURL()
+      })
+    })).then((resp) => {
+      setIsPickedSuccess(true);
+    }).catch(err => {
+      console.error(err)
+    }).finally(() => {
+      setIsSaving(false);
+    })
   }
 
   const getCancelBtn = () => {
@@ -69,7 +78,7 @@ const AssetPickupConfirm = ({selectedProfile, clearSelectedProfile}: iAssetPicku
       return null;
     }
     return (
-      <><Button variant={'link'} onClick={() => clearSelectedProfile()}>Cancel</Button> {' '}</>
+      <><LoadingBtn variant={'link'} onClick={() => clearSelectedProfile()} isLoading={isSaving === true}>Cancel</LoadingBtn> {' '}</>
     )
   }
 
@@ -78,7 +87,7 @@ const AssetPickupConfirm = ({selectedProfile, clearSelectedProfile}: iAssetPicku
       return null;
     }
     return (
-      <Button variant={'primary'} onClick={handleSubmit}>Submit</Button>
+      <LoadingBtn variant={'primary'} onClick={handleSubmit} isLoading={isSaving === true}>Submit</LoadingBtn>
     )
   }
 
@@ -115,15 +124,58 @@ const AssetPickupConfirm = ({selectedProfile, clearSelectedProfile}: iAssetPicku
     )
   }
 
+  const getErrorPanel = () => {
+    const errorKeys = Object.keys(errors);
+    if (errorKeys.length <=0 ) {
+      return null;
+    }
+    return (
+      <Alert variant={'danger'}>
+        {Object.keys(errors).map(key => {
+          return (
+            <div>
+              {
+                // @ts-ignore
+                Array.isArray(errors[key]) ? errors[key].join(', ') : errors[key]
+              }
+            </div>
+          )
+        })}
+      </Alert>
+    )
+  }
+
+  const getActionBtns = () => {
+    if (isPickedSuccess === true) {
+      return <Button variant={'success'} onClick={() => window.location.reload()}>OK</Button>
+    }
+    return (
+      <>
+        {getCancelBtn()}
+        {getSubmitBtn()}
+      </>
+    )
+  }
+
   const getContent = () => {
     if (isLoading === true) {
       return <Spinner animation={'border'} />
     }
+
     if (assetRecords === null || !('data' in assetRecords) || assetRecords.data.length <= 0) {
       return (
         <Alert>Sorry, we couldn't find anything that is <b>Ready for Pickup</b> for <b>{selectedProfile.Given1} {selectedProfile.Surname}</b>.</Alert>
       );
     }
+
+    if (isPickedSuccess === true) {
+      return (
+        <Alert variant={'success'}>
+          You've now successfully picked all selected devices
+        </Alert>
+      );
+    }
+
     return (
       <Form>
         <p>I (<b>{selectedProfile.Given1} {selectedProfile.Surname}</b>) am here to pick up the following device(s) / equipment(s)</p>
@@ -133,6 +185,7 @@ const AssetPickupConfirm = ({selectedProfile, clearSelectedProfile}: iAssetPicku
           <SignatureInput setSignatureInputPad={(pad) => setSignaturePad(pad)}/>
           <FormErrorDisplay errorsMap={errors} fieldName={'signature'} />
         </div>
+        {getErrorPanel()}
       </Form>
     )
   }
@@ -141,8 +194,7 @@ const AssetPickupConfirm = ({selectedProfile, clearSelectedProfile}: iAssetPicku
     <PickupPageLayout
       communityProfile={selectedProfile}
       actionBtns={<div className={'text-right space top'}>
-        {getCancelBtn()}
-        {getSubmitBtn()}
+        {getActionBtns()}
       </div>}
     >
       {getContent()}
