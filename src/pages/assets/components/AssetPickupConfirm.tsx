@@ -28,7 +28,7 @@ const AssetPickupConfirm = ({selectedProfile, clearSelectedProfile}: iAssetPicku
 
     setIsLoading(true);
     AssetRecordService.getAssetRecords({
-        where: JSON.stringify({synId: selectedProfile.ID}),
+        where: JSON.stringify({synId: selectedProfile.ID, status: 'Ready For Pickup'}),
         include: `AssetRecordType`
       })
       .then(resp => {
