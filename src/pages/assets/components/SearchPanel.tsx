@@ -2,13 +2,15 @@ import styled from 'styled-components';
 import {Form, Spinner} from 'react-bootstrap';
 import React, {useState} from 'react';
 import InputGroup from 'react-bootstrap/InputGroup';
-import {Search} from 'react-bootstrap-icons';
+import {Search, ArrowDown} from 'react-bootstrap-icons';
 import LoadingBtn from '../../../components/common/LoadingBtn';
 import CommunityService from '../../../services/Synergetic/CommunityService';
 import iSynCommunity from '../../../types/Synergetic/iSynCommunity';
 import CommunityGridCell from '../../../components/CommunityGridCell';
 import {OP_LIKE, OP_OR} from '../../../helper/ServiceHelper';
 import UtilsService from '../../../services/UtilsService';
+import iPaginatedResult from '../../../types/iPaginatedResult';
+import MathHelper from '../../../helper/MathHelper';
 
 
 const Wrapper = styled.div``
@@ -19,34 +21,46 @@ type iSearchPanel = {
 const SearchPanel = ({onSelect}: iSearchPanel) => {
   const [searchText, SetSearchText] = useState('');
   const [isSearching, setIsSearching] = useState(false);
-  const [searchResults, setSearchResults] = useState<iSynCommunity[] | null>(null);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [searchResults, setSearchResults] = useState<iPaginatedResult<iSynCommunity> | null>(null);
 
 
-  const search = () => {
+  const search = (currentPage: number) => {
     const searchTxt = `${searchText || ''}`.trim();
     if (searchTxt === '') {
       return;
     }
     const where = UtilsService.isNumeric(searchTxt) ? { ID: searchTxt}: {
       [OP_OR]: [
-        { OccupEmail: {[OP_LIKE]: `%${searchTxt}%`} },
-        { Given1: {[OP_LIKE]: `%${searchTxt}%`} },
-        { Surname: {[OP_LIKE]: `%${searchTxt}%`} },
-      ],
+        { OccupEmail: {[OP_LIKE]: `${searchTxt}%`} },
+        { Given1: {[OP_LIKE]: `${searchTxt}%`} },
+        { Surname: {[OP_LIKE]: `${searchTxt}%`} },
+      ]
     };
-    setIsSearching(true);
-    CommunityService.getCommunityProfiles({ where: JSON.stringify(where) })
+    setIsSearching(currentPage === 1);
+    setIsLoadingMore(currentPage > 1);
+    CommunityService.getCommunityProfiles({
+        currentOnly: 'true',
+        currentPage: `${currentPage}`,
+        where: JSON.stringify(where),
+        sort: 'ID:DESC',
+      })
       .then(resp => {
-        setSearchResults(resp.data);
+        if (currentPage > 1) {
+          setSearchResults({...resp, data: [...(searchResults?.data || []), ...resp.data]});
+        } else {
+          setSearchResults(resp);
+        }
       })
       .finally(() => {
-        setIsSearching(false)
+        setIsSearching(false);
+        setIsLoadingMore(false);
       });
   }
 
   const onSearchEnterKey = (event: any) => {
     if (event.key === 'Enter') {
-      search();
+      search(1);
     }
   }
 
@@ -62,6 +76,24 @@ const SearchPanel = ({onSelect}: iSearchPanel) => {
     )
   }
 
+  const getMoreBtnDiv = () => {
+    if (!searchResults) { return null }
+    if (searchResults?.currentPage >= searchResults?.pages) {
+      return null;
+    }
+    return (
+      <div className={'text-center'}>
+        <LoadingBtn
+          variant={'outline-secondary'}
+          onClick={() => {search(MathHelper.add(searchResults?.currentPage, 1))}}
+          isLoading={isLoadingMore === true}>
+          <ArrowDown />{' '}
+          <div className={'d-none d-sm-inline-block'}>Show More</div>
+        </LoadingBtn>
+      </div>
+    )
+  }
+
   const getSearchResults = () => {
     if (isSearching === true) {
       return <Spinner animation={'border'} />
@@ -69,12 +101,12 @@ const SearchPanel = ({onSelect}: iSearchPanel) => {
     if (searchResults === null) {
       return null;
     }
-    if (searchResults.length <= 0) {
+    if (searchResults.data.length <= 0) {
       return <h4>No result found</h4>
     }
     return (
       <>
-        {searchResults.map(searchResult => {
+        {searchResults.data.map(searchResult => {
           return (
             <CommunityGridCell
               communityProfile={searchResult}
@@ -93,7 +125,7 @@ const SearchPanel = ({onSelect}: iSearchPanel) => {
     <div className={'search-inputs space bottom'}>
       <InputGroup>
         {getSearchInputs()}
-        <LoadingBtn variant={'primary'} onClick={() => search()} isLoading={isSearching === true}>
+        <LoadingBtn variant={'primary'} onClick={() => {search(1)}} isLoading={isSearching === true}>
           <Search />{' '}
           <div className={'d-none d-sm-inline-block'}>Search</div>
         </LoadingBtn>
@@ -102,6 +134,7 @@ const SearchPanel = ({onSelect}: iSearchPanel) => {
 
     <div className={'search-results space bottom'}>
       {getSearchResults()}
+      {getMoreBtnDiv()}
     </div>
 
   </Wrapper>

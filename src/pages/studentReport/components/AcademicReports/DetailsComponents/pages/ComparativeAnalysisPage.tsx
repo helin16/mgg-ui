@@ -66,7 +66,7 @@ const ComparativeAnalysisPage = ({
             .map((code) => {
               return (
                 <div className={'result-row'} key={code}>
-                  <div>The expected standards were {row[code].name}</div>
+                  <div>{row[code].name}</div>
                   <div>{row[code].percentage} %</div>
                 </div>
               )
@@ -108,7 +108,7 @@ const ComparativeAnalysisPage = ({
           The information provided on this page is designed to give you an understanding of your daughter's performance
           relative to her cohort in the key learning areas of English,
           Humanities, Languages, Mathematics, Science and The Arts.
-          The tables below indicate the percentage of students in Year {studentReportResult.StudentYearLevelDescription}
+          The tables below indicate the percentage of students in Year {studentReportResult.StudentYearLevelDescription} {' '}
           who were awarded the various levels on our five point scale for overall progress in relation to standards.
         </p>
       </div>

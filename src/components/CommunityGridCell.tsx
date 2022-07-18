@@ -26,7 +26,11 @@ const CommunityGridCell = ({communityProfile, caption, onClick}: iCommunityGridC
     setIsLoading(true);
     SynPhotoService.getPhoto(communityProfile.ID)
       .then(resp => {
-        setProfileUrl(SynPhotoService.convertBufferToUrl(resp.Photo.data))
+        if (!resp || !('Photo' in resp)) {
+          setProfileUrl('/images/User-avatar.png');
+        } else {
+          setProfileUrl(SynPhotoService.convertBufferToUrl(resp.Photo.data, resp.PhotoType))
+        }
       })
       .finally(() => {
         setIsLoading(false)

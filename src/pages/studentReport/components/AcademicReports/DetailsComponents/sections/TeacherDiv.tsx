@@ -94,7 +94,7 @@ const TeachersDiv = ({
       <div className={'head-of-school text-left'}>
         <div>{headOfSchoolTeacher.SynSSTStaff?.Title} {headOfSchoolTeacher.SynSSTStaff?.Initials} {headOfSchoolTeacher.SynSSTStaff?.Surname}</div>
         {(headOfSchoolTeacher.Comments && headOfSchoolTeacher.Comments.trim() !== '') ? <div><b>{headOfSchoolTeacher.Comments}</b></div> : null}
-        <div><b>{`Head Of ${headOfSchoolCode === SMT_SCHOOL_ROL_CODE_HEAD_OF_JUNIOR_SCHOOL ? 'Junior' : 'Senior'} School`}</b></div>
+        <div><b>{`Head of ${headOfSchoolCode === SMT_SCHOOL_ROL_CODE_HEAD_OF_JUNIOR_SCHOOL ? 'Junior' : 'Senior'} School`}</b></div>
       </div>
     )
   }

@@ -5,5 +5,6 @@ type iPaginatedResult<T> = {
   to: number;
   total: number;
   data: T[];
+  pages: number;
 }
 export default iPaginatedResult;
