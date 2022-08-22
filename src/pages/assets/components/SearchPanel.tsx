@@ -40,7 +40,7 @@ const SearchPanel = ({onSelect}: iSearchPanel) => {
     setIsSearching(currentPage === 1);
     setIsLoadingMore(currentPage > 1);
     CommunityService.getCommunityProfiles({
-        // currentOnly: 'true',
+        currentOnly: 'true',
         currentPage: `${currentPage}`,
         where: JSON.stringify(where),
         sort: 'ID:DESC',
