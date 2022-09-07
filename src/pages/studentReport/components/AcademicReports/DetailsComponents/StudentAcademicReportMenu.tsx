@@ -13,6 +13,8 @@ import LinkBtn from '../../../../../components/common/LinkBtn';
 import StudentReportDownloadBtn from './Helpers/StudentReportDownloadBtn';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../../../redux/makeReduxStore';
+import {STUDENT_REPORT_YEAR_STYLE_DOCMAN_DOWNLOAD} from '../../../../../types/Synergetic/iStudentReportStyle';
+import StudentAcademicDocManList from './StudentAcademicDocManList';
 
 const Wrapper = styled.div`
   margin-bottom: 0.4rem;
@@ -163,6 +165,18 @@ const StudentAcademicReportMenu = ({
     return null;
   }
 
+  const getPDFBtns = () => {
+    if (`${studentReportYear?.styleCode || ''}` === STUDENT_REPORT_YEAR_STYLE_DOCMAN_DOWNLOAD) {
+      return <StudentAcademicDocManList student={student} studentReportYear={studentReportYear} />;
+    }
+    return (
+      <>
+        <StudentReportDownloadBtn student={student} studentReportYear={studentReportYear} />
+        <Button variant={'danger'} onClick={() => setShowingEmailPopup(true)}><Icon.Envelope /> Email PDF Report</Button>
+      </>
+    )
+  }
+
   const getContent = () => {
     if (isLoading === true) {
       return <Spinner animation={'border'} />
@@ -187,8 +201,7 @@ const StudentAcademicReportMenu = ({
       <div>
         {getCourseList()}
         <div className="d-grid gap-2">
-          <StudentReportDownloadBtn student={student} studentReportYear={studentReportYear} />
-          <Button variant={'danger'} onClick={() => setShowingEmailPopup(true)}><Icon.Envelope /> Email PDF Report</Button>
+          {getPDFBtns()}
           <Button variant={'danger'} onClick={() => onClearReportYear ? onClearReportYear() : null }>
             <Icon.ListUl /> All {student.StudentGiven1}'s Reports
           </Button>

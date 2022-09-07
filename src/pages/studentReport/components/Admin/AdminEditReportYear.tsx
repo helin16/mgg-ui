@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import iStudentReportYear, {getDataForClone} from '../../../../types/Synergetic/iStudentReportYear';
-import {Button, Col, Form, Row } from 'react-bootstrap';
+import {Alert, Button, Col, Form, Row} from 'react-bootstrap';
 import FileYearSelector from '../../../../components/student/FileYearSelector';
 import CampusSelector from '../../../../components/student/CampusSelector';
 import YearLevelSelector from '../../../../components/student/YearLevelSelector';
@@ -17,6 +17,7 @@ import LoadingBtn from '../../../../components/common/LoadingBtn';
 import EmptyState from '../../../../components/common/EmptyState';
 import StudentReportService from '../../../../services/Synergetic/StudentReportService';
 import * as Icons from 'react-bootstrap-icons';
+import {STUDENT_REPORT_YEAR_STYLE_DOCMAN_DOWNLOAD} from '../../../../types/Synergetic/iStudentReportStyle';
 
 const Wrapper = styled.div`
   .form-control.is-invalid {
@@ -166,6 +167,83 @@ const AdminEditReportYear = ({reportYear, onCancel, onSaved}: iAdminEditReportYe
     return 'is-invalid';
   }
 
+  const getExtraInfo = () => {
+    if (`${editingReportYear?.styleCode || ''}` === STUDENT_REPORT_YEAR_STYLE_DOCMAN_DOWNLOAD) {
+      return (
+      <Form.Group as={Col} xs={12} className={'form-field'}>
+        <Alert variant={'warning'}>This online report will only display updated reports in DocMan</Alert>
+      </Form.Group>
+      )
+    }
+    return (
+      <>
+        <Form.Group as={Col} md={1} sm={2} xs={4} className={'form-field'}>
+          <Form.Label>
+            <span>Sh. HG:</span>{' '}<ExplanationTooltip placement={'top'} description={<div>Show Home Group Page in Report</div>} />
+          </Form.Label>
+          <div>
+            <ToggleBtn
+              on={'Yes'}
+              off={'No'}
+              size={'sm'}
+              checked={editingReportYear?.IncludeHomeGroup === true}
+              onChange={(checked) => changeField('IncludeHomeGroup', checked)}
+            />
+          </div>
+        </Form.Group>
+
+        <Form.Group as={Col} md={1} sm={2} xs={4} className={'form-field'}>
+          <Form.Label>
+            <span>Incl. LoE:</span>{' '}<ExplanationTooltip placement={'top'} description={<div>Include Letter of Explanation in the PDF</div>} />
+          </Form.Label>
+          <div>
+            <ToggleBtn
+              on={'Yes'}
+              off={'No'}
+              size={'sm'}
+              checked={editingReportYear?.IncludeLetterOfExplanation === true}
+              onChange={(checked) => changeField('IncludeLetterOfExplanation', checked)}
+            />
+          </div>
+        </Form.Group>
+
+        <Form.Group as={Col} md={1} sm={2} xs={4} className={'form-field'}>
+          <Form.Label>
+            <span>Sh. Co.:</span>{' '}<ExplanationTooltip placement={'top'} description={<div>Show Comparative Page in Report</div>} />
+          </Form.Label>
+          <div>
+            <ToggleBtn
+              on={'Yes'}
+              off={'No'}
+              size={'sm'}
+              checked={editingReportYear?.IncludeComparative === true}
+              onChange={(checked) => changeField('IncludeComparative', checked)}
+            />
+          </div>
+        </Form.Group>
+
+        <Form.Group as={Col} md={5} className={'form-field'}>
+          <Form.Label>
+            <span>Exclude area codes in comparative:</span>
+          </Form.Label>
+          <div>
+            <LearningAreaSelector
+              showIndicator={false}
+              fileTypes={[ SYN_LEARNING_AREA_FILE_TYPE_A ]}
+              values={editingReportYear?.ComparativeExcludeCode?.split(',')}
+              allowClear={true}
+              isMulti={true}
+              onSelect={(options) => {
+                // @ts-ignore
+                changeField('ComparativeExcludeCode', Array.isArray(options) !== true || options.length <= 0 ? null : options?.map(option => option.value).join(','))
+              }}
+            />
+          </div>
+        </Form.Group>
+      </>
+    )
+  }
+
   if (savedSuccessfully === true) {
     return <EmptyState
       title={'Saved Successfully'}
@@ -291,69 +369,7 @@ const AdminEditReportYear = ({reportYear, onCancel, onSaved}: iAdminEditReportYe
               />
             </Form.Group>
 
-            <Form.Group as={Col} md={1} sm={2} xs={4} className={'form-field'}>
-              <Form.Label>
-                <span>Sh. HG:</span>{' '}<ExplanationTooltip placement={'top'} description={<div>Show Home Group Page in Report</div>} />
-              </Form.Label>
-              <div>
-                <ToggleBtn
-                  on={'Yes'}
-                  off={'No'}
-                  size={'sm'}
-                  checked={editingReportYear?.IncludeHomeGroup === true}
-                  onChange={(checked) => changeField('IncludeHomeGroup', checked)}
-                />
-              </div>
-            </Form.Group>
-
-            <Form.Group as={Col} md={1} sm={2} xs={4} className={'form-field'}>
-              <Form.Label>
-                <span>Incl. LoE:</span>{' '}<ExplanationTooltip placement={'top'} description={<div>Include Letter of Explanation in the PDF</div>} />
-              </Form.Label>
-              <div>
-                <ToggleBtn
-                  on={'Yes'}
-                  off={'No'}
-                  size={'sm'}
-                  checked={editingReportYear?.IncludeLetterOfExplanation === true}
-                  onChange={(checked) => changeField('IncludeLetterOfExplanation', checked)}
-                />
-              </div>
-            </Form.Group>
-
-            <Form.Group as={Col} md={1} sm={2} xs={4} className={'form-field'}>
-              <Form.Label>
-                <span>Sh. Co.:</span>{' '}<ExplanationTooltip placement={'top'} description={<div>Show Comparative Page in Report</div>} />
-              </Form.Label>
-              <div>
-                <ToggleBtn
-                  on={'Yes'}
-                  off={'No'}
-                  size={'sm'}
-                  checked={editingReportYear?.IncludeComparative === true}
-                  onChange={(checked) => changeField('IncludeComparative', checked)}
-                />
-              </div>
-            </Form.Group>
-
-            <Form.Group as={Col} md={5} className={'form-field'}>
-              <Form.Label>
-                <span>Exclude area codes in comparative:</span>
-              </Form.Label>
-              <div>
-                <LearningAreaSelector
-                  showIndicator={false}
-                  fileTypes={[ SYN_LEARNING_AREA_FILE_TYPE_A ]}
-                  values={editingReportYear?.ComparativeExcludeCode?.split(',')}
-                  allowClear={true}
-                  isMulti={true}
-                  onSelect={(options) => {
-                    // @ts-ignore
-                    changeField('ComparativeExcludeCode', Array.isArray(options) !== true || options.length <= 0 ? null : options?.map(option => option.value).join(','))
-                  }}
-                />
-              </div>
-            </Form.Group>
+            {getExtraInfo()}
           </Row>
 
           <Row>
