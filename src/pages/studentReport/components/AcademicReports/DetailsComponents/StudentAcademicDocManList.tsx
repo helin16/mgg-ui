@@ -44,20 +44,20 @@ const StudentAcademicDocManList = ({student, studentReportYear}: iStudentAcademi
         const documents = await SynVDocumentService.getVDocuments({
           where: JSON.stringify({
             ID: student.StudentID,
-            ClassificationCode: ['REPORTS']
+            ClassificationCode: ['REPORT']
           }),
           perPage: '1000',
         });
         if (isCanceled ) return;
         setDocumentList(documents.data
           .filter((doc) => {
-            // console.log('doc.SourceDate >= fileSemester.StartDate', `${doc.SourceDate}`, fileSemester.StartDate, `${doc.SourceDate}` >= fileSemester.StartDate);
-            // console.log('doc.SourceDate <= fileSemester.EndDate', `${doc.SourceDate}`, fileSemester.EndDate, `${doc.SourceDate}` <= fileSemester.EndDate);
-            return `${doc.SourceDate}` >= fileSemester.StartDate && `${doc.SourceDate}` <= fileSemester.EndDate
+            if (`${studentReportYear.ReleaseToAllDate || ''}`.trim() === '') {
+              return `${doc.SourceDate}` >= fileSemester.StartDate;
+            }
+            return `${doc.SourceDate}` >= fileSemester.StartDate && `${doc.SourceDate}` <= `${studentReportYear.ReleaseToAllDate || ''}`
           })
         );
         setIsLoading(false);
-        console.log('documents', documents);
       } catch (err) {
         setIsLoading(false);
       }

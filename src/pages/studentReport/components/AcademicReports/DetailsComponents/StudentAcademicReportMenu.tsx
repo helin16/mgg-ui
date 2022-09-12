@@ -24,15 +24,15 @@ const Wrapper = styled.div`
 `
 
 const StudentAcademicReportMenu = ({
-  isLoading,
-  student,
-  studentReportYear,
-  onClearReportYear,
-  onClearSelectedStudent,
-  studentReportResultMap,
-  onSelectedCourse,
-  selectedCourseCode = '',
-}: StudentAcademicReportDetailsProps & {
+                                     isLoading,
+                                     student,
+                                     studentReportYear,
+                                     onClearReportYear,
+                                     onClearSelectedStudent,
+                                     studentReportResultMap,
+                                     onSelectedCourse,
+                                     selectedCourseCode = '',
+                                   }: StudentAcademicReportDetailsProps & {
   isLoading: boolean;
   studentReportResultMap: iStudentAcademicReportResultMap;
   selectedCourseCode?: string;
@@ -93,7 +93,7 @@ const StudentAcademicReportMenu = ({
         <LinkBtn
           className={getItemClassName(STUDENT_REPORT_SUBJECT_NAME_COMPARATIVE_ANALYSIS)}
           onClick={() => onSelectedCourse(STUDENT_REPORT_SUBJECT_NAME_COMPARATIVE_ANALYSIS)}>
-            {STUDENT_REPORT_SUBJECT_NAME_COMPARATIVE_ANALYSIS}
+          {STUDENT_REPORT_SUBJECT_NAME_COMPARATIVE_ANALYSIS}
         </LinkBtn>
       </li>
     )
@@ -165,16 +165,11 @@ const StudentAcademicReportMenu = ({
     return null;
   }
 
-  const getPDFBtns = () => {
-    if (`${studentReportYear?.styleCode || ''}` === STUDENT_REPORT_YEAR_STYLE_DOCMAN_DOWNLOAD) {
-      return <StudentAcademicDocManList student={student} studentReportYear={studentReportYear} />;
+  const getDocManList = () => {
+    if (`${studentReportYear?.styleCode || ''}` !== STUDENT_REPORT_YEAR_STYLE_DOCMAN_DOWNLOAD) {
+      return null;
     }
-    return (
-      <>
-        <StudentReportDownloadBtn student={student} studentReportYear={studentReportYear} />
-        <Button variant={'danger'} onClick={() => setShowingEmailPopup(true)}><Icon.Envelope /> Email PDF Report</Button>
-      </>
-    )
+    return <StudentAcademicDocManList student={student} studentReportYear={studentReportYear} />;
   }
 
   const getContent = () => {
@@ -182,10 +177,11 @@ const StudentAcademicReportMenu = ({
       return <Spinner animation={'border'} />
     }
 
-    if (studentReportYear.HideResults === true) {
+    if (studentReportYear.HideResults === true || `${studentReportYear?.styleCode || ''}` !== STUDENT_REPORT_YEAR_STYLE_DOCMAN_DOWNLOAD) {
       return (
         <div>
           <div className="d-grid gap-2" style={{marginTop: '1rem'}}>
+            {getDocManList()}
             <Button variant={'danger'} onClick={() => onClearReportYear ? onClearReportYear() : null }>
               <Icon.ListUl /> All {student.StudentGiven1}'s Reports
             </Button>
@@ -201,7 +197,8 @@ const StudentAcademicReportMenu = ({
       <div>
         {getCourseList()}
         <div className="d-grid gap-2">
-          {getPDFBtns()}
+          <StudentReportDownloadBtn student={student} studentReportYear={studentReportYear} />
+          <Button variant={'danger'} onClick={() => setShowingEmailPopup(true)}><Icon.Envelope /> Email PDF Report</Button>
           <Button variant={'danger'} onClick={() => onClearReportYear ? onClearReportYear() : null }>
             <Icon.ListUl /> All {student.StudentGiven1}'s Reports
           </Button>
