@@ -177,7 +177,7 @@ const StudentAcademicReportMenu = ({
       return <Spinner animation={'border'} />
     }
 
-    if (studentReportYear.HideResults === true || `${studentReportYear?.styleCode || ''}` !== STUDENT_REPORT_YEAR_STYLE_DOCMAN_DOWNLOAD) {
+    if (studentReportYear.HideResults === true || `${studentReportYear?.styleCode || ''}` === STUDENT_REPORT_YEAR_STYLE_DOCMAN_DOWNLOAD) {
       return (
         <div>
           <div className="d-grid gap-2" style={{marginTop: '1rem'}}>
