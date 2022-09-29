@@ -4,14 +4,14 @@ import {RootState} from '../../redux/makeReduxStore';
 import AuthService from '../../services/AuthService';
 import {Spinner} from 'react-bootstrap';
 import Page401 from '../Page401';
-import {ROLE_ID_ADMIN} from '../../types/modules/iRole';
 
 type iModuleAccessWrapper = {
   moduleId: number;
   roleId?: number;
+  silentMode?: boolean;
   children: React.ReactElement;
 }
-const ModuleAccessWrapper = ({moduleId, roleId, children}: iModuleAccessWrapper) => {
+const ModuleAccessWrapper = ({moduleId, roleId, silentMode = false, children}: iModuleAccessWrapper) => {
   const {user} = useSelector((state: RootState) => state.auth);
   const [canAccess, setCanAccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -30,7 +30,7 @@ const ModuleAccessWrapper = ({moduleId, roleId, children}: iModuleAccessWrapper)
           }
         }, {});
         if (roleId) {
-          setCanAccess(Object.keys(canAccessRoles).filter(roleId => `${roleId}` === `${roleId}`).length > 0);
+          setCanAccess(Object.keys(canAccessRoles).filter(rId => `${rId}` === `${roleId}`).length > 0);
         } else {
           setCanAccess(Object.keys(canAccessRoles).length > 0);
         }
@@ -54,6 +54,9 @@ const ModuleAccessWrapper = ({moduleId, roleId, children}: iModuleAccessWrapper)
   }
 
   if (!canAccess) {
+    if (silentMode) {
+      return null;
+    }
     return <Page401 />
   }
 
