@@ -5,7 +5,8 @@ import {Button, Dropdown, Spinner} from 'react-bootstrap';
 import iSynVDocument from '../../../types/Synergetic/iSynVDocument';
 import {useState} from 'react';
 import OperooSafetyAlertIgnorePopup from './OperooSafetyAlertIgnorePopup';
-import DocManViewingPopup from './DocManViewingPopup';
+import DocManReplacingPopup from './DocManReplacingPopup';
+import DocManInsertingPopup from './DocManInsertingPopup';
 // import moment from 'moment-timezone';
 
 type iOperooSafetyAlertActionRow = {
@@ -39,7 +40,8 @@ const Wrapper = styled.div`
 `;
 
 const ACTION_IGNORE = 'INGORE';
-const ACTION_VIEW_DOC = 'VIEW_DOC';
+const ACTION_REPLACING_DOC = 'REPLACING_DOC';
+const ACTION_INSERTING_DOC = 'INSERTING_DOC';
 
 const OperooSafetyAlertActionRow = ({student, alert, docMans, onUpdated, isLoading = false, showActions = false}: iOperooSafetyAlertActionRow) => {
 
@@ -91,13 +93,17 @@ const OperooSafetyAlertActionRow = ({student, alert, docMans, onUpdated, isLoadi
               return (
                 <Dropdown.Item
                   key={docMan.tDocumentsSeq}
-                  onClick={() => {setAction(ACTION_VIEW_DOC); setViewingDoc(docMan)}}>
+                  onClick={() => {setAction(ACTION_REPLACING_DOC); setViewingDoc(docMan)}}>
                   <small>Replacing <b>{docMan.Description}</b></small>
                 </Dropdown.Item>
               )
             })}
             {docMans.length > 0 ? (<Dropdown.Divider />) : null}
-            <Dropdown.Item><small>INSERT AS NEW</small></Dropdown.Item>
+            <Dropdown.Item
+              onClick={() => {setAction(ACTION_INSERTING_DOC);}}
+              >
+              <small>INSERT AS NEW</small>
+            </Dropdown.Item>
             <Dropdown.Divider />
             <Dropdown.Item>
               <Button variant={'danger'} size={'sm'} style={{width: '100%'}} onClick={() => setAction(ACTION_IGNORE)}>
@@ -110,10 +116,10 @@ const OperooSafetyAlertActionRow = ({student, alert, docMans, onUpdated, isLoadi
     );
   }
 
-  const handleUpdated = (updatedAlerts: iOperooSafetyAlert[]) => {
+  const handleUpdated = (updatedAlert: iOperooSafetyAlert) => {
     setAction('');
     if (onUpdated) {
-      onUpdated(updatedAlerts);
+      onUpdated([updatedAlert]);
     }
   }
 
@@ -124,16 +130,23 @@ const OperooSafetyAlertActionRow = ({student, alert, docMans, onUpdated, isLoadi
         <OperooSafetyAlertIgnorePopup
           alert={alert}
           onCancel={() => setAction('')}
-          onUpdated={(alert) => handleUpdated([alert])}
+          onUpdated={(alert) => handleUpdated(alert)}
         />
       );
     }
     return null;
   }
 
-  const getViewingPopup = () => {
-    if (action === ACTION_VIEW_DOC && viewingDoc) {
-      return <DocManViewingPopup document={viewingDoc} onCancel={() => setAction('')}/>
+  const getReplacingPopup = () => {
+    if (action === ACTION_REPLACING_DOC && viewingDoc) {
+      return <DocManReplacingPopup student={student} alert={alert} document={viewingDoc} onCancel={() => setAction('')} onUpdated={handleUpdated} />
+    }
+    return null;
+  }
+
+  const getInsertingPopup = () => {
+    if (action === ACTION_INSERTING_DOC) {
+      return <DocManInsertingPopup student={student} alert={alert} onCancel={() => setAction('')} onUpdated={handleUpdated} />
     }
     return null;
   }
@@ -154,7 +167,8 @@ const OperooSafetyAlertActionRow = ({student, alert, docMans, onUpdated, isLoadi
         {/*<div><small>{alert.operooRecord?.medication}</small></div>*/}
       </Wrapper>
       {getActionPopup()}
-      {getViewingPopup()}
+      {getInsertingPopup()}
+      {getReplacingPopup()}
     </>
   )
 }

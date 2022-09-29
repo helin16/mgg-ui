@@ -11,9 +11,14 @@ const ignoreOperooSafetyAlert = (id: string, params: iConfigParams, config: Axio
   return appService.put(`/operoo/safetyAlert/${id}/ignore`, params, config).then(({data}) => data);
 }
 
+const syncOperooSafetyAlert = (id: string, params: iConfigParams, config: AxiosRequestConfig = {}): Promise<iOperooSafetyAlert> => {
+  return appService.put(`/operoo/safetyAlert/${id}/sync`, params, config).then(({data}) => data);
+}
+
 const OperooSafetyAlertService = {
   getOperooSafetyAlerts,
   ignoreOperooSafetyAlert,
+  syncOperooSafetyAlert,
 }
 
 export default OperooSafetyAlertService
