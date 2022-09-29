@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import iOperooSafetyAlert, {
   OPEROO_STATUS_SAFETY_ALERT_NEW,
   OPEROO_STATUS_SAFETY_ALERT_UPDATED
@@ -9,6 +9,9 @@ import OperooSafetyAlertRow from './components/OperooSafetyAlertRow';
 import SynVStudentService from '../../services/Synergetic/SynVStudentService';
 import iVStudent from '../../types/Synergetic/iVStudent';
 import * as _ from 'lodash';
+import ModuleAdminBtn from '../../components/module/ModuleAdminBtn';
+import AdminPage from './AdminPage';
+import {MODULE_ID_OPEROO_SAFETY_ALERTS} from '../../types/modules/iModuleUser';
 
 const showAlertStatuses = [OPEROO_STATUS_SAFETY_ALERT_NEW, OPEROO_STATUS_SAFETY_ALERT_UPDATED];
 
@@ -17,9 +20,12 @@ const OperooSafetyAlertsPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [operooSafetyAlertMap, setOperooSafetyAlertMap] = useState<{[key: number]: iOperooSafetyAlert[]}>({});
   const [students, setStudents] = useState<iVStudent[]>([]);
-  const [count, setCount] = useState(0);
+  const [isViewingAdminPage, setIsViewingAdminPage] = useState(false);
 
   useEffect(() => {
+    if (isViewingAdminPage) {
+      return;
+    }
     let isCanceled = false;
 
     const getData = async () => {
@@ -66,7 +72,7 @@ const OperooSafetyAlertsPage = () => {
     return () => {
       isCanceled = true;
     }
-  }, [count])
+  }, [isViewingAdminPage])
 
   const handleAlertUpdated = (alert: iOperooSafetyAlert) => {
     if (!(alert.studentId in operooSafetyAlertMap)) {
@@ -95,14 +101,24 @@ const OperooSafetyAlertsPage = () => {
   if (isLoading === true) {
     return <Spinner animation={'border'} />
   }
+
+  if (isViewingAdminPage === true) {
+    return <AdminPage backToReportFn={() => setIsViewingAdminPage(false) }/>
+  }
+
   return <div className={'operoo-safety-alerts-page'}>
-    <h3>Operoo Safety Alert Sync</h3>
+    <h3>
+      Operoo Safety Alert Sync
+      <span className={'pull-right'} >
+        <ModuleAdminBtn onClick={() => setIsViewingAdminPage(true)} moduleId={MODULE_ID_OPEROO_SAFETY_ALERTS} />
+      </span>
+    </h3>
     {students.map(student => {
       return <OperooSafetyAlertRow
         key={student.StudentID}
         alerts={student.StudentID in operooSafetyAlertMap ? operooSafetyAlertMap[student.StudentID] : []}
         student={student}
-        onAlertUpdated={handleAlertUpdated}
+        onAlertUpdated={(alerts) => alerts.map(alert => handleAlertUpdated(alert))}
       />
     })}
   </div>

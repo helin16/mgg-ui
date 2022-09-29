@@ -1,18 +1,17 @@
 import React, {useEffect, useState} from 'react';
 import {Button, ButtonProps, Spinner} from 'react-bootstrap';
 import * as Icons from 'react-bootstrap-icons';
-import AuthService from '../../../../services/AuthService';
-import {MODULE_ID_STUDENT_REPORT} from '../../../../types/modules/iModuleUser';
-import {ROLE_ID_ADMIN} from '../../../../types/modules/iRole';
+import AuthService from '../../services/AuthService';
+import {ROLE_ID_ADMIN} from '../../types/modules/iRole';
 
-const AdminBtn = ({...props}: ButtonProps) => {
+const ModuleAdminBtn = ({moduleId, ...props}: ButtonProps & {moduleId: number}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [canShowAdminBtn, setCanShowAdminBtn] = useState(false);
 
   useEffect(() => {
     let isCancelled = false;
     setIsLoading(true);
-    AuthService.canAccessModule(MODULE_ID_STUDENT_REPORT)
+    AuthService.canAccessModule(moduleId)
       .then(resp => {
         if (isCancelled === true) { return }
         setCanShowAdminBtn(Object.keys(resp).filter(roleId => `${roleId}` === `${ROLE_ID_ADMIN}`).length > 0)
@@ -41,4 +40,4 @@ const AdminBtn = ({...props}: ButtonProps) => {
   )
 };
 
-export default AdminBtn;
+export default ModuleAdminBtn;

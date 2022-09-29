@@ -1,6 +1,8 @@
 import React from 'react';
 import StudentReport from '../../pages/studentReport/StudentReport';
 import OperooSafetyAlertsPage from '../../pages/operoo/OperooSafetyAlertsPage';
+import ModuleAccessWrapper from '../../components/module/ModuleAccessWrapper';
+import {MODULE_ID_OPEROO_SAFETY_ALERTS} from '../../types/modules/iModuleUser';
 // import PageNotFound from '../../components/PageNotFound';
 
 const schoolBoxIframeElementId = 'remote';
@@ -27,7 +29,7 @@ const SchoolBoxRouter = ({path}: {path: string}) => {
     }
     case '/operoo/safetyAlerts': {
       removeSchoolBoxIframe();
-      return <OperooSafetyAlertsPage />;
+      return <ModuleAccessWrapper moduleId={MODULE_ID_OPEROO_SAFETY_ALERTS}><OperooSafetyAlertsPage /></ModuleAccessWrapper>;
     }
     default: {
       showSchoolBoxIframe();

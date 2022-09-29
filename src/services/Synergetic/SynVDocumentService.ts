@@ -25,11 +25,16 @@ const getFileType = (document: iSynVDocument) => {
 
 }
 
-export const openDocument = (document: iSynVDocument) => {
+export const getDocumentUrl = (document: iSynVDocument) => {
   // const fileName = `${student.StudentID}_${document.Description.replace(' ', '_').trim()}.${document.DocumentType.toLowerCase()}`;
   // @ts-ignore
   const file = new Blob([new Uint8Array(document.Document.data)], { type: getFileType(document) });
   const fileURL = URL.createObjectURL(file);
+  return fileURL;
+}
+
+export const openDocument = (document: iSynVDocument) => {
+  const fileURL = getDocumentUrl(document);
   return window.open(fileURL);
 }
 

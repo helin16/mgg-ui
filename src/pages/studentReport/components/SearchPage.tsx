@@ -7,8 +7,9 @@ import iVStudent from '../../../types/Synergetic/iVStudent';
 import styled from 'styled-components';
 import PanelTitle from '../../../components/PanelTitle';
 import EmptyState from '../../../components/common/EmptyState';
-import AdminBtn from './Admin/AdminBtn';
+import ModuleAdminBtn from '../../../components/module/ModuleAdminBtn';
 import AdminPage from '../AdminPage';
+import {MODULE_ID_STUDENT_REPORT} from '../../../types/modules/iModuleUser';
 
 
 const Wrapper = styled.div`
@@ -110,7 +111,7 @@ const SearchPage = ({onSelect}: {onSelect: (student: iVStudent) => void}) => {
       <h3>
         Student Report
         <span className={'pull-right'} >
-          <AdminBtn onClick={() => setIsShowAdminPage(true)}/>
+          <ModuleAdminBtn onClick={() => setIsShowAdminPage(true)} moduleId={MODULE_ID_STUDENT_REPORT} />
         </span>
       </h3>
       <p>Welcome to the student academic report viewer. Type the homeroom or name of the student you want to locate below.</p>

@@ -10,7 +10,7 @@ import iSynVDocument from '../../../types/Synergetic/iSynVDocument';
 type iOperooSafetyAlertRow = {
   student?: iVStudent;
   alerts: iOperooSafetyAlert[];
-  onAlertUpdated?: (alert: iOperooSafetyAlert) => void;
+  onAlertUpdated?: (alerts: iOperooSafetyAlert[]) => void;
 }
 
 const Wrapper = styled.div`

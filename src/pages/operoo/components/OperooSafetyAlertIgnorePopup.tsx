@@ -28,7 +28,6 @@ const OperooSafetyAlertIgnorePopup = ({alert, onCancel, onUpdated}: iOperooSafet
     setIsSaving(true)
     OperooSafetyAlertService.ignoreOperooSafetyAlert(alert.id, {})
       .then(resp => {
-        console.log('resp', resp);
         if (onUpdated) {
           onUpdated(resp);
         }

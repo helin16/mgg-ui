@@ -14,7 +14,7 @@ type iOperooSafetyAlertActionRow = {
   docMans: iSynVDocument[];
   isLoading?: boolean;
   showActions?: boolean;
-  onUpdated?: (alert: iOperooSafetyAlert) => void;
+  onUpdated?: (alerts: iOperooSafetyAlert[]) => void;
 }
 
 const Wrapper = styled.div`
@@ -46,29 +46,29 @@ const OperooSafetyAlertActionRow = ({student, alert, docMans, onUpdated, isLoadi
   const [action, setAction] = useState<string>('');
   const [viewingDoc, setViewingDoc] = useState<iSynVDocument | null>(null);
 
-  const getViewingDropdown = () => {
-    if (docMans.length <= 0) {
-      return null;
-    }
-    return (
-      <Dropdown>
-        <Dropdown.Toggle size={'sm'}>
-          View
-        </Dropdown.Toggle>
-        <Dropdown.Menu>
-          {docMans.map(docMan => {
-            return (
-              <Dropdown.Item
-                key={docMan.tDocumentsSeq}
-                onClick={() => {setAction(ACTION_VIEW_DOC); setViewingDoc(docMan)}}>
-                <small>View <b>{docMan.Description}</b></small>
-              </Dropdown.Item>
-            );
-          })}
-        </Dropdown.Menu>
-      </Dropdown>
-    )
-  }
+  // const getViewingDropdown = () => {
+  //   if (docMans.length <= 0) {
+  //     return null;
+  //   }
+  //   return (
+  //     <Dropdown>
+  //       <Dropdown.Toggle size={'sm'}>
+  //         View
+  //       </Dropdown.Toggle>
+  //       <Dropdown.Menu>
+  //         {docMans.map(docMan => {
+  //           return (
+  //             <Dropdown.Item
+  //               key={docMan.tDocumentsSeq}
+  //               onClick={() => {setAction(ACTION_VIEW_DOC); setViewingDoc(docMan)}}>
+  //               <small>View <b>{docMan.Description}</b></small>
+  //             </Dropdown.Item>
+  //           );
+  //         })}
+  //       </Dropdown.Menu>
+  //     </Dropdown>
+  //   )
+  // }
 
   const getDocManDiv = () => {
     if (isLoading) {
@@ -81,14 +81,20 @@ const OperooSafetyAlertActionRow = ({student, alert, docMans, onUpdated, isLoadi
 
     return (
       <>
-        {getViewingDropdown()}
+        {/*{getViewingDropdown()}*/}
         <Dropdown>
           <Dropdown.Toggle size={'sm'}>
             Action
           </Dropdown.Toggle>
           <Dropdown.Menu>
             {docMans.map(docMan => {
-              return <Dropdown.Item key={docMan.tDocumentsSeq}><small>REPLACE <b>{docMan.Description}</b></small></Dropdown.Item>
+              return (
+                <Dropdown.Item
+                  key={docMan.tDocumentsSeq}
+                  onClick={() => {setAction(ACTION_VIEW_DOC); setViewingDoc(docMan)}}>
+                  <small>Replacing <b>{docMan.Description}</b></small>
+                </Dropdown.Item>
+              )
             })}
             {docMans.length > 0 ? (<Dropdown.Divider />) : null}
             <Dropdown.Item><small>INSERT AS NEW</small></Dropdown.Item>
@@ -104,17 +110,23 @@ const OperooSafetyAlertActionRow = ({student, alert, docMans, onUpdated, isLoadi
     );
   }
 
-  const handleUpdated = (updatedAlert: iOperooSafetyAlert) => {
+  const handleUpdated = (updatedAlerts: iOperooSafetyAlert[]) => {
     setAction('');
     if (onUpdated) {
-      onUpdated(updatedAlert);
+      onUpdated(updatedAlerts);
     }
   }
 
 
   const getActionPopup = () => {
     if (action === ACTION_IGNORE) {
-      return <OperooSafetyAlertIgnorePopup alert={alert} onCancel={() => setAction('')} onUpdated={handleUpdated} />
+      return (
+        <OperooSafetyAlertIgnorePopup
+          alert={alert}
+          onCancel={() => setAction('')}
+          onUpdated={(alert) => handleUpdated([alert])}
+        />
+      );
     }
     return null;
   }
