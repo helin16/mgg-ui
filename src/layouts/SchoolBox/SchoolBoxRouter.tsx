@@ -1,5 +1,6 @@
 import React from 'react';
 import StudentReport from '../../pages/studentReport/StudentReport';
+import OperooSafetyAlertsPage from '../../pages/operoo/OperooSafetyAlertsPage';
 // import PageNotFound from '../../components/PageNotFound';
 
 const schoolBoxIframeElementId = 'remote';
@@ -23,6 +24,10 @@ const SchoolBoxRouter = ({path}: {path: string}) => {
     case '/reports/student': {
       removeSchoolBoxIframe();
       return <StudentReport />;
+    }
+    case '/operoo/safetyAlerts': {
+      removeSchoolBoxIframe();
+      return <OperooSafetyAlertsPage />;
     }
     default: {
       showSchoolBoxIframe();

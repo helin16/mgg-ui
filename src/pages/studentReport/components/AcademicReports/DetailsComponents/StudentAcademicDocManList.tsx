@@ -1,9 +1,9 @@
 import iVStudent from '../../../../../types/Synergetic/iVStudent';
 import iStudentReportYear from '../../../../../types/Synergetic/iStudentReportYear';
 import {useEffect, useState} from 'react';
-import iSynVDocument, {openDocument} from '../../../../../types/Synergetic/iSynVDocument';
+import iSynVDocument from '../../../../../types/Synergetic/iSynVDocument';
 import SynFileSemesterService from '../../../../../services/Synergetic/SynFileSemesterService';
-import SynVDocumentService from '../../../../../services/Synergetic/SynVDocumentService';
+import SynVDocumentService, {openDocument} from '../../../../../services/Synergetic/SynVDocumentService';
 import {Spinner} from 'react-bootstrap';
 import styled from 'styled-components';
 
