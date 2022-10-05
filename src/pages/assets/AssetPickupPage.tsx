@@ -37,8 +37,8 @@ const AssetPickupPage = () => {
           <SchoolLogo className={'school-logo space bottom'}/>
             <div className={'content'}>
             <div>
-              <h4>You are picking up device / equipment for:</h4>
-              <p>Please search peron's profile by ID or email</p>
+              <h4>You are picking up device(s) / equipment(s) for:</h4>
+              <p>Please search profile by ID or email</p>
             </div>
             <SearchPanel onSelect={(profile: iSynCommunity) => setSelectedProfile(profile)}/>
           </div>
