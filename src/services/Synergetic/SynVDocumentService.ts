@@ -22,15 +22,35 @@ const getFileType = (document: iSynVDocument) => {
       return '';
     }
   }
+}
 
+const getFileExtensionFromFileName = (fileName: string) => {
+  console.log(fileName);
+  const typeTypes = fileName.split('.');
+  console.log(typeTypes);
+  const typeType = typeTypes.pop();
+  switch (`${typeType || ''}`.trim().toUpperCase()) {
+    case 'PDF': {
+      return "pdf";
+    }
+    case 'JPG':
+    case 'JPEG': {
+      return "jpg";
+    }
+    case 'PNG': {
+      return "png";
+    }
+    default: {
+      return '';
+    }
+  }
 }
 
 export const getDocumentUrl = (document: iSynVDocument) => {
   // const fileName = `${student.StudentID}_${document.Description.replace(' ', '_').trim()}.${document.DocumentType.toLowerCase()}`;
   // @ts-ignore
   const file = new Blob([new Uint8Array(document.Document.data)], { type: getFileType(document) });
-  const fileURL = URL.createObjectURL(file);
-  return fileURL;
+  return URL.createObjectURL(file);
 }
 
 export const openDocument = (document: iSynVDocument) => {
@@ -41,6 +61,7 @@ export const openDocument = (document: iSynVDocument) => {
 const SynVDocumentService = {
   getVDocuments,
   openDocument,
+  getFileExtensionFromFileName,
 }
 
 export default SynVDocumentService;

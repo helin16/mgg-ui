@@ -7,6 +7,9 @@ import {useState} from 'react';
 import OperooSafetyAlertIgnorePopup from './OperooSafetyAlertIgnorePopup';
 import DocManReplacingPopup from './DocManReplacingPopup';
 import DocManInsertingPopup from './DocManInsertingPopup';
+import LoadingBtn from '../../../components/common/LoadingBtn';
+import moment from 'moment-timezone';
+import PopoverLayer from '../../../components/common/PopoverLayer';
 // import moment from 'moment-timezone';
 
 type iOperooSafetyAlertActionRow = {
@@ -18,23 +21,53 @@ type iOperooSafetyAlertActionRow = {
   onUpdated?: (alerts: iOperooSafetyAlert[]) => void;
 }
 
-const Wrapper = styled.div`
-  display: flex;
-  justify-content: space-between;
-  padding: 4px 3px;
-  :hover {
-    background-color: #ccc;
+const Wrapper = styled.tr`
+  td > [role="button"] {
+    padding: 0px;
+    font-size: 12px;
   }
-  .alert-row {
-    display: flex;
-    > * {
-      padding: 0 4px;
+  td.modified-date {
+    width: 10rem;
+  }
+  td.view-operoo,
+  td.actions {
+    width: 8rem;
+  }
+  td.actions {
+    text-align: right;
+    > .dropdown {
+      text-align: right;
+      > button {
+        padding: 0px 4px;
+        font-size: 12px;
+      }
     }
   }
-  .docman-row {
-    display: flex;
-    > * {
-      padding: 0 0 0 2px;
+  td.medication,
+  td.description {
+    width: 200px;
+    .popover-btn {
+      font-size: 11px;
+      width: 200px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding: 0px;
+      text-align: left;
+    }
+  }
+  .risk-level {
+    width: 4rem;
+    &.high {
+      background-color: red;
+      color: white;
+    }
+    &.medium {
+      background-color: #ffc107;
+    }
+    &.low {
+      background-color: green;
+      color: white;
     }
   }
 `;
@@ -152,24 +185,34 @@ const OperooSafetyAlertActionRow = ({student, alert, docMans, onUpdated, isLoadi
   }
 
   return (
-    <>
-      <Wrapper>
-        <div className={'alert-row'}>
-          <div>{alert.operooRecord?.name}</div>
-          <div>{alert.operooRecord?.risk_level}</div>
-          <div><a href={alert.operooRecord?.attachment_url} >{alert.operooRecord?.attachment_name || ''}</a></div>
-          {/*<div>{moment(alert.operooRecord?.updated_at).format('lll')}</div>*/}
-        </div>
-        <div className={'docman-row'}>
-          {getDocManDiv()}
-        </div>
-        {/*<div>{alert.operooRecord?.description}</div>*/}
-        {/*<div><small>{alert.operooRecord?.medication}</small></div>*/}
-      </Wrapper>
-      {getActionPopup()}
-      {getInsertingPopup()}
-      {getReplacingPopup()}
-    </>
+    <Wrapper>
+      <td>{alert.operooRecord?.name}</td>
+      <td className={'description'}>
+        <PopoverLayer body={<p>{alert.operooRecord?.description || ''}</p>}  header={<b>Description</b>} triggerProps={{ placement: 'auto'}}>
+          <Button variant={'link'} size={'sm'} className={'popover-btn'}>{alert.operooRecord?.description}</Button>
+        </PopoverLayer>
+      </td>
+      <td className={'medication'}>
+        <PopoverLayer body={<p>{alert.operooRecord?.medication || ''}</p>} header={<b>Medication</b>} triggerProps={{ placement: 'auto'}}>
+          <Button variant={'link'} size={'sm'} className={'popover-btn'}>{alert.operooRecord?.medication}</Button>
+        </PopoverLayer>
+      </td>
+      <td className={`risk-level ${alert.operooRecord?.risk_level || ''}`.toLowerCase()}>{alert.operooRecord?.risk_level}</td>
+      <td className={'modified-date'}>{moment(alert.operooRecord?.updated_at).format('lll')}</td>
+      <td className={'view-operoo'}>
+        {showActions && (
+          <LoadingBtn variant={'link'} size={'sm'} href={alert.operooRecord?.attachment_url} isLoading={isLoading} target={'__BLANK'}>
+            View New
+          </LoadingBtn>
+        )}
+      </td>
+      <td className={'actions'}>
+        {getDocManDiv()}
+        {getActionPopup()}
+        {getInsertingPopup()}
+        {getReplacingPopup()}
+      </td>
+    </Wrapper>
   )
 }
 

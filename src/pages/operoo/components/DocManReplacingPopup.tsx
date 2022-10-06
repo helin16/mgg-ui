@@ -1,12 +1,13 @@
 import iSynVDocument from '../../../types/Synergetic/iSynVDocument';
 import PopupModal from '../../../components/common/PopupModal';
 import styled from 'styled-components';
-import {getDocumentUrl, openDocument} from '../../../services/Synergetic/SynVDocumentService';
 import {Button} from 'react-bootstrap';
 import iOperooSafetyAlert from '../../../types/Operoo/iOperooSafetyAlert';
 import {useState} from 'react';
 import OperooSafetyAlertService from '../../../services/Operoo/OperooSafetyAlertService';
 import iVStudent from '../../../types/Synergetic/iVStudent';
+import OperooExisitingDocViewer from './OperooExisitingDocViewer';
+import OperooNewDocViewer from './OperooNewDocViewer';
 
 type iDocManViewingPopup = {
   alert: iOperooSafetyAlert;
@@ -17,19 +18,12 @@ type iDocManViewingPopup = {
 }
 
 const Wrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  justify-items: flex-start;
+  .new-doc,
   .current-doc {
-    width: 50%;
-    iframe {
-      height: calc(100vh - 12.5rem);
-      width: 100%;
-    }
-  }
-  .title-row {
-    display: flex;
-    justify-content: space-between;
-    button {
-      padding: 0px;
-    }
+    width: calc(50% - 0.5rem);
   }
 `;
 const DocManReplacingPopup = ({alert, document, student, onCancel, onUpdated}: iDocManViewingPopup) => {
@@ -71,12 +65,11 @@ const DocManReplacingPopup = ({alert, document, student, onCancel, onUpdated}: i
       }
     >
       <Wrapper>
+        <div className={'new-doc'}>
+          <OperooNewDocViewer alert={alert} />
+        </div>
         <div className={'current-doc'}>
-          <div className={'title-row'}>
-            <div>Current: <b>{document.Description}</b></div>
-            <Button variant={'link'} size={'sm'} onClick={() => openDocument(document)}>View fullscreen</Button>
-          </div>
-          <iframe src={getDocumentUrl(document)} title={'current-doc'}/>
+          <OperooExisitingDocViewer document={document} />
         </div>
       </Wrapper>
     </PopupModal>

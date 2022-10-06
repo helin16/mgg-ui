@@ -1,11 +1,12 @@
 import iOperooSafetyAlert from '../../../types/Operoo/iOperooSafetyAlert';
 import styled from 'styled-components';
 import iVStudent from '../../../types/Synergetic/iVStudent';
-import {Badge, Button, Image, Spinner} from 'react-bootstrap';
+import {Badge, Button, Image, Spinner, Table} from 'react-bootstrap';
 import OperooSafetyAlertActionRow from './OperooSafetyAlertActionRow';
 import {useState} from 'react';
 import SynVDocumentService from '../../../services/Synergetic/SynVDocumentService';
 import iSynVDocument from '../../../types/Synergetic/iSynVDocument';
+import OperooSafetyAlertService from '../../../services/Operoo/OperooSafetyAlertService';
 
 type iOperooSafetyAlertRow = {
   student?: iVStudent;
@@ -15,7 +16,9 @@ type iOperooSafetyAlertRow = {
 
 const Wrapper = styled.div`
   display: flex;
-  margin-bottom: 1rem;
+  border-bottom: 1px solid #1a1e21;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
   .profile {
     font-weight: bold;
     display: flex;
@@ -41,20 +44,25 @@ const Wrapper = styled.div`
 const OperooSafetyAlertRow = ({student, alerts, onAlertUpdated}: iOperooSafetyAlertRow) => {
 
   const [isLoading, setIsLoading] = useState(false);
+  const [operooAlerts, setOperooAlerts] = useState(alerts);
   const [documents, setDocuments] = useState<iSynVDocument[]>([]);
   const [showActions, setShowActions] = useState(false);
 
   const loadData = () => {
     if (!student) return;
     setIsLoading(true);
-    SynVDocumentService.getVDocuments({
-      where: JSON.stringify({
-        ID: student.StudentID,
-        SourceCode: 'MEDICAL_CURRENT',
-        ClassificationCode: 'MEDICAL',
-      })
-    }).then(resp => {
-      setDocuments(resp.data);
+    Promise.all([
+      SynVDocumentService.getVDocuments({
+        where: JSON.stringify({
+          ID: student.StudentID,
+          SourceCode: 'MEDICAL_CURRENT',
+          ClassificationCode: 'MEDICAL',
+        })
+      }),
+      OperooSafetyAlertService.refetchAlerts(alerts[0].id)
+    ]).then(resp => {
+      setDocuments(resp[0].data);
+      setOperooAlerts(resp[1]);
       setShowActions(true);
     }).catch((err) => {
       console.error(err)
@@ -88,22 +96,26 @@ const OperooSafetyAlertRow = ({student, alerts, onAlertUpdated}: iOperooSafetyAl
           <div>
             {showActions === true ? null : (
               <Button variant={'link'} size={'sm'} className={'load-btn'} disabled={isLoading} onClick={() => loadData()}>
-                {isLoading === true ? (<Spinner animation={'border'} size={'sm'}/>) : 'Load DocMan'}
+                {isLoading === true ? (<Spinner animation={'border'} size={'sm'}/>) : 'Load Data'}
               </Button>
             )}
           </div>
         </div>
-        {alerts.map(alert => {
-          return <OperooSafetyAlertActionRow
-            key={alert.id}
-            alert={alert}
-            student={student}
-            docMans={documents}
-            isLoading={isLoading}
-            showActions={showActions}
-            onUpdated={onAlertUpdated}
-          />
-        })}
+        <Table size={'sm'} className={'alerts-table'} borderless hover>
+          <tbody>
+          {operooAlerts.map(alert => {
+            return <OperooSafetyAlertActionRow
+              key={alert.id}
+              alert={alert}
+              student={student}
+              docMans={documents}
+              isLoading={isLoading}
+              showActions={showActions}
+              onUpdated={onAlertUpdated}
+            />
+          })}
+          </tbody>
+        </Table>
       </div>
     </Wrapper>
   )

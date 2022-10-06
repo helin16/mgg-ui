@@ -15,10 +15,15 @@ const syncOperooSafetyAlert = (id: string, params: iConfigParams, config: AxiosR
   return appService.put(`/operoo/safetyAlert/${id}/sync`, params, config).then(({data}) => data);
 }
 
+const refetchAlerts = (id: string, params?: iConfigParams, config: AxiosRequestConfig = {}): Promise<iOperooSafetyAlert[]> => {
+  return appService.get(`/operoo/safetyAlert/${id}/refetch`, params, config).then(({data}) => data);
+}
+
 const OperooSafetyAlertService = {
   getOperooSafetyAlerts,
   ignoreOperooSafetyAlert,
   syncOperooSafetyAlert,
+  refetchAlerts,
 }
 
 export default OperooSafetyAlertService
