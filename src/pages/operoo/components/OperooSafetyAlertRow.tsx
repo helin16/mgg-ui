@@ -74,6 +74,11 @@ const OperooSafetyAlertRow = ({student, alerts, onAlertUpdated}: iOperooSafetyAl
   if (!student) {
     return null;
   }
+
+  if (!operooAlerts || operooAlerts.length <= 0 ){
+    return null;
+  }
+
   return (
     <Wrapper>
       <div className={'profile-image'}>
