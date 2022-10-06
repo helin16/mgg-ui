@@ -81,30 +81,6 @@ const OperooSafetyAlertActionRow = ({student, alert, docMans, onUpdated, isLoadi
   const [action, setAction] = useState<string>('');
   const [viewingDoc, setViewingDoc] = useState<iSynVDocument | null>(null);
 
-  // const getViewingDropdown = () => {
-  //   if (docMans.length <= 0) {
-  //     return null;
-  //   }
-  //   return (
-  //     <Dropdown>
-  //       <Dropdown.Toggle size={'sm'}>
-  //         View
-  //       </Dropdown.Toggle>
-  //       <Dropdown.Menu>
-  //         {docMans.map(docMan => {
-  //           return (
-  //             <Dropdown.Item
-  //               key={docMan.tDocumentsSeq}
-  //               onClick={() => {setAction(ACTION_VIEW_DOC); setViewingDoc(docMan)}}>
-  //               <small>View <b>{docMan.Description}</b></small>
-  //             </Dropdown.Item>
-  //           );
-  //         })}
-  //       </Dropdown.Menu>
-  //     </Dropdown>
-  //   )
-  // }
-
   const getDocManDiv = () => {
     if (isLoading) {
       return <Spinner animation={'border'} size={'sm'}/>;
@@ -116,7 +92,6 @@ const OperooSafetyAlertActionRow = ({student, alert, docMans, onUpdated, isLoadi
 
     return (
       <>
-        {/*{getViewingDropdown()}*/}
         <Dropdown>
           <Dropdown.Toggle size={'sm'}>
             Action

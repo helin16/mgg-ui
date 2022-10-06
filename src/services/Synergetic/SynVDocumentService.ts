@@ -25,9 +25,7 @@ const getFileType = (document: iSynVDocument) => {
 }
 
 const getFileExtensionFromFileName = (fileName: string) => {
-  console.log(fileName);
   const typeTypes = fileName.split('.');
-  console.log(typeTypes);
   const typeType = typeTypes.pop();
   switch (`${typeType || ''}`.trim().toUpperCase()) {
     case 'PDF': {

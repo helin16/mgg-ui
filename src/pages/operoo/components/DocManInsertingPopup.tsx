@@ -1,12 +1,14 @@
 import PopupModal from '../../../components/common/PopupModal';
 import styled from 'styled-components';
-import {Button} from 'react-bootstrap';
+import {Form} from 'react-bootstrap';
 import iOperooSafetyAlert from '../../../types/Operoo/iOperooSafetyAlert';
 import iVStudent from '../../../types/Synergetic/iVStudent';
 import OperooSafetyAlertService from '../../../services/Operoo/OperooSafetyAlertService';
 import {useState} from 'react';
 import LoadingBtn from '../../../components/common/LoadingBtn';
 import OperooNewDocViewer from './OperooNewDocViewer';
+import {FlexContainer} from '../../../styles';
+import moment from 'moment-timezone';
 
 type iDocManInsertingPopup = {
   alert: iOperooSafetyAlert;
@@ -23,6 +25,7 @@ const Wrapper = styled.div`
 `;
 const DocManInsertingPopup = ({alert, student, onCancel, onUpdated}: iDocManInsertingPopup) => {
   const [isSaving, setIsSaving] = useState(false);
+  const [description, setDescription] = useState(`${moment(alert.operooRecord?.updated_at).format('YYYY')} ${alert.operooRecord?.name}`);
 
   const handleCancel = () => {
     if (isSaving) {
@@ -56,10 +59,22 @@ const DocManInsertingPopup = ({alert, student, onCancel, onUpdated}: iDocManInse
       handleClose={handleCancel}
       fullscreen
       footer={
-        <>
-          <Button variant={'default'} onClick={handleCancel} disabled={isSaving}>Cancel</Button>
-          <LoadingBtn variant={'primary'} onClick={handleUpdate} disabled={isSaving}>Insert</LoadingBtn>
-        </>
+        <FlexContainer className={'justify-content space-between'}>
+          <div>
+            <Form.Control
+            style={{width: '20rem'}}
+            placeholder="description for Synergetic DocMan"
+            aria-label="description"
+            value={description}
+            onChange={(newValue) => setDescription(newValue.target.value)}
+            disabled={isSaving}
+          />
+          </div>
+          <div>
+            <LoadingBtn variant={'default'} onClick={handleCancel} isLoading={isSaving}>Cancel</LoadingBtn>
+            <LoadingBtn variant={'primary'} onClick={handleUpdate} isLoading={isSaving}>Insert</LoadingBtn>
+          </div>
+        </FlexContainer>
       }
     >
       <Wrapper>

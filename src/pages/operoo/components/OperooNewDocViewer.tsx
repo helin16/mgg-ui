@@ -28,7 +28,7 @@ const OperooNewDocViewer = ({alert}: iOperooDocViewer) => {
     }
     return (
       <FlexContainer className={'justify-content space-between'}>
-        <div>Current: <b>{alert.operooRecord?.attachment_name}</b></div>
+        <div>Operoo: <b>{alert.operooRecord?.attachment_name}</b></div>
         <Button variant={'link'} size={'sm'} target={'__BLANK'} href={alert.operooRecord?.attachment_url || ''}>View fullscreen</Button>
       </FlexContainer>
     )

@@ -27,7 +27,7 @@ const OperooExisitingDocViewer = ({document}: iOperooExisitingDocViewer) => {
     }
     return (
       <FlexContainer className={'justify-content space-between'}>
-        <div>Current: <b>{document.Description}</b></div>
+        <div>Synergetic: <b>{document.Description}</b></div>
         <Button variant={'link'} size={'sm'} onClick={() => openDocument(document)}>View fullscreen</Button>
       </FlexContainer>
     )

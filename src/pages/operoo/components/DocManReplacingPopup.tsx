@@ -1,13 +1,16 @@
 import iSynVDocument from '../../../types/Synergetic/iSynVDocument';
 import PopupModal from '../../../components/common/PopupModal';
 import styled from 'styled-components';
-import {Button} from 'react-bootstrap';
+import {Form} from 'react-bootstrap';
 import iOperooSafetyAlert from '../../../types/Operoo/iOperooSafetyAlert';
 import {useState} from 'react';
 import OperooSafetyAlertService from '../../../services/Operoo/OperooSafetyAlertService';
 import iVStudent from '../../../types/Synergetic/iVStudent';
 import OperooExisitingDocViewer from './OperooExisitingDocViewer';
 import OperooNewDocViewer from './OperooNewDocViewer';
+import moment from 'moment-timezone';
+import {FlexContainer} from '../../../styles';
+import LoadingBtn from '../../../components/common/LoadingBtn';
 
 type iDocManViewingPopup = {
   alert: iOperooSafetyAlert;
@@ -28,6 +31,7 @@ const Wrapper = styled.div`
 `;
 const DocManReplacingPopup = ({alert, document, student, onCancel, onUpdated}: iDocManViewingPopup) => {
   const [isSaving, setIsSaving] = useState(false);
+  const [description, setDescription] = useState(`${moment(alert.operooRecord?.updated_at).format('YYYY')} ${alert.operooRecord?.name}`);
 
   const handleCancel = () => {
     if (isSaving) {
@@ -38,7 +42,7 @@ const DocManReplacingPopup = ({alert, document, student, onCancel, onUpdated}: i
 
   const handleUpdate = () => {
     setIsSaving(true);
-    OperooSafetyAlertService.syncOperooSafetyAlert(alert.id, { tDocumentsSeq: `${document.tDocumentsSeq}` })
+    OperooSafetyAlertService.syncOperooSafetyAlert(alert.id, { tDocumentsSeq: `${document.tDocumentsSeq}`, description })
       .then(resp => {
         if (onUpdated) {
           onUpdated(resp);
@@ -58,10 +62,22 @@ const DocManReplacingPopup = ({alert, document, student, onCancel, onUpdated}: i
       handleClose={onCancel}
       fullscreen
       footer={
-        <>
-          <Button variant={'default'} onClick={handleCancel}>Cancel</Button>
-          <Button variant={'primary'} onClick={handleUpdate}>Replace</Button>
-        </>
+        <FlexContainer className={'justify-content space-between'}>
+          <div>
+            <Form.Control
+              style={{width: '20rem'}}
+              placeholder="description for Synergetic DocMan"
+              aria-label="description"
+              value={description}
+              onChange={(newValue) => setDescription(newValue.target.value)}
+              disabled={isSaving}
+            />
+          </div>
+          <div>
+            <LoadingBtn variant={'default'} onClick={handleCancel} isLoading={isSaving}>Cancel</LoadingBtn>
+            <LoadingBtn variant={'primary'} onClick={handleUpdate} isLoading={isSaving}>Replace</LoadingBtn>
+          </div>
+        </FlexContainer>
       }
     >
       <Wrapper>

@@ -8,7 +8,7 @@ import {Spinner} from 'react-bootstrap';
 import OperooSafetyAlertRow from './components/OperooSafetyAlertRow';
 import SynVStudentService from '../../services/Synergetic/SynVStudentService';
 import iVStudent from '../../types/Synergetic/iVStudent';
-import * as _ from 'lodash';
+// import * as _ from 'lodash';
 import ModuleAdminBtn from '../../components/module/ModuleAdminBtn';
 import AdminPage from './AdminPage';
 import {MODULE_ID_OPEROO_SAFETY_ALERTS} from '../../types/modules/iModuleUser';
@@ -76,29 +76,29 @@ const OperooSafetyAlertsPage = () => {
     }
   }, [isViewingAdminPage])
 
-  const handleAlertUpdated = (alert: iOperooSafetyAlert) => {
-    if (!(alert.studentId in operooSafetyAlertMap)) {
-      return;
-    }
-    const index = _.findIndex(operooSafetyAlertMap[alert.studentId], {id: alert.id});
-    if (index < 0) {
-      operooSafetyAlertMap[alert.studentId].push(alert);
-    } else {
-      operooSafetyAlertMap[alert.studentId].splice(index, 1, alert);
-    }
-
-    const alerts = operooSafetyAlertMap[alert.studentId].filter(alert => showAlertStatuses.indexOf(alert.status) >= 0);
-    if (alerts.length > 0) {
-      setOperooSafetyAlertMap({
-        ...operooSafetyAlertMap,
-        [alert.studentId]: alerts,
-      });
-    } else {
-      delete operooSafetyAlertMap[alert.studentId];
-      setOperooSafetyAlertMap(operooSafetyAlertMap);
-      setStudents(students.filter(student => student.StudentID !== alert.studentId));
-    }
-  }
+  // const handleAlertUpdated = (alert: iOperooSafetyAlert) => {
+  //   if (!(alert.studentId in operooSafetyAlertMap)) {
+  //     return;
+  //   }
+  //   const index = _.findIndex(operooSafetyAlertMap[alert.studentId], {id: alert.id});
+  //   if (index < 0) {
+  //     operooSafetyAlertMap[alert.studentId].push(alert);
+  //   } else {
+  //     operooSafetyAlertMap[alert.studentId].splice(index, 1, alert);
+  //   }
+  //
+  //   const alerts = operooSafetyAlertMap[alert.studentId].filter(alert => showAlertStatuses.indexOf(alert.status) >= 0);
+  //   if (alerts.length > 0) {
+  //     setOperooSafetyAlertMap({
+  //       ...operooSafetyAlertMap,
+  //       [alert.studentId]: alerts,
+  //     });
+  //   } else {
+  //     delete operooSafetyAlertMap[alert.studentId];
+  //     setOperooSafetyAlertMap(operooSafetyAlertMap);
+  //     setStudents(students.filter(student => student.StudentID !== alert.studentId));
+  //   }
+  // }
 
   if (isLoading === true) {
     return <Spinner animation={'border'} />
@@ -120,7 +120,7 @@ const OperooSafetyAlertsPage = () => {
         key={student.StudentID}
         alerts={student.StudentID in operooSafetyAlertMap ? operooSafetyAlertMap[student.StudentID] : []}
         student={student}
-        onAlertUpdated={(alerts) => alerts.map(alert => handleAlertUpdated(alert))}
+        // onAlertUpdated={(alerts) => alerts.map(alert => handleAlertUpdated(alert))}
       />
     })}
   </div>

@@ -111,7 +111,7 @@ const OperooSafetyAlertRow = ({student, alerts, onAlertUpdated}: iOperooSafetyAl
               docMans={documents}
               isLoading={isLoading}
               showActions={showActions}
-              onUpdated={onAlertUpdated}
+              onUpdated={() => loadData()}
             />
           })}
           </tbody>
