@@ -65,7 +65,7 @@ const OperooSafetyAlertRow = ({student, alerts, onAlertUpdated}: iOperooSafetyAl
       OperooSafetyAlertService.refetchAlerts(alerts[0].id)
     ]).then(resp => {
       setDocuments(resp[0].data);
-      setOperooAlerts(resp[1]);
+      setOperooAlerts(resp[1].filter(alert => [OPEROO_STATUS_SAFETY_ALERT_NEW, OPEROO_STATUS_SAFETY_ALERT_UPDATED].indexOf(alert.status) >= 0));
       setShowActions(true);
     }).catch((err) => {
       console.error(err)
@@ -111,9 +111,7 @@ const OperooSafetyAlertRow = ({student, alerts, onAlertUpdated}: iOperooSafetyAl
         </div>
         <Table size={'sm'} className={'alerts-table'} borderless hover>
           <tbody>
-          {operooAlerts
-            .filter(alert => [OPEROO_STATUS_SAFETY_ALERT_NEW, OPEROO_STATUS_SAFETY_ALERT_UPDATED].indexOf(alert.status) >= 0)
-            .map(alert => {
+          {operooAlerts.map(alert => {
             return <OperooSafetyAlertActionRow
               key={alert.id}
               alert={alert}
