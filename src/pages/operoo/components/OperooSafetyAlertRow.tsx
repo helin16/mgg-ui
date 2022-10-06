@@ -1,4 +1,7 @@
-import iOperooSafetyAlert from '../../../types/Operoo/iOperooSafetyAlert';
+import iOperooSafetyAlert, {
+  OPEROO_STATUS_SAFETY_ALERT_NEW,
+  OPEROO_STATUS_SAFETY_ALERT_UPDATED
+} from '../../../types/Operoo/iOperooSafetyAlert';
 import styled from 'styled-components';
 import iVStudent from '../../../types/Synergetic/iVStudent';
 import {Badge, Button, Image, Spinner, Table} from 'react-bootstrap';
@@ -108,7 +111,9 @@ const OperooSafetyAlertRow = ({student, alerts, onAlertUpdated}: iOperooSafetyAl
         </div>
         <Table size={'sm'} className={'alerts-table'} borderless hover>
           <tbody>
-          {operooAlerts.map(alert => {
+          {operooAlerts
+            .filter(alert => [OPEROO_STATUS_SAFETY_ALERT_NEW, OPEROO_STATUS_SAFETY_ALERT_UPDATED].indexOf(alert.status) >= 0)
+            .map(alert => {
             return <OperooSafetyAlertActionRow
               key={alert.id}
               alert={alert}
