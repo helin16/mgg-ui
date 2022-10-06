@@ -6,6 +6,7 @@ import iVStudent from '../../../types/Synergetic/iVStudent';
 import OperooSafetyAlertService from '../../../services/Operoo/OperooSafetyAlertService';
 import {useState} from 'react';
 import LoadingBtn from '../../../components/common/LoadingBtn';
+import OperooNewDocViewer from './OperooNewDocViewer';
 
 type iDocManInsertingPopup = {
   alert: iOperooSafetyAlert;
@@ -15,10 +16,10 @@ type iDocManInsertingPopup = {
 }
 
 const Wrapper = styled.div`
-  iframe {
-    height: calc(100vh - 12.5rem);
-    width: 100%;
+  .title-row {
+    display: flex;
   }
+  
 `;
 const DocManInsertingPopup = ({alert, student, onCancel, onUpdated}: iDocManInsertingPopup) => {
   const [isSaving, setIsSaving] = useState(false);
@@ -46,6 +47,8 @@ const DocManInsertingPopup = ({alert, student, onCancel, onUpdated}: iDocManInse
       })
   }
 
+
+
   return (
     <PopupModal
       title={<small style={{fontSize: '14px'}}>Inserting <b>{alert.operooRecord?.Description}</b> into Synergetic DocMan for <b>{student.StudentLegalFullName}</b></small>}
@@ -60,7 +63,7 @@ const DocManInsertingPopup = ({alert, student, onCancel, onUpdated}: iDocManInse
       }
     >
       <Wrapper>
-        <iframe src={alert.operooRecord?.attachment_url || ''} title={'current-doc'}/>
+        <OperooNewDocViewer alert={alert} />
       </Wrapper>
     </PopupModal>
   )

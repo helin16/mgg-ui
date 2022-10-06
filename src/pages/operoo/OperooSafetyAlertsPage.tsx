@@ -38,7 +38,7 @@ const OperooSafetyAlertsPage = () => {
           }),
           perPage: '1000',
         });
-        // if (isCanceled) return;
+        if (isCanceled) return;
 
         const resultMap = result.data.reduce((map, alert) => {
           // @ts-ignore
@@ -50,6 +50,7 @@ const OperooSafetyAlertsPage = () => {
           }
         }, {});
 
+        if (isCanceled) return;
         setOperooSafetyAlertMap(resultMap);
         const studentIds = Object.keys(resultMap);
 
@@ -60,6 +61,7 @@ const OperooSafetyAlertsPage = () => {
           perPage: `${studentIds.length}`,
           sort: 'StudentLegalFullName:ASC',
         });
+        if (isCanceled) return;
         setStudents(students);
         setIsLoading(false);
       } catch (err) {
