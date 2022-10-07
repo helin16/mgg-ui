@@ -55,6 +55,7 @@ const DocManReplacingPopup = ({alert, document, student, onCancel, onUpdated}: i
         setIsSaving(false);
       })
   }
+
   return (
     <PopupModal
       title={<small style={{fontSize: '14px'}}>Replacing <b>{alert.operooRecord?.Description}</b> into Synergetic DocMan for <b>{student.StudentLegalFullName}</b></small>}
