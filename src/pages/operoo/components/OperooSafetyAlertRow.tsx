@@ -10,6 +10,7 @@ import {useState} from 'react';
 import SynVDocumentService from '../../../services/Synergetic/SynVDocumentService';
 import iSynVDocument from '../../../types/Synergetic/iSynVDocument';
 import OperooSafetyAlertService from '../../../services/Operoo/OperooSafetyAlertService';
+import Toaster from '../../../services/Toaster';
 
 type iOperooSafetyAlertRow = {
   student?: iVStudent;
@@ -68,7 +69,7 @@ const OperooSafetyAlertRow = ({student, alerts, onAlertUpdated}: iOperooSafetyAl
       setOperooAlerts(resp[1].filter(alert => [OPEROO_STATUS_SAFETY_ALERT_NEW, OPEROO_STATUS_SAFETY_ALERT_UPDATED].indexOf(alert.status) >= 0));
       setShowActions(true);
     }).catch((err) => {
-      console.error(err)
+      Toaster.showApiError(err);
     }).finally(() => {
       setIsLoading(false)
     })

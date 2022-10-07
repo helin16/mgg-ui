@@ -5,6 +5,7 @@ import {Badge, Button, Table} from 'react-bootstrap';
 import styled from 'styled-components';
 import moment from 'moment-timezone';
 import OperooSafetyAlertService from '../../../services/Operoo/OperooSafetyAlertService';
+import Toaster, {TOAST_TYPE_SUCCESS} from '../../../services/Toaster';
 
 type iOperooSafetyAlertIgnorePopup = {
   alert: iOperooSafetyAlert;
@@ -28,6 +29,7 @@ const OperooSafetyAlertIgnorePopup = ({alert, onCancel, onUpdated}: iOperooSafet
     setIsSaving(true)
     OperooSafetyAlertService.ignoreOperooSafetyAlert(alert.id, {})
       .then(resp => {
+        Toaster.showToast('Marked as ignored', TOAST_TYPE_SUCCESS);
         if (onUpdated) {
           onUpdated(resp);
         }

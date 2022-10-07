@@ -11,7 +11,7 @@ import OperooNewDocViewer from './OperooNewDocViewer';
 import moment from 'moment-timezone';
 import {FlexContainer} from '../../../styles';
 import LoadingBtn from '../../../components/common/LoadingBtn';
-import Toaster from '../../../services/Toaster';
+import Toaster, {TOAST_TYPE_SUCCESS} from '../../../services/Toaster';
 
 type iDocManViewingPopup = {
   alert: iOperooSafetyAlert;
@@ -45,6 +45,7 @@ const DocManReplacingPopup = ({alert, document, student, onCancel, onUpdated}: i
     setIsSaving(true);
     OperooSafetyAlertService.syncOperooSafetyAlert(alert.id, { tDocumentsSeq: `${document.tDocumentsSeq}`, description })
       .then(resp => {
+        Toaster.showToast('Replaced Successfully', TOAST_TYPE_SUCCESS);
         if (onUpdated) {
           onUpdated(resp);
         }

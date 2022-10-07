@@ -7,6 +7,7 @@ import AuthService from '../../services/AuthService';
 import LocalStorageService from '../../services/LocalStorageService';
 import {removedAuthentication, userAuthenticated} from '../../redux/reduxers/auth.slice';
 import {useDispatch} from 'react-redux';
+import Toaster from '../../services/Toaster';
 
 type iSchoolBoxComponent = {
   path: string;
@@ -43,7 +44,7 @@ const SchoolBoxComponent = ({path, remoteUrl, id = null, user = null, time = nul
       })
       .catch(err => {
         if (isCancelled) {return}
-        console.error(err);
+        Toaster.showApiError(err);
         LocalStorageService.removeToken();
         dispatch(removedAuthentication());
       })

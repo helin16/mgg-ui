@@ -4,6 +4,7 @@ import {RootState} from '../../redux/makeReduxStore';
 import AuthService from '../../services/AuthService';
 import {Spinner} from 'react-bootstrap';
 import Page401 from '../Page401';
+import Toaster from '../../services/Toaster';
 
 type iModuleAccessWrapper = {
   moduleId: number;
@@ -37,7 +38,7 @@ const ModuleAccessWrapper = ({moduleId, roleId, silentMode = false, children}: i
       })
       .catch(err => {
         if (isCanceled) return;
-        console.error(err);
+        Toaster.showApiError(err);
       })
       .finally(() => {
         if (isCanceled) return;

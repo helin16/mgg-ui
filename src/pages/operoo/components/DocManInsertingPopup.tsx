@@ -9,6 +9,7 @@ import LoadingBtn from '../../../components/common/LoadingBtn';
 import OperooNewDocViewer from './OperooNewDocViewer';
 import {FlexContainer} from '../../../styles';
 import moment from 'moment-timezone';
+import Toaster, {TOAST_TYPE_SUCCESS} from '../../../services/Toaster';
 
 type iDocManInsertingPopup = {
   alert: iOperooSafetyAlert;
@@ -38,18 +39,18 @@ const DocManInsertingPopup = ({alert, student, onCancel, onUpdated}: iDocManInse
     setIsSaving(true);
     OperooSafetyAlertService.syncOperooSafetyAlert(alert.id, {description})
       .then(resp => {
+        Toaster.showToast('Inserted Successfully', TOAST_TYPE_SUCCESS);
         if (onUpdated) {
           onUpdated(resp);
         }
       })
       .catch(err => {
-        console.error(err);
+        Toaster.showApiError(err);
       })
       .finally(() => {
         setIsSaving(false);
       })
   }
-
 
 
   return (

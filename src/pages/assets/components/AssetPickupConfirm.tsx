@@ -9,6 +9,7 @@ import iPaginatedResult from '../../../types/iPaginatedResult';
 import iAssetRecord from '../../../types/asset/iAssetRecord';
 import AssetRecordService from '../../../services/Asset/AssetRecordService';
 import LoadingBtn from '../../../components/common/LoadingBtn';
+import Toaster from '../../../services/Toaster';
 
 type iAssetPickupConfirm = {
   selectedProfile: iSynCommunity;
@@ -67,7 +68,7 @@ const AssetPickupConfirm = ({selectedProfile, clearSelectedProfile}: iAssetPicku
     })).then((resp) => {
       setIsPickedSuccess(true);
     }).catch(err => {
-      console.error(err)
+      Toaster.showApiError(err);
     }).finally(() => {
       setIsSaving(false);
     })
