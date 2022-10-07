@@ -11,6 +11,7 @@ import OperooNewDocViewer from './OperooNewDocViewer';
 import moment from 'moment-timezone';
 import {FlexContainer} from '../../../styles';
 import LoadingBtn from '../../../components/common/LoadingBtn';
+import Toaster from '../../../services/Toaster';
 
 type iDocManViewingPopup = {
   alert: iOperooSafetyAlert;
@@ -49,7 +50,7 @@ const DocManReplacingPopup = ({alert, document, student, onCancel, onUpdated}: i
         }
       })
       .catch(err => {
-        console.error(err);
+        Toaster.showApiError(err);
       })
       .finally(() => {
         setIsSaving(false);

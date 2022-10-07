@@ -7,10 +7,12 @@ import store, {RootState} from './redux/makeReduxStore';
 import AppWrapper from './AppWrapper';
 import './App.css';
 import AssetPickupPage from './pages/assets/AssetPickupPage';
-import {Button} from 'react-bootstrap';
+import {Button } from 'react-bootstrap';
 import * as Icon from 'react-bootstrap-icons';
 import {setIsProd} from './redux/reduxers/app.slice';
 import PingService from './services/PingService';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Router = () => {
   const {isProd} = useSelector((state: RootState) => state.app);
@@ -44,6 +46,17 @@ const Router = () => {
           <Route path="*" element={<PageNotFound />} />
         </Routes>
       </BrowserRouter>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </AppWrapper>
   )
 }

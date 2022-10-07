@@ -12,6 +12,8 @@ import iVStudent from '../../types/Synergetic/iVStudent';
 import ModuleAdminBtn from '../../components/module/ModuleAdminBtn';
 import AdminPage from './AdminPage';
 import {MODULE_ID_OPEROO_SAFETY_ALERTS} from '../../types/modules/iModuleUser';
+import Page from '../../layouts/Page';
+import Toaster from '../../services/Toaster';
 
 const showAlertStatuses = [OPEROO_STATUS_SAFETY_ALERT_NEW, OPEROO_STATUS_SAFETY_ALERT_UPDATED];
 
@@ -65,7 +67,7 @@ const OperooSafetyAlertsPage = () => {
         setStudents(students);
         setIsLoading(false);
       } catch (err) {
-        console.error(err);
+        Toaster.showApiError(err);
         setIsLoading(false);
       }
     }
@@ -76,30 +78,6 @@ const OperooSafetyAlertsPage = () => {
     }
   }, [isViewingAdminPage])
 
-  // const handleAlertUpdated = (alert: iOperooSafetyAlert) => {
-  //   if (!(alert.studentId in operooSafetyAlertMap)) {
-  //     return;
-  //   }
-  //   const index = _.findIndex(operooSafetyAlertMap[alert.studentId], {id: alert.id});
-  //   if (index < 0) {
-  //     operooSafetyAlertMap[alert.studentId].push(alert);
-  //   } else {
-  //     operooSafetyAlertMap[alert.studentId].splice(index, 1, alert);
-  //   }
-  //
-  //   const alerts = operooSafetyAlertMap[alert.studentId].filter(alert => showAlertStatuses.indexOf(alert.status) >= 0);
-  //   if (alerts.length > 0) {
-  //     setOperooSafetyAlertMap({
-  //       ...operooSafetyAlertMap,
-  //       [alert.studentId]: alerts,
-  //     });
-  //   } else {
-  //     delete operooSafetyAlertMap[alert.studentId];
-  //     setOperooSafetyAlertMap(operooSafetyAlertMap);
-  //     setStudents(students.filter(student => student.StudentID !== alert.studentId));
-  //   }
-  // }
-
   if (isLoading === true) {
     return <Spinner animation={'border'} />
   }
@@ -108,22 +86,23 @@ const OperooSafetyAlertsPage = () => {
     return <AdminPage backToReportFn={() => setIsViewingAdminPage(false) }/>
   }
 
-  return <div className={'operoo-safety-alerts-page'}>
-    <h3>
-      Operoo Safety Alert Sync
-      <span className={'pull-right'} >
-        <ModuleAdminBtn onClick={() => setIsViewingAdminPage(true)} moduleId={MODULE_ID_OPEROO_SAFETY_ALERTS} />
-      </span>
-    </h3>
-    {students.map(student => {
-      return <OperooSafetyAlertRow
-        key={student.StudentID}
-        alerts={student.StudentID in operooSafetyAlertMap ? operooSafetyAlertMap[student.StudentID] : []}
-        student={student}
-        // onAlertUpdated={(alerts) => alerts.map(alert => handleAlertUpdated(alert))}
-      />
-    })}
-  </div>
+  return (
+    <Page className={'operoo-safety-alerts-page'}>
+      <h3>
+        Operoo Safety Alert Sync
+        <span className={'pull-right'} >
+          <ModuleAdminBtn onClick={() => setIsViewingAdminPage(true)} moduleId={MODULE_ID_OPEROO_SAFETY_ALERTS} />
+        </span>
+      </h3>
+      {students.map(student => {
+        return <OperooSafetyAlertRow
+          key={student.StudentID}
+          alerts={student.StudentID in operooSafetyAlertMap ? operooSafetyAlertMap[student.StudentID] : []}
+          student={student}
+        />
+      })}
+    </Page>
+  );
 }
 
 export default OperooSafetyAlertsPage;

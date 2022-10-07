@@ -47,7 +47,7 @@ const ModuleAccessWrapper = ({moduleId, roleId, silentMode = false, children}: i
     return () => {
       isCanceled = true;
     }
-  }, [user]);
+  }, [user, moduleId, roleId]);
 
   if (isLoading) {
     return <Spinner animation={'border'} />

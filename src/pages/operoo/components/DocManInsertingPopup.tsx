@@ -1,6 +1,6 @@
 import PopupModal from '../../../components/common/PopupModal';
 import styled from 'styled-components';
-import {Alert, Form} from 'react-bootstrap';
+import {Form} from 'react-bootstrap';
 import iOperooSafetyAlert from '../../../types/Operoo/iOperooSafetyAlert';
 import iVStudent from '../../../types/Synergetic/iVStudent';
 import OperooSafetyAlertService from '../../../services/Operoo/OperooSafetyAlertService';

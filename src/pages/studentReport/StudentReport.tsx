@@ -13,6 +13,7 @@ import {MODULE_ID_STUDENT_REPORT} from '../../types/modules/iModuleUser';
 import {ROLE_ID_ADMIN} from '../../types/modules/iRole';
 import PageNotFound from '../../components/PageNotFound';
 import ContactSupportPopupBtn from '../../components/support/ContactSupportPopupBtn';
+import Page from '../../layouts/Page';
 
 const StudentReport = () => {
   const {user} = useSelector((state: RootState) => state.auth);
@@ -98,9 +99,9 @@ const StudentReport = () => {
   }
 
   return (
-    <div className={'student-report-wrapper'}>
+    <Page className={'student-report-wrapper'}>
       {getMainPage()}
-    </div>
+    </Page>
   )
 };
 
