@@ -63,7 +63,7 @@ const OperooSafetyAlertRow = ({student, alerts, onAlertUpdated}: iOperooSafetyAl
           ClassificationCode: 'MEDICAL',
         })
       }),
-      OperooSafetyAlertService.refetchAlerts(alerts[0].id)
+      OperooSafetyAlertService.refetchAlerts(student.StudentID)
     ]).then(resp => {
       setDocuments(resp[0].data);
       setOperooAlerts(resp[1].filter(alert => [OPEROO_STATUS_SAFETY_ALERT_NEW, OPEROO_STATUS_SAFETY_ALERT_UPDATED].indexOf(alert.status) >= 0));
