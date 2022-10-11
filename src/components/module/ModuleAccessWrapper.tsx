@@ -10,7 +10,7 @@ type iModuleAccessWrapper = {
   moduleId: number;
   roleId?: number;
   silentMode?: boolean;
-  children: React.ReactElement;
+  children: React.ReactElement | null;
 }
 const ModuleAccessWrapper = ({moduleId, roleId, silentMode = false, children}: iModuleAccessWrapper) => {
   const {user} = useSelector((state: RootState) => state.auth);

@@ -1,10 +1,13 @@
 import React, {useState} from 'react';
-import MessageListPanel from '../../../components/common/MessageListPanel';
-import {MESSAGE_TYPE_CRON_JOBS_OPEROO_SAFETY_DOWNLOADER} from '../../../types/Message/iMessage';
-import OperooSafetyAlertDownloadPopupBtn from './OperooSafetyAlertDownloadPopupBtn';
+import MessageListPanel from '../../../../components/common/MessageListPanel';
+import {MESSAGE_TYPE_CRON_JOBS_OPEROO_SAFETY_DOWNLOADER} from '../../../../types/Message/iMessage';
+import OperooSafetyAlertDownloadPopupBtn from '../OperooSafetyAlertDownloadPopupBtn';
 import styled from 'styled-components';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup'
+import {ROLE_ID_ADMIN} from '../../../../types/modules/iRole';
+import ModuleAccessWrapper from '../../../../components/module/ModuleAccessWrapper';
+import {MODULE_ID_OPEROO_SAFETY_ALERTS} from '../../../../types/modules/iModuleUser';
 
 const ACTION_DOWNLOAD = 'DOWNLOAD';
 const ACTION_LOG = 'LOGS';
@@ -48,15 +51,17 @@ const OperooDownloadPanel = () => {
   }
 
   return (
-    <Wrapper>
-      <ButtonGroup>
-        <Button variant={getBtnClassName(ACTION_DOWNLOAD)} onClick={() => setAction(ACTION_DOWNLOAD)}>Download</Button>
-        <Button variant={getBtnClassName(ACTION_LOG)} onClick={() => setAction(ACTION_LOG)}>Logs</Button>
-      </ButtonGroup>
-      <div className={'content-wrapper'}>
-        {getContent()}
-      </div>
-    </Wrapper>
+    <ModuleAccessWrapper moduleId={MODULE_ID_OPEROO_SAFETY_ALERTS} roleId={ROLE_ID_ADMIN} silentMode={true}>
+      <Wrapper>
+          <ButtonGroup size={'sm'}>
+            <Button variant={getBtnClassName(ACTION_DOWNLOAD)} onClick={() => setAction(ACTION_DOWNLOAD)}>Download</Button>
+            <Button variant={getBtnClassName(ACTION_LOG)} onClick={() => setAction(ACTION_LOG)}>Logs</Button>
+          </ButtonGroup>
+          <div className={'content-wrapper'}>
+            {getContent()}
+          </div>
+      </Wrapper>
+    </ModuleAccessWrapper>
   )
 }
 
