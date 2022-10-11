@@ -36,8 +36,9 @@ const OperooSafetyAlertModuleEditPanelContent = ({module, onUpdate}: iOperooSafe
     <Wrapper>
       <Form.Group controlId="apiToken">
         <Form.Label>
-          Operoo API Token, can be generated from {' '}
-          <a href={operooApiTokenGeneratePageUrl} target={'__BLANK'}>Operoo API Token Generate Page</a>
+          Operoo API Token can be generated from {' '}
+          <a href={operooApiTokenGeneratePageUrl} target={'__BLANK'}>Operoo API Token Generate Page</a>,
+          and pasted below:
         </Form.Label>
         <InputGroup>
           <Form.Control
