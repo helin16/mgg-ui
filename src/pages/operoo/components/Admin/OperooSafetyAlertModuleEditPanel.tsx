@@ -10,6 +10,7 @@ import { Eye, EyeSlash } from 'react-bootstrap-icons';
 import styled from 'styled-components';
 
 const operooApiTokenGeneratePageUrl = 'https://groups.operoo.com/admin/groups/32996/api_settings';
+const mailGunTemplateUrl = 'https://app.mailgun.com/app/sending/domains/mentonegirls.vic.edu.au/templates';
 
 type iOperooSafetyAlertModuleEditPanelContent = {
   module: iModule;
@@ -27,14 +28,26 @@ const Wrapper = styled.div`
     border-left: none;
     outline: none;
   }
+  .content-row {
+    margin-bottom: 0.6rem;
+  }
 `;
 const OperooSafetyAlertModuleEditPanelContent = ({module, onUpdate}: iOperooSafetyAlertModuleEditPanelContent) => {
-  const [apiToken, setApiToken] = useState<string | undefined>(undefined);
+  const [apiToken, setApiToken] = useState(module?.settings.apiToken || '');
+  const [emailTemplateName, setEmailTemplateName] = useState(module?.settings.emailTemplateName || '');
   const [inputType, setInputType] = useState(INPUT_TYPE_PASSWORD);
+
+  const handleUpdate = () => {
+    onUpdate({
+      ...module?.settings,
+      ...(apiToken ? {apiToken} : {}),
+      ...(emailTemplateName ? {emailTemplateName} : {}),
+    })
+  }
 
   return (
     <Wrapper>
-      <Form.Group controlId="apiToken">
+      <Form.Group controlId="apiToken" className={'content-row'}>
         <Form.Label>
           Operoo API Token can be generated from {' '}
           <a href={operooApiTokenGeneratePageUrl} target={'__BLANK'}>Operoo API Token Generate Page</a>,
@@ -44,9 +57,9 @@ const OperooSafetyAlertModuleEditPanelContent = ({module, onUpdate}: iOperooSafe
           <Form.Control
             placeholder="Paste your newly generated API token here."
             type={inputType}
-            defaultValue={module.settings?.apiToken || ''}
+            value={apiToken}
             onChange={(event) => setApiToken(event.target.value)}
-            onBlur={() => onUpdate(apiToken)}
+            onBlur={() => handleUpdate()}
           />
           <Button
             className={'input-type-chg-btn'}
@@ -57,17 +70,30 @@ const OperooSafetyAlertModuleEditPanelContent = ({module, onUpdate}: iOperooSafe
           </Button>
         </InputGroup>
       </Form.Group>
+      <Form.Group controlId="emailTemplateName"  className={'content-row'}>
+        <Form.Label>
+          Notification Email Template can be created and managed at: {' '}
+          <a href={mailGunTemplateUrl} target={'__BLANK'}>MailGun Template Page</a>.
+          Copy the name of the template and paste it into below:
+        </Form.Label>
+        <Form.Control
+          placeholder="Paste MailGun template name here."
+          value={ emailTemplateName }
+          onChange={(event) => setEmailTemplateName(event.target.value)}
+          onBlur={() => handleUpdate()}
+        />
+      </Form.Group>
     </Wrapper>
   )
 }
 
 const OperooSafetyAlertModuleEditPanel = () => {
-  const [apiToken, setApiToken] = useState('');
+  const [settings, setSettings] = useState({});
 
 
   const getContent = (module: iModule) => {
     return (
-      <OperooSafetyAlertModuleEditPanelContent module={module} onUpdate={(token: string) => setApiToken(token)}/>
+      <OperooSafetyAlertModuleEditPanelContent module={module} onUpdate={(newSettings: any) => setSettings(newSettings)}/>
     )
   }
 
@@ -76,9 +102,7 @@ const OperooSafetyAlertModuleEditPanel = () => {
       moduleId={MODULE_ID_OPEROO_SAFETY_ALERTS}
       roleId={ROLE_ID_ADMIN}
       getChildren={getContent}
-      getSubmitData={() => ({
-        apiToken
-      })}
+      getSubmitData={() => (settings)}
     />
   )
 }

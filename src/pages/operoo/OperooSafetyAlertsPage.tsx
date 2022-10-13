@@ -61,7 +61,7 @@ const OperooSafetyAlertsPage = () => {
             ID: studentIds,
           }),
           perPage: `${studentIds.length}`,
-          sort: 'StudentLegalFullName:ASC',
+          sort: 'StudentSurname:ASC',
         });
         if (isCanceled) return;
         setStudents(students);

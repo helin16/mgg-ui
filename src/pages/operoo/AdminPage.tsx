@@ -35,16 +35,16 @@ const AdminPage = ({backToReportFn}: iAdminPage) => {
       </h3>
       <div className={'section-row'}>
         <h5>Users</h5>
-        <small>List of users who can access this module and process alerts</small>
+        <small>List of users who can access this module and process alerts. They will receive email notifications</small>
         <ModuleUserList moduleId={MODULE_ID_OPEROO_SAFETY_ALERTS} roleId={ROLE_ID_NORMAL} showCreatingPanel={true} showDeletingBtn={true}/>
       </div>
       <div className={'section-row'}>
         <h5>Admin</h5>
-        <small>List of users who can access this module, process alerts and manage users</small>
+        <small>List of users who can access this module, process alerts and manage users. They will <b>NOT</b> receive email notifications</small>
         <ModuleUserList moduleId={MODULE_ID_OPEROO_SAFETY_ALERTS} roleId={ROLE_ID_ADMIN} showCreatingPanel={true} showDeletingBtn={true}/>
       </div>
       <div className={'section-row'}>
-        <h5>Operoo API Token</h5>
+        <h5>Module Settings</h5>
         <OperooSafetyAlertModuleEditPanel />
       </div>
       <div className={'section-row'}>
