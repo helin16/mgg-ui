@@ -169,7 +169,7 @@ const OperooSafetyAlertDownloadPopupBtn = () => {
     return (
       <>
         <LoadingBtn variant={'danger'} isLoading={showingConfirmPanel} onClick={() => getLatestMessage()}>
-          Force From Operoo Now
+          Force Download Now
         </LoadingBtn>
         {getPopup()}
       </>
