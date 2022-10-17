@@ -1,4 +1,4 @@
-import appService, {iConfigParams} from '../AppService';
+import appService, {iConfigParams, iParams} from '../AppService';
 import iPaginatedResult from '../../types/iPaginatedResult';
 import iOperooSafetyAlert from '../../types/Operoo/iOperooSafetyAlert';
 import {AxiosRequestConfig} from 'axios';
@@ -20,7 +20,7 @@ const refetchAlerts = (studentId: string | number, params?: iConfigParams, confi
   return appService.get(`/operoo/safetyAlert/refetch/${studentId}`, params, config).then(({data}) => data);
 }
 
-const downloadAlerts = (params: iConfigParams = {}, config: AxiosRequestConfig = {}): Promise<iMessage> => {
+const downloadAlerts = (params: iParams = {}, config: AxiosRequestConfig = {}): Promise<iMessage> => {
   return appService.post(`/operoo/safetyAlert/download`, params, config).then(({data}) => data);
 }
 

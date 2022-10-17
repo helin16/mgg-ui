@@ -54,7 +54,7 @@ const OperooSafetyAlertDownloadPopupBtn = () => {
 
   const submit = () => {
     setIsSaving(true);
-    OperooSafetyAlertService.downloadAlerts()
+    OperooSafetyAlertService.downloadAlerts({sendEmailNotification})
       .then(resp => {
         setMessage(resp);
       }).catch(err => {
@@ -120,7 +120,6 @@ const OperooSafetyAlertDownloadPopupBtn = () => {
       >
         <Form.Check
           disabled={isSaving}
-          type="switch"
           checked={sendEmailNotification}
           label=""
           onChange={() => {}}

@@ -4,7 +4,7 @@ import LocalStorageService from './LocalStorageService';
 export type iConfigParams = {
   [key: string]: string;
 };
-type iParams = {
+export type iParams = {
   [key: string]: string | boolean | number | null | undefined | string[];
 };
 
