@@ -6,6 +6,7 @@ import Toaster, {TOAST_TYPE_SUCCESS} from '../../services/Toaster';
 import {Spinner} from 'react-bootstrap';
 import LoadingBtn from '../common/LoadingBtn';
 import styled from 'styled-components';
+import { Save } from 'react-bootstrap-icons';
 
 type iModuleEditPanel = {
   moduleId: number;
@@ -79,7 +80,10 @@ const ModuleEditPanel = ({moduleId, roleId, getChildren, getSubmitData}: iModule
       <Wrapper>
         {getContent()}
         <div className={'actions-div'}>
-          <LoadingBtn isLoading={isSaving} variant={'primary'} size={'sm'} onClick={() => updateModule()}>Update</LoadingBtn>
+          <LoadingBtn isLoading={isSaving} variant={'primary'} size={'sm'} onClick={() => updateModule()}>
+            <Save />{' '}
+            Update
+          </LoadingBtn>
         </div>
       </Wrapper>
     </ModuleAccessWrapper>

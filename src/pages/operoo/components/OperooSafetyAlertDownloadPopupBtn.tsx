@@ -13,6 +13,7 @@ import iMessage, {
 import Toaster from '../../../services/Toaster';
 import MessageService from '../../../services/MessageService';
 import moment from 'moment-timezone';
+import { CloudDownloadFill } from 'react-bootstrap-icons';
 
 const Wrapper = styled.div``
 const PopupBodyWrapper = styled.div`
@@ -168,8 +169,12 @@ const OperooSafetyAlertDownloadPopupBtn = () => {
   const getContent = () => {
     return (
       <>
-        <LoadingBtn variant={'danger'} isLoading={showingConfirmPanel} onClick={() => getLatestMessage()}>
-          Force Download Now
+        <LoadingBtn
+          variant={'danger'}
+          isLoading={showingConfirmPanel}
+          onClick={() => getLatestMessage()}
+        >
+          <CloudDownloadFill />{' '}Force Download Now
         </LoadingBtn>
         {getPopup()}
       </>
