@@ -1,8 +1,8 @@
 import styled from 'styled-components';
 import LoadingBtn from '../../../components/common/LoadingBtn';
-import {useEffect, useState} from 'react';
+import {useState} from 'react';
 import PopupModal from '../../../components/common/PopupModal';
-import {Button, Spinner} from 'react-bootstrap';
+import {Button, Form, Spinner} from 'react-bootstrap';
 import {FlexContainer} from '../../../styles';
 import OperooSafetyAlertService from '../../../services/Operoo/OperooSafetyAlertService';
 import iMessage, {
@@ -15,6 +15,20 @@ import MessageService from '../../../services/MessageService';
 import moment from 'moment-timezone';
 
 const Wrapper = styled.div``
+const PopupBodyWrapper = styled.div`
+  .sendEmailNotification-switch {
+    width: 32px;
+    height: 10px;
+    padding: 4px;
+    input {
+      position: relative;
+      opacity: 1;
+      width: 100%;
+      height: 10px;
+      margin: 0px;
+    }
+  }
+`
 const OperooSafetyAlertDownloadPopupBtn = () => {
 
   const [showingConfirmPanel, setShowingConfirmPanel] = useState(false);
@@ -23,8 +37,8 @@ const OperooSafetyAlertDownloadPopupBtn = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<iMessage | null>(null);
 
-  useEffect(() => {
-    let isCanceled = false;
+  const getLatestMessage = () => {
+    setShowingConfirmPanel(true);
     setIsLoading(true);
     MessageService.getMessages({
       where: JSON.stringify({type: MESSAGE_TYPE_CRON_JOBS_OPEROO_SAFETY_DOWNLOADER}),
@@ -32,18 +46,13 @@ const OperooSafetyAlertDownloadPopupBtn = () => {
       currentPage: '1',
       perPage: '1',
     }).then(resp => {
-      if (isCanceled) return;
       setMessage(resp.data.length > 0 ? resp.data[0] : null)
     }).catch(err => {
-      if (isCanceled) return;
       Toaster.showApiError(err);
     }).finally(() => {
       setIsLoading(false);
     })
-    return () => {
-      isCanceled = true;
-    }
-  }, [])
+  }
 
   const handleClose = () => {
     if (isSaving) {
@@ -105,25 +114,37 @@ const OperooSafetyAlertDownloadPopupBtn = () => {
   }
 
   const getPopupBody = () => {
+    if (isLoading) {
+      return <Spinner animation={'border'} />
+    }
     if (getMessageIsWIP()) {
       return (
-        <FlexContainer className={'withGap'}>
-          <Spinner animation={'border'} size={'sm'}/>
-          <div>Job started @ {moment(message?.createdAt).format('lll')}. Processing...</div>
-        </FlexContainer>
+        <div>
+          <FlexContainer className={'withGap'}>
+            <Spinner animation={'border'} size={'sm'} />
+            <div>Processing</div>
+          </FlexContainer>
+          <div>There is a Job started @ <b>{moment(message?.createdAt).format('lll')}</b>. Please wait until it finishes before request a new one.</div>
+        </div>
       )
     }
     return (
-      <FlexContainer
-        style={{cursor: 'pointer'}}
-        onClick={() => setSendEmailNotification(!sendEmailNotification)}
-      >
-        <input
-          type={'checkbox'}
-          disabled={isSaving}
-          checked={sendEmailNotification} /> {' '}
-        <div>Send notifications to users when there are changes from Operoo</div>
-      </FlexContainer>
+      <PopupBodyWrapper>
+        <FlexContainer
+          style={{cursor: 'pointer'}}
+          onClick={() => setSendEmailNotification(!sendEmailNotification)}
+        >
+          <Form.Check
+            disabled={isSaving}
+            type="switch"
+            checked={sendEmailNotification}
+            label=""
+            onChange={() => {}}
+            className={'sendEmailNotification-switch'}
+          />
+          <div>Send notifications to users when there are changes from Operoo</div>
+        </FlexContainer>
+      </PopupBodyWrapper>
     )
   }
 
@@ -145,12 +166,9 @@ const OperooSafetyAlertDownloadPopupBtn = () => {
   }
 
   const getContent = () => {
-    if (isLoading) {
-      return <Spinner animation={'border'} />
-    }
     return (
       <>
-        <LoadingBtn variant={'danger'} isLoading={showingConfirmPanel} onClick={() => setShowingConfirmPanel(true)}>
+        <LoadingBtn variant={'danger'} isLoading={showingConfirmPanel} onClick={() => getLatestMessage()}>
           Force From Operoo Now
         </LoadingBtn>
         {getPopup()}
