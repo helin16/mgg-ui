@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import LoadingBtn from '../../../components/common/LoadingBtn';
 import {useEffect, useState} from 'react';
 import PopupModal from '../../../components/common/PopupModal';
-import {Button, Form, Spinner} from 'react-bootstrap';
+import {Button, Spinner} from 'react-bootstrap';
 import {FlexContainer} from '../../../styles';
 import OperooSafetyAlertService from '../../../services/Operoo/OperooSafetyAlertService';
 import iMessage, {
@@ -118,12 +118,10 @@ const OperooSafetyAlertDownloadPopupBtn = () => {
         style={{cursor: 'pointer'}}
         onClick={() => setSendEmailNotification(!sendEmailNotification)}
       >
-        <Form.Check
+        <input
+          type={'checkbox'}
           disabled={isSaving}
-          checked={sendEmailNotification}
-          label=""
-          onChange={() => {}}
-        />
+          checked={sendEmailNotification} /> {' '}
         <div>Send notifications to users when there are changes from Operoo</div>
       </FlexContainer>
     )
