@@ -2,7 +2,8 @@ import React from 'react';
 import StudentReport from '../../pages/studentReport/StudentReport';
 import OperooSafetyAlertsPage from '../../pages/operoo/OperooSafetyAlertsPage';
 import ModuleAccessWrapper from '../../components/module/ModuleAccessWrapper';
-import {MODULE_ID_OPEROO_SAFETY_ALERTS} from '../../types/modules/iModuleUser';
+import {MODULE_ID_HOUSE_AWARDS, MODULE_ID_OPEROO_SAFETY_ALERTS} from '../../types/modules/iModuleUser';
+import HouseAwardsPage from '../../pages/houseAwards/HouseAwardsPage';
 // import PageNotFound from '../../components/PageNotFound';
 
 const schoolBoxIframeElementId = 'remote';
@@ -30,6 +31,10 @@ const SchoolBoxRouter = ({path}: {path: string}) => {
     case '/operoo/safetyAlerts': {
       removeSchoolBoxIframe();
       return <ModuleAccessWrapper moduleId={MODULE_ID_OPEROO_SAFETY_ALERTS}><OperooSafetyAlertsPage /></ModuleAccessWrapper>;
+    }
+    case '/houseAwards': {
+      removeSchoolBoxIframe();
+      return <ModuleAccessWrapper moduleId={MODULE_ID_HOUSE_AWARDS}><HouseAwardsPage /></ModuleAccessWrapper>;
     }
     default: {
       showSchoolBoxIframe();

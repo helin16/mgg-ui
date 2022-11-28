@@ -2,10 +2,11 @@ import styled from 'styled-components';
 
 export const FlexContainer = styled.div`
   display: flex;
-  width: 100%;
+  //width: 100%;
   &.withGap {
     > * {
       padding: 2px;
+      margin: 2px;
     }
   }
   
@@ -13,5 +14,20 @@ export const FlexContainer = styled.div`
     &.space-between {
       justify-content: space-between;
     }
+  }
+
+  &.space-below {
+    margin-bottom: 0.8rem;
+  }
+
+  &.wrap {
+    flex-wrap: wrap;
+  }
+  &.full-width {
+    width: 100%;
+  }
+  
+  .full-width {
+    width: 100%;
   }
 `

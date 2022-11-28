@@ -82,6 +82,30 @@ const TeachersDiv = ({
     }
   }, [results, showHeadOfYear, showHeadOfSchool])
 
+  const getHeadOfSchoolRow = (code: string, prefix = '') => {
+    const headOfSchoolCodeStr = `${code}`.trim();
+    if (headOfSchoolCodeStr === '') {
+      return null;
+    }
+    return <div><b>{prefix || ''}{`Head of ${headOfSchoolCodeStr === SMT_SCHOOL_ROL_CODE_HEAD_OF_JUNIOR_SCHOOL ? 'Junior' : 'Senior'} School`}</b></div>
+  }
+
+  const getPositionRow = () => {
+    const comments = `${headOfSchoolTeacher?.Comments  || ''}`.trim();
+    if (comments === '') {
+      return getHeadOfSchoolRow(headOfSchoolCode);
+    }
+    if (comments.toLowerCase() === 'acting') {
+      return getHeadOfSchoolRow(headOfSchoolCode, `${comments} `);
+    }
+    return  (
+      <>
+        <div><b>{comments}</b></div>
+        {getHeadOfSchoolRow(headOfSchoolCode)}
+      </>
+    )
+  }
+
   if (isLoading === true) {
     return <Spinner animation={'border'} />
   }
@@ -93,8 +117,7 @@ const TeachersDiv = ({
     return (
       <div className={'head-of-school text-left'}>
         <div>{headOfSchoolTeacher.SynSSTStaff?.Title} {headOfSchoolTeacher.SynSSTStaff?.Initials} {headOfSchoolTeacher.SynSSTStaff?.Surname}</div>
-        {(headOfSchoolTeacher.Comments && headOfSchoolTeacher.Comments.trim() !== '') ? <div><b>{headOfSchoolTeacher.Comments}</b></div> : null}
-        <div><b>{`Head of ${headOfSchoolCode === SMT_SCHOOL_ROL_CODE_HEAD_OF_JUNIOR_SCHOOL ? 'Junior' : 'Senior'} School`}</b></div>
+        {getPositionRow()}
       </div>
     )
   }

@@ -4,7 +4,7 @@ import iSynSubjectClassesResultLock from '../../../../types/Synergetic/iSynSubje
 import {Spinner, Table} from 'react-bootstrap';
 import styled from 'styled-components';
 import moment from 'moment-timezone';
-import DeleteConfirmPopupBtn from '../../../../components/common/DeleteConfirmPopupBtn';
+import DeleteConfirmPopupBtn from '../../../../components/common/DeleteConfirm/DeleteConfirmPopupBtn';
 
 const Wrapper = styled.div``
 

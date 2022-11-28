@@ -5,7 +5,7 @@ import iModuleUser from '../../types/modules/iModuleUser';
 import * as Icons from 'react-bootstrap-icons';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../redux/makeReduxStore';
-import DeleteConfirmPopupBtn from '../common/DeleteConfirmPopupBtn';
+import DeleteConfirmPopupBtn from '../common/DeleteConfirm/DeleteConfirmPopupBtn';
 import styled from 'styled-components';
 import StaffAutoComplete from '../staff/StaffAutoComplete';
 import {iAutoCompleteSingle} from '../common/AutoComplete';
@@ -55,8 +55,6 @@ const ModuleUserList = ({moduleId, roleId, showCreatingPanel, showDeletingBtn}: 
   }
 
   const handleDeletedFn = (user: iModuleUser) => (resp: {deleted: boolean }) => {
-    console.log(user);
-    console.log(resp);
     if (resp.deleted === true) {
       delete userMap[user.SynergeticID];
       setUserMap({...userMap});

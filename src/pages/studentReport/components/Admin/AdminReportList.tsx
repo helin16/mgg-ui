@@ -7,7 +7,7 @@ import EmptyState from '../../../../components/common/EmptyState';
 import moment from 'moment-timezone';
 import * as _ from 'lodash';
 import * as Icons from 'react-bootstrap-icons';
-import DeleteConfirmPopupBtn from '../../../../components/common/DeleteConfirmPopupBtn';
+import DeleteConfirmPopupBtn from '../../../../components/common/DeleteConfirm/DeleteConfirmPopupBtn';
 import FileYearSelector from '../../../../components/student/FileYearSelector';
 import FileSemesterSelector from '../../../../components/student/FileSemesterSelector';
 import CampusSelector, {translateCampusToOption} from '../../../../components/student/CampusSelector';
