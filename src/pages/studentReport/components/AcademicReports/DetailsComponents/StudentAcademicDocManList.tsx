@@ -44,7 +44,7 @@ const StudentAcademicDocManList = ({student, studentReportYear}: iStudentAcademi
         const documents = await SynVDocumentService.getVDocuments({
           where: JSON.stringify({
             ID: student.StudentID,
-            ClassificationCode: ['REPORT', 'ARCHIVEDRPTS'],
+            ClassificationCode: ['REPORT', 'ARCHIVEDRPTS', 'ONLINESCHRPT'],
           }),
           perPage: '100',
         });
