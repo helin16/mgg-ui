@@ -7,3 +7,4 @@ export const OP_GT = 'OP_GT';
 export const OP_LT = 'OP_LT';
 export const OP_LTE = 'OP_LTE';
 export const OP_NOT = 'OP_NOT';
+export const OP_BETWEEN = 'OP_BETWEEN';

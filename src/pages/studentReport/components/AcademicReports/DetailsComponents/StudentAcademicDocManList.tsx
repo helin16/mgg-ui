@@ -6,6 +6,7 @@ import SynFileSemesterService from '../../../../../services/Synergetic/SynFileSe
 import SynVDocumentService, {openDocument} from '../../../../../services/Synergetic/SynVDocumentService';
 import {Spinner} from 'react-bootstrap';
 import styled from 'styled-components';
+import {OP_BETWEEN, OP_GTE} from '../../../../../helper/ServiceHelper';
 
 type iStudentAcademicDocManList = {
   student: iVStudent,
@@ -41,22 +42,19 @@ const StudentAcademicDocManList = ({student, studentReportYear}: iStudentAcademi
           return;
         }
         const fileSemester = fileSemesters[0];
+        const extraWhere = (`${studentReportYear.ReleaseToAllDate || ''}`.trim() === '') ? {SourceDate: {[OP_GTE]: fileSemester.StartDate}} : {
+          SourceDate: {[OP_BETWEEN]: [fileSemester.StartDate, `${studentReportYear.ReleaseToAllDate || ''}`]}
+        }
         const documents = await SynVDocumentService.getVDocuments({
           where: JSON.stringify({
             ID: student.StudentID,
             ClassificationCode: ['REPORT', 'ARCHIVEDRPTS', 'ONLINESCHRPT'],
+            ...extraWhere,
           }),
           perPage: '100',
         });
         if (isCanceled ) return;
-        setDocumentList(documents.data
-          .filter((doc) => {
-            if (`${studentReportYear.ReleaseToAllDate || ''}`.trim() === '') {
-              return `${doc.SourceDate}` >= fileSemester.StartDate;
-            }
-            return `${doc.SourceDate}` >= fileSemester.StartDate && `${doc.SourceDate}` <= `${studentReportYear.ReleaseToAllDate || ''}`
-          })
-        );
+        setDocumentList(documents.data);
         setIsLoading(false);
       } catch (err) {
         setIsLoading(false);
