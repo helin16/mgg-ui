@@ -9,6 +9,7 @@ import AdminPageHeader from './components/Admin/AdminPageHeader';
 import {MODULE_ID_STUDENT_REPORT} from '../../types/modules/iModuleUser';
 import {ROLE_ID_ADMIN} from '../../types/modules/iRole';
 import ModuleUserList from '../../components/module/ModuleUserList';
+import GenComparativePopupBtn from './components/Admin/GenComparativePopupBtn';
 
 const btnTextClassName = 'd-none d-sm-inline-block';
 
@@ -65,8 +66,10 @@ const AdminPage = ({backToReportFn}: {backToReportFn?: () => void}) => {
             <span className={btnTextClassName}>Reports</span>
           </Button>
           {' '}
+          <GenComparativePopupBtn />
+          {' '}
           <Button
-            variant={'outline-warning'}
+            variant={'outline-danger'}
             size={'sm'}
             title={'Synergetic Report Editing Locks'}
             onClick={() => setShowingEditingLocks(true)}

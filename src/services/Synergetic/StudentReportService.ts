@@ -57,6 +57,10 @@ const getPowerBIReports = (studentId: string | number, params: iConfigParams = {
   return AppService.get(`${baseEndPoint}/getPowerBIReportIds/${studentId}`, params).then(resp => resp.data);
 };
 
+const genComparativeResults = (params: iConfigParams): Promise<{ success: boolean}> => {
+  return AppService.post(`${baseEndPoint}/comparative`, params).then(resp => resp.data);
+}
+
 const StudentReportService = {
   getStudentReportStyles,
   getStudentReportYears,
@@ -71,6 +75,7 @@ const StudentReportService = {
   getStudentReportDownloadPDF,
   emailStudentReportPDF,
   getPowerBIReports,
+  genComparativeResults,
 }
 
 export default StudentReportService;
