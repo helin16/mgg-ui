@@ -151,7 +151,7 @@ const GenComparativePopupBtn = () => {
 
   return (
     <>
-      <Button variant={'outline-success'} size={'sm'} onClick={() => setShowingPopup(true)}>
+      <Button variant={'outline-warning'} size={'sm'} onClick={() => setShowingPopup(true)}>
         <Icons.List />{' '}
         <span className={'d-none d-sm-inline-block'}>Gen Comparatives</span>
       </Button>
