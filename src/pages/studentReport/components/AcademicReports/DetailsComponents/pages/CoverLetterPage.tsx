@@ -5,10 +5,15 @@ import SectionDiv from '../sections/SectionDiv';
 import styled from 'styled-components';
 import iStudentReportResult from '../../../../../../types/Synergetic/iStudentReportResult';
 import PageTitleDivider from '../sections/PageTitleDivider';
+import StudentStatusBadge from '../../StudentStatusBadge';
+import {FlexContainer} from '../../../../../../styles';
 
 const Wrapper = styled.div`
   .d-table {
     width: 100%;
+    .title {
+      display: inline-block;
+    }
   }
   .cover-letter {
     table {
@@ -23,12 +28,15 @@ const Wrapper = styled.div`
 const CoverLetterPage = ({student, studentReportYear, studentReportResult}: StudentAcademicReportDetailsProps & {studentReportResult: iStudentReportResult | null}) => {
   return (
     <Wrapper className={'cover-letter-wrapper'}>
-      <h4 className={'d-table'}>
-        Academic Reports
+      <div className={'d-table'}>
+        <h4 className={'title'}>Academic Reports</h4>
         <div className={'pull-right d-table-cell'}>
-          {student.StudentGiven1} {student.StudentSurname} ({student.StudentID})
+          <FlexContainer className={'withGap justify-content flex-end align-items center'}>
+            <StudentStatusBadge student={student} />
+            <h4>{student.StudentGiven1} {student.StudentSurname} ({student.StudentID})</h4>
+          </FlexContainer>
         </div>
-      </h4>
+      </div>
 
       <PageTitleDivider student={student} studentReportResult={studentReportResult} />
 

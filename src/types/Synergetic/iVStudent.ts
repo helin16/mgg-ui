@@ -1,3 +1,8 @@
+export const SYN_STUDENT_STATUS_ID_NORMAL = '0';
+export const SYN_STUDENT_STATUS_ID_NEW = '1';
+export const SYN_STUDENT_STATUS_ID_LEAVING = '5';
+export const SYN_STUDENT_STATUS_ID_LEFT = '4';
+
 type iVStudent = {
   StudentID: number;
   StudentNameInternal: string;

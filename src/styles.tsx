@@ -10,9 +10,19 @@ export const FlexContainer = styled.div`
     }
   }
   
+  
   &.justify-content {
     &.space-between {
       justify-content: space-between;
+    }
+    &.flex-end {
+      justify-content: flex-end;
+    }
+  }
+  
+  &.align-items {
+    &.center {
+      align-items: center;
     }
   }
 

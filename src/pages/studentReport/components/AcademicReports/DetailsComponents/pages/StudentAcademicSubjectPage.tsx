@@ -15,10 +15,15 @@ import LearningBehavioursDiv from '../sections/LearningBehavioursDiv';
 import AssessmentTasksDiv from '../sections/AssessmentTasksDiv';
 import OutcomesDiv from '../sections/OutcomesDiv';
 import ReflectionDiv from '../sections/RefelectionDiv';
+import {FlexContainer} from '../../../../../../styles';
+import StudentStatusBadge from '../../StudentStatusBadge';
 
 export const SubjectPageWrapper = styled.div`
   .d-table {
     width: 100%;
+    .title {
+      display: inline-block;
+    }
   }
 `;
 
@@ -26,12 +31,15 @@ export type iSubjectPageParams = StudentAcademicReportDetailsProps & {selectedRe
 export const StudentAcademicSubjectPageHeader = ({student, selectedReportResults}: iSubjectPageParams) => {
   return (
     <>
-      <h4 className={'d-table'}>
-        {getStudentReportClassname(selectedReportResults[0])}
+      <div className={'d-table'}>
+        <h4 className={'title'}>{getStudentReportClassname(selectedReportResults[0])}</h4>
         <div className={'pull-right d-table-cell'}>
-          {student.StudentGiven1} {student.StudentSurname} ({student.StudentID})
+          <FlexContainer className={'withGap justify-content flex-end align-items center'}>
+            <StudentStatusBadge student={student} />
+            <h4>{student.StudentGiven1} {student.StudentSurname} ({student.StudentID})</h4>
+          </FlexContainer>
         </div>
-      </h4>
+      </div>
 
       <PageTitleDivider student={student} studentReportResult={selectedReportResults[0]} />
 

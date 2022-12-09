@@ -10,6 +10,8 @@ import {
 import iStudentReportComparativeResultMap from '../../../../../../types/Synergetic/iStudentReportComparativeResult';
 import StudentReportService from '../../../../../../services/Synergetic/StudentReportService';
 import styled from 'styled-components';
+import StudentStatusBadge from '../../StudentStatusBadge';
+import {FlexContainer} from '../../../../../../styles';
 
 
 const Wrapper = styled.div`
@@ -96,7 +98,10 @@ const ComparativeAnalysisPage = ({
           <h4>Comparative Analysis</h4>
         </Col>
         <Col className={'text-right'}>
-          <h4>{student.StudentGiven1} {student.StudentSurname} ({student.StudentID})</h4>
+          <FlexContainer className={'withGap justify-content flex-end align-items center'}>
+            <StudentStatusBadge student={student} />
+            <h4>{student.StudentGiven1} {student.StudentSurname} ({student.StudentID})</h4>
+          </FlexContainer>
         </Col>
       </Row>
 

@@ -14,6 +14,8 @@ import {iPowerBiReportMap} from '../../../types/student/iPowerBIReports';
 import PowerBIReportViewer from '../../../components/powerBI/PowerBIReportViewer';
 import AssessmentGraph from './AssessmentGraph/AssessmentGraph';
 import {mainBlue} from '../../../AppWrapper';
+import StudentStatusBadge from './AcademicReports/StudentStatusBadge';
+import {FlexContainer} from '../../../styles';
 
 const TAB_ACADEMIC_REPORTS = 'academicReports';
 const TAB_STUDENT_PARTICIPATION = 'studentParticipation';
@@ -134,12 +136,15 @@ const StudentDetailsPage = ({student ,onClearSelectedStudent}: {student: iVStude
       <>
         <PageTitle
           operations={
-            <h3 className={'text-right'}>
-              {student.StudentGiven1} {' '}
-              {student.StudentSurname} {' '}
-              ({student.StudentID}) {' '}
-              {student.StudentFormHomeRoom}
-            </h3>
+            <FlexContainer className={'withGap justify-content flex-end align-items center'}>
+              <StudentStatusBadge student={student} />
+              <h3 className={'text-right'}>
+                {student.StudentGiven1} {' '}
+                {student.StudentSurname} {' '}
+                ({student.StudentID}) {' '}
+                {student.StudentFormHomeRoom}
+              </h3>
+            </FlexContainer>
           }
         >
           <h3>

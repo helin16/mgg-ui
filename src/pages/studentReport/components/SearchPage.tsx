@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {InputGroup, FormControl} from 'react-bootstrap';
+import {InputGroup, FormControl, Badge} from 'react-bootstrap';
 import {Search} from 'react-bootstrap-icons';
 import LoadingBtn from '../../../components/common/LoadingBtn';
 import SynVStudentService from '../../../services/Synergetic/SynVStudentService';
@@ -10,6 +10,7 @@ import EmptyState from '../../../components/common/EmptyState';
 import ModuleAdminBtn from '../../../components/module/ModuleAdminBtn';
 import AdminPage from '../AdminPage';
 import {MODULE_ID_STUDENT_REPORT} from '../../../types/modules/iModuleUser';
+import StudentStatusBadge from './AcademicReports/StudentStatusBadge';
 
 
 const Wrapper = styled.div`
@@ -30,6 +31,11 @@ const Wrapper = styled.div`
       }
       :nth-child(2n+1) {
         background-color: #f9f9f9;
+      }
+      
+      .status-div {
+        margin-left: 20px;
+        font-size: 9px;
       }
     }
   }
@@ -91,6 +97,7 @@ const SearchPage = ({onSelect}: {onSelect: (student: iVStudent) => void}) => {
               className={'search-result-item'}>
               <div className={'left'}>
                 {student.StudentSurname}, {student.StudentGiven1} ({student.StudentPreferred}) - {student.StudentID}
+                <StudentStatusBadge student={student} className={'status-div'} />
               </div>
               <div className={'right'}>
                 {student.StudentForm}
