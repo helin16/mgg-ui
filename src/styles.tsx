@@ -10,6 +10,11 @@ export const FlexContainer = styled.div`
     }
   }
   
+  &.flex-wrap {
+    &.wrap {
+      flex-wrap: wrap;
+    }
+  }
   
   &.justify-content {
     &.space-between {

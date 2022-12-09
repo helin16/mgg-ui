@@ -8,6 +8,8 @@ import {OP_OR} from '../../helper/ServiceHelper';
 import * as _ from 'lodash';
 import SynVStudentService from '../../services/Synergetic/SynVStudentService';
 import styled from 'styled-components';
+import StudentStatusBadge from '../../pages/studentReport/components/AcademicReports/StudentStatusBadge';
+import {FlexContainer} from '../../styles';
 
 const Wrapper = styled.div`
   .student-div {
@@ -114,10 +116,11 @@ const StudentGridForAParent = ({
   const getStudentProfileDiv = (student: iVStudent) => {
     return (
       <div className={'student-div'} key={student.StudentID} onClick={() => onSelect && onSelect(student)}>
-        <Image src={student.profileUrl} />
+        <Image src={student.profileUrl} className={'profile-img'}/>
         <div className={'title-div'}>
           <div><b>{student.StudentGiven1} {student.StudentSurname}</b></div>
           <div>{student.StudentFormHomeRoom} ({student.StudentID})</div>
+          <StudentStatusBadge student={student} />
         </div>
       </div>
     )
@@ -130,7 +133,9 @@ const StudentGridForAParent = ({
   return (
     <Wrapper>
       <h4>Please select one of your daughter's profile below: </h4>
-      {students.map(student => getStudentProfileDiv(student))}
+      <FlexContainer className={'flex-wrap wrap'}>
+        {students.map(student => getStudentProfileDiv(student))}
+      </FlexContainer>
     </Wrapper>
   );
 };

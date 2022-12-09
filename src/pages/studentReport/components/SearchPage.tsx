@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {InputGroup, FormControl, Badge} from 'react-bootstrap';
+import {InputGroup, FormControl} from 'react-bootstrap';
 import {Search} from 'react-bootstrap-icons';
 import LoadingBtn from '../../../components/common/LoadingBtn';
 import SynVStudentService from '../../../services/Synergetic/SynVStudentService';
