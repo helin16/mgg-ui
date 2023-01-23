@@ -1,3 +1,6 @@
+// script to run:
+// scp -r ./build/* alaress@10.114.37.24:/usr/share/schoolbox/www//static/mggs/; scp ./build/schoolBox.html alaress@10.114.37.24:/usr/share/mentone-scripts/iframe/frame.html; scp ./build/schoolBox.html alaress@10.114.37.24:/usr/share/schoolbox/templates/core/modules/remote/frame.html
+
 import * as fs from 'fs';
 import { Client } from 'node-scp'
 
