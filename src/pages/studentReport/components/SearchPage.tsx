@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {InputGroup, FormControl} from 'react-bootstrap';
+import {InputGroup, FormControl, Row, Col, Form} from 'react-bootstrap';
 import {Search} from 'react-bootstrap-icons';
 import LoadingBtn from '../../../components/common/LoadingBtn';
 import SynVStudentService from '../../../services/Synergetic/SynVStudentService';
@@ -11,9 +11,18 @@ import ModuleAdminBtn from '../../../components/module/ModuleAdminBtn';
 import AdminPage from '../AdminPage';
 import {MODULE_ID_STUDENT_REPORT} from '../../../types/modules/iModuleUser';
 import StudentStatusBadge from './AcademicReports/StudentStatusBadge';
+import Toaster from '../../../services/Toaster';
+import FileYearSelector from '../../../components/student/FileYearSelector';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../../redux/makeReduxStore';
+import FileSemesterSelector from '../../../components/student/FileSemesterSelector';
 
 
 const Wrapper = styled.div`
+  .form-label {
+    margin-bottom: 0px;
+    margin-top: 8px;
+  }
   .search-btn {
     @media only print, screen and (max-width: 40em) {
      max-width: 45px;
@@ -41,28 +50,41 @@ const Wrapper = styled.div`
   }
 `
 const SearchPage = ({onSelect}: {onSelect: (student: iVStudent) => void}) => {
+  const {user} = useSelector((state: RootState) => state.auth);
   const innerRef = useRef();
   const [searchTxt, setSearchTxt] = useState('');
+  const [searchFileYear, setSearchFileYear] = useState<number | undefined>(undefined);
+  const [searchFileSemester, setSearchFileSemester] = useState<number | undefined>(undefined);
   const [isSearching, setIsSearching] = useState(false);
   const [students, setStudents] = useState<iVStudent[] | undefined>(undefined);
   const [isShowAdminPage, setIsShowAdminPage] = useState(false);
 
-  // @ts-ignore
-  useEffect(() => innerRef.current && innerRef.current.focus());
+  useEffect(() => {
+    if (!user || !user.SynCurrentFileSemester) return;
+    setSearchFileYear(user.SynCurrentFileSemester.FileYear);
+    setSearchFileSemester(user.SynCurrentFileSemester.FileSemester);
+    // @ts-ignore
+    innerRef.current && innerRef.current.focus()
+  }, [user, user?.SynCurrentFileSemester]);
 
   const onSearch = () => {
-    if (`${searchTxt}`.trim() === '') {
-      return;
-    }
     setIsSearching(true);
-    SynVStudentService.searchVStudents(searchTxt)
+    SynVStudentService.searchVStudents(searchTxt, {
+      ...(`${searchFileYear}`.trim() === '' ? {} : {FileYear: `${searchFileYear}`}),
+      ...(`${searchFileSemester}`.trim() === '' ? {} : {FileSemester: `${searchFileSemester}`}),
+    })
       .then(resp => {
-        setIsSearching(false);
         setStudents(resp
           .sort((stu1, stu2) => {
             return (stu1.StudentGiven1 > stu2.StudentGiven1) ? 1 : -1
           })
         )
+      })
+      .catch(err => {
+        Toaster.showApiError(err)
+      })
+      .finally(() => {
+        setIsSearching(false);
       })
   }
 
@@ -122,7 +144,22 @@ const SearchPage = ({onSelect}: {onSelect: (student: iVStudent) => void}) => {
         </span>
       </h3>
       <p>Welcome to the student academic report viewer. Type the homeroom or name of the student you want to locate below.</p>
+      <Row>
+        <Col sm={6}>
+          <Form.Label>File Year</Form.Label>
+          <FileYearSelector onSelect={(fileYear) => setSearchFileYear(fileYear || undefined)} value={searchFileYear} />
+        </Col>
+        <Col sm={6}>
+          <Form.Label>File Semester</Form.Label>
+          <FileSemesterSelector
+            semesters={[1, 2, 3, 4, 5]}
+            onSelect={(fileSemester) => setSearchFileSemester(fileSemester  || undefined)}
+            value={searchFileSemester}
+          />
+        </Col>
+      </Row>
       <div className={'search-bar'}>
+        <Form.Label>Search</Form.Label>
         <InputGroup className="mb-3">
           <FormControl
             disabled={isSearching === true}

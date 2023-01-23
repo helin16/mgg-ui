@@ -17,6 +17,10 @@ const Wrapper = styled.div`
     min-height: 0px;
     height: auto;
   }
+
+  div[class$='-menu'] {
+    z-index: 99999;
+  }
   
   .form-control {
     padding: 0px;
