@@ -17,6 +17,7 @@ import iSynVDocument from '../../types/Synergetic/iSynVDocument';
 import SynVDocumentService from '../../services/Synergetic/SynVDocumentService';
 import {HEADER_NAME_SELECTING_FIELDS} from '../../services/AppService';
 import MedicalReportExportDropdown from './components/MedicalReportExportDropdown';
+import Page401 from '../../components/Page401';
 
 const ResultWrapper = styled.div`
   padding: 1rem 0;
@@ -309,17 +310,28 @@ const MedicalReportPage = () => {
     )
   }
 
+  const getContent = () => {
+    if (!user || !user.isStaff) {
+      return <Page401 description={<h4>ONLY Staff can access this page</h4>} />
+    }
+    return (
+      <>
+        <MedicalReportSearchPanel
+          isSearching={isSearching}
+          onSearch={onSearch}
+          onClear={onClear}
+        />
+        <ResultWrapper className={'result-wrapper'}>
+          {getResultPanel()}
+        </ResultWrapper>
+      </>
+    )
+  }
+
   return (
     <div>
       <h3>Medical Reports / Action Plans</h3>
-      <MedicalReportSearchPanel
-        isSearching={isSearching}
-        onSearch={onSearch}
-        onClear={onClear}
-      />
-      <ResultWrapper className={'result-wrapper'}>
-        {getResultPanel()}
-      </ResultWrapper>
+      {getContent()}
     </div>
   )
 }

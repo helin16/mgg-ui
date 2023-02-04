@@ -27,7 +27,10 @@ const reloadPage = () => {
 };
 
 
-const Page401 = () => {
+type iPage401 = {
+  description?: any,
+}
+const Page401 = ({description}: iPage401) => {
   return (
     <Wrapper>
       <div className={'logo'}>
@@ -35,9 +38,9 @@ const Page401 = () => {
       </div>
       <div className={'description'}>
         <h4 className={'title'}>Access Denied</h4>
-        <p>
+        {description ? description: (<p>
           You don't have Access to this page or your session has timed out.
-        </p>
+        </p>)}
       </div>
       <div className={'actions'}>
         <Button variant={'danger'} size="sm" onClick={() => reloadPage()}>Reload Page</Button>
