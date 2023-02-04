@@ -4,7 +4,7 @@ import iOperooSafetyAlert, {
   OPEROO_STATUS_SAFETY_ALERT_UPDATED
 } from '../../types/Operoo/iOperooSafetyAlert';
 import OperooSafetyAlertService from '../../services/Operoo/OperooSafetyAlertService';
-import {Spinner} from 'react-bootstrap';
+import {Alert, Spinner} from 'react-bootstrap';
 import OperooSafetyAlertRow from './components/OperooSafetyAlertRow';
 import SynVStudentService from '../../services/Synergetic/SynVStudentService';
 import iVStudent from '../../types/Synergetic/iVStudent';
@@ -14,6 +14,7 @@ import AdminPage from './AdminPage';
 import {MODULE_ID_OPEROO_SAFETY_ALERTS} from '../../types/modules/iModuleUser';
 import Page from '../../layouts/Page';
 import Toaster from '../../services/Toaster';
+import * as Icons from 'react-bootstrap-icons';
 
 const showAlertStatuses = [OPEROO_STATUS_SAFETY_ALERT_NEW, OPEROO_STATUS_SAFETY_ALERT_UPDATED];
 
@@ -94,6 +95,9 @@ const OperooSafetyAlertsPage = () => {
           <ModuleAdminBtn onClick={() => setIsViewingAdminPage(true)} moduleId={MODULE_ID_OPEROO_SAFETY_ALERTS} />
         </span>
       </h3>
+      <Alert variant={'secondary'}>
+        <Icons.ExclamationOctagonFill /> This module is designed for the School Nurse to auto sync down Operoo Docs to Synergetic DocMan
+      </Alert>
       {students.map(student => {
         return <OperooSafetyAlertRow
           key={student.StudentID}

@@ -58,7 +58,7 @@ const ModuleAccessWrapper = ({moduleId, roleId, silentMode = false, children}: i
     if (silentMode) {
       return null;
     }
-    return <Page401 />
+    return <Page401 description={<h4>Please contact IT or Module Admins for assistant</h4>}/>
   }
 
   return <>{children}</>
