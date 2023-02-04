@@ -16,7 +16,12 @@ import moment from 'moment-timezone';
 
 
 
-const Wrapper = styled.div``;
+const Wrapper = styled.div`
+  .search-btn-wrapper {
+    display: flex;
+    align-items: flex-end;
+  }
+`;
 
 export type iSearchState = {
   searchText: string;
@@ -145,19 +150,19 @@ const MedicalReportSearchPanel = ({onSearch, onClear, isSearching = false}: iSta
           </Col>
           <Col sm={2}>
             <FormLabel label={' '} />
-            <div className={'text-right'}>
-              <LoadingBtn variant={'link'} isLoading={isSearching} onClick={() => {
+            <div className={'search-btn-wrapper'}>
+              <LoadingBtn variant={'link'} size={'sm'} isLoading={isSearching} onClick={() => {
                 setSearchCriteria(initialSearchState);
                 if (onClear) {
                   onClear();
                 }
               }}>
-                <Icons.X /> Clear
+                <Icons.X />Clear
               </LoadingBtn>
-              <LoadingBtn variant={'primary'} isLoading={isSearching} onClick={() => onSearch && onSearch(searchCriteria)}>
+              <LoadingBtn variant={'primary'} size={'sm'} isLoading={isSearching} onClick={() => onSearch && onSearch(searchCriteria)}>
                 <Icons.Search /> Search
               </LoadingBtn>
-            </ div>
+            </div>
           </Col>
         </Row>
         <Row>

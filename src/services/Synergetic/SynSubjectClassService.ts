@@ -4,8 +4,8 @@ import IPaginatedResult from '../../types/iPaginatedResult';
 
 const endPoint = '/syn/subjectClass';
 
-const getAll = (params: iConfigParams = {}): Promise<IPaginatedResult<iSynSubjectClass>> => {
-  return AppService.get(endPoint, params).then(resp => resp.data);
+const getAll = (params: iConfigParams = {}, config?: iConfigParams): Promise<IPaginatedResult<iSynSubjectClass>> => {
+  return AppService.get(endPoint, params, config).then(resp => resp.data);
 };
 
 const SynSubjectClassService = {

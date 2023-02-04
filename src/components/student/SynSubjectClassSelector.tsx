@@ -4,6 +4,7 @@ import {Spinner} from 'react-bootstrap';
 import SelectBox from '../common/SelectBox';
 import iSynSubjectClass from '../../types/Synergetic/iSynSubjectClass';
 import SynSubjectClassService from '../../services/Synergetic/SynSubjectClassService';
+import {HEADER_NAME_SELECTING_FIELDS} from '../../services/AppService';
 
 type iSynSubjectClassSelector = {
   isMulti?: boolean;
@@ -32,12 +33,14 @@ const SynSubjectClassSelector = ({
     if (Object.keys(optionMap).length > 0) { return }
     setIsLoading(true);
     SynSubjectClassService.getAll({
-      where: JSON.stringify({
-        FileYear: FileYear,
-        FileSemester: FileSemester,
-      }),
-      ...(pageSize ? {perPage: `${pageSize}`} : {})
-    })
+        where: JSON.stringify({
+          FileYear: FileYear,
+          FileSemester: FileSemester,
+        }),
+        ...(pageSize ? {perPage: `${pageSize}`} : {})
+      }, {
+         headers: {[HEADER_NAME_SELECTING_FIELDS]: JSON.stringify(['ClassCode', 'Description'])}
+      })
       .then(resp => {
         if (isCancelled === true) { return }
         setOptionMap(resp.data.reduce((map, SubjectClass) => {

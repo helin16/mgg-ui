@@ -49,7 +49,18 @@ const ResultWrapper = styled.div`
     td.conditions {
       padding: 0px;
       .conditions-table {
+        background-color: transparent;
         margin-bottom: 0px;
+        tr {
+          border-bottom-width: 1px;
+          border-bottom-color: #ccc;
+          &:last-child {
+            border-bottom: none;
+          }
+          td {
+            padding: 0.5rem 0.5rem;
+          }
+        }
         .type-name {
           width: 150px;
         }
@@ -217,7 +228,7 @@ const MedicalReportPage = () => {
       return null;
     }
     return (
-      <Table className={'conditions-table'}>
+      <table className={'conditions-table'}>
         <tbody>
         {
           conditionsMap[studentId].map(condition => {
@@ -237,7 +248,7 @@ const MedicalReportPage = () => {
           })
         }
         </tbody>
-      </Table>
+      </table>
     )
   }
 
