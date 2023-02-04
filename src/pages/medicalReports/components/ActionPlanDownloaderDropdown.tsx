@@ -1,9 +1,8 @@
 import Dropdown from 'react-bootstrap/Dropdown';
 import styled from 'styled-components';
 import iSynVDocument from '../../../types/Synergetic/iSynVDocument';
-import {Button, FormControl, Spinner} from 'react-bootstrap';
+import {Spinner} from 'react-bootstrap';
 import {useState} from 'react';
-import LoadingBtn from '../../../components/common/LoadingBtn';
 import PopupModal from '../../../components/common/PopupModal';
 import SynVDocumentService from '../../../services/Synergetic/SynVDocumentService';
 import Toaster from '../../../services/Toaster';
@@ -84,10 +83,8 @@ const ActionPlanDownloaderDropdown = ({docs, isLoading}: iActionPlanDownloaderDr
           {
             docs.map(doc => {
               return (
-                <Dropdown.Item key={doc.tDocumentsSeq}>
-                  <LoadingBtn variant={'link'} onClick={() => showDocument(doc.tDocumentsSeq)}>
-                    {doc.Description}
-                  </LoadingBtn>
+                <Dropdown.Item key={doc.tDocumentsSeq} onClick={() => showDocument(doc.tDocumentsSeq)}>
+                  {doc.Description}
                 </Dropdown.Item>
               );
             })

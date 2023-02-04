@@ -1,6 +1,5 @@
 import Dropdown from 'react-bootstrap/Dropdown';
 import styled from 'styled-components';
-import LoadingBtn from '../../../components/common/LoadingBtn';
 import iVStudent from '../../../types/Synergetic/iVStudent';
 import iSynVMedicalConditionStudent from '../../../types/Synergetic/iSynVMedicalConditionStudent';
 import * as Icons from 'react-bootstrap-icons';
