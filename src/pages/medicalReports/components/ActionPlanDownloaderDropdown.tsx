@@ -58,9 +58,9 @@ const ActionPlanDownloaderDropdown = ({docs, isLoading}: iActionPlanDownloaderDr
     return <PopupModal
       show={loadingDocSeq !== null}
       handleClose={onClose}
-      title={'Loading document...'}
+      title={'Downloading...'}
     >
-      <div><Spinner animation={'border'}/><div>Loading document details...</div></div>
+      <div><Spinner animation={'border'}/><div>Downloading document...</div></div>
     </PopupModal>
   }
 
