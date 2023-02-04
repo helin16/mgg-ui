@@ -41,10 +41,12 @@ const ResultWrapper = styled.div`
     }
     
     th.conditions {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      padding-bottom: 0.42rem;
+      position: relative;
+      .download-btn {
+        position: absolute;
+        right: 0px;
+        bottom: 0.5rem;
+      }
     }
     
     td.conditions {
@@ -277,8 +279,8 @@ const MedicalReportPage = () => {
             <th className={'name'}>Name</th>
             <th className={'form'}>Form</th>
             <th className={'conditions'}>
-              <div>Conditions</div>
-              <div>
+              Conditions
+              <div className={'download-btn'}>
                 <MedicalReportExportDropdown students={students} conditionsMap={conditionsMap} />
               </div>
             </th>
