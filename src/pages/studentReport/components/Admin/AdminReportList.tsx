@@ -10,7 +10,7 @@ import * as Icons from 'react-bootstrap-icons';
 import DeleteConfirmPopupBtn from '../../../../components/common/DeleteConfirm/DeleteConfirmPopupBtn';
 import FileYearSelector from '../../../../components/student/FileYearSelector';
 import FileSemesterSelector from '../../../../components/student/FileSemesterSelector';
-import CampusSelector, {translateCampusToOption} from '../../../../components/student/CampusSelector';
+import SynCampusSelector, {translateCampusToOption} from '../../../../components/student/SynCampusSelector';
 import YearLevelSelector, {translateYearLevelToOption} from '../../../../components/student/YearLevelSelector';
 import iLuCampus, {CAMPUS_CODE_ELC, CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR} from '../../../../types/Synergetic/iLuCampus';
 import iLuYearLevel from '../../../../types/Synergetic/iLuYearLevel';
@@ -203,11 +203,11 @@ const AdminReportList = ({ onSelected }: iAdminReportList) => {
             <Form.Group as={Col} md={2} sm={4} xs={6}>
               <Form.Label>Campus:</Form.Label>
               <div>
-                <CampusSelector
+                <SynCampusSelector
                   allowClear={true}
                   showIndicator={false}
                   values={query.campus ? [translateCampusToOption(query.campus)] : undefined}
-                  onSelect={(option) => onChangeFilter(option === null ? null : option.data, 'campus')}
+                  onSelect={(option) => onChangeFilter(option === null ? null : (Array.isArray(option) ? option[0].data : option.data), 'campus')}
                 />
               </div>
             </Form.Group>
@@ -224,7 +224,7 @@ const AdminReportList = ({ onSelected }: iAdminReportList) => {
                     CAMPUS_CODE_SENIOR,
                   ]}
                   values={query.yearLevel ? [translateYearLevelToOption(query.yearLevel)] : undefined}
-                  onSelect={(yearLevel) => onChangeFilter(yearLevel === null ? null : yearLevel.data, 'yearLevel')}
+                  onSelect={(option) => onChangeFilter(option === null ? null : (Array.isArray(option) ? option[0].data : option.data), 'yearLevel')}
                 />
               </div>
             </Form.Group>

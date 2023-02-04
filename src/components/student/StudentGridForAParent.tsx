@@ -127,7 +127,7 @@ const StudentGridForAParent = ({
   }
 
   if (isLoadingCommunity === true || isLoadingContacts === true || isLoadingStudents === true) {
-    return <Spinner animation={'border'} />
+    return <Spinner animation={'border'} size={'sm'}/>
   }
 
   return (

@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import iStudentReportYear, {getDataForClone} from '../../../../types/Synergetic/iStudentReportYear';
 import {Alert, Button, Col, Form, Row} from 'react-bootstrap';
 import FileYearSelector from '../../../../components/student/FileYearSelector';
-import CampusSelector from '../../../../components/student/CampusSelector';
+import SynCampusSelector from '../../../../components/student/SynCampusSelector';
 import YearLevelSelector from '../../../../components/student/YearLevelSelector';
 import ReportStyleSelector from './ReportStyleSelector';
 import styled from 'styled-components';
@@ -316,11 +316,11 @@ const AdminEditReportYear = ({reportYear, onCancel, onSaved}: iAdminEditReportYe
 
             <Form.Group as={Col} md={2} xs={6} className={'form-field'}>
               <Form.Label>Campus <small className={'text-danger'}>*</small></Form.Label>
-              <CampusSelector
+              <SynCampusSelector
                 className={`form-control ${getErrorClassName('CampusCode')}`}
                 showIndicator={false}
                 values={editingReportYear ? [editingReportYear?.CampusCode] : undefined}
-                onSelect={(option) => changeField('CampusCode', option?.value || null)}
+                onSelect={(option) => changeField('CampusCode', option === null ? null : Array.isArray(option) ? option[0].value : option?.value)}
               />
               {getErrorMsg('CampusCode')}
             </Form.Group>
@@ -331,7 +331,7 @@ const AdminEditReportYear = ({reportYear, onCancel, onSaved}: iAdminEditReportYe
                 showIndicator={false}
                 allowClear={true}
                 values={editingReportYear ? [editingReportYear?.YearLevelCode] : undefined}
-                onSelect={(option) => changeField('YearLevelCode', option?.value || null)}
+                onSelect={(option) => changeField('YearLevelCode', option === null ? null : Array.isArray(option) ? option[0].value : option?.value)}
               />
             </Form.Group>
           </Row>

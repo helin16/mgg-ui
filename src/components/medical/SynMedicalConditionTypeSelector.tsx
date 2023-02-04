@@ -1,25 +1,23 @@
 import {iAutoCompleteSingle} from '../common/AutoComplete';
 import {useEffect, useState} from 'react';
 import {Spinner} from 'react-bootstrap';
-import SynLuYearLevelService from '../../services/Synergetic/SynLuYearLevelService';
-import iLuYearLevel from '../../types/Synergetic/iLuYearLevel';
+import SynLuMedicalConditionTypeService from '../../services/Synergetic/SynLuMedicalConditionTypeService';
+import iSynLuMedicalConditionType from '../../types/Synergetic/iSynLuMedicalConditionType';
 import SelectBox from '../common/SelectBox';
-import {CAMPUS_CODE_ELC, CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR} from '../../types/Synergetic/iLuCampus';
 
-type iYearLevelSelector = {
+type iSynMedicalConditionTypeSelector = {
   values?: iAutoCompleteSingle[] | string[];
-  campusCodes?: string[];
-  onSelect?: (yearLevel: iAutoCompleteSingle | iAutoCompleteSingle[] | null) => void;
+  onSelect?: (MedicalConditionType: iAutoCompleteSingle | iAutoCompleteSingle[] | null) => void;
   allowClear?: boolean;
   showIndicator?: boolean;
   isMulti?: boolean;
 };
 
-export const translateYearLevelToOption = (yearLevel: iLuYearLevel) => {
-  return {value: yearLevel.Code, data: yearLevel, label: yearLevel.Description}
+export const translateMedicalConditionTypeToOption = (MedicalConditionType: iSynLuMedicalConditionType) => {
+  return {value: MedicalConditionType.Code, data: MedicalConditionType, label: MedicalConditionType.Description}
 }
 
-const YearLevelSelector = ({values, onSelect, allowClear, campusCodes, showIndicator = true, isMulti = false}: iYearLevelSelector) => {
+const SynMedicalConditionTypeSelector = ({values, onSelect, allowClear, showIndicator = true, isMulti = false}: iSynMedicalConditionTypeSelector) => {
   const [optionsMap, setOptionsMap] = useState<{[key: string]: iAutoCompleteSingle}>({});
   const [isLoading, setIsLoading] = useState(false);
 
@@ -29,18 +27,15 @@ const YearLevelSelector = ({values, onSelect, allowClear, campusCodes, showIndic
 
     setIsLoading(true);
     // @ts-ignore
-    SynLuYearLevelService.getAllYearLevels({
-        where: JSON.stringify({
-          Campus: campusCodes || [CAMPUS_CODE_JUNIOR, CAMPUS_CODE_ELC, CAMPUS_CODE_SENIOR],
-        }),
-        sort: 'YearLevelSort:ASC',
+    SynLuMedicalConditionTypeService.getAllMedicalConditionTypes({
+        sort: 'SortOrder:ASC',
       })
       .then(resp => {
         if (isCancelled === true) { return }
-        setOptionsMap(resp.reduce((map, yearLevel) => {
+        setOptionsMap(resp.reduce((map, synLuMedicalConditionType) => {
           return {
             ...map,
-            [yearLevel.Code]: translateYearLevelToOption(yearLevel),
+            [synLuMedicalConditionType.Code]: translateMedicalConditionTypeToOption(synLuMedicalConditionType),
           };
         }, {}))
       })
@@ -50,10 +45,10 @@ const YearLevelSelector = ({values, onSelect, allowClear, campusCodes, showIndic
     return () => {
       isCancelled = true;
     }
-  }, [optionsMap, campusCodes]);
+  }, [optionsMap]);
 
-  if (isLoading === true) {
-    return <Spinner animation={'border'} size={'sm'}/>;
+  if (isLoading) {
+    return <Spinner animation={'border'} size={'sm'} />;
   }
 
   const getSelectedValues = () => {
@@ -77,7 +72,7 @@ const YearLevelSelector = ({values, onSelect, allowClear, campusCodes, showIndic
         if (!opt1.data || !opt2.data) {
           return 1;
         }
-        return opt1.data.YearLevelSort > opt2.data.YearLevelSort ? 1 : -1;
+        return opt1.data.Description > opt2.data.Description ? 1 : -1;
       })
   }
 
@@ -93,4 +88,4 @@ const YearLevelSelector = ({values, onSelect, allowClear, campusCodes, showIndic
   )
 };
 
-export default YearLevelSelector;
+export default SynMedicalConditionTypeSelector;

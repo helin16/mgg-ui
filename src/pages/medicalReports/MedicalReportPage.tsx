@@ -1,0 +1,316 @@
+import MedicalReportSearchPanel, {iSearchState} from './components/MedicalReportSearchPanel';
+import {useEffect, useState} from 'react';
+import {Image, Spinner, Table} from 'react-bootstrap';
+import styled from 'styled-components';
+import Toaster from '../../services/Toaster';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../redux/makeReduxStore';
+import SynVStudentService from '../../services/Synergetic/SynVStudentService';
+import iVStudent from '../../types/Synergetic/iVStudent';
+import SynVMedicalConditionStudentService from '../../services/Synergetic/SynVMedicalConditionStudentService';
+import iSynVMedicalConditionStudent from '../../types/Synergetic/iSynVMedicalConditionStudent';
+import {OP_LIKE, OP_OR} from '../../helper/ServiceHelper';
+import moment from 'moment-timezone';
+import SynVStudentClassService from '../../services/Synergetic/SynVStudentClassService';
+import ActionPlanDownloaderDropdown from './components/ActionPlanDownloaderDropdown';
+import iSynVDocument from '../../types/Synergetic/iSynVDocument';
+import SynVDocumentService from '../../services/Synergetic/SynVDocumentService';
+import {HEADER_NAME_SELECTING_FIELDS} from '../../services/AppService';
+import MedicalReportExportDropdown from './components/MedicalReportExportDropdown';
+
+const ResultWrapper = styled.div`
+  padding: 1rem 0;
+  .loading {
+    padding: 2rem;
+  }
+  
+  .result-table {
+    .photo {
+      width: 90px;
+      img {
+        width: 100%;
+        height: auto;
+      }
+    }
+    .name {
+      width: 110px;
+    }
+    .form {
+      width: 40px;
+    }
+    
+    th.conditions {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding-bottom: 0.42rem;
+    }
+    
+    td.conditions {
+      padding: 0px;
+      .conditions-table {
+        margin-bottom: 0px;
+        .type-name {
+          width: 150px;
+        }
+        .severity {
+          width: 150px;
+          &.orange {
+            background-color: orange;
+          }
+          &.green {
+            background-color: green;
+            color: white;
+          }
+          &.red {
+            background-color: red;
+            color: white;
+          }
+        }
+        .details {
+          font-size: 12px;
+        }
+      }
+    }
+  }
+`
+const MedicalReportPage = () => {
+  const {user} = useSelector((state: RootState) => state.auth);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isLoadingDocs, setIsLoadingDocs] = useState(false);
+  const [students, setStudents] = useState<iVStudent[]>([]);
+  const [conditionsMap, setConditionsMap] = useState<{[key: number]: iSynVMedicalConditionStudent[]}>({});
+  const [docsMap, setDocsMap] = useState<{[key: number]: iSynVDocument[]}>({});
+
+  const onSearch = (criteria: iSearchState) => {
+    setIsSearching(true);
+    const conditionsWhere = {
+      ...(criteria.conditionTypes.length > 0 ? {ConditionTypeCode: criteria.conditionTypes} : {}),
+      ...(criteria.conditionSeverities.length > 0 ? {ConditionSeverityCode: criteria.conditionSeverities} : {}),
+    }
+    Promise.all([
+      SynVStudentService.getCurrentVStudents({
+        where: JSON.stringify({
+          ...(`${criteria.searchText || ''}`.trim() !== '' ? {
+            [OP_OR]: [
+              {StudentForm: {[OP_LIKE]: `%${`${criteria.searchText || ''}`.trim()}%`}},
+              {StudentNameInternal: {[OP_LIKE]: `%${`${criteria.searchText || ''}`.trim()}%`}},
+              {StudentNameExternal: {[OP_LIKE]: `%${`${criteria.searchText || ''}`.trim()}%`}},
+            ],
+          } : {}),
+          ...(criteria.campuses.length > 0 ? {StudentCampus: criteria.campuses} : {}),
+          ...(criteria.yearLevels.length > 0 ? {StudentYearLevel: criteria.yearLevels} : {}),
+          FileYear: (user?.SynCurrentFileSemester?.FileYear || moment().year()),
+          FileSemester: (user?.SynCurrentFileSemester?.FileSemester || 1),
+          CurrentSemesterOnlyFlag: true,
+        }),
+        sort: `StudentNameInternal:ASC`,
+      }, {
+        headers: {[HEADER_NAME_SELECTING_FIELDS]: JSON.stringify(['StudentID', 'StudentGiven1', 'StudentSurname', 'StudentForm', 'profileUrl'])}
+      }),
+      SynVMedicalConditionStudentService.getAll({
+        where: JSON.stringify({
+          ...conditionsWhere,
+          ConditionActiveFlag: true,
+        })
+      }, {
+        headers: {[HEADER_NAME_SELECTING_FIELDS]: JSON.stringify([
+          'ID', 'MedicalConditionSeq', 'ConditionTypeDescription', 'ConditionSeverityDisplayColour',
+            'ConditionSeverityDescription', 'ConditionDetails'
+          ])}
+      }),
+      (criteria.classCodes.length === 0 ? undefined : SynVStudentClassService.getAll({
+        where: JSON.stringify({
+          ClassCode: criteria.classCodes,
+          CurrentSemesterOnlyFlag: true,
+          FileYear: (user?.SynCurrentFileSemester?.FileYear || moment().year()),
+          FileSemester: (user?.SynCurrentFileSemester?.FileSemester || 1),
+        }),
+        perPage: '99999',
+      }))
+    ])
+      .then(resp => {
+        setConditionsMap(resp[1].reduce((map, condition) => {
+          if (!(condition.ID in map)) {
+            return {
+              ...map,
+              [condition.ID]: [condition]
+            }
+          }
+          // @ts-ignore
+          const existing = map[condition.ID];
+          return {
+            ...map,
+            [condition.ID]: [...existing, ...[condition]]
+          }
+        }, {}))
+
+        const classCodeStudentIds = (resp[2]?.data || []).map(studentClass => studentClass.StudentID);
+        if (Object.keys(conditionsWhere).length <= 0 && classCodeStudentIds.length <= 0) {
+          setStudents(resp[0]);
+        } else {
+          const conditionStudentIds = resp[1].map(condition => condition.ID);
+          setStudents(resp[0].filter(student => {
+            return conditionStudentIds.indexOf(student.StudentID) > 0 && classCodeStudentIds.indexOf(student.StudentID) > 0;
+          }));
+        }
+      })
+      .catch(err => {
+        Toaster.showApiError(err)
+      })
+      .finally(() => {
+        setIsSearching(false);
+      })
+  }
+
+  useEffect(() => {
+    if (students.length <= 0) return;
+
+    let isCanceled = false;
+    setIsLoadingDocs(true);
+    SynVDocumentService.getVDocuments({
+        where: JSON.stringify({
+          ID: students.map(student => student.StudentID),
+          ClassificationCode: 'MEDICAL',
+          SourceCode: 'MEDICAL_CURRENT',
+        }),
+        perPage: '99999',
+      }, {
+        headers: {[HEADER_NAME_SELECTING_FIELDS]: JSON.stringify(['tDocumentsSeq', 'ID', 'Description'])}
+      }).then(resp => {
+        if (isCanceled) return;
+        setDocsMap(resp.data.reduce((map, doc) => {
+          if (!(doc.ID in map)) {
+            return {
+              ...map,
+              [doc.ID]: [doc]
+            }
+          }
+          // @ts-ignore
+          const existing = map[doc.ID];
+          return {
+            ...map,
+            [doc.ID]: [...existing, ...[doc]]
+          }
+        }, {}))
+      }).catch(err => {
+        if (isCanceled) return;
+        Toaster.showApiError(err);
+      }).finally(() => {
+        if (isCanceled) return;
+        setIsLoadingDocs(false);
+      })
+
+    return () => {
+      isCanceled = true;
+    }
+  }, [students])
+
+  const onClear = () => {
+    setIsSearching(false);
+    setStudents([]);
+    setConditionsMap({});
+  }
+
+  const getConditionCell = (studentId: number) => {
+    if (!(studentId in conditionsMap) || conditionsMap[studentId].length <= 0){
+      return null;
+    }
+    return (
+      <Table className={'conditions-table'}>
+        <tbody>
+        {
+          conditionsMap[studentId].map(condition => {
+            return (
+              <tr key={condition.MedicalConditionSeq}>
+                <td className={'type-name'}>
+                  {condition.ConditionTypeDescription}
+                </td>
+                <td className={`severity ${condition.ConditionSeverityDisplayColour.toLowerCase()}`}>
+                  {condition.ConditionSeverityDescription}
+                </td>
+                <td className={'details'}>
+                  {condition.ConditionDetails}
+                </td>
+              </tr>
+            )
+          })
+        }
+        </tbody>
+      </Table>
+    )
+  }
+
+  const getResultPanel = () => {
+    if (isSearching) {
+      return (
+        <div className={'text-center text-muted loading'}>
+          <Spinner animation={'border'} />
+          <div>
+            <b>Loading ...</b>
+          </div>
+        </div>
+      );
+    }
+
+    if (students.length <= 0) {
+      return null;
+    }
+
+    return (
+      <Table striped hover responsive className={'result-table'}>
+        <thead>
+          <tr>
+            <th className={'photo'}> </th>
+            <th className={'name'}>Name</th>
+            <th className={'form'}>Form</th>
+            <th className={'conditions'}>
+              <div>Conditions</div>
+              <div>
+                <MedicalReportExportDropdown students={students} conditionsMap={conditionsMap} />
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {students?.map(vStudent => {
+            return (
+              <tr key={vStudent.StudentID}>
+                <td className={'photo'}>
+                  <Image src={vStudent.profileUrl} />
+                </td>
+                <td className={`name`}>
+                  <div>{vStudent.StudentSurname},</div>
+                  <div>{vStudent.StudentGiven1}</div>
+                  <div>
+                    <ActionPlanDownloaderDropdown docs={docsMap[vStudent.StudentID] || []} isLoading={isLoadingDocs}/>
+                  </div>
+                </td>
+                <td className={`form`}>{vStudent.StudentForm}</td>
+                <td className={`conditions`}>
+                  {getConditionCell(vStudent.StudentID)}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </Table>
+    )
+  }
+
+  return (
+    <div>
+      <h3>Medical Reports / Action Plans</h3>
+      <MedicalReportSearchPanel
+        isSearching={isSearching}
+        onSearch={onSearch}
+        onClear={onClear}
+      />
+      <ResultWrapper className={'result-wrapper'}>
+        {getResultPanel()}
+      </ResultWrapper>
+    </div>
+  )
+}
+
+export default MedicalReportPage;

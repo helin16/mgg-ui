@@ -2,8 +2,12 @@ import AppService, {iConfigParams} from '../AppService';
 import iSynVDocument from '../../types/Synergetic/iSynVDocument';
 import iPaginatedResult from '../../types/iPaginatedResult';
 
-const getVDocuments = (params: iConfigParams = {}): Promise<iPaginatedResult<iSynVDocument>> => {
-  return AppService.get(`/syn/vDocument`, params).then(resp => resp.data);
+const getVDocuments = (params: iConfigParams, config?: iConfigParams): Promise<iPaginatedResult<iSynVDocument>> => {
+  return AppService.get(`/syn/vDocument`, params, config).then(resp => resp.data);
+};
+
+const getVDocumentBySeq = (tDocumentSeq: number, params?: iConfigParams, config?: iConfigParams): Promise<iSynVDocument> => {
+  return AppService.get(`/syn/vDocument/${tDocumentSeq}`, params, config).then(resp => resp.data);
 };
 
 const getFileType = (document: iSynVDocument) => {
@@ -58,6 +62,7 @@ export const openDocument = (document: iSynVDocument) => {
 
 const SynVDocumentService = {
   getVDocuments,
+  getVDocumentBySeq,
   openDocument,
   getFileExtensionFromFileName,
 }

@@ -5,9 +5,10 @@ import {Spinner} from 'react-bootstrap';
 import iLuCampus from '../../types/Synergetic/iLuCampus';
 import SelectBox from '../common/SelectBox';
 
-type iCampusSelector = {
+type iSynCampusSelector = {
+  isMulti?: boolean;
   values?: iAutoCompleteSingle[] | string[];
-  onSelect?: (campus: iAutoCompleteSingle | null) => void;
+  onSelect?: (campus: iAutoCompleteSingle | null | iAutoCompleteSingle[]) => void;
   allowClear?: boolean;
   showIndicator?: boolean;
   className?: string;
@@ -17,7 +18,7 @@ export const translateCampusToOption = (campus: iLuCampus) => {
   return {value: campus.Code, data: campus, label: campus.Description}
 }
 
-const CampusSelector = ({values, onSelect, allowClear, className, showIndicator = true}: iCampusSelector) => {
+const SynCampusSelector = ({values, onSelect, allowClear, className, showIndicator = true, isMulti = false}: iSynCampusSelector) => {
   const [optionMap, setOptionMap] = useState<{ [key: string]: iAutoCompleteSingle }>({});
   const [isLoading, setIsLoading] = useState(false);
 
@@ -63,11 +64,12 @@ const CampusSelector = ({values, onSelect, allowClear, className, showIndicator 
   }
 
   if (isLoading === true) {
-    return <Spinner animation={'border'} />;
+    return <Spinner animation={'border'} size={'sm'}/>;
   }
   return (
     <SelectBox
       options={Object.values(optionMap)}
+      isMulti={isMulti}
       className={className}
       onChange={onSelect}
       value={getSelectedValues()}
@@ -77,4 +79,4 @@ const CampusSelector = ({values, onSelect, allowClear, className, showIndicator 
   )
 };
 
-export default CampusSelector;
+export default SynCampusSelector;

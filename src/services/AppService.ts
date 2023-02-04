@@ -1,8 +1,11 @@
 import axios, {AxiosRequestConfig} from 'axios';
 import LocalStorageService from './LocalStorageService';
 
+export const HEADER_NAME_APP_TOKEN = 'X-MGGS-TOKEN';
+export const HEADER_NAME_SELECTING_FIELDS = 'X-MGGS-SELECT-FIELDS';
+
 export type iConfigParams = {
-  [key: string]: string;
+  [key: string]: any;
 };
 export type iParams = {
   [key: string]: string | boolean | number | null | undefined | string[];
@@ -12,13 +15,14 @@ const getEndPointUrl = (url: string) => {
   return `${process.env.REACT_APP_API_END_POINT}${url}`;
 };
 
-const getHeaders = () => {
+const getHeaders = (extra = {}) => {
   const token = LocalStorageService.getToken();
   const authHeader = (!token || token === '') ? {} : {Authorization: `Bearer ${token}`};
   return {
     headers: {
-      'X-MGGS-TOKEN': `${process.env.REACT_APP_TOKEN || ''}`,
+      [HEADER_NAME_APP_TOKEN]: `${process.env.REACT_APP_TOKEN || ''}`,
       ...authHeader,
+      ...extra,
     },
   };
 };
@@ -32,12 +36,13 @@ const getUrlParams = (params: iConfigParams = {}) => {
 };
 
 const get = (url: string, params: iConfigParams = {}, config: AxiosRequestConfig = {}) => {
+  const {headers, ...rest} = config;
   return axios.get(
     `${getEndPointUrl(url)}${getUrlParams(params)}`,
     // @ts-ignore
     {
-      ...config,
-      ...getHeaders()
+      ...rest,
+      ...getHeaders(headers)
     },
   );
 };
