@@ -5,10 +5,11 @@ import ModuleAccessWrapper from '../../components/module/ModuleAccessWrapper';
 import {MODULE_ID_HOUSE_AWARDS, MODULE_ID_OPEROO_SAFETY_ALERTS} from '../../types/modules/iModuleUser';
 import HouseAwardsPage from '../../pages/houseAwards/HouseAwardsPage';
 import MedicalReportPage from '../../pages/medicalReports/MedicalReportPage';
+import CustomScriptUrlGenPage from '../../pages/tools/CustomScriptUrlGenPage';
 // import PageNotFound from '../../components/PageNotFound';
 
 const schoolBoxIframeElementId = 'remote';
-const SchoolBoxRouter = ({path}: {path: string}) => {
+const SchoolBoxRouter = ({path, remoteUrl}: {path: string, remoteUrl: string}) => {
 
   const removeSchoolBoxIframe = () => {
     const schoolBoxIframeElement = document.getElementById(schoolBoxIframeElementId);
@@ -40,6 +41,10 @@ const SchoolBoxRouter = ({path}: {path: string}) => {
     case '/medial/action_plan': {
       removeSchoolBoxIframe();
       return <MedicalReportPage />
+    }
+    case '/helper/url/mconnect': {
+      removeSchoolBoxIframe();
+      return <CustomScriptUrlGenPage customUrl={remoteUrl} customUrlPath={path}/>
     }
     default: {
       showSchoolBoxIframe();

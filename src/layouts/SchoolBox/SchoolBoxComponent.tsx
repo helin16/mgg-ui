@@ -64,7 +64,7 @@ const SchoolBoxComponent = ({path, remoteUrl, id = null, user = null, time = nul
   return (
     <div className={'school-box-layout'}>
       <SchoolBoxDebugInfo remoteUrl={remoteUrl} path={path} searchParams={{synId, schoolBoxUser, authTime, authKey}}/>
-      <SchoolBoxRouter path={path} />
+      <SchoolBoxRouter path={path} remoteUrl={remoteUrl} />
     </div>
   )
 };

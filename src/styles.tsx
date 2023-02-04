@@ -3,6 +3,7 @@ import styled from 'styled-components';
 export const FlexContainer = styled.div`
   display: flex;
   //width: 100%;
+  &.with-gap,
   &.withGap {
     > * {
       padding: 2px;
@@ -41,7 +42,6 @@ export const FlexContainer = styled.div`
   &.full-width {
     width: 100%;
   }
-  
   .full-width {
     width: 100%;
   }
