@@ -6,6 +6,7 @@ import {MODULE_ID_HOUSE_AWARDS, MODULE_ID_OPEROO_SAFETY_ALERTS} from '../../type
 import HouseAwardsPage from '../../pages/houseAwards/HouseAwardsPage';
 import MedicalReportPage from '../../pages/medicalReports/MedicalReportPage';
 import CustomScriptUrlGenPage from '../../pages/tools/CustomScriptUrlGenPage';
+import MyStudentsPage from '../../pages/students/MyStudentsPage';
 // import PageNotFound from '../../components/PageNotFound';
 
 const schoolBoxIframeElementId = 'remote';
@@ -45,6 +46,10 @@ const SchoolBoxRouter = ({path, remoteUrl}: {path: string, remoteUrl: string}) =
     case '/helper/url/mconnect': {
       removeSchoolBoxIframe();
       return <CustomScriptUrlGenPage customUrl={remoteUrl} customUrlPath={path}/>
+    }
+    case '/my_student': {
+      removeSchoolBoxIframe();
+      return <MyStudentsPage />
     }
     default: {
       showSchoolBoxIframe();

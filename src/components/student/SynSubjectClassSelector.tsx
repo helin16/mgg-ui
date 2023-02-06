@@ -14,7 +14,7 @@ type iSynSubjectClassSelector = {
   showIndicator?: boolean;
   className?: string;
   FileYear: number;
-  FileSemester?: number;
+  FileSemester: number;
   pageSize?: number;
 };
 

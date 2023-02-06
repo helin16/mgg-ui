@@ -5,8 +5,8 @@ import iSynVStudentClass from '../../types/Synergetic/iSynVStudentClass';
 
 
 const endPoint = '/syn/vStudentClass';
-const getAll = (params: iConfigParams = {}): Promise<IPaginatedResult<iSynVStudentClass>> => {
-  return AppService.get(endPoint, params).then(resp => resp.data);
+const getAll = (params: iConfigParams = {}, config?: iConfigParams): Promise<IPaginatedResult<iSynVStudentClass>> => {
+  return AppService.get(endPoint, params, config).then(resp => resp.data);
 };
 
 const SynVStudentClassService = {

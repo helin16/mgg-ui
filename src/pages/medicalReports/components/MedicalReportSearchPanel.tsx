@@ -13,6 +13,7 @@ import SynSubjectClassSelector from '../../../components/student/SynSubjectClass
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../redux/makeReduxStore';
 import moment from 'moment-timezone';
+import UtilsService from '../../../services/UtilsService';
 
 
 
@@ -110,13 +111,6 @@ const MedicalReportSearchPanel = ({onSearch, onClear, isSearching = false}: iSta
     )
   }
 
-  const handleSearchKeyPressed = (event: any) => {
-    if (event.key === 'Enter') {
-      return onSearch && onSearch(searchCriteria);
-    }
-    return true;
-  }
-
   return (
     <Wrapper>
       <Container fluid>
@@ -129,7 +123,9 @@ const MedicalReportSearchPanel = ({onSearch, onClear, isSearching = false}: iSta
                 ...searchCriteria,
                 searchText: event.target.value,
               })}
-              onKeyUp={(event) => handleSearchKeyPressed(event)}
+              onKeyUp={(event) => UtilsService.handleEnterKeyPressed(event, () => {
+                return onSearch && onSearch(searchCriteria)
+              }, () => true)}
             />
           </Col>
           <Col sm={4}>

@@ -5,7 +5,7 @@ import StudentDetailsPage from './components/StudentDetailsPage';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../redux/makeReduxStore';
 import SynVStudentService from '../../services/Synergetic/SynVStudentService';
-import {Button, Spinner} from 'react-bootstrap';
+import {Button} from 'react-bootstrap';
 import Page401 from '../../components/Page401';
 import StudentGridForAParent from '../../components/student/StudentGridForAParent';
 import AuthService from '../../services/AuthService';
@@ -14,6 +14,7 @@ import {ROLE_ID_ADMIN} from '../../types/modules/iRole';
 import PageNotFound from '../../components/PageNotFound';
 import ContactSupportPopupBtn from '../../components/support/ContactSupportPopupBtn';
 import Page from '../../layouts/Page';
+import PageLoadingSpinner from '../../components/common/PageLoadingSpinner';
 
 const StudentReport = () => {
   const {user} = useSelector((state: RootState) => state.auth);
@@ -64,7 +65,7 @@ const StudentReport = () => {
   }
 
   if (isLoading === true) {
-    return <Spinner animation={'border'} />;
+    return (<PageLoadingSpinner />);
   }
 
   const getMainPage = () => {

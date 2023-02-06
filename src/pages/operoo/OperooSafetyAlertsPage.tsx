@@ -4,17 +4,16 @@ import iOperooSafetyAlert, {
   OPEROO_STATUS_SAFETY_ALERT_UPDATED
 } from '../../types/Operoo/iOperooSafetyAlert';
 import OperooSafetyAlertService from '../../services/Operoo/OperooSafetyAlertService';
-import {Alert, Spinner} from 'react-bootstrap';
 import OperooSafetyAlertRow from './components/OperooSafetyAlertRow';
 import SynVStudentService from '../../services/Synergetic/SynVStudentService';
 import iVStudent from '../../types/Synergetic/iVStudent';
-// import * as _ from 'lodash';
 import ModuleAdminBtn from '../../components/module/ModuleAdminBtn';
 import AdminPage from './AdminPage';
 import {MODULE_ID_OPEROO_SAFETY_ALERTS} from '../../types/modules/iModuleUser';
 import Page from '../../layouts/Page';
 import Toaster from '../../services/Toaster';
-import * as Icons from 'react-bootstrap-icons';
+import ExplanationPanel from '../../components/ExplanationPanel';
+import PageLoadingSpinner from '../../components/common/PageLoadingSpinner';
 
 const showAlertStatuses = [OPEROO_STATUS_SAFETY_ALERT_NEW, OPEROO_STATUS_SAFETY_ALERT_UPDATED];
 
@@ -80,7 +79,7 @@ const OperooSafetyAlertsPage = () => {
   }, [isViewingAdminPage])
 
   if (isLoading === true) {
-    return <Spinner animation={'border'} />
+    return <PageLoadingSpinner />
   }
 
   if (isViewingAdminPage === true) {
@@ -95,9 +94,7 @@ const OperooSafetyAlertsPage = () => {
           <ModuleAdminBtn onClick={() => setIsViewingAdminPage(true)} moduleId={MODULE_ID_OPEROO_SAFETY_ALERTS} />
         </span>
       </h3>
-      <Alert variant={'secondary'}>
-        <Icons.ExclamationOctagonFill /> This module is designed for the School Nurse to auto sync down Operoo Docs to Synergetic DocMan
-      </Alert>
+      <ExplanationPanel text={'This module is designed for the School Nurse to auto sync down Operoo Docs to Synergetic DocMan'} />
       {students.map(student => {
         return <OperooSafetyAlertRow
           key={student.StudentID}
