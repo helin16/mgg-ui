@@ -16,28 +16,44 @@ type iMessageListPanel = {
 }
 
 const Wrapper = styled.div`
-  .message-table {
-    .date {
-      width: 10rem;
+  
+  .message-table-wrapper {
+    overflow-y: hidden;
+    overflow-x: auto;
+    max-width: 100%;
+    .message-table {
+      .date {
+        width: 10rem;
+      }
+      .status {
+        width: 10rem;
+        &.SUCCESS {
+          background-color: green;
+          color: white;
+        }
+        &.PROCESSING {
+          color: blue;
+          font-weight: bold;
+        }
+        &.ERROR,
+        &.FAILED {
+          background-color: red;
+          color: white;
+        }
+      }
+      
+      .request,
+      .error,
+      .response {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+      }
     }
-    .status {
-      width: 10rem;
-      &.SUCCESS {
-        background-color: green;
-        color: white;
-      }
-      &.PROCESSING {
-        color: blue;
-        font-weight: bold;
-      }
-      &.ERROR {
-        background-color: red;
-        color: white;
-      }
+    
+    .pagination-wrapper {
+      justify-items: center;
     }
-  }
-  .pagination-wrapper {
-    justify-items: center;
   }
 `;
 const MessageListPanel = ({type}: iMessageListPanel) => {
@@ -125,7 +141,7 @@ const MessageListPanel = ({type}: iMessageListPanel) => {
       return <Spinner animation={'border'} />
     }
     return (
-      <>
+      <div className={'message-table-wrapper'}>
         <Table striped hover responsive className={'message-table'}>
           <thead>
             <tr>
@@ -139,7 +155,7 @@ const MessageListPanel = ({type}: iMessageListPanel) => {
           <tbody>
           {messageList?.data.map(message => {
             return (
-              <tr>
+              <tr key={message.id}>
                 <td className={'date'}>{moment(message.createdAt).format('lll')}</td>
                 <td className={`status ${message.status?.toUpperCase()}`}>{message.status}</td>
                 <td className={`request`}>{message.request ? JSON.stringify(message.request) : ''}</td>
@@ -151,7 +167,7 @@ const MessageListPanel = ({type}: iMessageListPanel) => {
           </tbody>
         </Table>
         {getPagination()}
-      </>
+      </div>
     );
   }
 

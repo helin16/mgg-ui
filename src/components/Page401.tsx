@@ -29,8 +29,9 @@ const reloadPage = () => {
 
 type iPage401 = {
   description?: any,
+  btns?: any
 }
-const Page401 = ({description}: iPage401) => {
+const Page401 = ({description, btns}: iPage401) => {
   return (
     <Wrapper>
       <div className={'logo'}>
@@ -43,10 +44,14 @@ const Page401 = ({description}: iPage401) => {
         </p>)}
       </div>
       <div className={'actions'}>
-        <Button variant={'danger'} size="sm" onClick={() => reloadPage()}>Reload Page</Button>
-        <ContactSupportPopupBtn>
-          <Button variant="link">Support</Button>
-        </ContactSupportPopupBtn>
+        {btns || (
+          <>
+            <Button variant={'danger'} size="sm" onClick={() => reloadPage()}>Reload Page</Button>
+            <ContactSupportPopupBtn>
+              <Button variant="link">Support</Button>
+            </ContactSupportPopupBtn>
+          </>
+        )}
       </div>
     </Wrapper>
   );

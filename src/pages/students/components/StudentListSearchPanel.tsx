@@ -29,6 +29,10 @@ type iStudentListSearchPanel = {
 }
 
 const Wrapper = styled.div`
+  .btns {
+    padding-left: 0px;
+    padding-right: 0px;
+  }
 `;
 const StudentListSearchPanel = ({isLoading = false, preSelectedClassCodes = [], onSearch}: iStudentListSearchPanel) => {
   const initialSearchCriteria: iSearchCriteria = {
@@ -93,9 +97,9 @@ const StudentListSearchPanel = ({isLoading = false, preSelectedClassCodes = [], 
               })}
             />
           </Col>
-          <Col sm={1}>
+          <Col sm={1} className={'btns'}>
             <FormLabel label={' '} />
-            <div>
+            <div className={'text-right'}>
               <LoadingBtn
                 isLoading={isLoading || isSearching}
                 variant={'primary'}

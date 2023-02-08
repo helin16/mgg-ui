@@ -2,8 +2,7 @@ import React from 'react';
 import {Modal} from 'react-bootstrap';
 import AppWrapper from '../../AppWrapper';
 
-const PopupModal = ({handleClose, footer, body, header, title, children, ...props}: any) => {
-
+const PopupModal = ({handleClose, footer, body, header, title, children, fullWidth, ...props}: any) => {
   const getHeader = () => {
     if (!header && !title) {
       return null;
@@ -38,8 +37,8 @@ const PopupModal = ({handleClose, footer, body, header, title, children, ...prop
   }
 
   return (
-    <Modal onHide={handleClose} {...props} className={'PopupModal'}>
-      <AppWrapper>
+    <Modal onHide={handleClose} {...props} className={`PopupModal ${fullWidth !== undefined ? 'full-width' : ''}`}>
+      <AppWrapper className={'modal-wrapper'}>
         {getHeader()}
         {getBody()}
         {getFooter()}

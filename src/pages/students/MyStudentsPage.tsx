@@ -13,7 +13,14 @@ import {HEADER_NAME_SELECTING_FIELDS} from '../../services/AppService';
 import {OP_LIKE, OP_OR} from '../../helper/ServiceHelper';
 import {FlexContainer} from '../../styles';
 import iSynVStudentClass from '../../types/Synergetic/iSynVStudentClass';
+import TimeTableImportPopupBtn from '../../components/timeTable/TimeTableImportPopupBtn';
+import styled from 'styled-components';
 
+const Wrapper = styled.div`
+  .float-right {
+    float: right;
+  }
+`
 const MyStudentsPage = () => {
   const {user} = useSelector((state: RootState) => state.auth);
   const [isLoading, setIsLoading] = useState(false);
@@ -73,13 +80,16 @@ const MyStudentsPage = () => {
   }
 
   return (
-    <div>
-      <h3>My Students</h3>
-      <ExplanationPanel text={'This page is designed for teachers export student list, in order to import them into external tools like: Education Perfect'} />
+    <Wrapper>
+      <h3>
+        My Class List
+        <TimeTableImportPopupBtn className={'float-right'} btnPros={{size: 'sm'}} />
+      </h3>
+      <ExplanationPanel text={'This page is designed for teachers export student list, in order to import them into external tools like: Education Perfect. Data is pulled from Synergetic directly.'} />
       <StudentListSearchPanel isLoading={isLoading} onSearch={onSearch} />
       <FlexContainer className={'space-below'} />
       <StudentListResultPanel isLoading={isLoading} students={students} studentClassCodeMap={studentIdClassCodeMap} />
-    </div>
+    </Wrapper>
   )
 }
 

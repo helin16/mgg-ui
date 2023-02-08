@@ -11,3 +11,7 @@ a {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+.PopupModal.full-width .modal-dialog {
+    max-width: calc(100% - 10px);
+}
+
