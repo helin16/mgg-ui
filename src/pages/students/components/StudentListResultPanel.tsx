@@ -59,7 +59,7 @@ const StudentListResultPanel = ({isLoading = false, students, studentClassCodeMa
                   </td>
                   <td className={'id'}>{student.StudentID}</td>
                   <td className={'name'}>{student.StudentNameInternal}</td>
-                  <td className={'dob'}>{moment(student.StudentBirthDate).format('YYYY-MMM-DD')}</td>
+                  <td className={'dob'}>{moment(student.StudentBirthDate).format('DD/MMM/YYYY')}</td>
                   <td className={'form'}>{student.StudentForm}</td>
                   <td className={'year-level'}>{student.StudentYearLevel}</td>
                   <td className={'email'}>{student.StudentOccupEmail}</td>
