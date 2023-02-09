@@ -21,7 +21,7 @@ const Wrapper = styled.div`
     float: right;
   }
 `
-const MyStudentsPage = () => {
+const MyClassListPage = () => {
   const {user} = useSelector((state: RootState) => state.auth);
   const [isLoading, setIsLoading] = useState(false);
   const [students, setStudents] = useState<iVStudent[]>([]);
@@ -93,4 +93,4 @@ const MyStudentsPage = () => {
   )
 }
 
-export default MyStudentsPage;
+export default MyClassListPage;

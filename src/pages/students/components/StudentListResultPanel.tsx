@@ -4,6 +4,7 @@ import {Image, Table} from 'react-bootstrap';
 import styled from 'styled-components';
 import iSynVStudentClass from '../../../types/Synergetic/iSynVStudentClass';
 import StudentListExportBtn from './StudentListExportBtn';
+import moment from 'moment-timezone';
 
 type iStudentListResultPanel = {
   isLoading: boolean;
@@ -34,6 +35,7 @@ const StudentListResultPanel = ({isLoading = false, students, studentClassCodeMa
             <th className={'photo'}></th>
             <th className={'id'}>Student ID</th>
             <th className={'name'}>Name</th>
+            <th className={'dob'}>DOB</th>
             <th className={'form'}>Form</th>
             <th className={'year-level'}>Year Level</th>
             <th className={'email'}>email</th>
@@ -57,6 +59,7 @@ const StudentListResultPanel = ({isLoading = false, students, studentClassCodeMa
                   </td>
                   <td className={'id'}>{student.StudentID}</td>
                   <td className={'name'}>{student.StudentNameInternal}</td>
+                  <td className={'dob'}>{moment(student.StudentBirthDate).format('YYYY-MMM-DD')}</td>
                   <td className={'form'}>{student.StudentForm}</td>
                   <td className={'year-level'}>{student.StudentYearLevel}</td>
                   <td className={'email'}>{student.StudentOccupEmail}</td>

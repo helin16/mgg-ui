@@ -25,6 +25,16 @@ const Wrapper = styled.span``;
 const PopupWrapper = styled.div`
   .type-row {
     cursor: pointer;
+    :hover {
+      background-color: #ececec;
+    }
+  }
+  
+  input[type='checkbox'] {
+    position: relative;
+    opacity: 1;
+    height: 21px;
+    width: 21px;
   }
 `
 
