@@ -23,6 +23,9 @@ type iBTGLListPanel = {
 }
 
 const Wrapper = styled.div`
+  input.form-control {
+    margin-bottom: 0px;
+  }
   .options {
     width: 180px;
   }
