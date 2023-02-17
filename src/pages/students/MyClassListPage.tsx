@@ -36,9 +36,11 @@ const MyClassListPage = () => {
           FileSemester: (user?.SynCurrentFileSemester?.FileSemester || 1),
           ...(`${criteria.searchText || ''}`.trim() !== '' ? {
             [OP_OR]: [
+              {StudentID: `${criteria.searchText || ''}`.trim()},
               {StudentForm: {[OP_LIKE]: `%${`${criteria.searchText || ''}`.trim()}%`}},
               {StudentNameInternal: {[OP_LIKE]: `%${`${criteria.searchText || ''}`.trim()}%`}},
               {StudentNameExternal: {[OP_LIKE]: `%${`${criteria.searchText || ''}`.trim()}%`}},
+              {StudentOccupEmail: {[OP_LIKE]: `%${`${criteria.searchText || ''}`.trim()}%`}},
             ],
           } : {}),
         }),

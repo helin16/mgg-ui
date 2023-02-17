@@ -79,7 +79,7 @@ const StudentListSearchPanel = ({isLoading = false, preSelectedClassCodes = [], 
                 ...searchCriteria,
                 searchText: event.target.value,
               })}
-              onKeyUp={(event) => UtilsService.handleEnterKeyPressed(event, )}
+              onKeyUp={(event) => UtilsService.handleEnterKeyPressed(event, () => onSearch && onSearch(searchCriteria))}
             />
           </Col>
           <Col sm={9}>
