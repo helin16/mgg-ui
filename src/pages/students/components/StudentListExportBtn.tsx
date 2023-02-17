@@ -21,6 +21,8 @@ const StudentListExportBtn  = ({className, students, studentClassCodeMap}: iStud
         DOB: moment(student.StudentBirthDate).format('DD/MM/YYYY'),
         Form: student.StudentForm,
         YearLevel: student.StudentYearLevel,
+        HouseCode: student.StudentHouse,
+        House: student.StudentHouseDescription,
         Email: student.StudentOccupEmail,
         ClassCodes: (student.StudentID in studentClassCodeMap) ? studentClassCodeMap[student.StudentID]
           .map(studentClass => studentClass.ClassCode)

@@ -38,6 +38,7 @@ const StudentListResultPanel = ({isLoading = false, students, studentClassCodeMa
             <th className={'dob'}>DOB</th>
             <th className={'form'}>Form</th>
             <th className={'year-level'}>Year Level</th>
+            <th className={'house'}>House</th>
             <th className={'email'}>email</th>
             <th className={'classes'}>
               classes
@@ -62,6 +63,7 @@ const StudentListResultPanel = ({isLoading = false, students, studentClassCodeMa
                   <td className={'dob'}>{moment(student.StudentBirthDate).format('DD/MMM/YYYY')}</td>
                   <td className={'form'}>{student.StudentForm}</td>
                   <td className={'year-level'}>{student.StudentYearLevel}</td>
+                  <td className={'house'}>{student.StudentHouseDescription}</td>
                   <td className={'email'}>{student.StudentOccupEmail}</td>
                   <td className={'classes'}>{
                     (student.StudentID in studentClassCodeMap ? studentClassCodeMap[student.StudentID] : [])

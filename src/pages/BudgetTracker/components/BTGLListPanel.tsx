@@ -23,7 +23,7 @@ type iBTGLListPanel = {
 }
 
 const Wrapper = styled.div`
-  input.form-control {
+  input {
     margin-bottom: 0px;
   }
   .options {
@@ -34,6 +34,9 @@ const Wrapper = styled.div`
     .flag-wrapper {
       color: white !important;
       display: flex;
+      input[type="checkbox"] {
+        position: relative !important;
+      }
     }
   }
   .content-wrapper {
@@ -109,7 +112,7 @@ const BTGLListPanel = ({ selectedYear, onChangeYear, onSelectGL, setShowingAdmin
       </FlexContainer>
       <PanelTitle>
         <FlexContainer className={'with-gap justify-content space-between'}>
-          <div>General Ledger Codes</div>
+          <div>General Ledgers</div>
           <FlexContainer className={'justify-content space-between title-options'}>
             <label className={'flag-wrapper'}>
               <input type={'checkbox'} checked={hideZeroBalance} onChange={(event) => {

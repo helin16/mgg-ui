@@ -161,7 +161,7 @@ const BTGLTable = ({glCodesResults, selectedYear, onSelectGL, hideZeroBalance = 
   }
 
   return (
-    <Table striped hover className={'gl-table'} size={'sm'}>
+    <Table striped hover className={'gl-table'}>
       <thead>
       <tr>
         <th>
