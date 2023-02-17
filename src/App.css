@@ -19,6 +19,7 @@ input[type="checkbox"] {
     width: 16px !important;
     height: 16px !important;
     display: inline-block !important;
+    opacity: 1 !important;
 }
 
 .cursor-pointer {

@@ -28,6 +28,10 @@ const Wrapper = styled.div`
   }
   .title-options {
     width: 280px;
+    .flag-wrapper {
+      color: white !important;
+      display: flex;
+    }
   }
   .content-wrapper {
     margin: 0.8rem 0px;
@@ -104,15 +108,17 @@ const BTGLListPanel = ({ selectedYear, onChangeYear, onSelectGL, setShowingAdmin
         <FlexContainer className={'with-gap justify-content space-between'}>
           <div>General Ledger Codes</div>
           <FlexContainer className={'justify-content space-between title-options'}>
-            <label>
+            <label className={'flag-wrapper'}>
               <input type={'checkbox'} checked={hideZeroBalance} onChange={(event) => {
                 setHideZeroBalance(event.target.checked);
-              }} /> {' '} Hide Zero Balance
+              }} />
+              <span>Hide Zero Balance</span>
             </label>
-            <label>
+            <label className={'flag-wrapper'}>
               <input type={'checkbox'} checked={showPendingOnly} onChange={(event) => {
                 setShowPendingOnly(event.target.checked);
-              }} /> {' '} Show Pending Only
+              }} />
+              <span>Show Pending Only</span>
             </label>
           </FlexContainer>
         </FlexContainer>
