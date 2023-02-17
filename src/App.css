@@ -15,3 +15,21 @@ a {
     max-width: calc(100% - 10px);
 }
 
+input[type="checkbox"] {
+    width: 16px !important;
+    height: 16px !important;
+    display: inline-block !important;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.no-margin {
+    margin: 0px !important;
+}
+
+
+.panel-wrapper.space-below {
+    margin-bottom: 1rem;
+}

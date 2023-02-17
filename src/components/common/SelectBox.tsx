@@ -10,6 +10,7 @@ type iSelectBox = {
   isClearable?: boolean;
   showDropdownIndicator?: boolean;
   showIndicatorSeparator?: boolean;
+  isDisabled?: boolean;
 }
 
 const Wrapper = styled.div`
@@ -41,7 +42,7 @@ const Wrapper = styled.div`
 `
 
 const SelectBox = ({
-  className, options, onChange, value, isClearable, isMulti, showDropdownIndicator = true, showIndicatorSeparator = true
+  className, options, onChange, value, isClearable, isMulti, showDropdownIndicator = true, showIndicatorSeparator = true, isDisabled
 }: iSelectBox) => {
   const getComponents = () => {
     if (showDropdownIndicator === false) {
@@ -63,6 +64,7 @@ const SelectBox = ({
   return (
     <Wrapper>
       <Select
+        isDisabled={isDisabled}
         isMulti={isMulti}
         className={className}
         options={options}

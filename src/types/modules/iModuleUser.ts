@@ -7,6 +7,7 @@ export const MODULE_ID_COD_ADMIN = 2;
 export const MODULE_ID_ALUMNI_REQUEST = 3;
 export const MODULE_ID_OPEROO_SAFETY_ALERTS = 4;
 export const MODULE_ID_HOUSE_AWARDS = 5;
+export const MODULE_ID_BUDGET_TRACKER = 6;
 
 type iModuleUser = {
   ID: number;

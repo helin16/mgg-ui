@@ -50,6 +50,7 @@ const DeleteConfirmPopupBtn = ({
     <>
       <Button {...props} onClick={() => onOpenDelete ? onOpenDelete() : setIsShowingPopup(true)}>{children}</Button>
       <DeleteConfirmPopup
+        description={description}
         onConfirm={submitDeletion}
         isDeleting={isSubmitting}
         isOpen={isShowingPopup}

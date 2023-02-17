@@ -13,9 +13,9 @@ type iFileYearSelector = {
 };
 
 const FileYearSelector = ({min, max, value, onSelect, allowClear, className, showIndicator = true}: iFileYearSelector) => {
-  const minYear = Number(min || moment().subtract(20, 'year').format('YYYY'));
-  const maxYear = Number(max || moment().add(20, 'year').format('YYYY'));
-  const options = _.range(minYear, maxYear, 1).map(year => ({value: year, label: `${year}`}));
+  const minYear = Number(min || moment().subtract(20, 'year').year());
+  const maxYear = Number(max || moment().year());
+  const options = _.range(minYear, maxYear + 1, 1).map(year => ({value: year, label: `${year}`})).sort((y1, y2) => y1 > y2 ? 1 : -1);
 
   const getSelectedOption = () => {
     if (value === undefined) {

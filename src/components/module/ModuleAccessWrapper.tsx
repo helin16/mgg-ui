@@ -11,10 +11,11 @@ type iModuleAccessWrapper = {
   roleId?: number;
   silentMode?: boolean;
   children: React.ReactElement | null;
+  btns?: any;
 }
-const ModuleAccessWrapper = ({moduleId, roleId, silentMode = false, children}: iModuleAccessWrapper) => {
+const ModuleAccessWrapper = ({moduleId, roleId, silentMode = false, children, btns}: iModuleAccessWrapper) => {
   const {user} = useSelector((state: RootState) => state.auth);
-  const [canAccess, setCanAccess] = useState(false);
+  const [canAccess, setCanAccess] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -50,7 +51,7 @@ const ModuleAccessWrapper = ({moduleId, roleId, silentMode = false, children}: i
     }
   }, [user, moduleId, roleId]);
 
-  if (isLoading) {
+  if (isLoading || canAccess === null) {
     return <Spinner animation={'border'} />
   }
 
@@ -58,7 +59,7 @@ const ModuleAccessWrapper = ({moduleId, roleId, silentMode = false, children}: i
     if (silentMode) {
       return null;
     }
-    return <Page401 description={<h4>Please contact IT or Module Admins for assistant</h4>}/>
+    return <Page401 description={<h4>Please contact IT or Module Admins for assistant</h4>} btns={btns} />
   }
 
   return <>{children}</>

@@ -28,17 +28,18 @@ const reloadPage = () => {
 
 
 type iPage401 = {
+  title?: string,
   description?: any,
   btns?: any
 }
-const Page401 = ({description, btns}: iPage401) => {
+const Page401 = ({title, description, btns}: iPage401) => {
   return (
     <Wrapper>
       <div className={'logo'}>
         <SchoolLogo />
       </div>
       <div className={'description'}>
-        <h4 className={'title'}>Access Denied</h4>
+        <h4 className={'title'}>{title || 'Access Denied'}</h4>
         {description ? description: (<p>
           You don't have Access to this page or your session has timed out.
         </p>)}

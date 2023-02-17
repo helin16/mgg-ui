@@ -1,0 +1,35 @@
+type iSynGeneralLedger =  {
+  GLYear: number;
+  GLCode: string;
+  GLCreatedDate: Date | null;
+  GLCreatedBy: number | null;
+  GLModifiedDate: Date | null;
+  GLModifiedBy: number | null;
+  GLDescription: string;
+  ProfitLossFlag: boolean;
+  NormallyCreditFlag: boolean;
+  CostCentreCode: string;
+  EnforceDescriptionFlag: boolean;
+  HeadingLevel: number;
+  LastYearMovement: number;
+  StartYearBalance: number;
+  CurrentBalance: number;
+  SubLedgerControl: string;
+  ReceiptAllocationCode: string;
+  TaxCode: string;
+  TaxCodeFixedFlag: boolean;
+  GLClassificationCode: string;
+  GovernmentReturnCategory: string;
+  RequiresSubAllocationFlag: boolean;
+  ActiveFlag: boolean;
+  GLCOACode: string;
+  Comment: string | null;
+  GeneralLedgerSeq: number;
+  AllowJournalsFlag: boolean;
+  JournalEntryMessage: string;
+  TransferMode: string;
+  TransferSynDatabaseCode: string;
+  TransferGLCode: string;
+};
+
+export default iSynGeneralLedger;

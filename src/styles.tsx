@@ -30,6 +30,9 @@ export const FlexContainer = styled.div`
     &.center {
       align-items: center;
     }
+    &.end {
+      align-items: flex-end;
+    }
   }
 
   &.space-below {

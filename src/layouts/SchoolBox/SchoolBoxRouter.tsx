@@ -7,6 +7,7 @@ import HouseAwardsPage from '../../pages/houseAwards/HouseAwardsPage';
 import MedicalReportPage from '../../pages/medicalReports/MedicalReportPage';
 import CustomScriptUrlGenPage from '../../pages/tools/CustomScriptUrlGenPage';
 import MyClassListPage from '../../pages/students/MyClassListPage';
+import BudgetTrackerPage from '../../pages/BudgetTracker/BudgetTrackerPage';
 // import PageNotFound from '../../components/PageNotFound';
 
 const schoolBoxIframeElementId = 'remote';
@@ -27,6 +28,10 @@ const SchoolBoxRouter = ({path, remoteUrl}: {path: string, remoteUrl: string}) =
   }
 
   switch (path) {
+    case '/bt': {
+      removeSchoolBoxIframe();
+      return <BudgetTrackerPage />
+    }
     case '/reports/student': {
       removeSchoolBoxIframe();
       return <StudentReport />;
