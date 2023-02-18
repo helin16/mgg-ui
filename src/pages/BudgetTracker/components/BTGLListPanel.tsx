@@ -112,7 +112,7 @@ const BTGLListPanel = ({ selectedYear, onChangeYear, onSelectGL, setShowingAdmin
       </FlexContainer>
       <PanelTitle>
         <FlexContainer className={'with-gap justify-content space-between'}>
-          <div>General Ledgers</div>
+          <div>GLs: below accounts are signed to you within Synergetic</div>
           <FlexContainer className={'justify-content space-between title-options'}>
             <label className={'flag-wrapper'}>
               <input type={'checkbox'} checked={hideZeroBalance} onChange={(event) => {
