@@ -3,6 +3,7 @@ import SchoolLogo from './SchoolLogo';
 import styled from 'styled-components';
 import {Button} from 'react-bootstrap';
 import ContactSupportPopupBtn from './support/ContactSupportPopupBtn';
+import {mainGreen, mainRed} from '../AppWrapper';
 
 const Wrapper = styled.div`
   padding: 1rem;
@@ -18,7 +19,12 @@ const Wrapper = styled.div`
     }
   }
   .title {
-    color: #d8242f;
+    &.danger {
+      color: ${mainRed};
+    }
+    &.success {
+      color: ${mainGreen};
+    }
   }
 `;
 
@@ -28,18 +34,22 @@ const reloadPage = () => {
 
 
 type iPage401 = {
-  title?: string,
-  description?: any,
-  btns?: any
+  title?: string;
+  description?: any;
+  btns?: any;
+  variant?: string;
+  showLogo?: boolean;
 }
-const Page401 = ({title, description, btns}: iPage401) => {
+const Page401 = ({title, description, btns, variant = 'danger', showLogo = true}: iPage401) => {
   return (
     <Wrapper>
-      <div className={'logo'}>
-        <SchoolLogo />
-      </div>
+      {showLogo ? (
+        <div className={'logo'}>
+          <SchoolLogo />
+        </div>
+      ) : null}
       <div className={'description'}>
-        <h4 className={'title'}>{title || 'Access Denied'}</h4>
+        <h4 className={`title ${variant?.trim().toLowerCase()}`}>{title || 'Access Denied'}</h4>
         {description ? description: (<p>
           You don't have Access to this page or your session has timed out.
         </p>)}
@@ -47,7 +57,7 @@ const Page401 = ({title, description, btns}: iPage401) => {
       <div className={'actions'}>
         {btns || (
           <>
-            <Button variant={'danger'} size="sm" onClick={() => reloadPage()}>Reload Page</Button>
+            <Button variant={variant} size="sm" onClick={() => reloadPage()}>Reload Page</Button>
             <ContactSupportPopupBtn>
               <Button variant="link">Support</Button>
             </ContactSupportPopupBtn>

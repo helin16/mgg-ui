@@ -48,10 +48,13 @@ const getBTItemStatusNameFromItem = (item: iBTItem) => {
   return BT_ITEM_STATUS_NEW;
 }
 
-export default {
+
+const BTItemService = {
   getAll,
   getAmountByType,
   create,
   update,
   getBTItemStatusNameFromItem,
-}
+};
+
+export default BTItemService;

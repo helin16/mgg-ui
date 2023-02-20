@@ -14,6 +14,7 @@ import Page from '../../layouts/Page';
 import Toaster from '../../services/Toaster';
 import ExplanationPanel from '../../components/ExplanationPanel';
 import PageLoadingSpinner from '../../components/common/PageLoadingSpinner';
+import Page401 from '../../components/Page401';
 
 const showAlertStatuses = [OPEROO_STATUS_SAFETY_ALERT_NEW, OPEROO_STATUS_SAFETY_ALERT_UPDATED];
 
@@ -55,7 +56,6 @@ const OperooSafetyAlertsPage = () => {
         if (isCanceled) return;
         setOperooSafetyAlertMap(resultMap);
         const studentIds = Object.keys(resultMap);
-
         const students = await SynVStudentService.getCurrentVStudents({
           where: JSON.stringify({
             ID: studentIds,
@@ -95,6 +95,14 @@ const OperooSafetyAlertsPage = () => {
         </span>
       </h3>
       <ExplanationPanel text={'This module is designed for the School Nurse to auto sync down Operoo Docs to Synergetic DocMan'} />
+      {students.length <= 0 ? (
+        <Page401
+          title={'No records found'}
+          description={'Hooray, you are up to date with your douments from Operoo.'}
+          variant={'success'}
+          showLogo={false}
+        />
+      ) : null}
       {students.map(student => {
         return <OperooSafetyAlertRow
           key={student.StudentID}

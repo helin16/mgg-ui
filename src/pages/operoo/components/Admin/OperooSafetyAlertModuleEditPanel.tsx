@@ -8,9 +8,9 @@ import InputGroup from 'react-bootstrap/InputGroup';
 import Button from 'react-bootstrap/Button';
 import { Eye, EyeSlash } from 'react-bootstrap-icons';
 import styled from 'styled-components';
+import ModuleEmailTemplateNameEditor from '../../../../components/module/ModuleEmailTemplateNameEditor';
 
 const operooApiTokenGeneratePageUrl = 'https://groups.operoo.com/admin/groups/32996/api_settings';
-const mailGunTemplateUrl = 'https://app.mailgun.com/app/sending/domains/mentonegirls.vic.edu.au/templates';
 
 type iOperooSafetyAlertModuleEditPanelContent = {
   module: iModule;
@@ -70,19 +70,12 @@ const OperooSafetyAlertModuleEditPanelContent = ({module, onUpdate}: iOperooSafe
           </Button>
         </InputGroup>
       </Form.Group>
-      <Form.Group controlId="emailTemplateName"  className={'content-row'}>
-        <Form.Label>
-          Notification Email Template can be created and managed at: {' '}
-          <a href={mailGunTemplateUrl} target={'__BLANK'}>MailGun Template Page</a>.
-          Copy the name of the template and paste it into below:
-        </Form.Label>
-        <Form.Control
-          placeholder="Paste MailGun template name here."
-          value={ emailTemplateName }
-          onChange={(event) => setEmailTemplateName(event.target.value)}
-          onBlur={() => handleUpdate()}
-        />
-      </Form.Group>
+      <ModuleEmailTemplateNameEditor
+        value={emailTemplateName}
+        className={'content-row'}
+        onChange={(event) => setEmailTemplateName(event.target.value)}
+        handleUpdate={() => handleUpdate()}
+      />
     </Wrapper>
   )
 }

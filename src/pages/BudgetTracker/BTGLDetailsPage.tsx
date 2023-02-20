@@ -92,6 +92,7 @@ const BTGLDetailsPage = ({gl, selectedYear, onNavBack}: iGLDetailsPage) => {
         onChangeYear={(year) => setShowingYear(year || selectedYear)}
         lockDown={lockDown || undefined}
         isReadOnly={isDisabled}
+        forceReloadCount={count}
       />
     )
   }
@@ -104,7 +105,12 @@ const BTGLDetailsPage = ({gl, selectedYear, onNavBack}: iGLDetailsPage) => {
       <div className={'panel-wrapper'}>
         <h3>Options</h3>
         <div className={'d-grid gap-2'}>
-          <BTItemCreatePopupBtn onItemSaved={() => setCount(MathHelper.add(count, 1))} gl={gl} forYear={showingYear}>
+          <BTItemCreatePopupBtn
+            btItem={{}}
+            onItemSaved={() => setCount(MathHelper.add(count, 1))}
+            gl={gl}
+            forYear={showingYear}
+          >
             <Button variant={'success'} size={'sm'} style={{width: '100%'}}>
               <Icons.Plus /> New Item
             </Button>

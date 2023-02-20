@@ -13,7 +13,7 @@ import UtilsService from '../../../services/UtilsService';
 import MathHelper from '../../../helper/MathHelper';
 import iSynGeneralLedger from '../../../types/Synergetic/Finance/iSynGeneralLedager';
 import BTItemService from '../../../services/BudgetTracker/BTItemService';
-import Toaster from '../../../services/Toaster';
+import Toaster, {TOAST_TYPE_SUCCESS} from '../../../services/Toaster';
 import FormLabel from '../../../components/form/FormLabel';
 import CommunityService from '../../../services/Synergetic/CommunityService';
 import iSynCommunity from '../../../types/Synergetic/iSynCommunity';
@@ -82,7 +82,6 @@ const BTItemCreatePopupBtn = ({onItemSaved, children, btItem, gl, forYear, force
     setEditingBtItem((btItem || {
       ...initialItem,
       gl_code: gl.GLCode,
-      year: forYear,
     }))
     if (forceReadyOnly === true) {
       setIsReadyOnly(forceReadyOnly)
@@ -90,7 +89,7 @@ const BTItemCreatePopupBtn = ({onItemSaved, children, btItem, gl, forYear, force
       setIsReadyOnly(editingBtItem.author_id !== null && editingBtItem.author_id !== undefined);
     }
     //eslint-disable-next-line
-  }, [JSON.stringify(btItem), gl.GLCode, forYear, currentUser, forceReadyOnly, editingBtItem.author_id])
+  }, [btItem, gl.GLCode, forYear, currentUser, forceReadyOnly, editingBtItem.author_id])
 
   useEffect(() => {
     setCommunityMap({});
@@ -152,9 +151,16 @@ const BTItemCreatePopupBtn = ({onItemSaved, children, btItem, gl, forYear, force
 
   const submit = () => {
     setIsSaving(true);
-    const func = editingBtItem.id ? BTItemService.update(editingBtItem.id, editingBtItem) : BTItemService.create(editingBtItem);
+    const func = editingBtItem.id ? BTItemService.update(editingBtItem.id, {
+      ...editingBtItem,
+      year: forYear,
+    }) : BTItemService.create({
+      ...editingBtItem,
+      year: forYear,
+    });
     func
       .then(resp => {
+        Toaster.showToast('Item saved successfully', TOAST_TYPE_SUCCESS);
         closePopup();
         onItemSaved(resp);
       }).catch(err => {

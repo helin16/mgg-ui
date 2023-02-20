@@ -11,6 +11,7 @@ export const BT_ADMIN_OPTION_DOWNLOAD_BT_ITEMS = 'download_budget_items';
 export const BT_ADMIN_OPTION_CONSOLIDATED_REPORTS = 'consolidated_reports';
 export const BT_ADMIN_OPTION_CATEGORIES = 'categories';
 export const BT_ADMIN_OPTION_EXCLUDED_GL_CODES = 'excluded_gl_codes';
+export const BT_ADMIN_OPTION_NOTIFICATIONS = 'notifications';
 
 export type iBTAdminOptions =
   typeof BT_ADMIN_OPTION_USERS
@@ -19,6 +20,7 @@ export type iBTAdminOptions =
   | typeof BT_ADMIN_OPTION_CONSOLIDATED_REPORTS
   | typeof BT_ADMIN_OPTION_CATEGORIES
   | typeof BT_ADMIN_OPTION_EXCLUDED_GL_CODES
+  | typeof BT_ADMIN_OPTION_NOTIFICATIONS
   | typeof BT_ADMIN_OPTION_LOCKDOWNS;
 
 type iBTAdminOptionsPanel = {
@@ -49,6 +51,9 @@ const BTAdminOptionsPanel = ({onSelectAdminModule, className, preExtraBtns}: iBT
           </Button>
           <Button variant={'primary'} size={'sm'} onClick={() => onSelectAdminModule(BT_ADMIN_OPTION_EXCLUDED_GL_CODES)}>
             <Icons.ListTask /> Excluded GL Codes
+          </Button>
+          <Button variant={'primary'} size={'sm'} onClick={() => onSelectAdminModule(BT_ADMIN_OPTION_NOTIFICATIONS)}>
+            <Icons.Mailbox /> Notifications
           </Button>
           <Button variant={'danger'} size={'sm'} onClick={() => onSelectAdminModule(BT_ADMIN_OPTION_LOCKDOWNS)}>
             <Icons.Lock /> Lockdowns
