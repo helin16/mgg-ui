@@ -18,17 +18,25 @@ const Wrapper = styled.div`
       float: right;
     }
   }
-`
+`;
+
+type iState = {
+  selectedLuHouse: iSynLuHouse | null;
+  selectedHouseAwardEventType: iHouseAwardEventType | null;
+}
+const initial: iState = {
+  selectedHouseAwardEventType: null,
+  selectedLuHouse: null,
+}
 const HouseAwardsPage = () => {
-  const [selectedHouseAwardEventType, setSelectedHouseAwardEventType] = useState<iHouseAwardEventType | null>(null);
-  const [selectedLuHouse, setSelectedLuHouse] = useState<iSynLuHouse | null>(null);
   const [viewingAdmin, setViewingAdmin] = useState(false);
+  const [state, setState] = useState(initial);
 
   if (viewingAdmin) {
     return <HouseAwardAdminPage onCancel={() => setViewingAdmin(false)} />
   }
 
-  if (!selectedHouseAwardEventType || !selectedLuHouse) {
+  if (!state.selectedHouseAwardEventType || !state.selectedLuHouse) {
     return (
       <Wrapper>
         <HouseAwardEventTypes
@@ -38,10 +46,10 @@ const HouseAwardsPage = () => {
               <ModuleAdminBtn moduleId={MODULE_ID_HOUSE_AWARDS} className={'admin-btn'} onClick={() => setViewingAdmin(true)}/>
             </h4>
           }
-          onSelect={(type: iHouseAwardEventType, luHouse: iSynLuHouse) => {
-            setSelectedHouseAwardEventType(type)
-            setSelectedLuHouse(luHouse)
-          }}
+          onSelect={(type: iHouseAwardEventType, luHouse: iSynLuHouse) => setState({
+            selectedLuHouse: luHouse,
+            selectedHouseAwardEventType: type,
+          })}
         />
       </Wrapper>
     );
@@ -50,12 +58,9 @@ const HouseAwardsPage = () => {
   return(
     <Wrapper>
       <HouseAwardScoreBoard
-        house={selectedLuHouse}
-        type={selectedHouseAwardEventType}
-        onCancel={() => {
-          setSelectedHouseAwardEventType(null)
-          setSelectedLuHouse(null)
-        }}
+        house={state.selectedLuHouse}
+        type={state.selectedHouseAwardEventType}
+        onCancel={() => setState(initial)}
       />
     </Wrapper>
   );

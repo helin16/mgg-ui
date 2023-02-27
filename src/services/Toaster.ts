@@ -18,7 +18,7 @@ const showToast = (msg: string, type?: string, options = {}) => {
 
 const showApiError = (error: any) => {
   console.error(error);
-  return showToast(error.message, TOAST_TYPE_ERROR);
+  return showToast(error.response.data.message || error.message, TOAST_TYPE_ERROR);
 }
 
 const Toaster = {

@@ -9,6 +9,7 @@ import DeleteConfirmPopupBtn from '../common/DeleteConfirm/DeleteConfirmPopupBtn
 import styled from 'styled-components';
 import StaffAutoComplete from '../staff/StaffAutoComplete';
 import {iAutoCompleteSingle} from '../common/AutoComplete';
+import Toaster from '../../services/Toaster';
 
 const Wrapper = styled.div`
   
@@ -69,6 +70,9 @@ const ModuleUserList = ({moduleId, roleId, showCreatingPanel, showDeletingBtn}: 
     return UserService.createUser(moduleId, roleId, selected.value)
       .then(resp => {
         setUserMap({...userMap, [resp.SynergeticID]: resp});
+      })
+      .catch(err => {
+        Toaster.showApiError(err);
       })
       .finally(() => {
         setIsCreating(false);

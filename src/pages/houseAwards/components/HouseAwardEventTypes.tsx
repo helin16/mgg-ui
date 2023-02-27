@@ -2,7 +2,7 @@ import iHouseAwardEventType from '../../../types/HouseAwards/iHouseAwardEventTyp
 import React, {useEffect, useState} from 'react';
 import HouseAwardEventTypeService from '../../../services/HouseAwards/HouseAwardEventTypeService';
 import Toaster from '../../../services/Toaster';
-import {Spinner} from 'react-bootstrap';
+import {Col, Container, Row, Spinner} from 'react-bootstrap';
 import styled from 'styled-components';
 import iSynLuHouse from '../../../types/Synergetic/iSynLuHouse';
 import SynLuHouseService from '../../../services/Synergetic/SynLuHouseService';
@@ -17,11 +17,8 @@ type iHouseAwardEventTypes = {
 };
 const Wrapper = styled.div`
   .house-list {
-    display: flex;
-    flex-wrap: wrap;
     
     .house-cell {
-      width: 50%;
       text-align: center;
       padding: 1rem;
       
@@ -148,16 +145,18 @@ const HouseAwardEventTypes = ({onSelect, header}: iHouseAwardEventTypes) => {
     }
 
     return (
-      <div className={'house-list'}>
-        {luHouses.map(house => {
-          return (
-            <div className={`house-cell ${house.Code.toLowerCase()}`} key={house.Code.toLowerCase()}>
-              <h6 className={'title'}>{house.Description}</h6>
-              {getTypes(house)}
-            </div>
-          )
-        })}
-      </div>
+      <Container>
+        <Row className={'house-list'}>
+          {luHouses.map(house => {
+            return (
+              <Col md={6} className={`house-cell ${house.Code.toLowerCase()}`} key={house.Code.toLowerCase()}>
+                <h6 className={'title'}>{house.Description}</h6>
+                {getTypes(house)}
+              </Col>
+            )
+          })}
+        </Row>
+      </Container>
     )
   }
 

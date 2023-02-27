@@ -11,18 +11,16 @@ import Toaster from '../../../services/Toaster';
 import {CAMPUS_CODE_SENIOR} from '../../../types/Synergetic/iLuCampus';
 import iLuYearLevel from '../../../types/Synergetic/iLuYearLevel';
 import SynLuYearLevelService from '../../../services/Synergetic/SynLuYearLevelService';
-import SelectBox from '../../../components/common/SelectBox';
 import HouseAwardScoreTable from './HouseAwardScoreTable';
 import HouseAwardEventService from '../../../services/HouseAwards/HouseAwardEventService';
 import iHouseAwardEvent from '../../../types/HouseAwards/iHouseAwardEvent';
 import moment from 'moment-timezone';
-import * as _ from 'lodash';
-import SynVStudentService from '../../../services/Synergetic/SynVStudentService';
-import iVStudent from '../../../types/Synergetic/iVStudent';
 import {FlexContainer} from '../../../styles';
 import UserService from '../../../services/UserService';
 import {MODULE_ID_HOUSE_AWARDS} from '../../../types/modules/iModuleUser';
 import {ROLE_ID_ADMIN} from '../../../types/modules/iRole';
+import YearLevelSelector from '../../../components/student/YearLevelSelector';
+import FileYearSelector from '../../../components/student/FileYearSelector';
 
 type iHouseAwardScoreBoard = {
   house: iSynLuHouse;
@@ -131,11 +129,9 @@ const HouseAwardScoreBoard = ({
   const currentFileYear = Number(user?.SynCurrentFileSemester?.FileYear || moment().format('YYYY'));
 
   const [isLoading, setIsLoading] = useState(false);
-  const [yearLevels, setYearLevels] = useState<iLuYearLevel[]>([]);
   const [selectedYearLevel, setSelectedYearLevel] = useState<iLuYearLevel | null>(null);
   const [events, setEvents] = useState<iHouseAwardEvent[]>([]);
   const [selectedFileYear, setSelectedFileYear] = useState(currentFileYear);
-  const [students, setStudents] = useState<iVStudent[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
@@ -155,12 +151,6 @@ const HouseAwardScoreBoard = ({
         }),
         sort: 'Name:ASC',
       }),
-      SynVStudentService.getCurrentVStudents({
-        where: JSON.stringify({
-          StudentHouse: house.Code,
-        }),
-        sort: 'StudentSurname:ASC,StudentPreferred:ASC',
-      }),
       UserService.getUsers({
         where: JSON.stringify({
           Active: true,
@@ -171,13 +161,11 @@ const HouseAwardScoreBoard = ({
       })
     ]).then(resp => {
       if (isCanceled) return;
-      setYearLevels(resp[0]);
       if (resp[0].length > 0) {
         setSelectedYearLevel(resp[0][0])
       }
       setEvents(resp[1]);
-      setStudents(resp[2]);
-      setIsAdmin(resp[3].length > 0);
+      setIsAdmin(resp[2].length > 0);
     }).catch(err => {
       if (isCanceled) return;
       Toaster.showApiError(err)
@@ -189,39 +177,8 @@ const HouseAwardScoreBoard = ({
     return () => {
       isCanceled = true;
     }
-  }, [house, type, campusCodes, user]);
-
-  const getYearLevelSelector = () => {
-    if (yearLevels.length <= 0) {
-      return null;
-    }
-    return (
-      <SelectBox
-        className={'yearLevel-selector'}
-        options={yearLevels.map(yearLevel => ({
-          label: `Year ${yearLevel.Description}`,
-          value: yearLevel.Code,
-          yearLevel: yearLevel,
-        }))}
-        value={selectedYearLevel ? ({label:`Year ${selectedYearLevel.Description}`, value: selectedYearLevel.Code }) : undefined}
-        onChange={(option) => setSelectedYearLevel(option.yearLevel)}
-      />
-    )
-  }
-
-  const getFileYearSelector = () => {
-    return (
-      <SelectBox
-        className={'fileYear-selector'}
-        options={_.range(currentFileYear - 4, currentFileYear +1).reverse().map(fileYear => ({
-          label: fileYear,
-          value: fileYear,
-        }))}
-        value={selectedFileYear ? ({label: selectedFileYear, value: selectedFileYear}) : undefined}
-        onChange={(option) => setSelectedFileYear(option.value)}
-      />
-    )
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [house, type, JSON.stringify(campusCodes), user]);
 
   const getIsDisabled = () => {
     if (!user) {
@@ -273,12 +230,27 @@ const HouseAwardScoreBoard = ({
         </div>
         <FlexContainer className={'withGap'}>
           <div>(Points to be awarded: {type.points_to_be_awarded})</div>
-          {getYearLevelSelector()}
+          <YearLevelSelector
+            campusCodes={[CAMPUS_CODE_SENIOR]}
+            classname={'yearLevel-selector'}
+            values={selectedYearLevel ? [`${selectedYearLevel?.Code}`] : []}
+            onSelect={(options) => {
+              // @ts-ignore
+              setSelectedYearLevel(options?.data || null)
+            }}
+          />
         </FlexContainer>
       </div>
       <div className={`summary-row ${house.Code.toLowerCase()}`}>
-        <div>{`${type.name} for: ${house.Description}`}</div>
-        <div>{getFileYearSelector()}</div>
+        <div>Year:</div>
+        <div>
+          <FileYearSelector
+            className={'fileYear-selector'}
+            onSelect={(newYear) => setSelectedFileYear(newYear || moment().year())}
+            value={selectedFileYear}
+            min={moment().subtract(5, 'year').year()}
+          />
+        </div>
       </div>
       {getDisabledMsg()}
       {selectedYearLevel && (
@@ -289,7 +261,6 @@ const HouseAwardScoreBoard = ({
           events={events}
           fileYear={selectedFileYear}
           isDisabled={getIsDisabled()}
-          students={students.filter(student => student.StudentYearLevel === selectedYearLevel.Code)}
         />
       )}
     </Wrapper>

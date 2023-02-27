@@ -16,6 +16,7 @@ import MathHelper from '../../../helper/MathHelper';
 import HouseAwardScoreCell from './HouseAwardScoreCell';
 import HouseAwardConfirmAwardPopupBtn from './HouseAwardConfirmAwardPopupBtn';
 import {OP_LTE} from '../../../helper/ServiceHelper';
+import SynVStudentService from '../../../services/Synergetic/SynVStudentService';
 
 type iHouseAwardScoreTable = {
   house: iSynLuHouse;
@@ -23,8 +24,8 @@ type iHouseAwardScoreTable = {
   yearLevel: iLuYearLevel;
   fileYear: number;
   events: iHouseAwardEvent[];
-  students: iVStudent[];
   isDisabled?: boolean;
+  isLoadingStudents?: boolean;
 }
 const Wrapper = styled.div`
 `;
@@ -35,9 +36,9 @@ const HouseAwardScoreTable = ({
   fileYear,
   events,
   isDisabled = false,
-  students,
+  isLoadingStudents = false,
 }: iHouseAwardScoreTable) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(isLoadingStudents);
   const [studentMap, setStudentMap] = useState<{ [key: number]: iVStudent }>({});
   const [lastStudentYearMap, setLastStudentYearMap] = useState<{ [key: number]: iHouseAwardStudentYear }>({});
   const [studentScoreMap, setStudentScoreMap] = useState<{ [key: number]: {[key: number]: iHouseAwardScore} }>({});
@@ -47,53 +48,47 @@ const HouseAwardScoreTable = ({
   useEffect(() => {
     let isCanceled = false;
 
-    if (students.length <= 0 )  return;
-
-    const map = students.reduce((m, student) => {
-      return {
-        ...m,
-        [student.StudentID]: student,
-      }
-    }, {});
-
-    Promise.all([
-        HouseAwardScoreService.getScores({
-          where: JSON.stringify( {
-            FileYear: fileYear,
-            StudentID: Object.keys(map),
-            event_type_id: type.id,
-            active: 1,
-          }),
-        }),
-        HouseAwardStudentYearService.getStudentYears({
+    const fetchData = async () => {
+      try {
+        setIsLoading(false);
+        const students = await SynVStudentService.getCurrentVStudents({
           where: JSON.stringify({
-            FileYear: MathHelper.sub(fileYear, 1),
-            StudentID: Object.keys(map),
-            event_type_id: type.id,
-            active: 1,
+            StudentHouse: house.Code,
+            FileYear: fileYear,
+            StudentYearLevel: yearLevel.Code,
           }),
-          sort: 'updated_at:ASC',
-        })
-      ]).then(resp => {
+          sort: 'StudentSurname:ASC,StudentPreferred:ASC',
+        });
         if (isCanceled) return;
-        setStudentScoreMap(resp[0].reduce((map, score) => {
-          if (!(score.StudentID in map)) {
-            return {
-              ...map,
-              [score.StudentID]: {[score.event_id]: score}
-            }
-          }
+        const studMap  = students.reduce((m, student) => {
           return {
-            ...map,
-            [score.StudentID]: {
-              // @ts-ignore
-              ...(map[score.StudentID] || {}),
-              [score.event_id]: score,
-            }
+            ...m,
+            [student.StudentID]: student,
           }
-        }, {}))
+        }, {});
+        setStudentMap(studMap);
+        const[houseAwardScores, houseAwardYears] = await Promise.all([
+          HouseAwardScoreService.getScores({
+            where: JSON.stringify( {
+              FileYear: fileYear,
+              StudentID: Object.keys(studMap),
+              event_type_id: type.id,
+              active: 1,
+            }),
+          }),
+          HouseAwardStudentYearService.getStudentYears({
+            where: JSON.stringify({
+              FileYear: MathHelper.sub(fileYear, 1),
+              StudentID: Object.keys(studMap),
+              event_type_id: type.id,
+              active: 1,
+            }),
+            sort: 'updated_at:ASC',
+          }),
+        ]);
 
-        setNotAwardedScoreMap(resp[0].filter(score => score.awarded_id === null).reduce((map, score) => {
+        if (isCanceled) return;
+        setStudentScoreMap(houseAwardScores.reduce((map, score) => {
           if (!(score.StudentID in map)) {
             return {
               ...map,
@@ -109,25 +104,41 @@ const HouseAwardScoreTable = ({
             }
           }
         }, {}));
-        setLastStudentYearMap(resp[1].reduce((map, studentYear) => {
+        setNotAwardedScoreMap(houseAwardScores.filter(score => score.awarded_id === null).reduce((map, score) => {
+          if (!(score.StudentID in map)) {
+            return {
+              ...map,
+              [score.StudentID]: {[score.event_id]: score}
+            }
+          }
+          return {
+            ...map,
+            [score.StudentID]: {
+              // @ts-ignore
+              ...(map[score.StudentID] || {}),
+              [score.event_id]: score,
+            }
+          }
+        }, {}));
+        setLastStudentYearMap(houseAwardYears.reduce((map, studentYear) => {
           return {
             ...map,
             [studentYear.StudentID]: studentYear,
           }
         }, {}));
-        setStudentMap(map);
-      }).catch(err => {
-        if (isCanceled) return;
-        Toaster.showApiError(err);
-      }).finally(() => {
-        if (isCanceled) return;
+
         setIsLoading(false);
-      })
+      } catch (err) {
+        setIsLoading(false);
+      }
+    }
+
+    fetchData();
 
     return () => {
       isCanceled = true;
     }
-  }, [house, type, yearLevel, events, fileYear, students]);
+  }, [house, type, yearLevel, events, fileYear]);
 
   const columnLeftFix = [
     {
@@ -348,7 +359,7 @@ const HouseAwardScoreTable = ({
     )
   }
 
-  if (isLoading) {
+  if (isLoading || isLoadingStudents) {
     return <Spinner animation={'border'} />
   }
 

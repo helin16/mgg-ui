@@ -1,0 +1,54 @@
+<script>
+  const renderFrame = function() {
+    const schoolBoxStaticUrl = 'https://mconnect.mentonegirls.vic.edu.au/static/mggs';
+    const header = document.getElementsByTagName('head')[0];
+
+    const meta = document.createElement('meta');
+    meta.name = "viewport";
+    meta.content = "width=device-width,initial-scale=1";
+    header.appendChild(meta);
+
+    const manifest = document.createElement('link');
+    manifest.ref = "manifest";
+    manifest.href = `${schoolBoxStaticUrl}/manifest.json`;
+    header.appendChild(manifest);
+
+    const mainCss = document.createElement('link');
+    mainCss.rel = "stylesheet";
+    mainCss.type = "text/css";
+    mainCss.href = `${schoolBoxStaticUrl}%MAIN_CSS%`;
+    header.appendChild(mainCss);
+
+    const mainJs = document.createElement('script');
+    mainJs.defer = "defer";
+    mainJs.src = `${schoolBoxStaticUrl}%MAIN_JS%`;
+    header.appendChild(mainJs);
+  }
+
+  const fetchData = function(url, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.responseType = 'json';
+    xhr.onload = function() {
+      var status = xhr.status;
+      if (status === 200) {
+        callback(null, xhr.response);
+      } else {
+        callback(status, xhr.response);
+      }
+    };
+    xhr.send();
+  };
+
+  const run = function() {
+    fetchData('https://app.mentonegirls.vic.edu.au/asset-manifest.json', function(status, response) {
+      if (status === null) {
+        return null;
+      }
+      console.log('resp', response);
+    })
+  }
+
+  run ();
+
+</script>

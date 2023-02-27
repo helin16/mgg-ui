@@ -5,6 +5,8 @@ import SynLuYearLevelService from '../../services/Synergetic/SynLuYearLevelServi
 import iLuYearLevel from '../../types/Synergetic/iLuYearLevel';
 import SelectBox from '../common/SelectBox';
 import {CAMPUS_CODE_ELC, CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR} from '../../types/Synergetic/iLuCampus';
+import UtilsService from '../../services/UtilsService';
+import Toaster from '../../services/Toaster';
 
 type iYearLevelSelector = {
   values?: iAutoCompleteSingle[] | string[];
@@ -13,20 +15,23 @@ type iYearLevelSelector = {
   allowClear?: boolean;
   showIndicator?: boolean;
   isMulti?: boolean;
+  classname?: string;
 };
 
+const getLabel = (yearLevel: iLuYearLevel) => {
+  return UtilsService.isNumeric(yearLevel.Description) ? `Year ${yearLevel.Description}` : yearLevel.Description;
+}
 export const translateYearLevelToOption = (yearLevel: iLuYearLevel) => {
-  return {value: yearLevel.Code, data: yearLevel, label: yearLevel.Description}
+  return {value: yearLevel.Code, data: yearLevel, label: getLabel(yearLevel)}
 }
 
-const YearLevelSelector = ({values, onSelect, allowClear, campusCodes, showIndicator = true, isMulti = false}: iYearLevelSelector) => {
+const YearLevelSelector = ({values, onSelect, allowClear, campusCodes, classname, showIndicator = true, isMulti = false}: iYearLevelSelector) => {
   const [optionsMap, setOptionsMap] = useState<{[key: string]: iAutoCompleteSingle}>({});
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    let isCancelled = false;
     if (Object.keys(optionsMap).length > 0) { return }
-
+    let isCancelled = false;
     setIsLoading(true);
     // @ts-ignore
     SynLuYearLevelService.getAllYearLevels({
@@ -44,7 +49,12 @@ const YearLevelSelector = ({values, onSelect, allowClear, campusCodes, showIndic
           };
         }, {}))
       })
+      .catch(err => {
+        if (isCancelled === true) { return }
+        Toaster.showApiError(err);
+      })
       .finally(() => {
+        if (isCancelled === true) { return }
         setIsLoading(false);
       })
     return () => {
@@ -83,6 +93,7 @@ const YearLevelSelector = ({values, onSelect, allowClear, campusCodes, showIndic
 
   return (
     <SelectBox
+      className={classname}
       options={getOptions()}
       isMulti={isMulti}
       onChange={onSelect}
