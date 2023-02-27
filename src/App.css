@@ -47,3 +47,15 @@ input[type="checkbox"] {
     min-width: inherit !important;
     position: inherit !important;
 }
+
+ul, ol, dl {
+    margin-bottom: inherit;
+    margin-top: inherit;
+    margin-left: inherit;
+    margin-right: inherit;
+
+    padding-left: inherit;
+    padding-bottom: inherit;
+    padding-right: inherit;
+    padding-right: inherit;
+}
