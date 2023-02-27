@@ -34,3 +34,16 @@ input[type="checkbox"] {
 .panel-wrapper.space-below {
     margin-bottom: 1rem;
 }
+
+/* trying to avoid conflict in SchoolBox's css */
+.card {
+    word-wrap: inherit !important;
+    background-clip: inherit !important;
+    background-color: inherit !important;
+    border: inherit !important;
+    border-radius: inherit !important;
+    display: inherit !important;
+    flex-direction: inherit !important;
+    min-width: inherit !important;
+    position: inherit !important;
+}
