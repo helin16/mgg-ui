@@ -127,5 +127,18 @@ const AppWrapper = styled.div`
     cursor: pointer;
   }
   
+  // trying to avoid conflict in SchoolBox's css
+  .card {
+    word-wrap: inherit;
+    background-clip: inherit;
+    background-color: inherit;
+    border: inherit;
+    border-radius: inherit;
+    display: inherit;
+    flex-direction: inherit;
+    min-width: inherit;
+    position: inherit;
+  }
+  
 `
 export default AppWrapper;
