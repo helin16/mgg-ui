@@ -48,14 +48,14 @@ input[type="checkbox"] {
     position: inherit !important;
 }
 
-ul, ol, dl {
-    margin-bottom: inherit;
-    margin-top: inherit;
-    margin-left: inherit;
-    margin-right: inherit;
+/*ul, ol, dl {*/
+/*    margin-bottom: 0px !important;*/
+/*    margin-top: 0px !important;*/
+/*    margin-left: 0px !important;*/
+/*    margin-right: 0px !important;*/
 
-    padding-left: inherit;
-    padding-bottom: inherit;
-    padding-right: inherit;
-    padding-right: inherit;
-}
+/*    padding-left: 0px !important;*/
+/*    padding-bottom: 0px !important;*/
+/*    padding-right: 0px !important;*/
+/*    padding-right: 0px !important;*/
+/*}*/
