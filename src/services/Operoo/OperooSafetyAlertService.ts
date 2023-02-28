@@ -18,7 +18,7 @@ const syncOperooSafetyAlert = (id: string, params: iConfigParams, config: AxiosR
 }
 
 const refetchAlerts = (studentId: string | number, params?: iConfigParams, config: AxiosRequestConfig = {}): Promise<iOperooSafetyAlert[]> => {
-  return appService.get(`/${endPoint}/refetch/${studentId}`, params, config).then(({data}) => data);
+  return appService.get(`${endPoint}/refetch/${studentId}`, params, config).then(({data}) => data);
 }
 
 const downloadAlerts = (params: iParams = {}, config: AxiosRequestConfig = {}): Promise<iMessage> => {
