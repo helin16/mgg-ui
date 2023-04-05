@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import iMessage from '../../types/Message/iMessage';
 import MessageService from '../../services/MessageService';
 import Toaster from '../../services/Toaster';
@@ -10,9 +10,14 @@ import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Button from 'react-bootstrap/Button';
 import * as _ from 'lodash';
+import PopupModal from './PopupModal';
+import MathHelper from '../../helper/MathHelper';
+import * as Icons from 'react-bootstrap-icons';
 
 type iMessageListPanel = {
   type: string;
+  reloadCount?: number;
+  title?: any
 }
 
 const Wrapper = styled.div`
@@ -48,6 +53,10 @@ const Wrapper = styled.div`
         text-overflow: ellipsis;
         overflow: hidden;
         white-space: nowrap;
+        max-width: 180px;
+        &.cursor:hover {
+          font-weight: bold;
+        }
       }
     }
     
@@ -56,12 +65,14 @@ const Wrapper = styled.div`
     }
   }
 `;
-const MessageListPanel = ({type}: iMessageListPanel) => {
+const MessageListPanel = ({type, title, reloadCount}: iMessageListPanel) => {
 
   const perPage = 10;
   const [messageList, setMessageList] = useState<iPaginatedResult<iMessage> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [popupContent, setPopupContent] = useState<string | null>(null);
+  const [count, setCount] = useState(reloadCount || 0);
 
   useEffect(() => {
     let isCanceled = false;
@@ -83,7 +94,7 @@ const MessageListPanel = ({type}: iMessageListPanel) => {
       if (isCanceled) { return }
       setIsLoading(false);
     })
-  }, [type, currentPage]);
+  }, [type, currentPage, count]);
 
 
   const getPaginationBtns = () => {
@@ -136,12 +147,32 @@ const MessageListPanel = ({type}: iMessageListPanel) => {
     )
   }
 
+  const showPopupContent = () => {
+    const content = `${popupContent || ''}`.trim();
+    if (content === '') {
+      return null;
+    }
+
+    return (
+      <PopupModal
+        title={''}
+        size={'lg'}
+        show={popupContent !== null}
+        handleClose={() => setPopupContent(null)}
+        footer={<><div /><Button variant={'primary'} onClick={() => setPopupContent(null)}>OK</Button> </>}
+      >
+        {popupContent}
+      </PopupModal>
+    )
+  }
+
   const getContent = () => {
     if (isLoading) {
       return <Spinner animation={'border'} />
     }
     return (
       <div className={'message-table-wrapper'}>
+        <Button size={'sm'} variant={'link'} onClick={() => setCount(MathHelper.add(count, 1))}><Icons.BootstrapReboot /> Refresh</Button>
         <Table striped hover responsive className={'message-table'}>
           <thead>
             <tr>
@@ -158,22 +189,29 @@ const MessageListPanel = ({type}: iMessageListPanel) => {
               <tr key={message.id}>
                 <td className={'date'}>{moment(message.createdAt).format('lll')}</td>
                 <td className={`status ${message.status?.toUpperCase()}`}>{message.status}</td>
-                <td className={`request`}>{message.request ? JSON.stringify(message.request) : ''}</td>
-                <td className={`response`}>{message.response ? JSON.stringify(message.response) : ''}</td>
-                <td className={`error`}>{message.error ? JSON.stringify(message.error) : ''}</td>
+                <td className={`request ${message.request ? 'cursor' : ''}`} onClick={() => setPopupContent(message.request ? JSON.stringify(message.request) : '')}>
+                  {message.request ? JSON.stringify(message.request) : ''}
+                </td>
+                <td className={`response ${message.response ? 'cursor' : ''}`} onClick={() => setPopupContent(message.response ? JSON.stringify(message.response) : '')}>
+                  {message.response ? JSON.stringify(message.response) : ''}
+                </td>
+                <td className={`error ${message.error ? 'cursor' : ''}`} onClick={() => setPopupContent(message.error ? JSON.stringify(message.error) : '')}>
+                  {message.error ? JSON.stringify(message.error) : ''}
+                </td>
               </tr>
             );
           })}
           </tbody>
         </Table>
         {getPagination()}
+        {showPopupContent()}
       </div>
     );
   }
 
   return(
     <Wrapper>
-      <p>List of logs for {type}</p>
+      <div>{title || <p>List of logs for {type}</p>} </div>
       {getContent()}
     </Wrapper>
   )

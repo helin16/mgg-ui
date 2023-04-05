@@ -9,7 +9,7 @@ import PanelTitle from '../../../components/PanelTitle';
 import EmptyState from '../../../components/common/EmptyState';
 import ModuleAdminBtn from '../../../components/module/ModuleAdminBtn';
 import AdminPage from '../AdminPage';
-import {MODULE_ID_STUDENT_REPORT} from '../../../types/modules/iModuleUser';
+import {MGGS_MODULE_ID_STUDENT_REPORT} from '../../../types/modules/iModuleUser';
 import StudentStatusBadge from './AcademicReports/StudentStatusBadge';
 import Toaster from '../../../services/Toaster';
 import FileYearSelector from '../../../components/student/FileYearSelector';
@@ -140,7 +140,7 @@ const SearchPage = ({onSelect}: {onSelect: (student: iVStudent) => void}) => {
       <h3>
         Student Report
         <span className={'pull-right'} >
-          <ModuleAdminBtn onClick={() => setIsShowAdminPage(true)} moduleId={MODULE_ID_STUDENT_REPORT} />
+          <ModuleAdminBtn onClick={() => setIsShowAdminPage(true)} moduleId={MGGS_MODULE_ID_STUDENT_REPORT} />
         </span>
       </h3>
       <p>Welcome to the student academic report viewer. Type the homeroom or name of the student you want to locate below.</p>

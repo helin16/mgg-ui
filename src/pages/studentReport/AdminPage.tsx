@@ -6,7 +6,7 @@ import iStudentReportYear from '../../types/Synergetic/iStudentReportYear';
 import AdminEditReportYear from './components/Admin/AdminEditReportYear';
 import AdminEditingLockList from './components/Admin/AdminEditingLockList';
 import AdminPageHeader from './components/Admin/AdminPageHeader';
-import {MODULE_ID_STUDENT_REPORT} from '../../types/modules/iModuleUser';
+import {MGGS_MODULE_ID_STUDENT_REPORT} from '../../types/modules/iModuleUser';
 import {ROLE_ID_ADMIN} from '../../types/modules/iRole';
 import ModuleUserList from '../../components/module/ModuleUserList';
 import GenComparativePopupBtn from './components/Admin/GenComparativePopupBtn';
@@ -22,7 +22,7 @@ const AdminPage = ({backToReportFn}: {backToReportFn?: () => void}) => {
     return (
       <div>
         <AdminPageHeader title={'Student Report Admin - Users'} backToAdminFn={() => setShowingAdminUsers(false)} />
-        <ModuleUserList moduleId={MODULE_ID_STUDENT_REPORT} roleId={ROLE_ID_ADMIN} showCreatingPanel={true} showDeletingBtn={true}/>
+        <ModuleUserList moduleId={MGGS_MODULE_ID_STUDENT_REPORT} roleId={ROLE_ID_ADMIN} showCreatingPanel={true} showDeletingBtn={true}/>
       </div>
     );
   }

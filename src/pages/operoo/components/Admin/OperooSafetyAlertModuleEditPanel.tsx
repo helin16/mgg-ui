@@ -1,4 +1,4 @@
-import {MODULE_ID_OPEROO_SAFETY_ALERTS} from '../../../../types/modules/iModuleUser';
+import {MGGS_MODULE_ID_OPEROO_SAFETY_ALERTS} from '../../../../types/modules/iModuleUser';
 import {ROLE_ID_ADMIN} from '../../../../types/modules/iRole';
 import ModuleEditPanel from '../../../../components/module/ModuleEditPanel';
 import React, {useState} from 'react';
@@ -92,7 +92,7 @@ const OperooSafetyAlertModuleEditPanel = () => {
 
   return (
     <ModuleEditPanel
-      moduleId={MODULE_ID_OPEROO_SAFETY_ALERTS}
+      moduleId={MGGS_MODULE_ID_OPEROO_SAFETY_ALERTS}
       roleId={ROLE_ID_ADMIN}
       getChildren={getContent}
       getSubmitData={() => (settings)}

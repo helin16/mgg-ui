@@ -3,7 +3,7 @@ import React from 'react';
 import {Button, Col, Row} from 'react-bootstrap';
 import {ROLE_ID_ADMIN} from '../../types/modules/iRole';
 import ModuleAccessWrapper from '../../components/module/ModuleAccessWrapper';
-import {MODULE_ID_BUDGET_TRACKER} from '../../types/modules/iModuleUser';
+import {MGGS_MODULE_ID_BUDGET_TRACKER} from '../../types/modules/iModuleUser';
 import BTAdminOptionsPanel, {
   BT_ADMIN_OPTION_CATEGORIES,
   BT_ADMIN_OPTION_CONSOLIDATED_REPORTS,
@@ -109,7 +109,7 @@ const BTAdminPage = ({onNavBack, setShowingAdminPageModule, adminPageModule}: iB
           <Col sm={9}>
             <h3>BT Admin {getSubTitle()}</h3>
             <ModuleAccessWrapper
-              moduleId={MODULE_ID_BUDGET_TRACKER}
+              moduleId={MGGS_MODULE_ID_BUDGET_TRACKER}
               roleId={ROLE_ID_ADMIN}
               btns={getBackToGLListBtn()}
             >

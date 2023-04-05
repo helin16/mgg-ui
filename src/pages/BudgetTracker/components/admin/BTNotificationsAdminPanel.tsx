@@ -2,7 +2,7 @@ import {useEffect, useState} from 'react';
 import iModule from '../../../../types/modules/iModule';
 import PageLoadingSpinner from '../../../../components/common/PageLoadingSpinner';
 import MggsModuleService from '../../../../services/Module/MggsModuleService';
-import {MODULE_ID_BUDGET_TRACKER} from '../../../../types/modules/iModuleUser';
+import {MGGS_MODULE_ID_BUDGET_TRACKER} from '../../../../types/modules/iModuleUser';
 import Toaster, {TOAST_TYPE_SUCCESS} from '../../../../services/Toaster';
 import ExplanationPanel from '../../../../components/ExplanationPanel';
 import styled from 'styled-components';
@@ -20,7 +20,7 @@ const BTNotificationsAdminPanel = () => {
   useEffect(() => {
     let isCanceled = false;
     setIsLoading(true);
-    MggsModuleService.getModule(MODULE_ID_BUDGET_TRACKER)
+    MggsModuleService.getModule(MGGS_MODULE_ID_BUDGET_TRACKER)
       .then(resp => {
         if (isCanceled) return;
         setModule(resp);

@@ -12,7 +12,7 @@ import BTGLTable from './BTGLTable';
 import FileYearSelector from '../../../components/student/FileYearSelector';
 import moment from 'moment-timezone';
 import ModuleAdminBtn from '../../../components/module/ModuleAdminBtn';
-import {MODULE_ID_BUDGET_TRACKER} from '../../../types/modules/iModuleUser';
+import {MGGS_MODULE_ID_BUDGET_TRACKER} from '../../../types/modules/iModuleUser';
 import {BT_ADMIN_OPTION_USERS, iBTAdminOptions} from './admin/BTAdminOptionsPanel';
 
 type iBTGLListPanel = {
@@ -98,7 +98,7 @@ const BTGLListPanel = ({ selectedYear, onChangeYear, onSelectGL, setShowingAdmin
           <div>
             <ModuleAdminBtn
               size={'sm'}
-              moduleId={MODULE_ID_BUDGET_TRACKER}
+              moduleId={MGGS_MODULE_ID_BUDGET_TRACKER}
               className={'admin-btn'}
               onClick={() => setShowingAdminPageModule && setShowingAdminPageModule(BT_ADMIN_OPTION_USERS)}
             />

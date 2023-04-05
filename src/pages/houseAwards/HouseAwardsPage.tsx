@@ -3,7 +3,7 @@ import React, {useState} from 'react';
 import iHouseAwardEventType from '../../types/HouseAwards/iHouseAwardEventType';
 import iSynLuHouse from '../../types/Synergetic/iSynLuHouse';
 import HouseAwardScoreBoard from './components/HouseAwardScoreBoard';
-import {MODULE_ID_HOUSE_AWARDS} from '../../types/modules/iModuleUser';
+import {MGGS_MODULE_ID_HOUSE_AWARDS} from '../../types/modules/iModuleUser';
 import ModuleAdminBtn from '../../components/module/ModuleAdminBtn';
 import styled from 'styled-components';
 import HouseAwardAdminPage from './HouseAwardAdminPage';
@@ -43,7 +43,7 @@ const HouseAwardsPage = () => {
           header={
             <h4 className={'head-title'}>
               House Awards
-              <ModuleAdminBtn moduleId={MODULE_ID_HOUSE_AWARDS} className={'admin-btn'} onClick={() => setViewingAdmin(true)}/>
+              <ModuleAdminBtn moduleId={MGGS_MODULE_ID_HOUSE_AWARDS} className={'admin-btn'} onClick={() => setViewingAdmin(true)}/>
             </h4>
           }
           onSelect={(type: iHouseAwardEventType, luHouse: iSynLuHouse) => setState({

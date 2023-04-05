@@ -9,7 +9,7 @@ import SynVStudentService from '../../services/Synergetic/SynVStudentService';
 import iVStudent from '../../types/Synergetic/iVStudent';
 import ModuleAdminBtn from '../../components/module/ModuleAdminBtn';
 import AdminPage from './AdminPage';
-import {MODULE_ID_OPEROO_SAFETY_ALERTS} from '../../types/modules/iModuleUser';
+import {MGGS_MODULE_ID_OPEROO_SAFETY_ALERTS} from '../../types/modules/iModuleUser';
 import Page from '../../layouts/Page';
 import Toaster from '../../services/Toaster';
 import ExplanationPanel from '../../components/ExplanationPanel';
@@ -91,7 +91,7 @@ const OperooSafetyAlertsPage = () => {
       <h3>
         Operoo Safety Alert Sync
         <span className={'pull-right'} >
-          <ModuleAdminBtn onClick={() => setIsViewingAdminPage(true)} moduleId={MODULE_ID_OPEROO_SAFETY_ALERTS} />
+          <ModuleAdminBtn onClick={() => setIsViewingAdminPage(true)} moduleId={MGGS_MODULE_ID_OPEROO_SAFETY_ALERTS} />
         </span>
       </h3>
       <ExplanationPanel text={'This module is designed for the School Nurse to auto sync down Operoo Docs to Synergetic DocMan'} />

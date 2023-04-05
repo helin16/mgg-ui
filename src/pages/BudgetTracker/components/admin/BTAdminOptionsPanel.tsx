@@ -2,7 +2,7 @@ import {Button} from 'react-bootstrap';
 import * as Icons from 'react-bootstrap-icons';
 import React from 'react';
 import ModuleAccessWrapper from '../../../../components/module/ModuleAccessWrapper';
-import {MODULE_ID_BUDGET_TRACKER} from '../../../../types/modules/iModuleUser';
+import {MGGS_MODULE_ID_BUDGET_TRACKER} from '../../../../types/modules/iModuleUser';
 import {ROLE_ID_ADMIN} from '../../../../types/modules/iRole';
 
 export const BT_ADMIN_OPTION_USERS = 'users';
@@ -32,7 +32,7 @@ type iBTAdminOptionsPanel = {
 
 const BTAdminOptionsPanel = ({onSelectAdminModule, className, preExtraBtns}: iBTAdminOptionsPanel) => {
   return (
-    <ModuleAccessWrapper moduleId={MODULE_ID_BUDGET_TRACKER} roleId={ROLE_ID_ADMIN} silentMode={true}>
+    <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_BUDGET_TRACKER} roleId={ROLE_ID_ADMIN} silentMode={true}>
       <div className={className}>
         <h3>Admin Options</h3>
         <div className={'d-grid gap-2'}>

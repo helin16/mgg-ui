@@ -9,7 +9,7 @@ import {Button} from 'react-bootstrap';
 import Page401 from '../../components/Page401';
 import StudentGridForAParent from '../../components/student/StudentGridForAParent';
 import AuthService from '../../services/AuthService';
-import {MODULE_ID_STUDENT_REPORT} from '../../types/modules/iModuleUser';
+import {MGGS_MODULE_ID_STUDENT_REPORT} from '../../types/modules/iModuleUser';
 import {ROLE_ID_ADMIN} from '../../types/modules/iRole';
 import PageNotFound from '../../components/PageNotFound';
 import ContactSupportPopupBtn from '../../components/support/ContactSupportPopupBtn';
@@ -46,7 +46,7 @@ const StudentReport = () => {
     if (!user || user?.isStaff !== true) { return }
     let isCancelled = false;
     setIsLoading(true);
-    AuthService.canAccessModule(MODULE_ID_STUDENT_REPORT)
+    AuthService.canAccessModule(MGGS_MODULE_ID_STUDENT_REPORT)
       .then(resp => {
         if (isCancelled === true) { return }
         setIsAdminUser(Object.keys(resp).filter(roleId => `${roleId}` === `${ROLE_ID_ADMIN}`).length > 0)

@@ -22,7 +22,7 @@ import {FlexContainer} from '../../../styles';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../redux/makeReduxStore';
 import AuthService from '../../../services/AuthService';
-import {MODULE_ID_BUDGET_TRACKER} from '../../../types/modules/iModuleUser';
+import {MGGS_MODULE_ID_BUDGET_TRACKER} from '../../../types/modules/iModuleUser';
 import {ROLE_ID_ADMIN} from '../../../types/modules/iRole';
 
 type iBTItemCreatePopupBtn = {
@@ -113,7 +113,7 @@ const BTItemCreatePopupBtn = ({onItemSaved, children, btItem, gl, forYear, force
           ID: ids,
         })
       }),
-      AuthService.isModuleRole(MODULE_ID_BUDGET_TRACKER, ROLE_ID_ADMIN),
+      AuthService.isModuleRole(MGGS_MODULE_ID_BUDGET_TRACKER, ROLE_ID_ADMIN),
     ]).then(resp => {
         if (isCanceled) return;
         setCommunityMap((resp[0].data || []).reduce((map, com) => {

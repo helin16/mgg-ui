@@ -17,7 +17,7 @@ import iHouseAwardEvent from '../../../types/HouseAwards/iHouseAwardEvent';
 import moment from 'moment-timezone';
 import {FlexContainer} from '../../../styles';
 import UserService from '../../../services/UserService';
-import {MODULE_ID_HOUSE_AWARDS} from '../../../types/modules/iModuleUser';
+import {MGGS_MODULE_ID_HOUSE_AWARDS} from '../../../types/modules/iModuleUser';
 import {ROLE_ID_ADMIN} from '../../../types/modules/iRole';
 import YearLevelSelector from '../../../components/student/YearLevelSelector';
 import FileYearSelector from '../../../components/student/FileYearSelector';
@@ -154,7 +154,7 @@ const HouseAwardScoreBoard = ({
       UserService.getUsers({
         where: JSON.stringify({
           Active: true,
-          ModuleID: MODULE_ID_HOUSE_AWARDS,
+          ModuleID: MGGS_MODULE_ID_HOUSE_AWARDS,
           RoleID: ROLE_ID_ADMIN,
           SynergeticID: user?.synergyId || 0,
         }),

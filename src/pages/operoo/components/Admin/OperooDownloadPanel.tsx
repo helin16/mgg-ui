@@ -7,7 +7,7 @@ import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup'
 import {ROLE_ID_ADMIN} from '../../../../types/modules/iRole';
 import ModuleAccessWrapper from '../../../../components/module/ModuleAccessWrapper';
-import {MODULE_ID_OPEROO_SAFETY_ALERTS} from '../../../../types/modules/iModuleUser';
+import {MGGS_MODULE_ID_OPEROO_SAFETY_ALERTS} from '../../../../types/modules/iModuleUser';
 
 const ACTION_DOWNLOAD = 'DOWNLOAD';
 const ACTION_LOG = 'LOGS';
@@ -51,7 +51,7 @@ const OperooDownloadPanel = () => {
   }
 
   return (
-    <ModuleAccessWrapper moduleId={MODULE_ID_OPEROO_SAFETY_ALERTS} roleId={ROLE_ID_ADMIN} silentMode={true}>
+    <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_OPEROO_SAFETY_ALERTS} roleId={ROLE_ID_ADMIN} silentMode={true}>
       <Wrapper>
           <ButtonGroup size={'sm'}>
             <Button variant={getBtnClassName(ACTION_DOWNLOAD)} onClick={() => setAction(ACTION_DOWNLOAD)}>Download</Button>
