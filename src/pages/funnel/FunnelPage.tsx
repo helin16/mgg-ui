@@ -12,12 +12,6 @@ import FunnelDownloadLatestPopupBtn from './components/FunnelDownloadLatestPopup
 import MathHelper from '../../helper/MathHelper';
 
 const Wrapper = styled.div`
-  .float-right {
-    float: right;
-  }
-  .section-row {
-    margin-bottom: 2rem;
-  }
 `;
 const FunnelPage = () => {
   const [showingAdminPage, setShowingAdminPage] = useState(false);

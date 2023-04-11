@@ -13,6 +13,8 @@ import {setIsProd} from './redux/reduxers/app.slice';
 import PingService from './services/PingService';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import AlumniRegistrationPage from './pages/alumni/AlumniRegistrationPage';
+import {URL_ALUMNI_REGISTRATION, URL_ASSET_PICK_UP} from './Url';
 
 const Router = () => {
   const {isProd} = useSelector((state: RootState) => state.app);
@@ -33,15 +35,17 @@ const Router = () => {
           <Route path="/" element={
             <PageNotFound
               title={'Service Support'}
-              description={'Mentone Girls\' Grammar Service Support'}
+              description={`Mentone Girls' Grammar Service Support`}
               primaryBtn={
                 <Button variant="primary" href={'https://mentonegirls.vic.edu.au'}>
                   <Icon.HouseDoorFill /> {' '}Home
                 </Button>
               }
-              secondaryBtn={<div />}/>}
-          />
-          <Route path="/asset/pickup" element={<AssetPickupPage />} />
+              secondaryBtn={<div />}
+            />
+          } />
+          <Route path={URL_ASSET_PICK_UP} element={<AssetPickupPage />} />
+          <Route path={URL_ALUMNI_REGISTRATION} element={<AlumniRegistrationPage />} />
           <Route path="/modules/remote/:code" element={<SchoolBoxLayout />} />
           <Route path="*" element={<PageNotFound />} />
         </Routes>

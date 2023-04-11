@@ -10,7 +10,8 @@ const schoolBoxStaticAssetUrlPath = '/static/mggs';
 const SCHOOLBOX_HOST = '10.114.37.24';
 // const SCHOOLBOX_PORT = 22;
 const SCHOOLBOX_STATIC_ASSET_FOLDER = '/usr/share/schoolbox/www/';
-const SCHOOLBOX_USERNAME = 'alaress';
+const SCHOOLBOX_USERNAME = 'schoolboxsuper';
+const SCHOOLBOX_USERNAME_ORIGINAL = 'alaress';
 // const SCHOOLBOX_PRIRVATE_KEY_FILE = '/Users/helin16/.ssh/id_rsa';
 const SCHOOLBOX_IFRAME_HTML_FILE = '/usr/share/mentone-scripts/iframe/frame.html';
 const SCHOOLBOX_IFRAME_HTML_RUNNING_FILE = '/usr/share/schoolbox/templates/core/modules/remote/frame.html';
@@ -36,7 +37,7 @@ const replaceSchoolBoxIndex = async (mainCssPath: string, mainJsPath: string) =>
 
 const uploadAssets = async () => {
   const commandToUploadAllFiles = `scp -r ${getBuildFolder()}* ${SCHOOLBOX_USERNAME}@${SCHOOLBOX_HOST}:${SCHOOLBOX_STATIC_ASSET_FOLDER}${schoolBoxStaticAssetUrlPath}/;`;
-  const commandToUploadFrameFile = `scp ${getBuildFolder()}schoolBox.html ${SCHOOLBOX_USERNAME}@${SCHOOLBOX_HOST}:${SCHOOLBOX_IFRAME_HTML_FILE};`;
+  const commandToUploadFrameFile = `scp ${getBuildFolder()}schoolBox.html ${SCHOOLBOX_USERNAME_ORIGINAL}@${SCHOOLBOX_HOST}:${SCHOOLBOX_IFRAME_HTML_FILE};`;
   const commandToUploadRunningFrameFile = `scp ${getBuildFolder()}schoolBox.html ${SCHOOLBOX_USERNAME}@${SCHOOLBOX_HOST}:${SCHOOLBOX_IFRAME_HTML_RUNNING_FILE};`;
   exec(`${commandToUploadAllFiles} ${commandToUploadFrameFile} ${commandToUploadRunningFrameFile}`, (error, stdout, stderr) => {
     if (error) {

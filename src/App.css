@@ -35,6 +35,14 @@ input[type="checkbox"] {
     margin-bottom: 1rem;
 }
 
+.float-right {
+    float: right;
+}
+
+.section-row {
+    margin-bottom: 2rem;
+}
+
 /* trying to avoid conflict in SchoolBox's css */
 .card {
     word-wrap: inherit !important;
