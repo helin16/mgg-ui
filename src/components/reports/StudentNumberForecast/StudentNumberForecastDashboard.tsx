@@ -282,7 +282,6 @@ const StudentNumberForecastDashboard = () => {
 
   const getSubTotal = (campusCodes: string[]) => {
     const campusCodesSelected = _.intersection(selectedCampusCodes, campusCodes);
-    console.log('campusCodesSelected', selectedCampusCodes, campusCodes, campusCodesSelected);
     const yearLevelCodes = Object.values(yearLevelMap).filter(yearLevel => campusCodesSelected.indexOf(yearLevel.Campus) >= 0).map(yearLevel => `${yearLevel.Code}`);
     if (yearLevelCodes.length <= 0) {
       return null;
