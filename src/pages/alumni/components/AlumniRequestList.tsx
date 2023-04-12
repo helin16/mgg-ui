@@ -132,7 +132,9 @@ const AlumniRequestList = () => {
         </small>
       )
     }
-    return <AlumniRequestApprovePopupBtn request={request} onApproved={() => 1}/>
+    return <AlumniRequestApprovePopupBtn request={request} onApproved={() => {
+      setCount(MathHelper.add(count, 1))
+    }}/>
   }
 
 
