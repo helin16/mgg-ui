@@ -26,6 +26,7 @@ import SynLuYearLevelService from '../../../services/Synergetic/SynLuYearLevelSe
 import iLuYearLevel from '../../../types/Synergetic/iLuYearLevel';
 import {mainBlue} from '../../../AppWrapper';
 import ExplanationPanel from '../../ExplanationPanel';
+import * as _ from 'lodash';
 
 const Wrapper = styled.div`
   .title-row {
@@ -71,9 +72,13 @@ const Wrapper = styled.div`
       }
     }
     tbody {
-      tr.code-40 {
+      tr.subtotal {
+        background: #e9e9e9;
         td {
-          border-bottom: 2px black solid;
+          font-weight: bold;
+          :first-child {
+            text-align: right;
+          }
         }
       }
     }
@@ -107,7 +112,7 @@ const initLeadMap: iLeadMap = {
 }
 const StudentNumberForecastDashboard = () => {
   const {user} = useSelector((state: RootState) => state.auth);
-  const [selectedCampusCodes, setSelectedCampusCodes] = useState<string[]>([]);
+  const [selectedCampusCodes, setSelectedCampusCodes] = useState<string[]>(['E', 'S', 'J']);
   const [currentStudentMap, setCurrentStudentMap] = useState<iMap>({});
   const [nextYearFunnelLeadMap, setNextYearFunnelLeadMap] = useState(initLeadMap);
   const [yearLevelMap, setYearLevelMap] = useState<{ [key: string]: iLuYearLevel }>({});
@@ -248,6 +253,13 @@ const StudentNumberForecastDashboard = () => {
   }, [selectedCampusCodes, currentFileYear, nextFileYear, currentFileSemester]);
 
   useEffect(() => {
+    if (selectedCampusCodes.length <=0) {
+      setSelectedCampusCodes(['E', 'J', 'S']);
+    }
+  }, [selectedCampusCodes]);
+
+
+  useEffect(() => {
     setFutureNextYearMap(yearLevelCodes.reduce((map, code, currentIndex) => {
       const nextYearConfirmed = code in nextYearFunnelLeadMap.confirmed ? nextYearFunnelLeadMap.confirmed[code] : 0;
       let currentYearStudentLowerLevel = 0;
@@ -266,6 +278,26 @@ const StudentNumberForecastDashboard = () => {
     }, {}))
 
   }, [currentStudentMap, yearLevelCodes, nextYearFunnelLeadMap.confirmed])
+
+
+  const getSubTotal = (campusCodes: string[]) => {
+    const campusCodesSelected = _.intersection(selectedCampusCodes, campusCodes);
+    console.log('campusCodesSelected', selectedCampusCodes, campusCodes, campusCodesSelected);
+    const yearLevelCodes = Object.values(yearLevelMap).filter(yearLevel => campusCodesSelected.indexOf(yearLevel.Campus) >= 0).map(yearLevel => `${yearLevel.Code}`);
+    if (yearLevelCodes.length <= 0) {
+      return null;
+    }
+    return (
+      <tr key={`sub-total-${yearLevelCodes.join('-')}`} className={'subtotal'}>
+        <td>Sub Total</td>
+        <td>{Object.keys(currentStudentMap).filter(key => yearLevelCodes.indexOf(key) >= 0).reduce((sum, key) => MathHelper.add(sum, currentStudentMap[key] ||  0), 0)}</td>
+        <td>{Object.keys(nextYearFunnelLeadMap.confirmed).filter(key => yearLevelCodes.indexOf(key) >= 0).reduce((sum, key) => MathHelper.add(sum, nextYearFunnelLeadMap.confirmed[key] ||  0), 0)}</td>
+        <td>{Object.keys(nextYearFunnelLeadMap.inProgress).filter(key => yearLevelCodes.indexOf(key) >= 0).reduce((sum, key) => MathHelper.add(sum, nextYearFunnelLeadMap.inProgress[key] ||  0), 0)}</td>
+        <td>{Object.keys(futureNextYearMap).filter(key => yearLevelCodes.indexOf(key) >= 0).reduce((sum, key) => MathHelper.add(sum, futureNextYearMap[key] ||  0), 0)}</td>
+        <td>{Object.keys(nextYearFunnelLeadMap.leadsAndTours).filter(key => yearLevelCodes.indexOf(key) >= 0).reduce((sum, key) => MathHelper.add(sum, nextYearFunnelLeadMap.leadsAndTours[key] ||  0), 0)}</td>
+      </tr>
+    )
+  }
 
   const getContent = () => {
     if (isLoading === true) {
@@ -304,7 +336,7 @@ const StudentNumberForecastDashboard = () => {
           </Col>
         </Row>
 
-        <Table hover striped className={'lead-table'}>
+        <Table hover className={'lead-table'}>
           <thead>
             <tr>
               <th>Year Level</th>
@@ -324,17 +356,21 @@ const StudentNumberForecastDashboard = () => {
                   return null;
                 }
                 return (
-                  <tr key={yearLevelCode} className={`code-${yearLevelCode}`}>
-                    <td>{Number(yearLevelCode) > 0 ? `Year ${yearLevel.Description}`: yearLevel.Description}</td>
-                    <td>{yearLevelCode in currentStudentMap ? currentStudentMap[yearLevelCode] : 0}</td>
-                    <td>{yearLevelCode in nextYearFunnelLeadMap.confirmed ? nextYearFunnelLeadMap.confirmed[yearLevelCode] : 0}</td>
-                    <td>{yearLevelCode in nextYearFunnelLeadMap.inProgress ? nextYearFunnelLeadMap.inProgress[yearLevelCode] : 0}</td>
-                    <td>{yearLevelCode in futureNextYearMap ? futureNextYearMap[yearLevelCode] : 0}</td>
-                    <td>{yearLevelCode in nextYearFunnelLeadMap.leadsAndTours ? nextYearFunnelLeadMap.leadsAndTours[yearLevelCode] : 0}</td>
-                  </tr>
+                  <>
+                    {yearLevelCode === '0' ? getSubTotal(['E']) : null}
+                    <tr key={yearLevelCode} className={`code-${yearLevelCode}`}>
+                      <td>{Number(yearLevelCode) > 0 ? `Year ${yearLevel.Description}`: yearLevel.Description}</td>
+                      <td>{yearLevelCode in currentStudentMap ? currentStudentMap[yearLevelCode] : 0}</td>
+                      <td>{yearLevelCode in nextYearFunnelLeadMap.confirmed ? nextYearFunnelLeadMap.confirmed[yearLevelCode] : 0}</td>
+                      <td>{yearLevelCode in nextYearFunnelLeadMap.inProgress ? nextYearFunnelLeadMap.inProgress[yearLevelCode] : 0}</td>
+                      <td>{yearLevelCode in futureNextYearMap ? futureNextYearMap[yearLevelCode] : 0}</td>
+                      <td>{yearLevelCode in nextYearFunnelLeadMap.leadsAndTours ? nextYearFunnelLeadMap.leadsAndTours[yearLevelCode] : 0}</td>
+                    </tr>
+                  </>
                 )
               })
           }
+          {getSubTotal(['J', 'S'])}
           </tbody>
           <tfoot>
             <tr>
@@ -371,7 +407,7 @@ const StudentNumberForecastDashboard = () => {
         <div className={'title'}>{nextFileYear} Semester {currentFileSemester} Student Numbers</div>
         <SynCampusSelector
           className={'campus-selector'}
-          allowClear
+          allowClear={false}
           isMulti
           values={selectedCampusCodes}
           onSelect={(values) => {
