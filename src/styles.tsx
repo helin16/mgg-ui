@@ -5,10 +5,7 @@ export const FlexContainer = styled.div`
   //width: 100%;
   &.with-gap,
   &.withGap {
-    > * {
-      padding: 2px;
-      margin: 2px;
-    }
+    gap: 2px;
   }
   
   &.flex-wrap {

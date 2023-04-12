@@ -1,21 +1,27 @@
 import styled from 'styled-components';
 import ExplanationPanel from '../../components/ExplanationPanel';
 import React, {useState} from 'react';
-import {
-  MESSAGE_TYPE_FUNNEL_DOWNLOAD_LATEST
-} from '../../types/Message/iMessage';
-import MessageListPanel from '../../components/common/MessageListPanel';
 import ModuleAdminBtn from '../../components/module/ModuleAdminBtn';
 import {MGGS_MODULE_ID_FUNNEL} from '../../types/modules/iModuleUser';
 import FunnelAdminPage from './FunnelAdminPage';
-import FunnelDownloadLatestPopupBtn from './components/FunnelDownloadLatestPopupBtn';
+import StudentNumberForecastDashboard
+  from '../../components/reports/StudentNumberForecast/StudentNumberForecastDashboard';
+import {
+  FUNNEL_STAGE_NAME_CLOSED_WON,
+  FUNNEL_STAGE_NAME_APPLICATION_RECEIVED,
+  FUNNEL_STAGE_NAME_STUDENT_LEARNING_PROFILE,
+  FUNNEL_STAGE_NAME_INTERVIEW,
+  FUNNEL_STAGE_NAME_OFFER_SENT,
+  FUNNEL_STAGE_NAME_ENQUIRY, FUNNEL_STAGE_NAME_SCHOOL_VISIT
+} from '../../types/Funnel/iFunnelLead';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../redux/makeReduxStore';
 import MathHelper from '../../helper/MathHelper';
-
-const Wrapper = styled.div`
-`;
+import moment from 'moment-timezone';
+const Wrapper = styled.div``;
 const FunnelPage = () => {
+  const {user} = useSelector((state: RootState) => state.auth);
   const [showingAdminPage, setShowingAdminPage] = useState(false);
-  const [count, setCount] = useState(0);
 
   const getContent = () => {
 
@@ -34,15 +40,21 @@ const FunnelPage = () => {
           />
         </h3>
         <ExplanationPanel
-          text={<span>This page is for Funnel(https://mggs-au-vic-254.app.digistorm.com/) Data Sync. Funnel Data will be sync down every hour. <b>THE RESULT OF THIS WILL AFFECT THE POWER BI DASHBOARD</b></span>}
+          text={
+            <>
+              All number below are excluding Leavers.
+              <ul>
+                <li><b>Current Student</b>: the number of student currently</li>
+                <li><b>Confirmed</b>: the number of leads from Funnel with status: {FUNNEL_STAGE_NAME_CLOSED_WON} & {FUNNEL_STAGE_NAME_APPLICATION_RECEIVED}</li>
+                <li><b>In Progress</b>: the number of leads from Funnel with status: {FUNNEL_STAGE_NAME_STUDENT_LEARNING_PROFILE}, {FUNNEL_STAGE_NAME_INTERVIEW} & {FUNNEL_STAGE_NAME_OFFER_SENT}</li>
+                <li><b>Future {MathHelper.add(user?.SynCurrentFileSemester?.FileYear || moment().year(), 1)}</b>: = Current Student on Lower Year Level + Confirmed.</li>
+                <li><b>Leads & Tours</b>: the number of leads from Funnel with status: {FUNNEL_STAGE_NAME_ENQUIRY}, {FUNNEL_STAGE_NAME_SCHOOL_VISIT} & {FUNNEL_STAGE_NAME_APPLICATION_RECEIVED}</li>
+              </ul>
+            </>
+          }
         />
-
         <div className={'section-row'}>
-          <FunnelDownloadLatestPopupBtn onSubmitted={() => setCount(MathHelper.add(count, 1))}/>
-        </div>
-
-        <div className={'section-row'}>
-          <MessageListPanel type={MESSAGE_TYPE_FUNNEL_DOWNLOAD_LATEST} reloadCount={count} />
+          <StudentNumberForecastDashboard />
         </div>
       </>
     )
