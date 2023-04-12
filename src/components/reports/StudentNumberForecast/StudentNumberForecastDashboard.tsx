@@ -3,7 +3,7 @@ import {useSelector} from 'react-redux';
 import {RootState} from '../../../redux/makeReduxStore';
 import PanelTitle from '../../PanelTitle';
 import SynCampusSelector from '../../student/SynCampusSelector';
-import {useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import Panel from '../../common/Panel';
 import {Col, Row, Table} from 'react-bootstrap';
 import MathHelper from '../../../helper/MathHelper';
@@ -25,6 +25,7 @@ import iFunnelLead, {
 import SynLuYearLevelService from '../../../services/Synergetic/SynLuYearLevelService';
 import iLuYearLevel from '../../../types/Synergetic/iLuYearLevel';
 import {mainBlue} from '../../../AppWrapper';
+import ExplanationPanel from '../../ExplanationPanel';
 
 const Wrapper = styled.div`
   .title-row {
@@ -39,6 +40,7 @@ const Wrapper = styled.div`
     .campus-selector {
       color: black;
       display: inline-block;
+      min-width: 220px;
     }
   }
   
@@ -64,7 +66,9 @@ const Wrapper = styled.div`
   .lead-table {
     thead {
       background: ${mainBlue};
-      color: white;
+      th {
+        color: white !important;
+      }
     }
     tfoot {
       font-weight: bold;
@@ -311,7 +315,7 @@ const StudentNumberForecastDashboard = () => {
                 }
                 return (
                   <tr key={yearLevelCode}>
-                    <td>{yearLevelCode} - {yearLevel.Description}</td>
+                    <td>{Number(yearLevelCode) > 0 ? `Year ${yearLevel.Description}`: yearLevel.Description}</td>
                     <td>{yearLevelCode in currentStudentMap ? currentStudentMap[yearLevelCode] : 0}</td>
                     <td>{yearLevelCode in nextYearFunnelLeadMap.confirmed ? nextYearFunnelLeadMap.confirmed[yearLevelCode] : 0}</td>
                     <td>{yearLevelCode in nextYearFunnelLeadMap.inProgress ? nextYearFunnelLeadMap.inProgress[yearLevelCode] : 0}</td>
@@ -339,6 +343,20 @@ const StudentNumberForecastDashboard = () => {
 
   return (
     <Wrapper>
+      <ExplanationPanel
+        text={
+          <>
+            All number below are excluding Leavers.
+            <ul>
+              <li><b>Current Student</b>: the number of student currently</li>
+              <li><b>Confirmed</b>: the number of leads from Funnel with status: {FUNNEL_STAGE_NAME_CLOSED_WON} & {FUNNEL_STAGE_NAME_APPLICATION_RECEIVED}</li>
+              <li><b>In Progress</b>: the number of leads from Funnel with status: {FUNNEL_STAGE_NAME_STUDENT_LEARNING_PROFILE}, {FUNNEL_STAGE_NAME_INTERVIEW} & {FUNNEL_STAGE_NAME_OFFER_SENT}</li>
+              <li><b>Future {MathHelper.add(user?.SynCurrentFileSemester?.FileYear || moment().year(), 1)}</b>: = Current Student on Lower Year Level + Confirmed.</li>
+              <li><b>Leads & Tours</b>: the number of leads from Funnel with status: {FUNNEL_STAGE_NAME_ENQUIRY}, {FUNNEL_STAGE_NAME_SCHOOL_VISIT} & {FUNNEL_STAGE_NAME_APPLICATION_RECEIVED}</li>
+            </ul>
+          </>
+        }
+      />
       <PanelTitle className={'title-row section-row'}>
         <div className={'title'}>{user?.SynCurrentFileSemester?.FileYear} Semester {user?.SynCurrentFileSemester?.FileSemester} Student Numbers</div>
         <SynCampusSelector
