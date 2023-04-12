@@ -4,7 +4,7 @@ import PopupModal from '../../../components/common/PopupModal';
 import LoadingBtn from '../../../components/common/LoadingBtn';
 import {Table} from 'react-bootstrap';
 import AlumniRequestService from '../../../services/Alumni/AlumniRequestService';
-import Toaster from '../../../services/Toaster';
+import Toaster, {TOAST_TYPE_SUCCESS} from '../../../services/Toaster';
 
 
 type iAlumniRequestApprovePopup = {
@@ -19,6 +19,7 @@ const AlumniRequestApprovePopupBtn = ({request, onApproved}: iAlumniRequestAppro
     setIsSaving(true);
     AlumniRequestService.approve(request.id)
       .then(resp => {
+        Toaster.showToast(`Request approved successfully.`, TOAST_TYPE_SUCCESS)
         onApproved(resp);
       })
       .catch(err => {
