@@ -42,6 +42,9 @@ input[type="checkbox"] {
 .section-row {
     margin-bottom: 2rem;
 }
+.content-row {
+    margin-bottom: 0.6rem;
+}
 
 /* trying to avoid conflict in SchoolBox's css */
 .card {

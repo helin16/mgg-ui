@@ -29,9 +29,6 @@ const Wrapper = styled.div`
     border-left: none;
     outline: none;
   }
-  .content-row {
-    margin-bottom: 0.6rem;
-  }
 `;
 const FunnelModuleEditPanelContent = ({module, onUpdate}: iFunnelModuleEditPanelContent) => {
   const [token, setToken] = useState(module?.settings?.token || '');

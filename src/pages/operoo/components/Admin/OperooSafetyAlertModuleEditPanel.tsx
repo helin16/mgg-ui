@@ -28,9 +28,6 @@ const Wrapper = styled.div`
     border-left: none;
     outline: none;
   }
-  .content-row {
-    margin-bottom: 0.6rem;
-  }
 `;
 const OperooSafetyAlertModuleEditPanelContent = ({module, onUpdate}: iOperooSafetyAlertModuleEditPanelContent) => {
   const [apiToken, setApiToken] = useState(module?.settings.apiToken || '');

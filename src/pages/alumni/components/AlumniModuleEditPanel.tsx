@@ -12,18 +12,7 @@ type iAlumniModuleEditPanelContent = {
   onUpdate: (data: any) => void;
 }
 
-const Wrapper = styled.div`
-  .input-type-chg-btn {
-    border: 1px solid #ced4da;
-    background-color: white;
-    color: #ced4da;
-    border-left: none;
-    outline: none;
-  }
-  .content-row {
-    margin-bottom: 0.6rem;
-  }
-`;
+const Wrapper = styled.div``;
 const AlumniModuleEditPanelContent = ({module, onUpdate}: iAlumniModuleEditPanelContent) => {
   const [emailTemplateName, setEmailTemplateName] = useState(module?.settings?.emailTemplateName?.notifyApprovers || '');
 
