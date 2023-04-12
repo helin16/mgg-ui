@@ -26,6 +26,8 @@ import SynLuYearLevelService from '../../../services/Synergetic/SynLuYearLevelSe
 import iLuYearLevel from '../../../types/Synergetic/iLuYearLevel';
 import {mainBlue} from '../../../AppWrapper';
 import ExplanationPanel from '../../ExplanationPanel';
+import {OP_GTE} from '../../../helper/ServiceHelper';
+import {stat} from 'fs';
 
 const Wrapper = styled.div`
   .title-row {
@@ -114,18 +116,28 @@ const StudentNumberForecastDashboard = () => {
   const [yearLevelCodes, setYearLevelCodes] = useState<string[]>([]);
   const [futureNextYearMap, setFutureNextYearMap] = useState<iMap>({});
   const [isLoading, setIsLoading] = useState(false);
+  const currentFileSemester = user?.SynCurrentFileSemester?.FileSemester || 1;
+  const currentFileYear = user?.SynCurrentFileSemester?.FileYear || moment().year();
+  const nextFileYear = MathHelper.add(currentFileYear, 1);
+  const fileYears = [currentFileYear, nextFileYear];
 
   const getStatusFromLead = (lead: iFunnelLead) => {
     switch (lead.pipeline_stage_name) {
       case FUNNEL_STAGE_NAME_CLOSED_WON:
       case FUNNEL_STAGE_NAME_OFFER_ACCEPTED: {
-        return 'confirmed';
+        if (fileYears.indexOf(Number(lead.student_starting_year)) >= 0 ) {
+          return 'confirmed';
+        }
+        return '';
       }
 
       case FUNNEL_STAGE_NAME_STUDENT_LEARNING_PROFILE:
       case FUNNEL_STAGE_NAME_INTERVIEW:
       case FUNNEL_STAGE_NAME_OFFER_SENT: {
-        return 'inProgress';
+        if (fileYears.indexOf(Number(lead.student_starting_year)) < 0 ) {
+          return 'inProgress';
+        }
+        return '';
       }
 
       case FUNNEL_STAGE_NAME_ENQUIRY:
@@ -178,15 +190,16 @@ const StudentNumberForecastDashboard = () => {
     Promise.all([
       SynVStudentService.getCurrentVStudents({
         where: JSON.stringify({
-          FileYear: user?.SynCurrentFileSemester?.FileYear || moment().year(),
-          FileSemester: user?.SynCurrentFileSemester?.FileSemester || 1,
+          FileYear: currentFileYear,
+          FileSemester: currentFileSemester,
           StudentActiveFlag: true,
           StudentLeavingDate: null,
         })
       }),
       FunnelService.getAll({
         where: JSON.stringify({
-          // student_starting_year: MathHelper.add(user?.SynCurrentFileSemester?.FileYear || moment().year(), 1),
+          // student_starting_year: [currentFileYear, nextFileYear, null],
+          student_starting_year: {[OP_GTE]: currentFileYear},
           isActive: true,
           pipeline_stage_name: leadStatuses,
           ...(yearLevelForLeads.length > 0 ? {student_starting_year_level: yearLevelForLeads} : {})
@@ -218,16 +231,19 @@ const StudentNumberForecastDashboard = () => {
       }, {}));
       setNextYearFunnelLeadMap(resp[1].data.reduce((map: iLeadMap, lead) => {
         const status = getStatusFromLead(lead);
-        const yearLevelCode = getYearLevelFromLead(lead)
+        if (`${status}`.trim() === '') {
+          return map;
+        }
+        const yearLevelCode = getYearLevelFromLead(lead);
         return {
           ...map,
           [status]: {
             // @ts-ignore
             ...map[status],
             // @ts-ignore
-            total: MathHelper.add(map[status].total || 0, 1),
+            total: MathHelper.add(map[status]?.total || 0, 1),
             // @ts-ignore
-            [yearLevelCode]: MathHelper.add(map[status][yearLevelCode] || 0, 1),
+            [yearLevelCode]: MathHelper.add(yearLevelCode in map[status] ? map[status][yearLevelCode] : 0, 1),
           }
         }
       }, initLeadMap))
@@ -242,7 +258,7 @@ const StudentNumberForecastDashboard = () => {
     return () => {
       isCanceled = true;
     };
-  }, [selectedCampusCodes, user?.SynCurrentFileSemester]);
+  }, [selectedCampusCodes, currentFileYear, nextFileYear, currentFileSemester]);
 
   useEffect(() => {
     setFutureNextYearMap(yearLevelCodes.reduce((map, code, currentIndex) => {
@@ -256,7 +272,7 @@ const StudentNumberForecastDashboard = () => {
       return {
         ...map,
         // @ts-ignore
-        total: MathHelper.add(map.total || 0, futureNextYear),
+        total: MathHelper.add(map?.total || 0, futureNextYear),
         // @ts-ignore
         [code]: MathHelper.add(map[code] || 0, futureNextYear),
       }
@@ -278,17 +294,17 @@ const StudentNumberForecastDashboard = () => {
             </Panel>
           </Col>
           <Col sm={2}>
-            <Panel title={'Confirmed'} className={'sum-div'}>
+            <Panel title={`Confirmed ${fileYears.join(' & ')}`} className={'sum-div'}>
               {nextYearFunnelLeadMap.confirmed.total || 0}
             </Panel>
           </Col>
           <Col sm={3}>
-            <Panel title={'In Progress'} className={'sum-div'}>
+            <Panel title={`In Progress ${fileYears.join(' & ')}`} className={'sum-div'}>
               {nextYearFunnelLeadMap.inProgress.total || 0}
             </Panel>
           </Col>
           <Col sm={3}>
-            <Panel title={`Future ${MathHelper.add(user?.SynCurrentFileSemester?.FileYear || moment().year(), 1)}`} className={'sum-div'}>
+            <Panel title={`Future ${fileYears.join(' & ')}`} className={'sum-div'}>
               {
                 futureNextYearMap.total || 0
               }
@@ -306,9 +322,9 @@ const StudentNumberForecastDashboard = () => {
             <tr>
               <th>Year Level</th>
               <th>Current Students</th>
-              <th>Confirmed</th>
-              <th>In Progress</th>
-              <th>Future {MathHelper.add(user?.SynCurrentFileSemester?.FileYear || moment().year(), 1)}</th>
+              <th>Confirmed {fileYears.join(' & ')}</th>
+              <th>In Progress {fileYears.join(' & ')}</th>
+              <th>Future {fileYears.join(' & ')}</th>
               <th>Leads & Tours</th>
             </tr>
           </thead>
@@ -353,19 +369,19 @@ const StudentNumberForecastDashboard = () => {
       <ExplanationPanel
         text={
           <>
-            All number below are excluding Leavers.
+            All number below are excluding Leavers and <b>Proposed Entry Year in : {fileYears.join(' & ')}</b>
             <ul>
               <li><b>Current Student</b>: the number of student currently</li>
-              <li><b>Confirmed</b>: the number of leads from Funnel with status: {FUNNEL_STAGE_NAME_CLOSED_WON} & {FUNNEL_STAGE_NAME_APPLICATION_RECEIVED}</li>
-              <li><b>In Progress</b>: the number of leads from Funnel with status: {FUNNEL_STAGE_NAME_STUDENT_LEARNING_PROFILE}, {FUNNEL_STAGE_NAME_INTERVIEW} & {FUNNEL_STAGE_NAME_OFFER_SENT}</li>
-              <li><b>Future {MathHelper.add(user?.SynCurrentFileSemester?.FileYear || moment().year(), 1)}</b>: = Current Student on Lower Year Level + Confirmed.</li>
+              <li><b>Confirmed {fileYears.join(' & ')}</b>: the number of leads from Funnel with status: {FUNNEL_STAGE_NAME_CLOSED_WON} & {FUNNEL_STAGE_NAME_APPLICATION_RECEIVED}</li>
+              <li><b>In Progress {fileYears.join(' & ')}</b>: the number of leads from Funnel with status: {FUNNEL_STAGE_NAME_STUDENT_LEARNING_PROFILE}, {FUNNEL_STAGE_NAME_INTERVIEW} & {FUNNEL_STAGE_NAME_OFFER_SENT}</li>
+              <li><b>Future {fileYears.join(' & ')}</b>: = Current Student on Lower Year Level + Confirmed.</li>
               <li><b>Leads & Tours</b>: the number of leads from Funnel with status: {FUNNEL_STAGE_NAME_ENQUIRY}, {FUNNEL_STAGE_NAME_SCHOOL_VISIT} & {FUNNEL_STAGE_NAME_APPLICATION_RECEIVED}</li>
             </ul>
           </>
         }
       />
       <PanelTitle className={'title-row section-row'}>
-        <div className={'title'}>{user?.SynCurrentFileSemester?.FileYear} Semester {user?.SynCurrentFileSemester?.FileSemester} Student Numbers</div>
+        <div className={'title'}>{currentFileYear} Semester {currentFileSemester} Student Numbers</div>
         <SynCampusSelector
           className={'campus-selector'}
           allowClear
