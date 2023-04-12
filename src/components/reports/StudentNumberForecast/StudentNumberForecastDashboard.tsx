@@ -70,6 +70,13 @@ const Wrapper = styled.div`
         color: white !important;
       }
     }
+    tbody {
+      tr.code-40 {
+        td {
+          border-bottom: 2px black solid;
+        }
+      }
+    }
     tfoot {
       font-weight: bold;
     }
@@ -241,7 +248,7 @@ const StudentNumberForecastDashboard = () => {
     setFutureNextYearMap(yearLevelCodes.reduce((map, code, currentIndex) => {
       const nextYearConfirmed = code in nextYearFunnelLeadMap.confirmed ? nextYearFunnelLeadMap.confirmed[code] : 0;
       let currentYearStudentLowerLevel = 0;
-      if (currentIndex > 0) {
+      if (currentIndex > 0 && code !== '0') {
         const currentYearStudentLowerLevelCode = yearLevelCodes[MathHelper.sub(currentIndex, 1)];
         currentYearStudentLowerLevel = currentYearStudentLowerLevelCode in currentStudentMap ? currentStudentMap[currentYearStudentLowerLevelCode] : 0;
       }
@@ -314,7 +321,7 @@ const StudentNumberForecastDashboard = () => {
                   return null;
                 }
                 return (
-                  <tr key={yearLevelCode}>
+                  <tr key={yearLevelCode} className={`code-${yearLevelCode}`}>
                     <td>{Number(yearLevelCode) > 0 ? `Year ${yearLevel.Description}`: yearLevel.Description}</td>
                     <td>{yearLevelCode in currentStudentMap ? currentStudentMap[yearLevelCode] : 0}</td>
                     <td>{yearLevelCode in nextYearFunnelLeadMap.confirmed ? nextYearFunnelLeadMap.confirmed[yearLevelCode] : 0}</td>
