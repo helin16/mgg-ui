@@ -14,6 +14,7 @@ import MyClassListPage from '../../pages/students/MyClassListPage';
 import BudgetTrackerPage from '../../pages/BudgetTracker/BudgetTrackerPage';
 import FunnelPage from '../../pages/funnel/FunnelPage';
 import AlumniRequestPage from '../../pages/alumni/AlumniRequestPage';
+import ParentDirectoryPage from '../../pages/parent/ParentDirectoryPage';
 // import PageNotFound from '../../components/PageNotFound';
 
 const schoolBoxIframeElementId = 'remote';
@@ -37,6 +38,10 @@ const SchoolBoxRouter = ({path, remoteUrl}: {path: string, remoteUrl: string}) =
     case '/bt': {
       removeSchoolBoxIframe();
       return <BudgetTrackerPage />
+    }
+    case '/parent/directory': {
+      removeSchoolBoxIframe();
+      return <ParentDirectoryPage />
     }
     case '/reports/student': {
       removeSchoolBoxIframe();
