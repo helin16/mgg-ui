@@ -70,11 +70,11 @@ type iSynCommunity = {
   // ParkingSpace: string;
   // NetworkLogin: string;
   // Barcode: string;
-  // SilentMobilePhoneFlag: boolean;
+  SilentMobilePhoneFlag: boolean;
   // MobilePhoneActual: string;
   // SilentOccupMobilePhoneFlag: boolean;
   // OccupMobilePhoneActual: string;
-  // DirectoryIncludeFlag: boolean;
+  DirectoryIncludeFlag: boolean;
   // DirectoryProvideFlag: boolean;
   // NameInternal: string;
   // NameInternalOverrideFlag: boolean;
