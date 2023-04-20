@@ -2,6 +2,7 @@ import iVStudent from '../../../../types/Synergetic/iVStudent';
 import iFunnelLead from '../../../../types/Funnel/iFunnelLead';
 import { Table} from 'react-bootstrap';
 import PopupModal from '../../../common/PopupModal';
+import moment from 'moment-timezone';
 
 type iStudentNumberDetailsPopup = {
   records: (iVStudent | iFunnelLead)[];
@@ -23,6 +24,7 @@ const StudentNumberDetailsPopup = ({records, handleClose, isShowing = false}: iS
           <tr>
             <th>First Name</th>
             <th>Last Name</th>
+            <th>Status</th>
             <th>Leaving Date</th>
             <th>Current Year Level</th>
             <th>Proposing Entry Year</th>
@@ -41,7 +43,8 @@ const StudentNumberDetailsPopup = ({records, handleClose, isShowing = false}: iS
               <tr key={index}>
                 <td>{'StudentGiven1' in record ? record.StudentGiven1 : record.student_first_name}</td>
                 <td>{'StudentSurname' in record ? record.StudentSurname : record.student_last_name}</td>
-                <td>{'StudentLeavingDate' in record ? record.StudentLeavingDate : ''}</td>
+                <td>{'StudentStatusDescription' in record ? record.StudentStatusDescription : ''}</td>
+                <td>{'StudentLeavingDate' in record ? (`${record.StudentLeavingDate || ''}`.trim() === '' ? '' : moment(record.StudentLeavingDate).format('ll')) : ''}</td>
                 <td>{'StudentYearLevelDescription' in record ? record.StudentYearLevelDescription : ''}</td>
                 <td>{'student_starting_year' in record ? record.student_starting_year : ''}</td>
                 <td>{'student_starting_year_level' in record ? record.student_starting_year_level : ''}</td>
