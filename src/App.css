@@ -14,6 +14,9 @@ a {
 .PopupModal.full-width .modal-dialog {
     max-width: calc(100% - 10px);
 }
+.modal-dialog.modal-90w {
+    max-width: 80vw;
+}
 
 input[type="checkbox"] {
     width: 16px !important;

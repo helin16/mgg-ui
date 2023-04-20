@@ -13,20 +13,21 @@ import SynVStudentService from '../../../services/Synergetic/SynVStudentService'
 import moment from 'moment-timezone';
 import FunnelService from '../../../services/Funnel/FunnelService';
 import iFunnelLead, {
-  FUNNEL_STAGE_NAME_CLOSED_WON,
   FUNNEL_STAGE_NAME_OFFER_ACCEPTED,
   FUNNEL_STAGE_NAME_STUDENT_LEARNING_PROFILE,
   FUNNEL_STAGE_NAME_INTERVIEW,
   FUNNEL_STAGE_NAME_OFFER_SENT,
   FUNNEL_STAGE_NAME_ENQUIRY,
   FUNNEL_STAGE_NAME_SCHOOL_VISIT,
-  FUNNEL_STAGE_NAME_APPLICATION_RECEIVED,
+  FUNNEL_STAGE_NAME_APPLICATION_RECEIVED, FUNNEL_STAGE_NAME_EXPORTED,
 } from '../../../types/Funnel/iFunnelLead';
 import SynLuYearLevelService from '../../../services/Synergetic/SynLuYearLevelService';
 import iLuYearLevel from '../../../types/Synergetic/iLuYearLevel';
 import {mainBlue} from '../../../AppWrapper';
 import ExplanationPanel from '../../ExplanationPanel';
 import * as _ from 'lodash';
+import iVStudent from '../../../types/Synergetic/iVStudent';
+import StudentNumberDetailsPopup from './components/StudentNumberDetailsPopup';
 
 const Wrapper = styled.div`
   .title-row {
@@ -65,6 +66,12 @@ const Wrapper = styled.div`
   }
   
   .lead-table {
+    td.cursor-pointer {
+      :hover {
+        background: #6c757d;
+        color: white;
+      }
+    }
     thead {
       background: ${mainBlue};
       th {
@@ -89,7 +96,7 @@ const Wrapper = styled.div`
 `;
 
 const leadStatuses = [
-  FUNNEL_STAGE_NAME_CLOSED_WON,
+  FUNNEL_STAGE_NAME_EXPORTED,
   FUNNEL_STAGE_NAME_OFFER_ACCEPTED,
   FUNNEL_STAGE_NAME_STUDENT_LEARNING_PROFILE,
   FUNNEL_STAGE_NAME_INTERVIEW,
@@ -99,7 +106,8 @@ const leadStatuses = [
   FUNNEL_STAGE_NAME_APPLICATION_RECEIVED,
 ];
 
-type iMap = {[key: string]: number};
+type iStudentMap = {[key: string]: iVStudent[]};
+type iMap = {[key: string]: iFunnelLead[]};
 type iLeadMap = {
   confirmed: iMap;
   inProgress: iMap;
@@ -113,7 +121,7 @@ const initLeadMap: iLeadMap = {
 const StudentNumberForecastDashboard = () => {
   const {user} = useSelector((state: RootState) => state.auth);
   const [selectedCampusCodes, setSelectedCampusCodes] = useState<string[]>(['E', 'S', 'J']);
-  const [currentStudentMap, setCurrentStudentMap] = useState<iMap>({});
+  const [currentStudentMap, setCurrentStudentMap] = useState<iStudentMap>({});
   const [nextYearFunnelLeadMap, setNextYearFunnelLeadMap] = useState(initLeadMap);
   const [yearLevelMap, setYearLevelMap] = useState<{ [key: string]: iLuYearLevel }>({});
   const [yearLevelCodes, setYearLevelCodes] = useState<string[]>([]);
@@ -122,11 +130,12 @@ const StudentNumberForecastDashboard = () => {
   const currentFileSemester = user?.SynCurrentFileSemester?.FileSemester || 1;
   const currentFileYear = user?.SynCurrentFileSemester?.FileYear || moment().year();
   const nextFileYear = MathHelper.add(currentFileYear, 1);
+  const [showingRecords, setShowingRecords] = useState<(iVStudent | iFunnelLead)[] | null>(null)
 
   const getStatusFromLead = (lead: iFunnelLead) => {
     switch (lead.pipeline_stage_name) {
-      case FUNNEL_STAGE_NAME_CLOSED_WON:
-      case FUNNEL_STAGE_NAME_OFFER_ACCEPTED: {
+      case FUNNEL_STAGE_NAME_OFFER_ACCEPTED:
+      case FUNNEL_STAGE_NAME_EXPORTED: {
         return 'confirmed';
       }
 
@@ -209,12 +218,12 @@ const StudentNumberForecastDashboard = () => {
       })
     ]).then(resp => {
       if (isCanceled) return;
-      setCurrentStudentMap(resp[0].reduce((map: iMap, student) => {
+      setCurrentStudentMap(resp[0].reduce((map: iStudentMap, student) => {
         const yearLevelCode = student.StudentYearLevel;
         return {
           ...map,
-          total: MathHelper.add(map.total || 0, selectedCampusCodes.length === 0 || selectedCampusCodes.indexOf(student.StudentCampus) >= 0 ? 1 : 0),
-          [yearLevelCode]: MathHelper.add(map[yearLevelCode] || 0, 1),
+          total: [...(map.total || []), ...((selectedCampusCodes.length === 0 || selectedCampusCodes.indexOf(student.StudentCampus) >= 0) ? [student] : [])],
+          [yearLevelCode]: [...(map[yearLevelCode] || []), student],
         };
       }, {}));
       setYearLevelCodes(resp[2].map(yearLevel => `${yearLevel.Code}`));
@@ -224,7 +233,7 @@ const StudentNumberForecastDashboard = () => {
           [`${yearLevel.Code}`]: yearLevel,
         };
       }, {}));
-      setNextYearFunnelLeadMap(resp[1].data.reduce((map: iLeadMap, lead) => {
+      setNextYearFunnelLeadMap((resp[1].data || []).reduce((map: iLeadMap, lead) => {
         const status = getStatusFromLead(lead);
         const yearLevelCode = getYearLevelFromLead(lead)
         return {
@@ -233,9 +242,9 @@ const StudentNumberForecastDashboard = () => {
             // @ts-ignore
             ...map[status],
             // @ts-ignore
-            total: MathHelper.add(map[status].total || 0, 1),
+            total: [...(map[status].total || []), lead], // MathHelper.add(map[status].total || 0, 1),
             // @ts-ignore
-            [yearLevelCode]: MathHelper.add(map[status][yearLevelCode] || 0, 1),
+            [yearLevelCode]: [...(map[status][yearLevelCode] || []), lead], // MathHelper.add(map[status][yearLevelCode] || 0, 1),
           }
         }
       }, initLeadMap))
@@ -261,19 +270,19 @@ const StudentNumberForecastDashboard = () => {
 
   useEffect(() => {
     setFutureNextYearMap(yearLevelCodes.reduce((map, code, currentIndex) => {
-      const nextYearConfirmed = code in nextYearFunnelLeadMap.confirmed ? nextYearFunnelLeadMap.confirmed[code] : 0;
-      let currentYearStudentLowerLevel = 0;
+      const nextYearConfirmed = code in nextYearFunnelLeadMap.confirmed ? nextYearFunnelLeadMap.confirmed[code] : [];
+      let currentYearStudentLowerLevel: iVStudent[] = [];
       if (currentIndex > 0 && code !== '0') {
         const currentYearStudentLowerLevelCode = yearLevelCodes[MathHelper.sub(currentIndex, 1)];
-        currentYearStudentLowerLevel = currentYearStudentLowerLevelCode in currentStudentMap ? currentStudentMap[currentYearStudentLowerLevelCode] : 0;
+        currentYearStudentLowerLevel = currentYearStudentLowerLevelCode in currentStudentMap ? currentStudentMap[currentYearStudentLowerLevelCode] : [];
       }
-      const futureNextYear = MathHelper.add(currentYearStudentLowerLevel, nextYearConfirmed);
+      const futureNextYear = [...currentYearStudentLowerLevel, ...nextYearConfirmed];
       return {
         ...map,
         // @ts-ignore
-        total: MathHelper.add(map.total || 0, futureNextYear),
+        total: [...(map.total || []), ...futureNextYear],
         // @ts-ignore
-        [code]: MathHelper.add(map[code] || 0, futureNextYear),
+        [code]: [...(map[code] || []), ...futureNextYear],
       }
     }, {}))
 
@@ -289,11 +298,58 @@ const StudentNumberForecastDashboard = () => {
     return (
       <tr key={`sub-total-${yearLevelCodes.join('-')}`} className={'subtotal'}>
         <td>Sub Total</td>
-        <td>{Object.keys(currentStudentMap).filter(key => yearLevelCodes.indexOf(key) >= 0).reduce((sum, key) => MathHelper.add(sum, currentStudentMap[key] ||  0), 0)}</td>
-        <td>{Object.keys(nextYearFunnelLeadMap.confirmed).filter(key => yearLevelCodes.indexOf(key) >= 0).reduce((sum, key) => MathHelper.add(sum, nextYearFunnelLeadMap.confirmed[key] ||  0), 0)}</td>
-        <td>{Object.keys(nextYearFunnelLeadMap.inProgress).filter(key => yearLevelCodes.indexOf(key) >= 0).reduce((sum, key) => MathHelper.add(sum, nextYearFunnelLeadMap.inProgress[key] ||  0), 0)}</td>
-        <td>{Object.keys(futureNextYearMap).filter(key => yearLevelCodes.indexOf(key) >= 0).reduce((sum, key) => MathHelper.add(sum, futureNextYearMap[key] ||  0), 0)}</td>
-        <td>{Object.keys(nextYearFunnelLeadMap.leadsAndTours).filter(key => yearLevelCodes.indexOf(key) >= 0).reduce((sum, key) => MathHelper.add(sum, nextYearFunnelLeadMap.leadsAndTours[key] ||  0), 0)}</td>
+        <td
+          className={'cursor-pointer'}
+          onClick={() => setShowingRecords(
+            Object.keys(currentStudentMap)
+              .filter(key => yearLevelCodes.indexOf(key) >= 0)
+              .map(key => currentStudentMap[key])
+              .reduce((arr, records) => [...arr, ...records], [])
+          )}
+        >
+          {
+            Object.keys(currentStudentMap)
+              .filter(key => yearLevelCodes.indexOf(key) >= 0)
+              .reduce((sum, key) => MathHelper.add(sum, currentStudentMap[key].length ||  0), 0)
+          }
+        </td>
+        <td
+          className={'cursor-pointer'}
+          onClick={() => setShowingRecords(
+            Object.keys(nextYearFunnelLeadMap.confirmed)
+              .filter(key => yearLevelCodes.indexOf(key) >= 0)
+              .map(key => nextYearFunnelLeadMap.confirmed[key])
+              .reduce((arr, records) => [...arr, ...records], [])
+          )}
+        >
+          {
+            Object.keys(nextYearFunnelLeadMap.confirmed).filter(key => yearLevelCodes.indexOf(key) >= 0).reduce((sum, key) => MathHelper.add(sum, nextYearFunnelLeadMap.confirmed[key].length ||  0), 0)
+          }
+        </td>
+        <td
+          className={'cursor-pointer'}
+          onClick={() => setShowingRecords(
+            Object.keys(nextYearFunnelLeadMap.inProgress)
+              .filter(key => yearLevelCodes.indexOf(key) >= 0)
+              .map(key => nextYearFunnelLeadMap.inProgress[key])
+              .reduce((arr, records) => [...arr, ...records], [])
+          )}>{Object.keys(nextYearFunnelLeadMap.inProgress).filter(key => yearLevelCodes.indexOf(key) >= 0).reduce((sum, key) => MathHelper.add(sum, nextYearFunnelLeadMap.inProgress[key].length ||  0), 0)}</td>
+        <td
+          className={'cursor-pointer'}
+          onClick={() => setShowingRecords(
+            Object.keys(futureNextYearMap)
+              .filter(key => yearLevelCodes.indexOf(key) >= 0)
+              .map(key => futureNextYearMap[key])
+              .reduce((arr, records) => [...arr, ...records], [])
+          )}>{Object.keys(futureNextYearMap).filter(key => yearLevelCodes.indexOf(key) >= 0).reduce((sum, key) => MathHelper.add(sum, futureNextYearMap[key].length ||  0), 0)}</td>
+        <td
+          className={'cursor-pointer'}
+          onClick={() => setShowingRecords(
+            Object.keys(nextYearFunnelLeadMap.leadsAndTours)
+              .filter(key => yearLevelCodes.indexOf(key) >= 0)
+              .map(key => nextYearFunnelLeadMap.leadsAndTours[key])
+              .reduce((arr, records) => [...arr, ...records], [])
+          )}>{Object.keys(nextYearFunnelLeadMap.leadsAndTours).filter(key => yearLevelCodes.indexOf(key) >= 0).reduce((sum, key) => MathHelper.add(sum, nextYearFunnelLeadMap.leadsAndTours[key].length ||  0), 0)}</td>
       </tr>
     )
   }
@@ -308,29 +364,29 @@ const StudentNumberForecastDashboard = () => {
         <Row className={'section-row sum-div-wrapper'}>
           <Col sm={2}>
             <Panel title={'Current Students'} className={'sum-div'}>
-              {currentStudentMap.total || 0}
+              {currentStudentMap.total?.length || 0}
             </Panel>
           </Col>
           <Col sm={2}>
             <Panel title={'Confirmed'} className={'sum-div'}>
-              {nextYearFunnelLeadMap.confirmed.total || 0}
+              {nextYearFunnelLeadMap.confirmed.total?.length || 0}
             </Panel>
           </Col>
           <Col sm={3}>
             <Panel title={'In Progress'} className={'sum-div'}>
-              {nextYearFunnelLeadMap.inProgress.total || 0}
+              {nextYearFunnelLeadMap.inProgress.total?.length || 0}
             </Panel>
           </Col>
           <Col sm={3}>
             <Panel title={`Future ${nextFileYear}`} className={'sum-div'}>
               {
-                futureNextYearMap.total || 0
+                futureNextYearMap.total?.length || 0
               }
             </Panel>
           </Col>
           <Col sm={2}>
             <Panel title={`Leads & Tours`} className={'sum-div'}>
-              {nextYearFunnelLeadMap.leadsAndTours.total || 0}
+              {nextYearFunnelLeadMap.leadsAndTours.total?.length || 0}
             </Panel>
           </Col>
         </Row>
@@ -355,17 +411,17 @@ const StudentNumberForecastDashboard = () => {
                   return null;
                 }
                 return (
-                  <>
+                  <React.Fragment key={yearLevelCode}>
                     {yearLevelCode === '0' ? getSubTotal(['E']) : null}
                     <tr key={yearLevelCode} className={`code-${yearLevelCode}`}>
                       <td>{Number(yearLevelCode) > 0 ? `Year ${yearLevel.Description}`: yearLevel.Description}</td>
-                      <td>{yearLevelCode in currentStudentMap ? currentStudentMap[yearLevelCode] : 0}</td>
-                      <td>{yearLevelCode in nextYearFunnelLeadMap.confirmed ? nextYearFunnelLeadMap.confirmed[yearLevelCode] : 0}</td>
-                      <td>{yearLevelCode in nextYearFunnelLeadMap.inProgress ? nextYearFunnelLeadMap.inProgress[yearLevelCode] : 0}</td>
-                      <td>{yearLevelCode in futureNextYearMap ? futureNextYearMap[yearLevelCode] : 0}</td>
-                      <td>{yearLevelCode in nextYearFunnelLeadMap.leadsAndTours ? nextYearFunnelLeadMap.leadsAndTours[yearLevelCode] : 0}</td>
+                      <td className={'cursor-pointer'} onClick={() => setShowingRecords(currentStudentMap[yearLevelCode] || [])}>{yearLevelCode in currentStudentMap ? currentStudentMap[yearLevelCode].length : 0}</td>
+                      <td className={'cursor-pointer'} onClick={() => setShowingRecords(nextYearFunnelLeadMap.confirmed[yearLevelCode] || [])}>{yearLevelCode in nextYearFunnelLeadMap.confirmed ? nextYearFunnelLeadMap.confirmed[yearLevelCode].length : 0}</td>
+                      <td className={'cursor-pointer'} onClick={() => setShowingRecords(nextYearFunnelLeadMap.inProgress[yearLevelCode] || [])}>{yearLevelCode in nextYearFunnelLeadMap.inProgress ? nextYearFunnelLeadMap.inProgress[yearLevelCode].length : 0}</td>
+                      <td className={'cursor-pointer'} onClick={() => setShowingRecords(futureNextYearMap[yearLevelCode] || [])}>{yearLevelCode in futureNextYearMap ? futureNextYearMap[yearLevelCode].length : 0}</td>
+                      <td className={'cursor-pointer'} onClick={() => setShowingRecords(nextYearFunnelLeadMap.leadsAndTours[yearLevelCode] || [])}>{yearLevelCode in nextYearFunnelLeadMap.leadsAndTours ? nextYearFunnelLeadMap.leadsAndTours[yearLevelCode].length : 0}</td>
                     </tr>
-                  </>
+                  </React.Fragment>
                 )
               })
           }
@@ -374,14 +430,19 @@ const StudentNumberForecastDashboard = () => {
           <tfoot>
             <tr>
               <td>Total</td>
-              <td>{currentStudentMap.total || 0}</td>
-              <td>{nextYearFunnelLeadMap.confirmed.total || 0}</td>
-              <td>{nextYearFunnelLeadMap.inProgress.total || 0}</td>
-              <td>{futureNextYearMap.total || 0}</td>
-              <td>{nextYearFunnelLeadMap.leadsAndTours.total || 0}</td>
+              <td className={'cursor-pointer'} onClick={() => setShowingRecords(currentStudentMap.total || [])}>{currentStudentMap.total?.length  || 0}</td>
+              <td className={'cursor-pointer'} onClick={() => setShowingRecords(nextYearFunnelLeadMap.confirmed.total || [])}>{nextYearFunnelLeadMap.confirmed.total?.length || 0}</td>
+              <td className={'cursor-pointer'} onClick={() => setShowingRecords(nextYearFunnelLeadMap.inProgress.total || [])}>{nextYearFunnelLeadMap.inProgress.total?.length || 0}</td>
+              <td className={'cursor-pointer'} onClick={() => setShowingRecords(futureNextYearMap.total || [])}>{futureNextYearMap.total?.length || 0}</td>
+              <td className={'cursor-pointer'} onClick={() => setShowingRecords(nextYearFunnelLeadMap.leadsAndTours.total || [])}>{nextYearFunnelLeadMap.leadsAndTours.total?.length || 0}</td>
             </tr>
           </tfoot>
         </Table>
+        <StudentNumberDetailsPopup
+          isShowing={showingRecords !== null}
+          handleClose={() => setShowingRecords(null)}
+          records={showingRecords || []}
+        />
       </>
     )
   }
@@ -394,7 +455,7 @@ const StudentNumberForecastDashboard = () => {
             All number below are excluding Leavers and <b>Proposed Entry Year in : {[currentFileYear, nextFileYear].join(' & ')}</b>
             <ul>
               <li><b>Current Student</b>: the number of student currently</li>
-              <li><b>Confirmed</b>: the number of leads from Funnel with status: {FUNNEL_STAGE_NAME_CLOSED_WON} & {FUNNEL_STAGE_NAME_APPLICATION_RECEIVED}</li>
+              <li><b>Confirmed</b>: the number of leads from Funnel with status: {FUNNEL_STAGE_NAME_EXPORTED} & {FUNNEL_STAGE_NAME_OFFER_ACCEPTED}</li>
               <li><b>In Progress</b>: the number of leads from Funnel with status: {FUNNEL_STAGE_NAME_STUDENT_LEARNING_PROFILE}, {FUNNEL_STAGE_NAME_INTERVIEW} & {FUNNEL_STAGE_NAME_OFFER_SENT}</li>
               <li><b>Future {nextFileYear}</b>: = Current Student on Lower Year Level + Confirmed.</li>
               <li><b>Leads & Tours</b>: the number of leads from Funnel with status: {FUNNEL_STAGE_NAME_ENQUIRY}, {FUNNEL_STAGE_NAME_SCHOOL_VISIT} & {FUNNEL_STAGE_NAME_APPLICATION_RECEIVED}</li>

@@ -1,5 +1,6 @@
 export const FUNNEL_STAGE_NAME_CLOSED_WON = 'Closed Won';
 export const FUNNEL_STAGE_NAME_OFFER_ACCEPTED = 'Offer Accepted';
+export const FUNNEL_STAGE_NAME_EXPORTED = 'Exported';
 export const FUNNEL_STAGE_NAME_STUDENT_LEARNING_PROFILE = 'Student Learning Profile';
 export const FUNNEL_STAGE_NAME_INTERVIEW = 'Interview';
 export const FUNNEL_STAGE_NAME_OFFER_SENT = 'Offer Sent';

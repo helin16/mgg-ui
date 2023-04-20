@@ -1,5 +1,4 @@
 import AppService, {iConfigParams} from '../AppService';
-import iStudentContact from '../../types/Synergetic/iStudentContact';
 import iPaginatedResult from '../../types/iPaginatedResult';
 import iSynVStudentContactAllAddress from '../../types/Synergetic/iSynVStudentContactAllAddress';
 
