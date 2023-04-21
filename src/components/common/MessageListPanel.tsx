@@ -98,16 +98,20 @@ const MessageListPanel = ({type, title, reloadCount}: iMessageListPanel) => {
 
 
   const getPaginationBtns = () => {
-    const maxPageNo = (messageList?.pages || 5);
+    const windowSize = 7;
+    const maxPageNo = (messageList?.pages || 0);
 
-    if (maxPageNo < 5 || currentPage < 3) {
-      return _.range(1, maxPageNo + 1);
+    if (maxPageNo <= windowSize) {
+      return _.range(1, maxPageNo);
     }
 
-    if (currentPage >= (maxPageNo - 2)) {
-      return _.range(maxPageNo - 4, maxPageNo + 1);
+    if (currentPage >= MathHelper.sub(maxPageNo, MathHelper.div(windowSize, 2))) {
+      return _.range(MathHelper.sub(MathHelper.add(maxPageNo,  1), windowSize), MathHelper.add(maxPageNo,  1));
     }
-    return _.range(currentPage - 2, currentPage + 2);
+
+    let start = MathHelper.sub(currentPage, 2) < 1 ? 1 : MathHelper.sub(currentPage, 2);
+    let end = MathHelper.add(start, windowSize) > maxPageNo ? MathHelper.add(maxPageNo,  1) : MathHelper.add(start, windowSize);
+    return _.range(start, end);
   }
 
 
@@ -129,6 +133,7 @@ const MessageListPanel = ({type, title, reloadCount}: iMessageListPanel) => {
           {getPaginationBtns().map(index => {
             return (
               <Button
+                key={index}
                 variant={index === currentPage ? 'primary' : 'link'}
                 onClick={() => setCurrentPage(index)}>
                 {index}
