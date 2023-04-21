@@ -371,7 +371,7 @@ const StudentNumberForecastDashboard = () => {
           {getSumPanel('Confirmed', nextYearFunnelLeadMap.confirmed.total)}
           {getSumPanel('In Progress', nextYearFunnelLeadMap.inProgress.total)}
           {getSumPanel(`Future ${nextFileYear}`, futureNextYearMap.total)}
-          {getSumPanel('Leads & Tours', nextYearFunnelLeadMap.inProgress.total)}
+          {getSumPanel('Leads & Tours', nextYearFunnelLeadMap.leadsAndTours.total)}
         </Row>
 
         <Table hover className={'lead-table'}>
@@ -441,6 +441,7 @@ const StudentNumberForecastDashboard = () => {
             All number below are excluding Leavers and <b>Proposed Entry Year in : {[currentFileYear, nextFileYear].join(' & ')}</b>
             <ul>
               <li><b>Current Student</b>: the number of student currently</li>
+              <li><b>Current Leavers</b>: current students who has a leaving date set</li>
               <li><b>Confirmed</b>: the number of leads from Funnel with status: {FUNNEL_STAGE_NAME_EXPORTED} & {FUNNEL_STAGE_NAME_OFFER_ACCEPTED}</li>
               <li><b>In Progress</b>: the number of leads from Funnel with status: {FUNNEL_STAGE_NAME_STUDENT_LEARNING_PROFILE}, {FUNNEL_STAGE_NAME_INTERVIEW} & {FUNNEL_STAGE_NAME_OFFER_SENT}</li>
               <li><b>Future {nextFileYear}</b>: = Current Student on Lower Year Level + Confirmed - leavers.</li>
