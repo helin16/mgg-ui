@@ -10,18 +10,30 @@ import LoadingBtn from '../../../components/common/LoadingBtn';
 import * as Icons from 'react-bootstrap-icons';
 import CommunityService from '../../../services/Synergetic/CommunityService';
 import {OP_OR} from '../../../helper/ServiceHelper';
-import SynVStudentContactAllAddressService from '../../../services/Synergetic/SynVStudentContactAllAddressService';
 import {HEADER_NAME_SELECTING_FIELDS} from '../../../services/AppService';
 import * as _ from 'lodash';
 import Toaster from '../../../services/Toaster';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../redux/makeReduxStore';
 import PageLoadingSpinner from '../../../components/common/PageLoadingSpinner';
+import {submitBtnBg, submitBtnHoverBg, submitBtnTextColor} from '../../../AppWrapper';
+import StudentContactService from '../../../services/Synergetic/StudentContactService';
+import iStudentContact, {
+  STUDENT_CONTACT_TYPE_SC1,
+  STUDENT_CONTACT_TYPE_SC2,
+  STUDENT_CONTACT_TYPE_SC3
+} from '../../../types/Synergetic/iStudentContact';
+import SynVStudentService from '../../../services/Synergetic/SynVStudentService';
 
 const Wrapper = styled.div`
   .search-btn {
     margin-top: 1rem;
     width: 100%;
+    background-color: ${submitBtnBg};
+    color: ${submitBtnTextColor};
+    :hover {
+      background-color: ${submitBtnHoverBg};
+    }
   }
 `;
 
@@ -53,6 +65,10 @@ const ParentDirectorySearchPanel = ({onChanged, className, isSearching = false}:
         setIsLoading(true);
         const parents = await CommunityService.getCommunityProfiles({
           where: JSON.stringify({ [OP_OR]: [ {SpouseID: user?.synergyId}, {ID: user?.synergyId} ] })
+        }, {
+          headers: {[HEADER_NAME_SELECTING_FIELDS]: JSON.stringify([
+              'ID', 'SpouseID'
+            ])}
         });
         const parentIds: number[] = [];
         parents.data.map(community => { // @ts-ignore
@@ -63,25 +79,41 @@ const ParentDirectorySearchPanel = ({onChanged, className, isSearching = false}:
         if (parentIds.length <= 0) {
           return;
         }
-        const contacts = await SynVStudentContactAllAddressService.getAll({
+        if (isCanceled) return;
+
+        const studentIds = ((await StudentContactService.getStudentContacts({
           where: JSON.stringify({
-            [OP_OR]: {
-              StudentContactID: parentIds,
-              StudentContactSpouseID: parentIds,
-            }
+            LinkedID: parentIds,
+            ContactType: [STUDENT_CONTACT_TYPE_SC1, STUDENT_CONTACT_TYPE_SC2, STUDENT_CONTACT_TYPE_SC3],
           }),
         }, {
           headers: {[HEADER_NAME_SELECTING_FIELDS]: JSON.stringify([
-              'StudentForm',
-              'StudentYearLevel'
+              'ID',
             ])}
-        });
+        })).data || []).map((contact: iStudentContact) => contact.ID);
 
+        if (studentIds.length <= 0) {
+          return;
+        }
+        if (isCanceled) return;
+
+        const currentStudents = await SynVStudentService.getCurrentVStudents({
+          where: JSON.stringify({
+            ID: studentIds,
+          })
+        }, {
+          headers: {[HEADER_NAME_SELECTING_FIELDS]: JSON.stringify([
+              'StudentForm', 'StudentYearLevel'
+            ])}
+        })
+        if (currentStudents.length <= 0) {
+          return;
+        }
         if (isCanceled) return;
         setIsLoading(false);
 
-        setLimitFormCodes(_.uniq(contacts.data.map(contact => `${contact.StudentForm || ''}`)))
-        setYearLevelCodes(_.uniq(contacts.data.map(contact => `${contact.StudentYearLevel || ''}`)))
+        setLimitFormCodes(_.uniq(currentStudents.map(vStudent => `${vStudent.StudentForm || ''}`)))
+        setYearLevelCodes(_.uniq(currentStudents.map(vStudent => `${vStudent.StudentYearLevel || ''}`)))
       } catch (err) {
         if (isCanceled) return;
         setIsLoading(false);

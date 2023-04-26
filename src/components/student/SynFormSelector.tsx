@@ -59,7 +59,8 @@ const LuFormSelector = ({values, onSelect, limitCodes = [], allowClear, classnam
     return () => {
       isCancelled = true;
     }
-  }, [optionsMap, limitCodes]);
+    //eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [limitCodes]);
 
   if (isLoading === true) {
     return <Spinner animation={'border'} size={'sm'}/>;
