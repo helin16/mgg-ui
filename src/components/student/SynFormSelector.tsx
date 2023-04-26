@@ -28,7 +28,6 @@ const LuFormSelector = ({values, onSelect, limitCodes = [], allowClear, classnam
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (Object.keys(optionsMap).length > 0) { return }
     let isCancelled = false;
     setIsLoading(true);
     // @ts-ignore
@@ -59,7 +58,6 @@ const LuFormSelector = ({values, onSelect, limitCodes = [], allowClear, classnam
     return () => {
       isCancelled = true;
     }
-    //eslint-disable-next-line react-hooks/exhaustive-deps
   }, [limitCodes]);
 
   if (isLoading === true) {
