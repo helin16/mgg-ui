@@ -128,7 +128,7 @@ const TeachersDiv = ({
     return (
       <div className={'head-of-year text-center'}>
         <div>{headOfYearTeacher.SynSSTStaff?.Title} {headOfYearTeacher.SynSSTStaff?.Initials} {headOfYearTeacher.SynSSTStaff?.Surname}</div>
-        <div><b>Head of Year</b></div>
+        <div><b>{`${headOfYearTeacher.Comments || ''}`.trim() === '' ? 'Head of Year' : `${headOfYearTeacher.Comments || ''}`.trim()}</b></div>
       </div>
     )
   }
