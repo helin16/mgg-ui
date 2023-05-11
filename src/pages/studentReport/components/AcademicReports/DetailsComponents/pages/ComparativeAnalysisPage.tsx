@@ -12,6 +12,8 @@ import StudentReportService from '../../../../../../services/Synergetic/StudentR
 import styled from 'styled-components';
 import StudentStatusBadge from '../../StudentStatusBadge';
 import {FlexContainer} from '../../../../../../styles';
+import {ResultTableWrapper} from '../sections/GraphTable';
+import ComparativeBarGraph from '../../../../../../components/support/ComparativeBarGraph';
 
 
 const Wrapper = styled.div`
@@ -22,11 +24,11 @@ const Wrapper = styled.div`
     border-bottom:1px solid #ddd;
     &.result-title {
       font-weight: bold;
-      background-color: transparent !important;
+      //background-color: transparent !important;
     }
-    :nth-child(2n+1) {
-      background-color: #f9f9f9;
-    }
+    //:nth-child(2n+1) {
+    //  background-color: #f9f9f9;
+    //}
   }
 `;
 
@@ -83,6 +85,62 @@ const ComparativeAnalysisPage = ({
       return <Spinner animation={'border'} />
     }
 
+    return (
+      <>
+        <SectionDiv>
+          <ResultTableWrapper>
+            <div className={'result-row'}>
+              <div>
+                <b>Arts</b>
+                <div>
+                  The comparative result for this arts
+                </div>
+              </div>
+              <div className={'result-table'}><ComparativeBarGraph cohortScores={[30, 40, 75, 80, 90, 99]} currentStudentScore={38} /></div>
+            </div>
+          </ResultTableWrapper>
+        </SectionDiv>
+        <SectionDiv>
+          <ResultTableWrapper>
+            <div className={'result-row'}>
+              <div>
+                <b>English</b>
+                <div>
+                  The comparative result for this English
+                </div>
+              </div>
+              <div className={'result-table'}><ComparativeBarGraph cohortScores={[45, 60, 70, 80, 87, 98]} currentStudentScore={98} /></div>
+            </div>
+          </ResultTableWrapper>
+        </SectionDiv>
+        <SectionDiv>
+          <ResultTableWrapper>
+            <div className={'result-row'}>
+              <div>
+                <b>Humanities</b>
+                <div>
+                  The comparative result for this Humanities
+                </div>
+              </div>
+              <div className={'result-table'}><ComparativeBarGraph cohortScores={[10, 30, 50, 70, 80, 90]} currentStudentScore={100} /></div>
+            </div>
+          </ResultTableWrapper>
+        </SectionDiv>
+        <SectionDiv>
+          <ResultTableWrapper>
+            <div className={'result-row'}>
+              <div>
+                <b>Languages</b>
+                <div>
+                  The comparative result for this Languages
+                </div>
+              </div>
+              <div className={'result-table'}><ComparativeBarGraph cohortScores={[45, 75, 60, 80, 90, 98]} currentStudentScore={60} /></div>
+            </div>
+          </ResultTableWrapper>
+        </SectionDiv>
+      </>
+    )
     return Object.keys(comparativeResults)
       .sort((res1, res2) => res1 > res2 ? 1 : -1)
       .map(assessHeading => {

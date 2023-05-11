@@ -15,6 +15,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AlumniRegistrationPage from './pages/alumni/AlumniRegistrationPage';
 import {URL_ALUMNI_REGISTRATION, URL_ASSET_PICK_UP} from './Url';
+import ComparativeBarGraph from './components/support/ComparativeBarGraph';
 
 const Router = () => {
   const {isProd} = useSelector((state: RootState) => state.app);

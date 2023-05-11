@@ -143,13 +143,14 @@ const SearchPage = ({onSelect}: {onSelect: (student: iVStudent) => void}) => {
           <ModuleAdminBtn onClick={() => setIsShowAdminPage(true)} moduleId={MGGS_MODULE_ID_STUDENT_REPORT} />
         </span>
       </h3>
+
       <p>Welcome to the student academic report viewer. Type the homeroom or name of the student you want to locate below.</p>
       <Row>
-        <Col sm={6}>
+        <Col sm={3}>
           <Form.Label>File Year</Form.Label>
           <FileYearSelector onSelect={(fileYear) => setSearchFileYear(fileYear || undefined)} value={searchFileYear} />
         </Col>
-        <Col sm={6}>
+        <Col sm={3}>
           <Form.Label>File Semester</Form.Label>
           <FileSemesterSelector
             semesters={[1, 2, 3, 4, 5]}
@@ -158,22 +159,25 @@ const SearchPage = ({onSelect}: {onSelect: (student: iVStudent) => void}) => {
           />
         </Col>
       </Row>
-      <div className={'search-bar'}>
-        <Form.Label>Search</Form.Label>
-        <InputGroup className="mb-3">
-          <FormControl
-            disabled={isSearching === true}
-            placeholder={`Student Name, HomeRoom or Student ID (e.g. Amanda, 9C) ...`}
-            value={searchTxt}
-            onChange={(event) => setSearchTxt(event.target.value)}
-            onKeyUp={(event) => search(event)}
-          />
-          <LoadingBtn variant={'primary'} isLoading={isSearching} onClick={() => onSearch()} className={'search-btn'}>
-            <Search />{' '}
-            <div className={'d-none d-sm-inline-block'}>Search</div>
-          </LoadingBtn>
-        </InputGroup>
-      </div>
+
+      <Row className={'search-bar'}>
+        <Col xs={12}>
+          <Form.Label>Search</Form.Label>
+          <InputGroup>
+            <FormControl
+              disabled={isSearching === true}
+              placeholder={`Student Name, HomeRoom or Student ID (e.g. Amanda, 9C) ...`}
+              value={searchTxt}
+              onChange={(event) => setSearchTxt(event.target.value)}
+              onKeyUp={(event) => search(event)}
+            />
+            <LoadingBtn variant={'primary'} isLoading={isSearching} onClick={() => onSearch()} className={'search-btn'}>
+              <Search />{' '}
+              <div className={'d-none d-sm-inline-block'}>Search</div>
+            </LoadingBtn>
+          </InputGroup>
+        </Col>
+      </Row>
       {getStudentSearchResults()}
     </Wrapper>
   )
