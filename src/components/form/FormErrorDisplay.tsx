@@ -21,7 +21,7 @@ const FormErrorDisplay = ({fieldName, errorsMap, errorMsg}: iFormErrorDisplay) =
     }
     return errorsMap[fieldName];
   }
-  return <div><small className={'text-danger'}>{getErrorString()}</small></div>
+  return <div><small className={'text-danger'}><b>{getErrorString()}</b></small></div>
 }
 
 export default FormErrorDisplay;

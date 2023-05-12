@@ -9,10 +9,13 @@ export type iAutoCompleteSingle = {
 
 type iAutoComplete = {
   placeholder?: string,
+  allowClear?: boolean,
   minSearchLength?: number,
   handleSearchFn: (keyword: string) => Promise<any>;
   renderOptionItemFn: (option: any) => iAutoCompleteSingle[];
   onSelected?: (option: iAutoCompleteSingle | null) => void;
+  value?: iAutoCompleteSingle;
+  isDisabled?: boolean;
 }
 
 const Wrapper = styled.div`
@@ -23,7 +26,7 @@ const Wrapper = styled.div`
 `;
 
 const AutoComplete = ({
-    placeholder, handleSearchFn, renderOptionItemFn, onSelected
+    placeholder, handleSearchFn, renderOptionItemFn, onSelected, value, allowClear, isDisabled
   }: iAutoComplete) => {
   const loadOptions = async (keyword: string) => {
     const results = await handleSearchFn(keyword)
@@ -39,6 +42,9 @@ const AutoComplete = ({
   return (
     <Wrapper>
       <AsyncSelect
+        isDisabled={isDisabled}
+        isClearable={allowClear}
+        value={value}
         placeholder={placeholder}
         onChange={onChange}
         cacheOptions
