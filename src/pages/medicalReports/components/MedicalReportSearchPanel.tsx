@@ -21,6 +21,9 @@ const Wrapper = styled.div`
   .search-btn-wrapper {
     display: flex;
     align-items: flex-end;
+    justify-content: flex-end;
+    height: calc(100% - 5px);
+    padding-top: 0.7rem;
   }
 `;
 
@@ -113,63 +116,60 @@ const MedicalReportSearchPanel = ({onSearch, onClear, isSearching = false}: iSta
 
   return (
     <Wrapper>
-      <Container fluid>
-        <Row>
-          <Col sm={6}>
-            <FormLabel label={' '} />
-            <Form.Control
-              placeholder="Name of student or homeroom (e.g. 'Amanda', '9C')" value={searchCriteria.searchText}
-              onChange={(event) => setSearchCriteria({
-                ...searchCriteria,
-                searchText: event.target.value,
-              })}
-              onKeyUp={(event) => UtilsService.handleEnterKeyPressed(event, () => {
-                return onSearch && onSearch(searchCriteria)
-              }, () => true)}
-            />
-          </Col>
-          <Col sm={4}>
-            <FormLabel label={'Classes'} />
-            <SynSubjectClassSelector
-              FileYear={user?.SynCurrentFileSemester?.FileYear || moment().year()}
-              FileSemester={user?.SynCurrentFileSemester?.FileSemester || 1}
-              isMulti
-              allowClear
-              showIndicator
-              pageSize={9999}
-              values={searchCriteria.classCodes || []}
-              onSelect={(values) => setSearchCriteria({
-                ...searchCriteria,
-                classCodes: (values === null ? [] : Array.isArray(values) ? values : [values]).map(value => `${value.value}`),
-              })}
-            />
-          </Col>
-          <Col sm={2}>
-            <FormLabel label={' '} />
-            <div className={'search-btn-wrapper'}>
-              <LoadingBtn variant={'link'} size={'sm'} isLoading={isSearching} onClick={() => {
-                setSearchCriteria(initialSearchState);
-                if (onClear) {
-                  onClear();
-                }
-              }}>
-                <Icons.X />Clear
-              </LoadingBtn>
-              <LoadingBtn variant={'primary'} size={'sm'} isLoading={isSearching} onClick={() => onSearch && onSearch(searchCriteria)}>
-                <Icons.Search /> Search
-              </LoadingBtn>
-            </div>
-          </Col>
-        </Row>
-        <Row>
-          <Col xs={12}>
-            <Button variant={'link'} className={'text-muted'} size={'sm'} onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}>
-              Advanced {isShowingAdvanced === true ? <Icons.ChevronUp /> : <Icons.ChevronDown />}
-            </Button>
-          </Col>
-        </Row>
-        {getAdvancedPanel()}
-      </Container>
+      <Row>
+        <Col sm={6}>
+          <FormLabel label={' '} />
+          <Form.Control
+            placeholder="Name of student or homeroom (e.g. 'Amanda', '9C')" value={searchCriteria.searchText}
+            onChange={(event) => setSearchCriteria({
+              ...searchCriteria,
+              searchText: event.target.value,
+            })}
+            onKeyUp={(event) => UtilsService.handleEnterKeyPressed(event, () => {
+              return onSearch && onSearch(searchCriteria)
+            }, () => true)}
+          />
+        </Col>
+        <Col md={4} sm={6}>
+          <FormLabel label={'Classes'} />
+          <SynSubjectClassSelector
+            FileYear={user?.SynCurrentFileSemester?.FileYear || moment().year()}
+            FileSemester={user?.SynCurrentFileSemester?.FileSemester || 1}
+            isMulti
+            allowClear
+            showIndicator
+            pageSize={9999}
+            values={searchCriteria.classCodes || []}
+            onSelect={(values) => setSearchCriteria({
+              ...searchCriteria,
+              classCodes: (values === null ? [] : Array.isArray(values) ? values : [values]).map(value => `${value.value}`),
+            })}
+          />
+        </Col>
+        <Col md={2}>
+          <div className={'search-btn-wrapper'}>
+            <LoadingBtn variant={'link'} size={'sm'} isLoading={isSearching} onClick={() => {
+              setSearchCriteria(initialSearchState);
+              if (onClear) {
+                onClear();
+              }
+            }}>
+              <Icons.X />Clear
+            </LoadingBtn>
+            <LoadingBtn variant={'primary'} size={'sm'} isLoading={isSearching} onClick={() => onSearch && onSearch(searchCriteria)}>
+              <Icons.Search /> Search
+            </LoadingBtn>
+          </div>
+        </Col>
+      </Row>
+      <Row>
+        <Col xs={12}>
+          <Button variant={'link'} className={'text-muted'} size={'sm'} onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}>
+            Advanced {isShowingAdvanced === true ? <Icons.ChevronUp /> : <Icons.ChevronDown />}
+          </Button>
+        </Col>
+      </Row>
+      {getAdvancedPanel()}
     </Wrapper>
   )
 }
