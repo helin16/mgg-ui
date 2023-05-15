@@ -17,6 +17,7 @@ type iYearLevelSelector = {
   isMulti?: boolean;
   classname?: string;
   limitCodes?: string[];
+  isDisabled?: boolean;
 };
 
 const getLabel = (yearLevel: iLuYearLevel) => {
@@ -26,7 +27,7 @@ export const translateYearLevelToOption = (yearLevel: iLuYearLevel) => {
   return {value: yearLevel.Code, data: yearLevel, label: getLabel(yearLevel)}
 }
 
-const YearLevelSelector = ({values, onSelect, allowClear, limitCodes = [], campusCodes, classname, showIndicator = true, isMulti = false}: iYearLevelSelector) => {
+const YearLevelSelector = ({isDisabled, values, onSelect, allowClear, limitCodes = [], campusCodes, classname, showIndicator = true, isMulti = false}: iYearLevelSelector) => {
   const [optionsMap, setOptionsMap] = useState<{[key: string]: iAutoCompleteSingle}>({});
   const [isLoading, setIsLoading] = useState(false);
 
@@ -101,6 +102,7 @@ const YearLevelSelector = ({values, onSelect, allowClear, limitCodes = [], campu
       onChange={onSelect}
       value={getSelectedValues()}
       isClearable={allowClear}
+      isDisabled={isDisabled}
       showDropdownIndicator={showIndicator}
     />
   )

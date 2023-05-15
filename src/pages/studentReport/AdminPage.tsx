@@ -10,29 +10,43 @@ import {MGGS_MODULE_ID_STUDENT_REPORT} from '../../types/modules/iModuleUser';
 import {ROLE_ID_ADMIN} from '../../types/modules/iRole';
 import ModuleUserList from '../../components/module/ModuleUserList';
 import GenComparativePopupBtn from './components/Admin/GenComparativePopupBtn';
+import SchoolManagementPanel from '../../components/SchoolManagement/SchoolManagementPanel';
 
 const btnTextClassName = 'd-none d-sm-inline-block';
 
-const AdminPage = ({backToReportFn}: {backToReportFn?: () => void}) => {
-  const [showingAdminUsers, setShowingAdminUsers] = useState(false);
-  const [showingEditingLocks, setShowingEditingLocks] = useState(false);
-  const [editingReportYear, setEditingReportYear] = useState<iStudentReportYear | null | undefined>(undefined);
 
-  if (showingAdminUsers === true) {
+const ADMIN_SECTION_NAME_USERS = 'users';
+const ADMIN_SECTION_NAME_LOCKS = 'locks';
+const ADMIN_SECTION_NAME_REPORTING_YEARS = 'reportingYears';
+const ADMIN_SECTION_NAME_SMT = 'smt';
+const AdminPage = ({backToReportFn}: {backToReportFn?: () => void}) => {
+  const [editingReportYear, setEditingReportYear] = useState<iStudentReportYear | null | undefined>(undefined);
+  const [showingSectionName, setShowingSectionName] = useState(ADMIN_SECTION_NAME_REPORTING_YEARS);
+
+  if (showingSectionName === ADMIN_SECTION_NAME_USERS) {
     return (
       <div>
-        <AdminPageHeader title={'Student Report Admin - Users'} backToAdminFn={() => setShowingAdminUsers(false)} />
+        <AdminPageHeader title={'Student Report Admin - Users'} backToAdminFn={() => setShowingSectionName(ADMIN_SECTION_NAME_REPORTING_YEARS)} />
         <ModuleUserList moduleId={MGGS_MODULE_ID_STUDENT_REPORT} roleId={ROLE_ID_ADMIN} showCreatingPanel={true} showDeletingBtn={true}/>
       </div>
     );
   }
 
-  if (showingEditingLocks === true) {
+  if (showingSectionName === ADMIN_SECTION_NAME_SMT) {
+    return (
+      <div>
+        <AdminPageHeader title={'Student Report Admin - School Management Team'} backToAdminFn={() => setShowingSectionName(ADMIN_SECTION_NAME_REPORTING_YEARS)} />
+        <SchoolManagementPanel />
+      </div>
+    );
+  }
+
+  if (showingSectionName === ADMIN_SECTION_NAME_LOCKS) {
     return (
       <div>
         <AdminPageHeader
           title={'Student Report Admin - Editing Locks'}
-          backToAdminFn={() => setShowingEditingLocks(false)}
+          backToAdminFn={() => setShowingSectionName(ADMIN_SECTION_NAME_REPORTING_YEARS)}
         />
         <div>
           <small>
@@ -69,16 +83,26 @@ const AdminPage = ({backToReportFn}: {backToReportFn?: () => void}) => {
           <GenComparativePopupBtn />
           {' '}
           <Button
+            variant={'outline-info'}
+            size={'sm'}
+            title={'Manage Team'}
+            onClick={() => setShowingSectionName(ADMIN_SECTION_NAME_SMT)}
+          >
+            <Icons.People />{' '}
+            <span className={btnTextClassName}>SMT</span>
+          </Button>
+          {' '}
+          <Button
             variant={'outline-danger'}
             size={'sm'}
             title={'Synergetic Report Editing Locks'}
-            onClick={() => setShowingEditingLocks(true)}
+            onClick={() => setShowingSectionName(ADMIN_SECTION_NAME_LOCKS)}
           >
             <Icons.LockFill />{' '}
             <span className={btnTextClassName}>Locks</span>
           </Button>
           {' '}
-          <Button variant={'success'} size={'sm'} onClick={() => setShowingAdminUsers(true)}>
+          <Button variant={'outline-success'} size={'sm'} onClick={() => setShowingSectionName(ADMIN_SECTION_NAME_USERS)}>
             <Icons.PeopleFill />{' '}
             <span className={btnTextClassName}>Users</span>
           </Button>

@@ -21,6 +21,8 @@ type iSchoolManagementTeam = {
   SynSSTStaff?: iSynCommunity;
   SynActingStaff1?: iSynCommunity;
   SynActingStaff2?: iSynCommunity;
+  SynCreatedBy?: iSynCommunity;
+  SynModifiedBy?: iSynCommunity;
 };
 
 export default iSchoolManagementTeam;
