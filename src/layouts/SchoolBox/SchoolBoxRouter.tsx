@@ -21,15 +21,16 @@ const schoolBoxIframeElementId = 'remote';
 const SchoolBoxRouter = ({path, remoteUrl}: {path: string, remoteUrl: string}) => {
 
   const removeSchoolBoxIframe = () => {
-    const schoolBoxIframeElement = document.getElementById(schoolBoxIframeElementId);
+    const schoolBoxIframeElement = document.querySelector(`iframe#${schoolBoxIframeElementId}`);
     if (schoolBoxIframeElement) {
       schoolBoxIframeElement.remove();
     }
   }
 
   const showSchoolBoxIframe = () => {
-    const schoolBoxIframeElement = document.getElementById(schoolBoxIframeElementId);
+    const schoolBoxIframeElement = document.querySelector(`iframe#${schoolBoxIframeElementId}`);
     if (schoolBoxIframeElement) {
+      // @ts-ignore
       schoolBoxIframeElement.style.display = 'block';
     }
   }

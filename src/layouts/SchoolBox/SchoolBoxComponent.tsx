@@ -58,7 +58,7 @@ const SchoolBoxComponent = ({path, remoteUrl, id = null, user = null, time = nul
   }, [synId, schoolBoxUser, authKey, authTime, loading, dispatch]);
 
   if (loading === true) {
-    return <div><Spinner animation={'border'}/>Authenticating ...</div>
+    return <div><Spinner animation={'border'}/>Authenticating / Fetching User Info ...</div>
   }
 
   return (
