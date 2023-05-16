@@ -6,7 +6,7 @@ import * as Icon from 'react-bootstrap-icons';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../redux/makeReduxStore';
 import {useEffect, useState} from 'react';
-import {Alert, Spinner} from 'react-bootstrap';
+import {Alert, Col, Row, Spinner} from 'react-bootstrap';
 import Toaster from '../../../services/Toaster';
 import {CAMPUS_CODE_SENIOR} from '../../../types/Synergetic/iLuCampus';
 import iLuYearLevel from '../../../types/Synergetic/iLuYearLevel';
@@ -35,7 +35,9 @@ const Wrapper = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.4rem 0.8rem;
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
+    padding-left: calc(var(--bs-gutter-x) * .5);
     &.gr {
       background-color: ${HOUSE_COLOR_GR};
     }
@@ -51,9 +53,13 @@ const Wrapper = styled.div`
     .menu-div {
       display: flex;
       gap: 0.4rem;
+      padding-left: 0px;
       .icon-btn {
         cursor: pointer;
       }
+    }
+    div[class^="col-"] {
+      padding-left: 0px;
     }
   }
   
@@ -64,8 +70,8 @@ const Wrapper = styled.div`
     gap: 0.4rem;
   }
   
-  .fileYear-selector,
-  .yearLevel-selector {
+  .selector,
+  .selector {
     z-index: 9999;
     font-size: 14px;
     color: #1a1e21;
@@ -126,7 +132,7 @@ const HouseAwardScoreBoard = ({
   onCancel
 }: iHouseAwardScoreBoard) => {
   const {user} = useSelector((root: RootState) => root.auth);
-  const currentFileYear = Number(user?.SynCurrentFileSemester?.FileYear || moment().format('YYYY'));
+  const currentFileYear = Number(user?.SynCurrentFileSemester?.FileYear || moment().year());
 
   const [isLoading, setIsLoading] = useState(false);
   const [selectedYearLevel, setSelectedYearLevel] = useState<iLuYearLevel | null>(null);
@@ -222,35 +228,33 @@ const HouseAwardScoreBoard = ({
 
   return (
     <Wrapper>
-      <div className={`title-row ${house.Code.toLowerCase()}`}>
-        <div className={'menu-div'}>
+      <Row className={`title-row ${house.Code.toLowerCase()}`}>
+        <Col className={'menu-div'} md={8}>
           <div className={'icon-btn'} onClick={() => onCancel()} title={'back to house selection'}><Icon.ArrowLeft /></div>
           <div><Icon.Speedometer2 /></div>
           <div>{`Board for ${type.name} in House: ${house.Description}`}</div>
-        </div>
-        <FlexContainer className={'withGap'}>
-          <div>(Points to be awarded: {type.points_to_be_awarded})</div>
+        </Col>
+        <Col md={2} sm={6} xs={6}>
+          <FileYearSelector
+            className={'selector'}
+            onSelect={(newYear) => setSelectedFileYear(newYear || moment().year())}
+            value={selectedFileYear}
+            min={moment().subtract(5, 'year').year()}
+          />
+        </Col>
+        <Col md={2} sm={6} xs={6}>
           <YearLevelSelector
             campusCodes={[CAMPUS_CODE_SENIOR]}
-            classname={'yearLevel-selector'}
+            classname={'selector'}
             values={selectedYearLevel ? [`${selectedYearLevel?.Code}`] : []}
             onSelect={(options) => {
               // @ts-ignore
               setSelectedYearLevel(options?.data || null)
             }}
           />
-        </FlexContainer>
-      </div>
+        </Col>
+      </Row>
       <div className={`summary-row ${house.Code.toLowerCase()}`}>
-        <div>Year:</div>
-        <div>
-          <FileYearSelector
-            className={'fileYear-selector'}
-            onSelect={(newYear) => setSelectedFileYear(newYear || moment().year())}
-            value={selectedFileYear}
-            min={moment().subtract(5, 'year').year()}
-          />
-        </div>
       </div>
       {getDisabledMsg()}
       {selectedYearLevel && (

@@ -1,6 +1,22 @@
 <script>
-  const renderFrame = function() {
-    const schoolBoxStaticUrl = 'https://mconnect.mentonegirls.vic.edu.au/static/mggs';
+  const BASE_URL = 'https://appdev.mentonegirls.vic.edu.au';
+
+  const initHtml = () => {
+    const iFrame = document.querySelector('iframe#remote');
+  console.log('iFrame', iFrame);
+    if (iFrame) {
+      iFrame.style.display = 'none';
+      const reactDiv = document.createElement("div");
+      reactDiv.setAttribute('id', 'mgg-root');
+      if(iFrame.nextSibling){
+        iFrame.parentNode.insertBefore(reactDiv, iFrame.nextSibling);
+      }else{
+        iFrame.parentNode.appendChild(reactDiv);
+      }
+    }
+  }
+
+  const renderFrame = (mainJsUrl, mainCssUrl) =>  {
     const header = document.getElementsByTagName('head')[0];
 
     const meta = document.createElement('meta');
@@ -10,45 +26,54 @@
 
     const manifest = document.createElement('link');
     manifest.ref = "manifest";
-    manifest.href = `${schoolBoxStaticUrl}/manifest.json`;
+    manifest.href = `${BASE_URL}/manifest.json`;
     header.appendChild(manifest);
 
     const mainCss = document.createElement('link');
     mainCss.rel = "stylesheet";
     mainCss.type = "text/css";
-    mainCss.href = `${schoolBoxStaticUrl}%MAIN_CSS%`;
+    mainCss.href = `${BASE_URL}${mainCssUrl}`;
     header.appendChild(mainCss);
 
     const mainJs = document.createElement('script');
     mainJs.defer = "defer";
-    mainJs.src = `${schoolBoxStaticUrl}%MAIN_JS%`;
+    mainJs.src = `${BASE_URL}${mainJsUrl}`;
     header.appendChild(mainJs);
   }
 
   const fetchData = function(url, callback) {
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', url, true);
+    xhr.open('GET', url, false);
     // xhr.responseType = 'json';
     xhr.onload = function() {
-      var status = xhr.status;
-      if (status === 200) {
-        callback(null, xhr.response);
-      } else {
-        callback(status, xhr.response);
-      }
+      const status = xhr.status;
+      callback(status, xhr.response);
     };
-    xhr.send();
+    xhr.send(null);
   };
 
   const run = function() {
-    fetchData('https://app.mentonegirls.vic.edu.au/asset-manifest.json', function(status, response) {
-      if (status === null) {
+    fetchData(`${BASE_URL}/asset-manifest.json`, (status, response) => {
+      if (status !== 200) {
         return null;
       }
-      console.log('resp', response);
+      try {
+
+          const responseObj = JSON.parse(response);
+          if (responseObj.files) {
+            const mainJsString = `${responseObj.files['main.js']}`.trim();
+            const mainCssString = `${responseObj.files['main.css']}`.trim();
+            initHtml();
+            renderFrame(mainJsString, mainCssString);
+          }
+      } catch (err) {
+        console.error(err);
+      }
     })
   }
 
-  run ();
+  window.onload = function() {
+    run();
+  }
 
 </script>

@@ -50,7 +50,7 @@ const HouseAwardScoreTable = ({
 
     const fetchData = async () => {
       try {
-        setIsLoading(false);
+        setIsLoading(true);
         const students = await SynVStudentService.getCurrentVStudents({
           where: JSON.stringify({
             StudentHouse: house.Code,
@@ -75,6 +75,7 @@ const HouseAwardScoreTable = ({
               event_type_id: type.id,
               active: 1,
             }),
+            include: 'event'
           }),
           HouseAwardStudentYearService.getStudentYears({
             where: JSON.stringify({
@@ -318,7 +319,7 @@ const HouseAwardScoreTable = ({
         return (
           <div style={{ textAlign: 'right' }}>
             <HouseAwardConfirmAwardPopupBtn
-              scores={scores}
+              scores={scores.filter(score => score.event?.active === true)}
               type={type}
               onAwarded={handleOnAwarded}
               student={cell.cell.row.original.student}
@@ -331,36 +332,30 @@ const HouseAwardScoreTable = ({
       },
     }];
 
-  const tableColumns = [
-    ...columnLeftFix,
-    ...columnEvents,
-    ...columnRightFix,
-  ];
-
-  const tableData = Object.values(studentMap)
-    .sort((student1, student2) => student1.StudentSurname > student2.StudentSurname ? 1 : -1)
-    .map(student => {
-      return {
-        student,
-        lastYearTotal: (student.StudentID in lastStudentYearMap ? lastStudentYearMap[student.StudentID].total_score_minus_award : 0),
-      }
-    });
-
-
   const getTable = () => {
+    if (isLoading || isLoadingStudents) {
+      return <Spinner animation={'border'} />
+    }
     if (Object.values(studentMap).length <= 0) {
       return null;
     }
     return (
       <ReactTableWithFixedColumns
-        data={tableData}
-        columns={tableColumns}
+        data={Object.values(studentMap)
+          .sort((student1, student2) => student1.StudentSurname > student2.StudentSurname ? 1 : -1)
+          .map(student => {
+            return {
+              student,
+              lastYearTotal: (student.StudentID in lastStudentYearMap ? lastStudentYearMap[student.StudentID].total_score_minus_award : 0),
+            }
+          })}
+        columns={[
+          ...columnLeftFix,
+          ...columnEvents,
+          ...columnRightFix,
+        ]}
       />
     )
-  }
-
-  if (isLoading || isLoadingStudents) {
-    return <Spinner animation={'border'} />
   }
 
   return (

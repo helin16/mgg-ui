@@ -26,18 +26,14 @@ const HouseAwardConfirmAwardPopupBtn = ({scores, type, student, FileYear, onAwar
   const filteredScores = scores.filter((score: iHouseAwardScore) => score.awarded_id === null).sort((score1, score2) => {
     return score1.created_at < score2.created_at ? 1 : -1;
   });
+  const eventMap: {[key: number]: iHouseAwardEvent} = events.reduce((map, event) => {
+    return {...map, [event.id]: event};
+  }, {});
   const [isShowing, setIsShowing] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [eventMap, setEventMap] = useState<{[key: number]: iHouseAwardEvent}>({});
-  const [selectedScores, setSelectedScores] = useState<iHouseAwardScore[]>([]);
+  const [selectedScores, setSelectedScores] = useState<iHouseAwardScore[]>(filteredScores.slice(0, type.points_to_be_awarded));
   const [notSelectedScores, setNotSelectedScores] = useState<iHouseAwardScore[]>([]);
 
-  useEffect(() => {
-    setEventMap(events.reduce((map, event) => {
-      return {...map, [event.id]: event};
-    }, {}));
-    setSelectedScores(filteredScores.slice(0, type.points_to_be_awarded));
-  }, [events, scores, type.points_to_be_awarded, filteredScores])
 
   useEffect(() => {
     const selectedScoreIds = selectedScores.map(score => score.id);
