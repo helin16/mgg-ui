@@ -1,1 +1,1 @@
-Access-Control-Allow-Origin: *
+headers: { 'access-control-allow-origin': '*' }
