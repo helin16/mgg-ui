@@ -15,6 +15,7 @@ import {FlexContainer} from '../../styles';
 import iSynVStudentClass from '../../types/Synergetic/iSynVStudentClass';
 import TimeTableImportPopupBtn from '../../components/timeTable/TimeTableImportPopupBtn';
 import styled from 'styled-components';
+import UtilsService from '../../services/UtilsService';
 
 const Wrapper = styled.div`
   .float-right {
@@ -36,11 +37,11 @@ const MyClassListPage = () => {
           FileSemester: (user?.SynCurrentFileSemester?.FileSemester || 1),
           ...(`${criteria.searchText || ''}`.trim() !== '' ? {
             [OP_OR]: [
-              {StudentID: `${criteria.searchText || ''}`.trim()},
               {StudentForm: {[OP_LIKE]: `%${`${criteria.searchText || ''}`.trim()}%`}},
               {StudentNameInternal: {[OP_LIKE]: `%${`${criteria.searchText || ''}`.trim()}%`}},
               {StudentNameExternal: {[OP_LIKE]: `%${`${criteria.searchText || ''}`.trim()}%`}},
               {StudentOccupEmail: {[OP_LIKE]: `%${`${criteria.searchText || ''}`.trim()}%`}},
+              ...(UtilsService.isNumeric(criteria.searchText || '') === true ? [{StudentID: `${criteria.searchText || ''}`.trim()}] : []),
             ],
           } : {}),
         }),
