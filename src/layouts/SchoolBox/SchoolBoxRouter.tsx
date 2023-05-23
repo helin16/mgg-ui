@@ -15,7 +15,7 @@ import BudgetTrackerPage from '../../pages/BudgetTracker/BudgetTrackerPage';
 import FunnelPage from '../../pages/funnel/FunnelPage';
 import AlumniRequestPage from '../../pages/alumni/AlumniRequestPage';
 import ParentDirectoryPage from '../../pages/parent/ParentDirectoryPage';
-import StudentAbsencePage from '../../pages/studentAbsences/StudentAbsencePage';
+// import StudentAbsencePage from '../../pages/studentAbsences/StudentAbsencePage';
 // import PageNotFound from '../../components/PageNotFound';
 
 const schoolBoxIframeElementId = 'remote';

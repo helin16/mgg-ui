@@ -141,11 +141,11 @@ const ComparativeAnalysisPage = ({
         </SectionDiv>
       </>
     )
-    return Object.keys(comparativeResults)
-      .sort((res1, res2) => res1 > res2 ? 1 : -1)
-      .map(assessHeading => {
-        return getComparativeResultTable(assessHeading, comparativeResults[assessHeading])
-      });
+    // return Object.keys(comparativeResults)
+    //   .sort((res1, res2) => res1 > res2 ? 1 : -1)
+    //   .map(assessHeading => {
+    //     return getComparativeResultTable(assessHeading, comparativeResults[assessHeading])
+    //   });
   }
 
 
