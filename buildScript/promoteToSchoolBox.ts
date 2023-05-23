@@ -35,6 +35,7 @@ const uploadAssets = async () => {
   const commandToUploadAllFiles = `scp -r ${getBuildFolder()}* ${SCHOOLBOX_USERNAME}@${SCHOOLBOX_HOST}:${SCHOOLBOX_STATIC_ASSET_FOLDER}${schoolBoxStaticAssetUrlPath}/;`;
   const commandToUploadFrameFile = `scp ${getBuildFolder()}schoolBox.html ${SCHOOLBOX_USERNAME_ORIGINAL}@${SCHOOLBOX_HOST}:${SCHOOLBOX_IFRAME_HTML_FILE};`;
   const commandToUploadRunningFrameFile = `scp ${getBuildFolder()}schoolBox.html ${SCHOOLBOX_USERNAME}@${SCHOOLBOX_HOST}:${SCHOOLBOX_IFRAME_HTML_RUNNING_FILE};`;
+  console.log('command: ', `${commandToUploadAllFiles} ${commandToUploadFrameFile} ${commandToUploadRunningFrameFile}`);
   exec(`${commandToUploadAllFiles} ${commandToUploadFrameFile} ${commandToUploadRunningFrameFile}`, (error, stdout, stderr) => {
     if (error) {
       console.log(`error: ${error.message}`);

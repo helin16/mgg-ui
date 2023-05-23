@@ -44,10 +44,6 @@
     "eject": "react-scripts eject",
     "install:test": "yarn install",
     "install:prod": "rm -rf ./node_modules/; yarn install --production",
-    "promote:test": "ts-node buildScript/promoteToSchoolBoxDev.ts",
-    "promote:prod": "ts-node buildScript/promoteToSchoolBox.ts",
-    "deploy:test": "yarn install:test; ./node_modules/.bin/env-cmd -f ./.env.development yarn build; yarn promote:test;",
-    "deploy:prod": "yarn install:test; ./node_modules/.bin/env-cmd -f ./.env.production yarn build; yarn promote:prod;"
   },
   "eslintConfig": {
     "extends": [

@@ -50,7 +50,7 @@ const SearchPage = ({onSelect}: {onSelect: (student: iVStudent) => void}) => {
   return (
     <Wrapper className={'search-box-wrapper'}>
       <h3>
-        Student Report
+        Student Report1
         <span className={'pull-right'} >
           <ModuleAdminBtn onClick={() => setIsShowAdminPage(true)} moduleId={MGGS_MODULE_ID_STUDENT_REPORT} />
         </span>
