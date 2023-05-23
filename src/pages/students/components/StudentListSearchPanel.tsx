@@ -69,48 +69,46 @@ const StudentListSearchPanel = ({isLoading = false, preSelectedClassCodes = [], 
 
   return (
     <Wrapper>
-      <Container fluid>
-        <Row>
-          <Col sm={2}>
-            <FormLabel label={' '} />
-            <Form.Control
-              placeholder="Student name or homeroom (e.g. 'Amanda', '9C')" value={searchCriteria.searchText}
-              onChange={(event) => setSearchCriteria({
-                ...searchCriteria,
-                searchText: event.target.value,
-              })}
-              onKeyUp={(event) => UtilsService.handleEnterKeyPressed(event, () => onSearch && onSearch(searchCriteria))}
-            />
-          </Col>
-          <Col sm={9}>
-            <FormLabel label={'Classes'} />
-            <SynSubjectClassSelector
-              pageSize={9999}
-              FileYear={user?.SynCurrentFileSemester?.FileYear || moment().year()}
-              FileSemester={user?.SynCurrentFileSemester?.FileSemester || 1}
-              values={searchCriteria.classCodes}
-              isMulti
-              allowClear
-              onSelect={(values) => setSearchCriteria({
-                ...searchCriteria,
-                classCodes: (values === null ? [] : Array.isArray(values) ? values : [values]).map(value => `${value.value}`),
-              })}
-            />
-          </Col>
-          <Col sm={1} className={'btns'}>
-            <FormLabel label={' '} />
-            <div className={'text-right'}>
-              <LoadingBtn
-                isLoading={isLoading || isSearching}
-                variant={'primary'}
-                icon={<Icons.Search />}
-                onClick={() => onSearch && onSearch(searchCriteria)}>
-                Search
-              </LoadingBtn>
-            </div>
-          </Col>
-        </Row>
-      </Container>
+      <Row>
+        <Col sm={2}>
+          <FormLabel label={' '} />
+          <Form.Control
+            placeholder="Student name or homeroom (e.g. 'Amanda', '9C')" value={searchCriteria.searchText}
+            onChange={(event) => setSearchCriteria({
+              ...searchCriteria,
+              searchText: event.target.value,
+            })}
+            onKeyUp={(event) => UtilsService.handleEnterKeyPressed(event, () => onSearch && onSearch(searchCriteria))}
+          />
+        </Col>
+        <Col sm={9}>
+          <FormLabel label={'Classes'} />
+          <SynSubjectClassSelector
+            pageSize={9999}
+            FileYear={user?.SynCurrentFileSemester?.FileYear || moment().year()}
+            FileSemester={user?.SynCurrentFileSemester?.FileSemester || 1}
+            values={searchCriteria.classCodes}
+            isMulti
+            allowClear
+            onSelect={(values) => setSearchCriteria({
+              ...searchCriteria,
+              classCodes: (values === null ? [] : Array.isArray(values) ? values : [values]).map(value => `${value.value}`),
+            })}
+          />
+        </Col>
+        <Col sm={1} className={'btns'}>
+          <FormLabel label={' '} />
+          <div className={'text-right'}>
+            <LoadingBtn
+              isLoading={isLoading || isSearching}
+              variant={'primary'}
+              icon={<Icons.Search />}
+              onClick={() => onSearch && onSearch(searchCriteria)}>
+              Search
+            </LoadingBtn>
+          </div>
+        </Col>
+      </Row>
     </Wrapper>
   );
 }
