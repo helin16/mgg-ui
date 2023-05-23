@@ -2,17 +2,13 @@
 // scp -r ./build/* alaress@10.114.37.24:/usr/share/schoolbox/www//static/mggs/; scp ./build/schoolBox.html alaress@10.114.37.24:/usr/share/mentone-scripts/iframe/frame.html; scp ./build/schoolBox.html alaress@10.114.37.24:/usr/share/schoolbox/templates/core/modules/remote/frame.html
 
 import * as fs from 'fs';
-// import { Client } from 'node-scp'
 import {exec} from 'child_process';
 
 const schoolBoxStaticAssetUrlPath = '/static/mggs';
-// const SCHOOLBOX_HOST = 'mconnect.mentonegirls.vic.edu.au';
 const SCHOOLBOX_HOST = '10.114.37.24';
-// const SCHOOLBOX_PORT = 22;
 const SCHOOLBOX_STATIC_ASSET_FOLDER = '/usr/share/schoolbox/www/';
 const SCHOOLBOX_USERNAME = 'schoolboxsuper';
 const SCHOOLBOX_USERNAME_ORIGINAL = 'alaress';
-// const SCHOOLBOX_PRIRVATE_KEY_FILE = '/Users/helin16/.ssh/id_rsa';
 const SCHOOLBOX_IFRAME_HTML_FILE = '/usr/share/mentone-scripts/iframe/frame.html';
 const SCHOOLBOX_IFRAME_HTML_RUNNING_FILE = '/usr/share/schoolbox/templates/core/modules/remote/frame.html';
 
@@ -50,22 +46,6 @@ const uploadAssets = async () => {
     }
     console.log(`stdout: ${stdout}`);
   });
-  // try {
-  //   const client = await Client({
-  //     host: SCHOOLBOX_HOST,
-  //     port: SCHOOLBOX_PORT,
-  //     username: SCHOOLBOX_USERNAME,
-  //     // password: 'password',
-  //     privateKey: fs.readFileSync(SCHOOLBOX_PRIRVATE_KEY_FILE),
-  //     // passphrase: 'your key passphrase',
-  //   })
-  //   await client.uploadDir(`${getBuildFolder()}`, `${SCHOOLBOX_STATIC_ASSET_FOLDER}${schoolBoxStaticAssetUrlPath}/`);
-  //   await client.uploadFile(`${getBuildFolder()}/schoolBox.html`, SCHOOLBOX_IFRAME_HTML_FILE);
-  //   await client.uploadFile(`${getBuildFolder()}/schoolBox.html`, SCHOOLBOX_IFRAME_HTML_RUNNING_FILE);
-  //   client.close() // remember to close connection after you finish
-  // } catch (e) {
-  //   console.error(e)
-  // }
 }
 
 const PromoteToSchoolBox = async () => {

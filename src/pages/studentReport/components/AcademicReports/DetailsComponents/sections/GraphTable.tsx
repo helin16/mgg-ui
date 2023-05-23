@@ -3,12 +3,12 @@ import iStudentReportResult from '../../../../../../types/Synergetic/iStudentRep
 import {ProgressBar} from 'react-bootstrap';
 import SectionDiv from './SectionDiv';
 
-const Wrapper = styled.div`
+export const ResultTableWrapper = styled.div`
   .result-row {
     display: flex;
     //padding: 2px 0;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: flex-start;
     
     &.title-row {
       font-weight: bold;
@@ -76,7 +76,7 @@ const GraphTable = ({
 
   return (
     <SectionDiv>
-      <Wrapper>
+      <ResultTableWrapper>
         <div className={'result-row title-row'}>
           <div className={'text-uppercase'}>{title}</div>
           {getResultColTitle()}
@@ -107,7 +107,7 @@ const GraphTable = ({
             </div>
           )
         })}
-      </Wrapper>
+      </ResultTableWrapper>
     </SectionDiv>
   )
 };

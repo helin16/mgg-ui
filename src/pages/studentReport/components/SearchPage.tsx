@@ -55,6 +55,7 @@ const SearchPage = ({onSelect}: {onSelect: (student: iVStudent) => void}) => {
           <ModuleAdminBtn onClick={() => setIsShowAdminPage(true)} moduleId={MGGS_MODULE_ID_STUDENT_REPORT} />
         </span>
       </h3>
+
       <p>Welcome to the student academic report viewer. Type the homeroom or name of the student you want to locate below.</p>
       <SynStudentSearchPanel
         showAdvancedSearch
