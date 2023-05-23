@@ -15,6 +15,11 @@ import {RootState} from '../../redux/makeReduxStore';
 import moment from 'moment-timezone';
 
 const Wrapper = styled.div`
+  .row {
+    > div {
+      padding-left: 0px;
+    }
+  }
 `;
 
 
