@@ -3,6 +3,7 @@ import "react-datetime/css/react-datetime.css";
 import moment from 'moment';
 import styled from 'styled-components';
 import * as Icons from 'react-bootstrap-icons'
+import {FormControl} from 'react-bootstrap';
 
 type iDateTimePicker = {
   value?: Date | string;
@@ -11,6 +12,7 @@ type iDateTimePicker = {
   displayTimeZone?: string;
   className?: string;
   allowClear?: boolean;
+  isDisabled?: boolean;
   isValidDate?: (currentDate: Date, selectedDate: Date) => boolean;
 }
 
@@ -59,7 +61,7 @@ const Wrapper = styled.div`
   }
 `
 const DateTimePicker = ({
-  onChange, value, isValidDate, displayTimeZone, className, allowClear, dateFormat = 'D / MMM / YYYY'
+  onChange, value, isValidDate, displayTimeZone, className, allowClear, isDisabled, dateFormat = 'D / MMM / YYYY h:m a'
 }: iDateTimePicker) => {
 
   const getValue = () => {
@@ -86,19 +88,25 @@ const DateTimePicker = ({
 
   return (
     <Wrapper className={className}>
-      <Datetime
-        isValidDate={isValidDate}
-        inputProps={{placeholder: 'Pick a date and time...'}}
-        className={'datetime-picker'}
-        onChange={onChange}
-        value={getValue()}
-        dateFormat={dateFormat}
-        displayTimeZone={displayTimeZone}
-        renderInput={(props) => {
-          return <input {...props} value={value ? props.value : ''} />
-        }}
-      />
-      { getClearBtn() }
+      {
+        isDisabled === true ? (<FormControl value={`${value || ''}`.trim() === '' ? '' : moment(value).format(dateFormat)} disabled />) : (
+          <>
+            <Datetime
+              isValidDate={isValidDate}
+              inputProps={{placeholder: 'Pick a date and time...'}}
+              className={'datetime-picker'}
+              onChange={onChange}
+              value={getValue()}
+              dateFormat={dateFormat}
+              displayTimeZone={displayTimeZone}
+              renderInput={(props) => {
+                return <input {...props} value={value ? props.value : ''} />
+              }}
+            />
+            { getClearBtn() }
+          </>
+        )
+      }
     </Wrapper>
   )
 };

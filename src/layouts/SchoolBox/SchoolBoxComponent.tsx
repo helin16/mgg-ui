@@ -8,6 +8,7 @@ import LocalStorageService from '../../services/LocalStorageService';
 import {removedAuthentication, userAuthenticated} from '../../redux/reduxers/auth.slice';
 import {useDispatch} from 'react-redux';
 import Toaster from '../../services/Toaster';
+import SchoolBoxUrlCheckPopup from './SchoolBoxUrlCheckPopup';
 
 type iSchoolBoxComponent = {
   path: string;
@@ -64,6 +65,7 @@ const SchoolBoxComponent = ({path, remoteUrl, id = null, user = null, time = nul
   return (
     <div className={'school-box-layout'}>
       <SchoolBoxDebugInfo remoteUrl={remoteUrl} path={path} searchParams={{synId, schoolBoxUser, authTime, authKey}}/>
+      <SchoolBoxUrlCheckPopup />
       <SchoolBoxRouter path={path} remoteUrl={remoteUrl} />
     </div>
   )

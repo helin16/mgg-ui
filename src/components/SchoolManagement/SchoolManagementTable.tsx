@@ -36,12 +36,17 @@ const Wrapper = styled.div`
   }
 `
 
-// type iSchoolManagementTable = {}
-const SchoolManagementTable = () => {
+type iSchoolManagementTable = {
+  roleCodes?: string[];
+  viewOnly?: boolean;
+  showExplanation?: boolean;
+  showSearchPanel?: boolean;
+}
+const SchoolManagementTable = ({showSearchPanel = true, showExplanation = true, viewOnly = false, roleCodes = []} : iSchoolManagementTable) => {
   const {user} = useSelector((state: RootState) => state.auth);
   const [selectedFileYear, setSelectedFileYear] = useState(user?.SynCurrentFileSemester?.FileYear || moment().year())
   const [selectedFileSemester, setSelectedFileSemester] = useState(user?.SynCurrentFileSemester?.FileSemester || 1)
-  const [selectedRoleCodes, setSelectedRoleCodes] = useState<string[]>([])
+  const [selectedRoleCodes, setSelectedRoleCodes] = useState<string[]>(roleCodes)
   const [searchingText, setSearchingText] = useState('')
   const [isLoading, setIsLoading] = useState(false);
   const [schoolManageTeams, setSchoolManageTeams] = useState<iSchoolManagementTeam[]>([]);
@@ -100,14 +105,16 @@ const SchoolManagementTable = () => {
             <th>Comments</th>
             <th>Acting 1</th>
             <th>Acting 2</th>
-            <th className={'col btns'}>
-              <SchoolManagementEditPopupBtn
-                onSaved={() => setCount(MathHelper.add(count, 1))}
-                variant={'success'}
-                size={'sm'}>
-                <Icons.Plus />{' '} New
-              </SchoolManagementEditPopupBtn>
-            </th>
+            {viewOnly === true ? null : (
+              <th className={'col btns'}>
+                <SchoolManagementEditPopupBtn
+                  onSaved={() => setCount(MathHelper.add(count, 1))}
+                  variant={'success'}
+                  size={'sm'}>
+                  <Icons.Plus />{' '} New
+                </SchoolManagementEditPopupBtn>
+              </th>
+            )}
           </tr>
         </thead>
         <tbody>
@@ -130,34 +137,36 @@ const SchoolManagementTable = () => {
                 <td>{team.Comments}</td>
                 <td>{getStaffDetailsCell(team.SynActingStaff1)}</td>
                 <td>{getStaffDetailsCell(team.SynActingStaff2)}</td>
-                <td className={'col btns'}>
-                  <SchoolManagementEditPopupBtn
-                    title={'Clone'}
-                    onSaved={() => setCount(MathHelper.add(count, 1))}
-                    schoolManagementTeam={{
-                      ...team,
-                      // @ts-ignore
-                      SchoolSeniorTeamID: undefined,
-                      // @ts-ignore
-                      FileYear: undefined,
-                      // @ts-ignore
-                      FileSemester: undefined,
-                    }}
-                    variant={'outline-secondary'}
-                    size={'sm'}>
-                    <Icons.Files />{' '} Clone
-                  </SchoolManagementEditPopupBtn>
-                  {' '}
-                  <DeleteConfirmPopupBtn
-                    deletingFn={() => SchoolManagementTeamService.remove(team.SchoolSeniorTeamID)}
-                    deletedCallbackFn={() => setCount(MathHelper.add(count, 1))}
-                    confirmString={`${team.SchoolSeniorTeamID}`}
-                    variant={'outline-danger'}
-                    size={'sm'}
-                  >
-                    <Icons.Trash />
-                  </DeleteConfirmPopupBtn>
-                </td>
+                {viewOnly === true ? null : (
+                  <td className={'col btns'}>
+                    <SchoolManagementEditPopupBtn
+                      title={'Clone'}
+                      onSaved={() => setCount(MathHelper.add(count, 1))}
+                      schoolManagementTeam={{
+                        ...team,
+                        // @ts-ignore
+                        SchoolSeniorTeamID: undefined,
+                        // @ts-ignore
+                        FileYear: undefined,
+                        // @ts-ignore
+                        FileSemester: undefined,
+                      }}
+                      variant={'outline-secondary'}
+                      size={'sm'}>
+                      <Icons.Files />{' '} Clone
+                    </SchoolManagementEditPopupBtn>
+                    {' '}
+                    <DeleteConfirmPopupBtn
+                      deletingFn={() => SchoolManagementTeamService.remove(team.SchoolSeniorTeamID)}
+                      deletedCallbackFn={() => setCount(MathHelper.add(count, 1))}
+                      confirmString={`${team.SchoolSeniorTeamID}`}
+                      variant={'outline-danger'}
+                      size={'sm'}
+                    >
+                      <Icons.Trash />
+                    </DeleteConfirmPopupBtn>
+                  </td>
+                )}
               </tr>
             )
           })}
@@ -173,15 +182,11 @@ const SchoolManagementTable = () => {
     return true;
   }
 
-  return (
-    <Wrapper>
-      <ExplanationPanel text={
-        <>
-          This a UI for managing the <b>uluSchoolManagementTeam</b>.
-          <p>Changing information below will affect: Student absence notification / Student Reports</p>
-          <p><b>The system run every night to check whether the current Semester is the same with the latest record in uluSchoolManagementTeam. If not, it will copy the latest records to the current Semester</b></p>
-        </>
-      } />
+  const getSearchPanel = () => {
+    if (showSearchPanel !== true) {
+      return null;
+    }
+    return (
       <Row className={'search-panel'}>
         <Col sm={2}>
           <FormLabel label={'File Year'} />
@@ -227,7 +232,21 @@ const SchoolManagementTable = () => {
           </LoadingBtn>
         </Col>
       </Row>
+    )
+  }
 
+  return (
+    <Wrapper>
+      {showExplanation && (
+        <ExplanationPanel text={
+          <>
+            This a UI for managing the <b>uluSchoolManagementTeam</b>.
+            <p>Changing information below will affect: Student absence notification / Student Reports</p>
+            <p><b>The system run every night to check whether the current Semester is the same with the latest record in uluSchoolManagementTeam. If not, it will copy the latest records to the current Semester</b></p>
+          </>
+        } />
+      )}
+      {getSearchPanel()}
       {getContent()}
     </Wrapper>
   )

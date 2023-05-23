@@ -1,3 +1,8 @@
+######
+### IMPORTANT !!!!!
+### THIS IS THE JS SCRIPT YOU NEED TO ADD TO SCHOOL BOX -> ADMINISTRATION -> SYSTEM SETTINGS -> SITE -> Custom JavaScript
+### without doing this first, none of the custom script will run.
+
 <script>
   const BASE_URL = 'https://appdev.mentonegirls.vic.edu.au';
 
@@ -7,12 +12,15 @@
       iFrame.style.display = 'none';
       const reactDiv = document.createElement("div");
       reactDiv.setAttribute('id', 'mgg-root');
+      reactDiv.setAttribute('data-url', `${iFrame.src || ''}`);
       if(iFrame.nextSibling){
         iFrame.parentNode.insertBefore(reactDiv, iFrame.nextSibling);
-      }else{
+      } else{
         iFrame.parentNode.appendChild(reactDiv);
       }
+      return true;
     }
+    return false;
   }
 
   const renderFrame = (mainJsUrl, mainCssUrl) =>  {
@@ -52,6 +60,10 @@
   };
 
   const run = function() {
+    if (initHtml() !== true) {
+      console.log('not a iframe page');
+      return;
+    }
     fetchData(`${BASE_URL}/asset-manifest.json`, (status, response) => {
       if (status !== 200) {
         return null;
@@ -62,7 +74,7 @@
           if (responseObj.files) {
             const mainJsString = `${responseObj.files['main.js']}`.trim();
             const mainCssString = `${responseObj.files['main.css']}`.trim();
-            initHtml();
+            // initHtml();
             renderFrame(mainJsString, mainCssString);
           }
       } catch (err) {

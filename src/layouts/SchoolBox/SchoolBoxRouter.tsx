@@ -3,9 +3,9 @@ import StudentReport from '../../pages/studentReport/StudentReport';
 import OperooSafetyAlertsPage from '../../pages/operoo/OperooSafetyAlertsPage';
 import ModuleAccessWrapper from '../../components/module/ModuleAccessWrapper';
 import {
-  MGGS_MODULE_ID_ALUMNI_REQUEST, MGGS_MODULE_ID_FUNNEL,
+  MGGS_MODULE_ID_FUNNEL,
   MGGS_MODULE_ID_HOUSE_AWARDS,
-  MGGS_MODULE_ID_OPEROO_SAFETY_ALERTS,
+  MGGS_MODULE_ID_OPEROO_SAFETY_ALERTS, MGGS_MODULE_ID_STUDENT_ABSENCES,
 } from '../../types/modules/iModuleUser';
 import HouseAwardsPage from '../../pages/houseAwards/HouseAwardsPage';
 import MedicalReportPage from '../../pages/medicalReports/MedicalReportPage';
@@ -15,6 +15,7 @@ import BudgetTrackerPage from '../../pages/BudgetTracker/BudgetTrackerPage';
 import FunnelPage from '../../pages/funnel/FunnelPage';
 import AlumniRequestPage from '../../pages/alumni/AlumniRequestPage';
 import ParentDirectoryPage from '../../pages/parent/ParentDirectoryPage';
+import StudentAbsencePage from '../../pages/studentAbsences/StudentAbsencePage';
 // import PageNotFound from '../../components/PageNotFound';
 
 const schoolBoxIframeElementId = 'remote';
@@ -74,8 +75,12 @@ const SchoolBoxRouter = ({path, remoteUrl}: {path: string, remoteUrl: string}) =
     }
     case '/alumni/admin': {
       removeSchoolBoxIframe();
-      return <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_ALUMNI_REQUEST}><AlumniRequestPage /></ModuleAccessWrapper>
+      return <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_STUDENT_ABSENCES}><AlumniRequestPage /></ModuleAccessWrapper>
     }
+    // case '/student_inout/home': {
+    //   removeSchoolBoxIframe();
+    //   return <StudentAbsencePage />
+    // }
     default: {
       showSchoolBoxIframe();
       return null; //<PageNotFound />

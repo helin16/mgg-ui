@@ -22,10 +22,10 @@ const Router = () => {
   useEffect(() => {
     PingService.ping()
       .then(res => {
-        dispatch(setIsProd({isProd: res.isProd === true}));
+        dispatch(setIsProd({isProd: res.isProd === true, backendSchoolBoxUrl: res.schoolBoxUrl }));
       })
       .catch(() => {
-        dispatch(setIsProd({isProd: false}));
+        dispatch(setIsProd({isProd: false, backendSchoolBoxUrl: undefined}));
       })
   }, [dispatch])
   return (

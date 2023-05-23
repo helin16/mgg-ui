@@ -6,6 +6,9 @@ export const FlexContainer = styled.div`
   &.with-gap,
   &.withGap {
     gap: 2px;
+    &.lg-gap {
+      gap: 1rem;
+    }
   }
   
   &.flex-wrap {

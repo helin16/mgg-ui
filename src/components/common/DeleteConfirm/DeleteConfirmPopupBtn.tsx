@@ -1,6 +1,7 @@
 import { useState} from 'react';
 import {Button, ButtonProps} from 'react-bootstrap';
 import DeleteConfirmPopup from './DeleteConfirmPopup';
+import Toaster from '../../../services/Toaster';
 
 
 type iDeleteConfirmPopupBtnProps = ButtonProps & {
@@ -41,6 +42,7 @@ const DeleteConfirmPopupBtn = ({
           deletedCallbackFn(resp);
         }
       })
+      .catch(err => Toaster.showApiError(err))
       .finally(() => {
         setIsSubmitting(false);
       })
