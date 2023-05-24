@@ -224,7 +224,7 @@ const AlumniRequestList = () => {
           />
         </Col>
         <Col md={3}>
-          <FormLabel label={'Year'} />
+          <FormLabel label={'Leaving Year'} />
           <FileYearSelector
             value={searchingYear}
             allowClear
@@ -234,7 +234,7 @@ const AlumniRequestList = () => {
           />
         </Col>
         <Col md={3}>
-          <FormLabel label={'Year Level'} />
+          <FormLabel label={'Leaving Year Level'} />
           <YearLevelSelector
             values={searchingYearLevels}
             isMulti
