@@ -17,7 +17,6 @@ import OutcomesDiv from '../sections/OutcomesDiv';
 import ReflectionDiv from '../sections/RefelectionDiv';
 import {FlexContainer} from '../../../../../../styles';
 import StudentStatusBadge from '../../StudentStatusBadge';
-import ComparativeSection from '../sections/ComparativeSection';
 
 export const SubjectPageWrapper = styled.div`
   .d-table {
@@ -65,7 +64,6 @@ const StudentAcademicSubjectPage = ({
         selectedReportResults={selectedReportResultList}
       />
 
-      <ComparativeSection />
       <OutcomesDiv results={selectedReportResultList}/>
       <AssessmentTasksDiv results={selectedReportResultList}/>
       <AchievementStandardsDiv results={selectedReportResultList} />

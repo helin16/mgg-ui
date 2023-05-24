@@ -23,7 +23,7 @@
     return false;
   }
 
-  const renderFrame = (mainJsUrl, mainCssUrl) =>  {
+  const renderFrame = (mainJsUrl, mainCssUrl, loadCss = false) =>  {
     const header = document.getElementsByTagName('head')[0];
 
     const meta = document.createElement('meta');
@@ -36,16 +36,18 @@
     manifest.href = `${BASE_URL}/manifest.json`;
     header.appendChild(manifest);
 
-    const mainCss = document.createElement('link');
-    mainCss.rel = "stylesheet";
-    mainCss.type = "text/css";
-    mainCss.href = `${BASE_URL}${mainCssUrl}`;
-    header.appendChild(mainCss);
+    if (loadCss === true) {
+        const mainCss = document.createElement('link');
+        mainCss.rel = "stylesheet";
+        mainCss.type = "text/css";
+        mainCss.href = `${BASE_URL}${mainCssUrl}`;
+        header.appendChild(mainCss);
+    }
 
     const mainJs = document.createElement('script');
     mainJs.defer = "defer";
     mainJs.src = `${BASE_URL}${mainJsUrl}`;
-    header.appendChild(mainJs);
+    document.body.appendChild(mainJs);
   }
 
   const fetchData = function(url, callback) {
@@ -60,10 +62,11 @@
   };
 
   const run = function() {
-    if (initHtml() !== true) {
-      console.log('not a iframe page');
-      return;
-    }
+    const htmlInitiated = initHtml();
+    // if (htmlInitiated !== true) {
+    //   console.log('not a iframe page');
+    //   return;
+    // }
     fetchData(`${BASE_URL}/asset-manifest.json`, (status, response) => {
       if (status !== 200) {
         return null;
@@ -75,7 +78,7 @@
             const mainJsString = `${responseObj.files['main.js']}`.trim();
             const mainCssString = `${responseObj.files['main.css']}`.trim();
             // initHtml();
-            renderFrame(mainJsString, mainCssString);
+            renderFrame(mainJsString, mainCssString, htmlInitiated);
           }
       } catch (err) {
         console.error(err);

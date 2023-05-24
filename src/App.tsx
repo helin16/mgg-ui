@@ -13,6 +13,7 @@ import {setIsProd} from './redux/reduxers/app.slice';
 import PingService from './services/PingService';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import AlumniRegistrationPage from './pages/alumni/AlumniRegistrationPage';
 import {URL_ALUMNI_REGISTRATION, URL_ASSET_PICK_UP} from './Url';
 
