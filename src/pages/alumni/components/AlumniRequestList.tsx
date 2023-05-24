@@ -213,7 +213,7 @@ const AlumniRequestList = () => {
     <Wrapper>
       <Row className={'search-panel'}>
         <Col md={4}>
-          <FormLabel label={'Relationship'} />
+          <FormLabel label={'Relationship To School'} />
           <AlumniRelationshipSelector
             values={searchRelationships}
             isMulti
