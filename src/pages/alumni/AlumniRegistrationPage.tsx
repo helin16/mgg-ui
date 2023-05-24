@@ -16,7 +16,6 @@ import AlumniRelationshipSelector from '../../components/alumni/AlumniRelationsh
 import FileYearSelector from '../../components/student/FileYearSelector';
 import moment from 'moment-timezone';
 import YearLevelSelector from '../../components/student/YearLevelSelector';
-import {CAMPUS_CODE_SENIOR} from '../../types/Synergetic/iLuCampus';
 
 const Wrapper = styled.div`
   padding-bottom: 3rem;

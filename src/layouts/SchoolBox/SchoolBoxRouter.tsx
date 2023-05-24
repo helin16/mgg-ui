@@ -6,7 +6,7 @@ import {
   MGGS_MODULE_ID_ALUMNI_REQUEST,
   MGGS_MODULE_ID_FUNNEL,
   MGGS_MODULE_ID_HOUSE_AWARDS,
-  MGGS_MODULE_ID_OPEROO_SAFETY_ALERTS, MGGS_MODULE_ID_STUDENT_ABSENCES,
+  MGGS_MODULE_ID_OPEROO_SAFETY_ALERTS,
 } from '../../types/modules/iModuleUser';
 import HouseAwardsPage from '../../pages/houseAwards/HouseAwardsPage';
 import MedicalReportPage from '../../pages/medicalReports/MedicalReportPage';

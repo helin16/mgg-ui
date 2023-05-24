@@ -38,6 +38,9 @@ export const FlexContainer = styled.div`
   &.space-below {
     margin-bottom: 0.8rem;
   }
+  &.space-above {
+    margin-top: 0.8rem;
+  }
 
   &.wrap {
     flex-wrap: wrap;
