@@ -64,6 +64,7 @@ input[type="checkbox"] {
 
 .row {
     margin-left: inherit !important;
+    width: calc(100% - 2px);
 }
 
 ul, ol, dl {

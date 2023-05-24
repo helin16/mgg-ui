@@ -3,6 +3,7 @@ import StudentReport from '../../pages/studentReport/StudentReport';
 import OperooSafetyAlertsPage from '../../pages/operoo/OperooSafetyAlertsPage';
 import ModuleAccessWrapper from '../../components/module/ModuleAccessWrapper';
 import {
+  MGGS_MODULE_ID_ALUMNI_REQUEST,
   MGGS_MODULE_ID_FUNNEL,
   MGGS_MODULE_ID_HOUSE_AWARDS,
   MGGS_MODULE_ID_OPEROO_SAFETY_ALERTS, MGGS_MODULE_ID_STUDENT_ABSENCES,
@@ -75,7 +76,7 @@ const SchoolBoxRouter = ({path, remoteUrl}: {path: string, remoteUrl: string}) =
     }
     case '/alumni/admin': {
       removeSchoolBoxIframe();
-      return <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_STUDENT_ABSENCES}><AlumniRequestPage /></ModuleAccessWrapper>
+      return <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_ALUMNI_REQUEST}><AlumniRequestPage /></ModuleAccessWrapper>
     }
     // case '/student_inout/home': {
     //   removeSchoolBoxIframe();

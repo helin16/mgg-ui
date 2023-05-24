@@ -12,6 +12,11 @@ import AlumniRequestService from '../../services/Alumni/AlumniRequestService';
 import Toaster, {TOAST_TYPE_ERROR} from '../../services/Toaster';
 import FormErrorDisplay from '../../components/form/FormErrorDisplay';
 import UtilsService from '../../services/UtilsService';
+import AlumniRelationshipSelector from '../../components/alumni/AlumniRelationshipSelector';
+import FileYearSelector from '../../components/student/FileYearSelector';
+import moment from 'moment-timezone';
+import YearLevelSelector from '../../components/student/YearLevelSelector';
+import {CAMPUS_CODE_SENIOR} from '../../types/Synergetic/iLuCampus';
 
 const Wrapper = styled.div`
   padding-bottom: 3rem;
@@ -63,16 +68,6 @@ const initFormValues: iFormValues = {
   relationship_to_school:  null,
 }
 
-const relationShips = [
-  'Current Student',
-  'Current Parent',
-  'Past Student',
-  'Past Parent',
-  'Current Staff',
-  'Past Staff',
-  'Past Committee Member',
-  'Friend Of the School',
-];
 const titles = [
   'Doctor',
   'Professor',
@@ -88,6 +83,7 @@ const AlumniRegistrationPage = () => {
   const [savedRequest, setSavedRequest] = useState<iAlumniRequest | null>(null);
 
   const preCheck = () => {
+    console.log('formValues', formValues);
     return [
       'title',
       'first_name',
@@ -129,7 +125,7 @@ const AlumniRegistrationPage = () => {
       return {
         ...map,
         [fieldName]: `is required.`,
-      }
+      };
     }, {});
   }
 
@@ -157,7 +153,7 @@ const AlumniRegistrationPage = () => {
       })
   }
 
-  const onChangeField = (fieldName: string, value: string) => {
+  const onChangeField = (fieldName: string, value: string | null) => {
     setFormValues({
       ...formValues,
       [fieldName]: value,
@@ -172,21 +168,25 @@ const AlumniRegistrationPage = () => {
       <>
         <Form.Group as={Col} sm="6" md={3}>
           <FormLabel label={'Leaving Year: '} isRequired/>
-          <Form.Control
-            value={`${formValues.leaving_year || ''}`}
-            placeholder={'Leaving Year (eg 2005)'}
-            isInvalid={`${errors.leaving_year  || ''}`.trim() !== ''}
-            onChange={(event) => onChangeField('leaving_year', event.target.value)}
+          <FileYearSelector
+            className={`form-control ${'leaving_year' in errors ? 'is-invalid' : ''}`}
+            value={`${formValues.leaving_year || ''}`.trim() === '' ? null : Number(`${formValues.leaving_year || ''}`)}
+            onSelect={(newYear) => onChangeField('leaving_year', newYear === null ? null : `${newYear}`) }
+            min={moment().subtract(200, 'year').year()}
+            max={moment().year()}
+            allowClear
           />
           <FormErrorDisplay errorsMap={errors} fieldName={'leaving_year'} />
         </Form.Group>
         <Form.Group as={Col} sm="6" md={3}>
           <FormLabel label={'Leaving Year Level: '} isRequired/>
-          <Form.Control
-            value={`${formValues.leaving_year_level || ''}`}
-            isInvalid={`${errors.leaving_year_level  || ''}`.trim() !== ''}
-            placeholder={'Leaving Year Level (eg Year 12)'}
-            onChange={(event) => onChangeField('leaving_year_level', event.target.value)}
+          <YearLevelSelector
+            classname={`form-control ${'leaving_year_level' in errors ? 'is-invalid' : ''}`}
+            allowClear
+            values={formValues.leaving_year_level ? [`${formValues.leaving_year_level}`] : []}
+            onSelect={(option) => {
+              onChangeField('leaving_year_level', option === null ? null : `${Array.isArray(option) ? option[0].value : option?.value}`)
+            }}
           />
           <FormErrorDisplay errorsMap={errors} fieldName={'leaving_year_level'} />
         </Form.Group>
@@ -261,18 +261,12 @@ const AlumniRegistrationPage = () => {
             </Form.Group>
             <Form.Group as={Col} sm="6" md={3}>
               <FormLabel label={'Relationship To School:'} isRequired/>
-              <Form.Select
-                value={formValues.relationship_to_school  || ''}
-                isInvalid={`${errors.relationship_to_school  || ''}`.trim() !== ''}
-                onChange={(event) => onChangeField('relationship_to_school', event.target.value)}
-              >
-                <option>Please select an option</option>
-                {relationShips.map(relationShip => {
-                  return (
-                    <option value={relationShip} key={relationShip}>{relationShip}</option>
-                  )
-                })}
-              </Form.Select>
+              <AlumniRelationshipSelector
+                classname={`form-control ${'relationship_to_school' in errors ? 'is-invalid' : ''}`}
+                values={`${formValues.relationship_to_school || ''}`.trim() === '' ? [] : [`${formValues.relationship_to_school}`]}
+                onSelect={(option) => onChangeField('relationship_to_school', option === null ? null : `${Array.isArray(option) ? option[0].value : option?.value}`)}
+                allowClear
+                />
               <FormErrorDisplay errorsMap={errors} fieldName={'relationship_to_school'} />
             </Form.Group>
             {getLeavingYearAndLevel()}

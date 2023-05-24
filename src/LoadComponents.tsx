@@ -18,6 +18,8 @@ const loadAll = () => {
   );
 }
 
-export default {
-  loadAll
-};
+const LoadComponents = {
+  loadAll,
+}
+
+export default LoadComponents;
