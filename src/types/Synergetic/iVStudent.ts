@@ -2,6 +2,7 @@ export const SYN_STUDENT_STATUS_ID_NORMAL = '0';
 export const SYN_STUDENT_STATUS_ID_NEW = '1';
 export const SYN_STUDENT_STATUS_ID_LEAVING = '5';
 export const SYN_STUDENT_STATUS_ID_LEFT = '4';
+export const SYN_STUDENT_STATUS_PAST = 'PAST';
 
 type iVStudent = {
   StudentID: number;
@@ -200,5 +201,10 @@ type iVStudent = {
   GenderSynergyMeaning: string;
   profileUrl: string;
 };
+
+export type iVPastStudent = iVStudent;
+export type iVPastAndCurrentStudent = iVStudent & {
+  StudentIsPastFlag: boolean;
+}
 
 export default iVStudent;

@@ -9,6 +9,7 @@ type iDateTimePicker = {
   value?: Date | string;
   onChange?: (selected: any) => void;
   dateFormat?: string;
+  timeFormat?: string | boolean;
   displayTimeZone?: string;
   className?: string;
   allowClear?: boolean;
@@ -61,7 +62,7 @@ const Wrapper = styled.div`
   }
 `
 const DateTimePicker = ({
-  onChange, value, isValidDate, displayTimeZone, className, allowClear, isDisabled, dateFormat = 'D / MMM / YYYY h:m a'
+  onChange, value, isValidDate, displayTimeZone, className, allowClear, isDisabled, timeFormat = true, dateFormat = 'D / MMM / YYYY h:m a'
 }: iDateTimePicker) => {
 
   const getValue = () => {
@@ -98,6 +99,7 @@ const DateTimePicker = ({
               onChange={onChange}
               value={getValue()}
               dateFormat={dateFormat}
+              timeFormat={timeFormat}
               displayTimeZone={displayTimeZone}
               renderInput={(props) => {
                 return <input {...props} value={value ? props.value : ''} />

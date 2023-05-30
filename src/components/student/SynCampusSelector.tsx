@@ -12,13 +12,14 @@ type iSynCampusSelector = {
   allowClear?: boolean;
   showIndicator?: boolean;
   className?: string;
+  filterEmptyCodes?: boolean
 };
 
 export const translateCampusToOption = (campus: iLuCampus) => {
   return {value: campus.Code, data: campus, label: campus.Description}
 }
 
-const SynCampusSelector = ({values, onSelect, allowClear, className, showIndicator = true, isMulti = false}: iSynCampusSelector) => {
+const SynCampusSelector = ({values, onSelect, allowClear, className, filterEmptyCodes = false,  showIndicator = true, isMulti = false}: iSynCampusSelector) => {
   const [optionMap, setOptionMap] = useState<{ [key: string]: iAutoCompleteSingle }>({});
   const [isLoading, setIsLoading] = useState(false);
 
@@ -33,11 +34,19 @@ const SynCampusSelector = ({values, onSelect, allowClear, className, showIndicat
       })
       .then(resp => {
         if (isCancelled === true) { return }
-        setOptionMap(resp.reduce((map, campus) => {
-          return {
-            ...map,
-            [campus.Code]: translateCampusToOption(campus),
-          }
+        setOptionMap(
+          resp
+            .filter(yearLevel => {
+              if(filterEmptyCodes !== true) {
+                return true;
+              }
+              return `${yearLevel.Code}`.trim() !== '';
+            })
+            .reduce((map, campus) => {
+              return {
+                ...map,
+                [campus.Code]: translateCampusToOption(campus),
+              }
         }, {}))
       })
       .finally(() => {

@@ -10,6 +10,7 @@ export const MGGS_MODULE_ID_HOUSE_AWARDS = 5;
 export const MGGS_MODULE_ID_BUDGET_TRACKER = 6;
 export const MGGS_MODULE_ID_STUDENT_ABSENCES = 7;
 export const MGGS_MODULE_ID_FUNNEL = 8;
+export const MGGS_MODULE_ID_SCHOOL_DATA_SUBMISSION = 9;
 
 type iModuleUser = {
   ID: number;

@@ -79,6 +79,7 @@ const ReactTableWithFixedColumns = ({
     getTableProps,
     getTableBodyProps,
     headerGroups,
+    footerGroups,
     rows,
     prepareRow,
   } = useTable(
@@ -122,17 +123,17 @@ const ReactTableWithFixedColumns = ({
             );
           })}
         </div>
-        {/*<div className="footer">*/}
-        {/*  {footerGroups.map((footerGroup) => (*/}
-        {/*    <div {...footerGroup.getHeaderGroupProps()} className="tr">*/}
-        {/*      {footerGroup.headers.map((column) => (*/}
-        {/*        <div {...column.getHeaderProps()} className="td">*/}
-        {/*          {column.render('Footer')}*/}
-        {/*        </div>*/}
-        {/*      ))}*/}
-        {/*    </div>*/}
-        {/*  ))}*/}
-        {/*</div>*/}
+        <div className="footer">
+          {footerGroups.map((footerGroup) => (
+            <div {...footerGroup.getHeaderGroupProps()} className="tr">
+              {footerGroup.headers.map((column) => (
+                <div {...column.getHeaderProps()} className="td">
+                  {column.render('Footer')}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
     </Wrapper>
   )
