@@ -23,13 +23,13 @@ const SchoolDataSubmissionsAdminPage = ({onNavBack}: iSchoolDataSubmissionsAdmin
       <SectionDiv>
         <h5>Users</h5>
         <small>All users who can access this module</small>
-        <ModuleUserList moduleId={MGGS_MODULE_ID_SCHOOL_DATA_SUBMISSION} roleId={ROLE_ID_NORMAL} showCreatingPanel/>
+        <ModuleUserList moduleId={MGGS_MODULE_ID_SCHOOL_DATA_SUBMISSION} roleId={ROLE_ID_NORMAL} showCreatingPanel showDeletingBtn/>
       </SectionDiv>
 
       <SectionDiv>
         <h5>Admins</h5>
         <small>All users who can manage this module</small>
-        <ModuleUserList moduleId={MGGS_MODULE_ID_SCHOOL_DATA_SUBMISSION} roleId={ROLE_ID_ADMIN} showCreatingPanel/>
+        <ModuleUserList moduleId={MGGS_MODULE_ID_SCHOOL_DATA_SUBMISSION} roleId={ROLE_ID_ADMIN} showCreatingPanel showDeletingBtn/>
       </SectionDiv>
     </Wrapper>
   )
