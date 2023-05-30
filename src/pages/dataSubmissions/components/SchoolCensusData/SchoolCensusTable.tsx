@@ -13,10 +13,13 @@ type iSchoolCensusTable = {
 
 const Wrapper = styled.div`
   .table {
-    
+    &.sticky {
+      background-color: transparent !important;
+    }
     .th,
     .td {
       padding: 0px !important;
+      min-height: 24px;
     }
     
     div[class^='col-'] {

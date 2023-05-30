@@ -23,6 +23,9 @@ const Wrapper = styled.div`
   gap: 0.7rem;
   
   .summary-div {
+    h5 {
+      color: white;
+    }
     min-width: 140px;
   }
 `;
@@ -59,7 +62,7 @@ const SchoolCensusDataSummaryDiv = ({records}: iSchoolCensusDataSummaryDiv) => {
 
   return (
     <Wrapper>
-      {getPanel('title', summary.total)}
+      {getPanel('Total', summary.total)}
       {getPanel('Indigenous', summary.indigenous)}
       {getPanel('International', summary.international)}
       {getPanel('With Visa', summary.withVisa)}
