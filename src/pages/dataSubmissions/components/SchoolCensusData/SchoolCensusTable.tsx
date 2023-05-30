@@ -174,19 +174,16 @@ const SchoolCensusTable = ({records, luYearLevels}: iSchoolCensusTable) => {
         },
         Footer: (cell: any) => {
           let sameAgeArr: iSchoolCensusStudentData[] = [];
-          Object.keys(dataMap).map(yearLvl => {
+          for(const yearLvl of Object.keys(dataMap)) {
             if (yearLvl.trim() === 'total') {
-              return '';
+              continue;
             }
-            Object.keys(dataMap[yearLvl]).map(age => {
+            for(const age of Object.keys(dataMap[yearLvl])) {
               if (age.trim() === ageStr) {
                 sameAgeArr = [...sameAgeArr, ...dataMap[yearLvl][age]];
               }
-              return '';
-            })
-            return '';
-          })
-
+            }
+          }
           if (sameAgeArr.length <= 0) {
             return <div className={'col-data total col-footer no-data'}>0</div>;
           }
