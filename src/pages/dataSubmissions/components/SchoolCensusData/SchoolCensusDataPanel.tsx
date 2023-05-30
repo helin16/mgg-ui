@@ -49,9 +49,9 @@ const SchoolCensusDataPanel = () => {
       return;
     }
     const local = LocalStorageService.getItem(LOCALSTORAGE_START_AND_END_NAME);
-    setStartDate(local.startDate);
-    setEndDate(local.endDate);
-    setCampusCodes(local.campusCodes);
+    setStartDate(local?.startDate || undefined);
+    setEndDate(local?.endDate || undefined);
+    setCampusCodes(local?.campusCodes || defaultCampusCodes);
     firstInit.current = false;
   }, []);
 
