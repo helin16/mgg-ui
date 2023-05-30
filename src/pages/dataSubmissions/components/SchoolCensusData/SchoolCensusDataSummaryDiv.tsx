@@ -1,5 +1,4 @@
 import iSchoolCensusStudentData from './iSchoolCensusStudentData';
-import {FlexContainer} from '../../../../styles';
 import SchoolCensusDataPopupBtn from './SchoolCensusDataPopupBtn';
 import {useEffect, useState} from 'react';
 import styled from 'styled-components';

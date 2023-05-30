@@ -25,7 +25,6 @@ import {CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR} from '../../../../types/Synerget
 import iLuYearLevel from '../../../../types/Synergetic/iLuYearLevel';
 import SynLuYearLevelService from '../../../../services/Synergetic/SynLuYearLevelService';
 import SynCampusSelector from '../../../../components/student/SynCampusSelector';
-import SchoolCensusDataPopupBtn from './SchoolCensusDataPopupBtn';
 import SchoolCensusDataSummaryDiv from './SchoolCensusDataSummaryDiv';
 
 const LOCALSTORAGE_START_AND_END_NAME = 'census_period';

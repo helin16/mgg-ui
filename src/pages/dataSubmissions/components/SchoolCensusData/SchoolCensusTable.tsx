@@ -182,7 +182,9 @@ const SchoolCensusTable = ({records, luYearLevels}: iSchoolCensusTable) => {
               if (age.trim() === ageStr) {
                 sameAgeArr = [...sameAgeArr, ...dataMap[yearLvl][age]];
               }
+              return;
             })
+            return;
           })
 
           if (sameAgeArr.length <= 0) {

@@ -55,7 +55,7 @@ const SynCampusSelector = ({values, onSelect, allowClear, className, filterEmpty
     return () => {
       isCancelled = true;
     }
-  }, [optionMap]);
+  }, [optionMap, filterEmptyCodes]);
 
   const getSelectedValues = () => {
     if (!values) {
