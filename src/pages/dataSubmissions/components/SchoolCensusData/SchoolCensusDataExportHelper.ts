@@ -2,26 +2,26 @@ import moment from 'moment-timezone';
 import * as XLSX from 'sheetjs-style';
 
 
-const titles: string[] = [
-  'ID',
-  'Student',
-  'Year Lvl.',
-  'Gender',
-  'D.O.B.',
-  'Age',
-  'Inter?',
-  'Indigenous?',
-  'Status',
-  'Visa Code',
-  'Visa Number',
-  'Visa Expiry',
-  'Entry Date',
-  'Left Date',
-  'NCCD Level',
-];
-
 const genCSVFile = (data: any[]) => {
-  const titleRows = [titles]
+  const titleRows = [[
+    'ID',
+    'Student',
+    'Year Lvl.',
+    'Gender',
+    'D.O.B.',
+    'Age',
+    'International?',
+    'Indigenous?',
+    'isPastStudent?',
+    'Status',
+    'Visa Code',
+    'Visa Number',
+    'Visa Expiry',
+    'Entry Date',
+    'Left Date',
+    'NCCD Category',
+    'NCCD Level',
+  ]]
 
   const rows = data.map(record => {
     return [
@@ -33,12 +33,14 @@ const genCSVFile = (data: any[]) => {
       record.age,
       record.isInternationalStudent === true ? 'Y' : '',
       record.isIndigenous === true ? 'Y' : '',
-      `${record.StudentStatusDescription}${record.isPastStudent === true ? '[PAST]' : ''}`,
+      record.isPastStudent === true ? 'Y' : '',
+      `${record.StudentStatusDescription}`,
       record.visaCode,
       record.visaNumber,
       `${record.visaExpiryDate || ''}`.trim() === '' ? '' : moment(record.visaExpiryDate).format('YYYY-MM-DD'),
       moment(record.entryDate).format('YYYY-MM-DD'),
       `${record.leavingDate || ''}`.trim() === '' ? '' : moment(record.leavingDate).format('YYYY-MM-DD'),
+      `${record.nccdStatusCategory}`.trim() === '' ? '' : `${record.nccdStatusCategory}`,
       `${record.nccdStatusAdjustmentLevel}`.trim() === '' ? '' : `${record.nccdStatusAdjustmentLevel}`,
     ]
   });
@@ -51,7 +53,6 @@ const genCSVFile = (data: any[]) => {
 }
 
 const SchoolCensusDataExportHelper = {
-  titles,
   genCSVFile
 };
 

@@ -14,10 +14,16 @@ type iSchoolCensusStudentData = {
   visaExpiryDate: Date | string;
   visaCode: string;
   visaNumber: string;
+  nccdStatusCategory: string;
   nccdStatusAdjustmentLevel: string;
   isInternationalStudent: boolean;
   isIndigenous: boolean;
   isPastStudent: boolean;
 };
+
+export type iStartAndEndDateString = {
+  startDateStr: string;
+  endDateStr: string;
+}
 
 export default iSchoolCensusStudentData;

@@ -14,7 +14,7 @@ import {OP_GTE, OP_LTE, OP_OR} from '../../../../helper/ServiceHelper';
 import * as _ from 'lodash';
 import SynVStudentService from '../../../../services/Synergetic/SynVStudentService';
 import iSynFileSemester from '../../../../types/Synergetic/iSynFileSemester';
-import iSchoolCensusStudentData from './iSchoolCensusStudentData';
+import iSchoolCensusStudentData, {iStartAndEndDateString} from './iSchoolCensusStudentData';
 import SchoolCensusTable from './SchoolCensusTable';
 import SectionDiv from '../../../studentReport/components/AcademicReports/DetailsComponents/sections/SectionDiv';
 import SynVtudentDisabilityAdjustmentService
@@ -29,10 +29,6 @@ import SchoolCensusDataSummaryDiv from './SchoolCensusDataSummaryDiv';
 
 const LOCALSTORAGE_START_AND_END_NAME = 'census_period';
 
-type iStartAndEndDateString = {
-  startDateStr: string;
-  endDateStr: string;
-}
 const Wrapper = styled.div``;
 const defaultCampusCodes = [CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR];
 const SchoolCensusDataPanel = () => {
@@ -42,6 +38,7 @@ const SchoolCensusDataPanel = () => {
   const [endDate, setEndDate] = useState<string | undefined>(undefined);
   const [campusCodes, setCampusCodes] = useState<string[]>(defaultCampusCodes);
   const [studentRecords, setStudentRecords] = useState<iSchoolCensusStudentData[] | null>(null);
+  const [studentAroundRecords, setStudentAroundRecords] = useState<iSchoolCensusStudentData[] | null>(null);
   const [yearLevels, setYearLevels] = useState<iLuYearLevel[]>([]);
 
   useEffect(() => {
@@ -94,7 +91,7 @@ const SchoolCensusDataPanel = () => {
     if (birthStr === '') {
       return '';
     }
-    const age = moment(`${endDateStr}T00:00:00Z`).diff(birthDateString, 'years');
+    const age = Math.floor(moment(`${endDateStr}`).diff(birthDateString, 'month') / 12);
     if (age <= 1) {
       return '1';
     }
@@ -108,7 +105,6 @@ const SchoolCensusDataPanel = () => {
     const resp = await SynVStudentService.getVPastAndCurrentStudentAll({
       where: JSON.stringify({
         StudentCampus: campusCodes,
-        StudentEntryDate: {[OP_LTE]: startAndEndDateString.endDateStr},
         ...(fileSemesters.length === 1 ? {FileYear: fileSemesters[0].FileYear, FileSemester: fileSemesters[0].FileSemester} : {
           [OP_OR]: fileSemesters.map(fileSemester => {
             return {FileYear: fileSemester.FileYear, FileSemester: fileSemester.FileSemester};
@@ -120,15 +116,6 @@ const SchoolCensusDataPanel = () => {
     })
     return _.uniqBy(
       (resp.data || [])
-        .filter(record => {
-          if (`${record.StudentYearLevel}`.trim() === '') {
-            return false;
-          }
-          if (`${record.StudentLeavingDate || ''}`.trim() === '' || moment(`${record.StudentLeavingDate || ''}`.trim()).isAfter(moment(`${startAndEndDateString.endDateStr}T00:00:00Z`))) {
-            return true;
-          }
-          return false;
-        })
         .map(row => ({
           ID: row.ID,
           Given1: row.StudentGiven1,
@@ -144,6 +131,7 @@ const SchoolCensusDataPanel = () => {
           visaExpiryDate: `${row.StudentsVisaExpiryDate || ''}`.trim(),
           visaCode: `${row.StudentsVisaType || ''}`.trim(),
           visaNumber: `${row.StudentVisaNumber || ''}`.trim(),
+          nccdStatusCategory: '',
           nccdStatusAdjustmentLevel: '',
           isInternationalStudent: row.FullFeeFlag,
           isIndigenous: row.IndigenousFlag,
@@ -159,10 +147,57 @@ const SchoolCensusDataPanel = () => {
       });
   }
 
+  const loadNccds = async (records: iSchoolCensusStudentData[], startEndDataString: iStartAndEndDateString) => {
+    const nccds = await SynVtudentDisabilityAdjustmentService.getAll({
+      where: JSON.stringify({
+        ID: records.map(record => record.ID),
+      }),
+      perPage: 9999,
+      sort: 'CurrentDisabilityFlag:ASC',
+    });
+    const nccdMap = (nccds.data || [])
+      .filter(nccd => {
+        if (moment(nccd.StartDate).isSameOrAfter(moment(startEndDataString.endDateStr))) {
+          return false;
+        }
+        if (moment(nccd.EndDate).isBefore(moment(startEndDataString.endDateStr))) {
+          return false;
+        }
+        return true;
+      })
+      .reduce((map, nccd) => {
+        return {
+          ...map,
+          [nccd.ID]: nccd,
+        }
+      }, {})
+    return records.map(record => {
+      return {
+        ...record,
+        // @ts-ignore
+        nccdStatusCategory: (record.ID in nccdMap ? nccdMap[record.ID].DisabilityCategory : ''),
+        // @ts-ignore
+        nccdStatusAdjustmentLevel: (record.ID in nccdMap ? nccdMap[record.ID].DisabilityAdjustmentLevelCode : ''),
+      }
+    })
+  }
+
+  const isConsiderAsStudentRecord = (record: iSchoolCensusStudentData, startEndDataString: iStartAndEndDateString) => {
+    if (`${record.entryDate}`.trim() === '' || moment(`${record.entryDate || ''}`.trim()).isSameOrAfter(moment(`${startEndDataString.endDateStr}`))) {
+      return false;
+    }
+
+    if (`${record.leavingDate || ''}`.trim() !== '' && moment(`${record.leavingDate || ''}`.trim()).isSameOrBefore(moment(`${startEndDataString.endDateStr}`))) {
+      return false;
+    }
+
+    return true;
+  }
+
   const doSearch = async () => {
     const startEndDataString = {
-      startDateStr: `${startDate || ''}`.trim().replace('T00:00:00Z', ''),
-      endDateStr: `${endDate || ''}`.trim().replace('T00:00:00Z', '')
+      startDateStr: `${startDate || ''}`.trim(),
+      endDateStr: `${endDate || ''}`.trim()
     }
     const fileSemesters = await getFileSemesters(startEndDataString);
     if (fileSemesters.length <= 0) {
@@ -184,28 +219,9 @@ const SchoolCensusDataPanel = () => {
       setStudentRecords(records[0]);
       return;
     }
-
-    const nccds = await SynVtudentDisabilityAdjustmentService.getAll({
-      where: JSON.stringify({
-        ID: records[0].map(record => record.ID),
-        FileYear: fileSemesters.map(fileSemester => fileSemester.FileYear),
-      }),
-      perPage: 9999,
-      sort: 'CurrentDisabilityFlag:ASC',
-    });
-    const nccdMap = (nccds.data || []).reduce((map, nccd) => {
-      return {
-        ...map,
-        [nccd.ID]: nccd,
-      }
-    }, {})
-    setStudentRecords(records[0].map(record => {
-      return {
-        ...record,
-        // @ts-ignore
-        nccdStatusAdjustmentLevel: (record.ID in nccdMap ? nccdMap[record.ID].DisabilityAdjustmentLevelCode : ''),
-      }
-    }));
+    const loadedNccds = await loadNccds(records[0], startEndDataString);
+    setStudentRecords(loadedNccds.filter(record => isConsiderAsStudentRecord(record, startEndDataString)));
+    setStudentAroundRecords(loadedNccds.filter(record => !isConsiderAsStudentRecord(record, startEndDataString)));
     return;
   }
 
@@ -253,7 +269,11 @@ const SchoolCensusDataPanel = () => {
 
     return (
       <>
-        <SchoolCensusDataSummaryDiv records={studentRecords} />
+        <SchoolCensusDataSummaryDiv
+          startAndEndDateString={{startDateStr: `${startDate || ''}`, endDateStr: `${endDate || ''}`}}
+          records={studentRecords}
+          aroundRecords={studentAroundRecords || []}
+        />
         <SectionDiv>
           <SchoolCensusTable
             records={studentRecords}

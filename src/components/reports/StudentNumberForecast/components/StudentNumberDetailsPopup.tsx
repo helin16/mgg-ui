@@ -14,7 +14,7 @@ const StudentNumberDetailsPopup = ({records, handleClose, isShowing = false}: iS
 
   return (
     <PopupModal
-      dialogClassName={'modal-90w'}
+      dialogClassName={'modal-80w'}
       show={isShowing}
       handleClose={handleClose}
       title={`${records.length} students:`}

@@ -36,7 +36,7 @@ const SchoolManagementEditPopupBtn = ({
       <PopupModal
         show={isShowingPopup}
         size={'lg'}
-        dialogClassName={'modal-90w'}
+        dialogClassName={'modal-80w'}
         handleClose={handleClose}
         header={<b>{`${schoolManagementTeam?.SchoolSeniorTeamID || ''}`.trim() !== '' ? 'Editing' : 'Creating'}</b>}
       >

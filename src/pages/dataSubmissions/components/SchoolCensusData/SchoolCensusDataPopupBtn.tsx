@@ -26,6 +26,7 @@ const SchoolCensusDataPopupBtn = ({records, children, ...rest}: iSchoolCensusDat
     return (
       <PopupModal
         dialogClassName={'modal-90w'}
+        size={'lg'}
         show={true}
         handleClose={() => setIsShowingPopup(false)}
         title={
@@ -39,6 +40,7 @@ const SchoolCensusDataPopupBtn = ({records, children, ...rest}: iSchoolCensusDat
                 })}
                 downloadFnc={SchoolCensusDataExportHelper.genCSVFile}
                 size={'sm'}
+                variant={'link'}
               />
             </FlexContainer>
           </>
@@ -47,7 +49,18 @@ const SchoolCensusDataPopupBtn = ({records, children, ...rest}: iSchoolCensusDat
         <Table hover striped responsive>
           <thead>
             <tr>
-              {SchoolCensusDataExportHelper.titles.map(title => <th key={title}>{title}</th>)}
+              <th className={'student'}>Student</th>
+              <th className={'year-level'}>Year Lvl.</th>
+              <th className={'gender'}>Gen.</th>
+              <th className={'dob'}>D.O.B.</th>
+              <th className={'age'}>Age</th>
+              <th className={'is-international'}>Inter?</th>
+              <th className={'is-indigenous'}>Ind.?</th>
+              <th className={'status'}>Status</th>
+              <th className={'visa'}>Visa</th>
+              <th className={'entry-date'}>Entry Date</th>
+              <th className={'left-date'}>Left Date</th>
+              <th className={'nccd'}>NCCD</th>
             </tr>
           </thead>
           <tbody>
@@ -55,23 +68,35 @@ const SchoolCensusDataPopupBtn = ({records, children, ...rest}: iSchoolCensusDat
             records.map(record => {
               return (
                 <tr key={record.ID}>
-                  <td>{record.ID}</td>
-                  <td>{record.Given1} {record.Surname}</td>
+                  <td>
+                    <div>[{record.ID}]</div>
+                    {record.Given1} {record.Surname}
+                  </td>
                   <td>{record.yearLevelCode}</td>
                   <td>{record.gender}</td>
                   <td>{moment(record.dateOfBirth).format('DD MMM YYYY')}</td>
                   <td>{record.age}</td>
                   <td>{record.isInternationalStudent === true ? 'Y' : ''}</td>
                   <td>{record.isIndigenous === true ? 'Y' : ''}</td>
-                  <td>{record.StudentStatusDescription}{record.isPastStudent === true ? '[PAST]' : ''}</td>
-                  <td>{record.visaCode}</td>
-                  <td>{record.visaNumber}</td>
                   <td>
-                    {`${record.visaExpiryDate || ''}`.trim() === '' ? '' : moment(record.visaExpiryDate).format('DD MMM YYYY')}
+                    <div>{record.StudentStatusDescription}</div>
+                    {record.isPastStudent === true ? <small>[PAST]</small> : ''}
+                  </td>
+                  <td>
+                    <div><small><b>{record.visaCode}</b></small></div>
+                    <div><small>{record.visaNumber}</small></div>
+                    <div>
+                      <small>
+                        {`${record.visaExpiryDate || ''}`.trim() === '' ? '' : moment(record.visaExpiryDate).format('DD MMM YYYY')}
+                      </small>
+                    </div>
                   </td>
                   <td>{moment(record.entryDate).format('DD MMM YYYY')}</td>
                   <td>{`${record.leavingDate || ''}`.trim() === '' ? '' : moment(record.leavingDate).format('DD MMM YYYY')}</td>
-                  <td>{`${record.nccdStatusAdjustmentLevel}`.trim() === '' ? '' : `${record.nccdStatusAdjustmentLevel}`}</td>
+                  <td>
+                    <div>{`${record.nccdStatusCategory}`.trim() === '' ? '' : `${record.nccdStatusCategory}`}</div>
+                    <div>{`${record.nccdStatusAdjustmentLevel}`.trim() === '' ? '' : `${record.nccdStatusAdjustmentLevel}`}</div>
+                  </td>
                 </tr>
               )
             })

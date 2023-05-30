@@ -1,4 +1,4 @@
-import iSchoolCensusStudentData from './iSchoolCensusStudentData';
+import iSchoolCensusStudentData, {iStartAndEndDateString} from './iSchoolCensusStudentData';
 import SchoolCensusDataPopupBtn from './SchoolCensusDataPopupBtn';
 import {useEffect, useState} from 'react';
 import styled from 'styled-components';
@@ -6,10 +6,13 @@ import UtilsService from '../../../../services/UtilsService';
 
 type iSchoolCensusDataSummaryDiv = {
   records: iSchoolCensusStudentData[];
+  aroundRecords: iSchoolCensusStudentData[];
+  startAndEndDateString: iStartAndEndDateString;
 };
 
 type iSummary = {
   total: iSchoolCensusStudentData[],
+  aroundTotal: iSchoolCensusStudentData[],
   indigenous: iSchoolCensusStudentData[],
   international: iSchoolCensusStudentData[],
   disability: iSchoolCensusStudentData[],
@@ -29,9 +32,10 @@ const Wrapper = styled.div`
     min-width: 140px;
   }
 `;
-const SchoolCensusDataSummaryDiv = ({records}: iSchoolCensusDataSummaryDiv) => {
+const SchoolCensusDataSummaryDiv = ({records, aroundRecords, startAndEndDateString}: iSchoolCensusDataSummaryDiv) => {
   const [summary, setSummary] = useState<iSummary>({
     total: [],
+    aroundTotal: [],
     indigenous: [],
     international: [],
     disability: [],
@@ -40,13 +44,22 @@ const SchoolCensusDataSummaryDiv = ({records}: iSchoolCensusDataSummaryDiv) => {
 
   useEffect(() => {
     setSummary({
+      aroundTotal: aroundRecords,
       total: records,
       indigenous: records.filter(record => record.isIndigenous === true),
       international: records.filter(record => record.isInternationalStudent === true),
       disability: records.filter(record => `${record.nccdStatusAdjustmentLevel}`.trim() !== ''),
-      withVisa: records.filter(record => `${record.visaNumber}`.trim() !== '' && UtilsService.isNumeric(record.visaCode) && record.isInternationalStudent !== true),
+      withVisa: records.filter(record => {
+        if(record.isInternationalStudent === true || `${record.visaExpiryDate}`.trim() === '' || !UtilsService.isNumeric(record.visaCode)) {
+          return false;
+        }
+        if (`${record.visaCode}`.trim() === '155') {
+          return false;
+        }
+        return true;
+      }),
     })
-  }, [records]);
+  }, [records, aroundRecords]);
 
   const getPanel = (title: string, recs: iSchoolCensusStudentData[]) => {
     return (
@@ -67,6 +80,7 @@ const SchoolCensusDataSummaryDiv = ({records}: iSchoolCensusDataSummaryDiv) => {
       {getPanel('International', summary.international)}
       {getPanel('With Visa', summary.withVisa)}
       {getPanel('With Disability', summary.disability)}
+      {getPanel('Around', summary.aroundTotal)}
     </Wrapper>
   )
 }

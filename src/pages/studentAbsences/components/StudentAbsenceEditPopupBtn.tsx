@@ -35,7 +35,7 @@ const StudentAbsenceEditPopupBtn = ({studentAbsenceRecord, recordType, children,
       <PopupModal
         show={isShowingPopup}
         size={'lg'}
-        dialogClassName={'modal-90w'}
+        dialogClassName={'modal-80w'}
         handleClose={handleClose}
         header={<h5>{`${studentAbsenceRecord?.id || ''}`.trim() !== '' ? `Editing` : 'Creating'} <u>{StudentAbsenceService.getAbsenceTypeName(recordType)}</u>: {studentAbsenceRecord?.Student ? studentAbsenceRecord?.Student.StudentNameInternal : null}</h5>}
       >
