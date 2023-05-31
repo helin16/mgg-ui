@@ -12,14 +12,15 @@ type iSynCampusSelector = {
   allowClear?: boolean;
   showIndicator?: boolean;
   className?: string;
-  filterEmptyCodes?: boolean
+  filterEmptyCodes?: boolean;
+  isDisabled?: boolean;
 };
 
 export const translateCampusToOption = (campus: iLuCampus) => {
   return {value: campus.Code, data: campus, label: campus.Description}
 }
 
-const SynCampusSelector = ({values, onSelect, allowClear, className, filterEmptyCodes = false,  showIndicator = true, isMulti = false}: iSynCampusSelector) => {
+const SynCampusSelector = ({values, onSelect, allowClear, className, isDisabled = false, filterEmptyCodes = false,  showIndicator = true, isMulti = false}: iSynCampusSelector) => {
   const [optionMap, setOptionMap] = useState<{ [key: string]: iAutoCompleteSingle }>({});
   const [isLoading, setIsLoading] = useState(false);
 
@@ -77,6 +78,7 @@ const SynCampusSelector = ({values, onSelect, allowClear, className, filterEmpty
   }
   return (
     <SelectBox
+      isDisabled={isDisabled}
       options={Object.values(optionMap)}
       isMulti={isMulti}
       className={className}

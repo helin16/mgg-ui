@@ -4,11 +4,14 @@ import {useEffect, useState} from 'react';
 import styled from 'styled-components';
 import UtilsService from '../../../../services/UtilsService';
 import moment from 'moment-timezone';
+import SchoolCensusAbsenceSummaryDiv from './SchoolCensusAbsenceSummaryDiv';
+import SchoolDaysPopupBtn from './SchoolDaysPopupBtn';
 
 type iSchoolCensusDataSummaryDiv = {
   records: iSchoolCensusStudentData[];
   unfilteredStudentRecords: iSchoolCensusStudentData[];
   startAndEndDateString: iStartAndEndDateString;
+  schoolDays: string[];
 };
 
 type iSummary = {
@@ -22,18 +25,20 @@ type iSummary = {
 const Wrapper = styled.div`
   margin-top: 1rem;
   margin-bottom: 1rem;
-  display: flex;
-  flex-flow: wrap;
-  gap: 0.7rem;
-  
-  .summary-div {
-    h5 {
-      color: white;
+  .summary-divs {
+    display: flex;
+    flex-flow: wrap;
+    gap: 0.7rem;
+
+    .summary-div {
+      h5 {
+        color: white;
+      }
+      min-width: 140px;
     }
-    min-width: 140px;
   }
 `;
-const SchoolCensusDataSummaryDiv = ({records, unfilteredStudentRecords, startAndEndDateString}: iSchoolCensusDataSummaryDiv) => {
+const SchoolCensusDataSummaryDiv = ({records, unfilteredStudentRecords, startAndEndDateString, schoolDays}: iSchoolCensusDataSummaryDiv) => {
   const [summary, setSummary] = useState<iSummary>({
     total: [],
     aroundTotal: [],
@@ -82,21 +87,31 @@ const SchoolCensusDataSummaryDiv = ({records, unfilteredStudentRecords, startAnd
 
   return (
     <Wrapper>
-      {getPanel('Total', summary.total, <h4>Total of {summary.total.length} Student{summary.total.length > 1 ? 's' : ''}</h4>)}
-      {getPanel('Indigenous', summary.indigenous, <h4>{summary.total.length} <u>Indigenous</u> Student{summary.indigenous.length > 1 ? 's' : ''}</h4>)}
-      {getPanel('International', summary.international, <h4>{summary.international.length} <u>International</u> Student{summary.international.length > 1 ? 's' : ''}</h4>)}
-      {getPanel('With Visa', summary.withVisa, <h4>{summary.withVisa.length} Student{summary.withVisa.length > 1 ? 's' : ''} <u>with visa</u></h4>)}
-      {getPanel('NCCD', summary.disability, <h4>{summary.disability.length} <u>NCCD</u> Student{summary.disability.length > 1 ? 's' : ''}</h4>)}
-      {getPanel(
-        'Around',
-        summary.aroundTotal,
-          <>
-            <h4>{summary.aroundTotal.length} Student{summary.aroundTotal.length > 1 ? 's' : ''}</h4>
-            <small className={'text-muted text-size-14'}>
-              left before <u>{moment(startAndEndDateString.endDateStr).format('DD MMM YYYY')}</u>
-            </small>
-          </>
-      )}
+      <h5>Total of <SchoolDaysPopupBtn schoolDays={schoolDays} variant={'link'}>{schoolDays.length}</SchoolDaysPopupBtn> School days</h5>
+      <div className={'summary-divs'}>
+        {getPanel('Total', summary.total, <h4>Total of {summary.total.length} Student{summary.total.length > 1 ? 's' : ''}</h4>)}
+        {getPanel('Indigenous', summary.indigenous, <h4>{summary.total.length} <u>Indigenous</u> Student{summary.indigenous.length > 1 ? 's' : ''}</h4>)}
+        {getPanel('International', summary.international, <h4>{summary.international.length} <u>International</u> Student{summary.international.length > 1 ? 's' : ''}</h4>)}
+        {getPanel('With Visa', summary.withVisa, <h4>{summary.withVisa.length} Student{summary.withVisa.length > 1 ? 's' : ''} <u>with visa</u></h4>)}
+        {getPanel('NCCD', summary.disability, <h4>{summary.disability.length} <u>NCCD</u> Student{summary.disability.length > 1 ? 's' : ''}</h4>)}
+        {getPanel(
+          'Around',
+          summary.aroundTotal,
+            <>
+              <h4>{summary.aroundTotal.length} Student{summary.aroundTotal.length > 1 ? 's' : ''}</h4>
+              <small className={'text-muted text-size-14'}>
+                left before <u>{moment(startAndEndDateString.endDateStr).format('DD MMM YYYY')}</u>
+              </small>
+            </>
+        )}
+        <SchoolCensusAbsenceSummaryDiv
+          schoolDays={schoolDays}
+          unfilteredStudentRecords={unfilteredStudentRecords}
+          startAndEndDateString={startAndEndDateString}
+          className={'summary-div'}
+          size={'lg'}
+        />
+      </div>
     </Wrapper>
   )
 }

@@ -4,7 +4,7 @@ import DateTimePicker from '../../../../components/common/DateTimePicker';
 import SynCampusSelector from '../../../../components/student/SynCampusSelector';
 import LoadingBtn from '../../../../components/common/LoadingBtn';
 import * as Icons from 'react-bootstrap-icons';
-import moment from 'moment-timezone';
+import moment, {Moment} from 'moment-timezone';
 import {useEffect, useRef, useState} from 'react';
 import LocalStorageService from '../../../../services/LocalStorageService';
 import SchoolCensusDataExportHelper from './SchoolCensusDataExportHelper';
@@ -24,16 +24,33 @@ const LOCALSTORAGE_START_AND_END_NAME = 'census_period';
 const SchoolCensusDataSearchPanel = ({searchFnc, btns, isLoading = false}: iSchoolCensusDataSearchPanel) => {
   const firstInit = useRef(true);
   const [startDate, setStartDate] = useState<string | undefined>(undefined);
-  const [endDate, setEndDate] = useState<string | undefined>(undefined);
+  const [endDate, setEndDate] = useState<string | undefined>(moment().toISOString());
   const [campusCodes, setCampusCodes] = useState<string[]>(SchoolCensusDataExportHelper.defaultCampusCodes);
 
   useEffect(() => {
     if (firstInit.current !== true) {
       return;
     }
+    const addBusinessDays = (originalDate: Moment, numDaysToSub: number) => {
+      const Sunday = 0;
+      const Saturday = 6;
+      let daysRemaining = numDaysToSub;
+
+      const newDate = originalDate.clone();
+
+      while (daysRemaining > 0) {
+        newDate.subtract(1, 'days');
+        if (newDate.day() !== Sunday && newDate.day() !== Saturday) {
+          daysRemaining--;
+        }
+      }
+
+      return newDate;
+    }
+
     const local = LocalStorageService.getItem(LOCALSTORAGE_START_AND_END_NAME);
-    setStartDate(local?.startDate || undefined);
-    setEndDate(local?.endDate || undefined);
+    setStartDate(local?.startDate || addBusinessDays(moment(), 20));
+    setEndDate(local?.endDate || moment().toISOString());
     setCampusCodes(local?.campusCodes || SchoolCensusDataExportHelper.defaultCampusCodes);
     firstInit.current = false;
   }, []);
@@ -47,6 +64,7 @@ const SchoolCensusDataSearchPanel = ({searchFnc, btns, isLoading = false}: iScho
       startDate, endDate, campusCodes
     })
   }, [startDate, endDate, campusCodes]);
+
   const selectDate = (selected: any, fieldName: string) => {
     const setFunc = (`${fieldName || ''}`.trim() === 'startDate' ? setStartDate: setEndDate);
     if (!selected) {
