@@ -8,6 +8,9 @@ import {OP_GTE, OP_LTE} from '../../../../helper/ServiceHelper';
 import Toaster from '../../../../services/Toaster';
 import {Spinner, Table} from 'react-bootstrap';
 import SynFileSemesterService from '../../../../services/Synergetic/SynFileSemesterService';
+import SchoolCensusDataExportHelper from './SchoolCensusDataExportHelper';
+import CSVExportBtn from '../../../../components/form/CSVExportBtn';
+import * as XLSX from 'sheetjs-style';
 
 type iSchoolCensusDataSummaryDiv = {
   className?: string;
@@ -117,14 +120,12 @@ const SchoolCensusAbsenceSummaryDiv = ({size, className, unfilteredStudentRecord
       return <>Absence(s)</>
     }
     const absenceMap = record?.extra || {};
-    console.log('absenceMap', absenceMap);
     return (
       <Table>
         <tbody>
           {Object.keys(absenceMap).map(date => {
             return (
-              <tr key={date}
-              >
+              <tr key={date}>
                 <td>{moment(date).format('DD MMM YYYY ddd')}</td>
                 <td>{absenceMap[date].SynLuAbsenceType.Description}</td>
                 <td>{absenceMap[date].SynergyMeaning}</td>
@@ -134,6 +135,27 @@ const SchoolCensusAbsenceSummaryDiv = ({size, className, unfilteredStudentRecord
         </tbody>
       </Table>
     )
+  }
+
+  const genCSVFile = (data: iSchoolCensusStudentData[]) => {
+    const titleRows = SchoolCensusDataExportHelper.getTitleRows(['Absence']);
+    const rows = data.map(record => {
+      const absenceMap = (record.extra || {});
+      return Object.keys(absenceMap).map(date => {
+        return [
+          ...SchoolCensusDataExportHelper.getCSVRow(record),
+          `${date}`,
+          `${absenceMap[date].SynLuAbsenceType?.Description}`,
+          `${absenceMap[date].SynergyMeaning}`,
+        ];
+      })
+    }).reduce((arr, row) => [...arr, ...row], []);
+    // const {rows, cellStyleMap, mergeCells} = getRows(3); //start from row 3, as there are two title rows
+    const ws = XLSX.utils.aoa_to_sheet([...titleRows, ...rows]);
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, `${moment().format('DD_MMM_YYYY_HH_mm_ss')}`);
+    XLSX.writeFile(wb, `School_Census_Export_Total_Absence_${moment().format('YYYY_MM_DD_HH_mm_ss')}.xlsx`);
   }
 
 
@@ -153,10 +175,21 @@ const SchoolCensusAbsenceSummaryDiv = ({size, className, unfilteredStudentRecord
       // @ts-ignore
       size={size}
       showExtraFn={getExtraCol}
+      exportBtn={
+        <CSVExportBtn
+          // @ts-ignore
+          fetchingFnc={() => new Promise(resolve => {
+            resolve(records)
+          })}
+          downloadFnc={genCSVFile}
+          size={'sm'}
+          variant={'link'}
+        />
+      }
     >
       {isLoading ? <Spinner animation={'border'} /> : (
         <>
-          <h5>Absences</h5>
+          <h5>Total Absence</h5>
           <div>{records.length}</div>
         </>
       )}

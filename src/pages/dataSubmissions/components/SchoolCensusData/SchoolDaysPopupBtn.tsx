@@ -2,6 +2,7 @@ import {Button, ButtonProps, Table} from 'react-bootstrap';
 import {useState} from 'react';
 import PopupModal from '../../../../components/common/PopupModal';
 import moment from 'moment-timezone';
+import MathHelper from '../../../../helper/MathHelper';
 
 type iSchoolDaysPopupBtn = ButtonProps & {
   schoolDays: string[];
@@ -23,9 +24,10 @@ const SchoolDaysPopupBtn = ({schoolDays, ...rest}: iSchoolDaysPopupBtn) => {
       >
         <Table>
           <tbody>
-          {schoolDays.map(schoolDay => {
+          {schoolDays.map((schoolDay, index) => {
             return (
               <tr key={schoolDay}>
+                <td>Day {MathHelper.add(index, 1)}</td>
                 <td>{moment(schoolDay).format('DD MMM YYYY')}</td>
                 <td>{moment(schoolDay).format('dddd')}</td>
               </tr>

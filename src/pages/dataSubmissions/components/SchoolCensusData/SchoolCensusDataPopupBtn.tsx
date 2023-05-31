@@ -11,6 +11,7 @@ import styled from 'styled-components';
 type iSchoolCensusDataPopupBtn = ButtonProps & {
   records: iSchoolCensusStudentData[];
   popupTitle?: any;
+  exportBtn?: any;
   showExtraFn?: (isTitleRow: boolean, record?: iSchoolCensusStudentData) => any;
 }
 
@@ -21,7 +22,7 @@ const TitleWrapper = styled.div`
   }
 `;
 
-const SchoolCensusDataPopupBtn = ({records, popupTitle, children, showExtraFn, ...rest}: iSchoolCensusDataPopupBtn) => {
+const SchoolCensusDataPopupBtn = ({records, popupTitle, children, showExtraFn, exportBtn, ...rest}: iSchoolCensusDataPopupBtn) => {
 
   const [isShowingPopup, setIsShowingPopup] = useState(false);
 
@@ -42,15 +43,17 @@ const SchoolCensusDataPopupBtn = ({records, popupTitle, children, showExtraFn, .
           <TitleWrapper>
             <FlexContainer className={'with-gap lg-gap align-items end'}>
               {popupTitle || <h4>{records.length} students:</h4>}
-              <CSVExportBtn
-                // @ts-ignore
-                fetchingFnc={() => new Promise(resolve => {
-                  resolve(records)
-                })}
-                downloadFnc={SchoolCensusDataExportHelper.genCSVFile}
-                size={'sm'}
-                variant={'link'}
-              />
+              {exportBtn || (
+                <CSVExportBtn
+                  // @ts-ignore
+                  fetchingFnc={() => new Promise(resolve => {
+                    resolve(records)
+                  })}
+                  downloadFnc={SchoolCensusDataExportHelper.genCSVFile}
+                  size={'sm'}
+                  variant={'link'}
+                />
+              )}
             </FlexContainer>
           </TitleWrapper>
         }
