@@ -65,7 +65,7 @@ const SchoolCensusDataSummaryDiv = ({records, unfilteredStudentRecords, startAnd
         return true;
       }),
     })
-  }, [records, unfilteredStudentRecords]);
+  }, [records, unfilteredStudentRecords, startAndEndDateString]);
 
   const getPanel = (title: string, recs: iSchoolCensusStudentData[], popupTitle?: any) => {
     return (
