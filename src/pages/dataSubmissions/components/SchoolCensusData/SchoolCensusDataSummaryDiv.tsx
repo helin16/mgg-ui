@@ -3,10 +3,11 @@ import SchoolCensusDataPopupBtn from './SchoolCensusDataPopupBtn';
 import {useEffect, useState} from 'react';
 import styled from 'styled-components';
 import UtilsService from '../../../../services/UtilsService';
+import moment from 'moment-timezone';
 
 type iSchoolCensusDataSummaryDiv = {
   records: iSchoolCensusStudentData[];
-  aroundRecords: iSchoolCensusStudentData[];
+  unfilteredStudentRecords: iSchoolCensusStudentData[];
   startAndEndDateString: iStartAndEndDateString;
 };
 
@@ -32,7 +33,7 @@ const Wrapper = styled.div`
     min-width: 140px;
   }
 `;
-const SchoolCensusDataSummaryDiv = ({records, aroundRecords, startAndEndDateString}: iSchoolCensusDataSummaryDiv) => {
+const SchoolCensusDataSummaryDiv = ({records, unfilteredStudentRecords, startAndEndDateString}: iSchoolCensusDataSummaryDiv) => {
   const [summary, setSummary] = useState<iSummary>({
     total: [],
     aroundTotal: [],
@@ -44,7 +45,12 @@ const SchoolCensusDataSummaryDiv = ({records, aroundRecords, startAndEndDateStri
 
   useEffect(() => {
     setSummary({
-      aroundTotal: aroundRecords,
+      aroundTotal: unfilteredStudentRecords.filter((record) => {
+        if (`${record.leavingDate}`.trim() !== '' && moment(`${record.leavingDate}`).isBefore(moment(startAndEndDateString.endDateStr))) {
+          return true;
+        }
+        return false;
+      }),
       total: records,
       indigenous: records.filter(record => record.isIndigenous === true),
       international: records.filter(record => record.isInternationalStudent === true),
@@ -59,7 +65,7 @@ const SchoolCensusDataSummaryDiv = ({records, aroundRecords, startAndEndDateStri
         return true;
       }),
     })
-  }, [records, aroundRecords]);
+  }, [records, unfilteredStudentRecords]);
 
   const getPanel = (title: string, recs: iSchoolCensusStudentData[], popupTitle?: any) => {
     return (
@@ -81,7 +87,16 @@ const SchoolCensusDataSummaryDiv = ({records, aroundRecords, startAndEndDateStri
       {getPanel('International', summary.international, <h4>{summary.international.length} <u>International</u> Student{summary.international.length > 1 ? 's' : ''}</h4>)}
       {getPanel('With Visa', summary.withVisa, <h4>{summary.withVisa.length} Student{summary.withVisa.length > 1 ? 's' : ''} <u>with visa</u></h4>)}
       {getPanel('NCCD', summary.disability, <h4>{summary.disability.length} <u>NCCD</u> Student{summary.disability.length > 1 ? 's' : ''}</h4>)}
-      {getPanel('Around', summary.aroundTotal)}
+      {getPanel(
+        'Around',
+        summary.aroundTotal,
+          <>
+            <h4>{summary.aroundTotal.length} Student{summary.aroundTotal.length > 1 ? 's' : ''}</h4>
+            <small className={'text-muted text-size-14'}>
+              left before <u>{moment(startAndEndDateString.endDateStr).format('DD MMM YYYY')}</u>
+            </small>
+          </>
+      )}
     </Wrapper>
   )
 }

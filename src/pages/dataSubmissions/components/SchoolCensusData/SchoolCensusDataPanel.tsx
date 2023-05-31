@@ -41,7 +41,7 @@ const SchoolCensusDataPanel = () => {
   const [endDate, setEndDate] = useState<string | undefined>(undefined);
   const [campusCodes, setCampusCodes] = useState<string[]>(defaultCampusCodes);
   const [studentRecords, setStudentRecords] = useState<iSchoolCensusStudentData[] | null>(null);
-  const [studentAroundRecords, setStudentAroundRecords] = useState<iSchoolCensusStudentData[] | null>(null);
+  const [unfilteredStudentRecords, setUnfilteredStudentRecords] = useState<iSchoolCensusStudentData[] | null>(null);
   const [yearLevels, setYearLevels] = useState<iLuYearLevel[]>([]);
 
   useEffect(() => {
@@ -221,11 +221,12 @@ const SchoolCensusDataPanel = () => {
     setYearLevels(records[1]);
     if (records[0].length <= 0 || records[1].length <= 0) {
       setStudentRecords(records[0]);
+      setUnfilteredStudentRecords(records[0]);
       return;
     }
     const loadedNccds = await loadNccds(records[0], startEndDataString);
     setStudentRecords(loadedNccds.filter(record => isConsiderAsStudentRecord(record, startEndDataString)));
-    setStudentAroundRecords(loadedNccds.filter(record => !isConsiderAsStudentRecord(record, startEndDataString)));
+    setUnfilteredStudentRecords(records[0]);
     return;
   }
 
@@ -276,7 +277,7 @@ const SchoolCensusDataPanel = () => {
         <SchoolCensusDataSummaryDiv
           startAndEndDateString={{startDateStr: `${startDate || ''}`, endDateStr: `${endDate || ''}`}}
           records={studentRecords}
-          aroundRecords={studentAroundRecords || []}
+          unfilteredStudentRecords={unfilteredStudentRecords || []}
         />
         <SectionDiv>
           <SchoolCensusTable
