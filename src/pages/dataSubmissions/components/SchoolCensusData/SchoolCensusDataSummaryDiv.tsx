@@ -61,9 +61,10 @@ const SchoolCensusDataSummaryDiv = ({records, aroundRecords, startAndEndDateStri
     })
   }, [records, aroundRecords]);
 
-  const getPanel = (title: string, recs: iSchoolCensusStudentData[]) => {
+  const getPanel = (title: string, recs: iSchoolCensusStudentData[], popupTitle?: any) => {
     return (
       <SchoolCensusDataPopupBtn
+        popupTitle={popupTitle}
         records={recs}
         className={'summary-div'}
         size={'lg'}>
@@ -75,11 +76,11 @@ const SchoolCensusDataSummaryDiv = ({records, aroundRecords, startAndEndDateStri
 
   return (
     <Wrapper>
-      {getPanel('Total', summary.total)}
-      {getPanel('Indigenous', summary.indigenous)}
-      {getPanel('International', summary.international)}
-      {getPanel('With Visa', summary.withVisa)}
-      {getPanel('With Disability', summary.disability)}
+      {getPanel('Total', summary.total, <h4>Total of {summary.total.length} Student{summary.total.length > 1 ? 's' : ''}</h4>)}
+      {getPanel('Indigenous', summary.indigenous, <h4>{summary.total.length} <u>Indigenous</u> Student{summary.indigenous.length > 1 ? 's' : ''}</h4>)}
+      {getPanel('International', summary.international, <h4>{summary.international.length} <u>International</u> Student{summary.international.length > 1 ? 's' : ''}</h4>)}
+      {getPanel('With Visa', summary.withVisa, <h4>{summary.withVisa.length} Student{summary.withVisa.length > 1 ? 's' : ''} <u>with visa</u></h4>)}
+      {getPanel('NCCD', summary.disability, <h4>{summary.disability.length} <u>NCCD</u> Student{summary.disability.length > 1 ? 's' : ''}</h4>)}
       {getPanel('Around', summary.aroundTotal)}
     </Wrapper>
   )

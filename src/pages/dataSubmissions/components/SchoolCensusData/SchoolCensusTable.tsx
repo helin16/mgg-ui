@@ -110,7 +110,7 @@ const SchoolCensusTable = ({records, luYearLevels}: iSchoolCensusTable) => {
       sticky: "left",
       width: 70,
       Cell: (cell: any) => {
-        return <div className={'col-left-fix'}>{cell.row.original.Code}</div>;
+        return <div className={'col-left-fix'}>{cell.row.original.Description}</div>;
       }
     }];
   }
@@ -127,6 +127,7 @@ const SchoolCensusTable = ({records, luYearLevels}: iSchoolCensusTable) => {
           : (
             <div className={'col-right-fix total'}>
               <SchoolCensusDataPopupBtn
+                popupTitle={<h4>Total list of {totalRecords.length} student(s)</h4>}
                 variant={'link'}
                 size={'sm'}
                 // @ts-ignore
@@ -143,6 +144,7 @@ const SchoolCensusTable = ({records, luYearLevels}: iSchoolCensusTable) => {
       width: 70,
       Cell: (cell: any) => {
         const ylCode = `${cell.row.original.Code}`.trim();
+        const ylDesc = `${cell.row.original.Description}`.trim();
 
         let totalRecords: iSchoolCensusStudentData[] = [];
         if ( ylCode in dataMap && 'total' in dataMap[ylCode]) {
@@ -153,6 +155,7 @@ const SchoolCensusTable = ({records, luYearLevels}: iSchoolCensusTable) => {
           : (
             <div className={'col-right-fix total'}>
               <SchoolCensusDataPopupBtn
+                popupTitle={<><h4>{totalRecords.length} student{totalRecords.length > 1 ? 's' : ''}</h4><small className={'text-muted text-size-14'}>in Year {ylDesc}</small></>}
                 variant={'link'}
                 size={'sm'}
                 records={totalRecords}
@@ -192,6 +195,7 @@ const SchoolCensusTable = ({records, luYearLevels}: iSchoolCensusTable) => {
           }
           return <div className={'col-data total col-footer'}>
             <SchoolCensusDataPopupBtn
+              popupTitle={<><h4>{sameAgeArr.length} student{sameAgeArr.length > 1 ? 's' : ''}</h4><small className={'text-muted text-size-14'}>aged {ageStr}</small></>}
               variant={'link'}
               size={'sm'}
               records={sameAgeArr}
@@ -204,6 +208,7 @@ const SchoolCensusTable = ({records, luYearLevels}: iSchoolCensusTable) => {
         width: 50,
         Cell: (cell: any, index: any) => {
           const ylCode = `${cell.row.original.Code}`.trim();
+          const ylDesc = `${cell.row.original.Description}`.trim();
           const age = `${cell.column.id}`.trim();
           let totalRecords: iSchoolCensusStudentData[] = [];
           if ( ylCode in dataMap && age in dataMap[ylCode]) {
@@ -212,6 +217,7 @@ const SchoolCensusTable = ({records, luYearLevels}: iSchoolCensusTable) => {
           return totalRecords.length === 0 ? null : (
             <div className={'col-data'}>
               <SchoolCensusDataPopupBtn
+                popupTitle={<><h4>{totalRecords.length} student{totalRecords.length > 1 ? 's' : ''}</h4><small className={'text-muted text-size-14'}>aged {age} in Year {ylDesc}</small></>}
                 variant={'link'}
                 size={'sm'}
                 records={totalRecords}

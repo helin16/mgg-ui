@@ -6,13 +6,21 @@ import moment from 'moment-timezone';
 import CSVExportBtn from '../../../../components/form/CSVExportBtn';
 import {FlexContainer} from '../../../../styles';
 import SchoolCensusDataExportHelper from './SchoolCensusDataExportHelper';
+import styled from 'styled-components';
 
 type iSchoolCensusDataPopupBtn = ButtonProps & {
   records: iSchoolCensusStudentData[];
+  popupTitle?: any;
 }
 
 
-const SchoolCensusDataPopupBtn = ({records, children, ...rest}: iSchoolCensusDataPopupBtn) => {
+const TitleWrapper = styled.div`
+  h1, h2, h3, h4, h5 {
+    margin-bottom: 0px;
+  }
+`;
+
+const SchoolCensusDataPopupBtn = ({records, popupTitle, children, ...rest}: iSchoolCensusDataPopupBtn) => {
 
   const [isShowingPopup, setIsShowingPopup] = useState(false);
 
@@ -30,9 +38,9 @@ const SchoolCensusDataPopupBtn = ({records, children, ...rest}: iSchoolCensusDat
         show={true}
         handleClose={() => setIsShowingPopup(false)}
         title={
-          <>
-            <FlexContainer className={'with-gap lg-gap'}>
-              <h4>{records.length} students:</h4>{' '}
+          <TitleWrapper>
+            <FlexContainer className={'with-gap lg-gap align-items end'}>
+              {popupTitle || <h4>{records.length} students:</h4>}
               <CSVExportBtn
                 // @ts-ignore
                 fetchingFnc={() => new Promise(resolve => {
@@ -43,7 +51,7 @@ const SchoolCensusDataPopupBtn = ({records, children, ...rest}: iSchoolCensusDat
                 variant={'link'}
               />
             </FlexContainer>
-          </>
+          </TitleWrapper>
         }
       >
         <Table hover striped responsive>

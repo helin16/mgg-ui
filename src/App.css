@@ -6,6 +6,14 @@ a {
     padding-left: 0px;
 }
 
+.text-size-12 {
+    font-size: 12px !important;
+}
+
+.text-size-14 {
+    font-size: 14px !important;
+}
+
 .ellipsis {
     white-space: nowrap;
     overflow: hidden;
