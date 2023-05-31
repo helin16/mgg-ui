@@ -35,6 +35,9 @@ const getWeekdaysBetweenDates = (fromDate: Moment, toDate: Moment)  => {
   const Saturday = 6;
   const weekDays = [];
   const newDate = fromDate.clone();
+  if (newDate.day() !== Sunday && newDate.day() !== Saturday) {
+    weekDays.push(newDate.clone());
+  }
   while (newDate.isBefore(toDate)) {
     newDate.add(1, 'days');
     if (newDate.day() !== Sunday && newDate.day() !== Saturday) {
