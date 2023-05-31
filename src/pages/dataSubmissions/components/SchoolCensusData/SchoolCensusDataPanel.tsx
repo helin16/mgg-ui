@@ -26,6 +26,9 @@ import iLuYearLevel from '../../../../types/Synergetic/iLuYearLevel';
 import SynLuYearLevelService from '../../../../services/Synergetic/SynLuYearLevelService';
 import SynCampusSelector from '../../../../components/student/SynCampusSelector';
 import SchoolCensusDataSummaryDiv from './SchoolCensusDataSummaryDiv';
+import {
+  DISABILITY_ADJUSTMENT_LEVEL_CODES_FOR_CENSUS_REPORT
+} from '../../../../types/Synergetic/iSynVStudentDisabilityAdjustment';
 
 const LOCALSTORAGE_START_AND_END_NAME = 'census_period';
 
@@ -151,6 +154,7 @@ const SchoolCensusDataPanel = () => {
     const nccds = await SynVtudentDisabilityAdjustmentService.getAll({
       where: JSON.stringify({
         ID: records.map(record => record.ID),
+        DisabilityAdjustmentLevelCode: DISABILITY_ADJUSTMENT_LEVEL_CODES_FOR_CENSUS_REPORT,
       }),
       perPage: 9999,
       sort: 'CurrentDisabilityFlag:ASC',
