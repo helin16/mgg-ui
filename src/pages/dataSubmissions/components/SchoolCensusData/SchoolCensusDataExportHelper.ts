@@ -1,7 +1,8 @@
 import moment from 'moment-timezone';
 import * as XLSX from 'sheetjs-style';
+import {CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR} from '../../../../types/Synergetic/iLuCampus';
 
-
+const defaultCampusCodes = [CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR];
 const genCSVFile = (data: any[]) => {
   const titleRows = [[
     'ID',
@@ -53,7 +54,8 @@ const genCSVFile = (data: any[]) => {
 }
 
 const SchoolCensusDataExportHelper = {
-  genCSVFile
+  genCSVFile,
+  defaultCampusCodes,
 };
 
 export default SchoolCensusDataExportHelper;
