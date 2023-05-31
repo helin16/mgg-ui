@@ -6,7 +6,7 @@ import moment from 'moment-timezone';
 import SynVAbsenceService from '../../../../services/Synergetic/Absence/SynVAbsenceService';
 import {OP_GTE, OP_LTE} from '../../../../helper/ServiceHelper';
 import Toaster from '../../../../services/Toaster';
-import {Spinner} from 'react-bootstrap';
+import {Spinner, Table} from 'react-bootstrap';
 import SynFileSemesterService from '../../../../services/Synergetic/SynFileSemesterService';
 
 type iSchoolCensusDataSummaryDiv = {
@@ -20,7 +20,7 @@ type iSchoolCensusDataSummaryDiv = {
 // const Wrapper = styled.div``;
 const SchoolCensusAbsenceSummaryDiv = ({size, className, unfilteredStudentRecords, schoolDays, startAndEndDateString}: iSchoolCensusDataSummaryDiv) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [records, setRecords] = useState([]);
+  const [records, setRecords] = useState<iSchoolCensusStudentData[]>([]);
 
   useEffect(() => {
     let isCanceled = false;
@@ -48,19 +48,18 @@ const SchoolCensusAbsenceSummaryDiv = ({size, className, unfilteredStudentRecord
         setRecords([]);
         return;
       }
-      console.log('schoolDays', schoolDays);
-
       const studentAbsences = await SynVAbsenceService.getAll({
         where: JSON.stringify({
           SynergyMeaning: 'AllDayAbsence',
           ID: unfilteredStudentRecords.map(rec => rec.ID),
-          // AbsenceDate: {[OP_BETWEEN]: [startAndEndDateString.startDateStr, startAndEndDateString.endDateStr]},
           AbsenceDate: schoolDays.map(schoolDay => `${schoolDay}T00:00:00Z`),
         }),
-        include: 'SynCommunity',
+        include: 'SynLuAbsenceType',
         perPage: 999999,
       });
-      const studentAbsencesMap = (studentAbsences.data || []).reduce((map, absence)=> {
+      const studentAbsencesMap = (studentAbsences.data || [])
+        .filter(absence => absence.SynLuAbsenceType?.CountAsAbsenceFlag === true)
+        .reduce((map, absence)=> {
         return {
           ...map,
           [absence.ID]: {
@@ -79,7 +78,22 @@ const SchoolCensusAbsenceSummaryDiv = ({size, className, unfilteredStudentRecord
           totalAbsenceMap[studentID] = studentAbsencesMap[studentID];
         }
       }
-      console.log('totalAbsenceMap', totalAbsenceMap);
+      if (Object.keys(totalAbsenceMap).length === 0) {
+        setRecords([]);
+        return;
+      }
+
+      setRecords(
+        unfilteredStudentRecords
+          .filter(record => Object.keys(totalAbsenceMap).indexOf(`${record.ID}`) >= 0 )
+          .map(record => {
+            return ({
+              ...record,
+              // @ts-ignore
+              extra: `${record.ID}` in totalAbsenceMap ? totalAbsenceMap[`${record.ID}`] : [],
+            })
+          })
+      )
     }
 
     setIsLoading(true);
@@ -98,6 +112,31 @@ const SchoolCensusAbsenceSummaryDiv = ({size, className, unfilteredStudentRecord
   }, [unfilteredStudentRecords, startAndEndDateString, schoolDays]);
 
 
+  const getExtraCol = (isTitleRow: boolean, record?: iSchoolCensusStudentData) => {
+    if (isTitleRow === true) {
+      return <>Absence(s)</>
+    }
+    const absenceMap = record?.extra || {};
+    console.log('absenceMap', absenceMap);
+    return (
+      <Table>
+        <tbody>
+          {Object.keys(absenceMap).map(date => {
+            return (
+              <tr key={date}
+              >
+                <td>{moment(date).format('DD MMM YYYY ddd')}</td>
+                <td>{absenceMap[date].SynLuAbsenceType.Description}</td>
+                <td>{absenceMap[date].SynergyMeaning}</td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </Table>
+    )
+  }
+
+
   return (
     <SchoolCensusDataPopupBtn
       disabled={isLoading}
@@ -113,6 +152,7 @@ const SchoolCensusAbsenceSummaryDiv = ({size, className, unfilteredStudentRecord
       className={className}
       // @ts-ignore
       size={size}
+      showExtraFn={getExtraCol}
     >
       {isLoading ? <Spinner animation={'border'} /> : (
         <>

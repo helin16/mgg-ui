@@ -11,6 +11,7 @@ import styled from 'styled-components';
 type iSchoolCensusDataPopupBtn = ButtonProps & {
   records: iSchoolCensusStudentData[];
   popupTitle?: any;
+  showExtraFn?: (isTitleRow: boolean, record?: iSchoolCensusStudentData) => any;
 }
 
 
@@ -20,7 +21,7 @@ const TitleWrapper = styled.div`
   }
 `;
 
-const SchoolCensusDataPopupBtn = ({records, popupTitle, children, ...rest}: iSchoolCensusDataPopupBtn) => {
+const SchoolCensusDataPopupBtn = ({records, popupTitle, children, showExtraFn, ...rest}: iSchoolCensusDataPopupBtn) => {
 
   const [isShowingPopup, setIsShowingPopup] = useState(false);
 
@@ -69,6 +70,7 @@ const SchoolCensusDataPopupBtn = ({records, popupTitle, children, ...rest}: iSch
               <th className={'entry-date'}>Entry Date</th>
               <th className={'left-date'}>Left Date</th>
               <th className={'nccd'}>NCCD</th>
+              {showExtraFn ? <th className={'extra'}>{showExtraFn(true)}</th> : null}
             </tr>
           </thead>
           <tbody>
@@ -105,6 +107,7 @@ const SchoolCensusDataPopupBtn = ({records, popupTitle, children, ...rest}: iSch
                     <div>{`${record.nccdStatusCategory}`.trim() === '' ? '' : `${record.nccdStatusCategory}`}</div>
                     <div>{`${record.nccdStatusAdjustmentLevel}`.trim() === '' ? '' : `${record.nccdStatusAdjustmentLevel}`}</div>
                   </td>
+                  {showExtraFn ? <td className={'extra'}>{showExtraFn(false, record)}</td> : null}
                 </tr>
               )
             })

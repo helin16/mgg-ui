@@ -19,6 +19,7 @@ type iSchoolCensusStudentData = {
   isInternationalStudent: boolean;
   isIndigenous: boolean;
   isPastStudent: boolean;
+  extra?: any;
 };
 
 export type iStartAndEndDateString = {
