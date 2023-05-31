@@ -26,12 +26,6 @@ const SchoolDataSubmissionsPage = () => {
           className={'float-right'}
         />
       </h3>
-      <ExplanationPanel
-        text={
-          <>This page is designed to helping school data submissions.</>
-        }
-      />
-
       <SchoolDataSubmissionsPanel />
     </Wrapper>
   )

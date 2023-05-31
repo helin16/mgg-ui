@@ -25,6 +25,7 @@ import SchoolCensusDataSearchPanel, {iSchoolCensusDataSearchCriteria} from './Sc
 import UtilsService from '../../../../services/UtilsService';
 import SynCalendarEventService from '../../../../services/Synergetic/TimeTable/SynCalendarEventService';
 import {HEADER_NAME_SELECTING_FIELDS} from '../../../../services/AppService';
+import ExplanationPanel from '../../../../components/ExplanationPanel';
 
 const Wrapper = styled.div``;
 
@@ -55,7 +56,7 @@ const SchoolCensusDataPanel = () => {
       if (birthStr === '') {
         return '';
       }
-      const age = Math.floor(moment(`${endDateStr}`).diff(birthDateString, 'month') / 12);
+      const age = Math.floor(moment(`${moment(endDateStr).year()}-07-01T00:00:00Z`).diff(birthDateString, 'month') / 12);
       if (age <= 1) {
         return '1';
       }
@@ -279,7 +280,19 @@ const SchoolCensusDataPanel = () => {
   return (
     <Wrapper>
       <h5 className={'title'}>Student Census Report</h5>
-
+      <ExplanationPanel
+        text={
+          <>
+            All student ages are calculated base on <b>1st of July</b> in the selected year (ie: 2022).
+            <div>- <b>School Days</b>: The days that students are supposed to be at school.</div>
+            <div>- <b>Total students</b>: list of all students who are here during the Census Reference Period.</div>
+            <div>- <b>International</b>: list of students who are marked as <u>Full Fee</u>.</div>
+            <div>- <b>NCCD</b>: list of students who have disabilities level in {DISABILITY_ADJUSTMENT_LEVEL_CODES_FOR_CENSUS_REPORT.map((code) => <> <u>{code}</u></>)}.</div>
+            <div>- <b>Around</b>: list of students who were here and left before End of Census Reference Period.</div>
+            <div>- <b>Total Absence</b>: list of students who are absent the entire Census Reference Period.</div>
+          </>
+        }
+      />
       <SchoolCensusDataSearchPanel
         isLoading={isLoading}
         searchFnc={(criteria) => setSearchCriteria(criteria)}
