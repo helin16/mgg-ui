@@ -88,6 +88,7 @@ const SchoolCensusAbsenceSummaryDiv = ({size, className, unfilteredStudentRecord
 
       setRecords(
         unfilteredStudentRecords
+          .filter(record => `${record.leavingDate || ''}`.trim() === '' || moment(record.leavingDate).isAfter(moment(startAndEndDateString.endDateStr)))
           .filter(record => Object.keys(totalAbsenceMap).indexOf(`${record.ID}`) >= 0 )
           .map(record => {
             return ({
