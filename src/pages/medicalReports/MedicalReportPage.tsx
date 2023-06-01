@@ -133,15 +133,16 @@ const MedicalReportPage = () => {
             'ConditionSeverityDescription', 'ConditionDetails'
           ])}
       }),
-      (criteria.classCodes.length === 0 ? undefined : SynVStudentClassService.getAll({
+      ...(criteria.classCodes.length === 0 ? [] : [SynVStudentClassService.getAll({
         where: JSON.stringify({
           ClassCode: criteria.classCodes,
-          CurrentSemesterOnlyFlag: true,
           FileYear: (user?.SynCurrentFileSemester?.FileYear || moment().year()),
           FileSemester: (user?.SynCurrentFileSemester?.FileSemester || 1),
         }),
         perPage: '99999',
-      }))
+      }, {
+        headers: {[HEADER_NAME_SELECTING_FIELDS]: JSON.stringify(['StudentID', 'ClassCode'])}
+      })]),
     ])
       .then(resp => {
         setConditionsMap(resp[1].reduce((map, condition) => {
@@ -165,7 +166,14 @@ const MedicalReportPage = () => {
         } else {
           const conditionStudentIds = resp[1].map(condition => condition.ID);
           setStudents(resp[0].filter(student => {
-            return conditionStudentIds.indexOf(student.StudentID) > 0 && classCodeStudentIds.indexOf(student.StudentID) > 0;
+            if (Object.keys(conditionsWhere).length <= 0) {
+              return classCodeStudentIds.indexOf(student.StudentID) >= 0;
+            }
+            if (classCodeStudentIds.length <= 0) {
+              return conditionStudentIds.indexOf(student.StudentID) >= 0;
+            }
+            return classCodeStudentIds.indexOf(student.StudentID) >= 0 && conditionStudentIds.indexOf(student.StudentID) >= 0;
+
           }));
         }
       })
