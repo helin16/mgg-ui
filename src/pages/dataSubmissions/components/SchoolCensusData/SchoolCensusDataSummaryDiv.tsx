@@ -28,6 +28,19 @@ type iSummary = {
 const Wrapper = styled.div`
   margin-top: 1rem;
   margin-bottom: 1rem;
+  
+  .title-row {
+    h5 {
+      margin-bottom: 0px;
+    }
+    .btn {
+      margin-bottom: 0px;
+      margin-top: 0px;
+      &.btn-link {
+        background-color: transparent !important;
+      }
+    }
+  }
   .summary-divs {
     display: flex;
     flex-flow: wrap;
@@ -90,7 +103,7 @@ const SchoolCensusDataSummaryDiv = ({records, unfilteredStudentRecords, startAnd
 
   return (
     <Wrapper>
-      <FlexContainer className={'with-gap lg-gap'}>
+      <FlexContainer className={'with-gap lg-gap title-row'}>
         <h5>Total of <SchoolDaysPopupBtn schoolDays={schoolDays} variant={'link'}>{schoolDays.length}</SchoolDaysPopupBtn> School days</h5>
         <SchoolCensusDataAttendancePopupBtn
           popupTitle={`Attendances on ${moment(startAndEndDateString.endDateStr).format('DD MMM YYYY')}`}
