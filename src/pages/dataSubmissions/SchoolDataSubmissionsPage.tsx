@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import ExplanationPanel from '../../components/ExplanationPanel';
 import {useState} from 'react';
 import SchoolDataSubmissionsAdminPage from './SchoolDataSubmissionsAdminPage';
 import ModuleAdminBtn from '../../components/module/ModuleAdminBtn';
