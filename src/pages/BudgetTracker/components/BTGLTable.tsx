@@ -10,7 +10,6 @@ import * as _ from 'lodash';
 import SynGeneralLedgerMonthlyBudgetService
   from '../../../services/Synergetic/Finance/SynGeneralLedgerMonthlyBudgetService';
 import MathHelper from '../../../helper/MathHelper';
-import {OP_LIKE} from '../../../helper/ServiceHelper';
 
 type iBTGLTable = {
   selectedYear: number;
