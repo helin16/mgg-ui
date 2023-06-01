@@ -1,3 +1,4 @@
+import React from 'react';
 import styled from 'styled-components';
 import {useEffect, useState} from 'react';
 import moment from 'moment-timezone';
@@ -26,6 +27,7 @@ import UtilsService from '../../../../services/UtilsService';
 import SynCalendarEventService from '../../../../services/Synergetic/TimeTable/SynCalendarEventService';
 import {HEADER_NAME_SELECTING_FIELDS} from '../../../../services/AppService';
 import ExplanationPanel from '../../../../components/ExplanationPanel';
+import SynVAbsenceService from '../../../../services/Synergetic/Absence/SynVAbsenceService';
 
 const Wrapper = styled.div``;
 
@@ -36,6 +38,7 @@ const SchoolCensusDataPanel = () => {
   const [schoolDays, setSchoolDays] = useState<string[]>([]);
   const [yearLevels, setYearLevels] = useState<iLuYearLevel[]>([]);
   const [searchCriteria, setSearchCriteria] = useState<iSchoolCensusDataSearchCriteria | null>(null);
+  const [absenteeOnEndDateIds, setAbsenteeOnEndDateIds] = useState<number[]>([]);
 
 
   useEffect(() => {
@@ -183,6 +186,17 @@ const SchoolCensusDataPanel = () => {
       return _.difference(weekDays, schoolFreeDays);
     }
 
+    const getAbsenteesOnEndDate = async (records: iSchoolCensusStudentData[], startAndEndDateString: iStartAndEndDateString) => {
+      const result = await SynVAbsenceService.getAll({
+        where: JSON.stringify({
+          SynergyMeaning: 'AllDayAbsence',
+          ID: records.map(rec => rec.ID),
+          AbsenceDate: {[OP_LIKE]: `${moment(startAndEndDateString.endDateStr).format('YYYY-MM-DD')}%`},
+        })
+      });
+      return result.data || [];
+    }
+
     const doSearch = async () => {
       const startEndDataString = {
         startDateStr: `${searchCriteria?.startDate || ''}`.trim(),
@@ -211,9 +225,16 @@ const SchoolCensusDataPanel = () => {
       if (records[0].length <= 0 || records[1].length <= 0) {
         setStudentRecords(records[0]);
         setUnfilteredStudentRecords(records[0]);
+        setAbsenteeOnEndDateIds([]);
         return;
       }
-      const loadedNccds = await loadNccds(records[0], startEndDataString);
+      const [loadedNccds, absenteesOnEndDate] = await Promise.all([
+        loadNccds(records[0], startEndDataString),
+        getAbsenteesOnEndDate(records[0], startEndDataString),
+      ]);
+
+
+      setAbsenteeOnEndDateIds(_.uniq(absenteesOnEndDate.map(record => record.ID)));
       setStudentRecords(loadedNccds.filter(record => isConsiderAsStudentRecord(record, startEndDataString)));
       setUnfilteredStudentRecords(records[0]);
       return;
@@ -248,6 +269,7 @@ const SchoolCensusDataPanel = () => {
         <SchoolCensusDataSummaryDiv
           startAndEndDateString={{startDateStr: `${searchCriteria?.startDate || ''}`, endDateStr: `${searchCriteria?.endDate || ''}`}}
           records={studentRecords}
+          absenteeIdsOnEndDate={absenteeOnEndDateIds}
           unfilteredStudentRecords={unfilteredStudentRecords || []}
           schoolDays={schoolDays}
         />
@@ -288,7 +310,7 @@ const SchoolCensusDataPanel = () => {
             <div>- <b>School Days</b>: The days that students are supposed to be at school.</div>
             <div>- <b>Total students</b>: list of all students who are here during the Census Reference Period.</div>
             <div>- <b>International</b>: list of students who are marked as <u>Full Fee</u>.</div>
-            <div>- <b>NCCD</b>: list of students who have disabilities level in {DISABILITY_ADJUSTMENT_LEVEL_CODES_FOR_CENSUS_REPORT.map((code) => <> <u>{code}</u></>)}.</div>
+            <div>- <b>NCCD</b>: list of students who have disabilities level in {DISABILITY_ADJUSTMENT_LEVEL_CODES_FOR_CENSUS_REPORT.map((code) => <React.Fragment key={code}> <u>{code}</u></React.Fragment>)}.</div>
             <div>- <b>Around</b>: list of students who were here and left before End of Census Reference Period.</div>
             <div>- <b>Total Absence</b>: list of students who are absent the entire Census Reference Period.</div>
           </>

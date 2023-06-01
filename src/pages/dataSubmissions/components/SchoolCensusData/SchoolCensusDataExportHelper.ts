@@ -2,6 +2,7 @@ import moment from 'moment-timezone';
 import * as XLSX from 'sheetjs-style';
 import {CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR} from '../../../../types/Synergetic/iLuCampus';
 import iSchoolCensusStudentData from './iSchoolCensusStudentData';
+import iSynVAttendance from '../../../../types/Synergetic/Attendance/iSynVAttendance';
 
 const defaultCampusCodes = [CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR];
 const getTitleRows = (extra: string[] = []) => [[
@@ -24,6 +25,39 @@ const getTitleRows = (extra: string[] = []) => [[
   'NCCD Level',
   ...extra,
 ]];
+
+const getAttendanceTitleRows = (extra: string[] = []) => [[
+  'ID',
+  'Student',
+  'Year Lvl.',
+  'Gender',
+  'D.O.B.',
+  'Age',
+  'International?',
+  'Indigenous?',
+  'isPastStudent?',
+  'Status',
+  'Attendance Date',
+  'Class Code',
+  ...extra,
+]];
+
+const getAttendanceCSVRow = (record: iSynVAttendance & {Student: iSchoolCensusStudentData}) => {
+  return [
+    record.Student.ID,
+    `${record.Student.Surname}, ${record.Student.Given1}`,
+    record.Student.yearLevelCode,
+    record.Student.gender,
+    moment(record.Student.dateOfBirth).format('YYYY-MM-DD'),
+    record.Student.age,
+    record.Student.isInternationalStudent === true ? 'Y' : '',
+    record.Student.isIndigenous === true ? 'Y' : '',
+    record.Student.isPastStudent === true ? 'Y' : '',
+    `${record.Student.StudentStatusDescription}`,
+    moment(record.AttendanceDate).format('YYYY-MM-DD'),
+    record.ClassCode,
+  ]
+};
 
 const getCSVRow = (record: iSchoolCensusStudentData) => {
   return [
@@ -59,7 +93,9 @@ const genCSVFile = (data: iSchoolCensusStudentData[]) => {
 
 const SchoolCensusDataExportHelper = {
   getTitleRows,
+  getAttendanceTitleRows,
   getCSVRow,
+  getAttendanceCSVRow,
   genCSVFile,
   defaultCampusCodes,
 };
