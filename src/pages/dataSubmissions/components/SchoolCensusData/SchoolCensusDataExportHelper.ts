@@ -28,7 +28,7 @@ const getTitleRows = (extra: string[] = []) => [[
 const getCSVRow = (record: iSchoolCensusStudentData) => {
   return [
     record.ID,
-    `${record.Given1} ${record.Surname}`,
+    `${record.Surname}, ${record.Given1}`,
     record.yearLevelCode,
     record.gender,
     moment(record.dateOfBirth).format('YYYY-MM-DD'),

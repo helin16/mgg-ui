@@ -83,7 +83,7 @@ const SchoolCensusDataPopupBtn = ({records, popupTitle, children, showExtraFn, e
                 <tr key={record.ID}>
                   <td>
                     <div>[{record.ID}]</div>
-                    {record.Given1} {record.Surname}
+                    {record.Surname}, {record.Given1}
                   </td>
                   <td>{record.yearLevelCode}</td>
                   <td>{record.gender}</td>

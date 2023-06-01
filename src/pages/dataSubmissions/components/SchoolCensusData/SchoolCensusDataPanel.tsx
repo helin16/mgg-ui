@@ -129,6 +129,7 @@ const SchoolCensusDataPanel = () => {
           if (moment(nccd.EndDate).isBefore(moment(startEndDataString.endDateStr))) {
             return false;
           }
+          // console.log('nccd', nccd)
           return true;
         })
         .reduce((map, nccd) => {
