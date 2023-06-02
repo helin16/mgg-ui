@@ -38,6 +38,7 @@ const SchoolCensusAbsenceSummaryDiv = ({size, className, unfilteredStudentRecord
           AbsenceDate: schoolDays.map(schoolDay => `${schoolDay}T00:00:00Z`),
         }),
         include: 'SynLuAbsenceType',
+        sort: 'AbsenceDate:ASC',
         perPage: 999999,
       });
       const studentAbsencesMap = (studentAbsences.data || [])
@@ -105,7 +106,9 @@ const SchoolCensusAbsenceSummaryDiv = ({size, className, unfilteredStudentRecord
     return (
       <Table>
         <tbody>
-          {Object.keys(absenceMap).map(date => {
+          {Object.keys(absenceMap)
+            .sort((date1, date2) => `${date1}`.trim() > `${date2}`.trim() ? 1 : -1)
+            .map(date => {
             return (
               <tr key={date}>
                 <td>{moment(date).format('DD MMM YYYY ddd')}</td>
