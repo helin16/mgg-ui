@@ -81,8 +81,17 @@ const SchoolCensusDataSearchPanel = ({searchFnc, btns, isLoading = false}: iScho
       Toaster.showToast(`Please provide both Start and End date for Census Period.`, TOAST_TYPE_ERROR);
       return;
     }
+    if (moment(endDate).isAfter(moment())) {
+      Toaster.showToast(`Please provide End date that is the past or today.`, TOAST_TYPE_ERROR);
+      return;
+    }
     if (moment(startDate).isAfter(moment(endDate))) {
       Toaster.showToast(`StartDate needs to be before EndDate`, TOAST_TYPE_ERROR);
+      return;
+    }
+
+    if (moment(endDate).diff(moment(startDate), 'days') > 100) {
+      Toaster.showToast(`Difference between start date and end date can NOT be more than 100 days`, TOAST_TYPE_ERROR);
       return;
     }
 

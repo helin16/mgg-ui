@@ -3,8 +3,8 @@ import iPaginatedResult from '../../../types/iPaginatedResult';
 import iSynVAbsence from '../../../types/Synergetic/Absence/iSynVAbsence';
 
 const endPoint = '/syn/vAbsence';
-const getAll = (params: iConfigParams = {}): Promise<iPaginatedResult<iSynVAbsence>> => {
-  return AppService.get(endPoint, params).then(resp => resp.data);
+const getAll = (params: iConfigParams = {}, options?: iConfigParams): Promise<iPaginatedResult<iSynVAbsence>> => {
+  return AppService.get(endPoint, params, options).then(resp => resp.data);
 };
 
 const SynVAbsenceService = {

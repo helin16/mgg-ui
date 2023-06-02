@@ -4,10 +4,8 @@ import {useEffect, useState} from 'react';
 // import styled from 'styled-components';
 import moment from 'moment-timezone';
 import SynVAbsenceService from '../../../../services/Synergetic/Absence/SynVAbsenceService';
-import {OP_GTE, OP_LTE} from '../../../../helper/ServiceHelper';
 import Toaster from '../../../../services/Toaster';
 import {Spinner, Table} from 'react-bootstrap';
-import SynFileSemesterService from '../../../../services/Synergetic/SynFileSemesterService';
 import SchoolCensusDataExportHelper from './SchoolCensusDataExportHelper';
 import CSVExportBtn from '../../../../components/form/CSVExportBtn';
 import * as XLSX from 'sheetjs-style';
@@ -28,25 +26,7 @@ const SchoolCensusAbsenceSummaryDiv = ({size, className, unfilteredStudentRecord
   useEffect(() => {
     let isCanceled = false;
 
-    const getFileSemesters = ({ startDateStr,  endDateStr, }:iStartAndEndDateString  ) => {
-      return SynFileSemesterService.getFileSemesters({
-        where: JSON.stringify({
-          ActivatedFlag: true,
-          StartDate: {[OP_LTE]: startDateStr},
-          EndDate: {[OP_GTE]: endDateStr},
-        }),
-        perPage: 1
-      });
-    }
-
     const getData = async () => {
-      const fileSemesters = await getFileSemesters(startAndEndDateString);
-      // the date range is not with any FileSemester, then return 0 as there is no school days
-      if (fileSemesters.length === 0) {
-        setRecords([]);
-        return;
-      }
-
       if(schoolDays.length === 0) {
         setRecords([]);
         return;
@@ -72,6 +52,7 @@ const SchoolCensusAbsenceSummaryDiv = ({size, className, unfilteredStudentRecord
           }
         }
       }, {});
+
 
       const totalAbsenceMap = {};
       for(const studentID of Object.keys(studentAbsencesMap)) {

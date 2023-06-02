@@ -5,7 +5,7 @@ import moment from 'moment-timezone';
 import PageLoadingSpinner from '../../../../components/common/PageLoadingSpinner';
 import Toaster, {TOAST_TYPE_ERROR} from '../../../../services/Toaster';
 import SynFileSemesterService from '../../../../services/Synergetic/SynFileSemesterService';
-import {OP_AND, OP_GTE, OP_LIKE, OP_LTE, OP_OR} from '../../../../helper/ServiceHelper';
+import {OP_GTE, OP_LTE, OP_OR} from '../../../../helper/ServiceHelper';
 import * as _ from 'lodash';
 import SynVStudentService from '../../../../services/Synergetic/SynVStudentService';
 import iSynFileSemester from '../../../../types/Synergetic/iSynFileSemester';
@@ -24,10 +24,10 @@ import {
 } from '../../../../types/Synergetic/iSynVStudentDisabilityAdjustment';
 import SchoolCensusDataSearchPanel, {iSchoolCensusDataSearchCriteria} from './SchoolCensusDataSearchPanel';
 import UtilsService from '../../../../services/UtilsService';
-import SynCalendarEventService from '../../../../services/Synergetic/TimeTable/SynCalendarEventService';
 import {HEADER_NAME_SELECTING_FIELDS} from '../../../../services/AppService';
 import ExplanationPanel from '../../../../components/ExplanationPanel';
 import SynVAbsenceService from '../../../../services/Synergetic/Absence/SynVAbsenceService';
+import SynVAttendanceService from '../../../../services/Synergetic/Attendance/SynVAttendanceService';
 
 const Wrapper = styled.div``;
 
@@ -44,14 +44,34 @@ const SchoolCensusDataPanel = () => {
   useEffect(() => {
     if (searchCriteria === null) return;
     let isCanceled = false;
-    const getFileSemesters = ({ startDateStr,  endDateStr, }:iStartAndEndDateString  ) => {
-      return SynFileSemesterService.getFileSemesters({
-        where: JSON.stringify({
-          ActivatedFlag: true,
-          StartDate: {[OP_LTE]: startDateStr},
-          EndDate: {[OP_GTE]: endDateStr},
-        })
-      });
+    const getFileSemesters = async ({ startDateStr,  endDateStr, }:iStartAndEndDateString  ) => {
+      const [startDateFileSemesters, endDateFileSemesters] = await Promise.all([
+        SynFileSemesterService.getFileSemesters({
+          where: JSON.stringify({
+            ActivatedFlag: true,
+            StartDate: {[OP_LTE]: startDateStr},
+            EndDate: {[OP_GTE]: startDateStr},
+          }),
+          perPage: 1,
+          currentPage: 1,
+        }),
+        SynFileSemesterService.getFileSemesters({
+          where: JSON.stringify({
+            ActivatedFlag: true,
+            StartDate: {[OP_LTE]: endDateStr},
+            EndDate: {[OP_GTE]: endDateStr},
+          }),
+          perPage: 1,
+          currentPage: 1,
+        }),
+      ]);
+
+      return {
+        // @ts-ignore
+        startDateFileSemesters: startDateFileSemesters.data || [],
+        // @ts-ignore
+        endDateFileSemesters: endDateFileSemesters.data || [],
+      }
     }
 
     const getAgeFromBirthDate = (birthDateString: string, { endDateStr, }:iStartAndEndDateString) => {
@@ -168,21 +188,30 @@ const SchoolCensusDataPanel = () => {
       const weekDays =
         UtilsService.getWeekdaysBetweenDates(moment(startAndEndDateString.startDateStr), moment(startAndEndDateString.endDateStr))
           .map(day => day.format('YYYY-MM-DD'));
-      const results = await  SynCalendarEventService.getAll({
-        where: JSON.stringify({
-          CalendarType: {[OP_LIKE]: '%D0%'},
-          [OP_AND]: [
-            {CalendarDate: {[OP_GTE]: startAndEndDateString.startDateStr}},
-            {CalendarDate: {[OP_LTE]: startAndEndDateString.endDateStr}},
-          ]
-        })
-      }, {
-        headers: {[HEADER_NAME_SELECTING_FIELDS]: JSON.stringify([
-            'CalendarDate', 'Comment',
-          ])}
-      });
+      const attendances = await SynVAttendanceService.getAll({
+          where: JSON.stringify({
+            AttendanceDate:  weekDays.map(weekDay => `${weekDay}T00:00:00Z`),
+          }),
+          perPage: 999999,
+        },
+        { headers: {[HEADER_NAME_SELECTING_FIELDS]: JSON.stringify(['ID', 'AttendanceDate'])}
+        });
 
-      const schoolFreeDays = _.uniq((results.data || []).map(calendarEvent => moment(calendarEvent.CalendarDate).format('YYYY-MM-DD')));
+      const attendanceMap = (attendances.data || []).reduce((map, record) => {
+        const date = moment(record.AttendanceDate).format('YYYY-MM-DD');
+        return ({
+          ...map,
+          // @ts-ignore
+          [date]: [...(map[date] || []), record]
+        })
+      }, {});
+
+      const schoolFreeDays = [];
+      for (const weekDay of weekDays) {
+        if (!(weekDay in attendanceMap)) {
+          schoolFreeDays.push(weekDay);
+        }
+      }
       return _.difference(weekDays, schoolFreeDays);
     }
 
@@ -204,24 +233,27 @@ const SchoolCensusDataPanel = () => {
         startDateStr: `${searchCriteria?.startDate || ''}`.trim(),
         endDateStr: `${searchCriteria?.endDate || ''}`.trim()
       }
-      const [fileSemesters, schoolDaysStrings] = await Promise.all([
+      const [{ endDateFileSemesters, }, schoolDaysStrings] = await Promise.all([
         getFileSemesters(startEndDataString),
         getSchoolDays(startEndDataString),
       ]);
-      if (fileSemesters.length <= 0) {
-        Toaster.showToast(`The Start and End Date should be within the same term, please change your dates and try again!`, TOAST_TYPE_ERROR);
+
+      if (endDateFileSemesters.length <= 0) {
+        Toaster.showToast(`The End Date should be within the a FileSemester, please change your dates and try again!`, TOAST_TYPE_ERROR);
         return;
       }
-
+      if (isCanceled) return;
       const records = await Promise.all([
-        getStudents(fileSemesters, startEndDataString),
+        getStudents([...endDateFileSemesters], startEndDataString),
         SynLuYearLevelService.getAllYearLevels({
           where: JSON.stringify({
             Campus: (searchCriteria?.campusCodes || []).length === 0 ? SchoolCensusDataExportHelper.defaultCampusCodes : searchCriteria?.campusCodes,
           }),
           sort: 'YearLevelSort:ASC'
         })
-      ])
+      ]);
+
+      if (isCanceled) return;
       setYearLevels(records[1]);
       setSchoolDays(schoolDaysStrings);
       if (records[0].length <= 0 || records[1].length <= 0) {
@@ -235,6 +267,7 @@ const SchoolCensusDataPanel = () => {
         getAbsenteesOnEndDate(records[0], startEndDataString),
       ]);
 
+      if (isCanceled) return;
       setAbsenteeOnEndDateIds(_.uniq(absenteesOnEndDate.map(record => record.ID)));
       setStudentRecords(loadedNccds.filter(record => isConsiderAsStudentRecord(record, startEndDataString)));
       setUnfilteredStudentRecords(records[0]);
