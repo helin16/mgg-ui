@@ -23,11 +23,8 @@ import {
   DISABILITY_ADJUSTMENT_LEVEL_CODES_FOR_CENSUS_REPORT
 } from '../../../../types/Synergetic/iSynVStudentDisabilityAdjustment';
 import SchoolCensusDataSearchPanel, {iSchoolCensusDataSearchCriteria} from './SchoolCensusDataSearchPanel';
-import UtilsService from '../../../../services/UtilsService';
-import {HEADER_NAME_SELECTING_FIELDS} from '../../../../services/AppService';
 import ExplanationPanel from '../../../../components/ExplanationPanel';
 import SynVAbsenceService from '../../../../services/Synergetic/Absence/SynVAbsenceService';
-import SynVAttendanceService from '../../../../services/Synergetic/Attendance/SynVAttendanceService';
 
 const Wrapper = styled.div``;
 
@@ -184,35 +181,11 @@ const SchoolCensusDataPanel = () => {
       return true;
     }
 
-    const getSchoolDays = async (startAndEndDateString: iStartAndEndDateString) => {
-      const weekDays =
-        UtilsService.getWeekdaysBetweenDates(moment(startAndEndDateString.startDateStr), moment(startAndEndDateString.endDateStr))
-          .map(day => day.format('YYYY-MM-DD'));
-      const attendances = await SynVAttendanceService.getAll({
-          where: JSON.stringify({
-            AttendanceDate:  weekDays.map(weekDay => `${weekDay}T00:00:00Z`),
-          }),
-          perPage: 999999,
-        },
-        { headers: {[HEADER_NAME_SELECTING_FIELDS]: JSON.stringify(['ID', 'AttendanceDate'])}
-        });
-
-      const attendanceMap = (attendances.data || []).reduce((map, record) => {
-        const date = moment(record.AttendanceDate).format('YYYY-MM-DD');
-        return ({
-          ...map,
-          // @ts-ignore
-          [date]: [...(map[date] || []), record]
-        })
-      }, {});
-
-      const schoolFreeDays = [];
-      for (const weekDay of weekDays) {
-        if (!(weekDay in attendanceMap)) {
-          schoolFreeDays.push(weekDay);
-        }
-      }
-      return _.difference(weekDays, schoolFreeDays);
+    const getSchoolDays = (startAndEndDateString: iStartAndEndDateString) => {
+      return SynFileSemesterService.getSchoolDays({
+        start:  moment(startAndEndDateString.startDateStr).format('YYYY-MM-DD'),
+        end:  moment(startAndEndDateString.endDateStr).format('YYYY-MM-DD'),
+      });
     }
 
     const getAbsenteesOnEndDate = async (records: iSchoolCensusStudentData[], startAndEndDateString: iStartAndEndDateString) => {
