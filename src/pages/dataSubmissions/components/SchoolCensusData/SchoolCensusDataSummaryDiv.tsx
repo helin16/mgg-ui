@@ -108,8 +108,8 @@ const SchoolCensusDataSummaryDiv = ({records, unfilteredStudentRecords, startAnd
         <h5>Total of <SchoolDaysPopupBtn schoolDays={schoolDays} variant={'link'}>{schoolDays.length}</SchoolDaysPopupBtn> School days</h5>
         <SchoolCensusDataAttendancePopupBtn
           popupTitle={
-            <FlexContainer className={'with-gap lg-gap'}>
-              <h5>Attendances on </h5>
+            <FlexContainer className={'with-gap lg-gap align-items end'}>
+              <div>Attendee(s) on </div>
               <small className={'text-muted text-size-14'}>
                 {moment(startAndEndDateString.endDateStr).format('DD MMM YYYY')}
               </small>
@@ -144,8 +144,8 @@ const SchoolCensusDataSummaryDiv = ({records, unfilteredStudentRecords, startAnd
         <SchoolCensusDataAttendancePopupBtn
           disabled={absenteeIdsOnEndDate.length <= 0}
           popupTitle={
-            <FlexContainer className={'with-gap lg-gap'}>
-              <h5>Attendances for ABSENTEES</h5>
+            <FlexContainer className={'with-gap lg-gap align-items end'}>
+              <div>Attendances for ABSENTEES</div>
               <small className={'text-muted text-size-14'}>
                 {moment(startAndEndDateString.startDateStr).format('DD MMM YYYY')} ~ {moment(startAndEndDateString.endDateStr).subtract(1, 'day').format('DD MMM YYYY')}
               </small>

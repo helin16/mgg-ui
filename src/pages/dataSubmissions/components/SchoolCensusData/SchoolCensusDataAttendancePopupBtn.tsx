@@ -162,7 +162,7 @@ const SchoolCensusDataAttendancePopupBtn = ({popupTitle, schoolDays, studentIds,
         handleClose={() => handleClose()}
         title={
           <>
-            <FlexContainer className={'with-gap lg-gap'}>
+            <FlexContainer className={'with-gap lg-gap align-items end'}>
               ({_.uniq(records.map(record => record.ID)).length}) {popupTitle}
               {isSearching === true ? <Spinner animation={'border'} /> : <CSVExportBtn
                 // @ts-ignore
