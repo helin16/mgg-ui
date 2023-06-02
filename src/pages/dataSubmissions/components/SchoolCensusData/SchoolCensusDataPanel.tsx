@@ -190,9 +190,11 @@ const SchoolCensusDataPanel = () => {
       const result = await SynVAbsenceService.getAll({
         where: JSON.stringify({
           SynergyMeaning: 'AllDayAbsence',
+          // ID: 50804,
           ID: records.map(rec => rec.ID),
-          AbsenceDate: {[OP_LIKE]: `${moment(startAndEndDateString.endDateStr).format('YYYY-MM-DD')}%`},
-        })
+          AbsenceDate: startAndEndDateString.endDateStr,
+        }),
+        perPage: 9999999,
       });
       return result.data || [];
     }
@@ -232,7 +234,6 @@ const SchoolCensusDataPanel = () => {
         loadNccds(records[0], startEndDataString),
         getAbsenteesOnEndDate(records[0], startEndDataString),
       ]);
-
 
       setAbsenteeOnEndDateIds(_.uniq(absenteesOnEndDate.map(record => record.ID)));
       setStudentRecords(loadedNccds.filter(record => isConsiderAsStudentRecord(record, startEndDataString)));

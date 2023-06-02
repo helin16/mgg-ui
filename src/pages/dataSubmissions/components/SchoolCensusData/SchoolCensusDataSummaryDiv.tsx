@@ -55,6 +55,7 @@ const Wrapper = styled.div`
   }
 `;
 const SchoolCensusDataSummaryDiv = ({records, unfilteredStudentRecords, startAndEndDateString, schoolDays, absenteeIdsOnEndDate}: iSchoolCensusDataSummaryDiv) => {
+
   const [summary, setSummary] = useState<iSummary>({
     total: [],
     aroundTotal: [],
@@ -106,7 +107,14 @@ const SchoolCensusDataSummaryDiv = ({records, unfilteredStudentRecords, startAnd
       <FlexContainer className={'with-gap lg-gap title-row'}>
         <h5>Total of <SchoolDaysPopupBtn schoolDays={schoolDays} variant={'link'}>{schoolDays.length}</SchoolDaysPopupBtn> School days</h5>
         <SchoolCensusDataAttendancePopupBtn
-          popupTitle={`Attendances on ${moment(startAndEndDateString.endDateStr).format('DD MMM YYYY')}`}
+          popupTitle={
+            <FlexContainer className={'with-gap lg-gap'}>
+              <h5>Attendances on </h5>
+              <small className={'text-muted text-size-14'}>
+                {moment(startAndEndDateString.endDateStr).format('DD MMM YYYY')}
+              </small>
+            </FlexContainer>
+          }
           size={'sm'}
           variant={'link'}
           studentIds={unfilteredStudentRecords.map(record => record.ID)}
@@ -117,17 +125,40 @@ const SchoolCensusDataSummaryDiv = ({records, unfilteredStudentRecords, startAnd
           Attendances on {moment(startAndEndDateString.endDateStr).format('DD MMM YYYY')}
         </SchoolCensusDataAttendancePopupBtn>
 
+        <SchoolCensusDataPopupBtn
+          size={'sm'}
+          variant={'link'}
+          popupTitle={
+            <FlexContainer className={'with-gap lg-gap'}>
+              <h5>{unfilteredStudentRecords.filter((record => absenteeIdsOnEndDate.indexOf(record.ID) >= 0)).length} Absentee(s) on</h5>
+              <small className={'text-muted text-size-14'}>
+                {moment(startAndEndDateString.endDateStr).format('DD MMM YYYY')}
+              </small>
+            </FlexContainer>
+          }
+          records={unfilteredStudentRecords.filter((record => absenteeIdsOnEndDate.indexOf(record.ID) >= 0))}
+        >
+          Absentees on {moment(startAndEndDateString.endDateStr).format('DD MMM YYYY')}
+        </SchoolCensusDataPopupBtn>
+
         <SchoolCensusDataAttendancePopupBtn
           disabled={absenteeIdsOnEndDate.length <= 0}
-          popupTitle={`Attendances for who is absent on ${moment(startAndEndDateString.endDateStr).format('DD MMM YYYY')}`}
+          popupTitle={
+            <FlexContainer className={'with-gap lg-gap'}>
+              <h5>Attendances for ABSENTEES</h5>
+              <small className={'text-muted text-size-14'}>
+                {moment(startAndEndDateString.startDateStr).format('DD MMM YYYY')} ~ {moment(startAndEndDateString.endDateStr).subtract(1, 'day').format('DD MMM YYYY')}
+              </small>
+            </FlexContainer>
+          }
           size={'sm'}
           variant={'link'}
           studentIds={absenteeIdsOnEndDate}
           schoolDays={schoolDays}
           unfilteredStudentRecords={unfilteredStudentRecords}
-          startAndEndDateString={startAndEndDateString}
+          startAndEndDateString={{...startAndEndDateString, endDateStr: moment(startAndEndDateString.endDateStr).subtract(1, 'day').toISOString()}}
         >
-          {absenteeIdsOnEndDate.length === 0 ? 'No student was absent' : `Attendances for who is absent`} on {moment(startAndEndDateString.endDateStr).format('DD MMM YYYY')}
+          {absenteeIdsOnEndDate.length === 0 ? 'No student was absent' : `Attendances for absentee`} {moment(startAndEndDateString.startDateStr).format('DD MMM YYYY')} ~ {moment(startAndEndDateString.endDateStr).subtract(1, 'day').format('DD MMM YYYY')}
         </SchoolCensusDataAttendancePopupBtn>
       </FlexContainer>
       <div className={'summary-divs'}>

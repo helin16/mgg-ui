@@ -14,9 +14,10 @@ import {FlexContainer} from '../../../../styles';
 import CSVExportBtn from '../../../../components/form/CSVExportBtn';
 import * as XLSX from 'sheetjs-style';
 import SchoolCensusDataExportHelper from './SchoolCensusDataExportHelper';
+import * as _ from 'lodash';
 
 type iSchoolCensusDataAttendancePopupBtn = ButtonProps & {
-  popupTitle: string;
+  popupTitle: any;
   schoolDays: string[];
   studentIds: number[];
   unfilteredStudentRecords: iSchoolCensusStudentData[];
@@ -158,7 +159,7 @@ const SchoolCensusDataAttendancePopupBtn = ({popupTitle, schoolDays, studentIds,
         title={
           <>
             <FlexContainer className={'with-gap lg-gap'}>
-              <h5>{popupTitle}</h5>
+              ({_.uniq(records.map(record => record.ID)).length}) {popupTitle}
               {isSearching === true ? <Spinner animation={'border'} /> : <CSVExportBtn
                 // @ts-ignore
                 fetchingFnc={() => new Promise(resolve => {

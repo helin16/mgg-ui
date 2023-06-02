@@ -23,7 +23,6 @@ import {MGGS_MODULE_ID_STUDENT_ABSENCES} from '../../../types/modules/iModuleUse
 import AuthService from '../../../services/AuthService';
 import SchoolManagementTeamService from '../../../services/Synergetic/SchoolManagementTeamService';
 import SectionDiv from '../../studentReport/components/AcademicReports/DetailsComponents/sections/SectionDiv';
-import ModuleAccessWrapper from '../../../components/module/ModuleAccessWrapper';
 
 type iStudentAbsenceEditPanel = {
   recordType: iRecordType;
@@ -104,7 +103,7 @@ const StudentAbsenceEditPanel = ({studentAbsenceRecord, recordType, student, onS
     return () => {
       isCanceled = true;
     }
-  }, [user, vStudent?.StudentYearLevel]);
+  }, [user, vStudent?.StudentYearLevel, record?.syncd_AbsenceEventSeq]);
 
 
   const preCheck = (): boolean => {
