@@ -102,6 +102,8 @@ const SchoolCensusDataAttendancePopupBtn = ({popupTitle, schoolDays, studentIds,
             <th>Inter?</th>
             <th>Ind.?</th>
             <th>Status</th>
+            <th>Entry Date</th>
+            <th>Left Date</th>
             <th>Attendance Date</th>
             <th>Class Code</th>
           </tr>
@@ -124,6 +126,8 @@ const SchoolCensusDataAttendancePopupBtn = ({popupTitle, schoolDays, studentIds,
                 <div>{record.Student.StudentStatusDescription}</div>
                 {record.Student.isPastStudent === true ? <small>[PAST]</small> : ''}
               </td>
+              <td>{moment(record.Student.entryDate).format('DD MMM YYYY')}</td>
+              <td>{`${record.Student.leavingDate || ''}`.trim() === '' ? '' : moment(record.Student.leavingDate).format('DD MMM YYYY')}</td>
               <td>
                 {moment(record.AttendanceDate).format('DD MMM YYYY')}
               </td>

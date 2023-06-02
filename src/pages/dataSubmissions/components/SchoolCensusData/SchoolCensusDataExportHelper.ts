@@ -37,6 +37,8 @@ const getAttendanceTitleRows = (extra: string[] = []) => [[
   'Indigenous?',
   'isPastStudent?',
   'Status',
+  'Entry Date',
+  'Left Date',
   'Attendance Date',
   'Class Code',
   ...extra,
@@ -54,6 +56,8 @@ const getAttendanceCSVRow = (record: iSynVAttendance & {Student: iSchoolCensusSt
     record.Student.isIndigenous === true ? 'Y' : '',
     record.Student.isPastStudent === true ? 'Y' : '',
     `${record.Student.StudentStatusDescription}`,
+    moment(record.Student.entryDate).format('YYYY-MM-DD'),
+    `${record.Student.leavingDate || ''}`.trim() === '' ? '' : moment(record.Student.leavingDate).format('YYYY-MM-DD'),
     moment(record.AttendanceDate).format('YYYY-MM-DD'),
     record.ClassCode,
   ]
