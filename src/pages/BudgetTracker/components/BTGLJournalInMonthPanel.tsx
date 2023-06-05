@@ -71,7 +71,6 @@ const BTGLJournalInMonthPanel = ({year, gl}: iBTGLJournalInMonthPanel) => {
     ])
     .then(resp => {
       if(isCanceled) return;
-      console.log('resp', resp[1]);
 
       setJournalMap(resp[0].data.reduce((map: iSumMap, journal) => {
         const month = moment(journal.GLDate).format('MMMM');
