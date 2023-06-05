@@ -107,23 +107,21 @@ const SchoolCensusDataPopupBtn = ({records, popupTitle, children, showExtraFn, e
                   </td>
                   <td>
                     <div><small><b>{record.studentPassportNo}</b></small></div>
-                    <div>Iss: <small>{`${record.studentPassportIssuedDate || ''}`.trim() === '' ? '' : moment(record.studentPassportIssuedDate).format('DD MMM YYYY')}</small></div>
-                    <div>Exp: <small>{`${record.studentPassportExpiryDate || ''}`.trim() === '' ? '' : moment(record.studentPassportExpiryDate).format('DD MMM YYYY')}</small></div>
-                    <div>Country: <small>{record.studentPassportIssueCountry || ''}</small></div>
+                    <div><small>{`${record.studentPassportIssuedDate || ''}`.trim() === '' ? '' : <>Iss: {moment(record.studentPassportIssuedDate).format('DD MMM YYYY')}</>}</small></div>
+                    <div><small>{`${record.studentPassportExpiryDate || ''}`.trim() === '' ? '' : <>Exp: {moment(record.studentPassportExpiryDate).format('DD MMM YYYY')}</>}</small></div>
+                    <div><small>{`${record.studentPassportIssueCountry || ''}`.trim() === '' ? '' : <>Country: {record.studentPassportIssueCountry || ''}</>}</small></div>
                   </td>
                   <td>
                     <div><small><b>{record.visaCode}</b></small></div>
                     <div><small>{record.visaNumber}</small></div>
                     <div>
-                      Iss:
                       <small>
-                        {`${record.visaIssueDate || ''}`.trim() === '' ? '' : moment(record.visaIssueDate).format('DD MMM YYYY')}
+                        {`${record.visaIssueDate || ''}`.trim() === '' ? '' : <>Iss: {moment(record.visaIssueDate).format('DD MMM YYYY')}</>}
                       </small>
                     </div>
                     <div>
-                      Exp:
                       <small>
-                        {`${record.visaExpiryDate || ''}`.trim() === '' ? '' : moment(record.visaExpiryDate).format('DD MMM YYYY')}
+                        {`${record.visaExpiryDate || ''}`.trim() === '' ? '' : <>Exp: {moment(record.visaExpiryDate).format('DD MMM YYYY')}</>}
                       </small>
                     </div>
                   </td>

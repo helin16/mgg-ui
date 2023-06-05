@@ -2,7 +2,6 @@ import iSchoolCensusStudentData, {iStartAndEndDateString} from './iSchoolCensusS
 import SchoolCensusDataPopupBtn from './SchoolCensusDataPopupBtn';
 import {useEffect, useState} from 'react';
 import styled from 'styled-components';
-import UtilsService from '../../../../services/UtilsService';
 import moment from 'moment-timezone';
 import SchoolCensusAbsenceSummaryDiv from './SchoolCensusAbsenceSummaryDiv';
 import SchoolDaysPopupBtn from './SchoolDaysPopupBtn';
@@ -78,11 +77,7 @@ const SchoolCensusDataSummaryDiv = ({records, unfilteredStudentRecords, startAnd
       international: records.filter(record => record.isInternationalStudent === true),
       disability: records.filter(record => `${record.nccdStatusAdjustmentLevel}`.trim() !== ''),
       withVisa: records.filter(record => {
-        if(record.isInternationalStudent === true || `${record.visaExpiryDate}`.trim() === '' || !UtilsService.isNumeric(record.visaCode)) {
-        // if(record.isInternationalStudent === true || `${record.visaCode}`.trim() === '') {
-          return false;
-        }
-        if (`${record.visaCode}`.trim() === '155') {
+        if (`${record.visaCode}`.trim() === '') {
           return false;
         }
         return true;
