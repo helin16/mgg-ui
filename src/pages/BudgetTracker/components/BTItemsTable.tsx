@@ -33,6 +33,7 @@ const Wrapper = styled.div`
 
     .category {
       width: 300px;
+      max-width: 300px;
       min-width: 150px;
     }
     
@@ -52,10 +53,13 @@ const Wrapper = styled.div`
       text-align: right;
       width: 120px;
       min-width: 120px;
+      max-width: 120px;
     }
     
     .status {
       width: 100px;
+      max-width: 100px;
+      min-width: 100px;
       &.approved {
         background-color: green;
         color: white;
