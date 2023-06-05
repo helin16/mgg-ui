@@ -11,9 +11,18 @@ type iSchoolCensusStudentData = {
   yearLevelCode: string;
   dateOfBirth: Date | string;
   age: string;
+  studentCountryOfBirth: string;
+  studentNationality: string;
+  studentNationality2: string;
   visaExpiryDate: Date | string;
   visaCode: string;
   visaNumber: string;
+  visaIssueDate: Date | string;
+  studentPassportNo: string;
+  studentPassportIssueCountry: string;
+  studentPassportCountryCode: string;
+  studentPassportIssuedDate: string;
+  studentPassportExpiryDate: string;
   nccdStatusCategory: string;
   nccdStatusAdjustmentLevel: string;
   isInternationalStudent: boolean;

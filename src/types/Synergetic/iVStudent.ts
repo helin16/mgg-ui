@@ -1,3 +1,5 @@
+import iSynLuCountry from './iSynLuCountry';
+
 export const SYN_STUDENT_STATUS_ID_NORMAL = '0';
 export const SYN_STUDENT_STATUS_ID_NEW = '1';
 export const SYN_STUDENT_STATUS_ID_LEAVING = '5';
@@ -200,6 +202,7 @@ type iVStudent = {
   LearningPathway: string;
   GenderSynergyMeaning: string;
   profileUrl: string;
+  StudentPassportCountry?: iSynLuCountry;
 };
 
 export type iVPastStudent = iVStudent;

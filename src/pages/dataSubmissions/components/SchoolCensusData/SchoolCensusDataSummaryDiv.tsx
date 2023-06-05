@@ -79,6 +79,7 @@ const SchoolCensusDataSummaryDiv = ({records, unfilteredStudentRecords, startAnd
       disability: records.filter(record => `${record.nccdStatusAdjustmentLevel}`.trim() !== ''),
       withVisa: records.filter(record => {
         if(record.isInternationalStudent === true || `${record.visaExpiryDate}`.trim() === '' || !UtilsService.isNumeric(record.visaCode)) {
+        // if(record.isInternationalStudent === true || `${record.visaCode}`.trim() === '') {
           return false;
         }
         if (`${record.visaCode}`.trim() === '155') {

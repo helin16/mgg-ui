@@ -96,6 +96,7 @@ const SchoolCensusDataPanel = () => {
             })
           }),
         }),
+        include: 'StudentPassportCountry',
         sort: 'StudentYearLevelSort:ASC,StudentGiven1:ASC,StudentSurname:ASC',
         perPage: 9999,
       })
@@ -114,6 +115,7 @@ const SchoolCensusDataPanel = () => {
             leavingDate: `${row.StudentLeavingDate || ''}`.trim(),
             yearLevelCode: `${row.StudentYearLevel}`.trim(),
             visaExpiryDate: `${row.StudentsVisaExpiryDate || ''}`.trim(),
+            visaIssueDate: `${row.StudentVisaIssuedDate || ''}`.trim(),
             visaCode: `${row.StudentsVisaType || ''}`.trim(),
             visaNumber: `${row.StudentVisaNumber || ''}`.trim(),
             nccdStatusCategory: '',
@@ -121,6 +123,15 @@ const SchoolCensusDataPanel = () => {
             isInternationalStudent: row.FullFeeFlag,
             isIndigenous: row.IndigenousFlag,
             isPastStudent: row.StudentIsPastFlag,
+            studentPassportCountryCode: `${row.StudentPassportCountryCode || ''}`,
+            studentPassportIssueCountry: `${row.StudentPassportCountry?.Description || ''}`,
+            studentPassportNo: `${row.StudentsPassportNo || ''}`,
+            studentPassportIssuedDate: `${row.StudentPassportIssuedDate || ''}`,
+            studentPassportExpiryDate: `${row.StudentPassportExpiryDate || ''}`,
+
+            studentCountryOfBirth: `${row.StudentCountryOfBirthDescription || ''}`,
+            studentNationality: `${row.StudentNationalityCode || ''}`.trim() === '' ? '' : `${row.StudentNationalityDescription || ''}`,
+            studentNationality2: `${row.StudentNationality2Code || ''}`.trim() === '' ? '' : `${row.StudentNationality2Description || ''}`,
           })),
         (record) => record.ID
       )
