@@ -3,8 +3,6 @@ import styled from 'styled-components';
 import {
   iRecordType,
   iStudentAbsence,
-  STUDENT_ABSENCE_RECORD_TYPE_EARLY_SIGN_OUT,
-  STUDENT_ABSENCE_RECORD_TYPE_LATE_SIGN_IN
 } from '../../../types/StudentAbsence/iStudentAbsence';
 import {useEffect, useState} from 'react';
 import iPaginatedResult from '../../../types/iPaginatedResult';
@@ -13,7 +11,6 @@ import Toaster from '../../../services/Toaster';
 import PageLoadingSpinner from '../../../components/common/PageLoadingSpinner';
 import {Table} from 'react-bootstrap';
 import moment from 'moment-timezone';
-import {FlexContainer} from '../../../styles';
 import * as Icons from 'react-bootstrap-icons';
 import DeleteConfirmPopupBtn from '../../../components/common/DeleteConfirm/DeleteConfirmPopupBtn';
 import MathHelper from '../../../helper/MathHelper';
@@ -161,7 +158,7 @@ const UnSyncdStudentAbsenceListPanel = ({type}: iStudentAbsenceListPanel) => {
               <React.Fragment key={record.id}>
                 <tr >
                   <td className={'student-img'} rowSpan={3}>
-                    {`${record.Student?.profileUrl || ''}`.trim() !== '' ?  <img src={`${record.Student?.profileUrl || ''}`.trim()} /> : null}
+                    {`${record.Student?.profileUrl || ''}`.trim() !== '' ?  <img src={`${record.Student?.profileUrl || ''}`.trim()} alt={'student profile'}/> : null}
                   </td>
                   <td className={'student'}>
                     <StudentAbsenceEditPopupBtn

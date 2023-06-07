@@ -47,7 +47,6 @@ const AlumniModuleEditPanel = () => {
       <AlumniModuleEditPanelContent module={module} onUpdate={(newSettings: any) => setSettings(newSettings)}/>
     )
   }
-  console.log('settings', settings);
   return (
     <ModuleEditPanel
       moduleId={MGGS_MODULE_ID_ALUMNI_REQUEST}

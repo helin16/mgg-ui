@@ -234,7 +234,7 @@ const StudentAbsenceEditPanel = ({studentAbsenceRecord, recordType, student, onS
     <Wrapper>
       <Row>
         <Col className={'text-center'} md={3}>
-          {vStudent ? <img src={vStudent.profileUrl}/> : null}
+          {vStudent ? <img src={vStudent.profileUrl} alt={vStudent.StudentGiven1}/> : null}
         </Col>
         <Col md={9}>
           {getAccessNotice()}

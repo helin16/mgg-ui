@@ -46,4 +46,4 @@ export const iRecordTypeMap = {
 }
 export const STUDENT_ABSENCE_REASON_CODE_OTHER = '500';
 
-export default {};
+export default iRecord;

@@ -6,6 +6,7 @@ import {
   iStudentAbsence,
   STUDENT_ABSENCE_RECORD_TYPE_EARLY_SIGN_OUT, STUDENT_ABSENCE_RECORD_TYPE_LATE_SIGN_IN,
 } from '../../types/StudentAbsence/iStudentAbsence';
+import iMessage from '../../types/Message/iMessage';
 
 const endPoint = '/studentAbsence';
 
@@ -30,6 +31,11 @@ const remove = (id: number | string, params?: iConfigParams, config: AxiosReques
   return appService.delete(`${endPoint}/${id}`, params, config).then(({data}) => data);
 };
 
+
+const submitByParent = (params: iConfigParams, config?: AxiosRequestConfig): Promise<iMessage> => {
+  return appService.post(`${endPoint}/parentSubmission`, params, config).then(({data}) => data);
+}
+
 const getAbsenceTypeName = (type: iRecordType) => {
   if(type === STUDENT_ABSENCE_RECORD_TYPE_EARLY_SIGN_OUT) {
     return 'Early Sign-outs';
@@ -47,6 +53,7 @@ const StudentAbsenceService =  {
   update,
   remove,
   getAbsenceTypeName,
+  submitByParent,
 }
 
 export default StudentAbsenceService;

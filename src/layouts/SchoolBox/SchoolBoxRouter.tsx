@@ -17,7 +17,8 @@ import FunnelPage from '../../pages/funnel/FunnelPage';
 import AlumniRequestPage from '../../pages/alumni/AlumniRequestPage';
 import ParentDirectoryPage from '../../pages/parent/ParentDirectoryPage';
 import SchoolDataSubmissionsPage from '../../pages/dataSubmissions/SchoolDataSubmissionsPage';
-// import StudentAbsencePage from '../../pages/studentAbsences/StudentAbsencePage';
+import StudentAbsenceParentSubmissionForm from '../../components/StudentAbsence/StudentAbsenceParentSubmissionForm';
+import StudentAbsencePage from '../../pages/studentAbsences/StudentAbsencePage';
 // import PageNotFound from '../../components/PageNotFound';
 
 const schoolBoxIframeElementId = 'remote';
@@ -83,10 +84,15 @@ const SchoolBoxRouter = ({path, remoteUrl}: {path: string, remoteUrl: string}) =
       removeSchoolBoxIframe();
       return <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_ALUMNI_REQUEST}><AlumniRequestPage /></ModuleAccessWrapper>
     }
-    // case '/student_inout/home': {
-    //   removeSchoolBoxIframe();
-    //   return <StudentAbsencePage />
-    // }
+    case 'student_absence_parent_form': {
+      removeSchoolBoxIframe();
+      return <StudentAbsenceParentSubmissionForm />
+    }
+    case '/student_inout/home': {
+    // case '/student_absence/home': {
+      removeSchoolBoxIframe();
+      return <StudentAbsencePage />
+    }
     default: {
       showSchoolBoxIframe();
       return null; //<PageNotFound />
