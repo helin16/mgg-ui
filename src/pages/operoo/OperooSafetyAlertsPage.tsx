@@ -37,6 +37,7 @@ const OperooSafetyAlertsPage = () => {
 
         const result = await OperooSafetyAlertService.getOperooSafetyAlerts({
           where: JSON.stringify({
+            isActive: true,
             status: showAlertStatuses,
           }),
           perPage: '1000',
