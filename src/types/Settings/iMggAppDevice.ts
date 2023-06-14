@@ -1,4 +1,5 @@
 import iBaseType from '../iBaseType';
+import iMggApp from './iMggApp';
 
 type iMggAppDevice = iBaseType & {
   name: string;
@@ -10,6 +11,7 @@ type iMggAppDevice = iBaseType & {
   make: string;
   model: string;
   deviceId: string;
+  MggApp?: iMggApp;
 };
 
 export default iMggAppDevice;

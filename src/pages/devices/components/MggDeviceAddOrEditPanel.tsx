@@ -8,6 +8,8 @@ import * as Icons from 'react-bootstrap-icons';
 import {FlexContainer} from '../../../styles';
 import FormErrorDisplay from '../../../components/form/FormErrorDisplay';
 import Toaster, {TOAST_TYPE_ERROR} from '../../../services/Toaster';
+import moment from 'moment-timezone';
+import SectionDiv from '../../studentReport/components/AcademicReports/DetailsComponents/sections/SectionDiv';
 
 const Wrapper = styled.div``;
 type iMggDeviceAddOrEditPanel = {
@@ -59,7 +61,27 @@ const MggDeviceAddOrEditPanel = ({mggAppDevice, onCancel, onSave, isSubmitting =
       Toaster.showToast('Error in your form, check all fields', TOAST_TYPE_ERROR);
       return;
     }
-    onSave && onSave(device || {});
+    const {CreatedBy, UpdatedBy, MggApp, ...deviceInfo} = (device || {});
+    onSave && onSave(deviceInfo || {});
+  }
+
+  const appPanel = () => {
+    if (!device?.MggApp) {
+      return null;
+    }
+
+    return (
+      <Row>
+        <Col>
+          <SectionDiv>
+            <Alert variant={'warning'}>
+              <div><b>App Token</b>: {device?.MggApp.token}</div>
+              <div><b>Expires At</b>: {`${device?.MggApp.expiresAt || ''}`.trim() === '' ? '' : moment(device?.MggApp.expiresAt).format('lll')}</div>
+            </Alert>
+          </SectionDiv>
+        </Col>
+      </Row>
+    )
   }
 
   return (
@@ -111,6 +133,7 @@ const MggDeviceAddOrEditPanel = ({mggAppDevice, onCancel, onSave, isSubmitting =
           />
         </Col>
       </Row>
+      {appPanel()}
       <FlexContainer className={'space-above justify-content space-between'}>
         <LoadingBtn
           variant={'link'}

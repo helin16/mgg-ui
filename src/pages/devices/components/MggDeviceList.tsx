@@ -11,6 +11,7 @@ import PopupModal from '../../../components/common/PopupModal';
 import MggDeviceAddOrEditPanel from './MggDeviceAddOrEditPanel';
 import DeleteConfirmPopupBtn from '../../../components/common/DeleteConfirm/DeleteConfirmPopupBtn';
 import {FlexContainer} from '../../../styles';
+import moment from 'moment-timezone';
 
 const MggDeviceList = () => {
   const {
@@ -28,9 +29,16 @@ const MggDeviceList = () => {
     forceRefreshAfterSave: true,
     getFn: useCallback((config?: iConfigParams) => {
       const where = config ? JSON.parse(config?.where || '{}') : {};
+      const includes = [
+        ...`${config?.include || ''}`.trim().split(','),
+        ...['CreatedBy', 'UpdatedBy', 'MggApp'],
+      ].filter(inc => `${inc}`.trim() !== '')
+
       delete config?.where;
+      delete config?.include;
       return MggAppDeviceService.getAll({
         where: JSON.stringify({...where, isActive: true}),
+        include: includes.join(','),
         ...(config || {}),
       })
     }, []),
@@ -88,6 +96,26 @@ const MggDeviceList = () => {
       }
     },
     {
+      key: 'created',
+      header: 'Created',
+      cell: (column: iTableColumn, row: iMggAppDevice) => {
+        return <td key={column.key}>
+          <div><b>By:</b> {row.CreatedBy?.firstName} {row.CreatedBy?.lastName}</div>
+          <div><b>@:</b> {moment(row.createdAt).format('lll')}</div>
+        </td>
+      }
+    },
+    {
+      key: 'updated',
+      header: 'Updated',
+      cell: (column: iTableColumn, row: iMggAppDevice) => {
+        return <td key={column.key}>
+          <div><b>By:</b> {row.UpdatedBy?.firstName} {row.UpdatedBy?.lastName}</div>
+          <div><b>@:</b> {moment(row.updatedAt).format('lll')}</div>
+        </td>
+      }
+    },
+    {
       key: 'operations',
       header: (column: iTableColumn) => <th className={'text-right'} key={column.key}><Button variant={'success'} size={'sm'} onClick={() => onOpenAddModal()}><Icons.Plus /> New</Button></th>,
       cell: (column: iTableColumn, row: iMggAppDevice) => {
@@ -131,6 +159,8 @@ const MggDeviceList = () => {
   return (
     <div>
       <Table
+        hover
+        responsive
         columns={getColumns()}
         rows={state.data}
         pagination={{

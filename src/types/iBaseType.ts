@@ -1,3 +1,5 @@
+import iUser from './user/iUser';
+
 type iBaseType = {
   id: string;
   isActive: boolean;
@@ -5,6 +7,8 @@ type iBaseType = {
   createdById: string;
   updatedAt: string;
   updatedById: string;
+  CreatedBy?: iUser;
+  UpdatedBy?: iUser;
 };
 
 export default iBaseType;
