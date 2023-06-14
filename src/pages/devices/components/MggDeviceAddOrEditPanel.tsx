@@ -8,7 +8,6 @@ import * as Icons from 'react-bootstrap-icons';
 import {FlexContainer} from '../../../styles';
 import FormErrorDisplay from '../../../components/form/FormErrorDisplay';
 import Toaster, {TOAST_TYPE_ERROR} from '../../../services/Toaster';
-import UtilsService from '../../../services/UtilsService';
 
 const Wrapper = styled.div``;
 type iMggDeviceAddOrEditPanel = {
@@ -47,11 +46,10 @@ const MggDeviceAddOrEditPanel = ({mggAppDevice, onCancel, onSave, isSubmitting =
     if (`${device?.name || ''}`.trim() === '') {
       error.name = 'Name is required.';
     }
-    if (`${device?.macAddress || ''}`.trim() === '') {
-      error.macAddress = 'MAC is required.';
-    } else if (UtilsService.validateMacAddress(`${device?.macAddress || ''}`.trim()) !== true) {
-      error.macAddress = 'Please provide a valid MAC address xx:xx:xx:xx:xx:xx';
+    if (`${device?.deviceId || ''}`.trim() === '') {
+      error.deviceId = 'DeviceId is required.';
     }
+
     setErrorMap(error);
     return Object.keys(error).length === 0;
   }
@@ -77,13 +75,13 @@ const MggDeviceAddOrEditPanel = ({mggAppDevice, onCancel, onSave, isSubmitting =
           <FormErrorDisplay errorsMap={errorMap} fieldName={'name'} />
         </Col>
         <Col md={4}>
-          <FormLabel label={'MAC address'} isRequired />
+          <FormLabel label={'Device ID'} isRequired />
           <FormControl
-            placeholder={'The MAC address of the device'}
-            value={`${device?.macAddress || ''}`.toLowerCase()}
-            onChange={(event) => handleChange('macAddress', `${event.target.value}`.toLowerCase())}
+            placeholder={'The Device ID we set internally.'}
+            value={`${device?.deviceId || ''}`.toLowerCase()}
+            onChange={(event) => handleChange('deviceId', `${event.target.value}`.toLowerCase())}
           />
-          <FormErrorDisplay errorsMap={errorMap} fieldName={'macAddress'} />
+          <FormErrorDisplay errorsMap={errorMap} fieldName={'deviceId'} />
         </Col>
         {getAppCodeCol()}
       </Row>

@@ -27,6 +27,7 @@ type iProps = {
   perPage?: number;
   loadMoreApplied?: boolean;
   paginationApplied?: boolean;
+  forceRefreshAfterSave?: boolean;
   sort?: string;
   filter?: string;
   advancedFilter?: string;
@@ -49,6 +50,7 @@ const useListCrudHook = <T extends { id: string | number }>({
   advancedFilter,
   jsonFilter,
   notRenderWithoutFilter = false,
+  forceRefreshAfterSave = false,
   createCallBack,
   editCallBack,
 }: iProps) => {
@@ -217,6 +219,7 @@ const useListCrudHook = <T extends { id: string | number }>({
         ...edit,
         target: undefined,
         isModalOpen: false,
+        ...(forceRefreshAfterSave === true ? {version: edit.version + 1} : {})
       });
     } catch (error) {
       dispatch({ type: ActionKind.Confirmed, payload: {} });
@@ -242,6 +245,7 @@ const useListCrudHook = <T extends { id: string | number }>({
         ...edit,
         target: undefined,
         isModalOpen: false,
+        ...(forceRefreshAfterSave === true ? {version: edit.version + 1} : {})
       });
       if (typeof createCallBack === 'function') {
         createCallBack(result.id);
@@ -269,6 +273,7 @@ const useListCrudHook = <T extends { id: string | number }>({
         ...edit,
         target: undefined,
         isModalOpen: false,
+        ...(forceRefreshAfterSave === true ? {version: edit.version + 1} : {})
       });
       if (typeof editCallBack === 'function') {
         editCallBack(result.id);

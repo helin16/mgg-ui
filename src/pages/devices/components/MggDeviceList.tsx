@@ -25,6 +25,7 @@ const MggDeviceList = () => {
     onSetCurrentPage,
   } = useListCrudHook<iMggAppDevice>({
     paginationApplied: true,
+    forceRefreshAfterSave: true,
     getFn: useCallback((config?: iConfigParams) => {
       const where = config ? JSON.parse(config?.where || '{}') : {};
       delete config?.where;
@@ -45,7 +46,7 @@ const MggDeviceList = () => {
         return <th key={column.key}>
           <FlexContainer className={'justify-content space-between'}>
             <div>Device</div>
-            <div>MAC</div>
+            <div>DeviceID</div>
           </FlexContainer>
         </th>
       },
@@ -53,7 +54,7 @@ const MggDeviceList = () => {
         return <td key={column.key}>
           <FlexContainer className={'justify-content space-between'}>
             <Button variant={'link'} size={'sm'} onClick={() => onOpenEditModal(row.id)}>{row.name}</Button>
-            <div>{row.macAddress}</div>
+            <div>{row.deviceId}</div>
           </FlexContainer>
           <small>{row.description}</small>
         </td>
@@ -96,7 +97,7 @@ const MggDeviceList = () => {
             deletingFn={() => onDelete(row.id)}
             deletedCallbackFn={() => onRefreshList()}
             size={'sm'}
-            description={<>You are about to deregister this device: <b>{row.name} {row.macAddress}</b></>}
+            description={<>You are about to deregister this device: <b>{row.name} {row.deviceId}</b></>}
             confirmString={`${row.code}`}
           >
             <Icons.Trash />

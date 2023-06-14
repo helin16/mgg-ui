@@ -9,7 +9,7 @@ type iMggAppDevice = iBaseType & {
   location: string;
   make: string;
   model: string;
-  macAddress: string;
+  deviceId: string;
 };
 
 export default iMggAppDevice;
