@@ -30,6 +30,12 @@ const validateEmail = (emailString: string) => {
   return regex.test(`${emailString}`.trim());
 }
 
+const validateMacAddress = (macAddress: string) => {
+  // eslint-disable-next-line no-useless-escape
+  const regex = /^[0-9a-f]{2}([\.:-])(?:[0-9a-f]{2}\1){4}[0-9a-f]{2}$/i
+  return regex.test(`${macAddress}`.trim());
+}
+
 const getWeekdaysBetweenDates = (fromDate: Moment, toDate: Moment)  => {
   const Sunday = 0;
   const Saturday = 6;
@@ -55,6 +61,7 @@ const UtilsService = {
   uniqByObjectKey,
   validateEmail,
   getWeekdaysBetweenDates,
+  validateMacAddress,
 }
 
 export default UtilsService;

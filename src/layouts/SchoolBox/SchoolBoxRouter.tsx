@@ -5,7 +5,7 @@ import ModuleAccessWrapper from '../../components/module/ModuleAccessWrapper';
 import {
   MGGS_MODULE_ID_ALUMNI_REQUEST,
   MGGS_MODULE_ID_FUNNEL,
-  MGGS_MODULE_ID_HOUSE_AWARDS,
+  MGGS_MODULE_ID_HOUSE_AWARDS, MGGS_MODULE_ID_MGG_APP_DEVICES,
   MGGS_MODULE_ID_OPEROO_SAFETY_ALERTS, MGGS_MODULE_ID_SCHOOL_DATA_SUBMISSION,
 } from '../../types/modules/iModuleUser';
 import HouseAwardsPage from '../../pages/houseAwards/HouseAwardsPage';
@@ -19,6 +19,7 @@ import ParentDirectoryPage from '../../pages/parent/ParentDirectoryPage';
 import SchoolDataSubmissionsPage from '../../pages/dataSubmissions/SchoolDataSubmissionsPage';
 import StudentAbsenceParentSubmissionForm from '../../components/StudentAbsence/StudentAbsenceParentSubmissionForm';
 import StudentAbsencePage from '../../pages/studentAbsences/StudentAbsencePage';
+import MggDevicesPage from '../../pages/devices/MggDevicesPage';
 // import PageNotFound from '../../components/PageNotFound';
 
 const schoolBoxIframeElementId = 'remote';
@@ -88,10 +89,14 @@ const SchoolBoxRouter = ({path, remoteUrl}: {path: string, remoteUrl: string}) =
       removeSchoolBoxIframe();
       return <StudentAbsenceParentSubmissionForm />
     }
-    // case '/student_inout/home': {
-    case '/student_absence/home': {
+    case '/student_inout/home': {
+    // case '/student_absence/home': {
       removeSchoolBoxIframe();
       return <StudentAbsencePage />
+    }
+    case '/mobile_devices': {
+      removeSchoolBoxIframe();
+      return <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_MGG_APP_DEVICES}><MggDevicesPage /></ModuleAccessWrapper>
     }
     default: {
       showSchoolBoxIframe();

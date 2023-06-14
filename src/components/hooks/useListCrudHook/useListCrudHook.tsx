@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useReducer } from 'react';
 import { reducer, ActionKind, iState, Action } from './reducer';
-import Toaster from '../../../services/Toaster';
+import Toaster, {TOAST_TYPE_SUCCESS} from '../../../services/Toaster';
 
 type iEditState<T> = {
   isModalOpen: boolean;
@@ -156,6 +156,7 @@ const useListCrudHook = <T extends { id: string | number }>({
                   total: fetchResult.total,
                   currentPage: fetchResult.currentPage,
                   perPage: fetchResult.perPage,
+                  pages: fetchResult.pages,
                 }
               : { data: fetchResult },
         });
@@ -203,6 +204,7 @@ const useListCrudHook = <T extends { id: string | number }>({
         createCallBack(result.id);
         return;
       }
+      Toaster.showToast('Saved Successfully', TOAST_TYPE_SUCCESS);
       // eslint-disable-next-line
       const eagerLoadResult: any = await getFn({ where: JSON.stringify({ id: result.id }) });
       dispatch({

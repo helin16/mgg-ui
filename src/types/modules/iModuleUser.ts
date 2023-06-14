@@ -11,6 +11,8 @@ export const MGGS_MODULE_ID_BUDGET_TRACKER = 6;
 export const MGGS_MODULE_ID_STUDENT_ABSENCES = 7;
 export const MGGS_MODULE_ID_FUNNEL = 8;
 export const MGGS_MODULE_ID_SCHOOL_DATA_SUBMISSION = 9;
+export const MGGS_MODULE_ID_MGG_APPS = 10;
+export const MGGS_MODULE_ID_MGG_APP_DEVICES = 11;
 
 type iModuleUser = {
   ID: number;
