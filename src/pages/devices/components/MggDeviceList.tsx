@@ -88,7 +88,7 @@ const MggDeviceList = () => {
     },
     {
       key: 'operations',
-      header: (column: iTableColumn) => <th className={'text-right'} key={column.key}><Button variant={'primary'} size={'sm'} onClick={() => onOpenAddModal()}><Icons.Plus /></Button></th>,
+      header: (column: iTableColumn) => <th className={'text-right'} key={column.key}><Button variant={'success'} size={'sm'} onClick={() => onOpenAddModal()}><Icons.Plus /> New</Button></th>,
       cell: (column: iTableColumn, row: iMggAppDevice) => {
         return <td className={'text-right'} key={column.key}>
           <DeleteConfirmPopupBtn
