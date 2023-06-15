@@ -18,6 +18,7 @@ import {OP_LIKE} from '../../helper/ServiceHelper';
 import {Button, Dropdown} from 'react-bootstrap';
 import * as Icons from 'react-bootstrap-icons'
 import * as _ from 'lodash';
+import Page401 from '../../components/Page401';
 
 const Wrapper = styled.div`
   .search-panel {
@@ -230,6 +231,18 @@ const ParentDirectoryPage = () => {
           })
         }
       </>
+    )
+  }
+
+  if (!canAccessPage) {
+    return (
+      <Page401
+        description={
+          <p>
+            You don't have access to this page.
+          </p>
+        }
+      />
     )
   }
 
