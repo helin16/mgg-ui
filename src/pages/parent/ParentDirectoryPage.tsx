@@ -236,13 +236,7 @@ const ParentDirectoryPage = () => {
 
   if (!canAccessPage) {
     return (
-      <Page401
-        description={
-          <p>
-            You don't have access to this page.
-          </p>
-        }
-      />
+      <Page401 />
     )
   }
 
