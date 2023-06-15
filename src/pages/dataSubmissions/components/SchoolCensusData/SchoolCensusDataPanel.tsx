@@ -5,7 +5,7 @@ import moment from 'moment-timezone';
 import PageLoadingSpinner from '../../../../components/common/PageLoadingSpinner';
 import Toaster, {TOAST_TYPE_ERROR} from '../../../../services/Toaster';
 import SynFileSemesterService from '../../../../services/Synergetic/SynFileSemesterService';
-import {OP_GTE, OP_LTE, OP_OR} from '../../../../helper/ServiceHelper';
+import {OP_OR} from '../../../../helper/ServiceHelper';
 import * as _ from 'lodash';
 import SynVStudentService from '../../../../services/Synergetic/SynVStudentService';
 import iSynFileSemester from '../../../../types/Synergetic/iSynFileSemester';
@@ -41,36 +41,6 @@ const SchoolCensusDataPanel = () => {
   useEffect(() => {
     if (searchCriteria === null) return;
     let isCanceled = false;
-    const getFileSemesters = async ({ startDateStr,  endDateStr, }:iStartAndEndDateString  ) => {
-      const [startDateFileSemesters, endDateFileSemesters] = await Promise.all([
-        SynFileSemesterService.getFileSemesters({
-          where: JSON.stringify({
-            ActivatedFlag: true,
-            StartDate: {[OP_LTE]: startDateStr},
-            EndDate: {[OP_GTE]: startDateStr},
-          }),
-          perPage: 1,
-          currentPage: 1,
-        }),
-        SynFileSemesterService.getFileSemesters({
-          where: JSON.stringify({
-            ActivatedFlag: true,
-            StartDate: {[OP_LTE]: endDateStr},
-            EndDate: {[OP_GTE]: endDateStr},
-          }),
-          perPage: 1,
-          currentPage: 1,
-        }),
-      ]);
-
-      return {
-        // @ts-ignore
-        startDateFileSemesters: startDateFileSemesters.data || [],
-        // @ts-ignore
-        endDateFileSemesters: endDateFileSemesters.data || [],
-      }
-    }
-
     const getAgeFromBirthDate = (birthDateString: string, { endDateStr, }:iStartAndEndDateString) => {
       const birthStr = `${birthDateString || ''}`.trim();
       if (birthStr === '') {
@@ -218,7 +188,7 @@ const SchoolCensusDataPanel = () => {
         endDateStr: `${searchCriteria?.endDate || ''}`.trim()
       }
       const [{ endDateFileSemesters, }, schoolDaysStrings] = await Promise.all([
-        getFileSemesters(startEndDataString),
+        SynFileSemesterService.getFileSemesterFromStartAndEndDate(startEndDataString),
         getSchoolDays(startEndDataString),
       ]);
 
@@ -334,7 +304,10 @@ const SchoolCensusDataPanel = () => {
           </>
         }
       />
+
       <SchoolCensusDataSearchPanel
+        title={<div>Census Reference Period</div>}
+        defaultNoOfBusinessDaysBeforeEndDay={20}
         isLoading={isLoading}
         searchFnc={(criteria) => setSearchCriteria(criteria)}
         btns={getExportBtn()}

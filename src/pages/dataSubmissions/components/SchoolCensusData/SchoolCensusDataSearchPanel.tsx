@@ -16,12 +16,16 @@ export type iSchoolCensusDataSearchCriteria = {
   campusCodes: string[];
 }
 type iSchoolCensusDataSearchPanel = {
+  title?: any;
+  defaultNoOfBusinessDaysBeforeEndDay?: number;
+  localStartAndEndName?: string;
   isLoading?: boolean;
   searchFnc: (criteria: iSchoolCensusDataSearchCriteria) => void;
   btns?: any;
 }
-const LOCALSTORAGE_START_AND_END_NAME = 'census_period';
-const SchoolCensusDataSearchPanel = ({searchFnc, btns, isLoading = false}: iSchoolCensusDataSearchPanel) => {
+export const LOCALSTORAGE_START_AND_END_NAME_CENSUS = 'census_period';
+export const LOCALSTORAGE_START_AND_END_NAME_ACARA = 'acara';
+const SchoolCensusDataSearchPanel = ({title, searchFnc, btns, defaultNoOfBusinessDaysBeforeEndDay = 0, isLoading = false, localStartAndEndName = LOCALSTORAGE_START_AND_END_NAME_CENSUS}: iSchoolCensusDataSearchPanel) => {
   const firstInit = useRef(true);
   const [startDate, setStartDate] = useState<string | undefined>(undefined);
   const [endDate, setEndDate] = useState<string | undefined>(moment().toISOString());
@@ -32,6 +36,10 @@ const SchoolCensusDataSearchPanel = ({searchFnc, btns, isLoading = false}: iScho
       return;
     }
     const addBusinessDays = (originalDate: Moment, numDaysToSub: number) => {
+      if (numDaysToSub <= 0) {
+        return originalDate.clone();
+      }
+
       const Sunday = 0;
       const Saturday = 6;
       let daysRemaining = numDaysToSub;
@@ -48,22 +56,22 @@ const SchoolCensusDataSearchPanel = ({searchFnc, btns, isLoading = false}: iScho
       return newDate;
     }
 
-    const local = LocalStorageService.getItem(LOCALSTORAGE_START_AND_END_NAME);
-    setStartDate(local?.startDate || addBusinessDays(moment(), 20));
+    const local = LocalStorageService.getItem(localStartAndEndName);
+    setStartDate(local?.startDate || addBusinessDays(moment(), defaultNoOfBusinessDaysBeforeEndDay));
     setEndDate(local?.endDate || moment().toISOString());
     setCampusCodes(local?.campusCodes || SchoolCensusDataExportHelper.defaultCampusCodes);
     firstInit.current = false;
-  }, []);
+  }, [defaultNoOfBusinessDaysBeforeEndDay, localStartAndEndName]);
 
   useEffect(() => {
     if (firstInit.current === true) {
       return;
     }
 
-    LocalStorageService.setItem(LOCALSTORAGE_START_AND_END_NAME, {
+    LocalStorageService.setItem(localStartAndEndName, {
       startDate, endDate, campusCodes
     })
-  }, [startDate, endDate, campusCodes]);
+  }, [startDate, endDate, campusCodes, localStartAndEndName]);
 
   const selectDate = (selected: any, fieldName: string) => {
     const setFunc = (`${fieldName || ''}`.trim() === 'startDate' ? setStartDate: setEndDate);
@@ -108,7 +116,7 @@ const SchoolCensusDataSearchPanel = ({searchFnc, btns, isLoading = false}: iScho
 
   return (
     <div className={'search-panel'}>
-      <div>Census Reference Period</div>
+      {title}
       <FlexContainer className={'with-gap align-items end justify-content space-between'}>
         <FlexContainer className={'with-gap align-items end'}>
           <div>

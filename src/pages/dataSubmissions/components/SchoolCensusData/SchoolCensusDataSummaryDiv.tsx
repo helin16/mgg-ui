@@ -107,7 +107,7 @@ const SchoolCensusDataSummaryDiv = ({records, unfilteredStudentRecords, startAnd
             <FlexContainer className={'with-gap lg-gap align-items end'}>
               <div>Attendee(s) on </div>
               <small className={'text-muted text-size-14'}>
-                {moment(startAndEndDateString.endDateStr).format('DD MMM YYYY')}
+                {moment(startAndEndDateString.startDateStr).format('DD MMM YYYY')} ~ {moment(startAndEndDateString.endDateStr).format('DD MMM YYYY')}
               </small>
             </FlexContainer>
           }
@@ -116,9 +116,9 @@ const SchoolCensusDataSummaryDiv = ({records, unfilteredStudentRecords, startAnd
           studentIds={unfilteredStudentRecords.map(record => record.ID)}
           schoolDays={schoolDays}
           unfilteredStudentRecords={unfilteredStudentRecords}
-          startAndEndDateString={{...startAndEndDateString, startDateStr: startAndEndDateString.endDateStr}}
+          startAndEndDateString={startAndEndDateString}
         >
-          Attendances on {moment(startAndEndDateString.endDateStr).format('DD MMM YYYY')}
+          Attendances on {moment(startAndEndDateString.startDateStr).format('DD MMM YYYY')} ~ {moment(startAndEndDateString.endDateStr).format('DD MMM YYYY')}
         </SchoolCensusDataAttendancePopupBtn>
 
         <SchoolCensusDataPopupBtn
