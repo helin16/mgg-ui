@@ -5,39 +5,35 @@ import moment from 'moment-timezone';
 
 type iAcaraDataList = {
   records: iAcaraData[];
-  schoolId: string;
-  schoolName: string;
   isLoading?: boolean;
 }
-const AcaraDataList = ({records, schoolId, schoolName, isLoading = false}: iAcaraDataList) => {
+const AcaraDataList = ({records, isLoading = false}: iAcaraDataList) => {
   if (records.length <= 0) {
     return null;
   }
 
   const getColumns = () => {
     return [{
-      key: 'ACARASMLID',
-      header: 'ACARA SML ID',
-      cell: schoolId
-    }, {
-      key: 'SchoolName',
-      header: 'School Name',
-      cell: schoolName
-    }, {
-      key: 'CalendarYear',
-      header: 'Calendar Year',
-      cell: (column: iTableColumn, row: iAcaraData) => {
-        return <td key={column.key}>{row.fileYear}</td>
-      }
-    }, {
-      key: 'JurisdictionStudentID',
-      header: 'Jurisdiction Student ID',
+      key: 'ID',
+      header: 'ID',
       cell: (column: iTableColumn, row: iAcaraData) => {
         return <td key={column.key}>{row.ID}</td>
       }
     }, {
-      key: 'GradeOfStudentEnrolment',
-      header: 'Grade Of Student Enrolment',
+      key: 'FileYear',
+      header: 'Year',
+      cell: (column: iTableColumn, row: iAcaraData) => {
+        return <td key={column.key}>{row.fileYear}</td>
+      }
+    }, {
+      key: 'FileSemester',
+      header: 'Semester',
+      cell: (column: iTableColumn, row: iAcaraData) => {
+        return <td key={column.key}>{row.fileSemester}</td>
+      }
+    }, {
+      key: 'yearLevel',
+      header: 'Yr Lvl.',
       cell: (column: iTableColumn, row: iAcaraData) => {
         return <td key={column.key}>{row.yearLevelCode}</td>
       }
@@ -46,12 +42,6 @@ const AcaraDataList = ({records, schoolId, schoolName, isLoading = false}: iAcar
       header: 'Date Of Birth',
       cell: (column: iTableColumn, row: iAcaraData) => {
         return <td key={column.key}>{moment(row.dateOfBirth).format('DD/MM/YYYY')}</td>
-      }
-    }, {
-      key: 'sex',
-      header: 'Sex (Gender)',
-      cell: (column: iTableColumn, row: iAcaraData) => {
-        return <td key={column.key}>{row.gender}</td>
       }
     }, {
       key: 'ATSIStatus',

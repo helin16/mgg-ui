@@ -68,7 +68,7 @@ const ParentDirectoryPage = () => {
 
   const recipientEmails = useRef('')
 
-  const canAccessPage = user?.isParent === true || user?.isStaff === true;
+  const canAccessPage = user?.isParent === true || user?.isStaff === true || user?.isCasualStaff === true;
 
   useEffect(() => {
     if (canAccessPage !== true) { return };

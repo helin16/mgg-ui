@@ -110,8 +110,8 @@ const AcaraDataPanel = () => {
       <AcaraDataList
         isLoading={isLoading}
         records={records || []}
-        schoolId={'46195'}
-        schoolName={'Mentone Girls\' Grammar School'}
+        // schoolId={'46195'}
+        // schoolName={'Mentone Girls\' Grammar School'}
       />
     </div>
   )
