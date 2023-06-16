@@ -15,16 +15,16 @@ const getCurrentVStudent = (synId: string | number, params: iConfigParams = {}):
   return AppService.get(`${endPoint}/current/${synId}`, params).then(resp => resp.data);
 };
 
-const getVStudentAll = (params: iConfigParams = {}): Promise<iPaginatedResult<iVStudent>> => {
-  return AppService.get(`${endPoint}/all`, params).then(resp => resp.data);
+const getVStudentAll = (params: iConfigParams = {}, config?: iConfigParams): Promise<iPaginatedResult<iVStudent>> => {
+  return AppService.get(`${endPoint}/all`, params, config).then(resp => resp.data);
 };
 
-const getVPastStudentAll = (params: iConfigParams = {}): Promise<iPaginatedResult<iVPastStudent>> => {
-  return AppService.get(`${endPoint}/pastAll`, params).then(resp => resp.data);
+const getVPastStudentAll = (params: iConfigParams = {}, config?: iConfigParams): Promise<iPaginatedResult<iVPastStudent>> => {
+  return AppService.get(`${endPoint}/pastAll`, params, config).then(resp => resp.data);
 };
 
-const getVPastAndCurrentStudentAll = (params: iConfigParams = {}): Promise<iPaginatedResult<iVPastAndCurrentStudent>> => {
-  return AppService.get(`${endPoint}/pastAndCurrentAll`, params).then(resp => resp.data);
+const getVPastAndCurrentStudentAll = (params: iConfigParams = {}, config?: iConfigParams): Promise<iPaginatedResult<iVPastAndCurrentStudent>> => {
+  return AppService.get(`${endPoint}/pastAndCurrentAll`, params, config).then(resp => resp.data);
 };
 
 const SynVStudentService = {

@@ -76,7 +76,7 @@ type iSynCommunity = {
   // OccupMobilePhoneActual: string;
   DirectoryIncludeFlag: boolean;
   // DirectoryProvideFlag: boolean;
-  // NameInternal: string;
+  NameInternal: string;
   // NameInternalOverrideFlag: boolean;
   // NameExternal: string;
   // NameExternalOverrideFlag: boolean;
@@ -106,7 +106,7 @@ type iSynCommunity = {
   // NeighbourIslandLanguageLevelCode: string;
   // DietaryRequirements: string | null;
   // PhysicalRequirements: string | null;
-  // HighestQualificationLevel: string;
+  HighestQualificationLevel: string;
   // PublishToAssociatedFlag: boolean;
   // HighestNonNationalQualificationCode: string;
   // OccupDescIncludeInMailAddressFlag: boolean;

@@ -10,8 +10,9 @@ import MathHelper from '../../helper/MathHelper';
 type iSchoolManagementEditPopupBtn = ButtonProps & {
   fetchingFnc: (pageNo: number) => Promise<any>;
   downloadFnc: (data: any[]) => void;
+  btnTxt?: string
 }
-const CSVExportBtn = ({fetchingFnc, downloadFnc, ...props}: iSchoolManagementEditPopupBtn) => {
+const CSVExportBtn = ({fetchingFnc, downloadFnc, btnTxt = 'Export', ...props}: iSchoolManagementEditPopupBtn) => {
   const [isLoading, setIsLoading] = useState(false);
   const currentP = useRef(1);
   const totalP = useRef(1);
@@ -74,7 +75,7 @@ const CSVExportBtn = ({fetchingFnc, downloadFnc, ...props}: iSchoolManagementEdi
     <>
       <Button {...props} onClick={() => start()}>
         <Icons.Download />{' '}
-        Export
+        {btnTxt}
       </Button>
       {getContent()}
     </>
