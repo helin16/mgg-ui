@@ -25,7 +25,7 @@ const SchoolDataSubmissionsPanel = () => {
           <SchoolCensusDataPanel />
         </Tab>
 
-        <Tab eventKey={TAB_NAME_ACARA} title={'ACARA'}>
+        <Tab eventKey={TAB_NAME_ACARA} title={'ACARA / SFOE'}>
           <AcaraDataPanel />
         </Tab>
       </Tabs>

@@ -26,10 +26,22 @@ import SynLuQualificationLevelService from "../../../../services/Synergetic/Look
 import iSynOccupationPosition from "../../../../types/Synergetic/Lookup/iSynLuOccupationPosition";
 import CSVExportBtn from "../../../../components/form/CSVExportBtn";
 import AcaraDataExportHelper from "./AcaraDataExportHelper";
-import {FlexContainer} from '../../../../styles';
+import {Dropdown} from 'react-bootstrap';
+import * as Icons from 'react-bootstrap-icons'
+import styled from 'styled-components';
 
 const ACARA_SCHOOL_ID = "46195";
 const ACARA_SCHOOL_NAME = `Mentone Girls' Grammar School`;
+
+const DropdownWrapper = styled.div`
+  .dropdown-menu.show {
+    .dropdown-item 
+      .btn {
+        width: 100%;
+      }
+    }
+  }
+`;
 const AcaraDataPanel = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [
@@ -353,41 +365,69 @@ const AcaraDataPanel = () => {
       return null;
     }
     return (
-      <FlexContainer className={'with-gap lg-gap'}>
-        <CSVExportBtn
-          // @ts-ignore
-          fetchingFnc={() =>
-            new Promise(resolve => {
-              resolve(records);
-            })
-          }
-          downloadFnc={() =>
-            AcaraDataExportHelper.genAcaraExcel(records || [], {
-              schoolId: ACARA_SCHOOL_ID,
-              schoolName: ACARA_SCHOOL_NAME
-            })
-          }
-          size={"sm"}
-          variant={'success'}
-          btnTxt={'Submission Data ONLY'}
-        />
+      <DropdownWrapper>
+        <Dropdown>
+          <Dropdown.Toggle size={'sm'}>
+            <Icons.Download /> {' '} Export
+          </Dropdown.Toggle>
 
-        <CSVExportBtn
-          // @ts-ignore
-          fetchingFnc={() =>
-            new Promise(resolve => {
-              resolve(records);
-            })
-          }
-          downloadFnc={() =>
-            AcaraDataExportHelper.genTotalExcel(records || [], {
-              schoolId: ACARA_SCHOOL_ID,
-              schoolName: ACARA_SCHOOL_NAME
-            })
-          }
-          size={"sm"}
-        />
-      </FlexContainer>
+          <Dropdown.Menu>
+            <Dropdown.Item>
+              <CSVExportBtn
+                // @ts-ignore
+                fetchingFnc={() =>
+                  new Promise(resolve => {
+                    resolve(records);
+                  })
+                }
+                downloadFnc={() =>
+                  AcaraDataExportHelper.genAcaraExcel(records || [], {
+                    schoolId: ACARA_SCHOOL_ID,
+                    schoolName: ACARA_SCHOOL_NAME
+                  })
+                }
+                size={"sm"}
+                variant={'success'}
+                btnTxt={'Submission Data'}
+              />
+            </Dropdown.Item>
+            <Dropdown.Item>
+              <CSVExportBtn
+                // @ts-ignore
+                fetchingFnc={() =>
+                  new Promise(resolve => {
+                    resolve(records);
+                  })
+                }
+                downloadFnc={() =>
+                  AcaraDataExportHelper.genSFOEExcel(records || [])
+                }
+                size={"sm"}
+                variant={'info'}
+                btnTxt={'Independent School / SFOE'}
+              />
+            </Dropdown.Item>
+            <Dropdown.Item>
+              <CSVExportBtn
+                // @ts-ignore
+                fetchingFnc={() =>
+                  new Promise(resolve => {
+                    resolve(records);
+                  })
+                }
+                downloadFnc={() =>
+                  AcaraDataExportHelper.genTotalExcel(records || [], {
+                    schoolId: ACARA_SCHOOL_ID,
+                    schoolName: ACARA_SCHOOL_NAME
+                  })
+                }
+                btnTxt={'Raw Data'}
+                size={"sm"}
+              />
+            </Dropdown.Item>
+          </Dropdown.Menu>
+        </Dropdown>
+      </DropdownWrapper>
     );
   };
 
