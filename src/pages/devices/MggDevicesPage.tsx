@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import ExplanationPanel from '../../components/ExplanationPanel';
-import SectionDiv from '../studentReport/components/AcademicReports/DetailsComponents/sections/SectionDiv';
+import SectionDiv from '../../components/common/SectionDiv';
 import MggDeviceList from './components/MggDeviceList';
 
 const Wrapper = styled.div``;

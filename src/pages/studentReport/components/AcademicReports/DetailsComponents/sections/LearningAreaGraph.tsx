@@ -5,7 +5,7 @@ import iStudentReportResult, {
   STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_OVERALL_GRADE_JNR
 } from '../../../../../../types/Synergetic/iStudentReportResult';
 import styled from 'styled-components';
-import SectionDiv from './SectionDiv';
+import SectionDiv from '../../../../../../components/common/SectionDiv';
 import iStudentReportYear from '../../../../../../types/Synergetic/iStudentReportYear';
 import iVStudent from '../../../../../../types/Synergetic/iVStudent';
 import SynLuYearLevelService from '../../../../../../services/Synergetic/SynLuYearLevelService';

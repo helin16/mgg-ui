@@ -9,7 +9,7 @@ import {FlexContainer} from '../../../styles';
 import FormErrorDisplay from '../../../components/form/FormErrorDisplay';
 import Toaster, {TOAST_TYPE_ERROR} from '../../../services/Toaster';
 import moment from 'moment-timezone';
-import SectionDiv from '../../studentReport/components/AcademicReports/DetailsComponents/sections/SectionDiv';
+import SectionDiv from '../../../components/common/SectionDiv';
 
 const Wrapper = styled.div``;
 type iMggDeviceAddOrEditPanel = {

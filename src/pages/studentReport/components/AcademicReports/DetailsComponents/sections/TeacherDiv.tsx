@@ -1,6 +1,6 @@
 import iStudentReportResult from '../../../../../../types/Synergetic/iStudentReportResult';
 import React, {useEffect, useState} from 'react';
-import SectionDiv from './SectionDiv';
+import SectionDiv from '../../../../../../components/common/SectionDiv';
 import styled from 'styled-components';
 import iSchoolManagementTeam, {
   SMT_SCHOOL_ROL_CODE_HEAD_OF_JUNIOR_SCHOOL,

@@ -11,7 +11,7 @@ import SynVStudentService from '../../../../services/Synergetic/SynVStudentServi
 import iSynFileSemester from '../../../../types/Synergetic/iSynFileSemester';
 import iSchoolCensusStudentData, {iStartAndEndDateString} from './iSchoolCensusStudentData';
 import SchoolCensusTable from './SchoolCensusTable';
-import SectionDiv from '../../../studentReport/components/AcademicReports/DetailsComponents/sections/SectionDiv';
+import SectionDiv from '../../../../components/common/SectionDiv';
 import SynVtudentDisabilityAdjustmentService
   from '../../../../services/Synergetic/SynVStudentDisabilityAdjustmentService';
 import CSVExportBtn from '../../../../components/form/CSVExportBtn';

@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import iStudentReportResult from '../../../../../../types/Synergetic/iStudentReportResult';
 import {ProgressBar} from 'react-bootstrap';
-import SectionDiv from './SectionDiv';
+import SectionDiv from '../../../../../../components/common/SectionDiv';
 
 export const ResultTableWrapper = styled.div`
   .result-row {

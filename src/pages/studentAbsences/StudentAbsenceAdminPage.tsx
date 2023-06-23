@@ -4,7 +4,7 @@ import ModuleUserList from '../../components/module/ModuleUserList';
 import {MGGS_MODULE_ID_STUDENT_ABSENCES} from '../../types/modules/iModuleUser';
 import {ROLE_ID_ADMIN, ROLE_ID_NORMAL} from '../../types/modules/iRole';
 import ExplanationPanel from '../../components/ExplanationPanel';
-import SectionDiv from '../studentReport/components/AcademicReports/DetailsComponents/sections/SectionDiv';
+import SectionDiv from '../../components/common/SectionDiv';
 import {useState} from 'react';
 import SchoolManagementTable from '../../components/SchoolManagement/SchoolManagementTable';
 import {SMT_SCHOOL_ROL_CODE_HEAD_OF_YEAR} from '../../types/Synergetic/iSchoolManagementTeam';
@@ -16,7 +16,7 @@ type iStudentAbsenceAdminPage = {
 
 const TAB_USERS = 'users';
 const TAB_ADMIN_USERS = 'admin_users';
-const TAB_PARENT_SUBMISSION = 'parent_submission';
+const TAB_SETTINGS = 'module_settings';
 const StudentAbsenceAdminPage = ({onNavBack}: iStudentAbsenceAdminPage) => {
   const [showingType, SetShowingType] = useState(TAB_USERS);
 
@@ -78,12 +78,11 @@ const StudentAbsenceAdminPage = ({onNavBack}: iStudentAbsenceAdminPage) => {
         </Tab>
 
         <Tab
-          title={'Parent Submission Form'}
-          eventKey={TAB_PARENT_SUBMISSION}
+          title={'Settings'}
+          eventKey={TAB_SETTINGS}
           unmountOnExit
         >
           <SectionDiv>
-            <ExplanationPanel text={'Settings for the Parent Submission Form'} />
             <StudentAbsenceModuleEditPanel />
           </SectionDiv>
         </Tab>

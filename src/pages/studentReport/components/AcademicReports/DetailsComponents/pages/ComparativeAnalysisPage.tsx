@@ -2,7 +2,7 @@ import {Col, Row, Spinner} from 'react-bootstrap';
 import {StudentAcademicReportDetailsProps} from '../../StudentAcademicReportDetails';
 import React, {useEffect, useState} from 'react';
 import PanelTitle from '../../../../../../components/PanelTitle';
-import SectionDiv from '../sections/SectionDiv';
+import SectionDiv from '../../../../../../components/common/SectionDiv';
 import iStudentReportResult from '../../../../../../types/Synergetic/iStudentReportResult';
 import {
   iStudentReportComparativeResultMapRow

@@ -2,7 +2,7 @@ import {useRef, useState} from 'react';
 import {Button, ButtonProps, ProgressBar, Spinner} from 'react-bootstrap';
 import * as Icons from 'react-bootstrap-icons';
 import PopupModal from '../common/PopupModal';
-import SectionDiv from '../../pages/studentReport/components/AcademicReports/DetailsComponents/sections/SectionDiv';
+import SectionDiv from '../common/SectionDiv';
 import Toaster from '../../services/Toaster';
 import MathHelper from '../../helper/MathHelper';
 

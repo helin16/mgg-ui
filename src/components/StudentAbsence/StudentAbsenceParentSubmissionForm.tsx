@@ -18,7 +18,7 @@ import * as _ from "lodash";
 import iVStudent from "../../types/Synergetic/iVStudent";
 import Toaster from "../../services/Toaster";
 import SelectBox from "../common/SelectBox";
-import SectionDiv from '../../pages/studentReport/components/AcademicReports/DetailsComponents/sections/SectionDiv';
+import SectionDiv from '../common/SectionDiv';
 import LoadingBtn from '../common/LoadingBtn';
 import * as Icons from 'react-bootstrap-icons';
 import {FlexContainer} from '../../styles';

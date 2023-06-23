@@ -4,7 +4,7 @@ import {Button} from 'react-bootstrap';
 import ModuleUserList from '../../components/module/ModuleUserList';
 import {MGGS_MODULE_ID_SCHOOL_DATA_SUBMISSION} from '../../types/modules/iModuleUser';
 import {ROLE_ID_ADMIN, ROLE_ID_NORMAL} from '../../types/modules/iRole';
-import SectionDiv from '../studentReport/components/AcademicReports/DetailsComponents/sections/SectionDiv';
+import SectionDiv from '../../components/common/SectionDiv';
 
 const Wrapper = styled.div``
 

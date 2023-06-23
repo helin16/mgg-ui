@@ -11,7 +11,7 @@ import SchoolManagementRoleSelector from './SchoolManagementRoleSelector';
 import YearLevelSelector from '../student/YearLevelSelector';
 import {CAMPUS_CODE_SENIOR} from '../../types/Synergetic/iLuCampus';
 import StaffAutoComplete from '../staff/StaffAutoComplete';
-import SectionDiv from '../../pages/studentReport/components/AcademicReports/DetailsComponents/sections/SectionDiv';
+import SectionDiv from '../common/SectionDiv';
 import moment from 'moment-timezone';
 import FormErrorDisplay from '../form/FormErrorDisplay';
 import Toaster, {TOAST_TYPE_ERROR, TOAST_TYPE_SUCCESS} from '../../services/Toaster';

@@ -22,7 +22,7 @@ import {SMT_SCHOOL_ROL_CODE_HEAD_OF_YEAR} from '../../../types/Synergetic/iSchoo
 import {MGGS_MODULE_ID_STUDENT_ABSENCES} from '../../../types/modules/iModuleUser';
 import AuthService from '../../../services/AuthService';
 import SchoolManagementTeamService from '../../../services/Synergetic/SchoolManagementTeamService';
-import SectionDiv from '../../studentReport/components/AcademicReports/DetailsComponents/sections/SectionDiv';
+import SectionDiv from '../../../components/common/SectionDiv';
 
 type iStudentAbsenceEditPanel = {
   recordType: iRecordType;
@@ -267,6 +267,8 @@ const StudentAbsenceEditPanel = ({studentAbsenceRecord, recordType, student, onS
               <FormLabel label={'Date'} isRequired/>
               <DateTimePicker
                 isDisabled={canEdit !== true}
+                dateFormat={'DD MMM YYYY'}
+                timeFormat={'h:m a'}
                 className={`form-control`}
                 value={eventDate}
                 onChange={(selected) => {

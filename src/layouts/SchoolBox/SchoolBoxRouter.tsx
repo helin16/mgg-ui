@@ -3,7 +3,7 @@ import StudentReport from '../../pages/studentReport/StudentReport';
 import OperooSafetyAlertsPage from '../../pages/operoo/OperooSafetyAlertsPage';
 import ModuleAccessWrapper from '../../components/module/ModuleAccessWrapper';
 import {
-  MGGS_MODULE_ID_ALUMNI_REQUEST,
+  MGGS_MODULE_ID_ALUMNI_REQUEST, MGGS_MODULE_ID_FINANCE,
   MGGS_MODULE_ID_FUNNEL,
   MGGS_MODULE_ID_HOUSE_AWARDS, MGGS_MODULE_ID_MGG_APP_DEVICES,
   MGGS_MODULE_ID_OPEROO_SAFETY_ALERTS, MGGS_MODULE_ID_SCHOOL_DATA_SUBMISSION,
@@ -20,6 +20,7 @@ import SchoolDataSubmissionsPage from '../../pages/dataSubmissions/SchoolDataSub
 import StudentAbsenceParentSubmissionForm from '../../components/StudentAbsence/StudentAbsenceParentSubmissionForm';
 import StudentAbsencePage from '../../pages/studentAbsences/StudentAbsencePage';
 import MggDevicesPage from '../../pages/devices/MggDevicesPage';
+import FinancePage from '../../pages/Finance/FinancePage';
 // import PageNotFound from '../../components/PageNotFound';
 
 const schoolBoxIframeElementId = 'remote';
@@ -97,6 +98,10 @@ const SchoolBoxRouter = ({path, remoteUrl}: {path: string, remoteUrl: string}) =
     case '/mobile_devices': {
       removeSchoolBoxIframe();
       return <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_MGG_APP_DEVICES}><MggDevicesPage /></ModuleAccessWrapper>
+    }
+    case '/finance': {
+      removeSchoolBoxIframe();
+      return <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_FINANCE}><FinancePage /></ModuleAccessWrapper>
     }
     default: {
       showSchoolBoxIframe();
