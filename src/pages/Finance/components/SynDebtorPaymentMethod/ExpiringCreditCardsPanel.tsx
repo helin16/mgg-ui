@@ -2,7 +2,7 @@ import ExplanationPanel from '../../../../components/ExplanationPanel';
 import {useCallback} from 'react';
 import iSynDebtorPaymentMethod from '../../../../types/Synergetic/Finance/iSynDebtorPaymentMethod';
 import SynDebtorPaymentMethodService from '../../../../services/Synergetic/Finance/SynDebtorPaymentMethodService';
-import {OP_AND, OP_GT, OP_LT, OP_LTE, OP_NOT, OP_OR} from '../../../../helper/ServiceHelper';
+import {OP_AND, OP_LT, OP_LTE, OP_NOT, OP_OR} from '../../../../helper/ServiceHelper';
 import moment from 'moment-timezone';
 import PageLoadingSpinner from '../../../../components/common/PageLoadingSpinner';
 import useListCrudHook from '../../../../components/hooks/useListCrudHook/useListCrudHook';
