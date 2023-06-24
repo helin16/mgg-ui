@@ -11,14 +11,18 @@ import ExpiringCreditCardsTable from './ExpiringCreditCardsTable';
 
 
 const ExpiringCreditCardsPanel = () => {
+  const getNextMonth = () => {
+    return moment().add(1, 'month');
+  };
+
   const {
     state,
   // @ts-ignore
   } = useListCrudHook<iSynDebtorPaymentMethod>({
     paginationApplied: true,
     getFn: useCallback((config?: iConfigParams) => {
+      const nextMonth = getNextMonth();
       const where = config ? JSON.parse(config?.where || '{}') : {};
-      const nextMonth = moment().add(1, 'month');
       return SynDebtorPaymentMethodService.getAllCurrent({
         ...config,
         perPage: 99999,
@@ -56,7 +60,7 @@ const ExpiringCreditCardsPanel = () => {
       <h6>{(state.data || []).length} Expiring Credit Card (s)</h6>
       <ExplanationPanel
         text={
-          <>List of all <b>CURRENT</b> debtors with credit cards that <u>has</u> or <u>about to EXPIRE</u> with in a month.</>
+          <>List of all <b>CURRENT</b> debtors with credit cards that <u>have expired</u> or <u>about to expire</u> in <b>{getNextMonth().format('MMMM YYYY')}</b>.</>
         }
       />
       {getContent()}
