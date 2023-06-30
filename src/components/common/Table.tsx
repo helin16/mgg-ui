@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import { Table as Original, TableProps } from "react-bootstrap";
 import styled from "styled-components";
 import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
@@ -10,6 +10,7 @@ import * as _ from 'lodash';
 export type iTableColumn = {
   key: string;
   header: ((column: iTableColumn) => any) | any;
+  footer?: ((column: iTableColumn) => any) | any;
   cell?: ((column: iTableColumn, data?: any) => any) | string;
   sort?: number;
 };
@@ -35,7 +36,13 @@ const Table = ({
   ...props
 }: iTable) => {
 
-  const [cols] = useState(columns.sort((col1, col2) => (col1.sort || 0 ) < (col2.sort || 0) ? -1 : 1))
+  const [cols, setCols] = useState<iTableColumn[]>([]);
+  const [hasFooter, setHasFooter] = useState(false);
+
+  useEffect(() => {
+    setCols(columns.sort((col1, col2) => (col1.sort || 0 ) < (col2.sort || 0) ? -1 : 1));
+    setHasFooter(columns.filter(col => col.footer !== undefined).length > 0);
+  }, [columns])
 
   const getPaginationBtns = () => {
     if (!pagination || !pagination?.currentPage || !pagination?.currentPage) {
@@ -124,6 +131,19 @@ const Table = ({
               )
             })}
         </tbody>
+        {hasFooter ? (
+          <tfoot>
+            <tr>
+              {cols.map(column => {
+                return typeof column.footer === "function" ? (
+                  column.footer(column)
+                ) : (
+                  <td key={column.key}>{column.footer}</td>
+                );
+              })}
+            </tr>
+          </tfoot>
+        ) : null}
       </Original>
       {getPaginator()}
     </Wrapper>

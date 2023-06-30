@@ -11,6 +11,8 @@ export type iParams = {
   [key: string]: string | boolean | number | null | undefined | string[];
 };
 
+const cancelToken = axios.CancelToken;
+
 const getEndPointUrl = (url: string) => {
   return `${process.env.REACT_APP_API_END_POINT}${url}`;
 };
@@ -90,12 +92,18 @@ const uploadImage = (url: string, params: FormData, config: AxiosRequestConfig =
   });
 };
 
+const cancelAll = () => {
+  return cancelToken.source().cancel();
+}
+
+
 const AppService = {
   get,
   post,
   put,
   delete: remove,
   uploadImage,
+  cancelAll,
 };
 
 export default AppService;
