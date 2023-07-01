@@ -1,41 +1,41 @@
-import DateRangeWithFileSemesterSelector from "../../../components/DateRangeWithFileSemesterSelector";
+import DateRangeWithFileSemesterSelector from "../../../../components/DateRangeWithFileSemesterSelector";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { RootState } from "../../../redux/makeReduxStore";
+import { RootState } from "../../../../redux/makeReduxStore";
 import moment from "moment-timezone";
-import { FlexContainer } from "../../../styles";
-import LoadingBtn from "../../../components/common/LoadingBtn";
+import { FlexContainer } from "../../../../styles";
+import LoadingBtn from "../../../../components/common/LoadingBtn";
 import * as Icons from "react-bootstrap-icons";
-import Toaster, {TOAST_TYPE_ERROR} from "../../../services/Toaster";
-import SynAttendanceMasterService from "../../../services/Synergetic/Attendance/SynAttendanceMasterService";
-import { OP_BETWEEN, OP_OR } from "../../../helper/ServiceHelper";
+import Toaster, {TOAST_TYPE_ERROR} from "../../../../services/Toaster";
+import SynAttendanceMasterService from "../../../../services/Synergetic/Attendance/SynAttendanceMasterService";
+import { OP_BETWEEN, OP_OR } from "../../../../helper/ServiceHelper";
 import AppService, {
   HEADER_NAME_SELECTING_FIELDS
-} from "../../../services/AppService";
+} from "../../../../services/AppService";
 import * as _ from "lodash";
-import SectionDiv from "../../../components/common/SectionDiv";
-import SchoolDaysPopupBtn from "../../dataSubmissions/components/SchoolCensusData/SchoolDaysPopupBtn";
+import SectionDiv from "../../../../components/common/SectionDiv";
+import SchoolDaysPopupBtn from "../../../dataSubmissions/components/SchoolCensusData/SchoolDaysPopupBtn";
 import { FormControl, ProgressBar } from "react-bootstrap";
-import SynVStudentService from "../../../services/Synergetic/SynVStudentService";
-import SynCampusSelector from "../../../components/student/SynCampusSelector";
-import FormLabel from "../../../components/form/FormLabel";
+import SynVStudentService from "../../../../services/Synergetic/SynVStudentService";
+import SynCampusSelector from "../../../../components/student/SynCampusSelector";
+import FormLabel from "../../../../components/form/FormLabel";
 import {
   CAMPUS_CODE_JUNIOR,
   CAMPUS_CODE_SENIOR
-} from "../../../types/Synergetic/iLuCampus";
-import SynLuYearLevelService from "../../../services/Synergetic/SynLuYearLevelService";
-import iLuYearLevel from "../../../types/Synergetic/iLuYearLevel";
-import ToggleBtn from "../../../components/common/ToggleBtn";
+} from "../../../../types/Synergetic/iLuCampus";
+import SynLuYearLevelService from "../../../../services/Synergetic/SynLuYearLevelService";
+import iLuYearLevel from "../../../../types/Synergetic/iLuYearLevel";
+import ToggleBtn from "../../../../components/common/ToggleBtn";
 import StudentAttendanceRateReportTable, {
   iAttendanceMap
-} from "./components/StudentAttendanceRateReportTable";
-import PageLoadingSpinner from "../../../components/common/PageLoadingSpinner";
-import YearLevelSelector from "../../../components/student/YearLevelSelector";
-import MathHelper from "../../../helper/MathHelper";
-import { iVPastAndCurrentStudent } from "../../../types/Synergetic/iVStudent";
-import SynVStudentAttendanceHistoryService from "../../../services/Synergetic/Attendance/SynVStudentAttendanceHistoryService";
-import iSynVStudentAttendanceHistory from "../../../types/Synergetic/Attendance/iSynVStudentAttendanceHistory";
-import UtilsService from '../../../services/UtilsService';
+} from "./StudentAttendanceRateReportTable";
+import PageLoadingSpinner from "../../../../components/common/PageLoadingSpinner";
+import YearLevelSelector from "../../../../components/student/YearLevelSelector";
+import MathHelper from "../../../../helper/MathHelper";
+import { iVPastAndCurrentStudent } from "../../../../types/Synergetic/iVStudent";
+import SynVStudentAttendanceHistoryService from "../../../../services/Synergetic/Attendance/SynVStudentAttendanceHistoryService";
+import iSynVStudentAttendanceHistory from "../../../../types/Synergetic/Attendance/iSynVStudentAttendanceHistory";
+import UtilsService from '../../../../services/UtilsService';
 
 type iDateRange = {
   StartDate: string;
@@ -43,7 +43,7 @@ type iDateRange = {
 };
 
 const defaultCampusCodes = [CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR];
-const StudentAttendanceRateReport = () => {
+const StudentAttendanceRateReport = ({adminBtn}: {adminBtn?: any}) => {
   const { user } = useSelector((state: RootState) => state.auth);
   const initDateRange: iDateRange = {
     StartDate:
@@ -380,7 +380,10 @@ const StudentAttendanceRateReport = () => {
 
   return (
     <>
-      <h3>Student Attendance Report</h3>
+      <h3>
+        Student Attendance Rate Report
+        {adminBtn}
+      </h3>
       <FlexContainer className={"with-gap lg-gap align-items end"}>
         <DateRangeWithFileSemesterSelector
           isDisabled={isSearching}

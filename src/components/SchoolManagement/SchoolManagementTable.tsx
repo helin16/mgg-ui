@@ -123,6 +123,7 @@ const SchoolManagementTable = ({showSearchPanel = true, showExplanation = true, 
               <tr key={team.SchoolSeniorTeamID}>
                 <td>
                   <SchoolManagementEditPopupBtn
+                    disabled={viewOnly}
                     title={'Edit'}
                     onSaved={() => setCount(MathHelper.add(count, 1))}
                     schoolManagementTeam={team}
