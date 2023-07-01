@@ -4,6 +4,7 @@ import styled, {CSSProperties} from 'styled-components';
 type iToggle = {
   className?: string;
   style?: CSSProperties;
+  btnStyle?: string;
   size?: 'lg' | 'sm' | 'xs';
   on: any;
   off: any;
@@ -44,15 +45,20 @@ const Wrapper = styled.div`
   .switch-off {
     background-color: #ccc !important;
   }
+  
+  .btn {
+    margin: 0px;
+  }
 `
 const ToggleBtn = ({
-  size, on, off, checked, onChange, className, style
+  size, on, off, checked, onChange, className, style, btnStyle
 }: iToggle) => {
 
   return (
     <Wrapper className={className} style={style}>
       <BootstrapSwitchButton
         checked={checked}
+        style={btnStyle}
         onstyle={'success'}
         size={size}
         onlabel={on}

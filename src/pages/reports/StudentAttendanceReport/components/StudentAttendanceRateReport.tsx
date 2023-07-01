@@ -447,7 +447,7 @@ const StudentAttendanceRateReport = ({adminBtn}: {adminBtn?: any}) => {
         <div>
           <FormLabel label={"Watching %"} />
           <FormControl
-            style={{width: '80px'}}
+            style={{width: '80px', marginBottom: '0px'}}
             type={'number'}
             placeholder={"The watching percentage, ie: 80"}
             value={watchingRate}
