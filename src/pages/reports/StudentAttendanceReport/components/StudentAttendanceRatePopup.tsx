@@ -182,6 +182,7 @@ const StudentAttendanceRatePopup = ({watchingRate, showingStudentIds, studentMap
             <tr>
               <th></th>
               <th>Date</th>
+              <th>Period</th>
               <th>Class Code</th>
               <th>Attended</th>
               <th>Possible Absence Code</th>
@@ -206,6 +207,7 @@ const StudentAttendanceRatePopup = ({watchingRate, showingStudentIds, studentMap
                   <tr key={index}>
                     <td>{MathHelper.add(index, 1)}</td>
                     <td>{`${record.AttendanceDate || ''}`.trim() !== '' ? moment(`${record.AttendanceDate || ''}`.trim()).format('DD MMM YYYY  ddd') : ''}</td>
+                    <td>{'AttendancePeriod' in record ? record.AttendancePeriod : ''}</td>
                     <td>{'ClassCode' in record ? record.ClassCode : ''}</td>
                     <td>{'AttendedFlag' in record ? (record.AttendedFlag ? 'Y' : '') : ''}</td>
                     <td>{'PossibleAbsenceCode' in record ? record.PossibleAbsenceCode : ''}</td>

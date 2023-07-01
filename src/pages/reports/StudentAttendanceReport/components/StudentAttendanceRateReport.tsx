@@ -188,7 +188,8 @@ const StudentAttendanceRateReport = ({adminBtn}: {adminBtn?: any}) => {
                   };
                 })
               }),
-              perPage: 9999999
+              perPage: 9999999,
+              sort: 'AttendanceDate:ASC,AttendancePeriod:ASC'
             },
             {
               headers: {
@@ -196,6 +197,7 @@ const StudentAttendanceRateReport = ({adminBtn}: {adminBtn?: any}) => {
                   "ID",
                   "ClassCode",
                   "AttendanceDate",
+                  "AttendancePeriod",
                   "AttendedFlag",
                   "PossibleDescription",
                   "PossibleAbsenceCode",
