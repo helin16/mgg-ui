@@ -6,6 +6,7 @@ import moment from "moment-timezone";
 import { Form } from "react-bootstrap";
 import { FlexContainer } from "../styles";
 import FormLabel from "./form/FormLabel";
+import styled from 'styled-components';
 
 type iDateRangeWithFileSemesterSelector = {
   ClassName?: string;
@@ -19,6 +20,15 @@ type iDateRangeWithFileSemesterSelector = {
     fileSemester: iSynFileSemester | null;
   }) => void;
 };
+const Wrapper = styled.div`
+  .select-type {
+    input {
+      width: 15px;
+      height: 15px;
+      opacity: 1;
+    }
+  }
+`;
 const DateRangeWithFileSemesterSelector = ({
   isDisabled = false,
   ClassName,
@@ -100,11 +110,12 @@ const DateRangeWithFileSemesterSelector = ({
   };
 
   return (
-    <div className={ClassName}>
+    <Wrapper className={ClassName}>
       <FlexContainer className={"with-gap lg-gap"}>
         <Form.Check
+          className={'select-type'}
           disabled={isDisabled}
-          label={"From Dates"}
+          label={"Dates"}
           name="select-type"
           type={"radio"}
           id={`select-type-dates`}
@@ -112,8 +123,9 @@ const DateRangeWithFileSemesterSelector = ({
           onChange={(event) => handleChangeDateSelectType(!event.target.checked)}
         />
         <Form.Check
+          className={'select-type'}
           disabled={isDisabled}
-          label={"From File Semesters"}
+          label={"Semesters"}
           name="select-type"
           type={"radio"}
           id={`select-type-semesters`}
@@ -122,7 +134,7 @@ const DateRangeWithFileSemesterSelector = ({
         />
       </FlexContainer>
       {getContent()}
-    </div>
+    </Wrapper>
   );
 };
 

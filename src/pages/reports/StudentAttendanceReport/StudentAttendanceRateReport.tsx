@@ -431,18 +431,18 @@ const StudentAttendanceRateReport = () => {
         </div>
         <div>
           <FormLabel label={"Include Past Students?"} />
-          <div>
-            <ToggleBtn
-              on={"Incl."}
-              off={"Excl."}
-              checked={includePastStudents}
-              onChange={checked => setIncludePastStudents(checked)}
-            />
-          </div>
+          <ToggleBtn
+            style={{width: '100%'}}
+            on={"Incl."}
+            off={"Excl."}
+            checked={includePastStudents}
+            onChange={checked => setIncludePastStudents(checked)}
+          />
         </div>
         <div>
-          <FormLabel label={"Watch %"} />
+          <FormLabel label={"Watching %"} />
           <FormControl
+            style={{width: '80px'}}
             type={'number'}
             placeholder={"The watching percentage, ie: 80"}
             value={watchingRate}

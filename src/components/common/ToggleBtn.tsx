@@ -1,7 +1,9 @@
 import BootstrapSwitchButton from 'bootstrap-switch-button-react'
-import styled from 'styled-components';
+import styled, {CSSProperties} from 'styled-components';
 
 type iToggle = {
+  className?: string;
+  style?: CSSProperties;
   size?: 'lg' | 'sm' | 'xs';
   on: any;
   off: any;
@@ -44,11 +46,11 @@ const Wrapper = styled.div`
   }
 `
 const ToggleBtn = ({
-  size, on, off, checked, onChange
+  size, on, off, checked, onChange, className, style
 }: iToggle) => {
 
   return (
-    <Wrapper>
+    <Wrapper className={className} style={style}>
       <BootstrapSwitchButton
         checked={checked}
         onstyle={'success'}
