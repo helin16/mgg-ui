@@ -114,7 +114,7 @@ const StudentAttendanceRateReportTable = ({
     {
       key: "rate-greater",
       header: `>=${watchingRate}%`,
-      footer: (column: iTableColumn, data: iLuYearLevel) => {
+      footer: (column: iTableColumn) => {
         // @ts-ignore
         const studentIds = getRatedStudentIds({
           minRate: watchingRate,
@@ -137,7 +137,7 @@ const StudentAttendanceRateReportTable = ({
     {
       key: "rate-less",
       header: `<${watchingRate}%`,
-      footer: (column: iTableColumn, data: iLuYearLevel) => {
+      footer: (column: iTableColumn) => {
         // @ts-ignore
         const studentIds = getRatedStudentIds({
           minRate: 0,
@@ -159,7 +159,7 @@ const StudentAttendanceRateReportTable = ({
     {
       key: "yrlvl-total",
       header: "Total",
-      footer: (column: iTableColumn, data: iLuYearLevel) => {
+      footer: (column: iTableColumn) => {
         // @ts-ignore
         const studentIds = Object.keys(studentMap);
 
