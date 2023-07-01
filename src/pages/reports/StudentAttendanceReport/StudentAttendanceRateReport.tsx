@@ -6,7 +6,7 @@ import moment from "moment-timezone";
 import { FlexContainer } from "../../../styles";
 import LoadingBtn from "../../../components/common/LoadingBtn";
 import * as Icons from "react-bootstrap-icons";
-import Toaster from "../../../services/Toaster";
+import Toaster, {TOAST_TYPE_ERROR} from "../../../services/Toaster";
 import SynAttendanceMasterService from "../../../services/Synergetic/Attendance/SynAttendanceMasterService";
 import { OP_BETWEEN, OP_OR } from "../../../helper/ServiceHelper";
 import AppService, {
@@ -15,7 +15,7 @@ import AppService, {
 import * as _ from "lodash";
 import SectionDiv from "../../../components/common/SectionDiv";
 import SchoolDaysPopupBtn from "../../dataSubmissions/components/SchoolCensusData/SchoolDaysPopupBtn";
-import { ProgressBar } from "react-bootstrap";
+import { FormControl, ProgressBar } from "react-bootstrap";
 import SynVStudentService from "../../../services/Synergetic/SynVStudentService";
 import SynCampusSelector from "../../../components/student/SynCampusSelector";
 import FormLabel from "../../../components/form/FormLabel";
@@ -26,15 +26,16 @@ import {
 import SynLuYearLevelService from "../../../services/Synergetic/SynLuYearLevelService";
 import iLuYearLevel from "../../../types/Synergetic/iLuYearLevel";
 import ToggleBtn from "../../../components/common/ToggleBtn";
-import StudentAttendanceReportTable, {
+import StudentAttendanceRateReportTable, {
   iAttendanceMap
-} from "./components/StudentAttendanceReportTable";
+} from "./components/StudentAttendanceRateReportTable";
 import PageLoadingSpinner from "../../../components/common/PageLoadingSpinner";
 import YearLevelSelector from "../../../components/student/YearLevelSelector";
 import MathHelper from "../../../helper/MathHelper";
-import iVStudent from "../../../types/Synergetic/iVStudent";
+import { iVPastAndCurrentStudent } from "../../../types/Synergetic/iVStudent";
 import SynVStudentAttendanceHistoryService from "../../../services/Synergetic/Attendance/SynVStudentAttendanceHistoryService";
 import iSynVStudentAttendanceHistory from "../../../types/Synergetic/Attendance/iSynVStudentAttendanceHistory";
+import UtilsService from '../../../services/UtilsService';
 
 type iDateRange = {
   StartDate: string;
@@ -42,7 +43,7 @@ type iDateRange = {
 };
 
 const defaultCampusCodes = [CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR];
-const StudentAttendanceReport = () => {
+const StudentAttendanceRateReport = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const initDateRange: iDateRange = {
     StartDate:
@@ -50,6 +51,7 @@ const StudentAttendanceReport = () => {
     EndDate: user?.SynCurrentFileSemester?.EndDate || moment().toISOString()
   };
   const [isSearching, setIsSearching] = useState(false);
+  const [watchingRate, setWatchingRate] = useState(80);
   const [loadingPercentage, setLoadingPercentage] = useState(0);
   const [searchingDateRange, setSearchingDateRange] = useState(initDateRange);
   const [searchingSchoolDays, setSearchingSchoolDays] = useState<string[]>([]);
@@ -64,9 +66,9 @@ const StudentAttendanceReport = () => {
   );
   const [yearLevels, setYearLevels] = useState<iLuYearLevel[]>([]);
   const [includePastStudents, setIncludePastStudents] = useState(false);
-  const [studentsMap, setStudentsMap] = useState<{ [key: number]: iVStudent }>(
-    {}
-  );
+  const [studentsMap, setStudentsMap] = useState<{
+    [key: number]: iVPastAndCurrentStudent;
+  }>({});
   const [classDateMap, setClassDateMap] = useState<{ [key: string]: string[] }>(
     {}
   );
@@ -164,7 +166,7 @@ const StudentAttendanceReport = () => {
   ): Promise<iSynVStudentAttendanceHistory[]> => {
     let attendanceRecords: iSynVStudentAttendanceHistory[] = [];
     let doneIds: (number | string)[] = [];
-    const idChunks = _.chunk(IDs, 20);
+    const idChunks = _.chunk(IDs, 30);
     for (const ids of idChunks) {
       const results = await Promise.all(
         ids.map(idArr =>
@@ -194,7 +196,10 @@ const StudentAttendanceReport = () => {
                   "ID",
                   "ClassCode",
                   "AttendanceDate",
-                  "AttendedFlag"
+                  "AttendedFlag",
+                  "PossibleDescription",
+                  "PossibleAbsenceCode",
+                  "PossibleReasonCode",
                 ])
               }
             }
@@ -256,6 +261,7 @@ const StudentAttendanceReport = () => {
               [HEADER_NAME_SELECTING_FIELDS]: JSON.stringify([
                 "ID",
                 "StudentID",
+                "StudentNameExternal",
                 "FileYear",
                 "FileSemester",
                 "StudentYearLevel",
@@ -299,6 +305,7 @@ const StudentAttendanceReport = () => {
           attendanceMap[studentId] = [];
         }
 
+        attendanceMap[studentId].push(row);
         attendanceRateMap[studentId].total = MathHelper.add(
           attendanceRateMap[studentId].total,
           1
@@ -317,10 +324,10 @@ const StudentAttendanceReport = () => {
           const info = attendanceRateMap[studentId];
           return {
             ...map,
-            [studentId]: info.total <= 0 ? 0 : MathHelper.mul(
-              MathHelper.div(info.attended, info.total),
-              100
-            )
+            [studentId]:
+              info.total <= 0
+                ? 0
+                : MathHelper.mul(MathHelper.div(info.attended, info.total), 100)
           };
         }, {})
       );
@@ -361,7 +368,8 @@ const StudentAttendanceReport = () => {
       return null;
     }
     return (
-      <StudentAttendanceReportTable
+      <StudentAttendanceRateReportTable
+        watchingRate={watchingRate}
         yearLevels={yearLevels}
         attendanceRecordMap={studentAttendanceMap}
         attendanceRateMap={studentAttendanceRateMap}
@@ -432,6 +440,22 @@ const StudentAttendanceReport = () => {
             />
           </div>
         </div>
+        <div>
+          <FormLabel label={"Watch %"} />
+          <FormControl
+            type={'number'}
+            placeholder={"The watching percentage, ie: 80"}
+            value={watchingRate}
+            onChange={(event) => {
+              const value = event.target.value;
+              if (!UtilsService.isNumeric(value)) {
+                Toaster.showToast(`Watch percentage needs to be a number between 0 and 100`, TOAST_TYPE_ERROR);
+                return;
+              }
+              setWatchingRate(Number(value))
+            }}
+          />
+        </div>
         <LoadingBtn
           variant={"primary"}
           isLoading={isSearching}
@@ -464,4 +488,4 @@ const StudentAttendanceReport = () => {
   );
 };
 
-export default StudentAttendanceReport;
+export default StudentAttendanceRateReport;

@@ -21,7 +21,7 @@ import StudentAbsenceParentSubmissionForm from '../../components/StudentAbsence/
 import StudentAbsencePage from '../../pages/studentAbsences/StudentAbsencePage';
 import MggDevicesPage from '../../pages/devices/MggDevicesPage';
 import FinancePage from '../../pages/Finance/FinancePage';
-import StudentAttendanceReport from '../../pages/reports/StudentAttendanceReport/StudentAttendanceReport';
+import StudentAttendanceRateReport from '../../pages/reports/StudentAttendanceReport/StudentAttendanceRateReport';
 // import PageNotFound from '../../components/PageNotFound';
 
 const schoolBoxIframeElementId = 'remote';
@@ -57,7 +57,7 @@ const SchoolBoxRouter = ({path, remoteUrl}: {path: string, remoteUrl: string}) =
     }
     case '/reports/student_attendance': {
       removeSchoolBoxIframe();
-      return <StudentAttendanceReport />
+      return <StudentAttendanceRateReport />
     }
     case '/operoo/safetyAlerts': {
       removeSchoolBoxIframe();
