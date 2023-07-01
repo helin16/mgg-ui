@@ -47,7 +47,7 @@ const Wrapper = styled.div`
   }
   
   .btn {
-    margin: 0px;
+    margin: 0px; 
   }
 `
 const ToggleBtn = ({

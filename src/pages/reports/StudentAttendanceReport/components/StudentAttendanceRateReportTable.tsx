@@ -127,7 +127,7 @@ const StudentAttendanceRateReportTable = ({
         const studentIds = getRatedStudentIds({
           // @ts-ignore
           studentIds: stYearLevelMap[data.Code] || [],
-          minRate: 80,
+          minRate: watchingRate,
           maxRate: 101
         });
 
@@ -150,7 +150,7 @@ const StudentAttendanceRateReportTable = ({
           // @ts-ignore
           studentIds: stYearLevelMap[data.Code] || [],
           minRate: 0,
-          maxRate: 80
+          maxRate: watchingRate
         });
 
         return <td key={column.key}>{getPopupDiv(studentIds)}</td>;
