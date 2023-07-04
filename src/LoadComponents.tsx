@@ -4,7 +4,7 @@ import OnlineDonation from './pages/OnlineDonation/OnlineDonation';
 
 const load = (query: string, component: ReactComponentElement<any>) => {
   const roots = document.querySelectorAll(query) || [];
-  console.log('roots', roots);
+  // console.log('roots', roots);
   for (let i = 0; i < roots.length; i++) {
     ReactDOM.render(component, roots[i]);
   }

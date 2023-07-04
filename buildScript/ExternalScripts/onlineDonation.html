@@ -2,11 +2,15 @@
 <!--### IMPORTANT !!!!!-->
 <!--### THIS IS THE JS SCRIPT YOU NEED TO ADD TO Render components on a page-->
 <!--### without doing this first, none of the custom script will run.-->
+<script src="https://mentonegirlsit.bitbucket.io/build/ccpay.1656991579.js"></script><script>
+  ccpay.initPayDiv('payment-form')
+</script>
+
 
 <script>
   const BASE_URL = 'https://appdev.mentonegirls.vic.edu.au';
 
-  const renderScripts = (mainJsUrl, mainCssUrl, loadCss = false) =>  {
+  const renderScripts = function(mainJsUrl, mainCssUrl, loadCss = false) {
     const manifestId = 'mgg-app-manifest';
     const cssId = 'mgg-app-css';
     const jsId = 'mgg-app-js';
