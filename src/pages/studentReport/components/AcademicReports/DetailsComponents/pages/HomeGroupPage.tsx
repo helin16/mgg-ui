@@ -8,6 +8,7 @@ import AwardsDiv from '../sections/AwardsDiv';
 import TeachersDiv from '../sections/TeacherDiv';
 import ApproachesToLearningDiv from '../sections/ApproachesToLearningDiv';
 import LearningAgencyDiv from '../sections/LearningAgencyDiv';
+import LearningBehavioursDiv from '../sections/LearningBehavioursDiv';
 
 const HomeGroupPage = ({
   student, studentReportYear, selectedReportResults
@@ -23,6 +24,7 @@ const HomeGroupPage = ({
 
       <AttitudeAndManagementDiv results={selectedReportResults} />
       <LearningAgencyDiv results={selectedReportResults} />
+      <LearningBehavioursDiv results={selectedReportResults} />
       <ApproachesToLearningDiv results={selectedReportResults} />
       <ReflectionDiv results={selectedReportResults} />
 
