@@ -111,7 +111,8 @@ const OnlineDonation = () => {
           setSuccessMsg(resp.message || '');
           return;
         }
-        Toaster.showApiError(resp.message || 'A unknown error occurred, please refresh page and try again.');
+        Toaster.showToast(resp.message || 'A unknown error occurred, please refresh page and try again.', TOAST_TYPE_ERROR);
+        return;
       }).catch(err => {
         Toaster.showApiError(err);
       }).finally(() => {
