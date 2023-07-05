@@ -42,7 +42,7 @@
     "build": "react-scripts build; yarn build:appLoader",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "build:appLoader": "./node_modules/.bin/tsc --skipLibCheck -t 'esnext' -m 'commonjs' ./AppLoader/src/*.ts --outDir ./build/AppLoader/; ./node_modules/.bin/uglifyjs ./build/AppLoader/*.js -o ./build/AppLoader/MggAppLoader.js;"
+    "build:appLoader": "./node_modules/.bin/tsc --skipLibCheck -t 'esnext' -m 'es6' ./AppLoader/src/*.ts --outDir ./build/AppLoader/; ./node_modules/.bin/uglifyjs ./build/AppLoader/*.js -o ./build/AppLoader/MggAppLoader.js;"
   },
   "eslintConfig": {
     "extends": [

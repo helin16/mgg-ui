@@ -1,4 +1,5 @@
-export default class AppLoader {
+// @ts-ignore
+class AppLoader {
   #renderScripts(
     BASE_URL: string,
     mainJsUrl: string,
@@ -86,4 +87,34 @@ export default class AppLoader {
       }
     );
   };
+}
+
+// @ts-ignore
+class SchoolBoxAppLoader {
+  #SCHOOL_BOX_APP_HTML_ID ='mgg-root'
+  #checkAndInitHtml() {
+    const iFrame = document.querySelector('iframe#remote');
+    if (iFrame) {
+      // @ts-ignore
+      iFrame.style.display = 'none';
+      const reactDiv = document.createElement("div");
+      reactDiv.setAttribute('id', this.#SCHOOL_BOX_APP_HTML_ID);
+      // @ts-ignore
+      reactDiv.setAttribute('data-url', `${iFrame.src || ''}`);
+      if(iFrame.nextSibling){
+        // @ts-ignore
+        iFrame.parentNode.insertBefore(reactDiv, iFrame.nextSibling);
+      } else{
+        // @ts-ignore
+        iFrame.parentNode.appendChild(reactDiv);
+      }
+      return true;
+    }
+    return false;
+  }
+
+  init(appScriptUrl: string){
+    const loadCss = this.#checkAndInitHtml();
+    (new AppLoader()).init(appScriptUrl, loadCss, true);
+  }
 }
