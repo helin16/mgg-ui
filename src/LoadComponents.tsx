@@ -13,7 +13,7 @@ const load = (query: string, component: ReactComponentElement<any>) => {
 
 const loadAll = () => {
   load(
-    '.mgg-app.online-donation',
+    '[mgg-app-loader="online-donation"]',
     // @ts-ignore
     <React.StrictMode>
       <OnlineDonation />
