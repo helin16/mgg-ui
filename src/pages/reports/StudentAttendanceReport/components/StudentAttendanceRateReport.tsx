@@ -14,7 +14,6 @@ import AppService, {
 } from "../../../../services/AppService";
 import * as _ from "lodash";
 import SectionDiv from "../../../../components/common/SectionDiv";
-import SchoolDaysPopupBtn from "../../../dataSubmissions/components/SchoolCensusData/SchoolDaysPopupBtn";
 import { FormControl, ProgressBar } from "react-bootstrap";
 import SynVStudentService from "../../../../services/Synergetic/SynVStudentService";
 import SynCampusSelector from "../../../../components/student/SynCampusSelector";
@@ -36,6 +35,8 @@ import { iVPastAndCurrentStudent } from "../../../../types/Synergetic/iVStudent"
 import SynVStudentAttendanceHistoryService from "../../../../services/Synergetic/Attendance/SynVStudentAttendanceHistoryService";
 import iSynVStudentAttendanceHistory from "../../../../types/Synergetic/Attendance/iSynVStudentAttendanceHistory";
 import UtilsService from '../../../../services/UtilsService';
+import SynFileSemesterService, {iSchoolDay} from '../../../../services/Synergetic/SynFileSemesterService';
+import SchoolDaysAllPopupBtn from '../../../dataSubmissions/components/SchoolCensusData/SchoolDaysAllPopupBtn';
 
 type iDateRange = {
   StartDate: string;
@@ -55,6 +56,7 @@ const StudentAttendanceRateReport = ({adminBtn}: {adminBtn?: any}) => {
   const [loadingPercentage, setLoadingPercentage] = useState(0);
   const [searchingDateRange, setSearchingDateRange] = useState(initDateRange);
   const [searchingSchoolDays, setSearchingSchoolDays] = useState<string[]>([]);
+  const [searchingSchoolDaysAll, setSearchingSchoolDaysAll] = useState<iSchoolDay[]>([]);
   const [searchingFileSemesterStrs, setSearchingFileSemesterStrs] = useState<
     string[]
   >([]);
@@ -91,38 +93,43 @@ const StudentAttendanceRateReport = ({adminBtn}: {adminBtn?: any}) => {
 
     setIsSearching(true);
     let isCanceled = false;
-    SynAttendanceMasterService.getAll(
-      {
-        where: JSON.stringify({
-          AttendanceDate: { [OP_BETWEEN]: [startDateStr, endDateStr] },
-          ClassCancelledFlag: false,
-          FileType: "A",
-          ...(searchingCampusCodes.length > 0
-            ? { ClassCampus: searchingCampusCodes }
-            : {})
-        }),
-        perPage: 99999
-      },
-      {
-        headers: {
-          [HEADER_NAME_SELECTING_FIELDS]: JSON.stringify([
-            "FileYear",
-            "FileSemester",
-            "ClassCode",
-            "AttendanceDate"
-          ])
+    Promise.all([
+      SynAttendanceMasterService.getAll(
+        {
+          where: JSON.stringify({
+            AttendanceDate: { [OP_BETWEEN]: [startDateStr, endDateStr] },
+            ClassCancelledFlag: false,
+            FileType: "A",
+            ...(searchingCampusCodes.length > 0
+              ? { ClassCampus: searchingCampusCodes }
+              : {})
+          }),
+          perPage: 99999
+        },
+        {
+          headers: {
+            [HEADER_NAME_SELECTING_FIELDS]: JSON.stringify([
+              "FileYear",
+              "FileSemester",
+              "ClassCode",
+              "AttendanceDate"
+            ])
+          }
         }
-      }
-    )
+      ),
+      SynFileSemesterService.getSchoolDaysAll({
+        start: moment(startDateStr).format('YYYY-MM-DD'),
+        end: moment(endDateStr).format('YYYY-MM-DD'),
+      })
+    ])
       .then(resp => {
         if (isCanceled) {
           return;
         }
-        const sDays: string[] = [];
+        const sDays: string[] = (resp[1] || []).filter(day => day.isSchoolDay === true).map(day => day.date);
         const fileSemStr: string[] = [];
         const cMap: { [key: string]: string[] } = {};
-        (resp.data || []).forEach(record => {
-          sDays.push(moment(record.AttendanceDate).toISOString());
+        (resp[0].data || []).forEach(record => {
           fileSemStr.push(`${record.FileYear}-${record.FileSemester}`);
           if (!(record.ClassCode in cMap)) {
             cMap[record.ClassCode] = [];
@@ -133,6 +140,7 @@ const StudentAttendanceRateReport = ({adminBtn}: {adminBtn?: any}) => {
         setSearchingSchoolDays(_.uniq(sDays));
         setSearchingFileSemesterStrs(_.uniq(fileSemStr));
         setClassDateMap(cMap);
+        setSearchingSchoolDaysAll(resp[1] || []);
       })
       .catch(err => {
         if (isCanceled) {
@@ -474,14 +482,14 @@ const StudentAttendanceRateReport = ({adminBtn}: {adminBtn?: any}) => {
         <h6>
           {isSearching === true ? null : (
             <>
-              <SchoolDaysPopupBtn
+              <SchoolDaysAllPopupBtn
                 disabled={isSearching}
-                schoolDays={searchingSchoolDays}
+                days={searchingSchoolDaysAll}
                 variant={"link"}
                 size={"sm"}
               >
                 {searchingSchoolDays.length}
-              </SchoolDaysPopupBtn>{" "}
+              </SchoolDaysAllPopupBtn>{" "}
               School Day(s) selected
             </>
           )}

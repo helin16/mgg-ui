@@ -8,8 +8,20 @@ const getFileSemesters = (params: iConfigParams = {}, options?: iConfigParams): 
   return AppService.get(endPoint, params, options).then(resp => resp.data);
 };
 
+export type iSchoolDay = {
+  date: string;
+  isSchoolDay: boolean;
+  isInAttMaster: boolean;
+  isWeekEnd: boolean;
+  isInStuFreeCalEvt: boolean;
+  isNotInFileSemester: boolean;
+  comments: string;
+};
 const getSchoolDays = (params: iConfigParams = {}, options?: iConfigParams): Promise<string[]> => {
   return AppService.get(`${endPoint}/schoolDays`, params, options).then(resp => resp.data);
+};
+const getSchoolDaysAll = (params: iConfigParams = {}, options?: iConfigParams): Promise<iSchoolDay[]> => {
+  return AppService.get(`${endPoint}/schoolDays`, {...params, showAll: true}, options).then(resp => resp.data);
 };
 
 const getFileSemesterFromStartAndEndDate = async ({ startDateStr,  endDateStr, }:iStartAndEndDateString  ): Promise<{
@@ -47,6 +59,7 @@ const getFileSemesterFromStartAndEndDate = async ({ startDateStr,  endDateStr, }
 
 const SynFileSemesterService = {
   getSchoolDays,
+  getSchoolDaysAll,
   getFileSemesters,
   getFileSemesterFromStartAndEndDate,
 }
