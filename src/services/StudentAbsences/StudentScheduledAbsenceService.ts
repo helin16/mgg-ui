@@ -2,6 +2,7 @@ import appService, {iConfigParams} from '../AppService';
 import {AxiosRequestConfig} from 'axios';
 import iPaginatedResult from '../../types/iPaginatedResult';
 import iStudentAbsenceSchedule from '../../types/StudentAbsence/iStudentAbsenceSchedule';
+import iMessage from '../../types/Message/iMessage';
 
 const endPoint = '/studentAbsenceSchedule';
 
@@ -26,12 +27,17 @@ const remove = (id: number | string, params?: iConfigParams, config: AxiosReques
   return appService.delete(`${endPoint}/${id}`, params, config).then(({data}) => data);
 };
 
+const scheduleForTomorrow = (params: iConfigParams = {}, config: AxiosRequestConfig = {}): Promise<iMessage> => {
+  return appService.post(`${endPoint}/scheduleForTomorrow`, params, config).then(({data}) => data);
+};
+
 const StudentScheduledAbsenceService =  {
   getAll,
   get,
   create,
   update,
   remove,
+  scheduleForTomorrow,
 }
 
 export default StudentScheduledAbsenceService;

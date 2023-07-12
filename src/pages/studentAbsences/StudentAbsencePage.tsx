@@ -23,6 +23,7 @@ import SchoolManagementTeamService from '../../services/Synergetic/SchoolManagem
 import {SMT_SCHOOL_ROL_CODE_HEAD_OF_YEAR} from '../../types/Synergetic/iSchoolManagementTeam';
 import moment from 'moment-timezone';
 import Page401 from '../../components/Page401';
+import StudentScheduledAbsenceListPanel from './components/StudentScheduledAbsenceListPanel';
 
 const Wrapper = styled.div`
   .tab-pane {
@@ -32,6 +33,8 @@ const Wrapper = styled.div`
 
 const TAB_EARLY_SIGN_OUT = STUDENT_ABSENCE_RECORD_TYPE_EARLY_SIGN_OUT;
 const TAB_LATE_SIGN_IN = STUDENT_ABSENCE_RECORD_TYPE_LATE_SIGN_IN;
+const TAB_SCHEDULED_EARLY_SIGN_OUT = `Scheduled ${STUDENT_ABSENCE_RECORD_TYPE_EARLY_SIGN_OUT}`;
+const TAB_SCHEDULED_LATE_SIGN_IN = `Scheduled ${STUDENT_ABSENCE_RECORD_TYPE_LATE_SIGN_IN}`;
 
 const StudentAbsencePage = () => {
   const [showingType, SetShowingType] = useState(TAB_EARLY_SIGN_OUT);
@@ -101,8 +104,12 @@ const StudentAbsencePage = () => {
   return (
     <Wrapper>
       <h3>
-        <span>UnSync'd Student Absence(s): <u>{ StudentAbsenceService.getAbsenceTypeName(showingType as iRecordType)}</u></span>
+        <span>UnSync'd Student Absence(s): <u>{ StudentAbsenceService.getAbsenceTypeName(`${showingType}`.replace('Scheduled', '').trim() as iRecordType)}</u></span>
         <FlexContainer className={'float-right with-gap'}>
+          <Button variant={'link'} href={process.env.REACT_APP_MOBILE_APP_URL || ''} target={'_blank'}>
+            <Icons.Link45deg />{' '}
+            Student SignIn/SignOut App
+          </Button>
           <Button
             variant={'primary'}
             onClick={() => setShowingCreationPage(true)}
@@ -116,15 +123,25 @@ const StudentAbsencePage = () => {
           />
         </FlexContainer>
       </h3>
+
       <Tabs
         activeKey={showingType}
         onSelect={(name) => SetShowingType(name || TAB_EARLY_SIGN_OUT)}
+        unmountOnExit
       >
-        <Tab eventKey={TAB_EARLY_SIGN_OUT} title="Early Sign-outs" unmountOnExit>
-          <UnSyncdStudentAbsenceListPanel type={TAB_EARLY_SIGN_OUT} />
+        <Tab eventKey={TAB_EARLY_SIGN_OUT} title="Early Sign-outs">
+          <UnSyncdStudentAbsenceListPanel type={STUDENT_ABSENCE_RECORD_TYPE_EARLY_SIGN_OUT} />
         </Tab>
-        <Tab eventKey={TAB_LATE_SIGN_IN} title="Late Sign-ins" unmountOnExit>
-          <UnSyncdStudentAbsenceListPanel type={TAB_LATE_SIGN_IN} />
+        <Tab eventKey={TAB_LATE_SIGN_IN} title="Late Sign-ins">
+          <UnSyncdStudentAbsenceListPanel type={STUDENT_ABSENCE_RECORD_TYPE_LATE_SIGN_IN} />
+        </Tab>
+
+        <Tab eventKey={TAB_SCHEDULED_EARLY_SIGN_OUT} title="Scheduled Early Sign-outs">
+          <StudentScheduledAbsenceListPanel type={STUDENT_ABSENCE_RECORD_TYPE_EARLY_SIGN_OUT} />
+        </Tab>
+
+        <Tab eventKey={TAB_SCHEDULED_LATE_SIGN_IN} title="Scheduled Late Sign-ins">
+          <StudentScheduledAbsenceListPanel type={STUDENT_ABSENCE_RECORD_TYPE_LATE_SIGN_IN} />
         </Tab>
       </Tabs>
     </Wrapper>

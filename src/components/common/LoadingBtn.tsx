@@ -1,7 +1,7 @@
 import React from 'react';
 import {Button, ButtonProps, Spinner} from 'react-bootstrap';
 
-type iLoadingBtn = {
+export type iLoadingBtn = {
   isLoading?: boolean;
   icon?: any;
 } & ButtonProps

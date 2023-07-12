@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import styled from 'styled-components';
 import {Tabs, Tab} from 'react-bootstrap';
 import SchoolManagementTable from './SchoolManagementTable';
-import MessageListPanel from '../common/MessageListPanel';
+import MessageListPanel from '../common/Message/MessageListPanel';
 import {MESSAGE_TYPE_TERM_ROLLING} from '../../types/Message/iMessage';
 
 type iSchoolManagementPanel = {

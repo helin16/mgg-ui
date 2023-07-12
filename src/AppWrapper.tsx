@@ -162,5 +162,13 @@ const AppWrapper = styled.div`
       border-bottom: 1px #ddd solid;
     }
   }
+
+  .space-below {
+    margin-bottom: 0.8rem;
+  }
+  
+  .space-above {
+    margin-top: 0.8rem;
+  }
 `
 export default AppWrapper;

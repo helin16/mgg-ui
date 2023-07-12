@@ -141,7 +141,7 @@ const UnSyncdStudentAbsenceListPanel = ({type}: iStudentAbsenceListPanel) => {
       <Table className={'record-table'} responsive>
         <thead>
           <tr>
-            <th colSpan={2}>Student</th>
+            <th colSpan={2}>{records?.total || 0} Student(s)</th>
             <th>Form</th>
             <th>Parent Slip?</th>
             <th>Date</th>
@@ -168,7 +168,7 @@ const UnSyncdStudentAbsenceListPanel = ({type}: iStudentAbsenceListPanel) => {
                       size={'sm'}
                       onSaved={() => setCount(MathHelper.add(count, 1))}
                     >
-                      {record.Student?.StudentNameInternal}
+                      {record.Student?.StudentNameInternal}{`${record.StudentID || ""}`.trim() !== '' ? ` [${`${record.StudentID || ""}`.trim()}]` : ''}
                     </StudentAbsenceEditPopupBtn>
                   </td>
                   <td className={'form'}>

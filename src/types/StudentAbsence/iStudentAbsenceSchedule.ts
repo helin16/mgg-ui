@@ -1,4 +1,5 @@
 import {iStudentAbsence} from './iStudentAbsence';
+import iSynCommunity from '../Synergetic/iSynCommunity';
 
 type iStudentAbsenceSchedule = {
   id: number;
@@ -19,6 +20,8 @@ type iStudentAbsenceSchedule = {
   updated_by_id: number | null;
   lastCreatedEventId: number | null;
   Event?: iStudentAbsence;
+  CreatedBy?: iSynCommunity | null;
+  UpdatedBy?: iSynCommunity | null;
 }
 
 export default iStudentAbsenceSchedule;

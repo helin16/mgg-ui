@@ -10,6 +10,14 @@ export const FlexContainer = styled.div`
       gap: 1rem;
     }
   }
+
+  &.flex-row {
+    flex-direction: row;
+  }
+
+  &.flex-col {
+    flex-direction: column;
+  }
   
   &.flex-wrap {
     &.wrap {

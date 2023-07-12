@@ -36,6 +36,11 @@ const validateMacAddress = (macAddress: string) => {
   return regex.test(`${macAddress}`.trim());
 }
 
+const validateTime = (time: string) => {
+  const regex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+  return regex.test(`${time}`.trim());
+}
+
 const getWeekdaysBetweenDates = (fromDate: Moment, toDate: Moment)  => {
   const Sunday = 0;
   const Saturday = 6;
@@ -62,6 +67,7 @@ const UtilsService = {
   validateEmail,
   getWeekdaysBetweenDates,
   validateMacAddress,
+  validateTime,
 }
 
 export default UtilsService;

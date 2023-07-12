@@ -85,6 +85,8 @@ const BTGLJournalInMonthPanel = ({year, gl}: iBTGLJournalInMonthPanel) => {
         setActualBudget((resp[1] || []).reduce((sum, record) => {
           return MathHelper.add(sum, Number(record.Budget1 || 0));
         }, 0))
+      } else {
+        setActualBudget(null);
       }
     }).catch(err => {
       if(isCanceled) return;

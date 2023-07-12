@@ -11,7 +11,7 @@ import ModuleUserList from '../../components/module/ModuleUserList';
 import FunnelModuleEditPanel from './components/FunnelModuleEditPanel';
 import FunnelDownloadLatestPopupBtn from './components/FunnelDownloadLatestPopupBtn';
 import MathHelper from '../../helper/MathHelper';
-import MessageListPanel from '../../components/common/MessageListPanel';
+import MessageListPanel from '../../components/common/Message/MessageListPanel';
 import {MESSAGE_TYPE_FUNNEL_DOWNLOAD_LATEST} from '../../types/Message/iMessage';
 import ExplanationPanel from '../../components/ExplanationPanel';
 

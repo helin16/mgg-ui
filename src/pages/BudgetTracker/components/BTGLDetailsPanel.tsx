@@ -55,7 +55,7 @@ const Wrapper = styled.div`
     margin-left: 10px;
   }
   .accordion {
-    margin-bottom: 0.85rem;
+    margin-bottom: 1.3rem;
     
     .accordion-item {
       background-color: transparent;
@@ -110,8 +110,8 @@ const Wrapper = styled.div`
     }
 
     .accordion-body {
-      padding-bottom: 0px;
-      padding-top: 0px;
+      padding-bottom: 0.4rem;
+      padding-top: 0.4rem;
     }
   }
 `
