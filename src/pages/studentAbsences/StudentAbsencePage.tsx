@@ -105,7 +105,7 @@ const StudentAbsencePage = () => {
     <Wrapper>
       <h3>
         <span>
-          {`${showingType}`.includes('Scheduled') ? 'Scheduled' : `UnSync'd`} 
+          {`${showingType}`.includes('Scheduled') ? 'Scheduled' : `UnSync'd`}
           Student Absence(s):
           <u>{ StudentAbsenceService.getAbsenceTypeName(`${showingType}`.replace('Scheduled', '').trim() as iRecordType)}</u>
         </span>
