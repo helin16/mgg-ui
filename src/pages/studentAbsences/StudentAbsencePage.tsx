@@ -104,7 +104,11 @@ const StudentAbsencePage = () => {
   return (
     <Wrapper>
       <h3>
-        <span>UnSync'd Student Absence(s): <u>{ StudentAbsenceService.getAbsenceTypeName(`${showingType}`.replace('Scheduled', '').trim() as iRecordType)}</u></span>
+        <span>
+          {`${showingType}`.includes('Scheduled') ? 'Scheduled' : `UnSync'd`} 
+          Student Absence(s):
+          <u>{ StudentAbsenceService.getAbsenceTypeName(`${showingType}`.replace('Scheduled', '').trim() as iRecordType)}</u>
+        </span>
         <FlexContainer className={'float-right with-gap'}>
           <Button variant={'link'} href={process.env.REACT_APP_MOBILE_APP_URL || ''} target={'_blank'}>
             <Icons.Link45deg />{' '}
