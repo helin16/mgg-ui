@@ -21,12 +21,12 @@ const FinanceAdminPage = ({onNavBack}: iFinanceAdminPage) => {
 
       <SectionDiv>
         <h5>Users</h5>
-        <ModuleUserList moduleId={MGGS_MODULE_ID_FINANCE} roleId={ROLE_ID_NORMAL} showCreatingPanel/>
+        <ModuleUserList moduleId={MGGS_MODULE_ID_FINANCE} roleId={ROLE_ID_NORMAL} showCreatingPanel showDeletingBtn/>
       </SectionDiv>
 
       <SectionDiv>
         <h5>Admin Users</h5>
-        <ModuleUserList moduleId={MGGS_MODULE_ID_FINANCE} roleId={ROLE_ID_ADMIN} showCreatingPanel/>
+        <ModuleUserList moduleId={MGGS_MODULE_ID_FINANCE} roleId={ROLE_ID_ADMIN} showCreatingPanel showDeletingBtn/>
       </SectionDiv>
 
       <SectionDiv>

@@ -157,6 +157,8 @@ const StudentScheduledAbsenceEditPanel = ({scheduledAbsence, recordType, student
       AbsenceCode: recordEvent?.AbsenceCode,
       EventDate: `${recordEvent?.EventDate || ''}`.trim() === '' ? moment().toISOString() : moment(`${recordEvent?.EventDate || ''}`.trim()).toISOString(),
       Comments: recordEvent?.Comments || '',
+      approved_at: moment().toISOString(),
+      approved_by_id: user?.synergyId,
     };
     const event = await (`${record?.eventId || ''}`.trim() === '' ? StudentAbsenceService.create(eventData) : StudentAbsenceService.update(record?.eventId || '', eventData));
 

@@ -76,7 +76,7 @@ const MggDeviceAddOrEditPanel = ({mggAppDevice, onCancel, onSave, isSubmitting =
           <SectionDiv>
             <Alert variant={'warning'}>
               <div><b>App Token</b>: {device?.MggApp.token}</div>
-              <div><b>Expires At</b>: {`${device?.MggApp.expiresAt || ''}`.trim() === '' ? '' : moment(device?.MggApp.expiresAt).format('lll')}</div>
+              <div><b>Expires At</b>: {`${device?.MggApp.expiresAt || ''}`.trim() === '' ? '' : <u>{moment(device?.MggApp.expiresAt).format('lll')}</u>} <small>(Expiry Date will be extended if the device did login before it expires)</small></div>
             </Alert>
           </SectionDiv>
         </Col>
