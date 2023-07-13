@@ -10,8 +10,9 @@ import SchoolManagementTable from '../../components/SchoolManagement/SchoolManag
 import {SMT_SCHOOL_ROL_CODE_HEAD_OF_YEAR} from '../../types/Synergetic/iSchoolManagementTeam';
 import StudentAbsenceModuleEditPanel from './components/StudentAbsenceModuleEditPanel';
 import MessageListPanel from '../../components/common/Message/MessageListPanel';
-import {MESSAGE_TYPE_ABSENCE_CREATE_FROM_SCHEDULED} from '../../types/Message/iMessage';
-import StudentScheduledAbsenceService from '../../services/StudentAbsences/StudentScheduledAbsenceService';
+import {
+  MESSAGE_TYPE_ABSENCE_SYNC_TO_SYNERGETIC
+} from '../../types/Message/iMessage';
 
 type iStudentAbsenceAdminPage = {
   onNavBack: () => void;
@@ -98,8 +99,7 @@ const StudentAbsenceAdminPage = ({onNavBack}: iStudentAbsenceAdminPage) => {
         >
           <SectionDiv>
             <MessageListPanel
-              type={MESSAGE_TYPE_ABSENCE_CREATE_FROM_SCHEDULED}
-              createMsgFn={() => StudentScheduledAbsenceService.scheduleForTomorrow()}
+              type={MESSAGE_TYPE_ABSENCE_SYNC_TO_SYNERGETIC}
             />
           </SectionDiv>
         </Tab>

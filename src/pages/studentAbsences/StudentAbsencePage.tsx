@@ -43,6 +43,7 @@ const StudentAbsencePage = () => {
   const [canAccess, setCanAccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const {user} = useSelector((state: RootState) => state.auth);
+  const [isModuleAdmin, setIsModuleAdmin]= useState(false);
 
   useEffect(() => {
     let isCanceled = false;
@@ -69,6 +70,7 @@ const StudentAbsencePage = () => {
           }
         }, {});
         setCanAccess(Object.keys(canAccessRoles).length > 0 || resp[1].length > 0);
+        setIsModuleAdmin(Object.keys(canAccessRoles).length > 0);
       })
       .catch(err => {
         if (isCanceled) return;
@@ -136,17 +138,23 @@ const StudentAbsencePage = () => {
         <Tab eventKey={TAB_EARLY_SIGN_OUT} title="Early Sign-outs">
           <UnSyncdStudentAbsenceListPanel type={STUDENT_ABSENCE_RECORD_TYPE_EARLY_SIGN_OUT} />
         </Tab>
+
         <Tab eventKey={TAB_LATE_SIGN_IN} title="Late Sign-ins">
           <UnSyncdStudentAbsenceListPanel type={STUDENT_ABSENCE_RECORD_TYPE_LATE_SIGN_IN} />
         </Tab>
 
-        <Tab eventKey={TAB_SCHEDULED_EARLY_SIGN_OUT} title="Scheduled Early Sign-outs">
-          <StudentScheduledAbsenceListPanel type={STUDENT_ABSENCE_RECORD_TYPE_EARLY_SIGN_OUT} />
-        </Tab>
+        {isModuleAdmin !== true ? null : (
+          <Tab eventKey={TAB_SCHEDULED_EARLY_SIGN_OUT} title="Scheduled Early Sign-outs">
+            <StudentScheduledAbsenceListPanel type={STUDENT_ABSENCE_RECORD_TYPE_EARLY_SIGN_OUT} />
+          </Tab>
+        )}
 
-        <Tab eventKey={TAB_SCHEDULED_LATE_SIGN_IN} title="Scheduled Late Sign-ins">
-          <StudentScheduledAbsenceListPanel type={STUDENT_ABSENCE_RECORD_TYPE_LATE_SIGN_IN} />
-        </Tab>
+        {isModuleAdmin !== true ? null : (
+          <Tab eventKey={TAB_SCHEDULED_LATE_SIGN_IN} title="Scheduled Late Sign-ins">
+            <StudentScheduledAbsenceListPanel type={STUDENT_ABSENCE_RECORD_TYPE_LATE_SIGN_IN} />
+          </Tab>
+        )}
+
       </Tabs>
     </Wrapper>
   )

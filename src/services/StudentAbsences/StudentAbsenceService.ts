@@ -36,6 +36,10 @@ const submitByParent = (params: iConfigParams, config?: AxiosRequestConfig): Pro
   return appService.post(`${endPoint}/parentSubmission`, params, config).then(({data}) => data);
 }
 
+const syncToSynergetic = (id: number | string, params: iConfigParams, config: AxiosRequestConfig = {}): Promise<iMessage> => {
+  return appService.put(`${endPoint}/${id}/syncToSynergetic`, params, config).then(({data}) => data);
+};
+
 const getAbsenceTypeName = (type: iRecordType) => {
   if(type === STUDENT_ABSENCE_RECORD_TYPE_EARLY_SIGN_OUT) {
     return 'Early Sign-outs';
@@ -54,6 +58,7 @@ const StudentAbsenceService =  {
   remove,
   getAbsenceTypeName,
   submitByParent,
+  syncToSynergetic,
 }
 
 export default StudentAbsenceService;

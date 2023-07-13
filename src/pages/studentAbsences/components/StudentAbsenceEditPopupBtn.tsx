@@ -14,7 +14,7 @@ type iStudentAbsenceEditPopupBtn = ButtonProps & {
   isShowing?: boolean;
   isExpectedEvent?: boolean;
   studentAbsenceRecord?: iStudentAbsence
-  onSaved?: (newRecord: iStudentAbsence) => void;
+  onSaved?: (newRecord: iStudentAbsence | null) => void;
   student?: iVStudent;
 }
 
@@ -22,6 +22,8 @@ type iStudentAbsenceEditPopupBtn = ButtonProps & {
 const StudentAbsenceEditPopupBtn = ({studentAbsenceRecord, recordType, children, onSaved, student, isExpectedEvent = false, isShowing = false, ...rest}: iStudentAbsenceEditPopupBtn) => {
   const [isShowingPopup, setIsShowingPopup] = useState(isShowing);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+
 
   const handleClose = () => {
     if (isSubmitting) {

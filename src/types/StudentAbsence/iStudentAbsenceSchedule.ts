@@ -5,8 +5,8 @@ type iStudentAbsenceSchedule = {
   id: number;
   eventType: string;
   eventId: number;
-  startDate: Date;
-  endDate: Date;
+  startDate: Date | string;
+  endDate: Date | string;
   time: string;
   monday: boolean;
   tuesday: boolean;

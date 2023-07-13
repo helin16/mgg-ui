@@ -19,6 +19,7 @@ import AuthService from '../../services/AuthService';
 import Toaster from '../../services/Toaster';
 import PageLoadingSpinner from '../../components/common/PageLoadingSpinner';
 import StudentAbsenceEditPopupBtn from './components/StudentAbsenceEditPopupBtn';
+import StudentScheduledAbsenceEditPopupBtn from './components/StudentScheduledAbsenceEditPopupBtn';
 
 type iStudentAbsenceCreatePage = {
   onNavBack: () => void;
@@ -99,6 +100,38 @@ const StudentAbsenceCreatePage = ({onNavBack}: iStudentAbsenceCreatePage) => {
     )
   }
 
+  const getScheduledDropDown = (title: string, variant: string, student: iVStudent) => {
+    return (
+      <DropdownButton
+        as={ButtonGroup}
+        size={'sm'}
+        variant={variant}
+        title={title}
+      >
+        {[
+          STUDENT_ABSENCE_RECORD_TYPE_EARLY_SIGN_OUT,
+          STUDENT_ABSENCE_RECORD_TYPE_LATE_SIGN_IN,
+        ].map((type: string) => {
+          return (
+            <Dropdown.Item key={type}>
+              <StudentScheduledAbsenceEditPopupBtn
+                recordType={type as iRecordType}
+                variant={'link'}
+                student={student}
+                onSaved={() => onNavBack()}
+              >
+                {
+                  // @ts-ignore
+                  StudentAbsenceService.getAbsenceTypeName(type)
+                }
+              </StudentScheduledAbsenceEditPopupBtn>
+            </Dropdown.Item>
+          )
+        })}
+      </DropdownButton>
+    )
+  }
+
   if (isLoading) {
     return <PageLoadingSpinner />
   }
@@ -125,7 +158,7 @@ const StudentAbsenceCreatePage = ({onNavBack}: iStudentAbsenceCreatePage) => {
               <Col md={8}>
                 <FlexContainer className={'btns justify-content flex-end with-gap lg-gap'}>
                   {canAccess ? getDropDown('Actual', 'danger', student) : null }
-                  {canAccess ? getDropDown('Scheduled', 'success', student) : null }
+                  {canAccess ? getScheduledDropDown('Scheduled', 'success', student) : null }
                   {getDropDown('Expected', 'primary', student, true)}
                 </FlexContainer>
               </Col>

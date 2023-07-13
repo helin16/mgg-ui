@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 import styled from 'styled-components';
-import {Alert, Col, Form, FormControl, Row, Spinner} from 'react-bootstrap';
+import {Alert, Col, FormControl, Row, Spinner} from 'react-bootstrap';
 import iVStudent from '../../../types/Synergetic/iVStudent';
 import {FlexContainer} from '../../../styles';
 import FormLabel from '../../../components/form/FormLabel';
@@ -8,7 +8,7 @@ import DateTimePicker from '../../../components/common/DateTimePicker';
 import SynLuAbsenceReasonSelector from '../../../components/student/SynLuAbsenceReasonSelector';
 import LoadingBtn from '../../../components/common/LoadingBtn';
 import * as Icons from 'react-bootstrap-icons';
-import Toaster from '../../../services/Toaster';
+import Toaster, {TOAST_TYPE_SUCCESS} from '../../../services/Toaster';
 import moment from 'moment-timezone';
 import FormErrorDisplay from '../../../components/form/FormErrorDisplay';
 import {useSelector} from 'react-redux';
@@ -49,7 +49,28 @@ const StudentScheduledAbsenceEditPanel = ({scheduledAbsence, recordType, student
   const {user} = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
-    setRecordEvent(record?.Event);
+    let isCanceled = false;
+    if (isCanceled) { return }
+    if (record === undefined) {
+      const now = moment();
+      // @ts-ignore
+      setRecord({
+        eventType: recordType,
+        startDate: now.local().format('YYYY-MM-DD'),
+        endDate: now.local().format('YYYY-MM-DD'),
+        time: `1970-01-01T${now.local().format('HH')}:${now.local().format('mm')}:00Z`,
+        monday: false,
+        tuesday: false,
+        wednesday: false,
+        thursday: false,
+        friday: false,
+      })
+    }
+
+    if (recordEvent === undefined) {
+      setRecordEvent(record?.Event);
+    }
+
     if (record?.Event?.Student) {
       setVStudent(record?.Event?.Student);
     } else if (student) {
@@ -57,7 +78,10 @@ const StudentScheduledAbsenceEditPanel = ({scheduledAbsence, recordType, student
     } else {
       setVStudent(null)
     }
-  }, [record, student]);
+    return () => {
+      isCanceled = true;
+    }
+  }, [record, student, recordEvent, recordType]);
 
 
   useEffect(() => {
@@ -85,7 +109,7 @@ const StudentScheduledAbsenceEditPanel = ({scheduledAbsence, recordType, student
             [roleId]: resp[0][roleId],
           }
         }, {});
-        if (record?.active !== true) {
+        if (`${record?.id || ''}`.trim() !== '' && record?.active !== true) {
           setCanEdit(false);
         } else {
           setCanEdit(Object.keys(canAccessRoles).length > 0 || resp[1].length > 0);
@@ -103,7 +127,7 @@ const StudentScheduledAbsenceEditPanel = ({scheduledAbsence, recordType, student
     return () => {
       isCanceled = true;
     }
-  }, [user, vStudent?.StudentYearLevel, record?.active]);
+  }, [user, vStudent?.StudentYearLevel, record?.active, record?.id]);
 
 
   const preCheck = (): boolean => {
@@ -124,8 +148,6 @@ const StudentScheduledAbsenceEditPanel = ({scheduledAbsence, recordType, student
   }
 
   const doSubmission = async () => {
-    console.log('recordEvent', recordEvent);
-    console.log('record', record);
     const eventData = {
       ...(recordEvent || {}),
       type: recordType,
@@ -136,10 +158,10 @@ const StudentScheduledAbsenceEditPanel = ({scheduledAbsence, recordType, student
       Comments: recordEvent?.Comments || '',
     };
     const event = await (`${record?.eventId || ''}`.trim() === '' ? StudentAbsenceService.create(eventData) : StudentAbsenceService.update(record?.eventId || '', eventData));
-    console.log('event', event);
 
     const data = {
       ...(record || {}),
+      hasNote: false,
       eventType: recordType,
       eventId: event.id,
       time: record?.time || '',
@@ -152,7 +174,11 @@ const StudentScheduledAbsenceEditPanel = ({scheduledAbsence, recordType, student
       friday: record?.friday || false,
     }
 
-    const savedRecord = await (`${record?.id || ''}`.trim() === '' ? StudentScheduledAbsenceService.create(data) : StudentScheduledAbsenceService.update(record?.id || '', data))
+    const [savedRecord,] = await Promise.all([
+      (`${record?.id || ''}`.trim() === '' ? StudentScheduledAbsenceService.create(data) : StudentScheduledAbsenceService.update(record?.id || '', data)),
+      StudentAbsenceService.remove(event.id, {type: recordType}),
+    ])
+    Toaster.showToast(`Scheduled Successfully for ${student?.StudentNameInternal}.`, TOAST_TYPE_SUCCESS);
     onSaved && onSaved(savedRecord);
   }
 
@@ -204,6 +230,22 @@ const StudentScheduledAbsenceEditPanel = ({scheduledAbsence, recordType, student
     })
   }
 
+  const getCheckInput = (isChecked: boolean | undefined) => {
+    return (isChecked === true ? <Icons.CheckSquareFill className={'text-success'} /> : <Icons.Square />)
+  }
+
+  const getCheckedDayOfWeekInputDiv = (label: string, fieldName: string) => {
+    // @ts-ignore
+    const isChecked = fieldName in (record || {}) ? record[fieldName] === true : false;
+    return (
+      <div className={'text-center cursor-pointer'} onClick={() => updateRecord(fieldName, !isChecked)}>
+        <FormLabel label={label} />
+        <div>
+          {getCheckInput(isChecked)}
+        </div>
+      </div>
+    )
+  }
 
   if (isLoading) {
     return <Spinner animation={'border'} />
@@ -230,14 +272,9 @@ const StudentScheduledAbsenceEditPanel = ({scheduledAbsence, recordType, student
           </Row>
           <Row className={'space bottom-lg'}>
             <Col xs={12}>
-              <FlexContainer className={'cursor-pointer withGap'} onClick={() => canEdit && updateRecordEvent('hasNote', (!recordEvent?.hasNote))}>
+              <FlexContainer className={'cursor-pointer withGap lg-gap'} onClick={() => updateRecordEvent('hasNote', !(recordEvent?.hasNote))}>
                 <b>Notification Received:</b>{' '}
-                <input
-                  disabled={canEdit !== true}
-                  type={'checkbox'}
-                  checked={recordEvent?.hasNote === true}
-                  onChange={(event) => updateRecordEvent('hasNote', event.target.checked)}
-                />
+                {getCheckInput(recordEvent?.hasNote)}
               </FlexContainer>
             </Col>
           </Row>
@@ -283,8 +320,6 @@ const StudentScheduledAbsenceEditPanel = ({scheduledAbsence, recordType, student
                         <TimePicker
                           value={`${record?.time || ""}`.trim() === '' ? undefined : moment(`${record?.time || ""}`).utc().format("HH:mm")}
                           onChange={(hours, minutes) => {
-                            console.log('hours', hours);
-                            console.log('minutes', minutes);
                             updateRecord('time', `1970-01-01T${hours}:${minutes}:00Z`)
                           }}
                         />
@@ -294,26 +329,11 @@ const StudentScheduledAbsenceEditPanel = ({scheduledAbsence, recordType, student
                 </Col>
                 <Col md={6}>
                   <FlexContainer className={'justify-content space-between align-items center'} style={{height: '100%'}}>
-                    <div className={'text-center'}>
-                      <FormLabel label={'MON'} />
-                      <Form.Check checked={record?.monday || false} onChange={(event) => updateRecord('monday', event.target.checked)}/>
-                    </div>
-                    <div className={'text-center'}>
-                      <FormLabel label={'TUE'} />
-                      <Form.Check checked={record?.tuesday || false} onChange={(event) => updateRecord('tuesday', event.target.checked)} />
-                    </div>
-                    <div className={'text-center'}>
-                      <FormLabel label={'WED'} />
-                      <Form.Check checked={record?.wednesday || false} onChange={(event) => updateRecord('wednesday', event.target.checked)} />
-                    </div>
-                    <div className={'text-center'}>
-                      <FormLabel label={'THU'} />
-                      <Form.Check checked={record?.thursday || false} onChange={(event) => updateRecord('thursday', event.target.checked)} />
-                    </div>
-                    <div className={'text-center'}>
-                      <FormLabel label={'FRI'} />
-                      <Form.Check checked={record?.friday || false} onChange={(event) => updateRecord('friday', event.target.checked)} />
-                    </div>
+                    {getCheckedDayOfWeekInputDiv('MON', 'monday')}
+                    {getCheckedDayOfWeekInputDiv('TUE', 'tuesday')}
+                    {getCheckedDayOfWeekInputDiv('WED', 'wednesday')}
+                    {getCheckedDayOfWeekInputDiv('THU', 'thursday')}
+                    {getCheckedDayOfWeekInputDiv('FRI', 'friday')}
                   </FlexContainer>
                 </Col>
               </Row>
