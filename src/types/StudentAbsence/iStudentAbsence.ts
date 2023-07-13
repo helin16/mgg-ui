@@ -29,6 +29,7 @@ type iRecord = {
   UpdatedBy?: iSynCommunity | null;
   ApprovedBy?: iSynCommunity | null;
   isExpectedEvent: boolean;
+  expectedEventId: number | null;
   Expected?: iRecord;
 }
 

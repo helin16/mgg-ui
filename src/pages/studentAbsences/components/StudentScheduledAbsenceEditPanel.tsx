@@ -151,6 +151,7 @@ const StudentScheduledAbsenceEditPanel = ({scheduledAbsence, recordType, student
     const eventData = {
       ...(recordEvent || {}),
       type: recordType,
+      isExpectedEvent: true,
       StudentID: vStudent?.StudentID,
       hasNote: recordEvent?.hasNote || false,
       AbsenceCode: recordEvent?.AbsenceCode,
