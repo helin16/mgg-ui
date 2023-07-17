@@ -9,7 +9,7 @@ const BudgetForecastPanel = () => {
   return (
     <Wrappers>
       <h4>BudgetForecastPanel</h4>
-      <StudentNumberForecastDashboard />
+      <StudentNumberForecastDashboard showExplanationPanel={false} showFinanceFigures={true} showSumPanels={false}/>
     </Wrappers>
   )
 }

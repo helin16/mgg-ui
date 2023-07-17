@@ -60,7 +60,7 @@ const StudentAbsenceEditPanel = ({
   const [absenceReasonCode, setAbsenceReasonCode] = useState(
     studentAbsenceRecord?.AbsenceCode || null
   );
-  const [comments, setComments] = useState(
+  const [recordComments, setRecordComments] = useState(
     studentAbsenceRecord?.Comments || ""
   );
   const [canEdit, setCanEdit] = useState(false);
@@ -145,12 +145,12 @@ const StudentAbsenceEditPanel = ({
       errors.absenceReasonCode = "Reason is required.";
     }
 
-    const commentsStr = `${comments || ""}`.trim();
+    const commentsStr = `${recordComments || ""}`.trim();
     if (
       reasonCode === STUDENT_ABSENCE_REASON_CODE_OTHER &&
       commentsStr === ""
     ) {
-      errors.comments = "Comments is required.";
+      errors.recordComments = "Comments is required.";
     }
 
     setErrorMap(errors);
@@ -167,7 +167,7 @@ const StudentAbsenceEditPanel = ({
       AbsenceCode: absenceReasonCode,
       hasNote,
       EventDate: eventDate,
-      Comments: comments,
+      Comments: `${recordComments || ''}`.trim(),
       ...(`${record?.id || ""}`.trim() === "" ? { isExpectedEvent } : {})
     };
     // console.log('data', data);
@@ -385,10 +385,14 @@ const StudentAbsenceEditPanel = ({
                 }
               />
               <FormControl
-                value={`${comments || ''}`.trim()}
+                type='text' placeholder='Name' name='name'
+                value={recordComments || ''}
                 disabled={canEdit !== true || isSubmitting === true}
+                onKeyDown={event => {
+                  event.stopPropagation();
+                }}
                 onChange={event => {
-                  setComments(`${event.target.value || ''}`.trim())
+                  setRecordComments(event.target.value || '')
                 }}
               />
               <FormErrorDisplay errorsMap={errorMap} fieldName={"comments"} />

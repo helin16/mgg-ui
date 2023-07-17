@@ -121,8 +121,10 @@ const initLeadMap: iLeadMap = {
 
 type iStudentNumberForecastDashboard = {
   showExplanationPanel?: boolean;
+  showFinanceFigures?: boolean;
+  showSumPanels?: boolean;
 }
-const StudentNumberForecastDashboard = ({showExplanationPanel}: iStudentNumberForecastDashboard) => {
+const StudentNumberForecastDashboard = ({showExplanationPanel = true, showFinanceFigures = false, showSumPanels = true}: iStudentNumberForecastDashboard) => {
   const {user} = useSelector((state: RootState) => state.auth);
   const [selectedCampusCodes, setSelectedCampusCodes] = useState<string[]>(['E', 'S', 'J']);
   const [currentStudentMap, setCurrentStudentMap] = useState<iStudentMap>({});
@@ -362,6 +364,23 @@ const StudentNumberForecastDashboard = ({showExplanationPanel}: iStudentNumberFo
     )
   }
 
+  const getSumPanels = () => {
+    if (showSumPanels !== true) {
+      return null;
+    }
+
+    return (
+      <Row className={'section-row sum-div-wrapper'}>
+        {getSumPanel('Current Students', currentStudentMap.total)}
+        {getSumPanel('Current Leavers', currentStudentLeaverMap.total)}
+        {getSumPanel('Confirmed', nextYearFunnelLeadMap.confirmed.total)}
+        {getSumPanel('In Progress', nextYearFunnelLeadMap.inProgress.total)}
+        {getSumPanel(`Future ${nextFileYear}`, futureNextYearMap.total)}
+        {getSumPanel('Leads & Tours', nextYearFunnelLeadMap.leadsAndTours.total)}
+      </Row>
+    )
+  }
+
   const getContent = () => {
     if (isLoading === true) {
       return <PageLoadingSpinner />;
@@ -369,15 +388,7 @@ const StudentNumberForecastDashboard = ({showExplanationPanel}: iStudentNumberFo
 
     return (
       <>
-        <Row className={'section-row sum-div-wrapper'}>
-          {getSumPanel('Current Students', currentStudentMap.total)}
-          {getSumPanel('Current Leavers', currentStudentLeaverMap.total)}
-          {getSumPanel('Confirmed', nextYearFunnelLeadMap.confirmed.total)}
-          {getSumPanel('In Progress', nextYearFunnelLeadMap.inProgress.total)}
-          {getSumPanel(`Future ${nextFileYear}`, futureNextYearMap.total)}
-          {getSumPanel('Leads & Tours', nextYearFunnelLeadMap.leadsAndTours.total)}
-        </Row>
-
+        {getSumPanels()}
         <Table hover className={'lead-table'}>
           <thead>
             <tr>
