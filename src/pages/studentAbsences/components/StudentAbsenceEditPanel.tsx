@@ -166,10 +166,12 @@ const StudentAbsenceEditPanel = ({
       StudentID: vStudent?.StudentID,
       AbsenceCode: absenceReasonCode,
       hasNote,
-      EventDate: moment(eventDate).toISOString(),
+      EventDate: eventDate,
       Comments: comments,
       ...(`${record?.id || ""}`.trim() === "" ? { isExpectedEvent } : {})
     };
+    // console.log('data', data);
+    // return;
     if (onIsSubmitting) {
       onIsSubmitting(true);
     } else {
