@@ -98,8 +98,8 @@ const SchoolBoxRouter = ({path, remoteUrl}: {path: string, remoteUrl: string}) =
       return <StudentAbsenceParentSubmissionForm />
     }
 
-    // case '/student_inout/home': {
-    case '/student_absence/home': {
+    case '/student_inout/home': {
+    // case '/student_absence/home': {
       removeSchoolBoxIframe();
       return <StudentAbsencePage />
     }

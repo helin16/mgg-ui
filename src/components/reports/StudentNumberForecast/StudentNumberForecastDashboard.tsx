@@ -118,7 +118,11 @@ const initLeadMap: iLeadMap = {
   inProgress: {},
   leadsAndTours: {},
 }
-const StudentNumberForecastDashboard = () => {
+
+type iStudentNumberForecastDashboard = {
+  showExplanationPanel?: boolean;
+}
+const StudentNumberForecastDashboard = ({showExplanationPanel}: iStudentNumberForecastDashboard) => {
   const {user} = useSelector((state: RootState) => state.auth);
   const [selectedCampusCodes, setSelectedCampusCodes] = useState<string[]>(['E', 'S', 'J']);
   const [currentStudentMap, setCurrentStudentMap] = useState<iStudentMap>({});
@@ -433,8 +437,11 @@ const StudentNumberForecastDashboard = () => {
     )
   }
 
-  return (
-    <Wrapper>
+  const getExplanationPanel = () => {
+    if (showExplanationPanel !== true) {
+      return null;
+    }
+    return (
       <ExplanationPanel
         text={
           <>
@@ -450,6 +457,12 @@ const StudentNumberForecastDashboard = () => {
           </>
         }
       />
+    )
+  }
+
+  return (
+    <Wrapper>
+      {getExplanationPanel()}
       <PanelTitle className={'title-row section-row'}>
         <div className={'title'}>{nextFileYear} Semester {currentFileSemester} Student Numbers</div>
         <SynCampusSelector
