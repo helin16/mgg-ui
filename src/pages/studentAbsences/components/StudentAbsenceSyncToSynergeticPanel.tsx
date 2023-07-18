@@ -15,7 +15,7 @@ import LoadingBtn from '../../../components/common/LoadingBtn';
 type iStudentAbsenceSyncToSynergeticPanel = {
   recordType: iRecordType;
   studentAbsenceRecord: iStudentAbsence
-  onSaved?: (newRecord: iStudentAbsence | null) => void;
+  onSaved?: (newRecord: iStudentAbsence | null, jobQueued: boolean) => void;
   onIsSubmitting?: (isSubmitting: boolean) => void;
   isSaving?: boolean;
 }
@@ -66,12 +66,12 @@ const StudentAbsenceSyncToSynergeticPanel = ({studentAbsenceRecord, recordType, 
     });
     setLatestMsg(msg);
     Toaster.showToast(
-      `Job queued successfully, please allow 5 minutes for system to process it to Synergetic.`,
+      `Sync request successfully.`,
       TOAST_TYPE_SUCCESS
     );
     if (onSaved) {
       const records = await StudentAbsenceService.getAll({where: JSON.stringify({id: studentAbsenceRecord.id, type: recordType}), include: `Student,AbsenceReason,CreatedBy,ApprovedBy,Expected,SyncdBy`,});
-      onSaved((records.data || []).length > 0 ? records.data[0] : null);
+      onSaved((records.data || []).length > 0 ? records.data[0] : null, true);
     }
   }
 

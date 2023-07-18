@@ -14,7 +14,7 @@ type iStudentAbsenceEditPopupBtn = ButtonProps & {
   isShowing?: boolean;
   isExpectedEvent?: boolean;
   studentAbsenceRecord?: iStudentAbsence
-  onSaved?: (newRecord: iStudentAbsence | null) => void;
+  onSaved?: (newRecord: iStudentAbsence | null, jobQueued: boolean) => void;
   student?: iVStudent;
 }
 
@@ -45,10 +45,10 @@ const StudentAbsenceEditPopupBtn = ({studentAbsenceRecord, recordType, children,
           recordType={recordType}
           student={student}
           isExpectedEvent={isExpectedEvent}
-          onSaved={(newData) => {
+          onSaved={(newData, jobQueued) => {
             setIsShowingPopup(false);
             if (onSaved) {
-              onSaved(newData)
+              onSaved(newData, jobQueued)
             }
           }}
           isSaving={isSubmitting}

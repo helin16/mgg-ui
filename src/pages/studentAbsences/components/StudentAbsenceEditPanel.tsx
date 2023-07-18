@@ -30,7 +30,7 @@ import StudentAbsenceSyncToSynergeticPanel from "./StudentAbsenceSyncToSynergeti
 type iStudentAbsenceEditPanel = {
   recordType: iRecordType;
   studentAbsenceRecord?: iStudentAbsence;
-  onSaved?: (newRecord: iStudentAbsence | null) => void;
+  onSaved?: (newRecord: iStudentAbsence | null, jobQueued: boolean) => void;
   onIsSubmitting?: (isSubmitting: boolean) => void;
   onCancel?: (isSubmitting: boolean) => void;
   isSaving?: boolean;
@@ -190,7 +190,7 @@ const StudentAbsenceEditPanel = ({
           TOAST_TYPE_SUCCESS
         );
         if (onSaved) {
-          onSaved(resp);
+          onSaved(resp, false);
         }
       })
       .catch(err => {
@@ -225,7 +225,7 @@ const StudentAbsenceEditPanel = ({
         );
         setRecord(resp);
         if (onSaved) {
-          onSaved(resp);
+          onSaved(resp, false);
         }
       })
       .catch(err => {
