@@ -1,6 +1,6 @@
 type iLuYearLevel = {
   Campus: string;
-  Code: number;
+  Code: string | number;
   YearLevelSort: number;
   Description: string;
   YearLevelCoordinator: string;
