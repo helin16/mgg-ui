@@ -385,7 +385,9 @@ const StudentAbsenceEditPanel = ({
                 }
               />
               <FormControl
-                type='text' placeholder='Name' name='name'
+                type='text'
+                placeholder='Comments'
+                name='comments'
                 value={recordComments || ''}
                 disabled={canEdit !== true || isSubmitting === true}
                 onKeyDown={event => {
