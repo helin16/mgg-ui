@@ -84,6 +84,7 @@ const UnSyncdStudentAbsenceListPanel = ({ type }: iStudentAbsenceListPanel) => {
   const [isLoading, setIsLoading] = useState(false);
   const [queuedIds, setQueuedIds] = useState<number[]>([]);
   const [count, setCount] = useState(0);
+  
 
   useEffect(() => {
     let isCanceled = false;
