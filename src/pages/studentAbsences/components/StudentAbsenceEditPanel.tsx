@@ -386,7 +386,7 @@ const StudentAbsenceEditPanel = ({
               />
               <FormControl
                 type='text'
-                placeholder='Comments'
+                placeholder='more details for the absence reason...'
                 name='comments'
                 value={recordComments || ''}
                 disabled={canEdit !== true || isSubmitting === true}
