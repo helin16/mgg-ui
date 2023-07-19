@@ -206,7 +206,6 @@ const StudentNumberDetailsPopupBtn = ({
         );
       }
     },
-    ,
     {
       key: "currentForm",
       header: "Form",
