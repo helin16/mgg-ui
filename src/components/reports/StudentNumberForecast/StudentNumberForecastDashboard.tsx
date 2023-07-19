@@ -223,7 +223,17 @@ const StudentNumberForecastDashboard = ({
     if (yearLevelCode in tuitFeeMap) {
       // @ts-ignore
       tuitFeeMap[yearLevelCode]
-        .filter(tuitFee => {
+        .filter((tuitFee, index) => {
+          // @ts-ignore
+          // this for ecl
+          if (Number(yearLevelCode) > 12) {
+            // @ts-ignore
+            if (`${record.StudentTuitionVariationType}`.trim() !== '') {
+              // @ts-ignore
+              return `${tuitFee.TuitionVariationType}`.trim() === `${record.StudentTuitionVariationType}`.trim();
+            }
+            return index === 0;
+          }
           // @ts-ignore
           if (record.FullFeeFlag === true) {
             return tuitFee.TuitionVariationType === AUTO_TUITION_VARIATION_TYPE_FULL_FEE
