@@ -220,6 +220,19 @@ const StudentNumberDetailsPopupBtn = ({
       }
     },
     {
+      key: "fullFee",
+      header: "FullFee?",
+      cell: (col: iTableColumn, record: iVStudent | iFunnelLead) => {
+        return (
+          <td key={col.key}>
+            {"FullFeeFlag" in record && record.FullFeeFlag === true
+              ? 'Y'
+              : ""}
+          </td>
+        );
+      }
+    },
+    {
       key: "ProposingEntryYear",
       header: "Proposing Entry Year",
       cell: (col: iTableColumn, record: iVStudent | iFunnelLead) => {
