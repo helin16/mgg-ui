@@ -278,6 +278,7 @@ const StudentNumberForecastTable = ({
     <Wrapper className={className}>
       <Table
         hover
+        responsive
         className={"lead-table"}
         columns={getColumns()}
         rows={yLevelArr}

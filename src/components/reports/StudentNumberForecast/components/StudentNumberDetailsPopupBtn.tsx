@@ -333,6 +333,7 @@ const StudentNumberDetailsPopupBtn = ({
         <TableWrapper>
           <Table
             hover
+            responsive
             columns={getColumns()}
             rows={records
               .sort((r1, r2) =>
