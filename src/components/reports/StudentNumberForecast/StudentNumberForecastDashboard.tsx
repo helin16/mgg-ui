@@ -256,7 +256,7 @@ const StudentNumberForecastDashboard = ({
       const sID = `${record.StudentID}`;
       // @ts-ignore
       currentConcessions = concessMap[sID].filter(concession => {
-        return (moment(concession.EffectiveToDate).year() >= currentFileYear || concession.EffectiveToDate === null);
+        return (moment(concession.EffectiveFromDate).year() <= currentFileYear || concession.EffectiveFromDate === null) &&(moment(concession.EffectiveToDate).year() >= currentFileYear || concession.EffectiveToDate === null);
       }).map((concession: iSynVDebtorStudentConcession) => ({...concession, concessionAmount: MathHelper.mul(yearLevelTuitionFees, MathHelper.div(concession.DiscountPercentage, 100))}));
       // @ts-ignore
       nextYearConcessions = concessMap[sID].filter(concession => {
