@@ -29,6 +29,11 @@ import iVStudent from "../../../types/Synergetic/iVStudent";
 import SynVDebtorStudentConcessionService from "../../../services/Synergetic/Finance/SynVDebtorStudentConcessionService";
 import StudentNumberForecastTable from "./components/StudentNumberForecastTable";
 import StudentNumberDetailsPopupBtn from './components/StudentNumberDetailsPopupBtn';
+import SynVDebtorFeeService from '../../../services/Synergetic/Finance/SynVDebtorFeeService';
+import iSynVDebtorFee, {
+  AUTO_TUITION_CODE_CONSOLIDATED_CHARGES,
+  AUTO_TUITION_CODE_TUITION
+} from '../../../types/Synergetic/Finance/iSynVDebtorFee';
 
 const Wrapper = styled.div`
   .title-row {
@@ -120,6 +125,9 @@ const StudentNumberForecastDashboard = ({
   );
   const [yearLevelMap, setYearLevelMap] = useState<{
     [key: string]: iLuYearLevel;
+  }>({});
+  const [tuitionFeeMap, setTuitionFeeMap] = useState<{
+    [key: string]: iSynVDebtorFee[];
   }>({});
   const [yearLevelCodes, setYearLevelCodes] = useState<string[]>([]);
   const [futureNextYearMap, setFutureNextYearMap] = useState<iMap>({});
@@ -230,13 +238,19 @@ const StudentNumberForecastDashboard = ({
           CurrentSemesterOnlyFlag: true
         }),
         perPage: 99999999
+      }),
+      SynVDebtorFeeService.getAll({
+        where: JSON.stringify({
+          ActiveFlag: true,
+          AutoTuitionCode: [AUTO_TUITION_CODE_TUITION, AUTO_TUITION_CODE_CONSOLIDATED_CHARGES],
+        }),
+        perPage: 99999999
       })
     ])
       .then(resp => {
         if (isCanceled) return;
         let currentStudMap: iStudentMap = {};
         let currentLeaverStudMap: iStudentMap = {};
-        // let currentContinuerStudMap: iStudentMap = {};
         resp[0].forEach(student => {
           const yearLevelCode = student.StudentYearLevel;
           currentStudMap = {
@@ -266,13 +280,6 @@ const StudentNumberForecastDashboard = ({
               ]
             };
           }
-          // else {
-          //   currentContinuerStudMap = {
-          //     ...currentContinuerStudMap,
-          //     total: [...(currentContinuerStudMap.total || []), ...((selectedCampusCodes.length === 0 || selectedCampusCodes.indexOf(student.StudentCampus) >= 0) ? [student] : [])],
-          //     [yearLevelCode]: [...(currentContinuerStudMap[yearLevelCode] || []), student],
-          //   }
-          // }
         });
         setCurrentStudentMap(currentStudMap);
         setCurrentStudentLeaverMap(currentLeaverStudMap);
@@ -303,6 +310,18 @@ const StudentNumberForecastDashboard = ({
             };
           }, initLeadMap)
         );
+        setTuitionFeeMap(
+          (resp[4].data || []).reduce((map, tuitionFee) => {
+            return ({
+              ...map,
+              [tuitionFee.YearLevel]: [
+                // @ts-ignore
+                ...(tuitionFee.YearLevel in map ? map[tuitionFee.YearLevel] : []),
+                tuitionFee,
+              ]
+            })
+          }, {})
+        )
       })
       .catch(err => {
         if (isCanceled) return;
@@ -409,6 +428,7 @@ const StudentNumberForecastDashboard = ({
           currentStudentLeaverMap={currentStudentLeaverMap}
           nextYearFunnelLeadMap={nextYearFunnelLeadMap}
           futureNextYearMap={futureNextYearMap}
+          tuitionFeeMap={tuitionFeeMap}
         />
       </>
     );

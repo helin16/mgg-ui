@@ -8,11 +8,12 @@ import moment from "moment-timezone";
 const WESTPAC_SCRIPT_URL = 'https://api.payway.com.au/rest/v1/payway.js';
 
 type iWestpacCreditCardInputPanel = {
+  className?: string;
   onCardValid?: () => void;
   onCardInValid?: () => void;
   getFrameObj?: (frame: any) => void;
 }
-const WestpacCreditCardInputPanel = ({onCardValid, onCardInValid, getFrameObj}: iWestpacCreditCardInputPanel) => {
+const WestpacCreditCardInputPanel = ({onCardValid, onCardInValid, getFrameObj, className}: iWestpacCreditCardInputPanel) => {
   const payWayScriptId = "payway-script";
 
   const [isLoading, setIsLoading] = useState(true);
@@ -113,7 +114,7 @@ const WestpacCreditCardInputPanel = ({onCardValid, onCardInValid, getFrameObj}: 
   };
 
   return (
-    <div>
+    <div className={className}>
       <div id={payWayHtmlId} />
       {getContent()}
     </div>

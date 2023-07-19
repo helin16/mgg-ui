@@ -1,15 +1,14 @@
 import styled from "styled-components";
 import FormLabel from "../../components/form/FormLabel";
-import {Alert, Col, Form, FormControl, FormGroup, Row} from "react-bootstrap";
+import { Alert, Col, Form, FormControl, FormGroup, Row } from "react-bootstrap";
 import React, { useState } from "react";
-import {FlexContainer} from '../../styles';
-import WestpacCreditCardInputPanel from '../../components/Payments/Westpac/WestpacCreditCardInputPanel';
-import LoadingBtn from '../../components/common/LoadingBtn';
-import FormErrorDisplay from '../../components/form/FormErrorDisplay';
-import Toaster, {TOAST_TYPE_ERROR} from '../../services/Toaster';
-import PaymentService from '../../services/Payments/PaymentService';
+import { FlexContainer } from "../../styles";
+import WestpacCreditCardInputPanel from "../../components/Payments/Westpac/WestpacCreditCardInputPanel";
+import LoadingBtn from "../../components/common/LoadingBtn";
+import FormErrorDisplay from "../../components/form/FormErrorDisplay";
+import Toaster, { TOAST_TYPE_ERROR } from "../../services/Toaster";
+import PaymentService from "../../services/Payments/PaymentService";
 
-const MAIN_WEBSITE_URL = 'https://mentonegirls.vic.edu.au';
 const Wrapper = styled.div`
   font-size: 1rem;
   .notice {
@@ -23,7 +22,7 @@ const Wrapper = styled.div`
   .input-div {
     margin-bottom: 1rem;
   }
-  .form-control{
+  .form-control {
     &.is-invalid {
       border-color: #dc3545;
     }
@@ -36,15 +35,17 @@ const Wrapper = styled.div`
       opacity: 1 !important;
     }
   }
-  
+
   .success-msg {
     margin-top: 1rem;
   }
 `;
 const OnlineDonation = () => {
-  const [formValues, setFormValues] = useState<{ [key: string]: string | boolean }>({});
+  const [formValues, setFormValues] = useState<{
+    [key: string]: string | boolean;
+  }>({});
   const [creditCardIsValid, setCreditCardIsValid] = useState(false);
-  const [errorMap, setErrorMap] = useState<{[key: string]: string}>({});
+  const [errorMap, setErrorMap] = useState<{ [key: string]: string }>({});
   const [frameObj, setFrameObj] = useState<any>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -67,77 +68,114 @@ const OnlineDonation = () => {
     isRequired = false
   ) => {
     return (
-      <FormGroup className={'input-div form-group'}>
-        {label === null ? null : <FormLabel label={label} isRequired={isRequired} />}
-        <FormControl value={value} placeholder={placeholder} onChange={event => onChange(event.target.value)} isInvalid={fieldName in errorMap} />
+      <FormGroup className={"mentone-form-group input-div form-group"}>
+        {label === null ? null : (
+          <FormLabel label={label} isRequired={isRequired} />
+        )}
+        <FormControl
+          value={value}
+          className={`mentone-input`}
+          placeholder={placeholder}
+          onChange={event => onChange(event.target.value)}
+          isInvalid={fieldName in errorMap}
+        />
         <FormErrorDisplay errorsMap={errorMap} fieldName={fieldName} />
       </FormGroup>
     );
   };
 
   const preSubmit = () => {
-    const errors: {[key: string]: string} = {};
+    const errors: { [key: string]: string } = {};
 
-    ['first_name', 'last_name', 'email', 'phone', 'amount', 'donation_direction'].forEach((field) => {
-      const value = `${field in formValues ? formValues[field] : ''}`.trim();
-      if (value === '') {
+    [
+      "first_name",
+      "last_name",
+      "email",
+      "phone",
+      "amount",
+      "donation_direction"
+    ].forEach(field => {
+      const value = `${field in formValues ? formValues[field] : ""}`.trim();
+      if (value === "") {
         errors[field] = `${field} is required.`;
       }
     });
     if (!frameObj) {
-      errors.frameObj = 'Error when init payment gateway...';
+      errors.frameObj = "Error when init payment gateway...";
     }
 
     setErrorMap(errors);
     return Object.keys(errors).length === 0;
-  }
+  };
 
   const onSubmit = async () => {
-    if (!(preSubmit())) {
+    if (!preSubmit()) {
       return;
     }
     setIsSaving(true);
     frameObj.getToken((err: any, data: any) => {
       if (err) {
-        const errMsg = 'Error occurred when connecting payment gateway, please check your credit card details and try again.';
+        const errMsg =
+          "Error occurred when connecting payment gateway, please check your credit card details and try again.";
         Toaster.showToast(errMsg, TOAST_TYPE_ERROR);
         return;
       }
       PaymentService.makeADonation({
         ...formValues,
         cc: data
-      }).then(resp => {
-        if(resp.success === true) {
-          setSuccessMsg(resp.message || '');
+      })
+        .then(resp => {
+          if (resp.success === true) {
+            setSuccessMsg(resp.message || "");
+            return;
+          }
+          Toaster.showToast(
+            resp.message ||
+              "A unknown error occurred, please refresh page and try again.",
+            TOAST_TYPE_ERROR
+          );
           return;
-        }
-        Toaster.showToast(resp.message || 'A unknown error occurred, please refresh page and try again.', TOAST_TYPE_ERROR);
-        return;
-      }).catch(err => {
-        Toaster.showApiError(err);
-      }).finally(() => {
-        setIsSaving(false);
-      });
-    })
-  }
+        })
+        .catch(err => {
+          Toaster.showApiError(err);
+        })
+        .finally(() => {
+          setIsSaving(false);
+        });
+    });
+  };
 
   if (successMsg !== null) {
-    if (`${successMsg || ''}`.trim() === '') {
+    if (`${successMsg || ""}`.trim() === "") {
       return (
-        <Alert variant={'success'} className={'success-msg'}>
+        <Alert variant={"success"} className={"success-msg"}>
           <h3>Thank you!</h3>
-          <p>A sincere thank you for your donation.  A receipt for tax purposes will be forwarded to you in the next 2-3 business days..</p>
-          <p>For any queries regarding your donation, please get in contact with us via our website: <a href={MAIN_WEBSITE_URL}>{MAIN_WEBSITE_URL}</a> </p>
+          <p>
+            A sincere thank you for your donation. A receipt for tax purposes
+            will be forwarded to you in the next 2-3 business days..
+          </p>
+          <p>
+            For any queries regarding your donation, please get in contact with
+            us via our website:{" "}
+            <a href={process.env.REACT_APP_MAIN_WEBSITE_URL || ""}>
+              {process.env.REACT_APP_MAIN_WEBSITE_URL || ""}
+            </a>{" "}
+          </p>
         </Alert>
-      )
+      );
     }
-    return <div dangerouslySetInnerHTML={{__html: `${successMsg || ''}`.trim()}} className={'success-msg'}/>
+    return (
+      <div
+        dangerouslySetInnerHTML={{ __html: `${successMsg || ""}`.trim() }}
+        className={"success-msg"}
+      />
+    );
   }
 
   return (
-    <Wrapper>
-      <Row>
-        <Col md={6}>
+    <Wrapper className={`mentone-form`}>
+      <Row className={`mentone-row`}>
+        <Col md={6} className={`mentone-col`}>
           {getInputDiv(
             "first_name",
             "First Name",
@@ -152,7 +190,7 @@ const OnlineDonation = () => {
             true
           )}
         </Col>
-        <Col md={6}>
+        <Col md={6} className={`mentone-col`}>
           {getInputDiv(
             "last_name",
             "Last Name",
@@ -167,7 +205,7 @@ const OnlineDonation = () => {
             true
           )}
         </Col>
-        <Col md={6}>
+        <Col md={6} className={`mentone-col`}>
           {getInputDiv(
             "email",
             "Email",
@@ -182,7 +220,7 @@ const OnlineDonation = () => {
             true
           )}
         </Col>
-        <Col md={6}>
+        <Col md={6} className={`mentone-col`}>
           {getInputDiv(
             "phone",
             "Phone Number",
@@ -198,13 +236,13 @@ const OnlineDonation = () => {
           )}
         </Col>
       </Row>
-      <Row>
-        <Col>
+      <Row className={`mentone-row`}>
+        <Col className={`mentone-col`}>
           <FormLabel label={"Address"} />
         </Col>
       </Row>
-      <Row>
-        <Col md={12}>
+      <Row className={`mentone-row`}>
+        <Col md={12} className={`mentone-col`}>
           {getInputDiv(
             "address_street",
             null,
@@ -218,7 +256,7 @@ const OnlineDonation = () => {
             }
           )}
         </Col>
-        <Col md={4}>
+        <Col md={4} className={`mentone-col`}>
           {getInputDiv(
             "address_city",
             null,
@@ -232,7 +270,7 @@ const OnlineDonation = () => {
             }
           )}
         </Col>
-        <Col md={4}>
+        <Col md={4} className={`mentone-col`}>
           {getInputDiv(
             "address_state",
             null,
@@ -246,7 +284,7 @@ const OnlineDonation = () => {
             }
           )}
         </Col>
-        <Col md={4}>
+        <Col md={4} className={`mentone-col`}>
           {getInputDiv(
             "address_postcode",
             null,
@@ -261,8 +299,8 @@ const OnlineDonation = () => {
           )}
         </Col>
       </Row>
-      <Row>
-        <Col xs={12}>
+      <Row className={`mentone-row`}>
+        <Col xs={12} className={`mentone-col`}>
           {getInputDiv(
             "amount",
             "Donation Amount",
@@ -281,12 +319,13 @@ const OnlineDonation = () => {
           </div>
         </Col>
       </Row>
-      <Row>
-        <Col xs={12}>
-          <FormGroup className={"form-group input-div"}>
+      <Row className={`mentone-row`}>
+        <Col xs={12} className={`mentone-col`}>
+          <FormGroup className={"mentone-form-group form-group input-div"}>
             <FormLabel label={"Please direct my donation to"} isRequired />
             <Form.Select
-              isInvalid={'donation_direction' in errorMap}
+              className={`mentone-input mentone-select`}
+              isInvalid={"donation_direction" in errorMap}
               value={`${formValues.donation_direction || ""}`}
               onChange={event =>
                 setFormValues({
@@ -301,17 +340,22 @@ const OnlineDonation = () => {
               <option value={"Scholarship Fund"}>Scholarship Fund</option>
               <option value={"Building Fund"}>Building Fund</option>
               <option value={"Library"}>Library</option>
-              <option value={"Presentation Night Sponsorship"}>Presentation Night Sponsorship</option>
+              <option value={"Presentation Night Sponsorship"}>
+                Presentation Night Sponsorship
+              </option>
               <option value={"General"}>General</option>
             </Form.Select>
-            <FormErrorDisplay errorsMap={errorMap} fieldName={'donation_direction'} />
+            <FormErrorDisplay
+              errorsMap={errorMap}
+              fieldName={"donation_direction"}
+            />
           </FormGroup>
         </Col>
       </Row>
-      <Row>
-        <Col xs={12}>
+      <Row className={`mentone-row`}>
+        <Col xs={12} className={`mentone-col`}>
           <FormGroup
-            className={"form-group input-div"}
+            className={"mentone-form-group form-group input-div"}
             onClick={event =>
               setFormValues({
                 ...formValues,
@@ -330,23 +374,25 @@ const OnlineDonation = () => {
           </FormGroup>
         </Col>
       </Row>
-      <Row>
-        <Col xs={12}>
-          <FormGroup className={"form-group input-div"}>
+      <Row className={`mentone-row`}>
+        <Col xs={12} className={`mentone-col`}>
+          <FormGroup className={"mentone-form-group form-group input-div"}>
             <WestpacCreditCardInputPanel
+              className={`mentone-cc-form`}
               onCardValid={() => setCreditCardIsValid(true)}
               onCardInValid={() => setCreditCardIsValid(false)}
-              getFrameObj={(frame) => setFrameObj(frame)}
+              getFrameObj={frame => setFrameObj(frame)}
             />
-            <FormErrorDisplay errorsMap={errorMap} fieldName={'frameObj'} />
-            <FormErrorDisplay errorsMap={errorMap} fieldName={'cc'} />
+            <FormErrorDisplay errorsMap={errorMap} fieldName={"frameObj"} />
+            <FormErrorDisplay errorsMap={errorMap} fieldName={"cc"} />
           </FormGroup>
         </Col>
       </Row>
-      <Row>
-        <Col xs={12}>
-          <FormGroup className={"form-group input-div"}>
+      <Row className={`mentone-row`}>
+        <Col xs={12} className={`mentone-col`}>
+          <FormGroup className={"mentone-form-group form-group input-div"}>
             <LoadingBtn
+              className={`mentone-btn`}
               disabled={creditCardIsValid !== true}
               variant={"primary"}
               isLoading={isSaving}

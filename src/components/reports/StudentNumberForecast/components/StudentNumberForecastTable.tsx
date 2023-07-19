@@ -7,6 +7,7 @@ import iFunnelLead from "../../../../types/Funnel/iFunnelLead";
 import StudentNumberDetailsPopupBtn from "./StudentNumberDetailsPopupBtn";
 import styled from "styled-components";
 import {mainBlue} from '../../../../AppWrapper';
+import iSynVDebtorFee from '../../../../types/Synergetic/Finance/iSynVDebtorFee';
 
 type iStudentMap = { [key: string]: iVStudent[] };
 type iMap = { [key: string]: iFunnelLead[] };
@@ -24,6 +25,7 @@ type iStudentNumberForecastTable = {
   currentStudentLeaverMap: iStudentMap;
   nextYearFunnelLeadMap: iFunnelLeadMap;
   futureNextYearMap: iMap;
+  tuitionFeeMap: { [key: string]: iSynVDebtorFee[] };
 };
 const Wrapper = styled.div`
   .st-no-popup-btn {
