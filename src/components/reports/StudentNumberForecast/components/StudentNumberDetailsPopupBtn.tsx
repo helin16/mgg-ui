@@ -206,6 +206,20 @@ const StudentNumberDetailsPopupBtn = ({
         );
       }
     },
+    ,
+    {
+      key: "currentForm",
+      header: "Form",
+      cell: (col: iTableColumn, record: iVStudent | iFunnelLead) => {
+        return (
+          <td key={col.key}>
+            {"StudentForm" in record
+              ? record.StudentForm
+              : ""}
+          </td>
+        );
+      }
+    },
     {
       key: "ProposingEntryYear",
       header: "Proposing Entry Year",
