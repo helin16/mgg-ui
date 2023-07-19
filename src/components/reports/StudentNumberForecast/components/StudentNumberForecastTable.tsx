@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import * as _ from "lodash";
 import iLuYearLevel from "../../../../types/Synergetic/iLuYearLevel";
 import Table, { iTableColumn } from "../../../common/Table";
@@ -6,8 +6,9 @@ import iVStudent from "../../../../types/Synergetic/iVStudent";
 import iFunnelLead from "../../../../types/Funnel/iFunnelLead";
 import StudentNumberDetailsPopupBtn from "./StudentNumberDetailsPopupBtn";
 import styled from "styled-components";
-import {mainBlue} from '../../../../AppWrapper';
-import iSynVDebtorFee from '../../../../types/Synergetic/Finance/iSynVDebtorFee';
+import { mainBlue } from "../../../../AppWrapper";
+import UtilsService from '../../../../services/UtilsService';
+import MathHelper from '../../../../helper/MathHelper';
 
 type iStudentMap = { [key: string]: iVStudent[] };
 type iMap = { [key: string]: iFunnelLead[] };
@@ -18,6 +19,7 @@ type iFunnelLeadMap = {
 };
 type iStudentNumberForecastTable = {
   className?: string;
+  showingFinanceFigures?: boolean;
   nextFileYear: number;
   selectedCampusCodes?: string[];
   yearLevelMap: { [key: string]: iLuYearLevel };
@@ -25,7 +27,6 @@ type iStudentNumberForecastTable = {
   currentStudentLeaverMap: iStudentMap;
   nextYearFunnelLeadMap: iFunnelLeadMap;
   futureNextYearMap: iMap;
-  tuitionFeeMap: { [key: string]: iSynVDebtorFee[] };
 };
 const Wrapper = styled.div`
   .st-no-popup-btn {
@@ -63,6 +64,7 @@ const StudentNumberForecastTable = ({
   currentStudentLeaverMap,
   nextYearFunnelLeadMap,
   futureNextYearMap,
+  showingFinanceFigures,
   selectedCampusCodes = ["S", "J", "E"]
 }: iStudentNumberForecastTable) => {
   const [yLevelArr, setYLevelArr] = useState<iLuYearLevel[]>([]);
@@ -70,22 +72,39 @@ const StudentNumberForecastTable = ({
   useEffect(() => {
     const arr = Object.values(yearLevelMap).sort((yl1, yl2) =>
       yl1.YearLevelSort > yl2.YearLevelSort ? 1 : -1
-    )
-    const campusCodesForE = _.intersection(selectedCampusCodes, ['E']);
-    const campusCodesForJS = _.intersection(selectedCampusCodes, ['J', 'S']);
+    );
+    const campusCodesForE = _.intersection(selectedCampusCodes, ["E"]);
+    const campusCodesForJS = _.intersection(selectedCampusCodes, ["J", "S"]);
     setYLevelArr([
       // @ts-ignore
-      ...(arr.filter(yl => yl.Campus === 'E')),
+      ...arr.filter(yl => yl.Campus === "E"),
+      ...(campusCodesForE.length > 0
+        ? // @ts-ignore
+          [{ Code: "subTotal", campuses: campusCodesForE }]
+        : []),
       // @ts-ignore
-      ...(campusCodesForE.length > 0 ? [{Code: 'subTotal', campuses: campusCodesForE}] : []),
+      ...arr.filter(yl => ["J", "S"].indexOf(yl.Campus) >= 0),
       // @ts-ignore
-      ...(arr.filter(yl => (['J', 'S'].indexOf(yl.Campus) >= 0))),
-      // @ts-ignore
-      ...(campusCodesForJS.length > 0 ? [{Code: 'subTotal', campuses: campusCodesForJS}] : []),
-    ])
-  }, [yearLevelMap, selectedCampusCodes])
+      ...(campusCodesForJS.length > 0
+        ? [{ Code: "subTotal", campuses: campusCodesForJS }]
+        : [])
+    ]);
+  }, [yearLevelMap, selectedCampusCodes]);
 
-  const StudentPopupDiv = (students: (iVStudent | iFunnelLead)[]) => {
+  const getTotalAmountForStudent = (record: iVStudent | iFunnelLead, forFuture: boolean = false) => {
+
+    if (forFuture === true) {
+      // @ts-ignore
+      return record.futureTotalFeeAmount || 0;
+    }
+    // @ts-ignore
+    return record.currentTotalFeeAmount || 0;
+  }
+
+  const StudentPopupDiv = (
+    students: (iVStudent | iFunnelLead)[],
+    forFuture: boolean = false
+  ) => {
     if (students.length <= 0) {
       return null;
     }
@@ -95,48 +114,62 @@ const StudentNumberForecastTable = ({
         records={students}
         size={"sm"}
         variant={"link"}
+        showingFuture={forFuture}
+        showingFinanceFigures={showingFinanceFigures}
       >
-        {students.length}
+        {showingFinanceFigures === true
+          ? UtilsService.formatIntoCurrency(
+              students.reduce(
+                (sum, student) =>
+                  MathHelper.add(
+                    sum,
+                    getTotalAmountForStudent(student, forFuture)
+                  ),
+                0
+              )
+            )
+          : students.length}
       </StudentNumberDetailsPopupBtn>
-    )
-  }
+    );
+  };
 
-  const getCell = (key: string, data: iLuYearLevel, map: any) => {
-    if (data.Code === 'subTotal') {
-      // const campusCodesSelected = _.intersection(
-      //   selectedCampusCodes,
-      //   campusCodes
-      // );
-      // @ts-ignore
-      const yearLevelCodes = yLevelArr.filter(yLevel => (data.campuses || []).indexOf(yLevel.Campus) >= 0).map(yLevel => yLevel.Code);
-      const students = yearLevelCodes.reduce((arr: iVStudent[], code) => [...arr, ...(code in map ? map[code] : [])], [])
+  const getCell = (
+    key: string,
+    data: iLuYearLevel,
+    map: any,
+    forFuture: boolean = false
+  ) => {
+    if (data.Code === "subTotal") {
+      const yearLevelCodes = yLevelArr
+        // @ts-ignore
+        .filter(yLevel => (data.campuses || []).indexOf(yLevel.Campus) >= 0)
+        .map(yLevel => yLevel.Code);
+      const students = yearLevelCodes.reduce(
+        (arr: iVStudent[], code) => [...arr, ...(code in map ? map[code] : [])],
+        []
+      );
       return (
-        <td key={key} className={'sub-total'}>
-          {StudentPopupDiv(students)}
+        <td key={key} className={"sub-total"}>
+          {StudentPopupDiv(students, forFuture)}
         </td>
-      )
+      );
     }
 
-    const students =
-      data.Code in map ? map[data.Code] : [];
-    return (
-      <td key={key}>
-        {StudentPopupDiv(students)}
-      </td>
-    );
-  }
+    const students = data.Code in map ? map[data.Code] : [];
+    return <td key={key}>{StudentPopupDiv(students, forFuture)}</td>;
+  };
 
   const getColumns = () => [
     {
       key: "ylevelCode",
       header: "Year Level",
       cell: (col: iTableColumn, data: iLuYearLevel) => {
-        if (data.Code === 'subTotal') {
+        if (data.Code === "subTotal") {
           return (
-            <td key={col.key} className={'text-right sub-total'}>
+            <td key={col.key} className={"text-right sub-total"}>
               <b>Sub Total</b>
             </td>
-          )
+          );
         }
         return (
           <td key={col.key}>
@@ -162,12 +195,8 @@ const StudentNumberForecastTable = ({
       },
       footer: (col: iTableColumn) => {
         const students =
-          'total' in currentStudentMap ? currentStudentMap.total : [];
-        return (
-          <td key={col.key}>
-            {StudentPopupDiv(students)}
-          </td>
-        );
+          "total" in currentStudentMap ? currentStudentMap.total : [];
+        return <td key={col.key}>{StudentPopupDiv(students)}</td>;
       }
     },
     {
@@ -178,84 +207,69 @@ const StudentNumberForecastTable = ({
       },
       footer: (col: iTableColumn) => {
         const students =
-          'total' in currentStudentLeaverMap ? currentStudentLeaverMap.total : [];
-        return (
-          <td key={col.key}>
-            {StudentPopupDiv(students)}
-          </td>
-        );
+          "total" in currentStudentLeaverMap
+            ? currentStudentLeaverMap.total
+            : [];
+        return <td key={col.key}>{StudentPopupDiv(students)}</td>;
       }
     },
     {
       key: "confirmed",
       header: "Confirmed",
       cell: (col: iTableColumn, data: iLuYearLevel) => {
-        return getCell(col.key, data, nextYearFunnelLeadMap.confirmed);
+        return getCell(col.key, data, nextYearFunnelLeadMap.confirmed, true);
       },
       footer: (col: iTableColumn) => {
         const students =
-          'total' in nextYearFunnelLeadMap.confirmed
+          "total" in nextYearFunnelLeadMap.confirmed
             ? nextYearFunnelLeadMap.confirmed.total
             : [];
-        return (
-          <td key={col.key}>
-            {StudentPopupDiv(students)}
-          </td>
-        );
+        return <td key={col.key}>{StudentPopupDiv(students, true)}</td>;
       }
     },
     {
       key: "inProgress",
       header: "In Progress",
       cell: (col: iTableColumn, data: iLuYearLevel) => {
-        return getCell(col.key, data, nextYearFunnelLeadMap.inProgress);
+        return getCell(col.key, data, nextYearFunnelLeadMap.inProgress, true);
       },
       footer: (col: iTableColumn) => {
         const students =
-          'total' in nextYearFunnelLeadMap.inProgress
+          "total" in nextYearFunnelLeadMap.inProgress
             ? nextYearFunnelLeadMap.inProgress.total
             : [];
-        return (
-          <td key={col.key}>
-            {StudentPopupDiv(students)}
-          </td>
-        );
+        return <td key={col.key}>{StudentPopupDiv(students, true)}</td>;
       }
     },
     {
       key: "nextYear",
       header: `Future ${nextFileYear}`,
       cell: (col: iTableColumn, data: iLuYearLevel) => {
-        return getCell(col.key, data, futureNextYearMap);
+        return getCell(col.key, data, futureNextYearMap, true);
       },
       footer: (col: iTableColumn) => {
         const students =
-          'total' in futureNextYearMap
-            ? futureNextYearMap.total
-            : [];
-        return (
-          <td key={col.key}>
-            {StudentPopupDiv(students)}
-          </td>
-        );
+          "total" in futureNextYearMap ? futureNextYearMap.total : [];
+        return <td key={col.key}>{StudentPopupDiv(students, true)}</td>;
       }
     },
     {
       key: "leadsAndTours",
       header: `Leads & Tours`,
       cell: (col: iTableColumn, data: iLuYearLevel) => {
-        return getCell(col.key, data, nextYearFunnelLeadMap.leadsAndTours);
+        return getCell(
+          col.key,
+          data,
+          nextYearFunnelLeadMap.leadsAndTours,
+          true
+        );
       },
       footer: (col: iTableColumn) => {
         const students =
-          'total' in nextYearFunnelLeadMap.leadsAndTours
+          "total" in nextYearFunnelLeadMap.leadsAndTours
             ? nextYearFunnelLeadMap.leadsAndTours.total
             : [];
-        return (
-          <td key={col.key}>
-            {StudentPopupDiv(students)}
-          </td>
-        );
+        return <td key={col.key}>{StudentPopupDiv(students, true)}</td>;
       }
     }
   ];
@@ -264,7 +278,7 @@ const StudentNumberForecastTable = ({
     <Wrapper className={className}>
       <Table
         hover
-        className={'lead-table'}
+        className={"lead-table"}
         columns={getColumns()}
         rows={yLevelArr}
       />

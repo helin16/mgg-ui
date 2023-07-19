@@ -28,12 +28,20 @@ import ExplanationPanel from "../../ExplanationPanel";
 import iVStudent from "../../../types/Synergetic/iVStudent";
 import SynVDebtorStudentConcessionService from "../../../services/Synergetic/Finance/SynVDebtorStudentConcessionService";
 import StudentNumberForecastTable from "./components/StudentNumberForecastTable";
-import StudentNumberDetailsPopupBtn from './components/StudentNumberDetailsPopupBtn';
-import SynVDebtorFeeService from '../../../services/Synergetic/Finance/SynVDebtorFeeService';
+import StudentNumberDetailsPopupBtn from "./components/StudentNumberDetailsPopupBtn";
+import SynVDebtorFeeService from "../../../services/Synergetic/Finance/SynVDebtorFeeService";
 import iSynVDebtorFee, {
   AUTO_TUITION_CODE_CONSOLIDATED_CHARGES,
-  AUTO_TUITION_CODE_TUITION
-} from '../../../types/Synergetic/Finance/iSynVDebtorFee';
+  AUTO_TUITION_CODE_TUITION, AUTO_TUITION_VARIATION_TYPE_FULL_FEE
+} from "../../../types/Synergetic/Finance/iSynVDebtorFee";
+import ToggleBtn from "../../common/ToggleBtn";
+import {
+  OP_AND,
+  OP_GTE,
+  OP_LTE,
+  OP_OR
+} from "../../../helper/ServiceHelper";
+import iSynVDebtorStudentConcession from "../../../types/Synergetic/Finance/iSynVDebtorStudentConcession";
 
 const Wrapper = styled.div`
   .title-row {
@@ -88,6 +96,8 @@ const leadStatuses = [
 
 type iStudentMap = { [key: string]: iVStudent[] };
 type iMap = { [key: string]: iFunnelLead[] };
+type iTuitionFeeMap = { [key: string]: iSynVDebtorFee[] };
+type iStudentConcessionMap = { [key: string]: iSynVDebtorStudentConcession[] };
 type iLeadMap = {
   confirmed: iMap;
   inProgress: iMap;
@@ -112,6 +122,9 @@ const StudentNumberForecastDashboard = ({
   showSumPanels = true
 }: iStudentNumberForecastDashboard) => {
   const { user } = useSelector((state: RootState) => state.auth);
+  const [showingFinanceFigures, setShowingFinanceFigures] = useState(
+    showFinanceFigures
+  );
   const [selectedCampusCodes, setSelectedCampusCodes] = useState<string[]>(
     defaultCampusCodes
   );
@@ -119,15 +132,11 @@ const StudentNumberForecastDashboard = ({
   const [currentStudentLeaverMap, setCurrentStudentLeaverMap] = useState<
     iStudentMap
   >({});
-  // const [currentStudentContinuerMap, setCurrentStudentContinuerMap] = useState<iStudentMap>({});
   const [nextYearFunnelLeadMap, setNextYearFunnelLeadMap] = useState(
     initLeadMap
   );
   const [yearLevelMap, setYearLevelMap] = useState<{
     [key: string]: iLuYearLevel;
-  }>({});
-  const [tuitionFeeMap, setTuitionFeeMap] = useState<{
-    [key: string]: iSynVDebtorFee[];
   }>({});
   const [yearLevelCodes, setYearLevelCodes] = useState<string[]>([]);
   const [futureNextYearMap, setFutureNextYearMap] = useState<iMap>({});
@@ -136,6 +145,8 @@ const StudentNumberForecastDashboard = ({
   const currentFileYear =
     user?.SynCurrentFileSemester?.FileYear || moment().year();
   const nextFileYear = MathHelper.add(currentFileYear, 1);
+  const [tuitionFeeMap, setTuitionFeeMap] = useState<iTuitionFeeMap>({});
+  const [concessionMap, setConcessionMap] = useState<iStudentConcessionMap>({});
 
   const getStatusFromLead = (lead: iFunnelLead) => {
     switch (lead.pipeline_stage_name) {
@@ -163,11 +174,13 @@ const StudentNumberForecastDashboard = ({
   };
 
   const getYearLevelFromLead = (lead: iFunnelLead) => {
-    return `${lead.student_starting_year_level || ""}`
-      .replace("Year ", "")
-      .replace("ELC - Pre Prep", "40")
-      .replace("ELC kinder", "30")
-      .replace("Prep", "0");
+    return Number(
+      `${lead.student_starting_year_level || ""}`
+        .replace("Year ", "")
+        .replace("ELC - Pre Prep", "40")
+        .replace("ELC kinder", "30")
+        .replace("Prep", "0")
+    );
   };
 
   const getYearLevelForLead = (campusCodes: string[]) => {
@@ -197,16 +210,90 @@ const StudentNumberForecastDashboard = ({
     }, []);
   };
 
+  const getFeeInfoForStudent = (
+    yearLevelCode: string,
+    record: iVStudent | iFunnelLead,
+    tuitFeeMap: iTuitionFeeMap,
+    concessMap: iStudentConcessionMap
+  ) => {
+    let yearLevelTuitionFees = 0;
+    let yearLevelConsolidateFees = 0;
+    let currentConcessions: iSynVDebtorStudentConcession[] = [];
+    let nextYearConcessions: iSynVDebtorStudentConcession[] = [];
+    if (yearLevelCode in tuitFeeMap) {
+      // @ts-ignore
+      tuitFeeMap[yearLevelCode]
+        .filter(tuitFee => {
+          // @ts-ignore
+          if (record.FullFeeFlag === true) {
+            return tuitFee.TuitionVariationType === AUTO_TUITION_VARIATION_TYPE_FULL_FEE
+          }
+          return tuitFee.TuitionVariationType !== AUTO_TUITION_VARIATION_TYPE_FULL_FEE
+        })
+        .forEach((tuitFee: iSynVDebtorFee) => {
+          if (tuitFee.AutoTuitionCode === AUTO_TUITION_CODE_TUITION) {
+            yearLevelTuitionFees = MathHelper.add(
+              yearLevelTuitionFees,
+              SynVDebtorFeeService.getAnnualFeeAmount(tuitFee)
+            );
+          }
+
+          if (
+            tuitFee.AutoTuitionCode === AUTO_TUITION_CODE_CONSOLIDATED_CHARGES
+          ) {
+            yearLevelConsolidateFees = MathHelper.add(
+              yearLevelConsolidateFees,
+              SynVDebtorFeeService.getAnnualFeeAmount(tuitFee)
+            );
+          }
+        });
+    }
+    const totalTuitionFeePerYearLevel = MathHelper.add(
+      yearLevelTuitionFees,
+      yearLevelConsolidateFees
+    );
+    if ('StudentID' in record && record.StudentID in concessionMap) {
+      const sID = `${record.StudentID}`;
+      // @ts-ignore
+      currentConcessions = concessionMap[sID].filter(concession => {
+        // console.log('current', moment(concession.EffectiveToDate).year() >= currentFileYear || concession.EffectiveToDate === null);
+        return (moment(concession.EffectiveToDate).year() >= currentFileYear || concession.EffectiveToDate === null);
+      }).map((concession: iSynVDebtorStudentConcession) => ({...concession, concessionAmount: MathHelper.mul(yearLevelTuitionFees, MathHelper.div(concession.DiscountPercentage, 100))}));
+      // @ts-ignore
+      nextYearConcessions = concessionMap[sID].filter(concession => {
+        return (moment(concession.EffectiveToDate).year() > currentFileYear || concession.EffectiveToDate === null);
+      }).map((concession: iSynVDebtorStudentConcession) => ({...concession, concessionAmount: MathHelper.mul(yearLevelTuitionFees, MathHelper.div(concession.DiscountPercentage, 100))}));
+    }
+
+    // @ts-ignore
+    const currentConcessionFees = currentConcessions.reduce((sum, concession) => MathHelper.add(sum, concession.concessionAmount), 0);
+    // @ts-ignore
+    const futureConcessionFees = nextYearConcessions.reduce((sum, concession) => MathHelper.add(sum, concession.concessionAmount), 0);
+    return {
+      ...record,
+      currentTotalFeeAmount: MathHelper.sub(totalTuitionFeePerYearLevel, currentConcessionFees),
+      futureTotalFeeAmount: MathHelper.sub(totalTuitionFeePerYearLevel, currentConcessionFees),
+      tuitionFees: yearLevelTuitionFees,
+      consolidateFees: yearLevelConsolidateFees,
+      currentConcessionFees,
+      currentConcessions,
+      futureConcessionFees,
+      nextYearConcessions,
+    };
+  };
+
   useEffect(() => {
     let isCanceled = false;
     setIsLoading(true);
     const yearLevelForLeads = getYearLevelForLead(selectedCampusCodes);
+
     Promise.all([
       SynVStudentService.getCurrentVStudents({
         where: JSON.stringify({
           FileYear: currentFileYear,
           FileSemester: currentFileSemester,
           StudentActiveFlag: true
+          // ID: 52807,
         })
       }),
       FunnelService.getAll({
@@ -235,14 +322,43 @@ const StudentNumberForecastDashboard = ({
             selectedCampusCodes.length > 0
               ? selectedCampusCodes
               : defaultCampusCodes,
-          CurrentSemesterOnlyFlag: true
+          FileYear: [currentFileYear, nextFileYear],
+          EffectiveFromDate: { [OP_LTE]: `${nextFileYear}-12-31 23:59:59` },
+          [OP_AND]: [
+            {
+              [OP_OR]: [
+                { EffectiveToDate: null },
+                {
+                  EffectiveToDate: {
+                    [OP_GTE]: moment().format("YYYY-MM-DD HH:mm:ss")
+                  }
+                }
+              ]
+            },
+            {
+              [OP_OR]: [
+                {
+                  FileYear: currentFileYear,
+                  FileSemester: {
+                    [OP_GTE]: user?.SynCurrentFileSemester?.FileSemester || 1
+                  }
+                },
+                {
+                  FileYear: nextFileYear
+                }
+              ]
+            }
+          ]
         }),
         perPage: 99999999
       }),
       SynVDebtorFeeService.getAll({
         where: JSON.stringify({
           ActiveFlag: true,
-          AutoTuitionCode: [AUTO_TUITION_CODE_TUITION, AUTO_TUITION_CODE_CONSOLIDATED_CHARGES],
+          AutoTuitionCode: [
+            AUTO_TUITION_CODE_TUITION,
+            AUTO_TUITION_CODE_CONSOLIDATED_CHARGES
+          ]
         }),
         perPage: 99999999
       })
@@ -251,39 +367,67 @@ const StudentNumberForecastDashboard = ({
         if (isCanceled) return;
         let currentStudMap: iStudentMap = {};
         let currentLeaverStudMap: iStudentMap = {};
+        const tuitFeeMap = (resp[4].data || []).reduce(
+          (map: iTuitionFeeMap, tuitionFee) => {
+            const ylCode = `${tuitionFee.YearLevel}`;
+            return {
+              ...map,
+              [ylCode]: [...(ylCode in map ? map[ylCode] : []), tuitionFee]
+            };
+          },
+          {}
+        );
+        const concessMap = (resp[3].data || []).reduce((map: iStudentConcessionMap, concession) => {
+          const sId = `${concession.StudentID}`;
+          return {
+            ...map,
+            [sId]: [...(sId in map ? map[sId] : []), concession]
+          };
+        }, {});
+
         resp[0].forEach(student => {
           const yearLevelCode = student.StudentYearLevel;
+          const studentWithFees = getFeeInfoForStudent(
+            `${yearLevelCode}`,
+            student,
+            tuitFeeMap,
+            concessMap
+          );
           currentStudMap = {
             ...currentStudMap,
+            // @ts-ignore
             total: [
               ...(currentStudMap.total || []),
               ...(selectedCampusCodes.length === 0 ||
               selectedCampusCodes.indexOf(student.StudentCampus) >= 0
-                ? [student]
+                ? [studentWithFees]
                 : [])
             ],
-            [yearLevelCode]: [...(currentStudMap[yearLevelCode] || []), student]
+            [yearLevelCode]: [
+              ...(currentStudMap[yearLevelCode] || []),
+              studentWithFees
+            ]
           };
           if (`${student.StudentLeavingDate || ""}`.trim() !== "") {
             currentLeaverStudMap = {
               ...currentLeaverStudMap,
+              // @ts-ignore
               total: [
                 ...(currentLeaverStudMap.total || []),
                 ...(selectedCampusCodes.length === 0 ||
                 selectedCampusCodes.indexOf(student.StudentCampus) >= 0
-                  ? [student]
+                  ? [studentWithFees]
                   : [])
               ],
               [yearLevelCode]: [
                 ...(currentLeaverStudMap[yearLevelCode] || []),
-                student
+                studentWithFees
               ]
             };
           }
         });
         setCurrentStudentMap(currentStudMap);
         setCurrentStudentLeaverMap(currentLeaverStudMap);
-        // setCurrentStudentContinuerMap(currentContinuerStudMap);
         setYearLevelCodes(resp[2].map(yearLevel => `${yearLevel.Code}`));
         setYearLevelMap(
           resp[2].reduce((map, yearLevel) => {
@@ -293,35 +437,37 @@ const StudentNumberForecastDashboard = ({
             };
           }, {})
         );
+        setTuitionFeeMap(tuitFeeMap);
+        setConcessionMap(concessMap);
         setNextYearFunnelLeadMap(
           (resp[1].data || []).reduce((map: iLeadMap, lead) => {
             const status = getStatusFromLead(lead);
             const yearLevelCode = getYearLevelFromLead(lead);
+            const leadWithFeeInfo = getFeeInfoForStudent(
+              `${yearLevelCode}`,
+              lead,
+              tuitFeeMap,
+              concessMap
+            );
             return {
               ...map,
               [status]: {
                 // @ts-ignore
                 ...map[status],
-                // @ts-ignore
-                total: [...(map[status].total || []), lead], // MathHelper.add(map[status].total || 0, 1),
-                // @ts-ignore
-                [yearLevelCode]: [...(map[status][yearLevelCode] || []), lead] // MathHelper.add(map[status][yearLevelCode] || 0, 1),
+                total: [
+                  // @ts-ignore
+                  ...(map[status].total || []),
+                  leadWithFeeInfo
+                ],
+                [yearLevelCode]: [
+                  // @ts-ignore
+                  ...(map[status][yearLevelCode] || []),
+                  leadWithFeeInfo
+                ]
               }
             };
           }, initLeadMap)
         );
-        setTuitionFeeMap(
-          (resp[4].data || []).reduce((map, tuitionFee) => {
-            return ({
-              ...map,
-              [tuitionFee.YearLevel]: [
-                // @ts-ignore
-                ...(tuitionFee.YearLevel in map ? map[tuitionFee.YearLevel] : []),
-                tuitionFee,
-              ]
-            })
-          }, {})
-        )
       })
       .catch(err => {
         if (isCanceled) return;
@@ -335,7 +481,14 @@ const StudentNumberForecastDashboard = ({
     return () => {
       isCanceled = true;
     };
-  }, [selectedCampusCodes, currentFileYear, nextFileYear, currentFileSemester]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    user,
+    selectedCampusCodes,
+    currentFileYear,
+    nextFileYear,
+    currentFileSemester
+  ]);
 
   useEffect(() => {
     if (selectedCampusCodes.length <= 0) {
@@ -360,9 +513,13 @@ const StudentNumberForecastDashboard = ({
               : [];
         }
         const futureNextYear = [
-          ...currentYearStudentLowerLevel.filter(
-            student => `${student.StudentLeavingDate || ""}`.trim() === ""
-          ),
+          ...currentYearStudentLowerLevel
+            .filter(
+              student => `${student.StudentLeavingDate || ""}`.trim() === ""
+            )
+            .map(student =>
+              getFeeInfoForStudent(code, student, tuitionFeeMap, concessionMap)
+            ),
           ...nextYearConfirmed
         ];
         return {
@@ -374,7 +531,14 @@ const StudentNumberForecastDashboard = ({
         };
       }, {})
     );
-  }, [currentStudentMap, yearLevelCodes, nextYearFunnelLeadMap.confirmed]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    currentStudentMap,
+    yearLevelCodes,
+    nextYearFunnelLeadMap.confirmed,
+    tuitionFeeMap,
+    concessionMap
+  ]);
 
   const getSumPanel = (title: string, sumArr?: any) => {
     return (
@@ -422,13 +586,13 @@ const StudentNumberForecastDashboard = ({
         {getSumPanels()}
         <StudentNumberForecastTable
           nextFileYear={nextFileYear}
+          showingFinanceFigures={showingFinanceFigures}
           yearLevelMap={yearLevelMap}
           selectedCampusCodes={selectedCampusCodes}
           currentStudentMap={currentStudentMap}
           currentStudentLeaverMap={currentStudentLeaverMap}
           nextYearFunnelLeadMap={nextYearFunnelLeadMap}
           futureNextYearMap={futureNextYearMap}
-          tuitionFeeMap={tuitionFeeMap}
         />
       </>
     );
@@ -482,6 +646,22 @@ const StudentNumberForecastDashboard = ({
     );
   };
 
+  const getFinanceFigureSwitch = () => {
+    if (showFinanceFigures !== true) {
+      return null;
+    }
+    return (
+      <ToggleBtn
+        className={"showing-toggle"}
+        on={"AUD $"}
+        off={"Count"}
+        size={"sm"}
+        checked={showingFinanceFigures === true}
+        onChange={checked => setShowingFinanceFigures(checked)}
+      />
+    );
+  };
+
   return (
     <Wrapper>
       {getExplanationPanel()}
@@ -506,6 +686,7 @@ const StudentNumberForecastDashboard = ({
             setSelectedCampusCodes(codes);
           }}
         />
+        {getFinanceFigureSwitch()}
       </PanelTitle>
       {getContent()}
     </Wrapper>

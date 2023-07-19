@@ -36,6 +36,7 @@ type iFunnelLead = {
   externalObj: any;
   isActive: boolean;
   checkSum: string | null;
+  StudentYearLevel?: number;
 }
 
 export default iFunnelLead;
