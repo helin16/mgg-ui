@@ -7,10 +7,10 @@ import { useState } from "react";
 import Table, { iTableColumn } from "../../../common/Table";
 import UtilsService from "../../../../services/UtilsService";
 import styled from "styled-components";
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import Popover from 'react-bootstrap/Popover';
-import iSynVDebtorStudentConcession from '../../../../types/Synergetic/Finance/iSynVDebtorStudentConcession';
-import MathHelper from '../../../../helper/MathHelper';
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import Popover from "react-bootstrap/Popover";
+import iSynVDebtorStudentConcession from "../../../../types/Synergetic/Finance/iSynVDebtorStudentConcession";
+import MathHelper from "../../../../helper/MathHelper";
 
 type iStudentNumberDetailsPopup = ButtonProps & {
   records: (iVStudent | iFunnelLead)[];
@@ -21,7 +21,7 @@ type iStudentNumberDetailsPopup = ButtonProps & {
 const TableWrapper = styled.div`
   .finance-col {
     background-color: #ececec;
-    
+
     &.concession {
       .btn {
         padding: 0px;
@@ -43,7 +43,7 @@ const StudentNumberDetailsPopupBtn = ({
     setIsShowing(false);
   };
 
-  const getConcessionDetails = (record: (iVStudent | iFunnelLead)) => {
+  const getConcessionDetails = (record: iVStudent | iFunnelLead) => {
     // @ts-ignore
     let totalAmount = record.currentConcessionFees || 0;
     // @ts-ignore
@@ -55,8 +55,10 @@ const StudentNumberDetailsPopupBtn = ({
       concessions = record.nextYearConcessions || [];
     }
     return (
-      <Popover style={{maxWidth: '600px'}}>
-        <Popover.Header as="h3">{UtilsService.formatIntoCurrency(totalAmount)}</Popover.Header>
+      <Popover style={{ maxWidth: "600px" }}>
+        <Popover.Header as="h3">
+          {UtilsService.formatIntoCurrency(totalAmount)}
+        </Popover.Header>
         <Popover.Body>
           <BTable>
             <thead>
@@ -70,60 +72,101 @@ const StudentNumberDetailsPopupBtn = ({
               </tr>
             </thead>
             <tbody>
-              {concessions.map((concession: iSynVDebtorStudentConcession, index: number) => {
-                return (
-                  <tr key={index}>
-                    <td>{concession.FeeCode}</td>
-                    <td>{concession.FeeDescription}</td>
-                    <td>{`${concession.EffectiveFromDate || ''}`.trim() === '' ? '' : moment(`${concession.EffectiveFromDate || ''}`).format('DD MMM YYYY')}</td>
-                    <td>{`${concession.EffectiveToDate || ''}`.trim() === '' ? '' : moment(`${concession.EffectiveToDate || ''}`).format('DD MMM YYYY')}</td>
-                    <td>{concession.DiscountPercentage}%</td>
-                    <td>
-                      {
-                        // @ts-ignore
-                        UtilsService.formatIntoCurrency(MathHelper.mul(record.tuitionFees || 0, MathHelper.div(concession.DiscountPercentage || 0, 100)))
-                      }
-                    </td>
-                  </tr>
-                )
-              })}
+              {concessions.map(
+                (concession: iSynVDebtorStudentConcession, index: number) => {
+                  return (
+                    <tr key={index}>
+                      <td>{concession.FeeCode}</td>
+                      <td>{concession.FeeDescription}</td>
+                      <td>
+                        {`${concession.EffectiveFromDate || ""}`.trim() === ""
+                          ? ""
+                          : moment(
+                              `${concession.EffectiveFromDate || ""}`
+                            ).format("DD MMM YYYY")}
+                      </td>
+                      <td>
+                        {`${concession.EffectiveToDate || ""}`.trim() === ""
+                          ? ""
+                          : moment(
+                              `${concession.EffectiveToDate || ""}`
+                            ).format("DD MMM YYYY")}
+                      </td>
+                      <td>{concession.DiscountPercentage}%</td>
+                      <td>
+                        {UtilsService.formatIntoCurrency(
+                          MathHelper.mul(
+                            // @ts-ignore
+                            record.tuitionFees || 0,
+                            MathHelper.div(
+                              concession.DiscountPercentage || 0,
+                              100
+                            )
+                          )
+                        )}
+                      </td>
+                    </tr>
+                  );
+                }
+              )}
             </tbody>
           </BTable>
         </Popover.Body>
       </Popover>
-    )
-  }
+    );
+  };
 
-  const getConcessionDiv = (record: (iVStudent | iFunnelLead)) => {
+  const getConcessionDiv = (record: iVStudent | iFunnelLead) => {
     if (showingFuture === true) {
-      // @ts-ignore
-      if (!("futureConcessionFees" in record) || record.futureConcessionFees <= 0) {
+      if (
+        !("futureConcessionFees" in record) ||
+        // @ts-ignore
+        record.futureConcessionFees <= 0
+      ) {
         return null;
       }
       return (
-        <OverlayTrigger trigger="click" placement="left" overlay={getConcessionDetails(record)} rootClose>
-          <Button variant="link" size={'sm'}>-{UtilsService.formatIntoCurrency(
-            // @ts-ignore
-            record.futureConcessionFees || 0
-          )}</Button>
+        <OverlayTrigger
+          trigger="click"
+          placement="left"
+          overlay={getConcessionDetails(record)}
+          rootClose
+        >
+          <Button variant="link" size={"sm"}>
+            -
+            {UtilsService.formatIntoCurrency(
+              // @ts-ignore
+              record.futureConcessionFees || 0
+            )}
+          </Button>
         </OverlayTrigger>
-      )
+      );
     }
 
-    // @ts-ignore
-    if (!("currentConcessionFees" in record) || record.currentConcessionFees <= 0) {
+    if (
+      !("currentConcessionFees" in record) ||
+      // @ts-ignore
+      record.currentConcessionFees <= 0
+    ) {
       return null;
     }
     return (
-      <OverlayTrigger trigger="click" placement="left" overlay={getConcessionDetails(record)} rootClose>
-        <Button variant="link" size={'sm'}>-{UtilsService.formatIntoCurrency(
-          // @ts-ignore
-          record.currentConcessionFees || 0
-        )}</Button>
+      <OverlayTrigger
+        trigger="click"
+        placement="left"
+        overlay={getConcessionDetails(record)}
+        rootClose
+      >
+        <Button variant="link" size={"sm"}>
+          -
+          {UtilsService.formatIntoCurrency(
+            // @ts-ignore
+            record.currentConcessionFees || 0
+          )}
+        </Button>
       </OverlayTrigger>
-    )
-
-  }
+    );
+  };
 
   const getColumns = () => [
     {
@@ -131,11 +174,7 @@ const StudentNumberDetailsPopupBtn = ({
       header: "ID",
       cell: (col: iTableColumn, record: iVStudent | iFunnelLead) => {
         return (
-          <td key={col.key}>
-            {"StudentID" in record
-              ? record.StudentID
-              : ''}
-          </td>
+          <td key={col.key}>{"StudentID" in record ? record.StudentID : ""}</td>
         );
       }
     },
@@ -212,9 +251,7 @@ const StudentNumberDetailsPopupBtn = ({
       cell: (col: iTableColumn, record: iVStudent | iFunnelLead) => {
         return (
           <td key={col.key}>
-            {"StudentForm" in record
-              ? record.StudentForm
-              : ""}
+            {"StudentForm" in record ? record.StudentForm : ""}
           </td>
         );
       }
@@ -225,9 +262,7 @@ const StudentNumberDetailsPopupBtn = ({
       cell: (col: iTableColumn, record: iVStudent | iFunnelLead) => {
         return (
           <td key={col.key}>
-            {"FullFeeFlag" in record && record.FullFeeFlag === true
-              ? 'Y'
-              : ""}
+            {"FullFeeFlag" in record && record.FullFeeFlag === true ? "Y" : ""}
           </td>
         );
       }
@@ -280,20 +315,20 @@ const StudentNumberDetailsPopupBtn = ({
                 <td key={col.key} className={"finance-col"}>
                   <b>
                     {showingFuture === true
-                      // @ts-ignore
-                      ? "futureTotalFeeAmount" in record
+                      ? // @ts-ignore
+                        "futureTotalFeeAmount" in record
                         ? UtilsService.formatIntoCurrency(
-                          // @ts-ignore
-                          record.futureTotalFeeAmount || 0
-                        )
+                            // @ts-ignore
+                            record.futureTotalFeeAmount || 0
+                          )
                         : ""
-                      // @ts-ignore
-                      : "currentTotalFeeAmount" in record
-                        ? UtilsService.formatIntoCurrency(
+                      : // @ts-ignore
+                      "currentTotalFeeAmount" in record
+                      ? UtilsService.formatIntoCurrency(
                           // @ts-ignore
                           record.currentTotalFeeAmount || 0
                         )
-                        : ""}
+                      : ""}
                   </b>
                 </td>
               );
@@ -351,7 +386,7 @@ const StudentNumberDetailsPopupBtn = ({
         className={`st-no-popup-btn ${rest.className || ""}`}
       />
       <PopupModal
-        dialogClassName={"modal-80w"}
+        dialogClassName={"modal-90w"}
         show={isShowing}
         handleClose={handleClose}
         title={`${records.length} students:`}
@@ -361,23 +396,79 @@ const StudentNumberDetailsPopupBtn = ({
             hover
             responsive
             columns={getColumns()}
-            rows={records
-              .sort((r1, r2) =>
+            rows={[
+            ...(records
                 // @ts-ignore
-                `${r1.StudentYearLevelDescription || ""}` >
+              .filter(record => `${record.StudentID || ""}`.trim() !== "")
+              .sort((r1, r2) => {
                 // @ts-ignore
-                `${r2.StudentYearLevelDescription || ""}`
-                  ? -1
-                  : 1
-              )
-              .sort((r1, r2) =>
+                const r1YLSort = Number(r1.StudentYearLevelSort || 0);
                 // @ts-ignore
-                `${r1.student_starting_year_level || ""}` >
+                const r2YLSort = Number(r2.StudentYearLevelSort || 0);
+                if (r1YLSort > r2YLSort) {
+                  return 1;
+                } else if (r1YLSort < r2YLSort) {
+                  return -1;
+                }
+
                 // @ts-ignore
-                `${r2.student_starting_year_level || ""}`
-                  ? 1
-                  : -1
-              )}
+                const r1Form = `${r1.StudentForm || ""}`;
+                // @ts-ignore
+                const r2Form = `${r2.StudentForm || ""}`;
+                if (r1Form > r2Form) {
+                  return 1;
+                } else if (r1Form < r2Form) {
+                  return -1;
+                }
+
+                // @ts-ignore
+                const r1Name = `${r1.StudentNameExternal || ""}`;
+                // @ts-ignore
+                const r2Name = `${r2.StudentNameExternal || ""}`;
+                if (r1Name > r2Name) {
+                  return 1;
+                } else if (r1Name < r2Name) {
+                  return -1;
+                }
+
+                return 0;
+              })),
+              ...(records
+                // @ts-ignore
+              .filter(record => `${record.StudentID || ""}`.trim() === "")
+              .sort((r1, r2) => {
+                // @ts-ignore
+                const r1StartingYL = `${r1.student_starting_year_level || ''}`;
+                // @ts-ignore
+                const r2StartingYL = `${r2.student_starting_year_level || ''}`;
+                if (r1StartingYL > r2StartingYL) {
+                  return 1
+                } else if (r1StartingYL < r2StartingYL) {
+                  return -1
+                }
+
+                // @ts-ignore
+                const r1Name = `${r1.student_first_name || ""}`;
+                // @ts-ignore
+                const r2Name = `${r2.student_first_name || ""}`;
+                if (r1Name > r2Name) {
+                  return 1;
+                } else if (r1Name < r2Name) {
+                  return -1;
+                }
+                // @ts-ignore
+                const r1LName = `${r1.student_last_name || ""}`;
+                // @ts-ignore
+                const r2LName = `${r2.student_last_name || ""}`;
+                if (r1LName > r2LName) {
+                  return 1;
+                } else if (r1LName < r2LName) {
+                  return -1;
+                }
+
+                return 0;
+              })),
+            ]}
           />
         </TableWrapper>
       </PopupModal>

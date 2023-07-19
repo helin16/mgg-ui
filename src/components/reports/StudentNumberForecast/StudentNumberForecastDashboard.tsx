@@ -666,7 +666,7 @@ const StudentNumberForecastDashboard = ({
       {getExplanationPanel()}
       <PanelTitle className={"title-row section-row"}>
         <div className={"title"}>
-          {nextFileYear} Semester {currentFileSemester} Student Numbers
+          Student Numbers
         </div>
         <SynCampusSelector
           className={"campus-selector"}
