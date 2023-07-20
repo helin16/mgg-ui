@@ -42,6 +42,9 @@ import {
   OP_OR
 } from "../../../helper/ServiceHelper";
 import iSynVDebtorStudentConcession from "../../../types/Synergetic/Finance/iSynVDebtorStudentConcession";
+import SynVFutureStudentService from '../../../services/Synergetic/SynVFutureStudent';
+import {FUTURE_STUDENT_STATUS_FINALISED} from '../../../types/Synergetic/iSynVFutureStudent';
+import SynVFutureStudent from '../../../services/Synergetic/SynVFutureStudent';
 
 const Wrapper = styled.div`
   .title-row {
@@ -147,6 +150,7 @@ const StudentNumberForecastDashboard = ({
   const nextFileYear = MathHelper.add(currentFileYear, 1);
   const [tuitionFeeMap, setTuitionFeeMap] = useState<iTuitionFeeMap>({});
   const [concessionMap, setConcessionMap] = useState<iStudentConcessionMap>({});
+  const [confirmedFutureStudentMap, setConfirmedFutureStudentMap] = useState<iStudentMap>({});
 
   const getStatusFromLead = (lead: iFunnelLead) => {
     switch (lead.pipeline_stage_name) {
@@ -214,7 +218,7 @@ const StudentNumberForecastDashboard = ({
     yearLevelCode: string,
     record: iVStudent | iFunnelLead,
     tuitFeeMap: iTuitionFeeMap,
-    concessMap: iStudentConcessionMap
+    concessMap: iStudentConcessionMap,
   ) => {
     let yearLevelTuitionFees = 0;
     let yearLevelConsolidateFees = 0;
@@ -270,7 +274,7 @@ const StudentNumberForecastDashboard = ({
       }).map((concession: iSynVDebtorStudentConcession) => ({...concession, concessionAmount: MathHelper.mul(yearLevelTuitionFees, MathHelper.div(concession.DiscountPercentage, 100))}));
       // @ts-ignore
       nextYearConcessions = concessMap[sID].filter(concession => {
-        return (moment(concession.EffectiveFromDate).year() > currentFileYear || concession.EffectiveFromDate === null) && (moment(concession.EffectiveToDate).year() > currentFileYear || concession.EffectiveToDate === null);
+        return (moment(concession.EffectiveFromDate).year() <= currentFileYear || concession.EffectiveFromDate === null) && (moment(concession.EffectiveToDate).year() > currentFileYear || concession.EffectiveToDate === null);
       }).map((concession: iSynVDebtorStudentConcession) => ({...concession, concessionAmount: MathHelper.mul(yearLevelTuitionFees, MathHelper.div(concession.DiscountPercentage, 100))}));
     }
 
@@ -290,6 +294,7 @@ const StudentNumberForecastDashboard = ({
       nextYearConcessions,
     };
   };
+
 
   useEffect(() => {
     let isCanceled = false;
@@ -370,12 +375,25 @@ const StudentNumberForecastDashboard = ({
           ]
         }),
         perPage: 99999999
+      }),
+      SynVFutureStudentService.getAll({
+        where: JSON.stringify({
+          FutureStatus: FUTURE_STUDENT_STATUS_FINALISED,
+          FutureEnrolYear: nextFileYear,
+        }),
+        perPage: 99999999
       })
     ])
       .then(resp => {
         if (isCanceled) return;
         let currentStudMap: iStudentMap = {};
         let currentLeaverStudMap: iStudentMap = {};
+        const yLevelMap = resp[2].reduce((map, yearLevel) => {
+          return {
+            ...map,
+            [`${yearLevel.Code}`]: yearLevel
+          };
+        }, {});
         const tuitFeeMap = (resp[4].data || []).reduce(
           (map: iTuitionFeeMap, tuitionFee) => {
             const ylCode = `${tuitionFee.YearLevel}`;
@@ -393,6 +411,32 @@ const StudentNumberForecastDashboard = ({
             [sId]: [...(sId in map ? map[sId] : []), concession]
           };
         }, {});
+        const confirmedStudMap = (resp[5].data || []).reduce((map, futureStudent) => {
+          const ylCode = `${futureStudent.FutureYearLevel}`;
+          const stud = SynVFutureStudent.mapFutureStudentToCurrent(futureStudent, yLevelMap);
+          const studentWithFees = getFeeInfoForStudent(
+            `${ylCode}`,
+            stud,
+            tuitFeeMap,
+            concessMap,
+          )
+          return {
+            ...map,
+            total: [
+              // @ts-ignore
+              ...(map.total || []),
+              ...(selectedCampusCodes.length === 0 ||
+              selectedCampusCodes.indexOf(stud.StudentCampus) >= 0
+                ? [studentWithFees]
+                : [])
+            ],
+            [ylCode]: [
+              // @ts-ignore
+              ...(map[ylCode] || []),
+              studentWithFees
+            ]
+          };
+        }, {})
 
         resp[0].forEach(student => {
           const yearLevelCode = student.StudentYearLevel;
@@ -400,7 +444,7 @@ const StudentNumberForecastDashboard = ({
             `${yearLevelCode}`,
             student,
             tuitFeeMap,
-            concessMap
+            concessMap,
           );
           currentStudMap = {
             ...currentStudMap,
@@ -438,16 +482,10 @@ const StudentNumberForecastDashboard = ({
         setCurrentStudentMap(currentStudMap);
         setCurrentStudentLeaverMap(currentLeaverStudMap);
         setYearLevelCodes(resp[2].map(yearLevel => `${yearLevel.Code}`));
-        setYearLevelMap(
-          resp[2].reduce((map, yearLevel) => {
-            return {
-              ...map,
-              [`${yearLevel.Code}`]: yearLevel
-            };
-          }, {})
-        );
+        setYearLevelMap(yLevelMap);
         setTuitionFeeMap(tuitFeeMap);
         setConcessionMap(concessMap);
+        setConfirmedFutureStudentMap(confirmedStudMap);
         setNextYearFunnelLeadMap(
           (resp[1].data || []).reduce((map: iLeadMap, lead) => {
             const status = getStatusFromLead(lead);
@@ -456,7 +494,7 @@ const StudentNumberForecastDashboard = ({
               `${yearLevelCode}`,
               lead,
               tuitFeeMap,
-              concessMap
+              concessMap,
             );
             return {
               ...map,
@@ -509,8 +547,8 @@ const StudentNumberForecastDashboard = ({
     setFutureNextYearMap(
       yearLevelCodes.reduce((map, code, currentIndex) => {
         const nextYearConfirmed =
-          code in nextYearFunnelLeadMap.confirmed
-            ? nextYearFunnelLeadMap.confirmed[code]
+          code in confirmedFutureStudentMap
+            ? confirmedFutureStudentMap[code]
             : [];
         let currentYearStudentLowerLevel: iVStudent[] = [];
         if (currentIndex > 0 && code !== "0") {
@@ -544,7 +582,7 @@ const StudentNumberForecastDashboard = ({
   }, [
     currentStudentMap,
     yearLevelCodes,
-    nextYearFunnelLeadMap.confirmed,
+    confirmedFutureStudentMap,
     tuitionFeeMap,
     concessionMap
   ]);
@@ -602,6 +640,7 @@ const StudentNumberForecastDashboard = ({
           currentStudentLeaverMap={currentStudentLeaverMap}
           nextYearFunnelLeadMap={nextYearFunnelLeadMap}
           futureNextYearMap={futureNextYearMap}
+          confirmedFutureStudentMap={confirmedFutureStudentMap}
         />
       </>
     );

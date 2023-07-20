@@ -7,8 +7,8 @@ import iFunnelLead from "../../../../types/Funnel/iFunnelLead";
 import StudentNumberDetailsPopupBtn from "./StudentNumberDetailsPopupBtn";
 import styled from "styled-components";
 import { mainBlue } from "../../../../AppWrapper";
-import UtilsService from '../../../../services/UtilsService';
-import MathHelper from '../../../../helper/MathHelper';
+import UtilsService from "../../../../services/UtilsService";
+import MathHelper from "../../../../helper/MathHelper";
 
 type iStudentMap = { [key: string]: iVStudent[] };
 type iMap = { [key: string]: iFunnelLead[] };
@@ -24,6 +24,7 @@ type iStudentNumberForecastTable = {
   selectedCampusCodes?: string[];
   yearLevelMap: { [key: string]: iLuYearLevel };
   currentStudentMap: iStudentMap;
+  confirmedFutureStudentMap: iStudentMap;
   currentStudentLeaverMap: iStudentMap;
   nextYearFunnelLeadMap: iFunnelLeadMap;
   futureNextYearMap: iMap;
@@ -53,6 +54,9 @@ const Wrapper = styled.div`
     }
     tfoot {
       font-weight: bold;
+      .btn {
+        font-weight: bold;
+      }
     }
   }
 `;
@@ -61,6 +65,7 @@ const StudentNumberForecastTable = ({
   nextFileYear,
   yearLevelMap,
   currentStudentMap,
+  confirmedFutureStudentMap,
   currentStudentLeaverMap,
   nextYearFunnelLeadMap,
   futureNextYearMap,
@@ -91,15 +96,17 @@ const StudentNumberForecastTable = ({
     ]);
   }, [yearLevelMap, selectedCampusCodes]);
 
-  const getTotalAmountForStudent = (record: iVStudent | iFunnelLead, forFuture: boolean = false) => {
-
+  const getTotalAmountForStudent = (
+    record: iVStudent | iFunnelLead,
+    forFuture: boolean = false
+  ) => {
     if (forFuture === true) {
       // @ts-ignore
       return record.futureTotalFeeAmount || 0;
     }
     // @ts-ignore
     return record.currentTotalFeeAmount || 0;
-  }
+  };
 
   const StudentPopupDiv = (
     students: (iVStudent | iFunnelLead)[],
@@ -217,30 +224,39 @@ const StudentNumberForecastTable = ({
       key: "confirmed",
       header: "Confirmed",
       cell: (col: iTableColumn, data: iLuYearLevel) => {
-        return getCell(col.key, data, nextYearFunnelLeadMap.confirmed, true);
+        return getCell(col.key, data, confirmedFutureStudentMap, true);
       },
       footer: (col: iTableColumn) => {
         const students =
-          "total" in nextYearFunnelLeadMap.confirmed
-            ? nextYearFunnelLeadMap.confirmed.total
+          "total" in confirmedFutureStudentMap
+            ? confirmedFutureStudentMap.total
             : [];
         return <td key={col.key}>{StudentPopupDiv(students, true)}</td>;
       }
     },
-    {
-      key: "inProgress",
-      header: "In Progress",
-      cell: (col: iTableColumn, data: iLuYearLevel) => {
-        return getCell(col.key, data, nextYearFunnelLeadMap.inProgress, true);
-      },
-      footer: (col: iTableColumn) => {
-        const students =
-          "total" in nextYearFunnelLeadMap.inProgress
-            ? nextYearFunnelLeadMap.inProgress.total
-            : [];
-        return <td key={col.key}>{StudentPopupDiv(students, true)}</td>;
-      }
-    },
+    ...(showingFinanceFigures === true
+      ? []
+      : [
+          {
+            key: "inProgress",
+            header: "In Progress",
+            cell: (col: iTableColumn, data: iLuYearLevel) => {
+              return getCell(
+                col.key,
+                data,
+                nextYearFunnelLeadMap.inProgress,
+                true
+              );
+            },
+            footer: (col: iTableColumn) => {
+              const students =
+                "total" in nextYearFunnelLeadMap.inProgress
+                  ? nextYearFunnelLeadMap.inProgress.total
+                  : [];
+              return <td key={col.key}>{StudentPopupDiv(students, true)}</td>;
+            }
+          }
+        ]),
     {
       key: "nextYear",
       header: `Future ${nextFileYear}`,
@@ -253,25 +269,29 @@ const StudentNumberForecastTable = ({
         return <td key={col.key}>{StudentPopupDiv(students, true)}</td>;
       }
     },
-    {
-      key: "leadsAndTours",
-      header: `Leads & Tours`,
-      cell: (col: iTableColumn, data: iLuYearLevel) => {
-        return getCell(
-          col.key,
-          data,
-          nextYearFunnelLeadMap.leadsAndTours,
-          true
-        );
-      },
-      footer: (col: iTableColumn) => {
-        const students =
-          "total" in nextYearFunnelLeadMap.leadsAndTours
-            ? nextYearFunnelLeadMap.leadsAndTours.total
-            : [];
-        return <td key={col.key}>{StudentPopupDiv(students, true)}</td>;
-      }
-    }
+    ...(showingFinanceFigures === true
+      ? []
+      : [
+          {
+            key: "leadsAndTours",
+            header: `Leads & Tours`,
+            cell: (col: iTableColumn, data: iLuYearLevel) => {
+              return getCell(
+                col.key,
+                data,
+                nextYearFunnelLeadMap.leadsAndTours,
+                true
+              );
+            },
+            footer: (col: iTableColumn) => {
+              const students =
+                "total" in nextYearFunnelLeadMap.leadsAndTours
+                  ? nextYearFunnelLeadMap.leadsAndTours.total
+                  : [];
+              return <td key={col.key}>{StudentPopupDiv(students, true)}</td>;
+            }
+          }
+        ])
   ];
 
   return (
