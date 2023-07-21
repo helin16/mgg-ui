@@ -59,6 +59,14 @@ const getWeekdaysBetweenDates = (fromDate: Moment, toDate: Moment)  => {
   return weekDays;
 }
 
+const letterRange = (start: string, stop: string) => {
+  const result=[];
+  for (let idx= start.charCodeAt(0),end= stop.charCodeAt(0); idx <= end; ++idx){
+    result.push(String.fromCharCode(idx));
+  }
+  return result;
+}
+
 const UtilsService = {
   isNumeric,
   handleEnterKeyPressed,
@@ -68,6 +76,7 @@ const UtilsService = {
   getWeekdaysBetweenDates,
   validateMacAddress,
   validateTime,
+  letterRange,
 }
 
 export default UtilsService;

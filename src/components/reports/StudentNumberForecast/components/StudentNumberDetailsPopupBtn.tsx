@@ -13,6 +13,9 @@ import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Popover from "react-bootstrap/Popover";
 import iSynVDebtorStudentConcession from "../../../../types/Synergetic/Finance/iSynVDebtorStudentConcession";
 import MathHelper from "../../../../helper/MathHelper";
+import { FlexContainer } from "../../../../styles";
+import CSVExportBtn from "../../../form/CSVExportBtn";
+import StudentNumberForecastExportHelper from "./StudentNumberForecastExportHelper";
 
 type iStudentNumberDetailsPopup = ButtonProps & {
   records: (iVStudent | iFunnelLead)[];
@@ -98,8 +101,11 @@ const StudentNumberDetailsPopupBtn = ({
                       <td>
                         {UtilsService.formatIntoCurrency(
                           MathHelper.mul(
-                            // @ts-ignore
-                            showingFuture === true ? (record.futureTuitionFees || 0) : (record.tuitionFees || 0),
+                            showingFuture === true
+                              ? // @ts-ignore
+                                record.futureTuitionFees || 0
+                              : // @ts-ignore
+                                record.tuitionFees || 0,
                             MathHelper.div(
                               concession.DiscountPercentage || 0,
                               100
@@ -381,8 +387,13 @@ const StudentNumberDetailsPopupBtn = ({
               return (
                 <td key={col.key} className={"finance-col"}>
                   {"tuitionFees" in record
-                    ? // @ts-ignore
-                      UtilsService.formatIntoCurrency(showingFuture === true ? (record.futureTuitionFees || 0) : (record.tuitionFees || 0))
+                    ? UtilsService.formatIntoCurrency(
+                        showingFuture === true
+                          ? // @ts-ignore
+                            record.futureTuitionFees || 0
+                          : // @ts-ignore
+                            record.tuitionFees || 0
+                      )
                     : ""}
                 </td>
               );
@@ -396,8 +407,11 @@ const StudentNumberDetailsPopupBtn = ({
                 <td key={col.key} className={"finance-col"}>
                   {"consolidateFees" in record
                     ? UtilsService.formatIntoCurrency(
-                        // @ts-ignore
-                      showingFuture === true ? (record.futureConsolidateFees || 0) : (record.consolidateFees || 0)
+                        showingFuture === true
+                          ? // @ts-ignore
+                            record.futureConsolidateFees || 0
+                          : // @ts-ignore
+                            record.consolidateFees || 0
                       )
                     : ""}
                 </td>
@@ -466,7 +480,27 @@ const StudentNumberDetailsPopupBtn = ({
         dialogClassName={"modal-90w"}
         show={isShowing}
         handleClose={handleClose}
-        title={`${records.length} students:`}
+        title={
+          <FlexContainer className={"with-gap lg-gap"}>
+            <div>{records.length} students:</div>
+            <CSVExportBtn // @ts-ignore
+              fetchingFnc={() =>
+                new Promise(resolve => {
+                  resolve(records);
+                })
+              }
+              downloadFnc={() =>
+                StudentNumberForecastExportHelper.downloadHeadCounts(
+                  records || [],
+                  showingFinanceFigures,
+                  showingFuture
+                )
+              }
+              size={"sm"}
+              btnTxt={"Export"}
+            />
+          </FlexContainer>
+        }
       >
         <TableWrapper>
           <Table
