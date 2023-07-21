@@ -8,7 +8,7 @@ const Wrappers = styled.div`
 const BudgetForecastPanel = () => {
   return (
     <Wrappers>
-      <StudentNumberForecastDashboard showExplanationPanel={false} showFinanceFigures={true} showSumPanels={false}/>
+      <StudentNumberForecastDashboard showFinanceFigures={true} showSumPanels={false}/>
     </Wrappers>
   )
 }
