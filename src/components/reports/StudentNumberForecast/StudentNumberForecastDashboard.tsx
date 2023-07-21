@@ -66,6 +66,7 @@ const Wrapper = styled.div`
     
     .increasing-percentage {
       width: 80px;
+      margin: 0px;
     }
   }
 
