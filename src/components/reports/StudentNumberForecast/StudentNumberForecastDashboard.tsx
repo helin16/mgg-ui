@@ -222,6 +222,13 @@ const StudentNumberForecastDashboard = ({
     }, []);
   };
 
+  const getNextFeeWithIncreasingPercentage = (currentYearFee: number) => {
+    return MathHelper.mul(
+      currentYearFee,
+      MathHelper.div(MathHelper.add(100, increasingPercentage), 100)
+    );
+  };
+
   const getFeeInfoForStudent = (
     yearLevelCode: string,
     record: iVStudent | iFunnelLead,
@@ -270,10 +277,10 @@ const StudentNumberForecastDashboard = ({
           }
         });
     }
-    const totalTuitionFeePerYearLevel = MathHelper.mul(MathHelper.add(
+    const totalTuitionFeePerYearLevel = MathHelper.add(
       yearLevelTuitionFees,
       yearLevelConsolidateFees
-    ), (MathHelper.div(MathHelper.add(100, increasingPercentage), 100)));
+    );
     if ('StudentID' in record && record.StudentID in concessMap) {
       const sID = `${record.StudentID}`;
       // @ts-ignore
@@ -283,7 +290,7 @@ const StudentNumberForecastDashboard = ({
       // @ts-ignore
       nextYearConcessions = concessMap[sID].filter(concession => {
         return (moment(concession.EffectiveFromDate).year() <= currentFileYear || concession.EffectiveFromDate === null) && (moment(concession.EffectiveToDate).year() > currentFileYear || concession.EffectiveToDate === null);
-      }).map((concession: iSynVDebtorStudentConcession) => ({...concession, concessionAmount: MathHelper.mul(yearLevelTuitionFees, MathHelper.div(concession.DiscountPercentage, 100))}));
+      }).map((concession: iSynVDebtorStudentConcession) => ({...concession, concessionAmount: MathHelper.mul(getNextFeeWithIncreasingPercentage(yearLevelTuitionFees), MathHelper.div(concession.DiscountPercentage, 100))}));
     }
 
     // @ts-ignore
@@ -293,9 +300,11 @@ const StudentNumberForecastDashboard = ({
     return {
       ...record,
       currentTotalFeeAmount: MathHelper.sub(totalTuitionFeePerYearLevel, currentConcessionFees),
-      futureTotalFeeAmount: MathHelper.sub(totalTuitionFeePerYearLevel, currentConcessionFees),
+      futureTotalFeeAmount: MathHelper.sub(getNextFeeWithIncreasingPercentage(totalTuitionFeePerYearLevel), futureConcessionFees),
       tuitionFees: yearLevelTuitionFees,
+      futureTuitionFees: getNextFeeWithIncreasingPercentage(yearLevelTuitionFees),
       consolidateFees: yearLevelConsolidateFees,
+      futureConsolidateFees: getNextFeeWithIncreasingPercentage(yearLevelConsolidateFees),
       currentConcessionFees,
       currentConcessions,
       futureConcessionFees,

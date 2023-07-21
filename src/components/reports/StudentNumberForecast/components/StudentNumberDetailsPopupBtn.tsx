@@ -99,7 +99,7 @@ const StudentNumberDetailsPopupBtn = ({
                         {UtilsService.formatIntoCurrency(
                           MathHelper.mul(
                             // @ts-ignore
-                            record.tuitionFees || 0,
+                            showingFuture === true ? (record.futureTuitionFees || 0) : (record.tuitionFees || 0),
                             MathHelper.div(
                               concession.DiscountPercentage || 0,
                               100
@@ -382,7 +382,7 @@ const StudentNumberDetailsPopupBtn = ({
                 <td key={col.key} className={"finance-col"}>
                   {"tuitionFees" in record
                     ? // @ts-ignore
-                      UtilsService.formatIntoCurrency(record.tuitionFees || 0)
+                      UtilsService.formatIntoCurrency(showingFuture === true ? (record.futureTuitionFees || 0) : (record.tuitionFees || 0))
                     : ""}
                 </td>
               );
@@ -397,7 +397,7 @@ const StudentNumberDetailsPopupBtn = ({
                   {"consolidateFees" in record
                     ? UtilsService.formatIntoCurrency(
                         // @ts-ignore
-                        record.consolidateFees || 0
+                      showingFuture === true ? (record.futureConsolidateFees || 0) : (record.consolidateFees || 0)
                       )
                     : ""}
                 </td>
