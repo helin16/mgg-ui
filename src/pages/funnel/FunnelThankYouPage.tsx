@@ -1,8 +1,10 @@
 import { useParams } from "react-router-dom";
 import PageNotFound from "../../components/PageNotFound";
 import styled from "styled-components";
-import {Alert} from 'react-bootstrap';
+import {Alert, Button} from 'react-bootstrap';
 import SchoolLogo from '../../components/SchoolLogo';
+import React from 'react';
+import * as Icons from 'react-bootstrap-icons';
 
 const FUNNEL_THANK_YOU_PAGE_NAME_APPLICATION = "application";
 const FUNNEL_THANK_YOU_PAGE_NAME_SCHOLARSHIP_EOI = "scholarshipEOI";
@@ -32,10 +34,16 @@ const FunnelThankYouPage = () => {
     return (
       <Wrapper>
         <SchoolLogo className={'logo'}/>
-        <Alert variant={'success'}>
+        <Alert variant={'success msg-div'}>
           <h4>Thank you</h4>
           {content}
         </Alert>
+        <div>
+          <Button variant={'link'} href={process.env.REACT_APP_MAIN_WEBSITE_URL || ''}>
+            <Icons.HouseDoor />{' '}
+            Back to Home
+          </Button>
+        </div>
       </Wrapper>
     );
   };
