@@ -677,9 +677,10 @@ const StudentNumberForecastDashboard = ({
                 set
               </li>
               <li>
-                <b>Confirmed</b>: the number of leads from Funnel with status:{" "}
-                {FUNNEL_STAGE_NAME_EXPORTED} &{" "}
-                {FUNNEL_STAGE_NAME_OFFER_ACCEPTED}
+                {/*<b>Confirmed</b>: the number of leads from Funnel with status:{" "}*/}
+                {/*{FUNNEL_STAGE_NAME_EXPORTED} &{" "}*/}
+                {/*{FUNNEL_STAGE_NAME_OFFER_ACCEPTED}*/}
+                <b>Confirmed</b>: All future students in Synergetic starting in {nextFileYear} with status "Application Finalised"
               </li>
               <li>
                 <b>In Progress</b>: the number of leads from Funnel with status:{" "}
