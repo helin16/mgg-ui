@@ -110,7 +110,8 @@ const StudentNumberForecastTable = ({
 
   const StudentPopupDiv = (
     students: (iVStudent | iFunnelLead)[],
-    forFuture: boolean = false
+    forFuture: boolean = false,
+    content?: any
   ) => {
     if (students.length <= 0) {
       return null;
@@ -124,7 +125,9 @@ const StudentNumberForecastTable = ({
         showingFuture={forFuture}
         showingFinanceFigures={showingFinanceFigures}
       >
-        {showingFinanceFigures === true
+        {content !== undefined
+          ? content
+          : showingFinanceFigures === true
           ? UtilsService.formatIntoCurrency(
               students.reduce(
                 (sum, student) =>
@@ -164,6 +167,78 @@ const StudentNumberForecastTable = ({
 
     const students = data.Code in map ? map[data.Code] : [];
     return <td key={key}>{StudentPopupDiv(students, forFuture)}</td>;
+  };
+
+  const getConcessionCell = (
+    key: string,
+    map: any,
+    data?: iLuYearLevel,
+    forFuture: boolean = false
+  ) => {
+    let students = [];
+    if (!data) {
+      // @ts-ignore
+      students = map.total || [];
+    } else if (data.Code === "subTotal") {
+      const yearLevelCodes = yLevelArr
+        // @ts-ignore
+        .filter(yLevel => (data.campuses || []).indexOf(yLevel.Campus) >= 0)
+        .map(yLevel => yLevel.Code);
+      students = yearLevelCodes.reduce(
+        (arr: iVStudent[], code) => [...arr, ...(code in map ? map[code] : [])],
+        []
+      );
+    } else {
+      students = data.Code in map ? map[data.Code] : [];
+    }
+
+    // @ts-ignore
+    const studentsWithConcessions: (
+      | iVStudent
+      | iFunnelLead
+    )[] = students.filter((record: iVStudent | iFunnelLead) => {
+      if (forFuture === true) {
+        return (
+          // @ts-ignore
+          record.futureConcessionFees &&
+          // @ts-ignore
+          record.futureConcessionFees > 0
+        );
+      }
+      return (
+        // @ts-ignore
+        record.currentConcessionFees &&
+        // @ts-ignore
+        record.currentConcessionFees > 0
+      );
+    });
+
+    return (
+      <td key={key} className={data?.Code === "subTotal" ? "sub-total" : ""}>
+        {StudentPopupDiv(
+          studentsWithConcessions,
+          false,
+          <small>
+            (
+            {UtilsService.formatIntoCurrency(
+              studentsWithConcessions.reduce(
+                (sum, student) =>
+                  MathHelper.add(
+                    sum,
+                    forFuture === true
+                      ? // @ts-ignore
+                      student.futureConcessionFees
+                      : // @ts-ignore
+                        student.currentConcessionFees
+                  ),
+                0
+              )
+            )}
+            )
+          </small>
+        )}
+      </td>
+    );
   };
 
   const getColumns = () => [
@@ -206,6 +281,25 @@ const StudentNumberForecastTable = ({
         return <td key={col.key}>{StudentPopupDiv(students)}</td>;
       }
     },
+    ...(showingFinanceFigures === true
+      ? [
+          {
+            key: "currentConcessions",
+            header: "Current Concessions",
+            cell: (col: iTableColumn, data: iLuYearLevel) => {
+              return getConcessionCell(col.key, currentStudentMap, data, false);
+            },
+            footer: (col: iTableColumn) => {
+              return getConcessionCell(
+                col.key,
+                currentStudentMap,
+                undefined,
+                false
+              );
+            }
+          }
+        ]
+      : []),
     {
       key: "currentLeavers",
       header: "Current Leavers",
@@ -269,6 +363,25 @@ const StudentNumberForecastTable = ({
         return <td key={col.key}>{StudentPopupDiv(students, true)}</td>;
       }
     },
+    ...(showingFinanceFigures === true
+      ? [
+        {
+          key: "futureConcessions",
+          header: `${nextFileYear} Concessions`,
+          cell: (col: iTableColumn, data: iLuYearLevel) => {
+            return getConcessionCell(col.key, futureNextYearMap, data, true);
+          },
+          footer: (col: iTableColumn) => {
+            return getConcessionCell(
+              col.key,
+              futureNextYearMap,
+              undefined,
+              true
+            );
+          }
+        }
+      ]
+      : []),
     ...(showingFinanceFigures === true
       ? []
       : [

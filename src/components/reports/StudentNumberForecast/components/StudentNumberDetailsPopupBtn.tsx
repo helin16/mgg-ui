@@ -1,4 +1,6 @@
-import iVStudent, {SYN_STUDENT_STATUS_ID_FINALISED} from "../../../../types/Synergetic/iVStudent";
+import iVStudent, {
+  SYN_STUDENT_STATUS_ID_FINALISED
+} from "../../../../types/Synergetic/iVStudent";
 import iFunnelLead from "../../../../types/Funnel/iFunnelLead";
 import { Button, ButtonProps, Table as BTable } from "react-bootstrap";
 import PopupModal from "../../../common/PopupModal";
@@ -133,11 +135,12 @@ const StudentNumberDetailsPopupBtn = ({
           rootClose
         >
           <Button variant="link" size={"sm"}>
-            -
+            (
             {UtilsService.formatIntoCurrency(
               // @ts-ignore
               record.futureConcessionFees || 0
             )}
+            )
           </Button>
         </OverlayTrigger>
       );
@@ -158,11 +161,12 @@ const StudentNumberDetailsPopupBtn = ({
         rootClose
       >
         <Button variant="link" size={"sm"}>
-          -
+          (
           {UtilsService.formatIntoCurrency(
             // @ts-ignore
             record.currentConcessionFees || 0
           )}
+          )
         </Button>
       </OverlayTrigger>
     );
@@ -236,11 +240,12 @@ const StudentNumberDetailsPopupBtn = ({
       key: "currentYearLevel",
       header: "Current Year Level",
       cell: (col: iTableColumn, record: iVStudent | iFunnelLead) => {
-        // @ts-ignore
-        if (`${record.StudentStatus || ''}`.trim() === SYN_STUDENT_STATUS_ID_FINALISED ) {
-          return (
-            <td key={col.key}></td>
-          );
+        if (
+          // @ts-ignore
+          `${record.StudentStatus || ""}`.trim() ===
+          SYN_STUDENT_STATUS_ID_FINALISED
+        ) {
+          return <td key={col.key}></td>;
         }
         return (
           <td key={col.key}>
@@ -277,14 +282,18 @@ const StudentNumberDetailsPopupBtn = ({
       key: "ProposingEntryYear",
       header: "Proposing Entry Year",
       cell: (col: iTableColumn, record: iVStudent | iFunnelLead) => {
-        // @ts-ignore
-        if (`${record.StudentStatus || ''}`.trim() === SYN_STUDENT_STATUS_ID_FINALISED ) {
+        if (
+          // @ts-ignore
+          `${record.StudentStatus || ""}`.trim() ===
+          SYN_STUDENT_STATUS_ID_FINALISED
+        ) {
           return (
             <td key={col.key}>
-              {
-                // @ts-ignore
-                `${record.StudentEntryDate || ''}`.trim() === '' ? '' : moment(record.StudentEntryDate).year()
-              }
+              {// @ts-ignore
+              `${record.StudentEntryDate || ""}`.trim() === ""
+                ? ""
+                : // @ts-ignore
+                  moment(record.StudentEntryDate).year()}
             </td>
           );
         }
@@ -301,8 +310,11 @@ const StudentNumberDetailsPopupBtn = ({
       key: "proposingEntryYearLevel",
       header: "Proposing Entry Year Level",
       cell: (col: iTableColumn, record: iVStudent | iFunnelLead) => {
-        // @ts-ignore
-        if (`${record.StudentStatus || ''}`.trim() === SYN_STUDENT_STATUS_ID_FINALISED ) {
+        if (
+          // @ts-ignore
+          `${record.StudentStatus || ""}`.trim() ===
+          SYN_STUDENT_STATUS_ID_FINALISED
+        ) {
           return (
             <td key={col.key}>
               {
@@ -406,7 +418,10 @@ const StudentNumberDetailsPopupBtn = ({
         ])
   ];
 
-  const sortStudents = (r1: iVStudent | iFunnelLead, r2: iVStudent | iFunnelLead) => {
+  const sortStudents = (
+    r1: iVStudent | iFunnelLead,
+    r2: iVStudent | iFunnelLead
+  ) => {
     // @ts-ignore
     const r1YLSort = Number(r1.StudentYearLevelSort || 0);
     // @ts-ignore
@@ -438,7 +453,7 @@ const StudentNumberDetailsPopupBtn = ({
     }
 
     return 0;
-  }
+  };
 
   return (
     <>
@@ -459,51 +474,63 @@ const StudentNumberDetailsPopupBtn = ({
             responsive
             columns={getColumns()}
             rows={[
-              ...(records
+              ...records
+                .filter(
+                  record =>
+                    // @ts-ignore
+                    `${record.StudentID || ""}`.trim() !== "" &&
+                    // @ts-ignore
+                    `${record.StudentStatus || ""}`.trim() !==
+                      SYN_STUDENT_STATUS_ID_FINALISED
+                )
+                .sort(sortStudents),
+              ...records
+                .filter(
+                  record =>
+                    // @ts-ignore
+                    `${record.StudentID || ""}`.trim() !== "" &&
+                    // @ts-ignore
+                    `${record.StudentStatus || ""}`.trim() ===
+                      SYN_STUDENT_STATUS_ID_FINALISED
+                )
+                .sort(sortStudents),
+              ...records
+                // @ts-ignore
+                .filter(record => `${record.StudentID || ""}`.trim() === "")
+                .sort((r1, r2) => {
                   // @ts-ignore
-                .filter(record => `${record.StudentID || ""}`.trim() !== "" && `${record.StudentStatus || ""}`.trim() !== SYN_STUDENT_STATUS_ID_FINALISED)
-                .sort(sortStudents)
-              ),
-              ...(records
+                  const r1StartingYL = `${r1.student_starting_year_level ||
+                    ""}`;
                   // @ts-ignore
-                  .filter(record => `${record.StudentID || ""}`.trim() !== "" && `${record.StudentStatus || ""}`.trim() === SYN_STUDENT_STATUS_ID_FINALISED)
-                  .sort(sortStudents)
-              ),
-              ...(records
-                // @ts-ignore
-              .filter(record => `${record.StudentID || ""}`.trim() === "")
-              .sort((r1, r2) => {
-                // @ts-ignore
-                const r1StartingYL = `${r1.student_starting_year_level || ''}`;
-                // @ts-ignore
-                const r2StartingYL = `${r2.student_starting_year_level || ''}`;
-                if (r1StartingYL > r2StartingYL) {
-                  return 1
-                } else if (r1StartingYL < r2StartingYL) {
-                  return -1
-                }
+                  const r2StartingYL = `${r2.student_starting_year_level ||
+                    ""}`;
+                  if (r1StartingYL > r2StartingYL) {
+                    return 1;
+                  } else if (r1StartingYL < r2StartingYL) {
+                    return -1;
+                  }
 
-                // @ts-ignore
-                const r1Name = `${r1.student_first_name || ""}`;
-                // @ts-ignore
-                const r2Name = `${r2.student_first_name || ""}`;
-                if (r1Name > r2Name) {
-                  return 1;
-                } else if (r1Name < r2Name) {
-                  return -1;
-                }
-                // @ts-ignore
-                const r1LName = `${r1.student_last_name || ""}`;
-                // @ts-ignore
-                const r2LName = `${r2.student_last_name || ""}`;
-                if (r1LName > r2LName) {
-                  return 1;
-                } else if (r1LName < r2LName) {
-                  return -1;
-                }
+                  // @ts-ignore
+                  const r1Name = `${r1.student_first_name || ""}`;
+                  // @ts-ignore
+                  const r2Name = `${r2.student_first_name || ""}`;
+                  if (r1Name > r2Name) {
+                    return 1;
+                  } else if (r1Name < r2Name) {
+                    return -1;
+                  }
+                  // @ts-ignore
+                  const r1LName = `${r1.student_last_name || ""}`;
+                  // @ts-ignore
+                  const r2LName = `${r2.student_last_name || ""}`;
+                  if (r1LName > r2LName) {
+                    return 1;
+                  } else if (r1LName < r2LName) {
+                    return -1;
+                  }
 
-                return 0;
-              })),
+                  return 0;
+                })
             ]}
           />
         </TableWrapper>

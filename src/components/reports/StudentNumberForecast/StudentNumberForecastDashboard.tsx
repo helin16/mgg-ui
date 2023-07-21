@@ -5,9 +5,9 @@ import PanelTitle from "../../PanelTitle";
 import SynCampusSelector from "../../student/SynCampusSelector";
 import React, { useEffect, useState } from "react";
 import Panel from "../../common/Panel";
-import { Col, Row } from "react-bootstrap";
+import {Col, FormControl, Row} from "react-bootstrap";
 import MathHelper from "../../../helper/MathHelper";
-import Toaster from "../../../services/Toaster";
+import Toaster, {TOAST_TYPE_ERROR} from "../../../services/Toaster";
 import PageLoadingSpinner from "../../common/PageLoadingSpinner";
 import SynVStudentService from "../../../services/Synergetic/SynVStudentService";
 import moment from "moment-timezone";
@@ -45,6 +45,8 @@ import iSynVDebtorStudentConcession from "../../../types/Synergetic/Finance/iSyn
 import SynVFutureStudentService from '../../../services/Synergetic/SynVFutureStudent';
 import {FUTURE_STUDENT_STATUS_FINALISED} from '../../../types/Synergetic/iSynVFutureStudent';
 import SynVFutureStudent from '../../../services/Synergetic/SynVFutureStudent';
+import {FlexContainer} from '../../../styles';
+import UtilsService from '../../../services/UtilsService';
 
 const Wrapper = styled.div`
   .title-row {
@@ -60,6 +62,10 @@ const Wrapper = styled.div`
       color: black;
       display: inline-block;
       min-width: 220px;
+    }
+    
+    .increasing-percentage {
+      width: 80px;
     }
   }
 
@@ -151,6 +157,7 @@ const StudentNumberForecastDashboard = ({
   const [tuitionFeeMap, setTuitionFeeMap] = useState<iTuitionFeeMap>({});
   const [concessionMap, setConcessionMap] = useState<iStudentConcessionMap>({});
   const [confirmedFutureStudentMap, setConfirmedFutureStudentMap] = useState<iStudentMap>({});
+  const [increasingPercentage, setIncreasingPercentage] = useState(0);
 
   const getStatusFromLead = (lead: iFunnelLead) => {
     switch (lead.pipeline_stage_name) {
@@ -262,10 +269,10 @@ const StudentNumberForecastDashboard = ({
           }
         });
     }
-    const totalTuitionFeePerYearLevel = MathHelper.add(
+    const totalTuitionFeePerYearLevel = MathHelper.mul(MathHelper.add(
       yearLevelTuitionFees,
       yearLevelConsolidateFees
-    );
+    ), (MathHelper.div(MathHelper.add(100, increasingPercentage), 100)));
     if ('StudentID' in record && record.StudentID in concessMap) {
       const sID = `${record.StudentID}`;
       // @ts-ignore
@@ -534,7 +541,8 @@ const StudentNumberForecastDashboard = ({
     selectedCampusCodes,
     currentFileYear,
     nextFileYear,
-    currentFileSemester
+    currentFileSemester,
+    increasingPercentage
   ]);
 
   useEffect(() => {
@@ -694,19 +702,47 @@ const StudentNumberForecastDashboard = ({
     );
   };
 
+  const setPercentage = (event: React.KeyboardEvent<any> | React.FocusEvent<any>) => {
+    const value = event.target.value;
+    if (!UtilsService.isNumeric(value) || Number(value) > 100 || Number(value) < 0) {
+      Toaster.showToast(`value needs to be a number between 0 and 100`, TOAST_TYPE_ERROR);
+      return;
+    }
+    setIncreasingPercentage(Number(value));
+  }
+
   const getFinanceFigureSwitch = () => {
     if (showFinanceFigures !== true) {
       return null;
     }
     return (
-      <ToggleBtn
-        className={"showing-toggle"}
-        on={"AUD $"}
-        off={"Count"}
-        size={"sm"}
-        checked={showingFinanceFigures === true}
-        onChange={checked => setShowingFinanceFigures(checked)}
-      />
+      <>
+        <ToggleBtn
+          className={"showing-toggle"}
+          on={"AUD $"}
+          off={"Count"}
+          size={"sm"}
+          checked={showingFinanceFigures === true}
+          onChange={checked => setShowingFinanceFigures(checked)}
+        />
+        <FlexContainer className={'with-gap align-items-center'}>
+          <div>Increasing for {nextFileYear}: </div>
+          <FormControl
+            placeholder={"increase percentage"}
+            defaultValue={increasingPercentage}
+            type={"number"}
+            className={"increasing-percentage"}
+            onBlur={(event) => setPercentage(event)}
+            onKeyDown={(event) => {
+              if (event.key !== 'Enter') {
+                return;
+              }
+              setPercentage(event);
+            }}
+          />
+          <div>%</div>
+        </FlexContainer>
+      </>
     );
   };
 
