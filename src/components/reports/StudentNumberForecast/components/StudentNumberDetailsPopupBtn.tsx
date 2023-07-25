@@ -45,7 +45,6 @@ const StudentNumberDetailsPopupBtn = ({
   ...rest
 }: iStudentNumberDetailsPopup) => {
   const [isShowing, setIsShowing] = useState(false);
-console.log(feeNameMap);
   const handleClose = () => {
     setIsShowing(false);
   };
@@ -495,7 +494,8 @@ console.log(feeNameMap);
                 StudentNumberForecastExportHelper.downloadHeadCounts(
                   records || [],
                   showingFinanceFigures,
-                  showingFuture
+                  showingFuture,
+                  feeNameMap
                 )
               }
               size={"sm"}

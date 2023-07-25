@@ -18,11 +18,12 @@ const getFinanceColumnTitles = (showingFinanceFigures = false) => {
     "Tuition Fee",
     "Consolidated Charges",
     "Concession Code",
-    "Concession Comments",
+    "Concession Name",
     "Concession From",
     "Concession To",
     "Concession %",
-    "Concession Amount"
+    "Concession Amount",
+    "Concession Comments"
   ];
 };
 
@@ -71,7 +72,7 @@ const getDefaultStudentRow = (record: iVStudent | iFunnelLead) => {
   ]
 }
 
-const getStudentRow = (record: iVStudent | iFunnelLead, showingFinanceFigures = false, showingFuture = false): (string | number | null)[][] => {
+const getStudentRow = (record: iVStudent | iFunnelLead, showingFinanceFigures = false, showingFuture = false, feeNameMap: {[key: string]: string} = {}): (string | number | null)[][] => {
   const defaultColumns = getDefaultStudentRow(record);
   if (showingFinanceFigures !== true) {
     return [defaultColumns];
@@ -88,7 +89,7 @@ const getStudentRow = (record: iVStudent | iFunnelLead, showingFinanceFigures = 
   ]
   const concessions = (
     // @ts-ignore
-    showingFuture === true ? ( record.futureConcessions || []) : ( record.currentConcessions || [])
+    showingFuture === true ? ( record.nextYearConcessions || []) : ( record.currentConcessions || [])
   );
   if (concessions.length <= 0) {
     return [defaultColumnsWithFinanceFigures];
@@ -100,7 +101,7 @@ const getStudentRow = (record: iVStudent | iFunnelLead, showingFinanceFigures = 
     returnArr.push([
       ...(index === 0 ? defaultColumnsWithFinanceFigures : _.range(0, defaultColumnsWithFinanceFigures.length).map(() => '')),
       `${concession.FeeCode}`,
-      `${concession.Comment}`,
+      `${concession.FeeCode in feeNameMap ? feeNameMap[concession.FeeCode] : ''}`,
       `${concession.EffectiveFromDate || ""}`.trim() === ""
         ? ""
         : moment(`${concession.EffectiveFromDate || ""}`).format("YYYY-MM-DD"),
@@ -109,7 +110,8 @@ const getStudentRow = (record: iVStudent | iFunnelLead, showingFinanceFigures = 
         : moment(`${concession.EffectiveToDate || ""}`).format("YYYY-MM-DD"),
       `${concession.OverridePercentage}%`,
       // @ts-ignore
-      `${concession.concessionAmount || ''}`
+      `${concession.concessionAmount || ''}`,
+      `${concession.Comment || ''}`
     ]);
   })
   return returnArr;
@@ -118,7 +120,8 @@ const getStudentRow = (record: iVStudent | iFunnelLead, showingFinanceFigures = 
 const downloadHeadCounts = (
   data: (iVStudent | iFunnelLead)[],
   showingFinanceFigures = false,
-  showingFuture = false
+  showingFuture = false,
+  feeNameMap: {[key: string]: string} = {}
 ) => {
   const titleRows: any = [
     [
@@ -139,7 +142,7 @@ const downloadHeadCounts = (
   let rowNo = 1;
   const mergeCells: {s: { r: number, c: number }, e: { r: number, c: number }}[] = [];
   const rows = data.map((record: iVStudent | iFunnelLead) => {
-    const recordRows =  getStudentRow(record, showingFinanceFigures, showingFuture);
+    const recordRows =  getStudentRow(record, showingFinanceFigures, showingFuture, feeNameMap);
     if (recordRows.length > 1) {
       _.range(0, 14).forEach(col => {
         mergeCells.push({s: { r: rowNo, c: col }, e: { r: MathHelper.sub(MathHelper.add(rowNo, recordRows.length), 1), c: col }})
@@ -151,14 +154,13 @@ const downloadHeadCounts = (
   // const {rows, cellStyleMap, mergeCells} = getRows(3); //start from row 3, as there are two title rows
   const ws = XLSX.utils.aoa_to_sheet([...titleRows, ...rows]);
 
-  const columRange = UtilsService.letterRange("A", showingFinanceFigures === true ? "T" : 'K');
+  const columRange = UtilsService.letterRange("A", showingFinanceFigures === true ? "U" : 'K');
   columRange.forEach(colRef => {
     ws[`${colRef}1`].s = {
       font: { sz: 14, bold: true }
     };
   });
 
-  console.log('mergeCells', mergeCells);
   ws["!merges"] = mergeCells;
   const nowString = `${moment().format("DD_MMM_YYYY_HH_mm_ss")}`;
   const nextYear = `${moment().add(1, 'year').year()}`;
