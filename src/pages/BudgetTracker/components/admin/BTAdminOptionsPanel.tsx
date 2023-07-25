@@ -59,7 +59,7 @@ const BTAdminOptionsPanel = ({onSelectAdminModule, className, preExtraBtns}: iBT
             <Icons.Mailbox /> Notifications
           </Button>
           <Button variant={'success'} size={'sm'} onClick={() => onSelectAdminModule(BT_ADMIN_OPTION_FORECAST)}>
-            <Icons.Mailbox /> Forecast {moment().add(1, 'year').year()}
+            <Icons.BarChartLineFill /> Forecast {moment().add(1, 'year').year()}
           </Button>
           <Button variant={'danger'} size={'sm'} onClick={() => onSelectAdminModule(BT_ADMIN_OPTION_LOCKDOWNS)}>
             <Icons.Lock /> Lockdowns
