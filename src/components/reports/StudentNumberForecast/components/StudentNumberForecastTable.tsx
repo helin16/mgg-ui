@@ -332,7 +332,18 @@ const StudentNumberForecastTable = ({
       }
     },
     ...(showingFinanceFigures === true
-      ? []
+      ? [
+        {
+          key: "confirmedConcessions",
+          header: "Confirmed Concessions",
+          cell: (col: iTableColumn, data: iLuYearLevel) => {
+            return getConcessionCell(col.key, confirmedFutureStudentMap, data, true);;
+          },
+          footer: (col: iTableColumn) => {
+            return getConcessionCell(col.key, confirmedFutureStudentMap, undefined, true);
+          }
+        }
+      ]
       : [
           {
             key: "inProgress",
