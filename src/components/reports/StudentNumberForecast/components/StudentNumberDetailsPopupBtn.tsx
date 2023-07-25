@@ -11,14 +11,15 @@ import UtilsService from "../../../../services/UtilsService";
 import styled from "styled-components";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Popover from "react-bootstrap/Popover";
-import iSynVDebtorStudentConcession from "../../../../types/Synergetic/Finance/iSynVDebtorStudentConcession";
 import MathHelper from "../../../../helper/MathHelper";
 import { FlexContainer } from "../../../../styles";
 import CSVExportBtn from "../../../form/CSVExportBtn";
 import StudentNumberForecastExportHelper from "./StudentNumberForecastExportHelper";
+import iSynDebtorStudentConcession from '../../../../types/Synergetic/Finance/iSynDebtorStudentConcession';
 
 type iStudentNumberDetailsPopup = ButtonProps & {
   records: (iVStudent | iFunnelLead)[];
+  feeNameMap?: { [key: string]: string };
   showingFinanceFigures?: boolean;
   showingFuture?: boolean;
 };
@@ -38,12 +39,13 @@ const TableWrapper = styled.div`
 
 const StudentNumberDetailsPopupBtn = ({
   records,
+  feeNameMap = {},
   showingFuture = false,
   showingFinanceFigures = false,
   ...rest
 }: iStudentNumberDetailsPopup) => {
   const [isShowing, setIsShowing] = useState(false);
-
+console.log(feeNameMap);
   const handleClose = () => {
     setIsShowing(false);
   };
@@ -78,11 +80,11 @@ const StudentNumberDetailsPopupBtn = ({
             </thead>
             <tbody>
               {concessions.map(
-                (concession: iSynVDebtorStudentConcession, index: number) => {
+                (concession: iSynDebtorStudentConcession, index: number) => {
                   return (
                     <tr key={index}>
                       <td>{concession.FeeCode}</td>
-                      <td>{concession.FeeDescription}</td>
+                      <td>{concession.FeeCode in feeNameMap ? feeNameMap[concession.FeeCode]  : ''}</td>
                       <td>
                         {`${concession.EffectiveFromDate || ""}`.trim() === ""
                           ? ""
@@ -97,7 +99,7 @@ const StudentNumberDetailsPopupBtn = ({
                               `${concession.EffectiveToDate || ""}`
                             ).format("DD MMM YYYY")}
                       </td>
-                      <td>{concession.DiscountPercentage}%</td>
+                      <td>{concession.OverridePercentage}%</td>
                       <td>
                         {UtilsService.formatIntoCurrency(
                           MathHelper.mul(
@@ -107,7 +109,7 @@ const StudentNumberDetailsPopupBtn = ({
                               : // @ts-ignore
                                 record.tuitionFees || 0,
                             MathHelper.div(
-                              concession.DiscountPercentage || 0,
+                              concession.OverridePercentage || 0,
                               100
                             )
                           )

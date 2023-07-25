@@ -1,6 +1,6 @@
 export const AUTO_TUITION_VARIATION_TYPE_FULL_FEE = 'F';
-export const AUTO_TUITION_CODE_TUITION = 'T';
-export const AUTO_TUITION_CODE_CONSOLIDATED_CHARGES = 'CC';
+
+
 type iSynVDebtorFee = {
   FeeCode: string;
   AutoTuitionCode: string;

@@ -6,8 +6,8 @@ import moment from "moment-timezone";
 import * as XLSX from "sheetjs-style";
 import UtilsService from "../../../../services/UtilsService";
 import * as _ from "lodash";
-import iSynVDebtorStudentConcession from '../../../../types/Synergetic/Finance/iSynVDebtorStudentConcession';
 import MathHelper from '../../../../helper/MathHelper';
+import iSynDebtorStudentConcession from '../../../../types/Synergetic/Finance/iSynDebtorStudentConcession';
 
 const getFinanceColumnTitles = (showingFinanceFigures = false) => {
   if (showingFinanceFigures !== true) {
@@ -18,7 +18,7 @@ const getFinanceColumnTitles = (showingFinanceFigures = false) => {
     "Tuition Fee",
     "Consolidated Charges",
     "Concession Code",
-    "Concession Name",
+    "Concession Comments",
     "Concession From",
     "Concession To",
     "Concession %",
@@ -96,18 +96,18 @@ const getStudentRow = (record: iVStudent | iFunnelLead, showingFinanceFigures = 
 
 
   const returnArr: any[]  = [];
-  concessions.forEach((concession: iSynVDebtorStudentConcession, index: number) => {
+  concessions.forEach((concession: iSynDebtorStudentConcession, index: number) => {
     returnArr.push([
       ...(index === 0 ? defaultColumnsWithFinanceFigures : _.range(0, defaultColumnsWithFinanceFigures.length).map(() => '')),
       `${concession.FeeCode}`,
-      `${concession.FeeDescription}`,
+      `${concession.Comment}`,
       `${concession.EffectiveFromDate || ""}`.trim() === ""
         ? ""
         : moment(`${concession.EffectiveFromDate || ""}`).format("YYYY-MM-DD"),
       `${concession.EffectiveToDate || ""}`.trim() === ""
         ? ""
         : moment(`${concession.EffectiveToDate || ""}`).format("YYYY-MM-DD"),
-      `${concession.DiscountPercentage}%`,
+      `${concession.OverridePercentage}%`,
       // @ts-ignore
       `${concession.concessionAmount || ''}`
     ]);

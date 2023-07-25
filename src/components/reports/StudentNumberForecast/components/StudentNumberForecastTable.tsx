@@ -23,6 +23,7 @@ type iStudentNumberForecastTable = {
   nextFileYear: number;
   selectedCampusCodes?: string[];
   yearLevelMap: { [key: string]: iLuYearLevel };
+  feeNameMap: { [key: string]: string };
   currentStudentMap: iStudentMap;
   confirmedFutureStudentMap: iStudentMap;
   currentStudentLeaverMap: iStudentMap;
@@ -70,6 +71,7 @@ const StudentNumberForecastTable = ({
   nextYearFunnelLeadMap,
   futureNextYearMap,
   showingFinanceFigures,
+  feeNameMap,
   selectedCampusCodes = ["S", "J", "E"]
 }: iStudentNumberForecastTable) => {
   const [yLevelArr, setYLevelArr] = useState<iLuYearLevel[]>([]);
@@ -124,6 +126,7 @@ const StudentNumberForecastTable = ({
         variant={"link"}
         showingFuture={forFuture}
         showingFinanceFigures={showingFinanceFigures}
+        feeNameMap={feeNameMap}
       >
         {content !== undefined
           ? content
@@ -227,7 +230,7 @@ const StudentNumberForecastTable = ({
                     sum,
                     forFuture === true
                       ? // @ts-ignore
-                      student.futureConcessionFees
+                        student.futureConcessionFees
                       : // @ts-ignore
                         student.currentConcessionFees
                   ),
@@ -365,22 +368,22 @@ const StudentNumberForecastTable = ({
     },
     ...(showingFinanceFigures === true
       ? [
-        {
-          key: "futureConcessions",
-          header: `${nextFileYear} Concessions`,
-          cell: (col: iTableColumn, data: iLuYearLevel) => {
-            return getConcessionCell(col.key, futureNextYearMap, data, true);
-          },
-          footer: (col: iTableColumn) => {
-            return getConcessionCell(
-              col.key,
-              futureNextYearMap,
-              undefined,
-              true
-            );
+          {
+            key: "futureConcessions",
+            header: `${nextFileYear} Concessions`,
+            cell: (col: iTableColumn, data: iLuYearLevel) => {
+              return getConcessionCell(col.key, futureNextYearMap, data, true);
+            },
+            footer: (col: iTableColumn) => {
+              return getConcessionCell(
+                col.key,
+                futureNextYearMap,
+                undefined,
+                true
+              );
+            }
           }
-        }
-      ]
+        ]
       : []),
     ...(showingFinanceFigures === true
       ? []

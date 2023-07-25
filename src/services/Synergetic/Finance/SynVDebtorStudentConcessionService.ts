@@ -8,8 +8,8 @@ const getAll =  (params: iConfigParams = {}): Promise<iPaginatedResult<iSynVDebt
   return AppService.get(endPoint, params).then(resp => resp.data);
 };
 
-const SynDebtorPaymentMethodService = {
+const SynVDebtorStudentConcessionService = {
   getAll,
 };
 
-export default SynDebtorPaymentMethodService;
+export default SynVDebtorStudentConcessionService;
