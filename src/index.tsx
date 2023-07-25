@@ -3,7 +3,9 @@ import ReactDOM from 'react-dom';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import LoadComponents from './LoadComponents';
+import Sentry from './components/error/Sentry';
 
+Sentry.init();
 
 const appRoot = document.getElementById('mgg-root');
 if (appRoot) {

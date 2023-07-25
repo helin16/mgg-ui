@@ -5,6 +5,7 @@
   "license": "MIT",
   "dependencies": {
     "@reduxjs/toolkit": "^1.8.1",
+    "@sentry/react": "^7.60.0",
     "@tinymce/tinymce-react": "^4.0.0",
     "axios": "^0.26.1",
     "big.js": "^6.1.1",
