@@ -59,6 +59,7 @@ const StudentAbsenceAdminPage = ({onNavBack}: iStudentAbsenceAdminPage) => {
             <ModuleUserList
               moduleId={MGGS_MODULE_ID_STUDENT_ABSENCES}
               roleId={ROLE_ID_NORMAL}
+              showDeletingBtn
               showCreatingPanel
             />
           </SectionDiv>
@@ -77,6 +78,7 @@ const StudentAbsenceAdminPage = ({onNavBack}: iStudentAbsenceAdminPage) => {
             <ModuleUserList
               moduleId={MGGS_MODULE_ID_STUDENT_ABSENCES}
               roleId={ROLE_ID_ADMIN}
+              showDeletingBtn
               showCreatingPanel
             />
           </SectionDiv>
