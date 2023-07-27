@@ -31,6 +31,7 @@ type iModuleUser = {
   Module?: iModule;
   Role?: iRole;
   SynCommunity?: iSynCommunity;
+  settings: any | null;
 };
 
 export default iModuleUser;
