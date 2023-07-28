@@ -7,7 +7,10 @@ import SchoolCensusAbsenceSummaryDiv from './SchoolCensusAbsenceSummaryDiv';
 import SchoolDaysPopupBtn from './SchoolDaysPopupBtn';
 import {FlexContainer} from '../../../../styles';
 import SchoolCensusDataAttendancePopupBtn from './SchoolCensusDataAttendancePopupBtn';
-import {SYN_NATIONALITY_CODE_AUSTRALIA} from '../../../../types/Synergetic/iSynLuNationality';
+import {
+  SYN_NATIONALITY_CODE_AUSTRALIA,
+  SYN_NATIONALITY_DESCRIPTION_AUSTRALIA
+} from '../../../../types/Synergetic/iSynLuNationality';
 
 type iSchoolCensusDataSummaryDiv = {
   records: iSchoolCensusStudentData[];
@@ -79,7 +82,12 @@ const SchoolCensusDataSummaryDiv = ({records, unfilteredStudentRecords, startAnd
       disability: records.filter(record => `${record.nccdStatusAdjustmentLevel}`.trim() !== ''),
       withVisa: records.filter(record => {
         // any student with non Australia Nationality
-        if (`${record.studentNationality}`.trim().toUpperCase() === SYN_NATIONALITY_CODE_AUSTRALIA || `${record.studentNationality2}`.trim().toUpperCase() === SYN_NATIONALITY_CODE_AUSTRALIA) {
+        if (
+          `${record.studentNationality}`.trim().toUpperCase() === SYN_NATIONALITY_CODE_AUSTRALIA
+          || `${record.studentNationality}`.trim().toUpperCase() === SYN_NATIONALITY_DESCRIPTION_AUSTRALIA
+          || `${record.studentNationality2}`.trim().toUpperCase() === SYN_NATIONALITY_CODE_AUSTRALIA
+          || `${record.studentNationality2}`.trim().toUpperCase() === SYN_NATIONALITY_DESCRIPTION_AUSTRALIA
+        ) {
           return false;
         }
         return true;
