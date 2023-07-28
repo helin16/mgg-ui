@@ -7,6 +7,7 @@ import SchoolCensusAbsenceSummaryDiv from './SchoolCensusAbsenceSummaryDiv';
 import SchoolDaysPopupBtn from './SchoolDaysPopupBtn';
 import {FlexContainer} from '../../../../styles';
 import SchoolCensusDataAttendancePopupBtn from './SchoolCensusDataAttendancePopupBtn';
+import {SYN_NATIONALITY_CODE_AUSTRALIA} from '../../../../types/Synergetic/iSynLuNationality';
 
 type iSchoolCensusDataSummaryDiv = {
   records: iSchoolCensusStudentData[];
@@ -77,7 +78,8 @@ const SchoolCensusDataSummaryDiv = ({records, unfilteredStudentRecords, startAnd
       international: records.filter(record => record.isInternationalStudent === true),
       disability: records.filter(record => `${record.nccdStatusAdjustmentLevel}`.trim() !== ''),
       withVisa: records.filter(record => {
-        if (`${record.visaCode}`.trim() === '') {
+        // any student with non Australia Nationality
+        if (`${record.studentNationality}`.trim().toUpperCase() === SYN_NATIONALITY_CODE_AUSTRALIA || `${record.studentNationality2}`.trim().toUpperCase() === SYN_NATIONALITY_CODE_AUSTRALIA) {
           return false;
         }
         return true;
