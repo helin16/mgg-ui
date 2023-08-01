@@ -118,7 +118,7 @@ const WellBeingGraphNurseVisitsPanel = ({
     }
     return (
       <>
-        <h6>Nurse Visits</h6>
+        <h6 style={{color: 'white'}}>Nurse Visits</h6>
         <h5 className={"number-wrapper"}>
           <div className={"number"}>{incidents.length}</div>
         </h5>
