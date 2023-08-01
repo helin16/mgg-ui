@@ -5,7 +5,7 @@ import iSynLuAbsenceReason from '../../StudentAbsence/iSynLuAbsenceReason';
 type iSynVAbsence = {
   ID: number;
   AbsenceDate: Date | string | null;
-  AbsencePeriod: number;
+  AbsencePeriod: number | string;
   AbsencePeriodSort: number | null;
   AbsenceType: string;
   AdvanceNotifiedFlag: boolean;
