@@ -32,6 +32,7 @@ import {
   ABSENCE_TYPE_CODE_EARLY_SIGN_OUT,
   ABSENCE_TYPE_CODE_LATE_SIGN_IN
 } from '../../../../types/StudentAbsence/iStudentAbsence';
+import MathHelper from '../../../../helper/MathHelper';
 
 const Wrapper = styled.div`
   .title {
@@ -235,9 +236,10 @@ const WellBeingGraphPanel = ({ student }: iWellBeingGraphPanel) => {
                   </div>
                 </div>
                 <div className={'sum-div'} style={{width: '50%'}}>
-                  <div className={"title"}>Roll Call Absence (%)</div>
+                  <div className={"title"}>Attendance (%)</div>
                   <div className={"content"}>
                     {/*format(CALCULATE(count(Attendance[AttendanceDate]),Attendance[HMPeriodMissed]=1)/CALCULATE(count(Attendance[AttendanceDate]),Attendance[AttendancePeriod]=1),"Percent")*/}
+                    {attendances.length <= 0 ? 0 : MathHelper.mul(MathHelper.div(attendances.filter(attendance => attendance.AttendedFlag === true).length, attendances.length), 100).toFixed(2)}
                   </div>
                 </div>
               </FlexContainer>
