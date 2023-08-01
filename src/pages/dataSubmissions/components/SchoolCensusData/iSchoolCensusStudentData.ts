@@ -11,6 +11,7 @@ type iSchoolCensusStudentData = {
   yearLevelCode: string;
   dateOfBirth: Date | string;
   age: string;
+  studentCountryOfBirthCode: string;
   studentCountryOfBirth: string;
   studentNationality: string;
   studentNationality2: string;

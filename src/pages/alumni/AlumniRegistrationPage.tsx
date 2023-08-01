@@ -82,7 +82,6 @@ const AlumniRegistrationPage = () => {
   const [savedRequest, setSavedRequest] = useState<iAlumniRequest | null>(null);
 
   const preCheck = () => {
-    console.log('formValues', formValues);
     return [
       'title',
       'first_name',

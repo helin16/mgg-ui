@@ -1,5 +1,6 @@
 import iSynCommunity from '../iSynCommunity';
 import iSynLuAbsenceType from './iSynLuAbsenceType';
+import iSynLuAbsenceReason from '../../StudentAbsence/iSynLuAbsenceReason';
 
 type iSynVAbsence = {
   ID: number;
@@ -27,6 +28,7 @@ type iSynVAbsence = {
   SynergyMeaning: string | null;
   SynCommunity?: iSynCommunity;
   SynLuAbsenceType?: iSynLuAbsenceType;
+  SynLuAbsenceReason?: iSynLuAbsenceReason;
 }
 
 export default iSynVAbsence;

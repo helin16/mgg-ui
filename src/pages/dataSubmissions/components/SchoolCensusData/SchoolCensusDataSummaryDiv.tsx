@@ -11,6 +11,7 @@ import {
   SYN_NATIONALITY_CODE_AUSTRALIA,
   SYN_NATIONALITY_DESCRIPTION_AUSTRALIA
 } from '../../../../types/Synergetic/iSynLuNationality';
+import {SYN_COUNTRY_CODE_AUSTRALIA} from '../../../../types/Synergetic/iSynLuCountry';
 
 type iSchoolCensusDataSummaryDiv = {
   records: iSchoolCensusStudentData[];
@@ -81,6 +82,10 @@ const SchoolCensusDataSummaryDiv = ({records, unfilteredStudentRecords, startAnd
       international: records.filter(record => record.isInternationalStudent === true),
       disability: records.filter(record => `${record.nccdStatusAdjustmentLevel}`.trim() !== ''),
       withVisa: records.filter(record => {
+        // any student born in Australia will be filtered out, requested by Kylie on 1st Aug 2023
+        if (`${record.studentCountryOfBirthCode || ''}`.trim() === SYN_COUNTRY_CODE_AUSTRALIA) {
+          return false;
+        }
         // any student with non Australia Nationality
         if (
           `${record.studentNationality}`.trim().toUpperCase() === SYN_NATIONALITY_CODE_AUSTRALIA

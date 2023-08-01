@@ -275,8 +275,7 @@ const StudentAbsenceParentSubmissionForm = () => {
 
     setIsSubmitting(true);
     StudentAbsenceService.submitByParent(data)
-      .then(resp => {
-        console.log('resp', resp);
+      .then(() => {
         setSubmittedSuccessfully(true);
       })
       .catch(err => {

@@ -1,3 +1,5 @@
+export const SYN_COUNTRY_CODE_AUSTRALIA = '1100';
+
 type iSynLuCountry = {
   Code: string;
   Description: string;

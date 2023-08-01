@@ -16,6 +16,7 @@ import AssessmentGraph from './AssessmentGraph/AssessmentGraph';
 import {mainBlue} from '../../../AppWrapper';
 import StudentStatusBadge from './AcademicReports/StudentStatusBadge';
 import {FlexContainer} from '../../../styles';
+import WellBeingGraphPanel from './WellBeingGraphs/WellBeingGraphPanel';
 
 const TAB_ACADEMIC_REPORTS = 'academicReports';
 const TAB_STUDENT_PARTICIPATION = 'studentParticipation';
@@ -101,7 +102,7 @@ const StudentDetailsPage = ({student ,onClearSelectedStudent}: {student: iVStude
       return <PowerBIReportViewer reportId={powerBIReports[selectedTab].reportId || ''} student={student}/>
     }
     if (selectedTab === TAB_WELL_BEING) {
-      return <PowerBIReportViewer reportId={powerBIReports[selectedTab].reportId || ''} student={student}/>
+      return <WellBeingGraphPanel student={student}/>
     }
     return <ReportedYearsList student={student} onSelect={(studentReportYear) => setSelectedStudentReportYear(studentReportYear)}/>
   }

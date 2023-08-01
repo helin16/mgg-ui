@@ -99,6 +99,7 @@ const SchoolCensusDataPanel = () => {
             studentPassportIssuedDate: `${row.StudentPassportIssuedDate || ''}`,
             studentPassportExpiryDate: `${row.StudentPassportExpiryDate || ''}`,
 
+            studentCountryOfBirthCode: `${row.StudentCountryOfBirthCode || ''}`,
             studentCountryOfBirth: `${row.StudentCountryOfBirthDescription || ''}`,
             studentNationality: `${row.StudentNationalityCode || ''}`.trim() === '' ? '' : `${row.StudentNationalityDescription || ''}`,
             studentNationality2: `${row.StudentNationality2Code || ''}`.trim() === '' ? '' : `${row.StudentNationality2Description || ''}`,
