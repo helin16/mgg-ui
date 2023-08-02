@@ -6,7 +6,7 @@ import {
   MGGS_MODULE_ID_ALUMNI_REQUEST, MGGS_MODULE_ID_FINANCE,
   MGGS_MODULE_ID_FUNNEL,
   MGGS_MODULE_ID_HOUSE_AWARDS, MGGS_MODULE_ID_MGG_APP_DEVICES, MGGS_MODULE_ID_ONLINE_DONATION,
-  MGGS_MODULE_ID_OPEROO_SAFETY_ALERTS, MGGS_MODULE_ID_SCHOOL_DATA_SUBMISSION,
+  MGGS_MODULE_ID_OPEROO_SAFETY_ALERTS, MGGS_MODULE_ID_SCHOOL_DATA_SUBMISSION, MGGS_MODULE_ID_STAFF_LIST,
 } from '../../types/modules/iModuleUser';
 import HouseAwardsPage from '../../pages/houseAwards/HouseAwardsPage';
 import MedicalReportPage from '../../pages/medicalReports/MedicalReportPage';
@@ -24,6 +24,7 @@ import FinancePage from '../../pages/Finance/FinancePage';
 import StudentAttendanceRateReportPage
   from '../../pages/reports/StudentAttendanceReport/StudentAttendanceRateReportPage';
 import OnlineDonationMangerPage from '../../pages/OnlineDonation/OnlineDonationMangerPage';
+import StaffListPage from '../../pages/Staff/StaffListPage';
 // import PageNotFound from '../../components/PageNotFound';
 
 const schoolBoxIframeElementId = 'remote';
@@ -114,6 +115,10 @@ const SchoolBoxRouter = ({path, remoteUrl}: {path: string, remoteUrl: string}) =
     case '/online_donation/admin': {
       removeSchoolBoxIframe();
       return <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_ONLINE_DONATION}><OnlineDonationMangerPage /></ModuleAccessWrapper>
+    }
+    case '/staff/list': {
+      removeSchoolBoxIframe();
+      return <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_STAFF_LIST}><StaffListPage /></ModuleAccessWrapper>
     }
     default: {
       showSchoolBoxIframe();

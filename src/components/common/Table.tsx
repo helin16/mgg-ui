@@ -9,6 +9,7 @@ import * as _ from 'lodash';
 
 export type iTableColumn = {
   key: string;
+  isDefault?: boolean;
   header: ((column: iTableColumn) => any) | any;
   footer?: ((column: iTableColumn) => any) | any;
   cell?: ((column: iTableColumn, data?: any) => any) | string;

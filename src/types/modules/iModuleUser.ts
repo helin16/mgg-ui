@@ -17,6 +17,7 @@ export const MGGS_MODULE_ID_FINANCE = 12;
 export const MGGS_MODULE_ID_REPORTS_STUDENT_ATTENDANCE_RATE = 13;
 
 export const MGGS_MODULE_ID_ONLINE_DONATION = 14;
+export const MGGS_MODULE_ID_STAFF_LIST = 15;
 
 type iModuleUser = {
   ID: number;

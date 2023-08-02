@@ -166,7 +166,9 @@ const StudentNumberForecastDashboard = ({
     iStudentMap
   >({});
   const [increasingPercentage, setIncreasingPercentage] = useState(0);
-  const [tuitFeeCodeMap, setTuitFeeCodeMap] = useState<{[key: string]: string}>({});
+  const [tuitFeeCodeMap, setTuitFeeCodeMap] = useState<{
+    [key: string]: string;
+  }>({});
 
   const getStatusFromLead = (lead: iFunnelLead) => {
     switch (lead.pipeline_stage_name) {
@@ -445,7 +447,7 @@ const StudentNumberForecastDashboard = ({
       SynVFutureStudentService.getAll({
         where: JSON.stringify({
           FutureStatus: FUTURE_STUDENT_STATUS_FINALISED,
-          FutureEnrolYear: nextFileYear
+          FutureEnrolYear: { [OP_LTE]: nextFileYear }
         }),
         perPage: 99999999
       })
@@ -476,7 +478,15 @@ const StudentNumberForecastDashboard = ({
               [ylCode]: [...(ylCode in map ? map[ylCode] : []), tuitionFee]
             };
           }, {});
-        setTuitFeeCodeMap((resp[4].data || []).reduce((map, tuitFee) => ({...map, [tuitFee.FeeCode]: tuitFee.Description}), {}));
+        setTuitFeeCodeMap(
+          (resp[4].data || []).reduce(
+            (map, tuitFee) => ({
+              ...map,
+              [tuitFee.FeeCode]: tuitFee.Description
+            }),
+            {}
+          )
+        );
         const concessMap = (resp[3].data || []).reduce(
           (map: iStudentConcessionMap, concession) => {
             const sId = `${concession.ID}`;
@@ -487,40 +497,10 @@ const StudentNumberForecastDashboard = ({
           },
           {}
         );
-        const confirmedStudMap = (resp[5].data || []).reduce(
-          (map, futureStudent) => {
-            const ylCode = `${futureStudent.FutureYearLevel}`;
-            const stud = SynVFutureStudent.mapFutureStudentToCurrent(
-              futureStudent,
-              yLevelMap
-            );
-            const studentWithFees = getFeeInfoForStudent(
-              `${ylCode}`,
-              stud,
-              tuitFeeMap,
-              concessMap
-            );
-            return {
-              ...map,
-              total: [
-                // @ts-ignore
-                ...(map.total || []),
-                ...(selectedCampusCodes.length === 0 ||
-                selectedCampusCodes.indexOf(stud.StudentCampus) >= 0
-                  ? [studentWithFees]
-                  : [])
-              ],
-              [ylCode]: [
-                // @ts-ignore
-                ...(map[ylCode] || []),
-                studentWithFees
-              ]
-            };
-          },
-          {}
-        );
 
+        const currentStudentIds: number[] = [];
         resp[0].forEach(student => {
+          currentStudentIds.push(student.StudentID);
           const yearLevelCode = student.StudentYearLevel;
           const studentWithFees = getFeeInfoForStudent(
             `${yearLevelCode}`,
@@ -561,6 +541,40 @@ const StudentNumberForecastDashboard = ({
             };
           }
         });
+        const confirmedStudMap = (resp[5].data || [])
+          .filter(
+            futureStudent =>
+              currentStudentIds.indexOf(futureStudent.FutureID) < 0
+          )
+          .reduce((map, futureStudent) => {
+            const ylCode = `${futureStudent.FutureYearLevel}`;
+            const stud = SynVFutureStudent.mapFutureStudentToCurrent(
+              futureStudent,
+              yLevelMap
+            );
+            const studentWithFees = getFeeInfoForStudent(
+              `${ylCode}`,
+              stud,
+              tuitFeeMap,
+              concessMap
+            );
+            return {
+              ...map,
+              total: [
+                // @ts-ignore
+                ...(map.total || []),
+                ...(selectedCampusCodes.length === 0 ||
+                selectedCampusCodes.indexOf(stud.StudentCampus) >= 0
+                  ? [studentWithFees]
+                  : [])
+              ],
+              [ylCode]: [
+                // @ts-ignore
+                ...(map[ylCode] || []),
+                studentWithFees
+              ]
+            };
+          }, {});
         setCurrentStudentMap(currentStudMap);
         setCurrentStudentLeaverMap(currentLeaverStudMap);
         setYearLevelCodes(resp[2].map(yearLevel => `${yearLevel.Code}`));
@@ -640,7 +654,7 @@ const StudentNumberForecastDashboard = ({
           currentYearStudentLowerLevel =
             currentYearStudentLowerLevelCode in currentStudentMap
               ? currentStudentMap[currentYearStudentLowerLevelCode]
-              : []
+              : [];
           // if (code === "0") {
           //   currentYearStudentLowerLevel = currentYearStudentLowerLevel.filter(student => student.StudentLeavingDate === null);
           // }
