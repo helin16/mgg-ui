@@ -100,7 +100,6 @@ const SchoolBoxRouter = ({path, remoteUrl}: {path: string, remoteUrl: string}) =
     }
 
     case '/student_inout/home': {
-    // case '/student_absence/home': {
       removeSchoolBoxIframe();
       return <StudentAbsencePage />
     }

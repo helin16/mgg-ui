@@ -12,6 +12,7 @@ import { iAutoCompleteSingle } from "../common/AutoComplete";
 import Toaster, { TOAST_TYPE_SUCCESS } from "../../services/Toaster";
 import Table, { iTableColumn } from "../common/Table";
 import PopupModal from "../common/PopupModal";
+import PageLoadingSpinner from '../common/PageLoadingSpinner';
 
 const Wrapper = styled.div``;
 type iModuleUserList = {
@@ -203,7 +204,7 @@ const ModuleUserList = ({
   };
 
   if (isLoading === true) {
-    return <Spinner animation={"border"} />;
+    return <PageLoadingSpinner />;
   }
 
   const getCreatingPanel = () => {

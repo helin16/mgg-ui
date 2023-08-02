@@ -44,7 +44,7 @@ type iDateRange = {
 };
 
 const defaultCampusCodes = [CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR];
-const StudentAttendanceRateReport = ({adminBtn}: {adminBtn?: any}) => {
+const StudentAttendanceRateReport = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const initDateRange: iDateRange = {
     StartDate:
@@ -389,11 +389,7 @@ const StudentAttendanceRateReport = ({adminBtn}: {adminBtn?: any}) => {
   };
 
   return (
-    <>
-      <h3>
-        Student Attendance Rate Report
-        {adminBtn}
-      </h3>
+    <div>
       <FlexContainer className={"with-gap lg-gap align-items end"}>
         <DateRangeWithFileSemesterSelector
           isDisabled={isSearching}
@@ -497,7 +493,7 @@ const StudentAttendanceRateReport = ({adminBtn}: {adminBtn?: any}) => {
       </SectionDiv>
 
       <SectionDiv>{getContent()}</SectionDiv>
-    </>
+    </div>
   );
 };
 

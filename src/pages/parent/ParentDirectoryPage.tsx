@@ -65,7 +65,6 @@ const ParentDirectoryPage = () => {
   const [contactMap, setContactMap] = useState<{ [key: string]: iSynVStudentContactAllAddress[] }>({});
   const [searchCriteria, setSearchCriteria] = useState<iParentDirectorySearchCriteria>({});
   const [showSearchPanel, setShowSearchPanel] = useState(false);
-  // const [recipientEmails, setRecipientEmails] = useState<string[]>([]);
 
   const recipientEmails = useRef('')
 

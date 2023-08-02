@@ -33,7 +33,7 @@ const HouseAwardsPage = () => {
   const [state, setState] = useState(initial);
 
   if (viewingAdmin) {
-    return <HouseAwardAdminPage onCancel={() => setViewingAdmin(false)} />
+    return <HouseAwardAdminPage onNavBack={() => setViewingAdmin(false)} />
   }
 
   if (!state.selectedHouseAwardEventType || !state.selectedLuHouse) {

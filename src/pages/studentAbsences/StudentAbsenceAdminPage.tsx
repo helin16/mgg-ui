@@ -1,5 +1,3 @@
-import { Button, Tab, Tabs } from "react-bootstrap";
-import * as Icons from "react-bootstrap-icons";
 import ModuleUserList from "../../components/module/ModuleUserList";
 import iModuleUser, {
   MGGS_MODULE_ID_STUDENT_ABSENCES
@@ -15,54 +13,52 @@ import MessageListPanel from "../../components/common/Message/MessageListPanel";
 import { MESSAGE_TYPE_ABSENCE_SYNC_TO_SYNERGETIC } from "../../types/Message/iMessage";
 import { iTableColumn } from "../../components/common/Table";
 import ToggleBtn from "../../components/common/ToggleBtn";
-import UserService from '../../services/UserService';
-import Toaster, {TOAST_TYPE_SUCCESS} from '../../services/Toaster';
-import MathHelper from '../../helper/MathHelper';
+import UserService from "../../services/UserService";
+import Toaster, { TOAST_TYPE_SUCCESS } from "../../services/Toaster";
+import MathHelper from "../../helper/MathHelper";
+import AdminPage from "../../layouts/AdminPage";
+import AdminPageTabs from "../../layouts/AdminPageTabs";
 
 type iStudentAbsenceAdminPage = {
   onNavBack: () => void;
 };
 
-const TAB_USERS = "users";
-const TAB_ADMIN_USERS = "admin_users";
-const TAB_SETTINGS = "module_settings";
-const TAB_SCHEDULED = "scheduled";
 const StudentAbsenceAdminPage = ({ onNavBack }: iStudentAbsenceAdminPage) => {
-  const [showingType, setShowingType] = useState(TAB_USERS);
   const [, setIsUpdating] = useState(false);
   const [count, setCount] = useState(0);
 
-  const setEmailNotificationForAUser = (user: iModuleUser, checked: boolean) => {
+  const setEmailNotificationForAUser = (
+    user: iModuleUser,
+    checked: boolean
+  ) => {
     setIsUpdating(true);
     UserService.updateUser(user.ModuleID, user.RoleID, user.SynergeticID, {
       settings: {
         ...(user.settings || {}),
-        ignoreEmailNotificationFlag: checked,
+        ignoreEmailNotificationFlag: checked
       }
-    }).then(resp => {
-      Toaster.showToast('Updated', TOAST_TYPE_SUCCESS);
-    }).catch(err => {
-      Toaster.showApiError(err);
-    }).finally(() => {
-      setIsUpdating(false);
-      setCount(MathHelper.add(count, 1))
     })
-  }
+      .then(resp => {
+        Toaster.showToast("Updated", TOAST_TYPE_SUCCESS);
+      })
+      .catch(err => {
+        Toaster.showApiError(err);
+      })
+      .finally(() => {
+        setIsUpdating(false);
+        setCount(MathHelper.add(count, 1));
+      });
+  };
 
   return (
-    <div>
-      <h3>
-        <Button onClick={() => onNavBack()} variant={"link"}>
-          <Icons.ArrowLeft />
-        </Button>{" "}
-        Student Absence Admin
-      </h3>
-
-      <Tabs
-        activeKey={showingType}
-        onSelect={name => setShowingType(name || TAB_USERS)}
-      >
-        <Tab title={"Users"} eventKey={TAB_USERS} unmountOnExit>
+    <AdminPage
+      title={<h3>Student Absence Admin</h3>}
+      moduleId={MGGS_MODULE_ID_STUDENT_ABSENCES}
+      onNavBack={onNavBack}
+    >
+      <AdminPageTabs
+        moduleId={MGGS_MODULE_ID_STUDENT_ABSENCES}
+        usersTab={
           <SectionDiv>
             <ExplanationPanel
               text={
@@ -79,9 +75,6 @@ const StudentAbsenceAdminPage = ({ onNavBack }: iStudentAbsenceAdminPage) => {
                 </>
               }
             />
-          </SectionDiv>
-          <SectionDiv>
-            <h5>Users</h5>
             <ModuleUserList
               moduleId={MGGS_MODULE_ID_STUDENT_ABSENCES}
               roleId={ROLE_ID_NORMAL}
@@ -96,13 +89,15 @@ const StudentAbsenceAdminPage = ({ onNavBack }: iStudentAbsenceAdminPage) => {
                     return (
                       <td key={column.key}>
                         <ToggleBtn
-                          size={'sm'}
+                          size={"sm"}
                           on={"Yes"}
                           off={"No"}
                           checked={
                             data.settings?.ignoreEmailNotificationFlag !== true
                           }
-                          onChange={value => setEmailNotificationForAUser(data, !value)}
+                          onChange={value =>
+                            setEmailNotificationForAUser(data, !value)
+                          }
                         />
                       </td>
                     );
@@ -110,18 +105,19 @@ const StudentAbsenceAdminPage = ({ onNavBack }: iStudentAbsenceAdminPage) => {
                 }
               ]}
             />
+
+            <SectionDiv>
+              <h5>Head Of Years</h5>
+              <SchoolManagementTable
+                roleCodes={[SMT_SCHOOL_ROL_CODE_HEAD_OF_YEAR]}
+                viewOnly
+                showExplanation={false}
+                showSearchPanel={false}
+              />
+            </SectionDiv>
           </SectionDiv>
-          <SectionDiv>
-            <h5>Head Of Years</h5>
-            <SchoolManagementTable
-              roleCodes={[SMT_SCHOOL_ROL_CODE_HEAD_OF_YEAR]}
-              viewOnly
-              showExplanation={false}
-              showSearchPanel={false}
-            />
-          </SectionDiv>
-        </Tab>
-        <Tab title={"Admin Users"} eventKey={TAB_ADMIN_USERS} unmountOnExit>
+        }
+        adminsTab={
           <SectionDiv>
             <ExplanationPanel
               text={
@@ -135,21 +131,28 @@ const StudentAbsenceAdminPage = ({ onNavBack }: iStudentAbsenceAdminPage) => {
               showCreatingPanel
             />
           </SectionDiv>
-        </Tab>
-
-        <Tab title={"Settings"} eventKey={TAB_SETTINGS} unmountOnExit>
-          <SectionDiv>
-            <StudentAbsenceModuleEditPanel />
-          </SectionDiv>
-        </Tab>
-
-        <Tab title={"Scheduled"} eventKey={TAB_SCHEDULED} unmountOnExit>
-          <SectionDiv>
-            <MessageListPanel type={MESSAGE_TYPE_ABSENCE_SYNC_TO_SYNERGETIC} />
-          </SectionDiv>
-        </Tab>
-      </Tabs>
-    </div>
+        }
+        extraTabs={[
+          {
+            key: "settings",
+            title: "Settings",
+            component: (
+              <SectionDiv>
+                <StudentAbsenceModuleEditPanel />
+              </SectionDiv>
+            )
+          }, {
+            key: "logs",
+            title: "Logs",
+            component: (
+              <SectionDiv>
+                <MessageListPanel type={MESSAGE_TYPE_ABSENCE_SYNC_TO_SYNERGETIC} />
+              </SectionDiv>
+            )
+          }
+        ]}
+      />
+    </AdminPage>
   );
 };
 

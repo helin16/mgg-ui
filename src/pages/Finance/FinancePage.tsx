@@ -1,31 +1,17 @@
-import styled from "styled-components";
 import { useState } from "react";
 import { Tab, Tabs } from "react-bootstrap";
 import ExpiringCreditCardsPanel from "./components/SynDebtorPaymentMethod/ExpiringCreditCardsPanel";
-import ModuleAdminBtn from "../../components/module/ModuleAdminBtn";
 import { MGGS_MODULE_ID_FINANCE } from "../../types/modules/iModuleUser";
 import FinanceAdminPage from "./FinanceAdminPage";
+import Page from '../../layouts/Page';
 
-const Wrapper = styled.div``;
 const TAB_EXPIRING_CREDIT_CARDS = "EXPIRING_CREDIT_CARDS";
 const FinancePage = () => {
   const [selectedTab, setSelectedTab] = useState(TAB_EXPIRING_CREDIT_CARDS);
-  const [showingAdminPage, setShowingAdminPage] = useState(false);
-
-  if (showingAdminPage === true) {
-    return <FinanceAdminPage onNavBack={() => setShowingAdminPage(false)} />;
-  }
 
   return (
-    <Wrapper>
-      <h3>
-        Finance
-        <ModuleAdminBtn
-          moduleId={MGGS_MODULE_ID_FINANCE}
-          className={"pull-right"}
-          onClick={() => setShowingAdminPage(true)}
-        />
-      </h3>
+    <Page title={<h3>
+      Finance</h3>} moduleId={MGGS_MODULE_ID_FINANCE} AdminPage={FinanceAdminPage}>
       <Tabs
         activeKey={selectedTab}
         className="mb-3"
@@ -36,7 +22,7 @@ const FinancePage = () => {
           <ExpiringCreditCardsPanel />
         </Tab>
       </Tabs>
-    </Wrapper>
+    </Page>
   );
 };
 
