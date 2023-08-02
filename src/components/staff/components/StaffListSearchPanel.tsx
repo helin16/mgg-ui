@@ -120,7 +120,7 @@ const StaffListSearchPanel = ({
             }
           />
         </Col>
-        <Col sm={6} md={3} className={"text-right"}>
+        <Col sm={6} md={4} className={"text-right"}>
           <LoadingBtn
             variant={"link"}
             isLoading={isSearching}
