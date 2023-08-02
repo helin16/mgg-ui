@@ -9,6 +9,7 @@ type iSynJobPosition = {
   JobPositionsSeq: number;
   AwardCode: string;
   ReportsToJobPositionsSeq: number | null;
+  ReportsToJobPosition?: iSynJobPosition;
 }
 
 export default iSynJobPosition;

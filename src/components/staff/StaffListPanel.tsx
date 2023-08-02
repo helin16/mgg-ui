@@ -9,7 +9,8 @@ import StaffListHelper from "./StaffListHelper";
 import SynStaffJobPositionService from "../../services/Synergetic/Staff/SynStaffJobPositionService";
 import {
   OP_AND,
-  OP_GTE, OP_LIKE,
+  OP_GTE,
+  OP_LIKE,
   OP_LTE,
   OP_NOT,
   OP_OR
@@ -20,15 +21,35 @@ import SynLuSkillService from "../../services/Synergetic/Lookup/SynLuSkillServic
 import StaffListSearchPanel, {
   iStaffListSearchCriteria
 } from "./components/StaffListSearchPanel";
-import SectionDiv from '../common/SectionDiv';
-import UtilsService from '../../services/UtilsService';
-import {FlexContainer} from '../../styles';
-import ColumnPopupSelector from '../common/ColumnPopupSelector';
+import SectionDiv from "../common/SectionDiv";
+import UtilsService from "../../services/UtilsService";
+import { FlexContainer } from "../../styles";
+import ColumnPopupSelector, {
+  getSelectedColumnsFromLocalStorage
+} from "../common/ColumnPopupSelector";
+import * as _ from "lodash";
+import iSynStaffJobPosition from "../../types/Synergetic/Staff/iSynStaffJobPosition";
+import iSynCommunitySkill from "../../types/Synergetic/Community/iSynCommunitySkill";
+import { STORAGE_COLUMN_KEY_STAFF_LIST } from "../../services/LocalStorageService";
+import {lightBlue} from '../../AppWrapper';
 
 const Wrapper = styled.div`
+  .staff-table {
+    tbody {
+      tr:hover {
+        background-color: ${lightBlue};
+      }
+    }
+  }
   .job-pos-col {
+    padding: 0px;
     div {
+      padding: 4px;
       border-top: 1px #ccc solid;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      //max-width: 120px;
       &:first-child {
         border-top: none;
       }
@@ -39,6 +60,7 @@ const Wrapper = styled.div`
 type iStaffListPanel = {
   showSearchPanel?: boolean;
 };
+const CHUNK_SIZE = 100;
 const StaffListPanel = ({ showSearchPanel = true }: iStaffListPanel) => {
   const [staffList, setStaffList] = useState<iVStaff[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -48,16 +70,31 @@ const StaffListPanel = ({ showSearchPanel = true }: iStaffListPanel) => {
     iStaffListSearchCriteria
   >({});
 
-
   const doSearch = async (criteria: iStaffListSearchCriteria) => {
-    const {ActiveFlag, SearchTxt, DepartmentCodes, CategoryCodes} = criteria;
+    const { ActiveFlag, SearchTxt, DepartmentCodes, CategoryCodes } = criteria;
     const [staffs, skills] = await Promise.all([
       SynVStaffService.getStaffList({
         where: JSON.stringify({
-          ...((ActiveFlag === undefined || ActiveFlag === null || `${ActiveFlag}`.trim() === '') ? {} : {ActiveFlag}),
-          ...(`${SearchTxt || ''}`.trim() === '' ? {} : (UtilsService.isNumeric(`${SearchTxt || ''}`.trim()) ? {StaffID: `${SearchTxt || ''}`.trim()} : { StaffNameInternal: {[OP_LIKE] : `%${`${SearchTxt || ''}`.trim()}%`}})),
-          ...((DepartmentCodes || []).length > 0 ? {StaffDepartment: DepartmentCodes} : {}),
-          ...((CategoryCodes || []).length > 0 ? {StaffCategory: CategoryCodes} : {}),
+          ...(ActiveFlag === undefined ||
+          ActiveFlag === null ||
+          `${ActiveFlag}`.trim() === ""
+            ? {}
+            : { ActiveFlag }),
+          ...(`${SearchTxt || ""}`.trim() === ""
+            ? {}
+            : UtilsService.isNumeric(`${SearchTxt || ""}`.trim())
+            ? { StaffID: `${SearchTxt || ""}`.trim() }
+            : {
+                StaffNameInternal: {
+                  [OP_LIKE]: `%${`${SearchTxt || ""}`.trim()}%`
+                }
+              }),
+          ...((DepartmentCodes || []).length > 0
+            ? { StaffDepartment: DepartmentCodes }
+            : {}),
+          ...((CategoryCodes || []).length > 0
+            ? { StaffCategory: CategoryCodes }
+            : {})
         })
       }),
       SynLuSkillService.getAll()
@@ -74,57 +111,87 @@ const StaffListPanel = ({ showSearchPanel = true }: iStaffListPanel) => {
     if (staffs.length < 0) {
       return originOb;
     }
+    const staffMap = staffs.reduce((map, staff) => {
+      return {
+        ...map,
+        [staff.StaffID]: staff
+      };
+    }, {});
 
-    const staffJobPositions = await SynStaffJobPositionService.getAll({
-      where: JSON.stringify({
-        JobPositionsSeq: { [OP_NOT]: null },
-        ID: staffs.map(staff => staff.StaffID),
-        [OP_AND]: [
-          {
-            [OP_OR]: [
-              { StartDate: null },
+    const staffJobPositionArr = await Promise.all(
+      _.chunk(Object.keys(staffMap), CHUNK_SIZE).map(ids => {
+        return SynStaffJobPositionService.getAll({
+          where: JSON.stringify({
+            JobPositionsSeq: { [OP_NOT]: null },
+            ID: ids,
+            [OP_AND]: [
               {
-                StartDate: {
-                  [OP_LTE]: moment().format(`YYYY-MM-DD HH:mm:ss`)
-                }
+                [OP_OR]: [
+                  { StartDate: null },
+                  {
+                    StartDate: {
+                      [OP_LTE]: moment().format(`YYYY-MM-DD HH:mm:ss`)
+                    }
+                  }
+                ]
+              },
+              {
+                [OP_OR]: [
+                  { EndDate: null },
+                  {
+                    EndDate: {
+                      [OP_GTE]: moment().format(`YYYY-MM-DD HH:mm:ss`)
+                    }
+                  }
+                ]
               }
             ]
-          },
-          {
-            [OP_OR]: [
-              { EndDate: null },
-              {
-                EndDate: { [OP_GTE]: moment().format(`YYYY-MM-DD HH:mm:ss`) }
-              }
-            ]
-          }
-        ]
-      }),
-      include: "SynJobPosition,OverrideReportsToJobPosition",
-      perPage: 99999
-    });
-
-    if ((staffJobPositions.data || []).length <= 0) {
+          }),
+          include:
+            "SynJobPosition.ReportsToJobPosition,OverrideReportsToJobPosition",
+          perPage: 99999
+        });
+      })
+    );
+    const staffJobPositions = staffJobPositionArr.reduce(
+      (arr: iSynStaffJobPosition[], staffJobPositionA) => [
+        ...arr,
+        ...(staffJobPositionA.data || [])
+      ],
+      []
+    );
+    if (staffJobPositions.length <= 0) {
       return originOb;
     }
 
-    const communitySkills = await SynCommunitySkillService.getAll({
-      where: JSON.stringify({
-        ID: staffs.map(staff => staff.StaffID),
-      }),
-      perPage: 99999
-    });
-
+    const communitySkillsArr = await Promise.all(
+      _.chunk(Object.keys(staffMap), CHUNK_SIZE).map(ids => {
+        return SynCommunitySkillService.getAll({
+          where: JSON.stringify({
+            ID: ids
+          }),
+          perPage: 99999
+        });
+      })
+    );
+    const communitySkills = communitySkillsArr.reduce(
+      (arr: iSynCommunitySkill[], communitySkillsA) => [
+        ...arr,
+        ...(communitySkillsA.data || [])
+      ],
+      []
+    );
     return {
       ...originOb,
-      // ...((SkillCodes || []).length > 0 ? {staffs: staffs.filter(staff => ().indexOf(staff.StaffID) >= 0)} : {}),
-      staffJobPositions: staffJobPositions.data || [],
-      communitySkills: communitySkills.data || []
+      staffJobPositions,
+      communitySkills
     };
   };
 
   useEffect(() => {
-    if (Object.keys(searchCriteria).length <= 0 ) { return }
+    if (Object.keys(searchCriteria).length <= 0) {
+      return;
+    }
     let isCanceled = false;
     setIsLoading(true);
 
@@ -134,7 +201,6 @@ const StaffListPanel = ({ showSearchPanel = true }: iStaffListPanel) => {
           return;
         }
         const { luSkills, staffs, staffJobPositions, communitySkills } = resp;
-        setStaffList(staffs);
         const sJobPosMap = (staffJobPositions || []).reduce(
           (map, staffJobPos) => {
             const key = staffJobPos.ID;
@@ -142,6 +208,25 @@ const StaffListPanel = ({ showSearchPanel = true }: iStaffListPanel) => {
               ...map,
               // @ts-ignore
               [key]: [...(key in map ? map[key] : []), staffJobPos]
+            };
+          },
+          {}
+        );
+        const posStaffMap = (staffJobPositions || []).reduce(
+          (map, staffJobPos) => {
+            const key = `${staffJobPos.SynJobPosition?.JobPositionsSeq ||
+              ""}`.trim();
+            if (key === "") {
+              return map;
+            }
+            const keyNumber = Number(key);
+            return {
+              ...map,
+              [keyNumber]: [
+                // @ts-ignore
+                ...(keyNumber in map ? map[keyNumber] : []),
+                staffJobPos.ID
+              ]
             };
           },
           {}
@@ -154,13 +239,32 @@ const StaffListPanel = ({ showSearchPanel = true }: iStaffListPanel) => {
             [key]: [...(key in map ? map[key] : []), communitySkill]
           };
         }, {});
+        const staffMap = staffs.reduce((map, staff) => {
+          return {
+            ...map,
+            [staff.StaffID]: staff
+          };
+        }, {});
         const columns = StaffListHelper.getListColumns({
           luSkills,
-          jobPosMap: sJobPosMap,
-          skillMap: sSkillMap
+          staffJobPosMap: sJobPosMap,
+          skillMap: sSkillMap,
+          staffMap,
+          positionStaffIdMap: posStaffMap
         });
+
         setColumns(columns);
-        setSelectedColumns(columns.filter(column => column.isDefault === true));
+        setStaffList(Object.values(staffMap));
+
+        const selectedCols = getSelectedColumnsFromLocalStorage(
+          STORAGE_COLUMN_KEY_STAFF_LIST,
+          columns
+        );
+        setSelectedColumns(
+          selectedCols.length > 0
+            ? selectedCols
+            : columns.filter(column => column.isDefault === true)
+        );
       })
       .catch(err => {
         if (isCanceled) {
@@ -191,14 +295,26 @@ const StaffListPanel = ({ showSearchPanel = true }: iStaffListPanel) => {
 
     return (
       <>
-        <FlexContainer className={'justify-content-between'}>
+        <FlexContainer className={"justify-content-between"}>
           <h5>{staffList?.length || 0} Staff</h5>
-          <ColumnPopupSelector columns={columns} size={'sm'} onColumnSelected={(cols) => setSelectedColumns(cols)}/>
+          <ColumnPopupSelector
+            localStorageKey={STORAGE_COLUMN_KEY_STAFF_LIST}
+            columns={columns}
+            selectedColumns={selectedColumns}
+            size={"sm"}
+            onColumnSelected={cols => setSelectedColumns(cols)}
+          />
         </FlexContainer>
-        <Table columns={selectedColumns} rows={staffList || []} striped />
+        <Table
+          columns={selectedColumns}
+          rows={staffList || []}
+          hover
+          striped
+          className={"staff-table"}
+        />
       </>
-    )
-  }
+    );
+  };
 
   return (
     <Wrapper>
@@ -207,15 +323,13 @@ const StaffListPanel = ({ showSearchPanel = true }: iStaffListPanel) => {
           isSearching={isLoading}
           onReset={() => {
             setStaffList(null);
-            setSearchCriteria({})
+            setSearchCriteria({});
           }}
           onSearch={criteria => setSearchCriteria(criteria)}
           selectedSearchCriteria={searchCriteria || undefined}
         />
       ) : null}
-      <SectionDiv>
-        {getContent()}
-      </SectionDiv>
+      <SectionDiv>{getContent()}</SectionDiv>
     </Wrapper>
   );
 };

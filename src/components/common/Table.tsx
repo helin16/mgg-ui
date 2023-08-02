@@ -106,6 +106,18 @@ const Table = ({
     );
   };
 
+  const getCell = (column: iTableColumn, data: any) => {
+    if (typeof column.cell !== "function") {
+      return <td key={column.key}>{column.cell}</td>
+    }
+    const result = column.cell(column, data);
+    if (typeof result === 'string') {
+      return <td key={column.key}>{result}</td>
+    }
+
+    return result;
+  }
+
   return (
     <Wrapper>
       <Original {...props}>
@@ -124,13 +136,7 @@ const Table = ({
             {rows.map((row, index) => {
               return (
                 <tr key={index}>
-                  {cols.map(column => {
-                    return typeof column.cell === "function" ? (
-                      column.cell(column, row)
-                    ) : (
-                      <td key={column.key}>{column.cell}</td>
-                    );
-                  })}
+                  {cols.map(column => getCell(column, row))}
                 </tr>
               )
             })}

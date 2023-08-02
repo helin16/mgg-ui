@@ -1,3 +1,6 @@
+
+export const STORAGE_COLUMN_KEY_STAFF_LIST = 'cols_staff_list';
+
 const getTokenName = () => {
   return process.env.REACT_APP_LOCAL_USER_TOKEN_NAME || 'token';
 };

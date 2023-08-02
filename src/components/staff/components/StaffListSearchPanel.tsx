@@ -120,7 +120,7 @@ const StaffListSearchPanel = ({
             }
           />
         </Col>
-        <Col sm={6} md={4} className={"text-right"}>
+        <Col sm={6} md={3} className={"text-right"}>
           <LoadingBtn
             variant={"link"}
             isLoading={isSearching}
@@ -128,13 +128,6 @@ const StaffListSearchPanel = ({
           >
             {!showAdvancedPanel ? <Icons.ChevronDown /> : <Icons.ChevronUp />}{" "}
             Advanced
-          </LoadingBtn>{" "}
-          <LoadingBtn
-            variant={"outline-secondary"}
-            isLoading={isSearching}
-            onClick={() => onReset()}
-          >
-            <Icons.X /> Reset
           </LoadingBtn>{" "}
           <LoadingBtn
             variant={"primary"}

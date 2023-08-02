@@ -5,9 +5,11 @@ import * as Icons from "react-bootstrap-icons";
 import { useEffect, useState } from "react";
 import PopupModal, { iPopupModal } from "./PopupModal";
 import { FlexContainer } from "../../styles";
+import LocalStorageService from '../../services/LocalStorageService';
 
 type iColumnPopupSelector = ButtonProps & {
   columns: iTableColumn[];
+  localStorageKey?: string;
   selectedColumns?: iTableColumn[];
   popupModalProp?: iPopupModal;
   onColumnSelected: (selectedColumns: iTableColumn[]) => void;
@@ -26,22 +28,35 @@ const PopupWrapper = styled.div`
     }
   }
 
-  .group-div {
-    .col-group-options {
-      display: flex;
-      flex-direction: column;
-      flex-wrap: wrap;
-      gap: 5px;
-      max-height: calc(100vh - 20rem);
+  .group-div-wrapper {
+    display: table-row;
+    .group-div {
+      padding: 0 0.5rem 0.5rem 0.5rem;
+      display: table-cell;
+      .col-group-options {
+        display: flex;
+        flex-direction: column;
+        gap: 0.1rem;
+      }
     }
   }
 `;
 type iGroupedColumns = { [key: string]: iTableColumn[] };
+
+export const getSelectedColumnsFromLocalStorage = (localStorageKey: string, columns: iTableColumn[]) => {
+  const selectedKeys = LocalStorageService.getItem(localStorageKey);
+  if (!Array.isArray(selectedKeys) || selectedKeys.length <= 0) {
+    return [];
+  }
+  return columns.filter(col => selectedKeys.indexOf(col.key) >= 0)
+}
+
 const ColumnPopupSelector = ({
   columns,
   selectedColumns,
   popupModalProp,
   onColumnSelected,
+  localStorageKey,
   ...props
 }: iColumnPopupSelector) => {
   const [showingPopup, setShowingPopup] = useState(false);
@@ -58,23 +73,36 @@ const ColumnPopupSelector = ({
         };
       }, {})
     );
+  }, [columns]);
+
+  useEffect(() => {
     setSelectedColumnKeys(
       (selectedColumns || columns.filter(col => col.isDefault === true)).map(
         col => col.key
       )
     );
-  }, [columns, selectedColumns]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedColumns]);
 
-  const handleConfirm = () => {
+  const handleClose = () => {
     setShowingPopup(false);
-    if (selectedColumnKeys.length <= 0) {
-      onColumnSelected([]);
+  }
+
+  const handleSelected = (selected: boolean, column: iTableColumn) => {
+    const newSelectedKeys = selected === true ? [
+      ...selectedColumnKeys,
+      column.key
+    ] : selectedColumnKeys.filter(
+      key =>
+        key !== column.key
+    )
+    setSelectedColumnKeys(newSelectedKeys);
+    const storageKey = `${localStorageKey || ''}`.trim();
+    if (storageKey !== '') {
+      LocalStorageService.setItem(storageKey, newSelectedKeys);
     }
-    const selectedColKeys = selectedColumnKeys
-      .map(key => `${key || ""}`.trim())
-      .filter(key => key !== "");
     onColumnSelected(
-      columns.filter(col => selectedColKeys.indexOf(`${col.key}`.trim()) >= 0)
+      columns.filter(col => newSelectedKeys.indexOf(col.key) >= 0)
     );
   };
 
@@ -83,7 +111,7 @@ const ColumnPopupSelector = ({
       <PopupModal
         show={showingPopup}
         dialogClassName={popupModalProp?.dialogClassName || "modal-80w"}
-        handleClose={() => setShowingPopup(false)}
+        handleClose={() => handleClose()}
         header={<b>Select columns to display</b>}
         footer={
           <FlexContainer className={"justify-content-between"}>
@@ -91,17 +119,10 @@ const ColumnPopupSelector = ({
             <div>
               <Button
                 size={"sm"}
-                variant={"link"}
-                onClick={() => setShowingPopup(false)}
-              >
-                <Icons.X /> Cancel
-              </Button>{" "}
-              <Button
-                size={"sm"}
                 variant={"primary"}
-                onClick={() => handleConfirm()}
+                onClick={() => handleClose()}
               >
-                <Icons.CheckLg /> Confirm
+                <Icons.CheckLg /> OK
               </Button>
             </div>
           </FlexContainer>
@@ -109,7 +130,7 @@ const ColumnPopupSelector = ({
         {...popupModalProp}
       >
         <PopupWrapper>
-          <FlexContainer className={"with-gap lg-gap flex-wrap wrap"}>
+          <div className={"group-div-wrapper"}>
             {Object.keys(groupedColumns).map(group => {
               return (
                 <div key={group} className={"group-div"}>
@@ -125,21 +146,7 @@ const ColumnPopupSelector = ({
                           id={column.key}
                           disabled={column.isSelectable === false}
                           checked={selectedColumnKeys.indexOf(column.key) >= 0}
-                          onChange={event => {
-                            if (event.target.checked) {
-                              setSelectedColumnKeys([
-                                ...selectedColumnKeys,
-                                column.key
-                              ]);
-                              return;
-                            }
-                            setSelectedColumnKeys(
-                              selectedColumnKeys.filter(
-                                key =>
-                                  `${key}`.trim() !== `${column.key}`.trim()
-                              )
-                            );
-                          }}
+                          onChange={event => handleSelected(event.target.checked, column)}
                           label={
                             column.name
                               ? column.name
@@ -154,7 +161,7 @@ const ColumnPopupSelector = ({
                 </div>
               );
             })}
-          </FlexContainer>
+          </div>
         </PopupWrapper>
       </PopupModal>
     );

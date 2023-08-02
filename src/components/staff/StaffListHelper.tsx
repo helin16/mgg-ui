@@ -4,165 +4,299 @@ import moment from "moment-timezone";
 import iSynStaffJobPosition from "../../types/Synergetic/Staff/iSynStaffJobPosition";
 import iSynCommunitySkill from "../../types/Synergetic/Community/iSynCommunitySkill";
 import iSynLuSkill from "../../types/Synergetic/Lookup/iSynLuSkill";
+import iSynJobPosition from "../../types/Synergetic/Staff/iSynJobPosition";
 
-export type iJobPositionMap = { [key: number]: iSynStaffJobPosition[] };
+export type iStaffJobPositionMap = { [key: number]: iSynStaffJobPosition[] };
 export type iCommunitySkillMap = { [key: number]: iSynCommunitySkill[] };
+export type iPositionStaffIdMap = { [key: number]: number[] };
+export type iStaffMap = { [key: number]: iVStaff };
 
 type iGetListColumns = {
   luSkills: iSynLuSkill[];
-  jobPosMap: iJobPositionMap;
+  staffJobPosMap: iStaffJobPositionMap;
   skillMap: iCommunitySkillMap;
+  staffMap: iStaffMap;
+  positionStaffIdMap: iPositionStaffIdMap;
 };
+
+const getJobPositionFromMap = (
+  staff: iVStaff,
+  staffJobPosMap: iStaffJobPositionMap
+) => {
+  return staff.StaffID in staffJobPosMap ? staffJobPosMap[staff.StaffID] : [];
+};
+
+const getReportsToPosFromJobPosition = (
+  jobPos: iSynStaffJobPosition
+): iSynJobPosition | null | undefined => {
+  if (
+    !jobPos.OverrideReportsToJobPosition &&
+    !jobPos.SynJobPosition?.ReportsToJobPosition
+  ) {
+    return null;
+  }
+
+  if (jobPos.OverrideReportsToJobPosition) {
+    return jobPos.OverrideReportsToJobPosition;
+  }
+  return jobPos.SynJobPosition?.ReportsToJobPosition;
+};
+
+const getReportsToStaffsFromJobPosition = (
+  reportsPosition: iSynJobPosition,
+  positionStaffIdMap: iPositionStaffIdMap,
+  staffMap: iStaffMap
+): iVStaff[] => {
+  const reportsToJobPosSeq = Number(reportsPosition?.JobPositionsSeq || 0);
+  if (!(reportsToJobPosSeq in positionStaffIdMap)) {
+    return [];
+  }
+  // @ts-ignore
+  return positionStaffIdMap[reportsToJobPosSeq]
+    .map(staffId => {
+      if (!(staffId in staffMap)) {
+        return null;
+      }
+      return staffMap[staffId];
+    })
+    .filter(staff => staff !== null);
+};
+
 const getListColumns = ({
   luSkills,
-  jobPosMap,
-  skillMap
+  staffJobPosMap,
+  skillMap,
+  positionStaffIdMap,
+  staffMap
 }: iGetListColumns): iTableColumn[] => [
   {
     isDefault: true,
     key: "ID",
     header: "Staff ID",
     isSelectable: false,
-    cell: (column: iTableColumn, data: iVStaff) => {
-      return <td key={column.key}>{data.StaffID}</td>;
-    }
+    cell: (column: iTableColumn, data: iVStaff) => `${data.StaffID}`
   },
   {
     isDefault: true,
     key: "name",
     header: "Staff Name",
-    cell: (column: iTableColumn, data: iVStaff) => {
-      return <td key={column.key}>{data.StaffNameInternal}</td>;
-    }
+    cell: (column: iTableColumn, data: iVStaff) => `${data.StaffNameInternal}`
   },
   {
     isDefault: true,
     key: "code",
     header: "Staff Code",
-    cell: (column: iTableColumn, data: iVStaff) => {
-      return <td key={column.key}>{data.SchoolStaffCode}</td>;
-    }
+    cell: (column: iTableColumn, data: iVStaff) => `${data.SchoolStaffCode}`
   },
   {
     key: "GivenName",
     header: "Given Name",
-    cell: (column: iTableColumn, data: iVStaff) => {
-      return <td key={column.key}>{data.StaffGiven1}</td>;
-    }
+    cell: (column: iTableColumn, data: iVStaff) => `${data.StaffGiven1}`
   },
   {
     key: "GivenName2",
     header: "Given Name 2",
-    cell: (column: iTableColumn, data: iVStaff) => {
-      return <td key={column.key}>{data.StaffGiven2}</td>;
-    }
+    cell: (column: iTableColumn, data: iVStaff) => `${data.StaffGiven2}`
   },
   {
     key: "Surname",
     header: "Surname",
-    cell: (column: iTableColumn, data: iVStaff) => {
-      return <td key={column.key}>{data.StaffSurname}</td>;
-    }
+    cell: (column: iTableColumn, data: iVStaff) => `${data.StaffSurname}`
   },
   {
     key: "CategoryCode",
     header: "Category Code",
-    cell: (column: iTableColumn, data: iVStaff) => {
-      return <td key={column.key}>{data.StaffCategory}</td>;
-    }
+    cell: (column: iTableColumn, data: iVStaff) => `${data.StaffCategory}`
   },
   {
     isDefault: true,
     key: "DepartmentCode",
     header: "Department",
-    cell: (column: iTableColumn, data: iVStaff) => {
-      return <td key={column.key}>{data.StaffDepartment}</td>;
-    }
+    cell: (column: iTableColumn, data: iVStaff) => `${data.StaffDepartment}`
   },
   {
     isDefault: true,
     key: "CategoryDescription",
     header: "Category Description",
-    cell: (column: iTableColumn, data: iVStaff) => {
-      return <td key={column.key}>{data.StaffCategoryDescription}</td>;
-    }
+    cell: (column: iTableColumn, data: iVStaff) =>
+      `${data.StaffCategoryDescription}`
   },
   {
     key: "CategoryType",
     header: "Category Type",
-    cell: (column: iTableColumn, data: iVStaff) => {
-      return <td key={column.key}>{data.StaffCategoryType}</td>;
-    }
+    cell: (column: iTableColumn, data: iVStaff) => `${data.StaffCategoryType}`
   },
   {
     isDefault: true,
     key: "OccupEmail",
     header: "Occup. Email",
-    cell: (column: iTableColumn, data: iVStaff) => {
-      return <td key={column.key}>{data.StaffOccupEmail}</td>;
-    }
+    cell: (column: iTableColumn, data: iVStaff) => `${data.StaffOccupEmail}`
   },
   {
     key: "Campus Code",
     header: "Campus Code",
-    cell: (column: iTableColumn, data: iVStaff) => {
-      return <td key={column.key}>{data.StaffCampus}</td>;
-    }
+    cell: (column: iTableColumn, data: iVStaff) => `${data.StaffCampus}`
   },
   {
     key: "Campus Description",
     header: "Campus Descr.",
-    cell: (column: iTableColumn, data: iVStaff) => {
-      return <td key={column.key}>{data.StaffCampusDescription}</td>;
-    }
+    cell: (column: iTableColumn, data: iVStaff) =>
+      `${data.StaffCampusDescription}`
   },
   {
     key: "ActiveFlag",
     header: "Is Active",
-    cell: (column: iTableColumn, data: iVStaff) => {
-      return <td key={column.key}>{data.ActiveFlag === true ? "Y" : "N"}</td>;
-    }
+    cell: (column: iTableColumn, data: iVStaff) =>
+      `${data.ActiveFlag === true ? "Y" : "N"}`
   },
   {
     key: "StartDate",
     header: "Start Date",
-    cell: (column: iTableColumn, data: iVStaff) => {
-      return (
-        <td key={column.key}>
-          {`${data.StartDate || ""}`.trim() === ""
-            ? ""
-            : moment(`${data.StartDate || ""}`.trim()).format("DD/MM/YYYY")}
-        </td>
-      );
-    }
+    cell: (column: iTableColumn, data: iVStaff) =>
+      `${
+        `${data.StartDate || ""}`.trim() === ""
+          ? ""
+          : moment(`${data.StartDate || ""}`.trim()).format("DD/MM/YYYY")
+      }`
   },
   {
     key: "EndDate",
     header: "Leaving Date",
+    cell: (column: iTableColumn, data: iVStaff) =>
+      `${
+        `${data.LeavingDate || ""}`.trim() === ""
+          ? ""
+          : moment(`${data.LeavingDate || ""}`.trim()).format("DD/MM/YYYY")
+      }`
+  },
+  {
+    key: "JobPositionCode",
+    header: "Position Code",
+    group: "Job Position",
     cell: (column: iTableColumn, data: iVStaff) => {
+      const jobPositions = getJobPositionFromMap(data, staffJobPosMap);
       return (
-        <td key={column.key}>
-          {`${data.LeavingDate || ""}`.trim() === ""
-            ? ""
-            : moment(`${data.LeavingDate || ""}`.trim()).format("DD/MM/YYYY")}
+        <td key={column.key} className={"job-pos-col"}>
+          {jobPositions.map((jobPosition, index) => {
+            const code =
+              jobPosition.SynJobPosition?.JobPositionCode || "&nbsp;";
+            return (
+              <div
+                key={index}
+                dangerouslySetInnerHTML={{
+                  __html: code
+                }}
+              />
+            );
+          })}
         </td>
       );
     }
   },
   {
     key: "JobPositionDescription",
-    header: "Job Position Description",
+    header: "Position Description",
     group: "Job Position",
     cell: (column: iTableColumn, data: iVStaff) => {
-      const jobPositions =
-        data.StaffID in jobPosMap ? jobPosMap[data.StaffID] : [];
+      const jobPositions = getJobPositionFromMap(data, staffJobPosMap);
       return (
         <td key={column.key} className={"job-pos-col"}>
           {jobPositions.map((jobPosition, index) => {
+            const string = jobPosition.SynJobPosition?.Description || "&nbsp;";
             return (
-              <div key={index}>
-                {jobPosition.SynJobPosition?.Description || ""}
-              </div>
+              <div
+                key={index}
+                title={string}
+                dangerouslySetInnerHTML={{
+                  __html: string
+                }}
+              />
+            );
+          })}
+        </td>
+      );
+    }
+  },
+  {
+    key: "JobPositionAwardLevelCode",
+    header: "Award Level Code",
+    group: "Job Position",
+    cell: (column: iTableColumn, data: iVStaff) => {
+      const jobPositions = getJobPositionFromMap(data, staffJobPosMap);
+      return (
+        <td key={column.key} className={"job-pos-col"}>
+          {jobPositions.map((jobPosition, index) => {
+            const string = jobPosition.AwardLevelCode || "&nbsp;";
+            return (
+              <div
+                key={index}
+                dangerouslySetInnerHTML={{
+                  __html: string
+                }}
+              />
+            );
+          })}
+        </td>
+      );
+    }
+  },
+  {
+    key: "JobPositionStartDate",
+    header: "Position Start",
+    group: "Job Position",
+    cell: (column: iTableColumn, data: iVStaff) => {
+      const jobPositions = getJobPositionFromMap(data, staffJobPosMap);
+      return (
+        <td key={column.key} className={"job-pos-col"}>
+          {jobPositions.map((jobPosition, index) => {
+            const string =
+              `${jobPosition.StartDate || ""}`.trim() === ""
+                ? "&nbsp;"
+                : moment(`${jobPosition.StartDate || ""}`.trim()).format(
+                    "DD/MM/YYYY"
+                  );
+            return (
+              <div
+                key={index}
+                dangerouslySetInnerHTML={{
+                  __html: string
+                }}
+              />
+            );
+          })}
+        </td>
+      );
+    }
+  },
+  {
+    key: "JobPositionEndDate",
+    header: "Position End",
+    group: "Job Position",
+    cell: (column: iTableColumn, data: iVStaff) => {
+      const jobPositions = getJobPositionFromMap(data, staffJobPosMap);
+      return (
+        <td key={column.key} className={"job-pos-col"}>
+          {jobPositions.map((jobPosition, index) => {
+            const className =
+              `${jobPosition.EndDate || ""}`.trim() === ""
+                ? ""
+                : moment(`${jobPosition.EndDate}`).isBefore(moment())
+                ? "bg-danger text-white"
+                : "";
+            const string =
+              `${jobPosition.EndDate || ""}`.trim() === ""
+                ? "&nbsp;"
+                : moment(`${jobPosition.EndDate || ""}`.trim()).format(
+                    "DD/MM/YYYY"
+                  );
+            return (
+              <div
+                key={index}
+                className={className}
+                dangerouslySetInnerHTML={{
+                  __html: string
+                }}
+              />
             );
           })}
         </td>
@@ -174,12 +308,18 @@ const getListColumns = ({
     header: "FTE",
     group: "Job Position",
     cell: (column: iTableColumn, data: iVStaff) => {
-      const jobPositions =
-        data.StaffID in jobPosMap ? jobPosMap[data.StaffID] : [];
+      const jobPositions = getJobPositionFromMap(data, staffJobPosMap);
       return (
         <td key={column.key} className={"job-pos-col"}>
           {jobPositions.map((jobPosition, index) => {
-            return <div key={index}>{jobPosition.FTE}</div>;
+            return (
+              <div
+                key={index}
+                dangerouslySetInnerHTML={{
+                  __html: `${jobPosition.FTE || "&nbsp;"}`
+                }}
+              />
+            );
           })}
         </td>
       );
@@ -190,8 +330,7 @@ const getListColumns = ({
     header: "Current Level",
     group: "Job Position",
     cell: (column: iTableColumn, data: iVStaff) => {
-      const jobPositions =
-        data.StaffID in jobPosMap ? jobPosMap[data.StaffID] : [];
+      const jobPositions = getJobPositionFromMap(data, staffJobPosMap);
       return (
         <td key={column.key} className={"job-pos-col"}>
           {jobPositions.map((jobPosition, index) => {
@@ -208,23 +347,134 @@ const getListColumns = ({
       );
     }
   },
+  {
+    key: "ReportsToPositionCode",
+    header: "Reports To Position Code",
+    group: "Job Position",
+    cell: (column: iTableColumn, data: iVStaff) => {
+      const jobPositions = getJobPositionFromMap(data, staffJobPosMap);
+      return (
+        <td key={column.key} className={"job-pos-col"}>
+          {jobPositions.map((jobPosition, index) => {
+            const reportsPosition = getReportsToPosFromJobPosition(jobPosition);
+            return (
+              <div
+                key={index}
+                dangerouslySetInnerHTML={{
+                  __html: `${reportsPosition?.JobPositionCode || "&nbsp;"}`
+                }}
+              />
+            );
+          })}
+        </td>
+      );
+    }
+  },
+  {
+    key: "ReportsToPosition",
+    header: "Reports To Position",
+    group: "Job Position",
+    cell: (column: iTableColumn, data: iVStaff) => {
+      const jobPositions = getJobPositionFromMap(data, staffJobPosMap);
+      return (
+        <td key={column.key} className={"job-pos-col"}>
+          {jobPositions.map((jobPosition, index) => {
+            const reportsPosition = getReportsToPosFromJobPosition(jobPosition);
+            return (
+              <div
+                key={index}
+                dangerouslySetInnerHTML={{
+                  __html: `${reportsPosition?.Description || "&nbsp;"}`
+                }}
+              />
+            );
+          })}
+        </td>
+      );
+    }
+  },
+  {
+    key: "ReportsTo",
+    header: "Reports To",
+    group: "Job Position",
+    cell: (column: iTableColumn, data: iVStaff) => {
+      const jobPositions = getJobPositionFromMap(data, staffJobPosMap);
+      return (
+        <td key={column.key} className={"job-pos-col"}>
+          {jobPositions.map((jobPosition, index) => {
+            const reportsPosition = getReportsToPosFromJobPosition(jobPosition);
+            let string = "&nbsp;";
+            if (reportsPosition) {
+              const reportsToStaffs = getReportsToStaffsFromJobPosition(
+                reportsPosition,
+                positionStaffIdMap,
+                staffMap
+              );
+              string = reportsToStaffs
+                .map(staff => `${staff.StaffNameInternal || ""}`.trim())
+                .filter(name => name !== "")
+                .join(" & ");
+            }
+            return (
+              <div key={index} dangerouslySetInnerHTML={{ __html: string }} />
+            );
+          })}
+        </td>
+      );
+    }
+  },
+  {
+    key: "ReportsToEmail",
+    header: "Reports To Email",
+    group: "Job Position",
+    cell: (column: iTableColumn, data: iVStaff) => {
+      const jobPositions = getJobPositionFromMap(data, staffJobPosMap);
+      return (
+        <td key={column.key} className={"job-pos-col"}>
+          {jobPositions.map((jobPosition, index) => {
+            const reportsPosition = getReportsToPosFromJobPosition(jobPosition);
+            let string = "&nbsp;";
+            if (reportsPosition) {
+              const reportsToStaffs = getReportsToStaffsFromJobPosition(
+                reportsPosition,
+                positionStaffIdMap,
+                staffMap
+              );
+              string = reportsToStaffs
+                .map(staff => `${staff.StaffOccupEmail || ""}`.trim())
+                .filter(name => name !== "")
+                .join(" & ");
+            }
+            return (
+              <div key={index} dangerouslySetInnerHTML={{ __html: string }} />
+            );
+          })}
+        </td>
+      );
+    }
+  },
+
   ...luSkills.map(luSkill => {
     return {
       key: `Expiry-${luSkill.Code}`,
       header: luSkill.Code,
+      name: `${luSkill.Code} - ${luSkill.Description}`,
       group: "Skill Expiry Date",
       cell: (column: iTableColumn, data: iVStaff) => {
-        const communitySkills =
-          (data.StaffID in skillMap ? skillMap[data.StaffID] : [])
-          .filter(communitySkill => `${communitySkill.SkillCode}`.trim() === `${luSkill.Code}`.trim());
+        const communitySkills = (data.StaffID in skillMap
+          ? skillMap[data.StaffID]
+          : []
+        ).filter(
+          communitySkill =>
+            `${communitySkill.SkillCode}`.trim() === `${luSkill.Code}`.trim()
+        );
 
         if (communitySkills.length <= 0) {
           return <td key={column.key}></td>;
         }
-        const latest = communitySkills
-          .sort((skill1, skill2) =>
-            `${skill1.ExpiryDate || ""}` > `${skill2.ExpiryDate || ""}` ? -1 : 1
-          );
+        const latest = communitySkills.sort((skill1, skill2) =>
+          `${skill1.ExpiryDate || ""}` > `${skill2.ExpiryDate || ""}` ? -1 : 1
+        );
 
         const className =
           `${latest[0].ExpiryDate || ""}`.trim() === ""
