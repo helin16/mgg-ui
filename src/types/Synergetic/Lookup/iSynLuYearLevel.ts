@@ -1,10 +1,6 @@
-export const CAMPUS_CODE_JUNIOR = 'J';
-export const CAMPUS_CODE_SENIOR = 'S';
-export const CAMPUS_CODE_ELC = 'E';
-
-type iLuCampus = {
+type iSynLuYearLevel = {
   Campus: string;
-  Code: number;
+  Code: string | number;
   YearLevelSort: number;
   Description: string;
   YearLevelCoordinator: string;
@@ -44,4 +40,4 @@ type iLuCampus = {
   NextYearLevelOther: string | null;
 };
 
-export default iLuCampus;
+export default iSynLuYearLevel;

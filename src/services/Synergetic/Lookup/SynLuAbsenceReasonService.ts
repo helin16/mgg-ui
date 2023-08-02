@@ -1,5 +1,5 @@
-import AppService, {iConfigParams} from '../AppService';
-import iSynLuAbsenceReason from '../../types/StudentAbsence/iSynLuAbsenceReason';
+import AppService, {iConfigParams} from '../../AppService';
+import iSynLuAbsenceReason from '../../../types/StudentAbsence/iSynLuAbsenceReason';
 
 const endPoint = '/syn/luAbsenceReason/';
 

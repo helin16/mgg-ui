@@ -1,5 +1,5 @@
-import AppService, {iConfigParams} from '../AppService';
-import iSynLuHouse from '../../types/Synergetic/iSynLuHouse';
+import AppService, {iConfigParams} from '../../AppService';
+import iSynLuHouse from '../../../types/Synergetic/Lookup/iSynLuHouse';
 
 const endPoint = '/syn/luHouse/';
 

@@ -4,7 +4,7 @@ import {Spinner} from 'react-bootstrap';
 import SelectBox from '../common/SelectBox';
 import Toaster from '../../services/Toaster';
 import iSynLuAbsenceReason from '../../types/StudentAbsence/iSynLuAbsenceReason';
-import SynLuAbsenceReasonService from '../../services/Synergetic/SynLuAbsenceReasonService';
+import SynLuAbsenceReasonService from '../../services/Synergetic/Lookup/SynLuAbsenceReasonService';
 import {OP_OR} from '../../helper/ServiceHelper';
 import {STUDENT_ABSENCE_REASON_CODE_OTHER} from '../../types/StudentAbsence/iStudentAbsence';
 

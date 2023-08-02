@@ -3,7 +3,7 @@ import iVStudent from '../../types/Synergetic/iVStudent';
 import StudentContactService from '../../services/Synergetic/StudentContactService';
 import {STUDENT_CONTACT_TYPE_SC1, STUDENT_CONTACT_TYPE_SC2, STUDENT_CONTACT_TYPE_SC3} from '../../types/Synergetic/iStudentContact';
 import {Image, Spinner} from 'react-bootstrap';
-import CommunityService from '../../services/Synergetic/CommunityService';
+import SynCommunityService from '../../services/Synergetic/Community/SynCommunityService';
 import {OP_OR} from '../../helper/ServiceHelper';
 import * as _ from 'lodash';
 import SynVStudentService from '../../services/Synergetic/SynVStudentService';
@@ -50,7 +50,7 @@ const StudentGridForAParent = ({
     let isCancelled = false;
     if (!parentSynId) { return; }
     setIsLoadingCommunity(true);
-    CommunityService.getCommunityProfiles({
+    SynCommunityService.getCommunityProfiles({
         where: JSON.stringify({ [OP_OR]: [ {SpouseID: parentSynId}, {ID: parentSynId} ] })
       })
       .then(resp => {

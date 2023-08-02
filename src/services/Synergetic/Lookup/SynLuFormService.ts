@@ -1,5 +1,5 @@
-import AppService, {iConfigParams} from '../AppService';
-import iSynLuForm from '../../types/Synergetic/iSynLuForm';
+import AppService, {iConfigParams} from '../../AppService';
+import iSynLuForm from '../../../types/Synergetic/Lookup/iSynLuForm';
 
 const endPoint = '/syn/luForm/';
 

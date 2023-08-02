@@ -16,8 +16,8 @@ import SynVtudentDisabilityAdjustmentService
   from '../../../../services/Synergetic/SynVStudentDisabilityAdjustmentService';
 import CSVExportBtn from '../../../../components/form/CSVExportBtn';
 import SchoolCensusDataExportHelper from './SchoolCensusDataExportHelper';
-import iLuYearLevel from '../../../../types/Synergetic/iLuYearLevel';
-import SynLuYearLevelService from '../../../../services/Synergetic/SynLuYearLevelService';
+import ISynLuYearLevel from '../../../../types/Synergetic/Lookup/iSynLuYearLevel';
+import SynLuYearLevelService from '../../../../services/Synergetic/Lookup/SynLuYearLevelService';
 import SchoolCensusDataSummaryDiv from './SchoolCensusDataSummaryDiv';
 import {
   DISABILITY_ADJUSTMENT_LEVEL_CODES_FOR_CENSUS_REPORT
@@ -33,7 +33,7 @@ const SchoolCensusDataPanel = () => {
   const [studentRecords, setStudentRecords] = useState<iSchoolCensusStudentData[] | null>(null);
   const [unfilteredStudentRecords, setUnfilteredStudentRecords] = useState<iSchoolCensusStudentData[] | null>(null);
   const [schoolDays, setSchoolDays] = useState<string[]>([]);
-  const [yearLevels, setYearLevels] = useState<iLuYearLevel[]>([]);
+  const [yearLevels, setYearLevels] = useState<ISynLuYearLevel[]>([]);
   const [searchCriteria, setSearchCriteria] = useState<iSchoolCensusDataSearchCriteria | null>(null);
   const [absenteeOnEndDateIds, setAbsenteeOnEndDateIds] = useState<number[]>([]);
 

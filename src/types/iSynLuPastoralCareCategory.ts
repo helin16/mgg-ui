@@ -1,4 +1,4 @@
-import iSynLuPastoralCareType from './Synergetic/iSynLuPastoralCareType';
+import iSynLuPastoralCareType from './Synergetic/Lookup/iSynLuPastoralCareType';
 
 type iSynLuPastoralCareCategory = {
   Code: string;

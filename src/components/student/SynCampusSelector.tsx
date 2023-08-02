@@ -1,8 +1,8 @@
 import {iAutoCompleteSingle} from '../common/AutoComplete';
 import {useEffect, useState} from 'react';
-import SynLuCampusService from '../../services/Synergetic/SynLuCampusService';
+import SynLuCampusService from '../../services/Synergetic/Lookup/SynLuCampusService';
 import {Spinner} from 'react-bootstrap';
-import iLuCampus from '../../types/Synergetic/iLuCampus';
+import ISynLuCampus from '../../types/Synergetic/Lookup/iSynLuCampus';
 import SelectBox from '../common/SelectBox';
 
 type iSynCampusSelector = {
@@ -16,7 +16,7 @@ type iSynCampusSelector = {
   isDisabled?: boolean;
 };
 
-export const translateCampusToOption = (campus: iLuCampus) => {
+export const translateCampusToOption = (campus: ISynLuCampus) => {
   return {value: campus.Code, data: campus, label: campus.Description}
 }
 

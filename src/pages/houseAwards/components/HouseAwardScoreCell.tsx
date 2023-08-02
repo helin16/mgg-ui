@@ -5,7 +5,7 @@ import iHouseAwardEvent from '../../../types/HouseAwards/iHouseAwardEvent';
 import {useState} from 'react';
 import PopupModal from '../../../components/common/PopupModal';
 import {Button, Spinner} from 'react-bootstrap';
-import CommunityService from '../../../services/Synergetic/CommunityService';
+import SynCommunityService from '../../../services/Synergetic/Community/SynCommunityService';
 import iSynCommunity from '../../../types/Synergetic/iSynCommunity';
 import Toaster from '../../../services/Toaster';
 import moment from 'moment-timezone';
@@ -53,7 +53,7 @@ const HouseAwardScoreCell = ({event, isDisabled, eventType, studentId, fileYear,
 
   const fetchAwardedInfo = () => {
     setIsLoadingAwardedBy(true);
-    CommunityService.getCommunityProfiles({
+    SynCommunityService.getCommunityProfiles({
       where: JSON.stringify({
         ID: scoreMap[event.id].awarded_by_id || 0
       })

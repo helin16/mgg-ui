@@ -1,54 +1,50 @@
 import {iAutoCompleteSingle} from '../common/AutoComplete';
 import {useEffect, useState} from 'react';
 import {Spinner} from 'react-bootstrap';
-import SynLuYearLevelService from '../../services/Synergetic/Lookup/SynLuYearLevelService';
-import ISynLuYearLevel from '../../types/Synergetic/Lookup/iSynLuYearLevel';
+import iSynLuDepartment from '../../types/Synergetic/Lookup/iSynLuDepartment';
 import SelectBox from '../common/SelectBox';
-import {CAMPUS_CODE_ELC, CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR} from '../../types/Synergetic/Lookup/iSynLuCampus';
-import UtilsService from '../../services/UtilsService';
 import Toaster from '../../services/Toaster';
+import SynLuDepartmentService from '../../services/Synergetic/Lookup/SynLuDepartmentService';
 
-type iYearLevelSelector = {
+type iSynFormSelector = {
   values?: iAutoCompleteSingle[] | string[];
-  campusCodes?: string[];
-  onSelect?: (yearLevel: iAutoCompleteSingle | iAutoCompleteSingle[] | null) => void;
+  onSelect?: (LuDepartment: iAutoCompleteSingle | iAutoCompleteSingle[] | null) => void;
   allowClear?: boolean;
   showIndicator?: boolean;
   isMulti?: boolean;
   classname?: string;
   limitCodes?: string[];
-  isDisabled?: boolean;
 };
 
-const getLabel = (yearLevel: ISynLuYearLevel) => {
-  return UtilsService.isNumeric(yearLevel.Description) ? `Year ${yearLevel.Description}` : yearLevel.Description;
+const getLabel = (luDepartment: iSynLuDepartment) => {
+  return `${luDepartment.Code} - ${luDepartment.Description}`;
 }
-export const translateYearLevelToOption = (yearLevel: ISynLuYearLevel) => {
-  return {value: yearLevel.Code, data: yearLevel, label: getLabel(yearLevel)}
+export const translateLuDepartmentToOption = (luDepartment: iSynLuDepartment) => {
+  return {value: luDepartment.Code, data: luDepartment, label: getLabel(luDepartment)}
 }
 
-const YearLevelSelector = ({isDisabled, values, onSelect, allowClear, limitCodes = [], campusCodes, classname, showIndicator = true, isMulti = false}: iYearLevelSelector) => {
+const LuDepartmentSelector = ({values, onSelect, limitCodes = [], allowClear, classname, showIndicator = true, isMulti = false}: iSynFormSelector) => {
   const [optionsMap, setOptionsMap] = useState<{[key: string]: iAutoCompleteSingle}>({});
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (Object.keys(optionsMap).length > 0) { return }
     let isCancelled = false;
     setIsLoading(true);
-    // @ts-ignore
-    SynLuYearLevelService.getAllYearLevels({
+    SynLuDepartmentService.getAll({
         where: JSON.stringify({
-          Campus: campusCodes || [CAMPUS_CODE_JUNIOR, CAMPUS_CODE_ELC, CAMPUS_CODE_SENIOR],
+          ActiveFlag: true,
           ...(limitCodes?.length > 0 ? {Code: limitCodes} : {}),
         }),
-        sort: 'YearLevelSort:ASC',
+        sort: 'Code:ASC',
       })
       .then(resp => {
         if (isCancelled === true) { return }
-        setOptionsMap(resp.reduce((map, yearLevel) => {
+        setOptionsMap(resp
+          .filter(luDepartment => `${luDepartment.Code || ''}`.trim() !== '')
+          .reduce((map, luDepartment) => {
           return {
             ...map,
-            [yearLevel.Code]: translateYearLevelToOption(yearLevel),
+            [luDepartment.Code]: translateLuDepartmentToOption(luDepartment),
           };
         }, {}))
       })
@@ -63,7 +59,8 @@ const YearLevelSelector = ({isDisabled, values, onSelect, allowClear, limitCodes
     return () => {
       isCancelled = true;
     }
-  }, [optionsMap, campusCodes, limitCodes]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (isLoading === true) {
     return <Spinner animation={'border'} size={'sm'}/>;
@@ -77,7 +74,7 @@ const YearLevelSelector = ({isDisabled, values, onSelect, allowClear, limitCodes
       return [];
     }
     return values.map(value => {
-      if(typeof value === 'string' || typeof value === 'number') {
+      if(typeof value === 'string') {
         return (value in optionsMap ? optionsMap[value] : {value, label: value, data: null})
       }
       return value;
@@ -90,7 +87,7 @@ const YearLevelSelector = ({isDisabled, values, onSelect, allowClear, limitCodes
         if (!opt1.data || !opt2.data) {
           return 1;
         }
-        return opt1.data.YearLevelSort > opt2.data.YearLevelSort ? 1 : -1;
+        return opt1.data.Code > opt2.data.Code ? 1 : -1;
       })
   }
 
@@ -102,10 +99,9 @@ const YearLevelSelector = ({isDisabled, values, onSelect, allowClear, limitCodes
       onChange={onSelect}
       value={getSelectedValues()}
       isClearable={allowClear}
-      isDisabled={isDisabled}
       showDropdownIndicator={showIndicator}
     />
   )
 };
 
-export default YearLevelSelector;
+export default LuDepartmentSelector;

@@ -10,8 +10,8 @@ import SchoolCensusDataAttendancePopupBtn from './SchoolCensusDataAttendancePopu
 import {
   SYN_NATIONALITY_CODE_AUSTRALIA,
   SYN_NATIONALITY_DESCRIPTION_AUSTRALIA
-} from '../../../../types/Synergetic/iSynLuNationality';
-import {SYN_COUNTRY_CODE_AUSTRALIA} from '../../../../types/Synergetic/iSynLuCountry';
+} from '../../../../types/Synergetic/Lookup/iSynLuNationality';
+import {SYN_COUNTRY_CODE_AUSTRALIA} from '../../../../types/Synergetic/Lookup/iSynLuCountry';
 
 type iSchoolCensusDataSummaryDiv = {
   records: iSchoolCensusStudentData[];

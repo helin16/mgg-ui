@@ -1,6 +1,6 @@
 import moment from 'moment-timezone';
 import * as XLSX from 'sheetjs-style';
-import {CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR} from '../../../../types/Synergetic/iLuCampus';
+import {CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR} from '../../../../types/Synergetic/Lookup/iSynLuCampus';
 import iSchoolCensusStudentData from './iSchoolCensusStudentData';
 import iSynVAttendance from '../../../../types/Synergetic/Attendance/iSynVAttendance';
 

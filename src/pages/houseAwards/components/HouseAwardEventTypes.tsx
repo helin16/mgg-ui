@@ -4,9 +4,9 @@ import HouseAwardEventTypeService from '../../../services/HouseAwards/HouseAward
 import Toaster from '../../../services/Toaster';
 import {Col, Container, Row, Spinner} from 'react-bootstrap';
 import styled from 'styled-components';
-import iSynLuHouse from '../../../types/Synergetic/iSynLuHouse';
-import SynLuHouseService from '../../../services/Synergetic/SynLuHouseService';
-import {CAMPUS_CODE_SENIOR} from '../../../types/Synergetic/iLuCampus';
+import iSynLuHouse from '../../../types/Synergetic/Lookup/iSynLuHouse';
+import SynLuHouseService from '../../../services/Synergetic/Lookup/SynLuHouseService';
+import {CAMPUS_CODE_SENIOR} from '../../../types/Synergetic/Lookup/iSynLuCampus';
 import {OP_NOT} from '../../../helper/ServiceHelper';
 import * as Icon from 'react-bootstrap-icons';
 import {HOUSE_COLOR_GR, HOUSE_COLOR_KT, HOUSE_COLOR_MC, HOUSE_COLOR_SM} from '../../../components/HouseAwards/styles';

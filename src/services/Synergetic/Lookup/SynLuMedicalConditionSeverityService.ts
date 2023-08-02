@@ -1,5 +1,5 @@
-import AppService, {iConfigParams} from '../AppService';
-import iSynLuMedicalConditionSeverity from '../../types/Synergetic/iSynLuMedicalConditionSeverity';
+import AppService, {iConfigParams} from '../../AppService';
+import iSynLuMedicalConditionSeverity from '../../../types/Synergetic/Lookup/iSynLuMedicalConditionSeverity';
 
 const endPoint = '/syn/luMedicalConditionSeverity';
 

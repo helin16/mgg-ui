@@ -4,7 +4,7 @@ import React, {useState} from 'react';
 import InputGroup from 'react-bootstrap/InputGroup';
 import {Search, ArrowDown} from 'react-bootstrap-icons';
 import LoadingBtn from '../../../components/common/LoadingBtn';
-import CommunityService from '../../../services/Synergetic/CommunityService';
+import SynCommunityService from '../../../services/Synergetic/Community/SynCommunityService';
 import iSynCommunity from '../../../types/Synergetic/iSynCommunity';
 import CommunityGridCell from '../../../components/CommunityGridCell';
 import {OP_LIKE, OP_OR} from '../../../helper/ServiceHelper';
@@ -39,7 +39,7 @@ const SearchPanel = ({onSelect}: iSearchPanel) => {
     };
     setIsSearching(currentPage === 1);
     setIsLoadingMore(currentPage > 1);
-    CommunityService.getCommunityProfiles({
+    SynCommunityService.getCommunityProfiles({
         currentOnly: 'true',
         currentPage: `${currentPage}`,
         where: JSON.stringify(where),

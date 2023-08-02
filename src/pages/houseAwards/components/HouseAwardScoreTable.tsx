@@ -1,11 +1,11 @@
-import iSynLuHouse from '../../../types/Synergetic/iSynLuHouse';
+import iSynLuHouse from '../../../types/Synergetic/Lookup/iSynLuHouse';
 import iHouseAwardEventType from '../../../types/HouseAwards/iHouseAwardEventType';
 import styled from 'styled-components';
 import {useEffect, useState} from 'react';
 import {Spinner} from 'react-bootstrap';
 import Toaster from '../../../services/Toaster';
 import ReactTableWithFixedColumns from '../../../components/common/ReactTableWithFixedColumns';
-import iLuYearLevel from '../../../types/Synergetic/iLuYearLevel';
+import ISynLuYearLevel from '../../../types/Synergetic/Lookup/iSynLuYearLevel';
 import iHouseAwardEvent from '../../../types/HouseAwards/iHouseAwardEvent';
 import iVStudent from '../../../types/Synergetic/iVStudent';
 import HouseAwardStudentYearService from '../../../services/HouseAwards/HouseAwardStudentYearService';
@@ -21,7 +21,7 @@ import SynVStudentService from '../../../services/Synergetic/SynVStudentService'
 type iHouseAwardScoreTable = {
   house: iSynLuHouse;
   type: iHouseAwardEventType;
-  yearLevel: iLuYearLevel;
+  yearLevel: ISynLuYearLevel;
   fileYear: number;
   events: iHouseAwardEvent[];
   isDisabled?: boolean;

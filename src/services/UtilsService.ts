@@ -67,6 +67,10 @@ const letterRange = (start: string, stop: string) => {
   return result;
 }
 
+const stripHTMLTags = (html: string) => {
+  return html.replace( /(<([^>]+)>)/ig, '');
+}
+
 const UtilsService = {
   isNumeric,
   handleEnterKeyPressed,
@@ -77,6 +81,7 @@ const UtilsService = {
   validateMacAddress,
   validateTime,
   letterRange,
+  stripHTMLTags,
 }
 
 export default UtilsService;

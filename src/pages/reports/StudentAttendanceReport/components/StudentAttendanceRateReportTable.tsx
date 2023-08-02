@@ -1,4 +1,4 @@
-import iLuYearLevel from "../../../../types/Synergetic/iLuYearLevel";
+import ISynLuYearLevel from "../../../../types/Synergetic/Lookup/iSynLuYearLevel";
 import Table, { iTableColumn } from "../../../../components/common/Table";
 import { iVPastAndCurrentStudent } from "../../../../types/Synergetic/iVStudent";
 import iSynVStudentAttendanceHistory from "../../../../types/Synergetic/Attendance/iSynVStudentAttendanceHistory";
@@ -10,7 +10,7 @@ export type iAttendanceMap = { [key: number]: iSynVStudentAttendanceHistory[] };
 
 type iStudentAttendanceReportTable = {
   watchingRate: number;
-  yearLevels: iLuYearLevel[];
+  yearLevels: ISynLuYearLevel[];
   studentMap: { [key: number]: iVPastAndCurrentStudent };
   attendanceRecordMap: iAttendanceMap;
   attendanceRateMap: { [key: number]: number };
@@ -96,7 +96,7 @@ const StudentAttendanceRateReportTable = ({
     {
       key: "yearLevel",
       header: "Yr Lvl.",
-      cell: (column: iTableColumn, data: iLuYearLevel) => {
+      cell: (column: iTableColumn, data: ISynLuYearLevel) => {
         return (
           <td key={column.key}>
             <b>{data.Description}</b>
@@ -123,7 +123,7 @@ const StudentAttendanceRateReportTable = ({
 
         return <td key={column.key}>{getPopupDiv(studentIds)}</td>;
       },
-      cell: (column: iTableColumn, data: iLuYearLevel) => {
+      cell: (column: iTableColumn, data: ISynLuYearLevel) => {
         const studentIds = getRatedStudentIds({
           // @ts-ignore
           studentIds: stYearLevelMap[data.Code] || [],
@@ -145,7 +145,7 @@ const StudentAttendanceRateReportTable = ({
         });
         return <td key={column.key}>{getPopupDiv(studentIds)}</td>;
       },
-      cell: (column: iTableColumn, data: iLuYearLevel) => {
+      cell: (column: iTableColumn, data: ISynLuYearLevel) => {
         const studentIds = getRatedStudentIds({
           // @ts-ignore
           studentIds: stYearLevelMap[data.Code] || [],
@@ -165,7 +165,7 @@ const StudentAttendanceRateReportTable = ({
 
         return <td key={column.key}>{getPopupDiv(studentIds)}</td>;
       },
-      cell: (column: iTableColumn, data: iLuYearLevel) => {
+      cell: (column: iTableColumn, data: ISynLuYearLevel) => {
         // @ts-ignore
         const studentIds = stYearLevelMap[data.Code] || [];
         return <td key={column.key}>{getPopupDiv(studentIds)}</td>;

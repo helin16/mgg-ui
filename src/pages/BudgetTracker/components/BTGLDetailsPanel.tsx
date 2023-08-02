@@ -13,7 +13,7 @@ import FileYearSelector from '../../../components/student/FileYearSelector';
 import MathHelper from '../../../helper/MathHelper';
 import UtilsService from '../../../services/UtilsService';
 import * as _ from 'lodash';
-import CommunityService from '../../../services/Synergetic/CommunityService';
+import SynCommunityService from '../../../services/Synergetic/Community/SynCommunityService';
 import iSynCommunity from '../../../types/Synergetic/iSynCommunity';
 import BTItemExportBtn from './BTItemExportBtn';
 import {FlexContainer} from '../../../styles';
@@ -183,7 +183,7 @@ const BTGLDetailsPanel = ({gl, showingYear, onChangeYear, forceReloadCount = 0, 
 
     let isCanceled = false;
     setIsLoadingCommunityInfo(true);
-    CommunityService.getCommunityProfiles({
+    SynCommunityService.getCommunityProfiles({
       where: JSON.stringify({
         ID: ids,
       }),

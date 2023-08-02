@@ -21,9 +21,9 @@ import FormLabel from "../../../../components/form/FormLabel";
 import {
   CAMPUS_CODE_JUNIOR,
   CAMPUS_CODE_SENIOR
-} from "../../../../types/Synergetic/iLuCampus";
-import SynLuYearLevelService from "../../../../services/Synergetic/SynLuYearLevelService";
-import iLuYearLevel from "../../../../types/Synergetic/iLuYearLevel";
+} from "../../../../types/Synergetic/Lookup/iSynLuCampus";
+import SynLuYearLevelService from "../../../../services/Synergetic/Lookup/SynLuYearLevelService";
+import ISynLuYearLevel from "../../../../types/Synergetic/Lookup/iSynLuYearLevel";
 import ToggleBtn from "../../../../components/common/ToggleBtn";
 import StudentAttendanceRateReportTable, {
   iAttendanceMap
@@ -66,7 +66,7 @@ const StudentAttendanceRateReport = ({adminBtn}: {adminBtn?: any}) => {
   const [searchYearLevelCodes, setSearchYearLevelCodes] = useState<string[]>(
     []
   );
-  const [yearLevels, setYearLevels] = useState<iLuYearLevel[]>([]);
+  const [yearLevels, setYearLevels] = useState<ISynLuYearLevel[]>([]);
   const [includePastStudents, setIncludePastStudents] = useState(false);
   const [studentsMap, setStudentsMap] = useState<{
     [key: number]: iVPastAndCurrentStudent;

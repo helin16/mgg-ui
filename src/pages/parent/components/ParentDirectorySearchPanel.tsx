@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
-import iSynLuForm from '../../../types/Synergetic/iSynLuForm';
-import iLuYearLevel from '../../../types/Synergetic/iLuYearLevel';
+import iSynLuForm from '../../../types/Synergetic/Lookup/iSynLuForm';
+import ISynLuYearLevel from '../../../types/Synergetic/Lookup/iSynLuYearLevel';
 import {Col, Form, Row} from 'react-bootstrap';
 import styled from 'styled-components';
 import FormLabel from '../../../components/form/FormLabel';
@@ -8,7 +8,7 @@ import YearLevelSelector from '../../../components/student/YearLevelSelector';
 import SynFormSelector from '../../../components/student/SynFormSelector';
 import LoadingBtn from '../../../components/common/LoadingBtn';
 import * as Icons from 'react-bootstrap-icons';
-import CommunityService from '../../../services/Synergetic/CommunityService';
+import SynCommunityService from '../../../services/Synergetic/Community/SynCommunityService';
 import {OP_OR} from '../../../helper/ServiceHelper';
 import {HEADER_NAME_SELECTING_FIELDS} from '../../../services/AppService';
 import * as _ from 'lodash';
@@ -39,7 +39,7 @@ const Wrapper = styled.div`
 
 export type iParentDirectorySearchCriteria = {
   form?: iSynLuForm;
-  yearLevel?: iLuYearLevel;
+  yearLevel?: ISynLuYearLevel;
   searchText?: string;
 }
 type iParentDirectorySearchPanel = {
@@ -50,7 +50,7 @@ type iParentDirectorySearchPanel = {
 const ParentDirectorySearchPanel = ({onChanged, className, isSearching = false}: iParentDirectorySearchPanel) => {
   const {user} = useSelector((state: RootState) => state.auth);
   const [form, setForm] = useState<iSynLuForm | null>(null)
-  const [yearLevel, setYearLevel] = useState<iLuYearLevel | null>(null);
+  const [yearLevel, setYearLevel] = useState<ISynLuYearLevel | null>(null);
   const [searchText, setSearchText] = useState('');
   const [limitFormCodes, setLimitFormCodes] = useState<string[] | null>(null);
   const [limitYearLevelCodes, setYearLevelCodes] = useState<string[] | null>(null);
@@ -63,7 +63,7 @@ const ParentDirectorySearchPanel = ({onChanged, className, isSearching = false}:
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const parents = await CommunityService.getCommunityProfiles({
+        const parents = await SynCommunityService.getCommunityProfiles({
           where: JSON.stringify({ [OP_OR]: [ {SpouseID: user?.synergyId}, {ID: user?.synergyId} ] })
         }, {
           headers: {[HEADER_NAME_SELECTING_FIELDS]: JSON.stringify([

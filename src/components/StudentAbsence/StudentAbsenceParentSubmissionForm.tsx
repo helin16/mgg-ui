@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import {Alert, Button, Col, FormControl, Row, Spinner} from "react-bootstrap";
 import FormLabel from "../form/FormLabel";
-import CommunityService from "../../services/Synergetic/CommunityService";
+import SynCommunityService from "../../services/Synergetic/Community/SynCommunityService";
 import {OP_OR} from "../../helper/ServiceHelper";
 import StudentContactService from "../../services/Synergetic/StudentContactService";
 import {
@@ -63,7 +63,7 @@ const StudentAbsenceParentSubmissionForm = () => {
     let isCanceled = false;
 
     const getChildren = async () => {
-      const communityProfiles = await CommunityService.getCommunityProfiles({
+      const communityProfiles = await SynCommunityService.getCommunityProfiles({
         where: JSON.stringify({
           [OP_OR]: [{ SpouseID: user.synergyId }, { ID: user.synergyId }]
         })

@@ -9,7 +9,7 @@ import LoadingBtn from '../common/LoadingBtn';
 import * as Icons from 'react-bootstrap-icons';
 import SchoolManagementRoleSelector from './SchoolManagementRoleSelector';
 import YearLevelSelector from '../student/YearLevelSelector';
-import {CAMPUS_CODE_SENIOR} from '../../types/Synergetic/iLuCampus';
+import {CAMPUS_CODE_SENIOR} from '../../types/Synergetic/Lookup/iSynLuCampus';
 import StaffAutoComplete from '../staff/StaffAutoComplete';
 import SectionDiv from '../common/SectionDiv';
 import moment from 'moment-timezone';

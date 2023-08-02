@@ -1,7 +1,7 @@
 import iSynVStudentContactAllAddress from '../../../types/Synergetic/iSynVStudentContactAllAddress';
 import {useEffect, useState} from 'react';
 import iSynCommunity from '../../../types/Synergetic/iSynCommunity';
-import CommunityService from '../../../services/Synergetic/CommunityService';
+import SynCommunityService from '../../../services/Synergetic/Community/SynCommunityService';
 import PageLoadingSpinner from '../../../components/common/PageLoadingSpinner';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import {Tooltip} from 'react-bootstrap';
@@ -17,7 +17,7 @@ const ParentDirectoryRow = ({contact, onEmailPopulated}: iParentDirectoryRow) =>
   useEffect(() => {
     let isCanceled = false;
     setIsLoading(true);
-    CommunityService.getCommunityProfiles({
+    SynCommunityService.getCommunityProfiles({
       where: JSON.stringify({
         ID: [contact.StudentContactID, ...(`${contact.StudentContactSpouseID || ''}`.trim() === '' ? [] : [contact.StudentContactSpouseID])]
       })

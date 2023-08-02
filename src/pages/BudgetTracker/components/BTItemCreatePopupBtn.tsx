@@ -15,7 +15,7 @@ import iSynGeneralLedger from '../../../types/Synergetic/Finance/iSynGeneralLeda
 import BTItemService from '../../../services/BudgetTracker/BTItemService';
 import Toaster, {TOAST_TYPE_SUCCESS} from '../../../services/Toaster';
 import FormLabel from '../../../components/form/FormLabel';
-import CommunityService from '../../../services/Synergetic/CommunityService';
+import SynCommunityService from '../../../services/Synergetic/Community/SynCommunityService';
 import iSynCommunity from '../../../types/Synergetic/iSynCommunity';
 import moment from 'moment-timezone';
 import {FlexContainer} from '../../../styles';
@@ -108,7 +108,7 @@ const BTItemCreatePopupBtn = ({onItemSaved, children, btItem, gl, forYear, force
     let isCanceled = false;
     setGettingCommunityInfo(true);
     Promise.all([
-      CommunityService.getCommunityProfiles({
+      SynCommunityService.getCommunityProfiles({
         where: JSON.stringify({
           ID: ids,
         })

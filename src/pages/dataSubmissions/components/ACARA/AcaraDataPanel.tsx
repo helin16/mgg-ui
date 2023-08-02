@@ -17,7 +17,7 @@ import SynLuOccupationPositionService from "../../../../services/Synergetic/Look
 import { HEADER_NAME_SELECTING_FIELDS } from "../../../../services/AppService";
 import SynVStudentParentService from "../../../../services/Synergetic/SynVStudentParentService";
 import iSynVStudentParent from "../../../../types/Synergetic/Community/iSynVStudentParent";
-import CommunityService from "../../../../services/Synergetic/CommunityService";
+import SynCommunityService from "../../../../services/Synergetic/Community/SynCommunityService";
 import iSynCommunity from "../../../../types/Synergetic/iSynCommunity";
 import { iVPastAndCurrentStudent } from "../../../../types/Synergetic/iVStudent";
 import iSynLuLanguage from "../../../../types/Synergetic/Lookup/iSynLuLanguage";
@@ -189,7 +189,7 @@ const AcaraDataPanel = () => {
       const parentProfiles = (
         await Promise.all(
           _.chunk(_.uniq(parentIds), 100).map(ids => {
-            return CommunityService.getCommunityProfiles(
+            return SynCommunityService.getCommunityProfiles(
               {
                 where: JSON.stringify({ ID: ids }),
                 perPage: 99999

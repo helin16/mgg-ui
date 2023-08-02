@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import * as _ from "lodash";
-import iLuYearLevel from "../../../../types/Synergetic/iLuYearLevel";
+import ISynLuYearLevel from "../../../../types/Synergetic/Lookup/iSynLuYearLevel";
 import Table, { iTableColumn } from "../../../common/Table";
 import iVStudent from "../../../../types/Synergetic/iVStudent";
 import iFunnelLead from "../../../../types/Funnel/iFunnelLead";
@@ -22,7 +22,7 @@ type iStudentNumberForecastTable = {
   showingFinanceFigures?: boolean;
   nextFileYear: number;
   selectedCampusCodes?: string[];
-  yearLevelMap: { [key: string]: iLuYearLevel };
+  yearLevelMap: { [key: string]: ISynLuYearLevel };
   feeNameMap: { [key: string]: string };
   currentStudentMap: iStudentMap;
   confirmedFutureStudentMap: iStudentMap;
@@ -74,7 +74,7 @@ const StudentNumberForecastTable = ({
   feeNameMap,
   selectedCampusCodes = ["S", "J", "E"]
 }: iStudentNumberForecastTable) => {
-  const [yLevelArr, setYLevelArr] = useState<iLuYearLevel[]>([]);
+  const [yLevelArr, setYLevelArr] = useState<ISynLuYearLevel[]>([]);
 
   useEffect(() => {
     const arr = Object.values(yearLevelMap).sort((yl1, yl2) =>
@@ -148,7 +148,7 @@ const StudentNumberForecastTable = ({
 
   const getCell = (
     key: string,
-    data: iLuYearLevel,
+    data: ISynLuYearLevel,
     map: any,
     forFuture: boolean = false
   ) => {
@@ -175,7 +175,7 @@ const StudentNumberForecastTable = ({
   const getConcessionCell = (
     key: string,
     map: any,
-    data?: iLuYearLevel,
+    data?: ISynLuYearLevel,
     forFuture: boolean = false
   ) => {
     let students = [];
@@ -248,7 +248,7 @@ const StudentNumberForecastTable = ({
     {
       key: "ylevelCode",
       header: "Year Level",
-      cell: (col: iTableColumn, data: iLuYearLevel) => {
+      cell: (col: iTableColumn, data: ISynLuYearLevel) => {
         if (data.Code === "subTotal") {
           return (
             <td key={col.key} className={"text-right sub-total"}>
@@ -275,7 +275,7 @@ const StudentNumberForecastTable = ({
     {
       key: "currentStudent",
       header: "Current Student",
-      cell: (col: iTableColumn, data: iLuYearLevel) => {
+      cell: (col: iTableColumn, data: ISynLuYearLevel) => {
         return getCell(col.key, data, currentStudentMap);
       },
       footer: (col: iTableColumn) => {
@@ -289,7 +289,7 @@ const StudentNumberForecastTable = ({
           {
             key: "currentConcessions",
             header: "Current Concessions",
-            cell: (col: iTableColumn, data: iLuYearLevel) => {
+            cell: (col: iTableColumn, data: ISynLuYearLevel) => {
               return getConcessionCell(col.key, currentStudentMap, data, false);
             },
             footer: (col: iTableColumn) => {
@@ -306,7 +306,7 @@ const StudentNumberForecastTable = ({
     {
       key: "currentLeavers",
       header: "Current Leavers",
-      cell: (col: iTableColumn, data: iLuYearLevel) => {
+      cell: (col: iTableColumn, data: ISynLuYearLevel) => {
         return getCell(col.key, data, currentStudentLeaverMap);
       },
       footer: (col: iTableColumn) => {
@@ -320,7 +320,7 @@ const StudentNumberForecastTable = ({
     {
       key: "confirmed",
       header: "Confirmed",
-      cell: (col: iTableColumn, data: iLuYearLevel) => {
+      cell: (col: iTableColumn, data: ISynLuYearLevel) => {
         return getCell(col.key, data, confirmedFutureStudentMap, true);
       },
       footer: (col: iTableColumn) => {
@@ -336,7 +336,7 @@ const StudentNumberForecastTable = ({
         {
           key: "confirmedConcessions",
           header: "Confirmed Concessions",
-          cell: (col: iTableColumn, data: iLuYearLevel) => {
+          cell: (col: iTableColumn, data: ISynLuYearLevel) => {
             return getConcessionCell(col.key, confirmedFutureStudentMap, data, true);;
           },
           footer: (col: iTableColumn) => {
@@ -348,7 +348,7 @@ const StudentNumberForecastTable = ({
           {
             key: "inProgress",
             header: "In Progress",
-            cell: (col: iTableColumn, data: iLuYearLevel) => {
+            cell: (col: iTableColumn, data: ISynLuYearLevel) => {
               return getCell(
                 col.key,
                 data,
@@ -368,7 +368,7 @@ const StudentNumberForecastTable = ({
     {
       key: "nextYear",
       header: `Future ${nextFileYear}`,
-      cell: (col: iTableColumn, data: iLuYearLevel) => {
+      cell: (col: iTableColumn, data: ISynLuYearLevel) => {
         return getCell(col.key, data, futureNextYearMap, true);
       },
       footer: (col: iTableColumn) => {
@@ -382,7 +382,7 @@ const StudentNumberForecastTable = ({
           {
             key: "futureConcessions",
             header: `${nextFileYear} Concessions`,
-            cell: (col: iTableColumn, data: iLuYearLevel) => {
+            cell: (col: iTableColumn, data: ISynLuYearLevel) => {
               return getConcessionCell(col.key, futureNextYearMap, data, true);
             },
             footer: (col: iTableColumn) => {
@@ -402,7 +402,7 @@ const StudentNumberForecastTable = ({
           {
             key: "leadsAndTours",
             header: `Leads & Tours`,
-            cell: (col: iTableColumn, data: iLuYearLevel) => {
+            cell: (col: iTableColumn, data: ISynLuYearLevel) => {
               return getCell(
                 col.key,
                 data,

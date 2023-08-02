@@ -22,8 +22,8 @@ import iFunnelLead, {
   FUNNEL_STAGE_NAME_APPLICATION_RECEIVED,
   FUNNEL_STAGE_NAME_EXPORTED
 } from "../../../types/Funnel/iFunnelLead";
-import SynLuYearLevelService from "../../../services/Synergetic/SynLuYearLevelService";
-import iLuYearLevel from "../../../types/Synergetic/iLuYearLevel";
+import SynLuYearLevelService from "../../../services/Synergetic/Lookup/SynLuYearLevelService";
+import ISynLuYearLevel from "../../../types/Synergetic/Lookup/iSynLuYearLevel";
 import ExplanationPanel from "../../ExplanationPanel";
 import iVStudent from "../../../types/Synergetic/iVStudent";
 import StudentNumberForecastTable from "./components/StudentNumberForecastTable";
@@ -151,7 +151,7 @@ const StudentNumberForecastDashboard = ({
     initLeadMap
   );
   const [yearLevelMap, setYearLevelMap] = useState<{
-    [key: string]: iLuYearLevel;
+    [key: string]: ISynLuYearLevel;
   }>({});
   const [yearLevelCodes, setYearLevelCodes] = useState<string[]>([]);
   const [futureNextYearMap, setFutureNextYearMap] = useState<iMap>({});

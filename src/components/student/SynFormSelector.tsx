@@ -1,10 +1,10 @@
 import {iAutoCompleteSingle} from '../common/AutoComplete';
 import {useEffect, useState} from 'react';
 import {Spinner} from 'react-bootstrap';
-import iSynLuForm from '../../types/Synergetic/iSynLuForm';
+import iSynLuForm from '../../types/Synergetic/Lookup/iSynLuForm';
 import SelectBox from '../common/SelectBox';
 import Toaster from '../../services/Toaster';
-import SynLuFormService from '../../services/Synergetic/SynLuFormService';
+import SynLuFormService from '../../services/Synergetic/Lookup/SynLuFormService';
 
 type iSynFormSelector = {
   values?: iAutoCompleteSingle[] | string[];

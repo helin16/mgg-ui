@@ -2,7 +2,7 @@ import iSynVFutureStudent from '../../types/Synergetic/iSynVFutureStudent';
 import AppService, {iConfigParams} from '../AppService';
 import iPaginatedResult from '../../types/iPaginatedResult';
 import iVStudent from '../../types/Synergetic/iVStudent';
-import iLuYearLevel from '../../types/Synergetic/iLuYearLevel';
+import ISynLuYearLevel from '../../types/Synergetic/Lookup/iSynLuYearLevel';
 
 
 const endPoint = '/syn/vFutureStudent'
@@ -10,7 +10,7 @@ const getAll =  (params: iConfigParams = {}): Promise<iPaginatedResult<iSynVFutu
   return AppService.get(endPoint, params).then(resp => resp.data);
 };
 
-const mapFutureStudentToCurrent = (student: iSynVFutureStudent, yLevelMap: {[key: string]: iLuYearLevel} = {}): iVStudent => {
+const mapFutureStudentToCurrent = (student: iSynVFutureStudent, yLevelMap: {[key: string]: ISynLuYearLevel} = {}): iVStudent => {
   const futureYearLevel = `${student.FutureYearLevel}`;
   return {
     StudentID: student.FutureID,

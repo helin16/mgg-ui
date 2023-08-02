@@ -8,7 +8,7 @@ import BTLockDownService from '../../../../services/BudgetTracker/BTLockDownServ
 import iBTLockDown from '../../../../types/BudgetTacker/iBTLockDown';
 import moment from 'moment-timezone';
 import {BT_ADMIN_OPTION_USERS, iBTAdminOptions} from './BTAdminOptionsPanel';
-import CommunityService from '../../../../services/Synergetic/CommunityService';
+import SynCommunityService from '../../../../services/Synergetic/Community/SynCommunityService';
 import iSynCommunity from '../../../../types/Synergetic/iSynCommunity';
 import BTLockDownCreatePopup from './BTLockDownCreatePopup';
 import MathHelper from '../../../../helper/MathHelper';
@@ -36,7 +36,7 @@ const BTLockDownAdminPanel = ({onSelectAdminModule}: iBTLockDownAdminPanel) => {
           ids.push(biLockDown.updated_by_id);
         })
 
-        const communityProfiles = await CommunityService.getCommunityProfiles({
+        const communityProfiles = await SynCommunityService.getCommunityProfiles({
           where: JSON.stringify({
             ID: _.uniq(ids),
           })

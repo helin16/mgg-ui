@@ -2,12 +2,12 @@ import iSchoolCensusStudentData from './iSchoolCensusStudentData';
 import ReactTableWithFixedColumns from '../../../../components/common/ReactTableWithFixedColumns';
 import * as _ from 'lodash';
 import {useEffect, useState} from 'react';
-import iLuYearLevel from '../../../../types/Synergetic/iLuYearLevel';
+import ISynLuYearLevel from '../../../../types/Synergetic/Lookup/iSynLuYearLevel';
 import styled from 'styled-components';
 import SchoolCensusDataPopupBtn from './SchoolCensusDataPopupBtn';
 
 type iSchoolCensusTable = {
-  luYearLevels: iLuYearLevel[];
+  luYearLevels: ISynLuYearLevel[];
   records: iSchoolCensusStudentData[];
 }
 

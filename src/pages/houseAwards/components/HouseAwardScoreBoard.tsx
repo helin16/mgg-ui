@@ -1,4 +1,4 @@
-import iSynLuHouse from '../../../types/Synergetic/iSynLuHouse';
+import iSynLuHouse from '../../../types/Synergetic/Lookup/iSynLuHouse';
 import iHouseAwardEventType from '../../../types/HouseAwards/iHouseAwardEventType';
 import styled from 'styled-components';
 import {HOUSE_COLOR_GR, HOUSE_COLOR_KT, HOUSE_COLOR_MC, HOUSE_COLOR_SM} from '../../../components/HouseAwards/styles';
@@ -8,9 +8,9 @@ import {RootState} from '../../../redux/makeReduxStore';
 import {useEffect, useState} from 'react';
 import {Alert, Col, Row, Spinner} from 'react-bootstrap';
 import Toaster from '../../../services/Toaster';
-import {CAMPUS_CODE_SENIOR} from '../../../types/Synergetic/iLuCampus';
-import iLuYearLevel from '../../../types/Synergetic/iLuYearLevel';
-import SynLuYearLevelService from '../../../services/Synergetic/SynLuYearLevelService';
+import {CAMPUS_CODE_SENIOR} from '../../../types/Synergetic/Lookup/iSynLuCampus';
+import ISynLuYearLevel from '../../../types/Synergetic/Lookup/iSynLuYearLevel';
+import SynLuYearLevelService from '../../../services/Synergetic/Lookup/SynLuYearLevelService';
 import HouseAwardScoreTable from './HouseAwardScoreTable';
 import HouseAwardEventService from '../../../services/HouseAwards/HouseAwardEventService';
 import iHouseAwardEvent from '../../../types/HouseAwards/iHouseAwardEvent';
@@ -135,7 +135,7 @@ const HouseAwardScoreBoard = ({
   const currentFileYear = Number(user?.SynCurrentFileSemester?.FileYear || moment().year());
 
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedYearLevel, setSelectedYearLevel] = useState<iLuYearLevel | null>(null);
+  const [selectedYearLevel, setSelectedYearLevel] = useState<ISynLuYearLevel | null>(null);
   const [events, setEvents] = useState<iHouseAwardEvent[]>([]);
   const [selectedFileYear, setSelectedFileYear] = useState(currentFileYear);
   const [isAdmin, setIsAdmin] = useState(false);
