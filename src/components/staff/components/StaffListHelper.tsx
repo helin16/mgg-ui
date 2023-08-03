@@ -1,4 +1,4 @@
-import { iTableColumn } from "../../common/Table";
+import {iTableColumn, TABLE_COLUMN_FORMAT_BOOLEAN, TABLE_COLUMN_FORMAT_DATE} from "../../common/Table";
 import iVStaff from "../../../types/Synergetic/iVStaff";
 import moment from "moment-timezone";
 import iSynStaffJobPosition from "../../../types/Synergetic/Staff/iSynStaffJobPosition";
@@ -14,7 +14,7 @@ export type iCommunitySkillMap = { [key: number]: iSynCommunitySkill[] };
 export type iPositionStaffIdMap = { [key: number]: number[] };
 export type iStaffMap = { [key: number]: iVStaff };
 
-type iGetListColumns = {
+export type iGetListColumns = {
   luSkills: iSynLuSkill[];
   staffJobPosMap: iStaffJobPositionMap;
   skillMap: iCommunitySkillMap;
@@ -65,6 +65,13 @@ const getReportsToStaffsFromJobPosition = (
     .filter(staff => staff !== null);
 };
 
+export const COLUMN_KEY_PREFIX_JP = 'JP-';
+export const COLUMN_KEY_PREFIX_JP_POS = 'JP-POS-';
+export const COLUMN_KEY_PREFIX_JP_REPORTS_TO = 'JP-RPT-TO-';
+export const COLUMN_KEY_PREFIX_JP_REPORTS_TO_STAFF = 'JP-RPT-TO-STAFF-';
+export const COLUMN_GROUP_JOB_POSITION = 'Job Position';
+export const COLUMN_GROUP_SKILL_EXPIRY_DATE = 'Skill Expiry Date';
+
 const getListColumns = ({
   luSkills,
   staffJobPosMap,
@@ -74,87 +81,89 @@ const getListColumns = ({
 }: iGetListColumns): iTableColumn[] => [
   {
     isDefault: true,
-    key: "ID",
+    key: "StaffID",
     header: "Staff ID",
     isSelectable: false,
     cell: (column: iTableColumn, data: iVStaff) => `${data.StaffID}`
   },
   {
     isDefault: true,
-    key: "name",
+    key: "StaffNameInternal",
     header: "Staff Name",
     cell: (column: iTableColumn, data: iVStaff) => `${data.StaffNameInternal}`
   },
   {
     isDefault: true,
-    key: "code",
+    key: "SchoolStaffCode",
     header: "Staff Code",
     cell: (column: iTableColumn, data: iVStaff) => `${data.SchoolStaffCode}`
   },
   {
-    key: "GivenName",
+    key: "StaffGiven1",
     header: "Given Name",
     cell: (column: iTableColumn, data: iVStaff) => `${data.StaffGiven1}`
   },
   {
-    key: "GivenName2",
+    key: "StaffGiven2",
     header: "Given Name 2",
     cell: (column: iTableColumn, data: iVStaff) => `${data.StaffGiven2}`
   },
   {
-    key: "Surname",
+    key: "StaffSurname",
     header: "Surname",
     cell: (column: iTableColumn, data: iVStaff) => `${data.StaffSurname}`
   },
   {
-    key: "CategoryCode",
+    key: "StaffCategory",
     header: "Category Code",
     cell: (column: iTableColumn, data: iVStaff) => `${data.StaffCategory}`
   },
   {
     isDefault: true,
-    key: "DepartmentCode",
+    key: "StaffDepartment",
     header: "Department",
     cell: (column: iTableColumn, data: iVStaff) => `${data.StaffDepartment}`
   },
   {
     isDefault: true,
-    key: "CategoryDescription",
+    key: "StaffCategoryDescription",
     header: "Category Description",
     cell: (column: iTableColumn, data: iVStaff) =>
       `${data.StaffCategoryDescription}`
   },
   {
-    key: "CategoryType",
+    key: "StaffCategoryType",
     header: "Category Type",
     cell: (column: iTableColumn, data: iVStaff) => `${data.StaffCategoryType}`
   },
   {
     isDefault: true,
-    key: "OccupEmail",
+    key: "StaffOccupEmail",
     header: "Occup. Email",
     cell: (column: iTableColumn, data: iVStaff) => `${data.StaffOccupEmail}`
   },
   {
-    key: "Campus Code",
+    key: "StaffCampus",
     header: "Campus Code",
     cell: (column: iTableColumn, data: iVStaff) => `${data.StaffCampus}`
   },
   {
-    key: "Campus Description",
-    header: "Campus Descr.",
+    key: "StaffCampusDescription",
+    header: "Campus",
     cell: (column: iTableColumn, data: iVStaff) =>
       `${data.StaffCampusDescription}`
   },
   {
     key: "ActiveFlag",
-    header: "Is Active",
+    header: "Active Flag",
+    format: TABLE_COLUMN_FORMAT_BOOLEAN,
     cell: (column: iTableColumn, data: iVStaff) =>
       `${data.ActiveFlag === true ? "Y" : "N"}`
   },
   {
     key: "StartDate",
     header: "Start Date",
+    format: TABLE_COLUMN_FORMAT_DATE,
     cell: (column: iTableColumn, data: iVStaff) =>
       `${
         `${data.StartDate || ""}`.trim() === ""
@@ -163,8 +172,9 @@ const getListColumns = ({
       }`
   },
   {
-    key: "EndDate",
+    key: "LeavingDate",
     header: "Leaving Date",
+    format: TABLE_COLUMN_FORMAT_DATE,
     cell: (column: iTableColumn, data: iVStaff) =>
       `${
         `${data.LeavingDate || ""}`.trim() === ""
@@ -173,9 +183,9 @@ const getListColumns = ({
       }`
   },
   {
-    key: "JobPositionCode",
+    key: `${COLUMN_KEY_PREFIX_JP_POS}JobPositionCode`,
     header: "Position Code",
-    group: "Job Position",
+    group: COLUMN_GROUP_JOB_POSITION,
     cell: (column: iTableColumn, data: iVStaff) => {
       const jobPositions = getJobPositionFromMap(data, staffJobPosMap);
       return (
@@ -197,9 +207,9 @@ const getListColumns = ({
     }
   },
   {
-    key: "JobPositionDescription",
+    key: `${COLUMN_KEY_PREFIX_JP_POS}Description`,
     header: "Position Description",
-    group: "Job Position",
+    group: COLUMN_GROUP_JOB_POSITION,
     cell: (column: iTableColumn, data: iVStaff) => {
       const jobPositions = getJobPositionFromMap(data, staffJobPosMap);
       return (
@@ -221,32 +231,10 @@ const getListColumns = ({
     }
   },
   {
-    key: "JobPositionAwardLevelCode",
-    header: "Award Level Code",
-    group: "Job Position",
-    cell: (column: iTableColumn, data: iVStaff) => {
-      const jobPositions = getJobPositionFromMap(data, staffJobPosMap);
-      return (
-        <td key={column.key} className={"job-pos-col"}>
-          {jobPositions.map((jobPosition, index) => {
-            const string = jobPosition.AwardLevelCode || "&nbsp;";
-            return (
-              <div
-                key={index}
-                dangerouslySetInnerHTML={{
-                  __html: string
-                }}
-              />
-            );
-          })}
-        </td>
-      );
-    }
-  },
-  {
-    key: "JobPositionStartDate",
+    key: `${COLUMN_KEY_PREFIX_JP}StartDate`,
     header: "Position Start",
-    group: "Job Position",
+    group: COLUMN_GROUP_JOB_POSITION,
+    format: TABLE_COLUMN_FORMAT_DATE,
     cell: (column: iTableColumn, data: iVStaff) => {
       const jobPositions = getJobPositionFromMap(data, staffJobPosMap);
       return (
@@ -272,9 +260,10 @@ const getListColumns = ({
     }
   },
   {
-    key: "JobPositionEndDate",
+    key: `${COLUMN_KEY_PREFIX_JP}EndDate`,
     header: "Position End",
-    group: "Job Position",
+    group: COLUMN_GROUP_JOB_POSITION,
+    format: TABLE_COLUMN_FORMAT_DATE,
     cell: (column: iTableColumn, data: iVStaff) => {
       const jobPositions = getJobPositionFromMap(data, staffJobPosMap);
       return (
@@ -307,9 +296,9 @@ const getListColumns = ({
     }
   },
   {
-    key: "FTE",
+    key: `${COLUMN_KEY_PREFIX_JP}FTE`,
     header: "FTE",
-    group: "Job Position",
+    group: COLUMN_GROUP_JOB_POSITION,
     cell: (column: iTableColumn, data: iVStaff) => {
       const jobPositions = getJobPositionFromMap(data, staffJobPosMap);
       return (
@@ -329,9 +318,9 @@ const getListColumns = ({
     }
   },
   {
-    key: "CurrentLevel",
+    key: `${COLUMN_KEY_PREFIX_JP}AwardLevelCode`,
     header: "Current Level",
-    group: "Job Position",
+    group: COLUMN_GROUP_JOB_POSITION,
     cell: (column: iTableColumn, data: iVStaff) => {
       const jobPositions = getJobPositionFromMap(data, staffJobPosMap);
       return (
@@ -351,9 +340,9 @@ const getListColumns = ({
     }
   },
   {
-    key: "ReportsToPositionCode",
+    key: `${COLUMN_KEY_PREFIX_JP_REPORTS_TO}JobPositionCode`,
     header: "Reports To Position Code",
-    group: "Job Position",
+    group: COLUMN_GROUP_JOB_POSITION,
     cell: (column: iTableColumn, data: iVStaff) => {
       const jobPositions = getJobPositionFromMap(data, staffJobPosMap);
       return (
@@ -374,9 +363,9 @@ const getListColumns = ({
     }
   },
   {
-    key: "ReportsToPosition",
+    key: `${COLUMN_KEY_PREFIX_JP_REPORTS_TO}Description`,
     header: "Reports To Position",
-    group: "Job Position",
+    group: COLUMN_GROUP_JOB_POSITION,
     cell: (column: iTableColumn, data: iVStaff) => {
       const jobPositions = getJobPositionFromMap(data, staffJobPosMap);
       return (
@@ -397,9 +386,9 @@ const getListColumns = ({
     }
   },
   {
-    key: "ReportsTo",
+    key: `${COLUMN_KEY_PREFIX_JP_REPORTS_TO_STAFF}StaffNameInternal`,
     header: "Reports To",
-    group: "Job Position",
+    group: COLUMN_GROUP_JOB_POSITION,
     cell: (column: iTableColumn, data: iVStaff) => {
       const jobPositions = getJobPositionFromMap(data, staffJobPosMap);
       return (
@@ -427,9 +416,9 @@ const getListColumns = ({
     }
   },
   {
-    key: "ReportsToEmail",
+    key: `${COLUMN_KEY_PREFIX_JP_REPORTS_TO_STAFF}StaffOccupEmail`,
     header: "Reports To Email",
-    group: "Job Position",
+    group: COLUMN_GROUP_JOB_POSITION,
     cell: (column: iTableColumn, data: iVStaff) => {
       const jobPositions = getJobPositionFromMap(data, staffJobPosMap);
       return (
@@ -462,7 +451,7 @@ const getListColumns = ({
       key: `Expiry-${luSkill.Code}`,
       header: luSkill.Code,
       name: `${luSkill.Code} - ${luSkill.Description}`,
-      group: "Skill Expiry Date",
+      group: COLUMN_GROUP_SKILL_EXPIRY_DATE,
       cell: (column: iTableColumn, data: iVStaff) => {
         const communitySkills = (data.StaffID in skillMap
           ? skillMap[data.StaffID]
@@ -544,6 +533,9 @@ const genExportFile = (selectedColumns: iTableColumn[], data: iVStaff[], getColM
 }
 
 const StaffListHelper = {
+  getJobPositionFromMap,
+  getReportsToPosFromJobPosition,
+  getReportsToStaffsFromJobPosition,
   getListColumns,
   genExportFile
 };

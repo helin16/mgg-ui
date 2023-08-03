@@ -4,7 +4,7 @@ import iVStaff from "../../types/Synergetic/iVStaff";
 import SynVStaffService from "../../services/Synergetic/SynVStaffService";
 import Toaster from "../../services/Toaster";
 import PageLoadingSpinner from "../common/PageLoadingSpinner";
-import Table, { iTableColumn } from "../common/Table";
+import { iTableColumn } from "../common/Table";
 import StaffListHelper, {
   iCommunitySkillMap,
   iPositionStaffIdMap,
@@ -36,31 +36,13 @@ import * as _ from "lodash";
 import iSynStaffJobPosition from "../../types/Synergetic/Staff/iSynStaffJobPosition";
 import iSynCommunitySkill from "../../types/Synergetic/Community/iSynCommunitySkill";
 import { STORAGE_COLUMN_KEY_STAFF_LIST } from "../../services/LocalStorageService";
-import { lightBlue } from "../../AppWrapper";
 import CSVExportBtn from "../form/CSVExportBtn";
 import iSynLuSkill from '../../types/Synergetic/Lookup/iSynLuSkill';
+import StaffListTable from './components/StaffListTable';
 
 const Wrapper = styled.div`
-  .staff-table {
-    tbody {
-      tr:hover {
-        background-color: ${lightBlue};
-      }
-    }
-  }
-  .job-pos-col {
-    padding: 0px;
-    div {
-      padding: 4px;
-      border-top: 1px #ccc solid;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      //max-width: 120px;
-      &:first-child {
-        border-top: none;
-      }
-    }
+  .staff-list-table {
+    max-height: calc(100vh - 11rem);
   }
 `;
 
@@ -317,16 +299,20 @@ const StaffListPanel = ({ showSearchPanel = true }: iStaffListPanel) => {
           <FlexContainer className={"with-gap"}>
             <CSVExportBtn
               // @ts-ignore
-              fetchingFnc={() => new Promise(resolve => {
-                resolve(staffList)
-              })}
-              downloadFnc={() => StaffListHelper.genExportFile(selectedColumns, staffList, {
-                luSkills: skills,
-                staffJobPosMap: staffJobPosMap,
-                skillMap: skillsMap,
-                staffMap,
-                positionStaffIdMap: positionStaffIdMap,
-              })}
+              fetchingFnc={() =>
+                new Promise(resolve => {
+                  resolve(staffList);
+                })
+              }
+              downloadFnc={() =>
+                StaffListHelper.genExportFile(selectedColumns, staffList, {
+                  luSkills: skills,
+                  staffJobPosMap: staffJobPosMap,
+                  skillMap: skillsMap,
+                  staffMap,
+                  positionStaffIdMap: positionStaffIdMap
+                })
+              }
               variant={"link"}
               size={"sm"}
             />
@@ -339,12 +325,14 @@ const StaffListPanel = ({ showSearchPanel = true }: iStaffListPanel) => {
             />
           </FlexContainer>
         </FlexContainer>
-        <Table
-          columns={selectedColumns}
-          rows={staffList || []}
-          hover
-          striped
-          className={"staff-table"}
+        <StaffListTable
+          staffList={staffList}
+          selectedColumns={selectedColumns}
+          staffJobPosMap={staffJobPosMap}
+          luSkills={skills}
+          skillMap={skillsMap}
+          staffMap={staffMap}
+          positionStaffIdMap={positionStaffIdMap}
         />
       </>
     );

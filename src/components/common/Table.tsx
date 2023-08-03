@@ -7,9 +7,13 @@ import Button from 'react-bootstrap/Button';
 import MathHelper from '../../helper/MathHelper';
 import * as _ from 'lodash';
 
+export const TABLE_COLUMN_FORMAT_DATE = 'Date';
+export const TABLE_COLUMN_FORMAT_BOOLEAN = 'Boolean';
+
 export type iTableColumn = {
   key: string;
   isDefault?: boolean;
+  format?: string;
   group?: string;
   name?: string;
   isSelectable?: boolean;
