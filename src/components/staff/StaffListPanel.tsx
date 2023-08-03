@@ -49,7 +49,9 @@ const Wrapper = styled.div`
 type iStaffListPanel = {
   showSearchPanel?: boolean;
 };
+
 const CHUNK_SIZE = 100;
+
 const StaffListPanel = ({ showSearchPanel = true }: iStaffListPanel) => {
   const [staffList, setStaffList] = useState<iVStaff[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
