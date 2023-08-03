@@ -119,6 +119,7 @@ const SchoolCensusDataPanel = () => {
         where: JSON.stringify({
           ID: records.map(record => record.ID),
           DisabilityAdjustmentLevelCode: DISABILITY_ADJUSTMENT_LEVEL_CODES_FOR_CENSUS_REPORT,
+          IncludeInExportFlag: true,
         }),
         perPage: 9999,
         sort: 'CurrentDisabilityFlag:ASC',
