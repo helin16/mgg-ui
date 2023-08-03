@@ -319,6 +319,7 @@ const StaffListPanel = ({ showSearchPanel = true }: iStaffListPanel) => {
               size={"sm"}
             />
             <ColumnPopupSelector
+              variant={'link'}
               localStorageKey={STORAGE_COLUMN_KEY_STAFF_LIST}
               columns={columns}
               selectedColumns={selectedColumns}

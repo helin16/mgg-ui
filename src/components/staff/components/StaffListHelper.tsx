@@ -488,26 +488,52 @@ const getListColumns = ({
 ];
 
 const genExportFile = (selectedColumns: iTableColumn[], data: iVStaff[], getColMaps: iGetListColumns) => {
+  const {skillMap} = getColMaps;
   const titleRows: string[][] = [selectedColumns.map(col => {
     return typeof col.header !== 'function' ? `${col.header}` : `${col.key}`
   })];
 
-  let rowIndex = 0;
+  const expiredDateCells: { rowIndex: number; colIndex: number }[] = [];
+  let rowIndex = 1;
   const rows: string[][] = [];
   data.forEach(staff => {
     const row: string[] = [];
-    selectedColumns.forEach(col => {
-      if (typeof col.cell !== 'function') {
-        row.push('');
-        return;
-      }
+    selectedColumns.forEach((col, colIndex) => {
+      // @ts-ignore
       const cell = col.cell(col, staff);
       if (typeof cell === 'string') {
         row.push(`${cell}`);
         return;
       }
 
-      return '';
+      if (`${col.group || ""}`.trim() === COLUMN_GROUP_SKILL_EXPIRY_DATE) {
+        const staffID = staff.StaffID;
+        const communitySkills = (staffID in skillMap
+            ? skillMap[staffID]
+            : []
+        ).filter(
+          communitySkill =>
+            `${communitySkill.SkillCode}`.trim() === `${col.header}`.trim()
+        );
+        if (communitySkills.length <= 0) {
+          row.push(``);
+          return;
+        }
+
+        const latest = communitySkills.sort((skill1, skill2) =>
+          `${skill1.ExpiryDate || ""}` > `${skill2.ExpiryDate || ""}` ? -1 : 1
+        );
+        const expiryDateString = `${latest[0].ExpiryDate || ""}`.trim();
+        if (expiryDateString !== '' && moment(expiryDateString).isBefore(moment())) {
+          expiredDateCells.push({rowIndex: rowIndex, colIndex: colIndex});
+        }
+        const dateString = `${latest[0].ExpiryDate || ""}`.trim();
+        row.push(dateString === "" ? "" : moment(dateString).format("DD/MM/YYYY"));
+        return;
+      }
+
+      row.push('');
+      return ;
     })
     rows.push(row);
     rowIndex = MathHelper.add(rowIndex, 1);
@@ -522,6 +548,19 @@ const genExportFile = (selectedColumns: iTableColumn[], data: iVStaff[], getColM
       font: { sz: 12, bold: true, color: { rgb: "FFFFFF" } },
       fill: {
         fgColor: { rgb: '0066ff' }, // RGB color code, e.g., 'FFFF00' for yellow
+        patternType: 'solid',
+      },
+    }
+  })
+
+  expiredDateCells.forEach(cell => {
+    const rowRef = XLSX.utils.encode_row(cell.rowIndex);
+    const colRef = XLSX.utils.encode_col(cell.colIndex);
+    console.log('ref', `${colRef}${rowRef}`);
+    ws[`${colRef}${rowRef}`].s = {
+      font: { color: { rgb: "FFFFFF" } },
+      fill: {
+        fgColor: { rgb: 'DC3545' }, // RGB color code, e.g., 'FFFF00' for yellow
         patternType: 'solid',
       },
     }
