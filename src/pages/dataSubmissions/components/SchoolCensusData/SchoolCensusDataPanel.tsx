@@ -125,7 +125,7 @@ const SchoolCensusDataPanel = () => {
       });
       const nccdMap = (nccds.data || [])
         .filter(nccd => {
-          if (`${nccd.StartDate || ''}`.trim() === '' || moment(nccd.StartDate).isSameOrAfter(moment(startEndDataString.endDateStr))) {
+          if (`${nccd.StartDate || ''}`.trim() !== '' && moment(nccd.StartDate).isSameOrAfter(moment(startEndDataString.endDateStr))) {
             return false;
           }
           if (`${nccd.EndDate || ''}`.trim() !== '' && moment(nccd.EndDate).isBefore(moment(startEndDataString.endDateStr))) {
