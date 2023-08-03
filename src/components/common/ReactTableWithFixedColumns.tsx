@@ -29,6 +29,7 @@ const Wrapper = styled.div`
     .th {
       font-weight: bold;
       background-color: white;
+      line-height: 1 !important;
       &[data-sticky-last-left-td] {
         position: sticky !important;
       }
