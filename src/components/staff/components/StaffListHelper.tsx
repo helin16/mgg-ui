@@ -1,10 +1,13 @@
-import { iTableColumn } from "../common/Table";
-import iVStaff from "../../types/Synergetic/iVStaff";
+import { iTableColumn } from "../../common/Table";
+import iVStaff from "../../../types/Synergetic/iVStaff";
 import moment from "moment-timezone";
-import iSynStaffJobPosition from "../../types/Synergetic/Staff/iSynStaffJobPosition";
-import iSynCommunitySkill from "../../types/Synergetic/Community/iSynCommunitySkill";
-import iSynLuSkill from "../../types/Synergetic/Lookup/iSynLuSkill";
-import iSynJobPosition from "../../types/Synergetic/Staff/iSynJobPosition";
+import iSynStaffJobPosition from "../../../types/Synergetic/Staff/iSynStaffJobPosition";
+import iSynCommunitySkill from "../../../types/Synergetic/Community/iSynCommunitySkill";
+import iSynLuSkill from "../../../types/Synergetic/Lookup/iSynLuSkill";
+import iSynJobPosition from "../../../types/Synergetic/Staff/iSynJobPosition";
+import * as XLSX from 'sheetjs-style';
+import * as _ from 'lodash';
+import MathHelper from '../../../helper/MathHelper';
 
 export type iStaffJobPositionMap = { [key: number]: iSynStaffJobPosition[] };
 export type iCommunitySkillMap = { [key: number]: iSynCommunitySkill[] };
@@ -495,8 +498,54 @@ const getListColumns = ({
   })
 ];
 
+const genExportFile = (selectedColumns: iTableColumn[], data: iVStaff[], getColMaps: iGetListColumns) => {
+  const titleRows: string[][] = [selectedColumns.map(col => {
+    return typeof col.header !== 'function' ? `${col.header}` : `${col.key}`
+  })];
+
+  let rowIndex = 0;
+  const rows: string[][] = [];
+  data.forEach(staff => {
+    const row: string[] = [];
+    selectedColumns.forEach(col => {
+      if (typeof col.cell !== 'function') {
+        row.push('');
+        return;
+      }
+      const cell = col.cell(col, staff);
+      if (typeof cell === 'string') {
+        row.push(`${cell}`);
+        return;
+      }
+
+      return '';
+    })
+    rows.push(row);
+    rowIndex = MathHelper.add(rowIndex, 1);
+  });
+
+
+  const ws = XLSX.utils.aoa_to_sheet([...titleRows, ...rows]);
+
+  _.range(0, selectedColumns.length).forEach(colIndex => {
+    const colRef = XLSX.utils.encode_col(colIndex);
+    ws[`${colRef}1`].s = {
+      font: { sz: 12, bold: true, color: { rgb: "FFFFFF" } },
+      fill: {
+        fgColor: { rgb: '0066ff' }, // RGB color code, e.g., 'FFFF00' for yellow
+        patternType: 'solid',
+      },
+    }
+  })
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, `${moment().format('DD_MMM_YYYY_HH_mm_ss')}`);
+  XLSX.writeFile(wb, `Staff_list_${moment().format('YYYY_MM_DD_HH_mm_ss')}.xlsx`);
+}
+
 const StaffListHelper = {
-  getListColumns
+  getListColumns,
+  genExportFile
 };
 
 export default StaffListHelper;

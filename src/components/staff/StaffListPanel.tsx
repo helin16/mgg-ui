@@ -5,7 +5,12 @@ import SynVStaffService from "../../services/Synergetic/SynVStaffService";
 import Toaster from "../../services/Toaster";
 import PageLoadingSpinner from "../common/PageLoadingSpinner";
 import Table, { iTableColumn } from "../common/Table";
-import StaffListHelper from "./StaffListHelper";
+import StaffListHelper, {
+  iCommunitySkillMap,
+  iPositionStaffIdMap,
+  iStaffJobPositionMap,
+  iStaffMap
+} from "./components/StaffListHelper";
 import SynStaffJobPositionService from "../../services/Synergetic/Staff/SynStaffJobPositionService";
 import {
   OP_AND,
@@ -31,7 +36,9 @@ import * as _ from "lodash";
 import iSynStaffJobPosition from "../../types/Synergetic/Staff/iSynStaffJobPosition";
 import iSynCommunitySkill from "../../types/Synergetic/Community/iSynCommunitySkill";
 import { STORAGE_COLUMN_KEY_STAFF_LIST } from "../../services/LocalStorageService";
-import {lightBlue} from '../../AppWrapper';
+import { lightBlue } from "../../AppWrapper";
+import CSVExportBtn from "../form/CSVExportBtn";
+import iSynLuSkill from '../../types/Synergetic/Lookup/iSynLuSkill';
 
 const Wrapper = styled.div`
   .staff-table {
@@ -66,6 +73,11 @@ const StaffListPanel = ({ showSearchPanel = true }: iStaffListPanel) => {
   const [isLoading, setIsLoading] = useState(false);
   const [columns, setColumns] = useState<iTableColumn[]>([]);
   const [selectedColumns, setSelectedColumns] = useState<iTableColumn[]>([]);
+  const [skills, setSkills] = useState<iSynLuSkill[]>([]);
+  const [staffJobPosMap, setStaffJobPosMap] = useState<iStaffJobPositionMap>({});
+  const [skillsMap, setSkillsMap] = useState<iCommunitySkillMap>({});
+  const [staffMap, setStaffMap] = useState<iStaffMap>({});
+  const [positionStaffIdMap, setPositionStaffIdMap] = useState<iPositionStaffIdMap>({});
   const [searchCriteria, setSearchCriteria] = useState<
     iStaffListSearchCriteria
   >({});
@@ -239,7 +251,7 @@ const StaffListPanel = ({ showSearchPanel = true }: iStaffListPanel) => {
             [key]: [...(key in map ? map[key] : []), communitySkill]
           };
         }, {});
-        const staffMap = staffs.reduce((map, staff) => {
+        const sfMap = staffs.reduce((map, staff) => {
           return {
             ...map,
             [staff.StaffID]: staff
@@ -249,12 +261,9 @@ const StaffListPanel = ({ showSearchPanel = true }: iStaffListPanel) => {
           luSkills,
           staffJobPosMap: sJobPosMap,
           skillMap: sSkillMap,
-          staffMap,
+          staffMap: sfMap,
           positionStaffIdMap: posStaffMap
         });
-
-        setColumns(columns);
-        setStaffList(Object.values(staffMap));
 
         const selectedCols = getSelectedColumnsFromLocalStorage(
           STORAGE_COLUMN_KEY_STAFF_LIST,
@@ -265,6 +274,14 @@ const StaffListPanel = ({ showSearchPanel = true }: iStaffListPanel) => {
             ? selectedCols
             : columns.filter(column => column.isDefault === true)
         );
+
+        setColumns(columns);
+        setStaffList(Object.values(sfMap));
+        setSkills(luSkills);
+        setStaffJobPosMap(sJobPosMap);
+        setSkillsMap(sSkillMap);
+        setStaffMap(sfMap);
+        setPositionStaffIdMap(posStaffMap);
       })
       .catch(err => {
         if (isCanceled) {
@@ -297,13 +314,30 @@ const StaffListPanel = ({ showSearchPanel = true }: iStaffListPanel) => {
       <>
         <FlexContainer className={"justify-content-between"}>
           <h5>{staffList?.length || 0} Staff</h5>
-          <ColumnPopupSelector
-            localStorageKey={STORAGE_COLUMN_KEY_STAFF_LIST}
-            columns={columns}
-            selectedColumns={selectedColumns}
-            size={"sm"}
-            onColumnSelected={cols => setSelectedColumns(cols)}
-          />
+          <FlexContainer className={"with-gap"}>
+            <CSVExportBtn
+              // @ts-ignore
+              fetchingFnc={() => new Promise(resolve => {
+                resolve(staffList)
+              })}
+              downloadFnc={() => StaffListHelper.genExportFile(selectedColumns, staffList, {
+                luSkills: skills,
+                staffJobPosMap: staffJobPosMap,
+                skillMap: skillsMap,
+                staffMap,
+                positionStaffIdMap: positionStaffIdMap,
+              })}
+              variant={"link"}
+              size={"sm"}
+            />
+            <ColumnPopupSelector
+              localStorageKey={STORAGE_COLUMN_KEY_STAFF_LIST}
+              columns={columns}
+              selectedColumns={selectedColumns}
+              size={"sm"}
+              onColumnSelected={cols => setSelectedColumns(cols)}
+            />
+          </FlexContainer>
         </FlexContainer>
         <Table
           columns={selectedColumns}
