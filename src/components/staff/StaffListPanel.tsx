@@ -42,7 +42,7 @@ import StaffListTable from './components/StaffListTable';
 
 const Wrapper = styled.div`
   .staff-list-table {
-    max-height: calc(100vh - 11rem);
+    max-height: calc(100vh - 20rem);
   }
 `;
 
