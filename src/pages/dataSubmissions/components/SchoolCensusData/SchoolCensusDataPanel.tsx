@@ -300,6 +300,7 @@ const SchoolCensusDataPanel = () => {
             <div>- <b>School Days</b>: The days that students are supposed to be at school.</div>
             <div>- <b>Total students</b>: list of all students who are here during the Census Reference Period.</div>
             <div>- <b>International</b>: list of students who are marked as <u>Full Fee</u>.</div>
+            <div>- <b>With Visa</b>: list of students who are marked as NOT <u>Full Fee</u>, not born in Australia and not having Australian Nationality.</div>
             <div>- <b>NCCD</b>: list of students who have disabilities level in {DISABILITY_ADJUSTMENT_LEVEL_CODES_FOR_CENSUS_REPORT.map((code) => <React.Fragment key={code}> <u>{code}</u></React.Fragment>)}.</div>
             <div>- <b>Around</b>: list of students who were here and left before End of Census Reference Period.</div>
             <div>- <b>Total Absence</b>: list of students who are absent the entire Census Reference Period.</div>

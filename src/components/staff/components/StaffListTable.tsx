@@ -44,7 +44,7 @@ const StaffListTable = ({
   staffMap,
 }: iStaffListTable) => {
   const [columns, setColumns] = useState<any[]>([]);
-  const [, setHasJPColumns] = useState(false);
+  const [hasJPColumns, setHasJPColumns] = useState(false);
 
   const getDefaultColumn = (column: iTableColumn) => ({
     Header: column.header,
@@ -208,14 +208,16 @@ const StaffListTable = ({
   };
 
   useEffect(() => {
+    const staffDetailsColumns = selectedColumns.map(column => getStaffColumns(column)).filter(col => col !== null);
     const jpColumns = selectedColumns.map(column => getJobPositionColumns(column)).filter(col => col !== null);
+    const skillExpiryDateColumns = selectedColumns.map(column => getSkillExpiryDateColumns(column)).filter(col => col !== null);
     setHasJPColumns(jpColumns.length > 0);
     setColumns(
       [
-        ...selectedColumns.map(column => getStaffColumns(column)),
+        ...staffDetailsColumns,
         ...jpColumns,
-        ...selectedColumns.map(column => getSkillExpiryDateColumns(column))
-      ].filter(col => col !== null)
+        ...skillExpiryDateColumns
+      ]
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedColumns]);
@@ -230,7 +232,14 @@ const StaffListTable = ({
         htmlId={tableHtmlId}
         hover
         className={`staff-list-table ${className || ""}`}
-        data={staffList}
+        data={staffList
+          .map(staff => {
+            if (hasJPColumns !== true || (!(staff.StaffID in staffJobPosMap)) || !Array.isArray(staffJobPosMap[staff.StaffID]) || staffJobPosMap[staff.StaffID].length <= 0) {
+              return [staff];
+            }
+            return staffJobPosMap[staff.StaffID].map(sJP => ({...staff, sJPSeq: sJP.StaffJobPositionsSeq}));
+          })
+          .reduce((arr: iVStaff[], staffs) => [...arr, ...staffs], [])}
         columns={columns}
       />
     </Wrapper>

@@ -82,6 +82,9 @@ const SchoolCensusDataSummaryDiv = ({records, unfilteredStudentRecords, startAnd
       international: records.filter(record => record.isInternationalStudent === true),
       disability: records.filter(record => `${record.nccdStatusAdjustmentLevel}`.trim() !== ''),
       withVisa: records.filter(record => {
+        if (record.isInternationalStudent === true) {
+          return false;
+        }
         // any student born in Australia will be filtered out, requested by Kylie on 1st Aug 2023
         if (`${record.studentCountryOfBirthCode || ''}`.trim() === SYN_COUNTRY_CODE_AUSTRALIA) {
           return false;
