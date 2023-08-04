@@ -52,6 +52,7 @@ const StudentAttendanceRateReport = () => {
     EndDate: user?.SynCurrentFileSemester?.EndDate || moment().toISOString()
   };
   const [isSearching, setIsSearching] = useState(false);
+  const [isFetchingSchoolDays, setIsFetchingSchoolDays] = useState(false);
   const [watchingRate, setWatchingRate] = useState(80);
   const [loadingPercentage, setLoadingPercentage] = useState(0);
   const [searchingDateRange, setSearchingDateRange] = useState(initDateRange);
@@ -91,7 +92,7 @@ const StudentAttendanceRateReport = () => {
       return;
     }
 
-    setIsSearching(true);
+    setIsFetchingSchoolDays(true);
     let isCanceled = false;
     Promise.all([
       SynAttendanceMasterService.getAll(
@@ -152,7 +153,7 @@ const StudentAttendanceRateReport = () => {
         if (isCanceled) {
           return;
         }
-        setIsSearching(false);
+        setIsFetchingSchoolDays(false);
       });
     return () => {
       isCanceled = true;
@@ -187,14 +188,7 @@ const StudentAttendanceRateReport = () => {
                     searchingDateRange.StartDate,
                     searchingDateRange.EndDate
                   ]
-                },
-                [OP_OR]: searchingFileSemesterStrs.map(semStr => {
-                  const [fileYear, fileSemester] = semStr.split("-");
-                  return {
-                    FileYear: fileYear,
-                    FileSemester: fileSemester
-                  };
-                })
+                }
               }),
               perPage: 9999999,
               sort: 'AttendanceDate:ASC,AttendancePeriod:ASC'
@@ -279,6 +273,7 @@ const StudentAttendanceRateReport = () => {
                 "StudentForm",
                 "StudentStatus",
                 "StudentStatusDescription",
+                "StudentEntryDate",
                 "StudentLeavingDate",
                 "StudentIsPastFlag"
               ])
@@ -308,6 +303,17 @@ const StudentAttendanceRateReport = () => {
       } = {};
       attendanceData.forEach(row => {
         const studentId = row.ID;
+        if (!(studentId in stuDataMap)) {
+          return;
+        }
+        // @ts-ignore
+        const student = stuDataMap[studentId];
+        if (`${student.StudentEntryDate || ''}`.trim() !== '' && moment(row.AttendanceDate).isBefore(moment(student.StudentEntryDate))) {
+          return;
+        }
+        if (`${student.StudentLeavingDate || ''}`.trim() !== '' && moment(row.AttendanceDate).isAfter(moment(student.StudentLeavingDate))) {
+          return;
+        }
         if (!(studentId in attendanceRateMap)) {
           attendanceRateMap[studentId] = { total: 0, attended: 0 };
         }
@@ -358,6 +364,12 @@ const StudentAttendanceRateReport = () => {
   };
 
   const getContent = () => {
+    if (isFetchingSchoolDays === true) {
+      return <PageLoadingSpinner
+        text={<h5>Calculating School Days...</h5>}
+      />
+    }
+
     if (isSearching === true) {
       return (
         <>
@@ -476,7 +488,7 @@ const StudentAttendanceRateReport = () => {
 
       <SectionDiv>
         <h6>
-          {isSearching === true ? null : (
+          {isFetchingSchoolDays === true ? null : (
             <>
               <SchoolDaysAllPopupBtn
                 disabled={isSearching}

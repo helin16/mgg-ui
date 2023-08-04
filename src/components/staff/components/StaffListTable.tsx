@@ -20,38 +20,21 @@ import iSynStaffJobPosition from '../../../types/Synergetic/Staff/iSynStaffJobPo
 
 const Wrapper = styled.div`
   .td {
-    .jp-col,
-    .job-pos-cell {
+    .skill-expiry-date {
       height: calc(100% + 10px);
       margin: -5px;
-    }
-    .job-pos-cell {
-      padding: 5px;
-    }
-
-    .jp-col {
-      > * {
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        border-top: 1px #eee solid;
-        padding: 2px 5px;
-
-        &:first-child {
-          border-top: none;
-        }
-      }
     }
   }
 `;
 
 type iStaffListTable = iGetListColumns & {
+  tableHtmlId?: string;
   className?: string;
   selectedColumns: iTableColumn[];
   staffList: iVStaff[];
 };
 const StaffListTable = ({
+  tableHtmlId,
   selectedColumns,
   staffList,
   className,
@@ -61,6 +44,7 @@ const StaffListTable = ({
   staffMap,
 }: iStaffListTable) => {
   const [columns, setColumns] = useState<any[]>([]);
+  const [, setHasJPColumns] = useState(false);
 
   const getDefaultColumn = (column: iTableColumn) => ({
     Header: column.header,
@@ -215,7 +199,7 @@ const StaffListTable = ({
 
         const dateString = `${latest[0].ExpiryDate || ""}`.trim();
         return (
-          <div className={`job-pos-cell ${className}`}>
+          <div className={`skill-expiry-date ${className}`}>
             {dateString === "" ? "" : moment(dateString).format("DD/MM/YYYY")}
           </div>
         );
@@ -224,10 +208,12 @@ const StaffListTable = ({
   };
 
   useEffect(() => {
+    const jpColumns = selectedColumns.map(column => getJobPositionColumns(column)).filter(col => col !== null);
+    setHasJPColumns(jpColumns.length > 0);
     setColumns(
       [
         ...selectedColumns.map(column => getStaffColumns(column)),
-        ...selectedColumns.map(column => getJobPositionColumns(column)),
+        ...jpColumns,
         ...selectedColumns.map(column => getSkillExpiryDateColumns(column))
       ].filter(col => col !== null)
     );
@@ -241,6 +227,7 @@ const StaffListTable = ({
   return (
     <Wrapper>
       <ReactTableWithFixedColumns
+        htmlId={tableHtmlId}
         hover
         className={`staff-list-table ${className || ""}`}
         data={staffList}

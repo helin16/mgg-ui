@@ -5,6 +5,7 @@ import {useEffect, useMemo, useState} from 'react';
 
 type iReactTableWithFixedColumns = {
   hover?: boolean;
+  htmlId?: string;
   className?: string;
   data: any[];
   columns: any[];
@@ -12,8 +13,9 @@ type iReactTableWithFixedColumns = {
 }
 
 const Wrapper = styled.div`
+  width: 100%;
+  overflow: auto;
   .table {
-    max-height: 100vh;
     [data-sticky-td] {
       background-color: white;
     }
@@ -113,6 +115,7 @@ const Wrapper = styled.div`
 
 const ReactTableWithFixedColumns = ({
   hover,
+  htmlId,
   data,
   columns,
   className,
@@ -149,28 +152,28 @@ const ReactTableWithFixedColumns = ({
       return null;
     }
     return (
-      <div className="footer">
+      <tfoot className="footer">
         {footerGroups.map((footerGroup) => (
-          <div {...footerGroup.getHeaderGroupProps()} className="tr">
+          <tr {...footerGroup.getHeaderGroupProps()} className="tr">
             {footerGroup.headers.map((column) => (
-              <div {...column.getHeaderProps()} className="td">
+              <td {...column.getHeaderProps()} className="td">
                 {column.render('Footer')}
-              </div>
+              </td>
             ))}
-          </div>
+          </tr>
         ))}
-      </div>
+      </tfoot>
     )
   }
 
   return (
-    <Wrapper>
-      <div {...getTableProps()} className={`table sticky ${className || ''} ${hover ? 'hover' : ''}`}>
-        <div className="header">
+    <Wrapper className={className}>
+      <table {...getTableProps()} className={`table sticky ${hover ? 'hover' : ''}`} id={htmlId}>
+        <thead className="header">
           {headerGroups.map((headerGroup) => (
-            <div {...headerGroup.getHeaderGroupProps()} className="tr">
+            <tr {...headerGroup.getHeaderGroupProps()} className="tr">
               {headerGroup.headers.map((column) => (
-                <div {...column.getHeaderProps()} className="th">
+                <th {...column.getHeaderProps()} className="th">
                   {column.render('Header')}
                   <div
                     // @ts-ignore
@@ -178,27 +181,27 @@ const ReactTableWithFixedColumns = ({
                     // @ts-ignore
                     className={`resizer ${column.isResizing ? "isResizing" : "" }`}
                   />
-                </div>
+                </th>
               ))}
-            </div>
+            </tr>
           ))}
-        </div>
-        <div {...getTableBodyProps()} className="body">
+        </thead>
+        <tbody {...getTableBodyProps()} className="body">
           {rows.map((row) => {
             prepareRow(row);
             return (
-              <div {...row.getRowProps()} className="tr">
+              <tr {...row.getRowProps()} className="tr">
                 {row.cells.map((cell) => (
-                  <div {...cell.getCellProps()} className={`td`}>
+                  <td {...cell.getCellProps()} className={`td`}>
                     {cell.render('Cell')}
-                  </div>
+                  </td>
                 ))}
-              </div>
+              </tr>
             );
           })}
-        </div>
+        </tbody>
         {getFooter()}
-      </div>
+      </table>
     </Wrapper>
   )
 }

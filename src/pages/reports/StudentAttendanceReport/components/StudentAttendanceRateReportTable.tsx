@@ -5,6 +5,7 @@ import iSynVStudentAttendanceHistory from "../../../../types/Synergetic/Attendan
 import { useEffect, useState } from "react";
 import StudentAttendanceRatePopup from "./StudentAttendanceRatePopup";
 import styled from "styled-components";
+import MathHelper from '../../../../helper/MathHelper';
 
 export type iAttendanceMap = { [key: number]: iSynVStudentAttendanceHistory[] };
 
@@ -76,7 +77,7 @@ const StudentAttendanceRateReportTable = ({
     });
   };
 
-  const getPopupDiv = (studentIds: number[] | string[]) => {
+  const getPopupDiv = (studentIds: number[] | string[], text?: string) => {
     return (
       <StudentAttendanceRatePopup
         variant={"link"}
@@ -87,10 +88,30 @@ const StudentAttendanceRateReportTable = ({
         attendanceRecordMap={attendanceRecordMap}
         attendanceRateMap={attendanceRateMap}
       >
-        {studentIds.length}
+        {text || studentIds.length}
       </StudentAttendanceRatePopup>
     );
   };
+
+  const getOverallAttendanceRate = (studentIds: number[] ) => {
+    const attendances = studentIds.reduce((arr: iSynVStudentAttendanceHistory[], studentId: number) => {
+      return [...arr, ...(studentId in attendanceRecordMap ? attendanceRecordMap[studentId] : [])]
+    }, []);
+    if (attendances.length <= 0) {
+      return {attendances, attended: [], notAttended: []};
+    }
+    const attended: iSynVStudentAttendanceHistory[] = [];
+    const notAttended: iSynVStudentAttendanceHistory[] = [];
+    attendances.forEach((attendance: iSynVStudentAttendanceHistory) => {
+      if (attendance.AttendedFlag === true) {
+        attended.push(attendance)
+      } else {
+        notAttended.push(attendance);
+      }
+    })
+    return {attended, notAttended, attendances}
+
+  }
 
   const getColumns = () => [
     {
@@ -169,6 +190,28 @@ const StudentAttendanceRateReportTable = ({
         // @ts-ignore
         const studentIds = stYearLevelMap[data.Code] || [];
         return <td key={column.key}>{getPopupDiv(studentIds)}</td>;
+      }
+    },
+    {
+      key: "yrlvl-overall",
+      header: "Overall %",
+      footer: (column: iTableColumn) => {
+        const studentIds = Object.keys(studentMap).map(studentId => Number(studentId));
+
+        const {attended, attendances} = getOverallAttendanceRate(studentIds);
+        if (attendances.length <= 0) {
+          return '';
+        }
+        return <td key={column.key}>{getPopupDiv(studentIds, MathHelper.mul(MathHelper.div(attended.length, attendances.length), 100).toFixed(2))}</td>;;
+      },
+      cell: (column: iTableColumn, data: ISynLuYearLevel) => {
+        // @ts-ignore
+        const studentIds = stYearLevelMap[data.Code] || [];
+        const {attended, attendances} = getOverallAttendanceRate(studentIds);
+        if (attendances.length <= 0) {
+          return '';
+        }
+        return <td key={column.key}>{getPopupDiv(studentIds, MathHelper.mul(MathHelper.div(attended.length, attendances.length), 100).toFixed(2))}</td>;
       }
     }
   ];

@@ -152,6 +152,13 @@ const StudentAttendanceRatePopup = ({watchingRate, showingStudentIds, studentMap
     );
   }
 
+  const getStudentLeavingDate = (record: iVPastAndCurrentStudent) => {
+    if (record.StudentIsPastFlag === true && `${record.StudentLeavingDate || ''}`.trim() === '') {
+      return <small className={'text-muted'}>Left outside date range</small> ;
+    }
+    return `${record.StudentLeavingDate || ''}`.trim() !== '' ? moment(`${record.StudentLeavingDate || ''}`.trim()).format('DD MMM YYYY') : ''
+  }
+
   const getPopupContent = () => {
     if (showingDetails) {
       const attendanceRecords = (showingDetails.StudentID in attendanceRecordMap ? attendanceRecordMap[showingDetails.StudentID] : []);
@@ -230,6 +237,7 @@ const StudentAttendanceRatePopup = ({watchingRate, showingStudentIds, studentMap
           <th>Year Level</th>
           <th>Form</th>
           <th>Status</th>
+          <th>Entry Date</th>
           <th>Leaving/Left Date</th>
           <th>isPast?</th>
           <th>Attendance Rate (%)</th>
@@ -246,7 +254,8 @@ const StudentAttendanceRatePopup = ({watchingRate, showingStudentIds, studentMap
                 <td>{'StudentYearLevel' in record ? record.StudentYearLevel : ''}</td>
                 <td>{'StudentForm' in record ? record.StudentForm : ''}</td>
                 <td>{'StudentStatusDescription' in record ? record.StudentStatusDescription : ''}</td>
-                <td>{`${record.StudentLeavingDate || ''}`.trim() !== '' ? moment(`${record.StudentLeavingDate || ''}`.trim()).format('DD MMM YYYY') : ''}</td>
+                <td>{`${record.StudentEntryDate || ''}`.trim() !== '' ? moment(`${record.StudentEntryDate || ''}`.trim()).format('DD MMM YYYY') : ''}</td>
+                <td>{getStudentLeavingDate(record)}</td>
                 <td>{'StudentIsPastFlag' in record ? (record.StudentIsPastFlag ? 'Y' : '') : ''}</td>
                 {/*// @ts-ignore*/}
                 <td className={`rate ${Number(record.attendanceRate || 0) < watchingRate ? 'bg-danger text-white' : ''}`}>

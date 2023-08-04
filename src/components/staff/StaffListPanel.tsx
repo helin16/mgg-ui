@@ -36,13 +36,14 @@ import * as _ from "lodash";
 import iSynStaffJobPosition from "../../types/Synergetic/Staff/iSynStaffJobPosition";
 import iSynCommunitySkill from "../../types/Synergetic/Community/iSynCommunitySkill";
 import { STORAGE_COLUMN_KEY_STAFF_LIST } from "../../services/LocalStorageService";
-import CSVExportBtn from "../form/CSVExportBtn";
-import iSynLuSkill from '../../types/Synergetic/Lookup/iSynLuSkill';
-import StaffListTable from './components/StaffListTable';
+import iSynLuSkill from "../../types/Synergetic/Lookup/iSynLuSkill";
+import StaffListTable from "./components/StaffListTable";
+import CSVExportFromHtmlTableBtn from "../form/CSVExportFromHtmlTableBtn";
 
 const Wrapper = styled.div`
   .staff-list-table {
-    max-height: calc(100vh - 20rem);
+    height: calc(100vh - 23rem);
+    width: 100%;
   }
 `;
 
@@ -58,13 +59,18 @@ const StaffListPanel = ({ showSearchPanel = true }: iStaffListPanel) => {
   const [columns, setColumns] = useState<iTableColumn[]>([]);
   const [selectedColumns, setSelectedColumns] = useState<iTableColumn[]>([]);
   const [skills, setSkills] = useState<iSynLuSkill[]>([]);
-  const [staffJobPosMap, setStaffJobPosMap] = useState<iStaffJobPositionMap>({});
+  const [staffJobPosMap, setStaffJobPosMap] = useState<iStaffJobPositionMap>(
+    {}
+  );
   const [skillsMap, setSkillsMap] = useState<iCommunitySkillMap>({});
   const [staffMap, setStaffMap] = useState<iStaffMap>({});
-  const [positionStaffIdMap, setPositionStaffIdMap] = useState<iPositionStaffIdMap>({});
+  const [positionStaffIdMap, setPositionStaffIdMap] = useState<
+    iPositionStaffIdMap
+  >({});
   const [searchCriteria, setSearchCriteria] = useState<
     iStaffListSearchCriteria
   >({});
+  const staffListTableHtmlId = `sl-${moment().unix()}-${Math.random()}`;
 
   const doSearch = async (criteria: iStaffListSearchCriteria) => {
     const { ActiveFlag, SearchTxt, DepartmentCodes, CategoryCodes } = criteria;
@@ -299,27 +305,16 @@ const StaffListPanel = ({ showSearchPanel = true }: iStaffListPanel) => {
         <FlexContainer className={"justify-content-between"}>
           <h5>{staffList?.length || 0} Staff</h5>
           <FlexContainer className={"with-gap"}>
-            <CSVExportBtn
-              // @ts-ignore
-              fetchingFnc={() =>
-                new Promise(resolve => {
-                  resolve(staffList);
-                })
-              }
-              downloadFnc={() =>
-                StaffListHelper.genExportFile(selectedColumns, staffList, {
-                  luSkills: skills,
-                  staffJobPosMap: staffJobPosMap,
-                  skillMap: skillsMap,
-                  staffMap,
-                  positionStaffIdMap: positionStaffIdMap
-                })
-              }
-              variant={"link"}
-              size={"sm"}
+            <CSVExportFromHtmlTableBtn
+              size={'sm'}
+              variant={'link'}
+              tableHtmlId={staffListTableHtmlId}
+              fileName={`Staff_List_${moment().format(
+                "YYYY_MM_DD_HH_mm_ss"
+              )}.xlsx`}
             />
             <ColumnPopupSelector
-              variant={'link'}
+              variant={"link"}
               localStorageKey={STORAGE_COLUMN_KEY_STAFF_LIST}
               columns={columns}
               selectedColumns={selectedColumns}
@@ -329,6 +324,7 @@ const StaffListPanel = ({ showSearchPanel = true }: iStaffListPanel) => {
           </FlexContainer>
         </FlexContainer>
         <StaffListTable
+          tableHtmlId={staffListTableHtmlId}
           staffList={staffList}
           selectedColumns={selectedColumns}
           staffJobPosMap={staffJobPosMap}
