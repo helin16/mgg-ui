@@ -23,6 +23,7 @@ const Wrapper = styled.div`
     .skill-expiry-date {
       height: calc(100% + 10px);
       margin: -5px;
+      padding: 5px;
     }
   }
 `;
@@ -48,7 +49,7 @@ const StaffListTable = ({
 
   const getDefaultColumn = (column: iTableColumn) => ({
     Header: column.header,
-    accessor: column.key
+    accessor: column.key,
   });
 
   const getFormatCell = (column: iTableColumn, value: any) => {
@@ -80,6 +81,14 @@ const StaffListTable = ({
     }
     return {
       ...defaultCol,
+      getCellProps: (cell: any) => {
+        if (!cell.row.original.noOfMergingRows && cell.row.original.noOfMergingRows <= 0) {
+          return {};
+        }
+        return {
+          rowSpan: cell.row.original.noOfMergingRows
+        }
+      },
       Cell: (cell: any) => {
         const dateString = `${cell.cell.row.original[column.key] || ""}`.trim();
         return getFormatCell(column, dateString);
@@ -118,7 +127,7 @@ const StaffListTable = ({
         const jobPositions = StaffListHelper.getJobPositionFromMap(
           vStaff,
           staffJobPosMap
-        );
+        ).filter(jp => jp.StaffJobPositionsSeq === cell.cell.row.original.sJPSeq);
 
         if (column.key.startsWith(COLUMN_KEY_PREFIX_JP_REPORTS_TO_STAFF)) {
           const key = `${column.key}`.replace(
@@ -221,7 +230,6 @@ const StaffListTable = ({
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedColumns]);
-
   if (columns.length <= 0) {
     return null;
   }
@@ -237,7 +245,8 @@ const StaffListTable = ({
             if (hasJPColumns !== true || (!(staff.StaffID in staffJobPosMap)) || !Array.isArray(staffJobPosMap[staff.StaffID]) || staffJobPosMap[staff.StaffID].length <= 0) {
               return [staff];
             }
-            return staffJobPosMap[staff.StaffID].map(sJP => ({...staff, sJPSeq: sJP.StaffJobPositionsSeq}));
+            const staffData = {...staff, noOfMergingRows: staffJobPosMap[staff.StaffID].length};
+            return staffJobPosMap[staff.StaffID].map(sJP => ({...staffData, sJPSeq: sJP.StaffJobPositionsSeq}));
           })
           .reduce((arr: iVStaff[], staffs) => [...arr, ...staffs], [])}
         columns={columns}

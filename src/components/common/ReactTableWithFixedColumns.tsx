@@ -191,11 +191,18 @@ const ReactTableWithFixedColumns = ({
             prepareRow(row);
             return (
               <tr {...row.getRowProps()} className="tr">
-                {row.cells.map((cell) => (
-                  <td {...cell.getCellProps()} className={`td`}>
-                    {cell.render('Cell')}
-                  </td>
-                ))}
+                {row.cells.map((cell) => {
+                  // @ts-ignore
+                  if (cell.column.CellRender) {
+                    // @ts-ignore
+                    return cell.column.CellRender(cell, {...cell.getCellProps(), className: 'td'});
+                  }
+                  return (
+                    <td {...cell.getCellProps()} className={`td`}>
+                      {cell.render('Cell')}
+                    </td>
+                  )
+                })}
               </tr>
             );
           })}

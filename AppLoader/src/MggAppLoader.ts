@@ -63,7 +63,7 @@ class AppLoader {
     loadManifest = true
   ){
     this.#fetchData(
-      `${appJsScriptUrl}/asset-manifest.json`,
+      `${appJsScriptUrl}/asset-manifest.json?${Date.now()}`,
       (status: number, response: any) => {
         if (status !== 200) {
           return null;
