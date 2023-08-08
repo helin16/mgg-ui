@@ -47,7 +47,7 @@ class AppLoader {
     url: string,
     callback: (status: number, resp: any) => void
   ){
-    var xhr = new XMLHttpRequest();
+    const xhr = new XMLHttpRequest();
     xhr.open("GET", url, false);
     // xhr.responseType = 'json';
     xhr.onload = function() {

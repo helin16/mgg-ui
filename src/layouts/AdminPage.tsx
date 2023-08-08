@@ -6,9 +6,12 @@ import { ROLE_ID_ADMIN } from "../types/modules/iRole";
 import ModuleAccessWrapper from '../components/module/ModuleAccessWrapper';
 import React from 'react';
 
-type iAdminPage = {
-  title: any;
+export type AdminPageProps = {
   onNavBack: () => void;
+}
+
+type iAdminPage = AdminPageProps & {
+  title: any;
   children: any;
   moduleId: number;
 };

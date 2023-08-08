@@ -9,7 +9,7 @@ import MathHelper from '../../helper/MathHelper';
 import BudgetForecastPanel from '../../components/reports/BudgetForecast/BudgetForecastPanel';
 
 const TAB_EXPIRING_CREDIT_CARDS = "EXPIRING_CREDIT_CARDS";
-const TAB_EXPIRING_FORECAST = "FORCAST_NEXT_YEAR";
+const TAB_EXPIRING_FORECAST = "FORECAST_NEXT_YEAR";
 const FinancePage = () => {
   const [selectedTab, setSelectedTab] = useState(TAB_EXPIRING_CREDIT_CARDS);
 

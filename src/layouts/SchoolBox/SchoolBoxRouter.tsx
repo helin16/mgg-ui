@@ -3,7 +3,7 @@ import StudentReport from '../../pages/studentReport/StudentReport';
 import OperooSafetyAlertsPage from '../../pages/operoo/OperooSafetyAlertsPage';
 import ModuleAccessWrapper from '../../components/module/ModuleAccessWrapper';
 import {
-  MGGS_MODULE_ID_ALUMNI_REQUEST, MGGS_MODULE_ID_FINANCE,
+  MGGS_MODULE_ID_ALUMNI_REQUEST, MGGS_MODULE_ID_ENROLMENTS, MGGS_MODULE_ID_FINANCE,
   MGGS_MODULE_ID_FUNNEL,
   MGGS_MODULE_ID_HOUSE_AWARDS, MGGS_MODULE_ID_MGG_APP_DEVICES, MGGS_MODULE_ID_ONLINE_DONATION,
   MGGS_MODULE_ID_OPEROO_SAFETY_ALERTS, MGGS_MODULE_ID_SCHOOL_DATA_SUBMISSION, MGGS_MODULE_ID_STAFF_LIST,
@@ -25,6 +25,7 @@ import StudentAttendanceRateReportPage
   from '../../pages/reports/StudentAttendanceReport/StudentAttendanceRateReportPage';
 import OnlineDonationMangerPage from '../../pages/OnlineDonation/OnlineDonationMangerPage';
 import StaffListPage from '../../pages/Staff/StaffListPage';
+import EnrolmentManagementPage from '../../pages/Enrolments/EnrolmentManagementPage';
 // import PageNotFound from '../../components/PageNotFound';
 
 const schoolBoxIframeElementId = 'remote';
@@ -118,6 +119,10 @@ const SchoolBoxRouter = ({path, remoteUrl}: {path: string, remoteUrl: string}) =
     case '/staff/list': {
       removeSchoolBoxIframe();
       return <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_STAFF_LIST}><StaffListPage /></ModuleAccessWrapper>
+    }
+    case '/enrolments_admin': {
+      removeSchoolBoxIframe();
+      return <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_ENROLMENTS}><EnrolmentManagementPage /></ModuleAccessWrapper>
     }
     default: {
       showSchoolBoxIframe();
