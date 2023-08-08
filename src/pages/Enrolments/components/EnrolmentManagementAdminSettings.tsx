@@ -1,13 +1,13 @@
 import React, {useState} from 'react';
-import styled from 'styled-components';
-import ModuleEmailTemplateNameEditor from '../../../components/module/ModuleEmailTemplateNameEditor';
-import {MGGS_MODULE_ID_FINANCE} from '../../../types/modules/iModuleUser';
-import {ROLE_ID_ADMIN} from '../../../types/modules/iRole';
-import ModuleEditPanel from '../../../components/module/ModuleEditPanel';
 import iModule from '../../../types/modules/iModule';
+import ModuleEditPanel from '../../../components/module/ModuleEditPanel';
+import {MGGS_MODULE_ID_ENROLMENTS} from '../../../types/modules/iModuleUser';
+import {ROLE_ID_ADMIN} from '../../../types/modules/iRole';
 import SectionDiv from '../../../components/common/SectionDiv';
-import {Form} from 'react-bootstrap';
 import ExplanationPanel from '../../../components/ExplanationPanel';
+import ModuleEmailTemplateNameEditor from '../../../components/module/ModuleEmailTemplateNameEditor';
+import {Form} from 'react-bootstrap';
+import styled from 'styled-components';
 
 const Wrapper = styled.div``;
 
@@ -33,7 +33,7 @@ const EditPanel = ({module, onUpdate}: iEditPanel) => {
   return (
     <Wrapper>
       <SectionDiv>
-        <h5>Expiring Credit Cards Notification Settings</h5>
+        <h5>Expiring Passport(s) and Visa(s) Notification Settings</h5>
         <ExplanationPanel text={'Email notifications will be sent to the nominated recipients below every Wednesday night'} />
         <ModuleEmailTemplateNameEditor
           value={expiryCCTemplate}
@@ -59,7 +59,7 @@ const EditPanel = ({module, onUpdate}: iEditPanel) => {
     </Wrapper>
   )
 }
-const FinanceAdminModuleSettings = () => {
+const EnrolmentManagementAdminSettings = () => {
   const [settings, setSettings] = useState({});
 
   const getContent = (module: iModule) => {
@@ -73,7 +73,7 @@ const FinanceAdminModuleSettings = () => {
 
   return (
     <ModuleEditPanel
-      moduleId={MGGS_MODULE_ID_FINANCE}
+      moduleId={MGGS_MODULE_ID_ENROLMENTS}
       roleId={ROLE_ID_ADMIN}
       getChildren={getContent}
       getSubmitData={() => (settings)}
@@ -81,4 +81,4 @@ const FinanceAdminModuleSettings = () => {
   )
 }
 
-export default FinanceAdminModuleSettings;
+export default EnrolmentManagementAdminSettings;
