@@ -86,6 +86,9 @@ const StudentAttendanceRateReport = () => {
       return;
     }
 
+    if(moment(searchingDateRange.StartDate).year() < moment().year()) {
+      setIncludePastStudents(true)
+    }
     setIsFetchingSchoolDays(true);
     let isCanceled = false;
     Promise.all([
@@ -276,7 +279,6 @@ const StudentAttendanceRateReport = () => {
         {}
       );
       setYearLevels(yrLevels);
-      setStudentsMap(stuDataMap);
       const attendanceData = await getAttendanceData(Object.keys(stuDataMap));
       const attendanceMap: iAttendanceMap = {};
       const attendanceRateMap: {
@@ -318,6 +320,15 @@ const StudentAttendanceRateReport = () => {
           );
         }
       });
+
+      const studentIdsWithAttendanceRecords = Object.keys(attendanceMap);
+      setStudentsMap(Object.keys(stuDataMap).filter(stuId => studentIdsWithAttendanceRecords.indexOf(stuId) >= 0).reduce((map, stuId) => {
+        return {
+          ...map,
+          // @ts-ignore
+          [stuId]: stuDataMap[stuId],
+        }
+      }, {}));
       setStudentAttendanceMap(attendanceMap);
       setStudentAttendanceRateMap(
         Object.keys(attendanceRateMap).reduce((map, studentId) => {
