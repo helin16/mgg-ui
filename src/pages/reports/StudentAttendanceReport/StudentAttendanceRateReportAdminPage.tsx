@@ -45,6 +45,7 @@ const StudentAttendanceRateReportAdminPage = ({
               moduleId={MGGS_MODULE_ID_REPORTS_STUDENT_ATTENDANCE_RATE}
               roleId={ROLE_ID_NORMAL}
               showCreatingPanel
+              showDeletingBtn
             />
             <SectionDiv>
               <h6>Head Of Years / Head of Schools</h6>
