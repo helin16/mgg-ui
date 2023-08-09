@@ -1,13 +1,13 @@
 import ISynLuYearLevel from "../../../../types/Synergetic/Lookup/iSynLuYearLevel";
 import Table, { iTableColumn } from "../../../../components/common/Table";
 import { iVPastAndCurrentStudent } from "../../../../types/Synergetic/iVStudent";
-import iSynVStudentAttendanceHistory from "../../../../types/Synergetic/Attendance/iSynVStudentAttendanceHistory";
 import { useEffect, useState } from "react";
 import StudentAttendanceRatePopup from "./StudentAttendanceRatePopup";
 import styled from "styled-components";
 import MathHelper from '../../../../helper/MathHelper';
+import iSynVAttendancesWithAbsence from '../../../../types/Synergetic/Attendance/iSynVAttendancesWithAbsence';
 
-export type iAttendanceMap = { [key: number]: iSynVStudentAttendanceHistory[] };
+export type iAttendanceMap = { [key: number]: iSynVAttendancesWithAbsence[] };
 
 type iStudentAttendanceReportTable = {
   watchingRate: number;
@@ -94,15 +94,15 @@ const StudentAttendanceRateReportTable = ({
   };
 
   const getOverallAttendanceRate = (studentIds: number[] ) => {
-    const attendances = studentIds.reduce((arr: iSynVStudentAttendanceHistory[], studentId: number) => {
+    const attendances = studentIds.reduce((arr: iSynVAttendancesWithAbsence[], studentId: number) => {
       return [...arr, ...(studentId in attendanceRecordMap ? attendanceRecordMap[studentId] : [])]
     }, []);
     if (attendances.length <= 0) {
       return {attendances, attended: [], notAttended: []};
     }
-    const attended: iSynVStudentAttendanceHistory[] = [];
-    const notAttended: iSynVStudentAttendanceHistory[] = [];
-    attendances.forEach((attendance: iSynVStudentAttendanceHistory) => {
+    const attended: iSynVAttendancesWithAbsence[] = [];
+    const notAttended: iSynVAttendancesWithAbsence[] = [];
+    attendances.forEach((attendance: iSynVAttendancesWithAbsence) => {
       if (attendance.AttendedFlag === true) {
         attended.push(attendance)
       } else {

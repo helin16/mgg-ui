@@ -32,11 +32,12 @@ import PageLoadingSpinner from "../../../../components/common/PageLoadingSpinner
 import YearLevelSelector from "../../../../components/student/YearLevelSelector";
 import MathHelper from "../../../../helper/MathHelper";
 import { iVPastAndCurrentStudent } from "../../../../types/Synergetic/iVStudent";
-import SynVStudentAttendanceHistoryService from "../../../../services/Synergetic/Attendance/SynVStudentAttendanceHistoryService";
-import iSynVStudentAttendanceHistory from "../../../../types/Synergetic/Attendance/iSynVStudentAttendanceHistory";
 import UtilsService from '../../../../services/UtilsService';
 import SynFileSemesterService, {iSchoolDay} from '../../../../services/Synergetic/SynFileSemesterService';
 import SchoolDaysAllPopupBtn from '../../../dataSubmissions/components/SchoolCensusData/SchoolDaysAllPopupBtn';
+import SynVAttendancesWithAbsenceService
+  from '../../../../services/Synergetic/Attendance/SynVAttendancesWithAbsenceService';
+import iSynVAttendancesWithAbsence from '../../../../types/Synergetic/Attendance/iSynVAttendancesWithAbsence';
 
 type iDateRange = {
   StartDate: string;
@@ -58,9 +59,6 @@ const StudentAttendanceRateReport = () => {
   const [searchingDateRange, setSearchingDateRange] = useState(initDateRange);
   const [searchingSchoolDays, setSearchingSchoolDays] = useState<string[]>([]);
   const [searchingSchoolDaysAll, setSearchingSchoolDaysAll] = useState<iSchoolDay[]>([]);
-  const [searchingFileSemesterStrs, setSearchingFileSemesterStrs] = useState<
-    string[]
-  >([]);
   const [searchingCampusCodes, setSearchingCampusCodes] = useState<string[]>(
     defaultCampusCodes
   );
@@ -72,9 +70,6 @@ const StudentAttendanceRateReport = () => {
   const [studentsMap, setStudentsMap] = useState<{
     [key: number]: iVPastAndCurrentStudent;
   }>({});
-  const [classDateMap, setClassDateMap] = useState<{ [key: string]: string[] }>(
-    {}
-  );
   const [studentAttendanceMap, setStudentAttendanceMap] = useState<
     iAttendanceMap
   >({});
@@ -88,36 +83,12 @@ const StudentAttendanceRateReport = () => {
     if (startDateStr === "" || endDateStr === "") {
       Toaster.showToast(`Both Start Date and End Date are required.`);
       setSearchingSchoolDays([]);
-      setSearchingFileSemesterStrs([]);
       return;
     }
 
     setIsFetchingSchoolDays(true);
     let isCanceled = false;
     Promise.all([
-      SynAttendanceMasterService.getAll(
-        {
-          where: JSON.stringify({
-            AttendanceDate: { [OP_BETWEEN]: [startDateStr, endDateStr] },
-            ClassCancelledFlag: false,
-            FileType: "A",
-            ...(searchingCampusCodes.length > 0
-              ? { ClassCampus: searchingCampusCodes }
-              : {})
-          }),
-          perPage: 99999
-        },
-        {
-          headers: {
-            [HEADER_NAME_SELECTING_FIELDS]: JSON.stringify([
-              "FileYear",
-              "FileSemester",
-              "ClassCode",
-              "AttendanceDate"
-            ])
-          }
-        }
-      ),
       SynFileSemesterService.getSchoolDaysAll({
         start: moment(startDateStr).format('YYYY-MM-DD'),
         end: moment(endDateStr).format('YYYY-MM-DD'),
@@ -127,21 +98,9 @@ const StudentAttendanceRateReport = () => {
         if (isCanceled) {
           return;
         }
-        const sDays: string[] = (resp[1] || []).filter(day => day.isSchoolDay === true).map(day => day.date);
-        const fileSemStr: string[] = [];
-        const cMap: { [key: string]: string[] } = {};
-        (resp[0].data || []).forEach(record => {
-          fileSemStr.push(`${record.FileYear}-${record.FileSemester}`);
-          if (!(record.ClassCode in cMap)) {
-            cMap[record.ClassCode] = [];
-          }
-          const date = moment(`${record.AttendanceDate}`).format("YYYY-MM-DD");
-          cMap[record.ClassCode] = _.uniq([...cMap[record.ClassCode], date]);
-        });
+        const sDays: string[] = (resp[0] || []).filter(day => day.isSchoolDay === true).map(day => day.date);
         setSearchingSchoolDays(_.uniq(sDays));
-        setSearchingFileSemesterStrs(_.uniq(fileSemStr));
-        setClassDateMap(cMap);
-        setSearchingSchoolDaysAll(resp[1] || []);
+        setSearchingSchoolDaysAll(resp[0] || []);
       })
       .catch(err => {
         if (isCanceled) {
@@ -172,14 +131,14 @@ const StudentAttendanceRateReport = () => {
 
   const getAttendanceData = async (
     IDs: (number | string)[]
-  ): Promise<iSynVStudentAttendanceHistory[]> => {
-    let attendanceRecords: iSynVStudentAttendanceHistory[] = [];
+  ): Promise<iSynVAttendancesWithAbsence[]> => {
+    let attendanceRecords: iSynVAttendancesWithAbsence[] = [];
     let doneIds: (number | string)[] = [];
     const idChunks = _.chunk(IDs, 30);
     for (const ids of idChunks) {
       const results = await Promise.all(
         ids.map(idArr =>
-          SynVStudentAttendanceHistoryService.getAll(
+          SynVAttendancesWithAbsenceService.getAll(
             {
               where: JSON.stringify({
                 ID: idArr,
@@ -204,6 +163,7 @@ const StudentAttendanceRateReport = () => {
                   "PossibleDescription",
                   "PossibleAbsenceCode",
                   "PossibleReasonCode",
+                  "ClassCancelledFlag",
                 ])
               }
             }
@@ -227,6 +187,29 @@ const StudentAttendanceRateReport = () => {
   const doSearch = async () => {
     try {
       setLoadingPercentage(0);
+      const attMasters = await SynAttendanceMasterService.getAll(
+        {
+          where: JSON.stringify({
+            AttendanceDate: { [OP_BETWEEN]: [searchingDateRange.StartDate, searchingDateRange.EndDate] },
+            ClassCancelledFlag: false,
+            FileType: "A",
+            ...(searchingCampusCodes.length > 0
+              ? { ClassCampus: searchingCampusCodes }
+              : {})
+          }),
+          perPage: 99999
+        },
+        {
+          headers: {
+            [HEADER_NAME_SELECTING_FIELDS]: JSON.stringify([
+              "FileYear",
+              "FileSemester"
+            ])
+          }
+        }
+      );
+      const searchingFileSemesterStrs = _.uniq((attMasters.data || []).map(record => `${record.FileYear}-${record.FileSemester}`));
+
       const [yrLevels, studentsArr] = await Promise.all([
         SynLuYearLevelService.getAllYearLevels({
           where: JSON.stringify({
@@ -290,12 +273,6 @@ const StudentAttendanceRateReport = () => {
       );
       setYearLevels(yrLevels);
       setStudentsMap(stuDataMap);
-      if (
-        Object.keys(stuDataMap).length <= 0 ||
-        Object.keys(classDateMap).length <= 0
-      ) {
-        return;
-      }
       const attendanceData = await getAttendanceData(Object.keys(stuDataMap));
       const attendanceMap: iAttendanceMap = {};
       const attendanceRateMap: {
@@ -308,12 +285,16 @@ const StudentAttendanceRateReport = () => {
         }
         // @ts-ignore
         const student = stuDataMap[studentId];
+        if (row.ClassCancelledFlag === true) {
+          return;
+        }
         if (`${student.StudentEntryDate || ''}`.trim() !== '' && moment(row.AttendanceDate).isBefore(moment(student.StudentEntryDate))) {
           return;
         }
         if (`${student.StudentLeavingDate || ''}`.trim() !== '' && moment(row.AttendanceDate).isAfter(moment(student.StudentLeavingDate))) {
           return;
         }
+
         if (!(studentId in attendanceRateMap)) {
           attendanceRateMap[studentId] = { total: 0, attended: 0 };
         }

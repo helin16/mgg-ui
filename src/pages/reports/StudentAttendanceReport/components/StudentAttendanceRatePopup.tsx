@@ -7,10 +7,10 @@ import moment from 'moment-timezone';
 import styled from 'styled-components';
 import {FlexContainer} from '../../../../styles';
 import * as Icons from 'react-bootstrap-icons'
-import iSynVStudentAttendanceHistory from '../../../../types/Synergetic/Attendance/iSynVStudentAttendanceHistory';
 import MathHelper from '../../../../helper/MathHelper';
 import CSVExportBtn from '../../../../components/form/CSVExportBtn';
 import StudentAttendanceRateDownloadHelper from './StudentAttendanceRateDownloadHelper';
+import iSynVAttendancesWithAbsence from '../../../../types/Synergetic/Attendance/iSynVAttendancesWithAbsence';
 
 type iStudentAttendanceRatePopup = ButtonProps & {
   watchingRate: number;
@@ -208,7 +208,7 @@ const StudentAttendanceRatePopup = ({watchingRate, showingStudentIds, studentMap
 
               return true;
             })
-              .map((record: iSynVStudentAttendanceHistory, index) => {
+              .map((record: iSynVAttendancesWithAbsence, index) => {
                 if (!record) { return null;}
                 return (
                   <tr key={index}>
