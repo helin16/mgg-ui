@@ -8,7 +8,7 @@ import LoadingBtn from "../../../../components/common/LoadingBtn";
 import * as Icons from "react-bootstrap-icons";
 import Toaster, {TOAST_TYPE_ERROR} from "../../../../services/Toaster";
 import SynAttendanceMasterService from "../../../../services/Synergetic/Attendance/SynAttendanceMasterService";
-import { OP_BETWEEN, OP_OR } from "../../../../helper/ServiceHelper";
+import {OP_BETWEEN, OP_GT, OP_LTE, OP_OR} from "../../../../helper/ServiceHelper";
 import AppService, {
   HEADER_NAME_SELECTING_FIELDS
 } from "../../../../services/AppService";
@@ -224,6 +224,11 @@ const StudentAttendanceRateReport = () => {
         SynVStudentService.getVPastAndCurrentStudentAll(
           {
             where: JSON.stringify({
+              StudentEntryDate: {[OP_LTE]: searchingDateRange.EndDate},
+              [OP_OR]: [
+                { StudentLeavingDate: null, },
+                { StudentLeavingDate: {[OP_GT]: searchingDateRange.StartDate}, },
+              ],
               ...(searchYearLevelCodes.length > 0
                 ? { StudentYearLevel: searchYearLevelCodes }
                 : {}),
@@ -241,6 +246,7 @@ const StudentAttendanceRateReport = () => {
                 };
               })
             }),
+            sort: 'FileYear:ASC,FileSemester:ASC',
             perPage: 99999
           },
           {
@@ -249,8 +255,6 @@ const StudentAttendanceRateReport = () => {
                 "ID",
                 "StudentID",
                 "StudentNameExternal",
-                "FileYear",
-                "FileSemester",
                 "StudentYearLevel",
                 "StudentCampus",
                 "StudentForm",
