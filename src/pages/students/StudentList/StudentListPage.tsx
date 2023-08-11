@@ -1,13 +1,16 @@
 import Page from "../../../layouts/Page";
 import StudentList from "./components/StudentList";
 import StudentListSearchPanel from "./components/StudentListSearchPanel";
-import { useState } from "react";
+import React, { useState } from "react";
 import styled from 'styled-components';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../../redux/makeReduxStore';
+import Page401 from '../../../components/Page401';
 
 
 const Wrapper = styled.div`
   .search-panel {
-    margin-bottom: 1rem;
+    margin-bottom: 2rem;
   }
   
   .student-list-wrapper {
@@ -18,8 +21,19 @@ const Wrapper = styled.div`
 `;
 
 const StudentListPage = () => {
+  const { user } = useSelector((state: RootState) => state.auth);
   const [isLoading, setIsLoading] = useState(false);
   const [searchCriteria, setSearchCriteria] = useState({});
+
+  if (user?.isStaff !== true) {
+    return (
+      <Page401
+        title={"Access to staff only"}
+        description={<h4>Please contact IT or Module Admins for assistant</h4>}
+      />
+    )
+  }
+
   return (
     <Page>
       <Wrapper>

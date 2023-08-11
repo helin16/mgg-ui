@@ -74,6 +74,12 @@ const Wrapper = styled.div`
   .pagination-wrapper {
     margin-top: 1rem;
     margin-left: 0px;
+    .page-item {
+      background-color: white;
+      .page-link {
+        padding: .375rem 0.75rem;
+      }
+    }
   }
   
   .page-size-selector-wrapper {
