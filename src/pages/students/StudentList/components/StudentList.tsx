@@ -87,11 +87,11 @@ const StudentList = ({ className, searchCriteria, isSearching, onSearching }: iS
         }
         const cols = Object.keys(dataList[0])
           .filter(name => ["profileUrl"].indexOf(name) < 0)
-          .map(name => {
+          .map((name, index) => {
             return {
               key: name,
               header: `${name}`,
-              isDefault: name === "StudentID",
+              isDefault: index < 5,
               isSelectable: name !== "StudentID",
               cell: StudentListHelper.getCell(name),
             }
