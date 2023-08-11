@@ -163,7 +163,7 @@ const StudentListSearchPanel = ({
         </Col>
         <Col md={2} sm={4} className={"text-right"}>
           <LoadingBtn variant={'link'} onClick={() => setShowingAdvancedPanel(!showingAdvancedPanel)}>
-            {!showingAdvancedPanel ? <Icons.ChevronDown /> : <Icons.ChevronUp />} Advanced
+            {!showingAdvancedPanel ? <Icons.ChevronDown /> : <Icons.ChevronUp />} Adv.
           </LoadingBtn>
           <LoadingBtn
             onClick={() =>
