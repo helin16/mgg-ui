@@ -106,7 +106,7 @@ const StudentListSearchPanel = ({
             }}
           />
         </Col>
-        <Col md={1} sm={6}>
+        <Col md={2} sm={6}>
           <FormLabel label={'Show Past Stud.'} />
           <FlagSelector
             value={criteria?.StudentIsPastFlag}
