@@ -18,7 +18,7 @@ type iSynFileSemesterSelector = {
 };
 
 const translateFileSemesterToOption = (fileSemester: iSynFileSemester) => {
-  return {value: fileSemester.FileSemestersSeq, data: fileSemester, label: (<>Year:<b>{fileSemester.FileYear}</b>, Sem:<b>{fileSemester.FileSemester}</b><div><small>{moment(fileSemester.StartDate).format('DD MMM YYYY')} ~ {moment(fileSemester.EndDate).format('DD MMM YYYY')}</small></div><div><small>{fileSemester.Description}</small></div></>)}
+  return {value: fileSemester.FileSemestersSeq, data: fileSemester, label: (<>Year:<b>{fileSemester.FileYear}</b>, Term:<b>{fileSemester.FileSemester}</b><div><small>{moment(fileSemester.StartDate).format('DD MMM YYYY')} ~ {moment(fileSemester.EndDate).format('DD MMM YYYY')}</small></div><div><small>{fileSemester.Description}</small></div></>)}
 }
 
 const SynFileSemesterSelector = ({values, onSelect, allowClear, className, isDisabled = false, showIndicator = true, isMulti = false}: iSynFileSemesterSelector) => {

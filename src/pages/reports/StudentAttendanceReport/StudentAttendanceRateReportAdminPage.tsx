@@ -12,6 +12,7 @@ import {
 } from "../../../types/Synergetic/iSchoolManagementTeam";
 import AdminPage from "../../../layouts/AdminPage";
 import AdminPageTabs from "../../../layouts/AdminPageTabs";
+import StudentAttendanceRateReportModuleSettings from './components/StudentAttendanceRateReportModuleSettings';
 
 type iStudentAttendanceRateReportAdminPage = {
   onNavBack: () => void;
@@ -69,6 +70,11 @@ const StudentAttendanceRateReportAdminPage = ({
             />
           </SectionDiv>
         }
+        extraTabs={[{
+          title: 'Settings',
+          key: 'settings',
+          component: <StudentAttendanceRateReportModuleSettings />
+        }]}
       />
     </AdminPage>
   );

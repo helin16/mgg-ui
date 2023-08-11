@@ -14,6 +14,7 @@ type iDateTimePicker = {
   className?: string;
   allowClear?: boolean;
   isDisabled?: boolean;
+  inputClassName?: string;
   isValidDate?: (currentDate: Date, selectedDate: Date) => boolean;
 }
 
@@ -62,7 +63,7 @@ const Wrapper = styled.div`
   }
 `
 const DateTimePicker = ({
-  onChange, value, isValidDate, displayTimeZone, className, allowClear, isDisabled, timeFormat = true, dateFormat = 'DD / MMM / YYYY h:m a'
+  onChange, value, isValidDate, displayTimeZone, inputClassName, className, allowClear, isDisabled, timeFormat = true, dateFormat = 'DD / MMM / YYYY h:m a'
 }: iDateTimePicker) => {
 
   const getValue = () => {
@@ -100,8 +101,8 @@ const DateTimePicker = ({
             dateFormat={dateFormat}
             timeFormat={timeFormat}
             displayTimeZone={displayTimeZone}
-            renderInput={(props) => {
-              return <FormControl {...props} value={value ? props.value : ''} disabled={isDisabled}/>
+            renderInput={({className: clsName, ...props}) => {
+              return <FormControl className={`${clsName} ${inputClassName}`} {...props} value={value ? props.value : ''} disabled={isDisabled}/>
             }}
           />
           { getClearBtn() }

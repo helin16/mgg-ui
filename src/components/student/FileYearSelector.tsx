@@ -9,11 +9,12 @@ type iFileYearSelector = {
   onSelect?: (year: number | null) => void;
   allowClear?: boolean;
   showIndicator?: boolean;
+  showIndicatorSeparator?: boolean;
   isDisabled?: boolean;
   className?: string;
 };
 
-const FileYearSelector = ({isDisabled, min, max, value, onSelect, allowClear, className, showIndicator = true}: iFileYearSelector) => {
+const FileYearSelector = ({isDisabled, min, max, value, onSelect, allowClear, className, showIndicator = true, showIndicatorSeparator = true}: iFileYearSelector) => {
   const minYear = Number(min || moment().subtract(20, 'year').year());
   const maxYear = Number(max || moment().year());
   const options = _.range(minYear, maxYear + 1, 1).map(year => ({value: year, label: `${year}`})).sort((y1, y2) => y1 > y2 ? 1 : -1);
@@ -35,6 +36,7 @@ const FileYearSelector = ({isDisabled, min, max, value, onSelect, allowClear, cl
       value={getSelectedOption()}
       isClearable={allowClear}
       showDropdownIndicator={showIndicator}
+      showIndicatorSeparator={showIndicatorSeparator}
     />
   )
 };

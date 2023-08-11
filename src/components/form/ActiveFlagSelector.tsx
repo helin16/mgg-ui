@@ -5,10 +5,11 @@ type iActiveFlagSelector = {
   value?: iAutoCompleteSingle | boolean | null;
   onSelect?: (value: iAutoCompleteSingle | null) => void;
   showIndicator?: boolean;
+  showIndicatorSeparator?: boolean;
   classname?: string;
 };
 
-const ActiveFlagSelector = ({value, classname, showIndicator, onSelect}: iActiveFlagSelector) => {
+const ActiveFlagSelector = ({value, classname, showIndicator, showIndicatorSeparator = true, onSelect}: iActiveFlagSelector) => {
   const getOption = (option?: string | number | boolean | null) => {
     return {
       label: option === true ? 'Active Only' : (option === false ? 'Inactive Only' : 'All'),
@@ -37,6 +38,7 @@ const ActiveFlagSelector = ({value, classname, showIndicator, onSelect}: iActive
       onChange={onSelect}
       value={getSelectedValues()}
       showDropdownIndicator={showIndicator}
+      showIndicatorSeparator={showIndicatorSeparator}
     />
   )
 }

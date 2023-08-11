@@ -1,19 +1,19 @@
 import styled from 'styled-components';
 import {Col, Row} from 'react-bootstrap';
-import FormLabel from '../../../components/form/FormLabel';
+import FormLabel from '../../../../components/form/FormLabel';
 import Form from 'react-bootstrap/Form';
 import {useEffect, useState} from 'react';
-import UtilsService from '../../../services/UtilsService';
-import SynSubjectClassSelector from '../../../components/student/SynSubjectClassSelector';
-import LoadingBtn from '../../../components/common/LoadingBtn';
+import UtilsService from '../../../../services/UtilsService';
+import SynSubjectClassSelector from '../../../../components/student/SynSubjectClassSelector';
+import LoadingBtn from '../../../../components/common/LoadingBtn';
 import * as Icons from 'react-bootstrap-icons';
 import {useSelector} from 'react-redux';
-import {RootState} from '../../../redux/makeReduxStore';
-import SynVStudentClassService from '../../../services/Synergetic/SynVStudentClassService';
-import Toaster from '../../../services/Toaster';
+import {RootState} from '../../../../redux/makeReduxStore';
+import SynVStudentClassService from '../../../../services/Synergetic/SynVStudentClassService';
+import Toaster from '../../../../services/Toaster';
 import moment from 'moment-timezone';
 import * as _ from 'lodash';
-import {HEADER_NAME_SELECTING_FIELDS} from '../../../services/AppService';
+import {HEADER_NAME_SELECTING_FIELDS} from '../../../../services/AppService';
 
 export type iSearchCriteria = {
   searchText: string;

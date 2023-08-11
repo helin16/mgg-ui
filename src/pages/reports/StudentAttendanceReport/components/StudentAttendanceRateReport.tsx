@@ -54,7 +54,7 @@ const StudentAttendanceRateReport = () => {
   };
   const [isSearching, setIsSearching] = useState(false);
   const [isFetchingSchoolDays, setIsFetchingSchoolDays] = useState(false);
-  const [watchingRate, setWatchingRate] = useState(80);
+  const [watchingRate, setWatchingRate] = useState(90);
   const [loadingPercentage, setLoadingPercentage] = useState(0);
   const [searchingDateRange, setSearchingDateRange] = useState(initDateRange);
   const [searchingSchoolDays, setSearchingSchoolDays] = useState<string[]>([]);

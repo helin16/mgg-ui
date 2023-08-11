@@ -32,6 +32,7 @@ type iBTItemCreatePopupBtn = {
   forYear: number;
   btItem?: iBTItem;
   forceReadyOnly?: boolean;
+  className?: string;
 }
 
 const Wrapper = styled.div`
@@ -69,7 +70,7 @@ const initialItem: iBTItem = {
   item_quantity: 0,
 }
 
-const BTItemCreatePopupBtn = ({onItemSaved, children, btItem, gl, forYear, forceReadyOnly = false}: iBTItemCreatePopupBtn) => {
+const BTItemCreatePopupBtn = ({onItemSaved, children, btItem, gl, forYear, forceReadyOnly = false, className}: iBTItemCreatePopupBtn) => {
   const [isReadyOnly, setIsReadyOnly] = useState(forceReadyOnly);
   const [showingPopup, setShowingPopup] = useState(false);
   const [editingBtItem, setEditingBtItem] = useState(initialItem);
@@ -405,12 +406,12 @@ const BTItemCreatePopupBtn = ({onItemSaved, children, btItem, gl, forYear, force
     )
   }
   return (
-    <Wrapper>
-      <span onClick={() => setShowingPopup(true)}>
+    <>
+      <Wrapper className={className} onClick={() => setShowingPopup(true)}>
         {children}
-      </span>
+      </Wrapper>
       {getPopup()}
-    </Wrapper>
+    </>
   )
 }
 

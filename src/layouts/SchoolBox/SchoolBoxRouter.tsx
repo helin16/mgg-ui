@@ -11,7 +11,7 @@ import {
 import HouseAwardsPage from '../../pages/houseAwards/HouseAwardsPage';
 import MedicalReportPage from '../../pages/medicalReports/MedicalReportPage';
 import CustomScriptUrlGenPage from '../../pages/tools/CustomScriptUrlGenPage';
-import MyClassListPage from '../../pages/students/MyClassListPage';
+import MyClassListPage from '../../pages/students/MyClassList/MyClassListPage';
 import BudgetTrackerPage from '../../pages/BudgetTracker/BudgetTrackerPage';
 import FunnelPage from '../../pages/funnel/FunnelPage';
 import AlumniRequestPage from '../../pages/alumni/AlumniRequestPage';
@@ -26,6 +26,7 @@ import StudentAttendanceRateReportPage
 import OnlineDonationMangerPage from '../../pages/OnlineDonation/OnlineDonationMangerPage';
 import StaffListPage from '../../pages/Staff/StaffListPage';
 import EnrolmentManagementPage from '../../pages/Enrolments/EnrolmentManagementPage';
+import StudentListPage from '../../pages/students/StudentList/StudentListPage';
 // import PageNotFound from '../../components/PageNotFound';
 
 const schoolBoxIframeElementId = 'remote';
@@ -123,6 +124,10 @@ const SchoolBoxRouter = ({path, remoteUrl}: {path: string, remoteUrl: string}) =
     case '/enrolments_admin': {
       removeSchoolBoxIframe();
       return <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_ENROLMENTS}><EnrolmentManagementPage /></ModuleAccessWrapper>
+    }
+    case '/student/list': {
+      removeSchoolBoxIframe();
+      return <StudentListPage />
     }
     default: {
       showSchoolBoxIframe();

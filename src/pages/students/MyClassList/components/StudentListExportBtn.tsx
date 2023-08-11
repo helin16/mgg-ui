@@ -1,6 +1,6 @@
 import * as Icons from 'react-bootstrap-icons';
-import iVStudent from '../../../types/Synergetic/iVStudent';
-import iSynVStudentClass from '../../../types/Synergetic/iSynVStudentClass';
+import iVStudent from '../../../../types/Synergetic/iVStudent';
+import iSynVStudentClass from '../../../../types/Synergetic/iSynVStudentClass';
 import {Button} from 'react-bootstrap';
 import * as XLSX from 'sheetjs-style';
 import moment from 'moment-timezone';

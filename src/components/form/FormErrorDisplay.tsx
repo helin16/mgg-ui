@@ -5,6 +5,14 @@ type iFormErrorDisplay = {
   fieldName: string;
   errorMsg?: string;
 }
+
+export const getErrorClass = (errorsMap: iErrorMap, fieldName: string) => {
+  if (!(fieldName in errorsMap)) {
+    return '';
+  }
+  return `is-invalid`;
+}
+
 const FormErrorDisplay = ({fieldName, errorsMap, errorMsg}: iFormErrorDisplay) => {
   if (!(fieldName in errorsMap)) {
     return null;

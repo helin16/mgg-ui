@@ -1,21 +1,21 @@
 import React, {useState} from 'react';
 import StudentListResultPanel from './components/StudentListResultPanel';
-import ExplanationPanel from '../../components/ExplanationPanel';
+import ExplanationPanel from '../../../components/ExplanationPanel';
 import StudentListSearchPanel, {iSearchCriteria} from './components/StudentListSearchPanel';
 import {useSelector} from 'react-redux';
-import {RootState} from '../../redux/makeReduxStore';
-import SynVStudentClassService from '../../services/Synergetic/SynVStudentClassService';
+import {RootState} from '../../../redux/makeReduxStore';
+import SynVStudentClassService from '../../../services/Synergetic/SynVStudentClassService';
 import moment from 'moment-timezone';
-import Toaster from '../../services/Toaster';
-import iVStudent from '../../types/Synergetic/iVStudent';
-import SynVStudentService from '../../services/Synergetic/SynVStudentService';
-import {HEADER_NAME_SELECTING_FIELDS} from '../../services/AppService';
-import {OP_LIKE, OP_OR} from '../../helper/ServiceHelper';
-import {FlexContainer} from '../../styles';
-import iSynVStudentClass from '../../types/Synergetic/iSynVStudentClass';
-import TimeTableImportPopupBtn from '../../components/timeTable/TimeTableImportPopupBtn';
+import Toaster from '../../../services/Toaster';
+import iVStudent from '../../../types/Synergetic/iVStudent';
+import SynVStudentService from '../../../services/Synergetic/SynVStudentService';
+import {HEADER_NAME_SELECTING_FIELDS} from '../../../services/AppService';
+import {OP_LIKE, OP_OR} from '../../../helper/ServiceHelper';
+import {FlexContainer} from '../../../styles';
+import iSynVStudentClass from '../../../types/Synergetic/iSynVStudentClass';
+import TimeTableImportPopupBtn from '../../../components/timeTable/TimeTableImportPopupBtn';
 import styled from 'styled-components';
-import UtilsService from '../../services/UtilsService';
+import UtilsService from '../../../services/UtilsService';
 
 const Wrapper = styled.div`
   .float-right {
