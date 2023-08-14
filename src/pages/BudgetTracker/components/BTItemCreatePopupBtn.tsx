@@ -11,6 +11,7 @@ type iBTItemCreatePopupBtn = {
   gl: iSynGeneralLedger;
   forYear: number;
   btItem?: iBTItem;
+  hidePopup?: boolean;
   forceReadyOnly?: boolean;
   className?: string;
 };
@@ -23,6 +24,7 @@ const BTItemCreatePopupBtn = ({
   btItem,
   gl,
   forYear,
+  hidePopup = false,
   forceReadyOnly = false,
   className
 }: iBTItemCreatePopupBtn) => {
@@ -63,7 +65,12 @@ const BTItemCreatePopupBtn = ({
   };
   return (
     <>
-      <Wrapper className={className} onClick={() => setShowingPopup(true)}>
+      <Wrapper className={className} onClick={() => {
+        if (hidePopup === true) {
+          return
+        }
+        setShowingPopup(true)
+      }}>
         {children}
       </Wrapper>
       {getPopup()}

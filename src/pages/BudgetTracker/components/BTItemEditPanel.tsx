@@ -118,8 +118,10 @@ const BTItemEditPanel = ({readyOnly, btItem, gl, forYear, onItemSaved, onCancel,
         }
       }, {}));
 
-      if (resp[1] === true) {
+      if (resp[1] === true && btItem?.year && btItem?.year > moment().year()) {
         setIsReadyOnly( false);
+      } else {
+        setIsReadyOnly(true)
       }
     }).catch(err => {
       if (isCanceled) return;
