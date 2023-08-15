@@ -29,7 +29,6 @@ const BTItemCreatePopupBtn = ({
   className
 }: iBTItemCreatePopupBtn) => {
   const [showingPopup, setShowingPopup] = useState(false);
-
   const closePopup = () => {
     // setEditingBtItem(initialItem);
     setShowingPopup(false);

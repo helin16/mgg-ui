@@ -71,6 +71,7 @@ const BTItemEditPanel = ({readyOnly, btItem, gl, forYear, onItemSaved, onCancel,
   const [isReadyOnly, setIsReadyOnly] = useState(readyOnly);
   const [editingBtItem, setEditingBtItem] = useState(initialItem);
   const [isSaving, setIsSaving] = useState(false);
+  const [isModuleAdmin, setIsModuleAdmin] = useState(false);
   const [communityMap, setCommunityMap] = useState<{[key: number]: iSynCommunity}>({});
   const [gettingCommunityInfo, setGettingCommunityInfo] = useState(false);
   const {user: currentUser} = useSelector((root: RootState) => root.auth);
@@ -83,10 +84,10 @@ const BTItemEditPanel = ({readyOnly, btItem, gl, forYear, onItemSaved, onCancel,
     if (readyOnly === true) {
       setIsReadyOnly(readyOnly)
     } else {
-      setIsReadyOnly(btItem?.author_id !== null && btItem?.author_id !== undefined);
+      setIsReadyOnly(btItem?.author_id !== null && btItem?.author_id !== undefined && btItem?.author_id !== currentUser?.synergyId);
     }
     //eslint-disable-next-line
-  }, [btItem, gl.GLCode, readyOnly, btItem?.author_id])
+  }, [btItem, gl.GLCode, readyOnly, btItem?.author_id, currentUser?.synergyId])
 
   useEffect(() => {
     setCommunityMap({});
@@ -117,12 +118,7 @@ const BTItemEditPanel = ({readyOnly, btItem, gl, forYear, onItemSaved, onCancel,
           [com.ID]: com,
         }
       }, {}));
-
-      if (resp[1] === true && btItem?.year && btItem?.year > moment().year()) {
-        setIsReadyOnly( false);
-      } else {
-        setIsReadyOnly(true)
-      }
+      setIsModuleAdmin(resp[1] === true)
     }).catch(err => {
       if (isCanceled) return;
       Toaster.showApiError(err);
@@ -173,7 +169,7 @@ const BTItemEditPanel = ({readyOnly, btItem, gl, forYear, onItemSaved, onCancel,
           <div>
             <FormLabel label={'Approved amount($)'} isRequired/>
             <Form.Control
-              disabled={isReadyOnly === true}
+              disabled={isReadyOnly === true || isModuleAdmin !== true}
               onChange={(event) => setItem('approved_amount', event.target.value)}
               value={editingBtItem.approved_amount || ''}
             />
@@ -182,7 +178,7 @@ const BTItemEditPanel = ({readyOnly, btItem, gl, forYear, onItemSaved, onCancel,
         <div>
           <FormLabel label={'Comments'} isRequired={editingBtItem.declined === true}/>
           <Form.Control
-            disabled={isReadyOnly === true}
+            disabled={isReadyOnly === true || isModuleAdmin !== true}
             onChange={(event) => setItem('approver_comments', event.target.value)}
             value={editingBtItem.approver_comments || ''}
           />
@@ -190,6 +186,7 @@ const BTItemEditPanel = ({readyOnly, btItem, gl, forYear, onItemSaved, onCancel,
       </>
     )
   }
+
   const getApproverInfo = (type: string) => {
     if (gettingCommunityInfo) {
       return (
@@ -273,6 +270,7 @@ const BTItemEditPanel = ({readyOnly, btItem, gl, forYear, onItemSaved, onCancel,
             {isReadyOnly === true ? null : (
               <ButtonGroup size={'sm'}>
                 <Button
+                  disabled={isModuleAdmin !== true}
                   onClick={() => setEditingBtItem({
                     ...editingBtItem,
                     approved: null,
@@ -285,6 +283,7 @@ const BTItemEditPanel = ({readyOnly, btItem, gl, forYear, onItemSaved, onCancel,
                   {BT_ITEM_STATUS_NEW.toUpperCase()}
                 </Button>
                 <Button
+                  disabled={isModuleAdmin !== true}
                   onClick={() => setEditingBtItem({
                     ...editingBtItem,
                     approved: true,
@@ -297,6 +296,7 @@ const BTItemEditPanel = ({readyOnly, btItem, gl, forYear, onItemSaved, onCancel,
                   {BT_ITEM_STATUS_APPROVED.toUpperCase()}
                 </Button>
                 <Button
+                  disabled={isModuleAdmin !== true}
                   onClick={() => setEditingBtItem({
                     ...editingBtItem,
                     approved: null,

@@ -663,7 +663,7 @@ const BTGLDetailsPanel = ({
           forYear={showingYear}
           gl={gl}
           communityMap={communityMap}
-          readyOnly={isReadOnly}
+          readyOnly={true}
         />
       </PopupModal>
     );
@@ -730,7 +730,6 @@ const BTGLDetailsPanel = ({
             gl={gl}
             onItemSaved={() => setCount(MathHelper.add(count, 1))}
             communityMap={communityMap}
-            readyOnly={isReadOnly}
           />
         </div>
       </>
