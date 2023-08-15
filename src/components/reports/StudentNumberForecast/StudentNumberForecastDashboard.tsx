@@ -113,6 +113,7 @@ type iStudentMap = { [key: string]: iVStudent[] };
 type iMap = { [key: string]: iFunnelLead[] };
 type iTuitionFeeMap = { [key: string]: iSynVDebtorFee[] };
 type iStudentConcessionMap = { [key: string]: iSynDebtorStudentConcession[] };
+type iSiblingDiscountFee = iSynVDebtorFee & { discountAmount?: number };
 type iLeadMap = {
   confirmed: iMap;
   inProgress: iMap;
@@ -161,6 +162,9 @@ const StudentNumberForecastDashboard = ({
     user?.SynCurrentFileSemester?.FileYear || moment().year();
   const nextFileYear = MathHelper.add(currentFileYear, 1);
   const [tuitionFeeMap, setTuitionFeeMap] = useState<iTuitionFeeMap>({});
+  const [siblingDiscountFees, setSiblingDiscountFees] = useState<
+    iSiblingDiscountFee[]
+  >([]);
   const [concessionMap, setConcessionMap] = useState<iStudentConcessionMap>({});
   const [confirmedFutureStudentMap, setConfirmedFutureStudentMap] = useState<
     iStudentMap
@@ -243,12 +247,15 @@ const StudentNumberForecastDashboard = ({
     yearLevelCode: string,
     record: iVStudent | iFunnelLead,
     tuitFeeMap: iTuitionFeeMap,
-    concessMap: iStudentConcessionMap
+    concessMap: iStudentConcessionMap,
+    siblingDisFees: iSynVDebtorFee[]
   ) => {
     let yearLevelTuitionFees = 0;
     let yearLevelConsolidateFees = 0;
     let currentConcessions: iSynDebtorStudentConcession[] = [];
     let nextYearConcessions: iSynDebtorStudentConcession[] = [];
+    let currentSiblingDiscounts: iSiblingDiscountFee[] = [];
+    let nextYearSiblingDiscounts: iSiblingDiscountFee[] = [];
     if (yearLevelCode in tuitFeeMap) {
       // @ts-ignore
       tuitFeeMap[yearLevelCode]
@@ -338,6 +345,33 @@ const StudentNumberForecastDashboard = ({
         }));
     }
 
+    // sibling discounts
+    if (
+      "StudentFamilyPosition" in record &&
+      record.StudentFamilyPosition > 0 &&
+      "TuitionNoSibFlag" in record &&
+      record.TuitionNoSibFlag !== true
+    ) {
+      siblingDisFees
+        .filter(fee => fee.FamilyPosition === record.StudentFamilyPosition)
+        .forEach(fee => {
+          currentSiblingDiscounts.push({
+            ...fee,
+            discountAmount: MathHelper.mul(
+              yearLevelTuitionFees,
+              MathHelper.div(fee.DiscountPercentage, 100)
+            )
+          });
+          nextYearSiblingDiscounts.push({
+            ...fee,
+            discountAmount: MathHelper.mul(
+              getNextFeeWithIncreasingPercentage(yearLevelTuitionFees),
+              MathHelper.div(fee.DiscountPercentage, 100)
+            )
+          });
+        });
+    }
+
     const currentConcessionFees = currentConcessions.reduce(
       // @ts-ignore
       (sum, concession) => MathHelper.add(sum, concession.concessionAmount),
@@ -348,15 +382,29 @@ const StudentNumberForecastDashboard = ({
       (sum, concession) => MathHelper.add(sum, concession.concessionAmount),
       0
     );
+    const currentSiblingDiscountFees = currentSiblingDiscounts.reduce(
+      // @ts-ignore
+      (sum, fee) => MathHelper.add(sum, fee.discountAmount),
+      0
+    );
+    const nextYearSiblingDiscountFees = nextYearSiblingDiscounts.reduce(
+      // @ts-ignore
+      (sum, fee) => MathHelper.add(sum, fee.discountAmount),
+      0
+    );
+
     return {
       ...record,
       currentTotalFeeAmount: MathHelper.sub(
-        totalTuitionFeePerYearLevel,
-        currentConcessionFees
+        MathHelper.sub(totalTuitionFeePerYearLevel, currentConcessionFees),
+        currentSiblingDiscountFees
       ),
       futureTotalFeeAmount: MathHelper.sub(
-        getNextFeeWithIncreasingPercentage(totalTuitionFeePerYearLevel),
-        futureConcessionFees
+        MathHelper.sub(
+          getNextFeeWithIncreasingPercentage(totalTuitionFeePerYearLevel),
+          futureConcessionFees
+        ),
+        nextYearSiblingDiscountFees
       ),
       tuitionFees: yearLevelTuitionFees,
       futureTuitionFees: getNextFeeWithIncreasingPercentage(
@@ -369,7 +417,11 @@ const StudentNumberForecastDashboard = ({
       currentConcessionFees,
       currentConcessions,
       futureConcessionFees,
-      nextYearConcessions
+      nextYearConcessions,
+      currentSiblingDiscounts,
+      nextYearSiblingDiscounts,
+      currentSiblingDiscountFees,
+      nextYearSiblingDiscountFees,
     };
   };
 
@@ -461,7 +513,8 @@ const StudentNumberForecastDashboard = ({
             [`${yearLevel.Code}`]: yearLevel
           };
         }, {});
-        const tuitFeeMap = (resp[4].data || [])
+        const fees = resp[4].data || [];
+        const tuitFeeMap = fees
           .filter(
             tuitFee =>
               tuitFee.ActiveFlag === true &&
@@ -478,13 +531,19 @@ const StudentNumberForecastDashboard = ({
             };
           }, {});
         setTuitFeeCodeMap(
-          (resp[4].data || []).reduce(
+          fees.reduce(
             (map, tuitFee) => ({
               ...map,
               [tuitFee.FeeCode]: tuitFee.Description
             }),
             {}
           )
+        );
+        const sibDisFees = fees.filter(
+          fee =>
+            fee.ActiveFlag === true &&
+            fee.FamilyPosition > 0 &&
+            fee.DiscountPercentage > 0
         );
         const concessMap = (resp[3].data || []).reduce(
           (map: iStudentConcessionMap, concession) => {
@@ -505,7 +564,8 @@ const StudentNumberForecastDashboard = ({
             `${yearLevelCode}`,
             student,
             tuitFeeMap,
-            concessMap
+            concessMap,
+            sibDisFees
           );
           currentStudMap = {
             ...currentStudMap,
@@ -555,7 +615,8 @@ const StudentNumberForecastDashboard = ({
               `${ylCode}`,
               stud,
               tuitFeeMap,
-              concessMap
+              concessMap,
+              siblingDiscountFees
             );
             return {
               ...map,
@@ -581,6 +642,7 @@ const StudentNumberForecastDashboard = ({
         setTuitionFeeMap(tuitFeeMap);
         setConcessionMap(concessMap);
         setConfirmedFutureStudentMap(confirmedStudMap);
+        setSiblingDiscountFees(sibDisFees);
         setNextYearFunnelLeadMap(
           (resp[1].data || []).reduce((map: iLeadMap, lead) => {
             const status = getStatusFromLead(lead);
@@ -589,7 +651,8 @@ const StudentNumberForecastDashboard = ({
               `${yearLevelCode}`,
               lead,
               tuitFeeMap,
-              concessMap
+              concessMap,
+              sibDisFees
             );
             return {
               ...map,
@@ -664,7 +727,13 @@ const StudentNumberForecastDashboard = ({
               student => `${student.StudentLeavingDate || ""}`.trim() === ""
             )
             .map(student =>
-              getFeeInfoForStudent(code, student, tuitionFeeMap, concessionMap)
+              getFeeInfoForStudent(
+                code,
+                student,
+                tuitionFeeMap,
+                concessionMap,
+                siblingDiscountFees
+              )
             ),
           ...nextYearConfirmed
         ];
@@ -683,7 +752,8 @@ const StudentNumberForecastDashboard = ({
     yearLevelCodes,
     confirmedFutureStudentMap,
     tuitionFeeMap,
-    concessionMap
+    concessionMap,
+    siblingDiscountFees
   ]);
 
   const getSumPanel = (title: string, sumArr?: any) => {

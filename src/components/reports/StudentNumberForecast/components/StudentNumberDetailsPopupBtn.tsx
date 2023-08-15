@@ -16,6 +16,7 @@ import { FlexContainer } from "../../../../styles";
 import CSVExportBtn from "../../../form/CSVExportBtn";
 import StudentNumberForecastExportHelper from "./StudentNumberForecastExportHelper";
 import iSynDebtorStudentConcession from '../../../../types/Synergetic/Finance/iSynDebtorStudentConcession';
+import iSynVDebtorFee from '../../../../types/Synergetic/Finance/iSynVDebtorFee';
 
 type iStudentNumberDetailsPopup = ButtonProps & {
   records: (iVStudent | iFunnelLead)[];
@@ -28,6 +29,7 @@ const TableWrapper = styled.div`
   .finance-col {
     background-color: #ececec;
 
+    &.sibling-disc,
     &.concession {
       .btn {
         padding: 0px;
@@ -125,6 +127,66 @@ const StudentNumberDetailsPopupBtn = ({
     );
   };
 
+  const getSiblingDiscountDetails = (record: iVStudent | iFunnelLead) => {
+    // @ts-ignore
+    let totalAmount = record.currentSiblingDiscountFees || 0;
+    // @ts-ignore
+    let discounts = record.currentSiblingDiscounts || [];
+    if (showingFuture === true) {
+      // @ts-ignore
+      totalAmount = record.nextYearSiblingDiscountFees || 0;
+      // @ts-ignore
+      discounts = record.nextYearSiblingDiscounts || [];
+    }
+    return (
+      <Popover style={{ maxWidth: "600px" }}>
+        <Popover.Header as="h3">
+          {UtilsService.formatIntoCurrency(totalAmount)}
+        </Popover.Header>
+        <Popover.Body>
+          <BTable>
+            <thead>
+            <tr>
+              <th>Code</th>
+              <th>Name</th>
+              <th>%</th>
+              <th>Amount</th>
+            </tr>
+            </thead>
+            <tbody>
+            {discounts.map(
+              (discount: iSynVDebtorFee, index: number) => {
+                return (
+                  <tr key={index}>
+                    <td>{discount.FeeCode}</td>
+                    <td>{discount.FeeCode in feeNameMap ? feeNameMap[discount.FeeCode]  : ''}</td>
+                    <td>{discount.DiscountPercentage}%</td>
+                    <td>
+                      {UtilsService.formatIntoCurrency(
+                        MathHelper.mul(
+                          showingFuture === true
+                            ? // @ts-ignore
+                            record.futureTuitionFees || 0
+                            : // @ts-ignore
+                            record.tuitionFees || 0,
+                          MathHelper.div(
+                            discount.DiscountPercentage || 0,
+                            100
+                          )
+                        )
+                      )}
+                    </td>
+                  </tr>
+                );
+              }
+            )}
+            </tbody>
+          </BTable>
+        </Popover.Body>
+      </Popover>
+    );
+  };
+
   const getConcessionDiv = (record: iVStudent | iFunnelLead) => {
     if (showingFuture === true) {
       if (
@@ -172,6 +234,60 @@ const StudentNumberDetailsPopupBtn = ({
           {UtilsService.formatIntoCurrency(
             // @ts-ignore
             record.currentConcessionFees || 0
+          )}
+          )
+        </Button>
+      </OverlayTrigger>
+    );
+  };
+
+  const getSiblingDiscountDiv = (record: iVStudent | iFunnelLead) => {
+    if (showingFuture === true) {
+      if (
+        !("nextYearSiblingDiscountFees" in record) ||
+        // @ts-ignore
+        record.nextYearSiblingDiscountFees <= 0
+      ) {
+        return null;
+      }
+      return (
+        <OverlayTrigger
+          trigger="click"
+          placement="left"
+          overlay={getSiblingDiscountDetails(record)}
+          rootClose
+        >
+          <Button variant="link" size={"sm"}>
+            (
+            {UtilsService.formatIntoCurrency(
+              // @ts-ignore
+              record.nextYearSiblingDiscountFees || 0
+            )}
+            )
+          </Button>
+        </OverlayTrigger>
+      );
+    }
+
+    if (
+      !("currentSiblingDiscountFees" in record) ||
+      // @ts-ignore
+      record.currentSiblingDiscountFees <= 0
+    ) {
+      return null;
+    }
+    return (
+      <OverlayTrigger
+        trigger="click"
+        placement="left"
+        overlay={getSiblingDiscountDetails(record)}
+        rootClose
+      >
+        <Button variant="link" size={"sm"}>
+          (
+          {UtilsService.formatIntoCurrency(
+            // @ts-ignore
+            record.currentSiblingDiscountFees || 0
           )}
           )
         </Button>
@@ -426,6 +542,17 @@ const StudentNumberDetailsPopupBtn = ({
               return (
                 <td key={col.key} className={"finance-col concession"}>
                   {getConcessionDiv(record)}
+                </td>
+              );
+            }
+          },
+          {
+            key: "siblingDiscounts",
+            header: "Sibling Dis.",
+            cell: (col: iTableColumn, record: iVStudent | iFunnelLead) => {
+              return (
+                <td key={col.key} className={"finance-col sibling-disc"}>
+                  {getSiblingDiscountDiv(record)}
                 </td>
               );
             }

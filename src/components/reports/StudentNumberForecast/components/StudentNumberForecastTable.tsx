@@ -104,10 +104,10 @@ const StudentNumberForecastTable = ({
   ) => {
     if (forFuture === true) {
       // @ts-ignore
-      return record.futureTotalFeeAmount || 0;
+      return MathHelper.add(record.futureTuitionFees || 0, record.futureConsolidateFees);
     }
     // @ts-ignore
-    return record.currentTotalFeeAmount || 0;
+    return MathHelper.add(record.tuitionFees || 0, record.consolidateFees); //record.currentTotalFeeAmount || 0;
   };
 
   const StudentPopupDiv = (
@@ -244,6 +244,76 @@ const StudentNumberForecastTable = ({
     );
   };
 
+  const getSiblingDiscountCell = (
+    key: string,
+    map: any,
+    data?: ISynLuYearLevel,
+    forFuture: boolean = false
+  ) => {
+    let students = [];
+    if (!data) {
+      // @ts-ignore
+      students = map.total || [];
+    } else if (data.Code === "subTotal") {
+      const yearLevelCodes = yLevelArr
+        // @ts-ignore
+        .filter(yLevel => (data.campuses || []).indexOf(yLevel.Campus) >= 0)
+        .map(yLevel => yLevel.Code);
+      students = yearLevelCodes.reduce(
+        (arr: iVStudent[], code) => [...arr, ...(code in map ? map[code] : [])],
+        []
+      );
+    } else {
+      students = data.Code in map ? map[data.Code] : [];
+    }
+
+    // @ts-ignore
+    const studentsWithSiblingDiscounts: (
+      | iVStudent
+      | iFunnelLead
+      )[] = students.filter((record: iVStudent | iFunnelLead) => {
+      if (forFuture === true) {
+        return (
+          'nextYearSiblingDiscountFees' in record &&
+          // @ts-ignore
+          record.nextYearSiblingDiscountFees > 0
+        );
+      }
+      return (
+        'currentSiblingDiscountFees' in record &&
+        // @ts-ignore
+        record.currentSiblingDiscountFees > 0
+      );
+    });
+
+    return (
+      <td key={key} className={data?.Code === "subTotal" ? "sub-total" : ""}>
+        {StudentPopupDiv(
+          studentsWithSiblingDiscounts,
+          false,
+          <small>
+            (
+            {UtilsService.formatIntoCurrency(
+              studentsWithSiblingDiscounts.reduce(
+                (sum, student) =>
+                  MathHelper.add(
+                    sum,
+                    forFuture === true
+                      ? // @ts-ignore
+                      student.nextYearSiblingDiscountFees
+                      : // @ts-ignore
+                      student.currentSiblingDiscountFees
+                  ),
+                0
+              )
+            )}
+            )
+          </small>
+        )}
+      </td>
+    );
+  };
+
   const getColumns = () => [
     {
       key: "ylevelCode",
@@ -300,6 +370,21 @@ const StudentNumberForecastTable = ({
                 false
               );
             }
+          },
+          {
+            key: "currentSiblingDiscounts",
+            header: "Current Sibling Disc.",
+            cell: (col: iTableColumn, data: ISynLuYearLevel) => {
+              return getSiblingDiscountCell(col.key, currentStudentMap, data, false);
+            },
+            footer: (col: iTableColumn) => {
+              return getSiblingDiscountCell(
+                col.key,
+                currentStudentMap,
+                undefined,
+                false
+              );
+            }
           }
         ]
       : []),
@@ -342,7 +427,17 @@ const StudentNumberForecastTable = ({
           footer: (col: iTableColumn) => {
             return getConcessionCell(col.key, confirmedFutureStudentMap, undefined, true);
           }
-        }
+        },
+        {
+          key: "confirmedSibDisc",
+          header: "Confirmed Sibling Disc.",
+          cell: (col: iTableColumn, data: ISynLuYearLevel) => {
+            return getSiblingDiscountCell(col.key, confirmedFutureStudentMap, data, true);;
+          },
+          footer: (col: iTableColumn) => {
+            return getSiblingDiscountCell(col.key, confirmedFutureStudentMap, undefined, true);
+          }
+        },
       ]
       : [
           {
@@ -393,7 +488,17 @@ const StudentNumberForecastTable = ({
                 true
               );
             }
-          }
+          },
+          {
+            key: "futureSibDisc",
+            header: `${nextFileYear} Sibling Disc.`,
+            cell: (col: iTableColumn, data: ISynLuYearLevel) => {
+              return getSiblingDiscountCell(col.key, futureNextYearMap, data, true);
+            },
+            footer: (col: iTableColumn) => {
+              return getSiblingDiscountCell(col.key, futureNextYearMap, undefined, true);
+            }
+          },
         ]
       : []),
     ...(showingFinanceFigures === true
