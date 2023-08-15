@@ -348,7 +348,7 @@ const BTGLDetailsPanel = ({
             <i>click the number to view details</i>
           </small>
         </span>
-        <Table className={"summary-table"}>
+        <Table className={"summary-table"} responsive>
           <thead>
             <tr>
               <th></th>

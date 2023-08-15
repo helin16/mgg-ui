@@ -22,6 +22,7 @@ type iBTGLItemsTable = {
 
 const Wrapper = styled.div`
   font-size: 12px;
+  overflow: auto;
   .items-table {
     display: table;
     .row {
