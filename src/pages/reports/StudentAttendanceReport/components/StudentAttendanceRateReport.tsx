@@ -38,11 +38,16 @@ import SchoolDaysAllPopupBtn from '../../../dataSubmissions/components/SchoolCen
 import SynVAttendancesWithAbsenceService
   from '../../../../services/Synergetic/Attendance/SynVAttendancesWithAbsenceService';
 import iSynVAttendancesWithAbsence from '../../../../types/Synergetic/Attendance/iSynVAttendancesWithAbsence';
+import MggsModuleService from '../../../../services/Module/MggsModuleService';
+import {MGGS_MODULE_ID_REPORTS_STUDENT_ATTENDANCE_RATE} from '../../../../types/modules/iModuleUser';
 
 type iDateRange = {
   StartDate: string;
   EndDate: string;
 };
+type iExcludingPeriodMap = {
+  [key: string]: { start: string; end: string }[];
+}
 
 const defaultCampusCodes = [CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR];
 const StudentAttendanceRateReport = () => {
@@ -76,6 +81,7 @@ const StudentAttendanceRateReport = () => {
   const [studentAttendanceRateMap, setStudentAttendanceRateMap] = useState<{
     [key: number]: number;
   }>({});
+  const [excludingPeriodsMap, setExcludingPeriodsMap] = useState<iExcludingPeriodMap>({});
 
   useEffect(() => {
     const startDateStr = `${searchingDateRange.StartDate}`.trim();
@@ -95,7 +101,8 @@ const StudentAttendanceRateReport = () => {
       SynFileSemesterService.getSchoolDaysAll({
         start: moment(startDateStr).format('YYYY-MM-DD'),
         end: moment(endDateStr).format('YYYY-MM-DD'),
-      })
+      }),
+      MggsModuleService.getModule(MGGS_MODULE_ID_REPORTS_STUDENT_ATTENDANCE_RATE)
     ])
       .then(resp => {
         if (isCanceled) {
@@ -104,6 +111,17 @@ const StudentAttendanceRateReport = () => {
         const sDays: string[] = (resp[0] || []).filter(day => day.isSchoolDay === true).map(day => day.date);
         setSearchingSchoolDays(_.uniq(sDays));
         setSearchingSchoolDaysAll(resp[0] || []);
+        setExcludingPeriodsMap((resp[1].settings?.excludingDates || []).reduce((map: iExcludingPeriodMap, period: any) => {
+          const key = `${period.yearLevelCode || ''}`.trim();
+          if (key === '') {
+            return map;
+          }
+          return {
+            ...map,
+            // @ts-ignore
+            [key]: [...(key in map? map[key] : []), {start: period.start, end: period.end}]
+          }
+        }, {}))
       })
       .catch(err => {
         if (isCanceled) {
@@ -167,6 +185,7 @@ const StudentAttendanceRateReport = () => {
                   "PossibleAbsenceCode",
                   "PossibleReasonCode",
                   "ClassCancelledFlag",
+                  "StudentYearLevel",
                 ])
               }
             }
@@ -298,6 +317,14 @@ const StudentAttendanceRateReport = () => {
           return;
         }
         if (`${student.StudentLeavingDate || ''}`.trim() !== '' && moment(row.AttendanceDate).isAfter(moment(student.StudentLeavingDate))) {
+          return;
+        }
+        if (`${row.StudentYearLevel}` in excludingPeriodsMap && excludingPeriodsMap[`${row.StudentYearLevel}`].filter(period => {
+          if (moment(row.AttendanceDate).isSameOrAfter(moment(`${period.start}T00:00:00Z`)) && moment(row.AttendanceDate).isSameOrBefore(moment(`${period.end}T00:00:00Z`))) {
+            return true;
+          }
+          return false;
+        }).length > 0) {
           return;
         }
 
