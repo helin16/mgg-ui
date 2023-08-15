@@ -197,7 +197,7 @@ const getListColumns = ({
   },
   {
     key: "ServicedMilestone",
-    header: "Milestone",
+    header: "Service Milestone",
     format: TABLE_COLUMN_FORMAT_CALCULATED,
     cell: (column: iTableColumn, data: iVStaff) => {
       if (`${data.StartDate || ""}`.trim() === "") {
