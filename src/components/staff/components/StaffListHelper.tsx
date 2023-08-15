@@ -185,11 +185,29 @@ const getListColumns = ({
     header: "Serviced Years",
     format: TABLE_COLUMN_FORMAT_CALCULATED,
     cell: (column: iTableColumn, data: iVStaff) => {
-      return `${
-        `${data.StartDate || ""}`.trim() === ""
-          ? ""
-          : Math.abs(moment(`${data.StartDate || ""}`.trim()).diff(moment(),'year'))
-      }`
+      if (`${data.StartDate || ""}`.trim() === "") {
+        return '';
+      }
+      const servicedYears = Math.abs(moment(`${data.StartDate || ""}`.trim()).diff(moment(),'year'));
+      if (servicedYears > 0 ) {
+        return servicedYears;
+      }
+      return '';
+    }
+  },
+  {
+    key: "ServicedMilestone",
+    header: "Serviced Milestone",
+    format: TABLE_COLUMN_FORMAT_CALCULATED,
+    cell: (column: iTableColumn, data: iVStaff) => {
+      if (`${data.StartDate || ""}`.trim() === "") {
+        return '';
+      }
+      const servicedYears = Math.abs(moment(`${data.StartDate || ""}`.trim()).diff(moment(),'year'));
+      if (servicedYears > 0 && servicedYears % 5 === 0) {
+        return servicedYears;
+      }
+      return '';
     }
   },
   {
