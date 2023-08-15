@@ -13,6 +13,7 @@ import SelectBox from "./SelectBox";
 
 export const TABLE_COLUMN_FORMAT_DATE = "Date";
 export const TABLE_COLUMN_FORMAT_BOOLEAN = "Boolean";
+export const TABLE_COLUMN_FORMAT_CALCULATED = "Calculated";
 
 export type iTableColumn = {
   key: string;

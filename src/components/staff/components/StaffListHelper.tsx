@@ -1,4 +1,9 @@
-import {iTableColumn, TABLE_COLUMN_FORMAT_BOOLEAN, TABLE_COLUMN_FORMAT_DATE} from "../../common/Table";
+import {
+  iTableColumn,
+  TABLE_COLUMN_FORMAT_BOOLEAN,
+  TABLE_COLUMN_FORMAT_CALCULATED,
+  TABLE_COLUMN_FORMAT_DATE
+} from "../../common/Table";
 import iVStaff from "../../../types/Synergetic/iVStaff";
 import moment from "moment-timezone";
 import iSynStaffJobPosition from "../../../types/Synergetic/Staff/iSynStaffJobPosition";
@@ -174,6 +179,18 @@ const getListColumns = ({
           ? ""
           : moment(`${data.LeavingDate || ""}`.trim()).format("DD/MM/YYYY")
       }`
+  },
+  {
+    key: "ServicedYears",
+    header: "Serviced Years",
+    format: TABLE_COLUMN_FORMAT_CALCULATED,
+    cell: (column: iTableColumn, data: iVStaff) => {
+      return `${
+        `${data.StartDate || ""}`.trim() === ""
+          ? ""
+          : Math.abs(moment(`${data.StartDate || ""}`.trim()).diff(moment(),'year'))
+      }`
+    }
   },
   {
     key: `${COLUMN_KEY_PREFIX_JP_POS}JobPositionCode`,

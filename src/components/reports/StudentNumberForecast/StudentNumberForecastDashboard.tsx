@@ -384,7 +384,6 @@ const StudentNumberForecastDashboard = ({
           FileYear: currentFileYear,
           FileSemester: currentFileSemester,
           StudentActiveFlag: true
-          // ID: 52807,
         })
       }),
       FunnelService.getAll({

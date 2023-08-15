@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import {
   iTableColumn,
-  TABLE_COLUMN_FORMAT_BOOLEAN,
+  TABLE_COLUMN_FORMAT_BOOLEAN, TABLE_COLUMN_FORMAT_CALCULATED,
   TABLE_COLUMN_FORMAT_DATE
 } from "../../common/Table";
 import { useEffect, useState } from "react";
@@ -52,7 +52,7 @@ const StaffListTable = ({
     accessor: column.key,
   });
 
-  const getFormatCell = (column: iTableColumn, value: any) => {
+  const getFormatCell = (column: iTableColumn, value: any, data?: any) => {
     switch (column.format) {
       case TABLE_COLUMN_FORMAT_BOOLEAN: {
         return `${value === true ? "Y" : "N"}`;
@@ -60,6 +60,9 @@ const StaffListTable = ({
       case TABLE_COLUMN_FORMAT_DATE: {
         const string =`${value || ""}`.trim();
         return string === "" ? "" : moment(string).format("DD/MM/YYYY");
+      }
+      case TABLE_COLUMN_FORMAT_CALCULATED: {
+        return typeof column.cell === 'function' ? column.cell(column, data) : '';
       }
       default: {
         return value;
@@ -91,7 +94,7 @@ const StaffListTable = ({
       },
       Cell: (cell: any) => {
         const dateString = `${cell.cell.row.original[column.key] || ""}`.trim();
-        return getFormatCell(column, dateString);
+        return getFormatCell(column, dateString, cell.cell.row.original);
       }
     };
   };
