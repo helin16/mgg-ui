@@ -27,6 +27,7 @@ import OnlineDonationMangerPage from '../../pages/OnlineDonation/OnlineDonationM
 import StaffListPage from '../../pages/Staff/StaffListPage';
 import EnrolmentManagementPage from '../../pages/Enrolments/EnrolmentManagementPage';
 import StudentListPage from '../../pages/students/StudentList/StudentListPage';
+import SynergeticEmailTemplateManagerPage from '../../pages/SynergeticEmailTemplate/SynergeticEmailTemplateManagerPage';
 // import PageNotFound from '../../components/PageNotFound';
 
 const schoolBoxIframeElementId = 'remote';
@@ -128,6 +129,10 @@ const SchoolBoxRouter = ({path, remoteUrl}: {path: string, remoteUrl: string}) =
     case '/student/list': {
       removeSchoolBoxIframe();
       return <StudentListPage />
+    }
+    case '/synergetic/emailTemplateManager': {
+      removeSchoolBoxIframe();
+      return <SynergeticEmailTemplateManagerPage />
     }
     default: {
       showSchoolBoxIframe();

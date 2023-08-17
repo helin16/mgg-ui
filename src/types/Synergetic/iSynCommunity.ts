@@ -68,7 +68,7 @@ type iSynCommunity = {
   // OccupAddressPAFVersion: string;
   // OccupAddressDPIDBarcode: string;
   // ParkingSpace: string;
-  // NetworkLogin: string;
+  NetworkLogin: string;
   // Barcode: string;
   SilentMobilePhoneFlag: boolean;
   // MobilePhoneActual: string;

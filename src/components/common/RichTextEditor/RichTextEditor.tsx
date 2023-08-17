@@ -1,4 +1,5 @@
 import {Editor} from '@tinymce/tinymce-react';
+import styled from 'styled-components';
 
 type iRichTextEditor = {
   value?: string;
@@ -33,25 +34,34 @@ const defaultToolBars = [
   'alignleft aligncenter alignright alignjustify',
   'bullist numlist',
   'outdent indent',
+  'image media',
   'link',
   'removeformat fullscreen',
 ];
+const Wrapper = styled.div`
+  .tox-statusbar__branding {
+    display: none;
+  }
+`;
+
 const RichTextEditor = ({value, plugins, toolBar, settings, onChange, height = 450}: iRichTextEditor) => {
   // const editorRef = useRef(null);
   return (
-    <Editor
-      initialValue={value || ''}
-      apiKey={process.env.REACT_APP_TINYMCE_API_KEY || ''}
-      onChange={(editor) => onChange && onChange(editor.target.getContent())}
-      init={{
-        height,
-        menubar: true,
-        plugins: plugins || defaultPlugins,
-        toolbar: toolBar || defaultToolBars.join('|'),
-        removed_menuitems: 'newdocument',
-        ...(settings || {})
-      }}
-    />
+    <Wrapper>
+      <Editor
+        initialValue={value || ''}
+        apiKey={process.env.REACT_APP_TINYMCE_API_KEY || ''}
+        onChange={(editor) => onChange && onChange(editor.target.getContent())}
+        init={{
+          height,
+          menubar: true,
+          plugins: plugins || defaultPlugins,
+          toolbar: toolBar || defaultToolBars.join('|'),
+          removed_menuitems: 'newdocument',
+          ...(settings || {})
+        }}
+      />
+    </Wrapper>
   )
 }
 

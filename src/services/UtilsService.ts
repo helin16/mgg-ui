@@ -68,7 +68,9 @@ const letterRange = (start: string, stop: string) => {
 }
 
 const stripHTMLTags = (html: string) => {
-  return html.replace( /(<([^>]+)>)/ig, '');
+  const el = document.createElement('div');
+  el.innerHTML = html;
+  return el.textContent;
 }
 
 const UtilsService = {
