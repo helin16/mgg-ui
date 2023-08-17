@@ -38,7 +38,7 @@ const BTGLTable = ({glCodesResults, selectedYear, onSelectGL, hideZeroBalance = 
     }
 
     const getData = async () => {
-      const btItems = (await Promise.all(_.chunk(glCodes, 50).map(codes => BTItemService.getAll({
+      const btItems = UtilsService.uniqByObjectKey((await Promise.all(_.chunk(glCodes, 50).map(codes => BTItemService.getAll({
         where: JSON.stringify({
           year: MathHelper.add(selectedYear, 1),
           gl_code: codes,
@@ -49,9 +49,9 @@ const BTGLTable = ({glCodesResults, selectedYear, onSelectGL, hideZeroBalance = 
           ...arr,
           ...(resp.data || [])
         ]
-      }, []);
+      }, []), 'id')
 
-      const btBudgets = (await Promise.all(_.chunk(glSeqs, 50).map(codes => SynGeneralLedgerMonthlyBudgetService.getAll({
+      const btBudgets = UtilsService.uniqByObjectKey((await Promise.all(_.chunk(glSeqs, 50).map(codes => SynGeneralLedgerMonthlyBudgetService.getAll({
         where: JSON.stringify({
           GeneralLedgerSeq: glSeqs,
         }),
@@ -61,7 +61,7 @@ const BTGLTable = ({glCodesResults, selectedYear, onSelectGL, hideZeroBalance = 
           ...arr,
           ...(resp.data || [])
         ]
-      }, [])
+      }, []), 'GeneralLedgerMonthlyBudgetsSeq')
 
 
       setBtItemMap(btItems.reduce((map: iBTItemMap, item) => {

@@ -18,6 +18,12 @@ type iBTGLJournalInMonthPanel = {
 
 const Wrapper = styled.div`
   margin: 1rem 0;
+  .summary-row {
+    font-weight: bold;
+    border-top: 1px #ccc solid;
+    margin-top: 0.3rem;
+    padding-top: 0.3rem;
+  }
 `;
 
 type iSumMap = {
@@ -53,6 +59,7 @@ const BTGLJournalInMonthPanel = ({year, gl}: iBTGLJournalInMonthPanel) => {
   const [isLoading, setIsLoading] = useState(false);
   const [journalMap, setJournalMap] = useState<iSumMap>(initSumMap);
   const [actualBudget, setActualBudget] = useState<number | null>(null);
+  const [yearToDateJournalTotal, setYearToDateJournalTotal] = useState(0);
 
   useEffect(() => {
     let isCanceled = false;
@@ -71,13 +78,15 @@ const BTGLJournalInMonthPanel = ({year, gl}: iBTGLJournalInMonthPanel) => {
     ])
     .then(resp => {
       if(isCanceled) return;
-
+      let total = 0;
       setJournalMap(resp[0].data.reduce((map: iSumMap, journal) => {
         const month = moment(journal.GLDate).format('MMMM');
+        // @ts-ignore
+        const subTotal = MathHelper.add(map[month] || 0, journal.GLAmount);
+        total = MathHelper.add(total, subTotal);
         return {
           ...map,
-          // @ts-ignore
-          [month]: MathHelper.add(map[month] || 0, journal.GLAmount),
+          [month]: subTotal,
         }
       }, initSumMap))
 
@@ -88,6 +97,8 @@ const BTGLJournalInMonthPanel = ({year, gl}: iBTGLJournalInMonthPanel) => {
       } else {
         setActualBudget(null);
       }
+
+      setYearToDateJournalTotal(total);
     }).catch(err => {
       if(isCanceled) return;
       Toaster.showApiError(err)
@@ -138,6 +149,10 @@ const BTGLJournalInMonthPanel = ({year, gl}: iBTGLJournalInMonthPanel) => {
           )
         })
       }
+      <FlexContainer className={'full-width justify-content space-between summary-row'}>
+        <div><b>Total</b></div>
+        <div>{UtilsService.formatIntoCurrency(yearToDateJournalTotal)}</div>
+      </FlexContainer>
     </Wrapper>
   )
 };
