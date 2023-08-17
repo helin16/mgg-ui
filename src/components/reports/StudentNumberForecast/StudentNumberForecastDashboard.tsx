@@ -35,7 +35,6 @@ import iSynVDebtorFee, {
 import ToggleBtn from "../../common/ToggleBtn";
 import {
   OP_BETWEEN,
-  OP_GT,
   OP_GTE,
   OP_LTE,
   OP_OR
@@ -421,7 +420,7 @@ const StudentNumberForecastDashboard = ({
       currentSiblingDiscounts,
       nextYearSiblingDiscounts,
       currentSiblingDiscountFees,
-      nextYearSiblingDiscountFees,
+      nextYearSiblingDiscountFees
     };
   };
 
@@ -464,7 +463,6 @@ const StudentNumberForecastDashboard = ({
             AUTO_TUITION_CODE_TUITION_CONCESSION,
             AUTO_TUITION_CODE_TUITION
           ],
-          OverridePercentage: { [OP_GT]: 0 },
           [OP_OR]: [
             {
               EffectiveFromDate: {
@@ -514,6 +512,9 @@ const StudentNumberForecastDashboard = ({
           };
         }, {});
         const fees = resp[4].data || [];
+        const feesMap = fees.reduce((map, fee) => {
+          return { ...map, [fee.FeeCode]: fee };
+        }, {});
         const tuitFeeMap = fees
           .filter(
             tuitFee =>
@@ -550,7 +551,19 @@ const StudentNumberForecastDashboard = ({
             const sId = `${concession.ID}`;
             return {
               ...map,
-              [sId]: [...(sId in map ? map[sId] : []), concession]
+              [sId]: [
+                ...(sId in map ? map[sId] : []),
+                {
+                  ...concession,
+                  OverridePercentage:
+                    concession.OverrideAmountFlag === true
+                      ? concession.OverridePercentage
+                      : concession.FeeCode in feesMap
+                      // @ts-ignore
+                      ? feesMap[concession.FeeCode].DiscountPercentage
+                      : 0
+                }
+              ]
             };
           },
           {}
