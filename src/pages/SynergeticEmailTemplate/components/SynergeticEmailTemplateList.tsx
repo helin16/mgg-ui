@@ -93,13 +93,14 @@ const SynergeticEmailTemplateList = () => {
           <td key={col.key}>
             <SynergeticEmailTemplateEditPopupBtn
               template={data}
+              className={'ellipsis'}
               onSaved={() => setCount(MathHelper.add(count, 1))}
               variant={"link"}
               size={"sm"}
             >
               {data.Name}
             </SynergeticEmailTemplateEditPopupBtn>
-            <div><i><small>{data.Description}</small></i></div>
+            <div className={'ellipsis'}><i><small>{data.Description}</small></i></div>
           </td>
         );
       }
@@ -112,6 +113,7 @@ const SynergeticEmailTemplateList = () => {
           <td key={col.key} className={'message'}>
             <SynergeticEmailTemplateEditPopupBtn
               template={data}
+              className={'ellipsis'}
               onSaved={() => setCount(MathHelper.add(count, 1))}
               variant={"link"}
               size={"sm"}
