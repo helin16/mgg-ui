@@ -220,7 +220,7 @@ const StudentNumberForecastTable = ({
       <td key={key} className={data?.Code === "subTotal" ? "sub-total" : ""}>
         {StudentPopupDiv(
           studentsWithConcessions,
-          false,
+          forFuture,
           <small>
             (
             {UtilsService.formatIntoCurrency(
@@ -290,7 +290,7 @@ const StudentNumberForecastTable = ({
       <td key={key} className={data?.Code === "subTotal" ? "sub-total" : ""}>
         {StudentPopupDiv(
           studentsWithSiblingDiscounts,
-          false,
+          forFuture,
           <small>
             (
             {UtilsService.formatIntoCurrency(

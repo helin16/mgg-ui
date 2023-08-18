@@ -1,5 +1,6 @@
 export const AUTO_TUITION_CODE_TUITION = 'T';
 export const AUTO_TUITION_CODE_CONSOLIDATED_CHARGES = 'CC';
+export const AUTO_TUITION_CODE_OTHER_CHARGES = 'O';
 export const AUTO_TUITION_CODE_TUITION_CONCESSION = 'TC';
 
 type iSynLuDebtorAutoTuition = {
