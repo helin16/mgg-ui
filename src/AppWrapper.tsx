@@ -119,6 +119,11 @@ const AppWrapper = styled.div`
 
   .form-control {
     border: 1px solid #ced4da;
+
+    &.is-invalid,
+    &:invalid {
+      border-color: #dc3545;
+    }
   }
 
   .space {

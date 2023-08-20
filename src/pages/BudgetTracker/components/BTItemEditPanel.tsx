@@ -23,6 +23,7 @@ import LoadingBtn from '../../../components/common/LoadingBtn';
 import moment from 'moment-timezone';
 import styled from 'styled-components';
 import iSynGeneralLedger from '../../../types/Synergetic/Finance/iSynGeneralLedager';
+import FormErrorDisplay, {iErrorMap} from '../../../components/form/FormErrorDisplay';
 
 type iBTItemEditPanel = {
   readyOnly?: boolean;
@@ -74,6 +75,7 @@ const BTItemEditPanel = ({readyOnly, btItem, gl, forYear, onItemSaved, onCancel,
   const [isModuleAdmin, setIsModuleAdmin] = useState(false);
   const [communityMap, setCommunityMap] = useState<{[key: number]: iSynCommunity}>({});
   const [gettingCommunityInfo, setGettingCommunityInfo] = useState(false);
+  const [errorMap, setErrorMap] = useState({});
   const {user: currentUser} = useSelector((root: RootState) => root.auth);
 
   useEffect(() => {
@@ -138,7 +140,47 @@ const BTItemEditPanel = ({readyOnly, btItem, gl, forYear, onItemSaved, onCancel,
     });
   }
 
+  const preCheck = () => {
+    const errors: iErrorMap = {};
+    if (`${editingBtItem.budget_item_category_guid || ''}`.trim() === '') {
+      errors.budget_item_category_guid = `Category is required.`;
+    }
+    if (`${editingBtItem.name || ''}`.trim() === '') {
+      errors.name = `Name is required.`;
+    }
+    if (`${editingBtItem.description || ''}`.trim() === '') {
+      errors.description = `Reason is required.`;
+    }
+    if (`${editingBtItem.item_quantity || ''}`.trim() === '') {
+      errors.item_quantity = `Item Qty is required.`;
+    } else if (!UtilsService.isNumeric(`${editingBtItem.item_quantity || ''}`.trim())) {
+      errors.item_quantity = `Item Qty needs to be a number like: 12 or 123.45`;
+    }
+    if (`${editingBtItem.item_cost || ''}`.trim() === '') {
+      errors.item_cost = `Item Cost is required.`;
+    } else if (!UtilsService.isNumeric(`${editingBtItem.item_cost || ''}`.trim())) {
+      errors.item_cost = `Item Cost needs to be a number like: 12 or 123.45`;
+    }
+
+    if(editingBtItem.approved === true) {
+      if (`${editingBtItem.approved_amount || ''}`.trim() === '') {
+        errors.approved_amount = 'Approved amount is needed.'
+      } else if (!UtilsService.isNumeric(`${editingBtItem.approved_amount || ''}`.trim())) {
+        errors.approved_amount = `Approved Amount needs to be a number like: 12 or 123.45`;
+      }
+    }
+
+    if(editingBtItem.declined === true && `${editingBtItem.approver_comments || ''}`.trim() === '') {
+      errors.approver_comments = 'A reason for declining is needed.'
+    }
+    setErrorMap(errors);
+    return Object.keys(errors).length === 0;
+  }
+
   const submit = () => {
+    if (!preCheck()) {
+      return;
+    }
     setIsSaving(true);
     const func = editingBtItem.id ? BTItemService.update(editingBtItem.id, {
       ...editingBtItem,
@@ -169,19 +211,23 @@ const BTItemEditPanel = ({readyOnly, btItem, gl, forYear, onItemSaved, onCancel,
           <div>
             <FormLabel label={'Approved amount($)'} isRequired/>
             <Form.Control
+              isInvalid={'approved_amount' in errorMap}
               disabled={isReadyOnly === true || isModuleAdmin !== true}
               onChange={(event) => setItem('approved_amount', event.target.value)}
               value={editingBtItem.approved_amount || ''}
             />
+            <FormErrorDisplay errorsMap={errorMap} fieldName={'approved_amount'} />
           </div>
         )}
         <div>
           <FormLabel label={'Comments'} isRequired={editingBtItem.declined === true}/>
           <Form.Control
+            isInvalid={'approver_comments' in errorMap}
             disabled={isReadyOnly === true || isModuleAdmin !== true}
             onChange={(event) => setItem('approver_comments', event.target.value)}
             value={editingBtItem.approver_comments || ''}
           />
+          <FormErrorDisplay errorsMap={errorMap} fieldName={'approver_comments'} />
         </div>
       </>
     )
@@ -318,6 +364,13 @@ const BTItemEditPanel = ({readyOnly, btItem, gl, forYear, onItemSaved, onCancel,
     )
   }
 
+  const getTotal = () => {
+    if (!UtilsService.isNumeric(`${editingBtItem?.item_quantity || ''}`.trim()) || !UtilsService.isNumeric(`${editingBtItem?.item_cost || ''}`.trim())) {
+      return 0;
+    }
+    return UtilsService.formatIntoCurrency(MathHelper.mul(editingBtItem?.item_quantity || 0, editingBtItem?.item_cost || 0));
+  }
+
   return (
     <Wrapper className={className}>
       <Row>
@@ -325,6 +378,7 @@ const BTItemEditPanel = ({readyOnly, btItem, gl, forYear, onItemSaved, onCancel,
         <Col sm={10}>
           <BTItemCategorySelector
             isDisabled={isReadyOnly === true}
+            isInvalid={'budget_item_category_guid' in errorMap}
             value={editingBtItem?.budget_item_category_guid || ''}
             onSelect={(option) => {
               const category = option?.data || null;
@@ -335,23 +389,27 @@ const BTItemEditPanel = ({readyOnly, btItem, gl, forYear, onItemSaved, onCancel,
               })
             }}
           />
+          <FormErrorDisplay errorsMap={errorMap} fieldName={'budget_item_category_guid'} />
         </Col>
       </Row>
       <Row>
         <Col sm={2} className={'title-col'}><FormLabel label={'Item Name:'} isRequired /></Col>
         <Col sm={10}>
           <Form.Control
+            isInvalid={'name' in errorMap}
             placeholder={'The name of the budget item...'}
             value={editingBtItem?.name || ''}
             onChange={(event) => setItem('name', event.target.value)}
             disabled={isReadyOnly === true}
           />
+          <FormErrorDisplay errorsMap={errorMap} fieldName={'name'} />
         </Col>
       </Row>
       <Row>
         <Col sm={2} className={'title-col'}><FormLabel label={'Reason For Purchase:'} isRequired /></Col>
         <Col sm={10}>
           <Form.Control
+            isInvalid={'description' in errorMap}
             disabled={isReadyOnly === true}
             className={'reason-input'}
             as="textarea"
@@ -359,27 +417,32 @@ const BTItemEditPanel = ({readyOnly, btItem, gl, forYear, onItemSaved, onCancel,
             value={editingBtItem?.description || ''}
             onChange={(event) => setItem('description', event.target.value)}
           />
+          <FormErrorDisplay errorsMap={errorMap} fieldName={'description'} />
         </Col>
       </Row>
       <Row>
         <Col sm={2} className={'title-col'}><FormLabel label={'Qty to purchase:'} isRequired /></Col>
         <Col sm={2}>
           <Form.Control
+            isInvalid={'item_quantity' in errorMap}
             value={editingBtItem?.item_quantity || 0}
             disabled={isReadyOnly === true}
             onChange={(event) => setItem('item_quantity', event.target.value)}
           />
+          <FormErrorDisplay errorsMap={errorMap} fieldName={'item_quantity'} />
         </Col>
         <Col sm={2} className={'title-col'}><FormLabel label={'Unit Cost($):'} isRequired /></Col>
         <Col sm={2}>
           <Form.Control
+            isInvalid={'item_cost' in errorMap}
             value={editingBtItem?.item_cost || 0}
             disabled={isReadyOnly === true}
             onChange={(event) => setItem('item_cost', event.target.value)} />
+          <FormErrorDisplay errorsMap={errorMap} fieldName={'item_cost'} />
         </Col>
         <Col sm={2} className={'title-col'}>Total Cost($):</Col>
         <Col sm={2}>
-          <h5>{UtilsService.formatIntoCurrency(MathHelper.mul(editingBtItem?.item_quantity || 0, editingBtItem?.item_cost || 0))}</h5>
+          <h5>{getTotal()}</h5>
         </Col>
       </Row>
       {getAdminPanel()}
