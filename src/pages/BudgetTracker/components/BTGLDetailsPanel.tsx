@@ -764,6 +764,9 @@ const BTGLDetailsPanel = ({
           </span>
         </FlexContainer>
         <div>
+          <Button variant={'link'} size={'sm'} onClick={() => setCount(MathHelper.add(count, 1))}>
+            <Icons.BootstrapReboot />{' '} Refresh
+          </Button>
           <BTItemExportBtn
             items={btItems}
             size={"sm"}
