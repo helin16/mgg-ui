@@ -2,6 +2,7 @@ import ReactDOM from "react-dom";
 import React, {ReactComponentElement} from "react";
 import OnlineDonation from './pages/OnlineDonation/OnlineDonation';
 import {ToastContainer} from 'react-toastify';
+import AlumniRegistrationForm from './pages/alumni/components/AlumniRegistrationForm';
 
 const load = (query: string, component: ReactComponentElement<any>) => {
   const roots = document.querySelectorAll(query) || [];
@@ -17,6 +18,25 @@ const loadAll = () => {
     // @ts-ignore
     <React.StrictMode>
       <OnlineDonation />
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+    </React.StrictMode>
+  );
+
+  load(
+    '[mgg-app-loader="alumni-reg-form"]',
+    // @ts-ignore
+    <React.StrictMode>
+      <AlumniRegistrationForm />
       <ToastContainer
         position="top-right"
         autoClose={3000}

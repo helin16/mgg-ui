@@ -278,7 +278,7 @@ const BTItemEditPanel = ({readyOnly, btItem, gl, forYear, onItemSaved, onCancel,
   const getFooter = () => {
     if (isReadyOnly) {
       return (
-        <FlexContainer className={'justify-content space-between full-width'}>
+        <FlexContainer className={'justify-content-between full-width'}>
           {getCreationInfo()}
           <div>
             <LoadingBtn variant={'primary'} onClick={() => onCancel()}>
