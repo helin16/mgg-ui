@@ -1,15 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { Button, ButtonProps } from "react-bootstrap";
+import { Button, ButtonProps, FormControl } from "react-bootstrap";
 import iSynCommunicationTemplate from "../../../types/Synergetic/iSynCommunicationTemplate";
 import PopupModal from "../../../components/common/PopupModal";
 import LoadingBtn from "../../../components/common/LoadingBtn";
 import * as Icons from "react-bootstrap-icons";
 import RichTextEditor from "../../../components/common/RichTextEditor/RichTextEditor";
 import styled from "styled-components";
-import Toaster, {TOAST_TYPE_ERROR, TOAST_TYPE_SUCCESS} from "../../../services/Toaster";
+import Toaster, {
+  TOAST_TYPE_ERROR,
+  TOAST_TYPE_SUCCESS
+} from "../../../services/Toaster";
 import SynCommunicationTemplateService from "../../../services/Synergetic/SynCommunicationTemplateService";
+import { FlexContainer } from "../../../styles";
+import ButtonGroup from "react-bootstrap/ButtonGroup";
+import FormLabel from "../../../components/form/FormLabel";
 
 type iSynergeticEmailTemplateEditPopupBtn = ButtonProps & {
+  editingMetaData?: boolean;
   template: iSynCommunicationTemplate;
   onSaved: (newTemplate: iSynCommunicationTemplate) => void;
 };
@@ -18,29 +25,45 @@ const Wrapper = styled.div`
   .tox.tox-tinymce {
     min-height: calc(100vh - 15rem) !important;
   }
+  
+  .form-row {
+    margin-bottom: 1rem;
+  }
 `;
 const SynergeticEmailTemplateEditPopupBtn = ({
   template,
   onSaved,
+  editingMetaData = false,
   ...props
 }: iSynergeticEmailTemplateEditPopupBtn) => {
+  const [isEditingMetaData, setIsEditingMetaData] = useState(editingMetaData);
   const [isShowingPopup, setIsShowingPopup] = useState(false);
-  const [content, setContent] = useState("");
+  const [editingTemplate, setEditingTemplate] = useState<{
+    [key: string]: any;
+  }>({});
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    setContent(`${template?.MessageBody || ""}`.trim());
+    setEditingTemplate(template || {});
   }, [template]);
 
+  const updateTemplate = (fieldName: string, newValue: any) => {
+    setEditingTemplate({
+      ...editingTemplate,
+      [fieldName]: newValue
+    });
+  };
+
   const submit = () => {
-    if (`${content}`.trim() === "") {
+    if (`${editingTemplate?.MessageBody || ""}`.trim() === "") {
       Toaster.showToast(`Template can NOT be empty.`, TOAST_TYPE_ERROR);
       return;
     }
     setIsSaving(true);
-    SynCommunicationTemplateService.update(template.CommunicationTemplatesSeq, {
-        MessageBody: content
-      })
+    SynCommunicationTemplateService.update(
+      template.CommunicationTemplatesSeq,
+      editingTemplate
+    )
       .then(resp => {
         Toaster.showToast(`Template Saved Successfully`, TOAST_TYPE_SUCCESS);
         onSaved(resp);
@@ -58,7 +81,47 @@ const SynergeticEmailTemplateEditPopupBtn = ({
       return;
     }
     setIsShowingPopup(false);
-  }
+  };
+console.log('isEditingMetaData', isEditingMetaData);
+  const getBodyForm = () => {
+    if (isEditingMetaData === true) {
+      return (
+        <>
+          <div className={'form-row'}>
+            <FormLabel label={"Name"} isRequired />
+            <FormControl
+              value={editingTemplate?.Name || ""}
+              placeholder={'The Name of the template'}
+              onChange={event => updateTemplate("Name", event.target.value)}
+            />
+          </div>
+          <div className={'form-row'}>
+            <FormLabel label={"Description"} />
+            <FormControl
+              value={editingTemplate?.Description || ""}
+              placeholder={'The Description of the template'}
+              onChange={event => updateTemplate("Description", event.target.value)}
+            />
+          </div>
+          <div className={'form-row'}>
+            <FormLabel label={"Subject"} />
+            <FormControl
+              value={editingTemplate?.MessageSubject || ""}
+              placeholder={'The Subject of the email'}
+              onChange={event => updateTemplate("MessageSubject", event.target.value)}
+            />
+          </div>
+        </>
+      );
+    }
+
+    return (
+      <RichTextEditor
+        value={editingTemplate?.MessageBody || ""}
+        onChange={text => updateTemplate("MessageBody", text)}
+      />
+    );
+  };
 
   return (
     <>
@@ -68,11 +131,31 @@ const SynergeticEmailTemplateEditPopupBtn = ({
       <PopupModal
         show={isShowingPopup}
         title={
-          <h6>
-            {`${template?.CommunicationTemplatesSeq || ""}`.trim() === ""
-              ? "Creating..."
-              : "Editing..."}
-          </h6>
+          <FlexContainer className={"with-gap lg-gap align-items end"}>
+            <h6 style={{ margin: 0 }}>
+              {`${template?.CommunicationTemplatesSeq || ""}`.trim() === ""
+                ? "Creating..."
+                : `Editing ${editingTemplate.Name || ''} ...`}
+            </h6>
+            <ButtonGroup size={"sm"}>
+              <Button
+                variant={
+                  isEditingMetaData === true ? "primary" : "outline-primary"
+                }
+                onClick={() => setIsEditingMetaData(true)}
+              >
+                Message
+              </Button>
+              <Button
+                variant={
+                  isEditingMetaData !== true ? "secondary" : "outline-secondary"
+                }
+                onClick={() => setIsEditingMetaData(false)}
+              >
+                Message Body
+              </Button>
+            </ButtonGroup>
+          </FlexContainer>
         }
         size={"lg"}
         dialogClassName={"modal-90w"}
@@ -99,9 +182,7 @@ const SynergeticEmailTemplateEditPopupBtn = ({
           </>
         }
       >
-        <Wrapper>
-          <RichTextEditor value={content} onChange={text => setContent(text)} />
-        </Wrapper>
+        <Wrapper>{getBodyForm()}</Wrapper>
       </PopupModal>
     </>
   );

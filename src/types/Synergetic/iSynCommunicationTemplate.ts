@@ -1,4 +1,5 @@
 export const SYN_COMMUNICATION_TEMPLATE_TYPE_HTML = 'HTML';
+export const SYN_COMMUNICATION_TEMPLATE_DOCUMENT_CLASSIFICATION_GENERAL_INFO = 'GENINFO';
 
 type iSynCommunicationTemplate = {
   CommunicationTemplatesSeq: number;

@@ -1,144 +1,205 @@
-import React from 'react';
-import StudentReport from '../../pages/studentReport/StudentReport';
-import OperooSafetyAlertsPage from '../../pages/operoo/OperooSafetyAlertsPage';
-import ModuleAccessWrapper from '../../components/module/ModuleAccessWrapper';
+import React from "react";
+import StudentReport from "../../pages/studentReport/StudentReport";
+import OperooSafetyAlertsPage from "../../pages/operoo/OperooSafetyAlertsPage";
+import ModuleAccessWrapper from "../../components/module/ModuleAccessWrapper";
 import {
-  MGGS_MODULE_ID_ALUMNI_REQUEST, MGGS_MODULE_ID_ENROLMENTS, MGGS_MODULE_ID_FINANCE,
+  MGGS_MODULE_ID_ALUMNI_REQUEST,
+  MGGS_MODULE_ID_ENROLMENTS,
+  MGGS_MODULE_ID_FINANCE,
   MGGS_MODULE_ID_FUNNEL,
-  MGGS_MODULE_ID_HOUSE_AWARDS, MGGS_MODULE_ID_MGG_APP_DEVICES, MGGS_MODULE_ID_ONLINE_DONATION,
-  MGGS_MODULE_ID_OPEROO_SAFETY_ALERTS, MGGS_MODULE_ID_SCHOOL_DATA_SUBMISSION, MGGS_MODULE_ID_STAFF_LIST,
-} from '../../types/modules/iModuleUser';
-import HouseAwardsPage from '../../pages/houseAwards/HouseAwardsPage';
-import MedicalReportPage from '../../pages/medicalReports/MedicalReportPage';
-import CustomScriptUrlGenPage from '../../pages/tools/CustomScriptUrlGenPage';
-import MyClassListPage from '../../pages/students/MyClassList/MyClassListPage';
-import BudgetTrackerPage from '../../pages/BudgetTracker/BudgetTrackerPage';
-import FunnelPage from '../../pages/funnel/FunnelPage';
-import AlumniRequestPage from '../../pages/alumni/AlumniRequestPage';
-import ParentDirectoryPage from '../../pages/parent/ParentDirectoryPage';
-import SchoolDataSubmissionsPage from '../../pages/dataSubmissions/SchoolDataSubmissionsPage';
-import StudentAbsenceParentSubmissionForm from '../../components/StudentAbsence/StudentAbsenceParentSubmissionForm';
-import StudentAbsencePage from '../../pages/studentAbsences/StudentAbsencePage';
-import MggDevicesPage from '../../pages/devices/MggDevicesPage';
-import FinancePage from '../../pages/Finance/FinancePage';
-import StudentAttendanceRateReportPage
-  from '../../pages/reports/StudentAttendanceReport/StudentAttendanceRateReportPage';
-import OnlineDonationMangerPage from '../../pages/OnlineDonation/OnlineDonationMangerPage';
-import StaffListPage from '../../pages/Staff/StaffListPage';
-import EnrolmentManagementPage from '../../pages/Enrolments/EnrolmentManagementPage';
-import StudentListPage from '../../pages/students/StudentList/StudentListPage';
-import SynergeticEmailTemplateManagerPage from '../../pages/SynergeticEmailTemplate/SynergeticEmailTemplateManagerPage';
+  MGGS_MODULE_ID_HOUSE_AWARDS,
+  MGGS_MODULE_ID_MGG_APP_DEVICES,
+  MGGS_MODULE_ID_ONLINE_DONATION,
+  MGGS_MODULE_ID_OPEROO_SAFETY_ALERTS,
+  MGGS_MODULE_ID_SCHOOL_DATA_SUBMISSION,
+  MGGS_MODULE_ID_STAFF_LIST,
+  MGGS_MODULE_ID_SYN_EMAIL_TEMPLATE
+} from "../../types/modules/iModuleUser";
+import HouseAwardsPage from "../../pages/houseAwards/HouseAwardsPage";
+import MedicalReportPage from "../../pages/medicalReports/MedicalReportPage";
+import CustomScriptUrlGenPage from "../../pages/tools/CustomScriptUrlGenPage";
+import MyClassListPage from "../../pages/students/MyClassList/MyClassListPage";
+import BudgetTrackerPage from "../../pages/BudgetTracker/BudgetTrackerPage";
+import FunnelPage from "../../pages/funnel/FunnelPage";
+import AlumniRequestPage from "../../pages/alumni/AlumniRequestPage";
+import ParentDirectoryPage from "../../pages/parent/ParentDirectoryPage";
+import SchoolDataSubmissionsPage from "../../pages/dataSubmissions/SchoolDataSubmissionsPage";
+import StudentAbsenceParentSubmissionForm from "../../components/StudentAbsence/StudentAbsenceParentSubmissionForm";
+import StudentAbsencePage from "../../pages/studentAbsences/StudentAbsencePage";
+import MggDevicesPage from "../../pages/devices/MggDevicesPage";
+import FinancePage from "../../pages/Finance/FinancePage";
+import StudentAttendanceRateReportPage from "../../pages/reports/StudentAttendanceReport/StudentAttendanceRateReportPage";
+import OnlineDonationMangerPage from "../../pages/OnlineDonation/OnlineDonationMangerPage";
+import StaffListPage from "../../pages/Staff/StaffListPage";
+import EnrolmentManagementPage from "../../pages/Enrolments/EnrolmentManagementPage";
+import StudentListPage from "../../pages/students/StudentList/StudentListPage";
+import SynergeticEmailTemplateManagerPage from "../../pages/SynergeticEmailTemplate/SynergeticEmailTemplateManagerPage";
 // import PageNotFound from '../../components/PageNotFound';
 
-const schoolBoxIframeElementId = 'remote';
-const SchoolBoxRouter = ({path, remoteUrl}: {path: string, remoteUrl: string}) => {
-
+const schoolBoxIframeElementId = "remote";
+const SchoolBoxRouter = ({
+  path,
+  remoteUrl
+}: {
+  path: string;
+  remoteUrl: string;
+}) => {
   const removeSchoolBoxIframe = () => {
-    const schoolBoxIframeElement = document.querySelector(`iframe#${schoolBoxIframeElementId}`);
+    const schoolBoxIframeElement = document.querySelector(
+      `iframe#${schoolBoxIframeElementId}`
+    );
     if (schoolBoxIframeElement) {
       schoolBoxIframeElement.remove();
     }
-  }
+  };
 
   const showSchoolBoxIframe = () => {
-    const schoolBoxIframeElement = document.querySelector(`iframe#${schoolBoxIframeElementId}`);
+    const schoolBoxIframeElement = document.querySelector(
+      `iframe#${schoolBoxIframeElementId}`
+    );
     if (schoolBoxIframeElement) {
       // @ts-ignore
-      schoolBoxIframeElement.style.display = 'block';
+      schoolBoxIframeElement.style.display = "block";
     }
-  }
+  };
 
   switch (path) {
-    case '/bt': {
+    case "/bt": {
       removeSchoolBoxIframe();
-      return <BudgetTrackerPage />
+      return <BudgetTrackerPage />;
     }
-    case '/parent/directory': {
+    case "/parent/directory": {
       removeSchoolBoxIframe();
-      return <ParentDirectoryPage />
+      return <ParentDirectoryPage />;
     }
-    case '/reports/student': {
+    case "/reports/student": {
       removeSchoolBoxIframe();
       return <StudentReport />;
     }
-    case '/reports/student_attendance': {
+    case "/reports/student_attendance": {
       removeSchoolBoxIframe();
-      return <StudentAttendanceRateReportPage />
+      return <StudentAttendanceRateReportPage />;
     }
-    case '/operoo/safetyAlerts': {
+    case "/operoo/safetyAlerts": {
       removeSchoolBoxIframe();
-      return <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_OPEROO_SAFETY_ALERTS}><OperooSafetyAlertsPage /></ModuleAccessWrapper>;
+      return (
+        <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_OPEROO_SAFETY_ALERTS}>
+          <OperooSafetyAlertsPage />
+        </ModuleAccessWrapper>
+      );
     }
-    case '/houseAwards': {
+    case "/houseAwards": {
       removeSchoolBoxIframe();
-      return <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_HOUSE_AWARDS}><HouseAwardsPage /></ModuleAccessWrapper>;
+      return (
+        <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_HOUSE_AWARDS}>
+          <HouseAwardsPage />
+        </ModuleAccessWrapper>
+      );
     }
-    case '/medial/action_plan': {
+    case "/medial/action_plan": {
       removeSchoolBoxIframe();
-      return <MedicalReportPage />
+      return <MedicalReportPage />;
     }
-    case '/helper/url/mconnect': {
+    case "/helper/url/mconnect": {
       removeSchoolBoxIframe();
-      return <CustomScriptUrlGenPage customUrl={remoteUrl} customUrlPath={path}/>
+      return (
+        <CustomScriptUrlGenPage customUrl={remoteUrl} customUrlPath={path} />
+      );
     }
-    case '/my_student': {
+    case "/my_student": {
       removeSchoolBoxIframe();
-      return <MyClassListPage />
+      return <MyClassListPage />;
     }
-    case '/funnel': {
+    case "/funnel": {
       removeSchoolBoxIframe();
-      return <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_FUNNEL}><FunnelPage /></ModuleAccessWrapper>
+      return (
+        <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_FUNNEL}>
+          <FunnelPage />
+        </ModuleAccessWrapper>
+      );
     }
-    case '/school_data_submission': {
+    case "/school_data_submission": {
       removeSchoolBoxIframe();
-      return <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_SCHOOL_DATA_SUBMISSION}><SchoolDataSubmissionsPage /></ModuleAccessWrapper>
+      return (
+        <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_SCHOOL_DATA_SUBMISSION}>
+          <SchoolDataSubmissionsPage />
+        </ModuleAccessWrapper>
+      );
     }
-    case '/alumni/admin': {
+    case "/alumni/admin": {
       removeSchoolBoxIframe();
-      return <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_ALUMNI_REQUEST}><AlumniRequestPage /></ModuleAccessWrapper>
+      return (
+        <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_ALUMNI_REQUEST}>
+          <AlumniRequestPage />
+        </ModuleAccessWrapper>
+      );
     }
-    case 'student_absence_parent_form': {
+    case "student_absence_parent_form": {
       removeSchoolBoxIframe();
-      return <StudentAbsenceParentSubmissionForm />
+      return <StudentAbsenceParentSubmissionForm />;
     }
 
-    case '/student_inout/home': {
+    case "/student_inout/home": {
       removeSchoolBoxIframe();
-      return <StudentAbsencePage />
+      return <StudentAbsencePage />;
     }
-    case '/mobile_devices': {
+    case "/mobile_devices": {
       removeSchoolBoxIframe();
-      return <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_MGG_APP_DEVICES}><MggDevicesPage /></ModuleAccessWrapper>
+      return (
+        <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_MGG_APP_DEVICES}>
+          <MggDevicesPage />
+        </ModuleAccessWrapper>
+      );
     }
-    case '/finance': {
+    case "/finance": {
       removeSchoolBoxIframe();
-      return <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_FINANCE}><FinancePage /></ModuleAccessWrapper>
+      return (
+        <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_FINANCE}>
+          <FinancePage />
+        </ModuleAccessWrapper>
+      );
     }
-    case '/online_donation/admin': {
+    case "/online_donation/admin": {
       removeSchoolBoxIframe();
-      return <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_ONLINE_DONATION}><OnlineDonationMangerPage /></ModuleAccessWrapper>
+      return (
+        <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_ONLINE_DONATION}>
+          <OnlineDonationMangerPage />
+        </ModuleAccessWrapper>
+      );
     }
-    case '/staff/list': {
+    case "/staff/list": {
       removeSchoolBoxIframe();
-      return <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_STAFF_LIST}><StaffListPage /></ModuleAccessWrapper>
+      return (
+        <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_STAFF_LIST}>
+          <StaffListPage />
+        </ModuleAccessWrapper>
+      );
     }
-    case '/enrolments_admin': {
+    case "/enrolments_admin": {
       removeSchoolBoxIframe();
-      return <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_ENROLMENTS}><EnrolmentManagementPage /></ModuleAccessWrapper>
+      return (
+        <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_ENROLMENTS}>
+          <EnrolmentManagementPage />
+        </ModuleAccessWrapper>
+      );
     }
-    case '/student/list': {
+    case "/student/list": {
       removeSchoolBoxIframe();
-      return <StudentListPage />
+      return <StudentListPage />;
     }
-    case '/synergetic/emailTemplateManager': {
+    case "/synergetic/emailTemplateManager": {
       removeSchoolBoxIframe();
-      return <SynergeticEmailTemplateManagerPage />
+      return (
+        <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_SYN_EMAIL_TEMPLATE}>
+          <SynergeticEmailTemplateManagerPage />
+        </ModuleAccessWrapper>
+      );
     }
     default: {
       showSchoolBoxIframe();
       return null; //<PageNotFound />
     }
   }
-}
+};
 
 export default SchoolBoxRouter;

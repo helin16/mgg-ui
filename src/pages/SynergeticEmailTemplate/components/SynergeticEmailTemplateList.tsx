@@ -5,7 +5,7 @@ import iSynCommunicationTemplate, {
   SYN_COMMUNICATION_TEMPLATE_TYPE_HTML
 } from "../../../types/Synergetic/iSynCommunicationTemplate";
 import SynCommunicationTemplateService from "../../../services/Synergetic/SynCommunicationTemplateService";
-import Toaster from "../../../services/Toaster";
+import Toaster, { TOAST_TYPE_SUCCESS } from "../../../services/Toaster";
 import Table, { iTableColumn } from "../../../components/common/Table";
 import moment from "moment-timezone";
 import { FlexContainer } from "../../../styles";
@@ -17,13 +17,13 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/makeReduxStore";
 import { OP_OR } from "../../../helper/ServiceHelper";
 import SynergeticEmailTemplateEditPopupBtn from "./SynergeticEmailTemplateEditPopupBtn";
-import styled from 'styled-components';
-import UtilsService from '../../../services/UtilsService';
-
+import styled from "styled-components";
+import UtilsService from "../../../services/UtilsService";
+import DeleteConfirmPopupBtn from "../../../components/common/DeleteConfirm/DeleteConfirmPopupBtn";
 
 const Wrapper = styled.div`
   .templates-table {
-    .btn {
+    .btn.btn-link {
       padding: 0px;
     }
     td.message {
@@ -93,14 +93,18 @@ const SynergeticEmailTemplateList = () => {
           <td key={col.key}>
             <SynergeticEmailTemplateEditPopupBtn
               template={data}
-              className={'ellipsis'}
+              className={"ellipsis"}
               onSaved={() => setCount(MathHelper.add(count, 1))}
               variant={"link"}
               size={"sm"}
             >
               {data.Name}
             </SynergeticEmailTemplateEditPopupBtn>
-            <div className={'ellipsis'}><i><small>{data.Description}</small></i></div>
+            <div className={"ellipsis"}>
+              <i>
+                <small>{data.Description}</small>
+              </i>
+            </div>
           </td>
         );
       }
@@ -110,17 +114,23 @@ const SynergeticEmailTemplateList = () => {
       header: "Message",
       cell: (col: iTableColumn, data: iSynCommunicationTemplate) => {
         return (
-          <td key={col.key} className={'message'}>
+          <td key={col.key} className={"message"}>
             <SynergeticEmailTemplateEditPopupBtn
               template={data}
-              className={'ellipsis'}
+              className={"ellipsis"}
               onSaved={() => setCount(MathHelper.add(count, 1))}
               variant={"link"}
               size={"sm"}
             >
               {data.MessageSubject}
             </SynergeticEmailTemplateEditPopupBtn>
-            <div className={'ellipsis'}><i><small>{UtilsService.stripHTMLTags(data.MessageBody || '')}</small></i></div>
+            <div className={"ellipsis"}>
+              <i>
+                <small>
+                  {UtilsService.stripHTMLTags(data.MessageBody || "")}
+                </small>
+              </i>
+            </div>
           </td>
         );
       }
@@ -182,6 +192,47 @@ const SynergeticEmailTemplateList = () => {
           </td>
         );
       }
+    },
+    {
+      key: "operations",
+      header: "",
+      cell: (col: iTableColumn, data: iSynCommunicationTemplate) => {
+        return (
+          <td key={col.key} className={'text-right'}>
+            <SynergeticEmailTemplateEditPopupBtn
+              editingMetaData={true}
+              template={data}
+              className={"ellipsis"}
+              onSaved={() => setCount(MathHelper.add(count, 1))}
+              variant={"outline-secondary"}
+              size={"sm"}
+            >
+              <Icons.Pencil /> {' '} Edit
+            </SynergeticEmailTemplateEditPopupBtn>
+            {' '}
+            <DeleteConfirmPopupBtn
+              variant={'danger'}
+              size={'sm'}
+              deletingFn={() =>
+                SynCommunicationTemplateService.update(
+                  data.CommunicationTemplatesSeq,
+                  {
+                    PrivateFlag: true,
+                    ...(`${data.Owner}`.trim() === 'zSynergeticCoreAPI' ? {} : { Owner: `MGG\\cda` }),
+                  }
+                )
+              }
+              deletedCallbackFn = {() => {
+                Toaster.showToast(`Template Archived Successfully`, TOAST_TYPE_SUCCESS);
+                setCount(MathHelper.add(count, 1));
+              }}
+              confirmString={`${data.CommunicationTemplatesSeq}`}
+            >
+              <Icons.Trash />{' '} Archive
+            </DeleteConfirmPopupBtn>
+          </td>
+        );
+      }
     }
   ];
 
@@ -216,7 +267,10 @@ const SynergeticEmailTemplateList = () => {
         </div>
       </FlexContainer>
       <Table
-        className={'templates-table'}
+        responsive
+        hover
+        striped
+        className={"templates-table"}
         columns={getColumns()}
         rows={templateList?.data || []}
         isLoading={isLoading === true && currentPage > 1}
