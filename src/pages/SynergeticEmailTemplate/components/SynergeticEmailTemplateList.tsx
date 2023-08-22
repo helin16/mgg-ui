@@ -195,7 +195,20 @@ const SynergeticEmailTemplateList = () => {
     },
     {
       key: "operations",
-      header: "",
+      header: (col: iTableColumn) => {
+        return (
+          <th key={col.key} className={'text-right'}>
+            <SynergeticEmailTemplateEditPopupBtn
+              editingMetaData={true}
+              onSaved={() => setCount(MathHelper.add(count, 1))}
+              variant={"success"}
+              size={"sm"}
+            >
+              <Icons.Plus /> {' '} New
+            </SynergeticEmailTemplateEditPopupBtn>
+          </th>
+        )
+      },
       cell: (col: iTableColumn, data: iSynCommunicationTemplate) => {
         return (
           <td key={col.key} className={'text-right'}>

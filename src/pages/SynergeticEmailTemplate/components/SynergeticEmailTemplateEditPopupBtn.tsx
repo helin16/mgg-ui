@@ -17,7 +17,7 @@ import FormLabel from "../../../components/form/FormLabel";
 
 type iSynergeticEmailTemplateEditPopupBtn = ButtonProps & {
   editingMetaData?: boolean;
-  template: iSynCommunicationTemplate;
+  template?: iSynCommunicationTemplate;
   onSaved: (newTemplate: iSynCommunicationTemplate) => void;
 };
 
@@ -25,7 +25,7 @@ const Wrapper = styled.div`
   .tox.tox-tinymce {
     min-height: calc(100vh - 15rem) !important;
   }
-  
+
   .form-row {
     margin-bottom: 1rem;
   }
@@ -55,15 +55,23 @@ const SynergeticEmailTemplateEditPopupBtn = ({
   };
 
   const submit = () => {
+    if (`${editingTemplate?.Name || ""}`.trim() === "") {
+      Toaster.showToast(`Template Name can NOT be empty.`, TOAST_TYPE_ERROR);
+      return;
+    }
     if (`${editingTemplate?.MessageBody || ""}`.trim() === "") {
       Toaster.showToast(`Template can NOT be empty.`, TOAST_TYPE_ERROR);
       return;
     }
     setIsSaving(true);
-    SynCommunicationTemplateService.update(
-      template.CommunicationTemplatesSeq,
-      editingTemplate
-    )
+    const func =
+      `${editingTemplate.CommunicationTemplatesSeq || ""}`.trim() === ""
+        ? SynCommunicationTemplateService.create(editingTemplate)
+        : SynCommunicationTemplateService.update(
+            editingTemplate.CommunicationTemplatesSeq,
+            editingTemplate
+          );
+    func
       .then(resp => {
         Toaster.showToast(`Template Saved Successfully`, TOAST_TYPE_SUCCESS);
         onSaved(resp);
@@ -82,33 +90,37 @@ const SynergeticEmailTemplateEditPopupBtn = ({
     }
     setIsShowingPopup(false);
   };
-console.log('isEditingMetaData', isEditingMetaData);
+  console.log("isEditingMetaData", isEditingMetaData);
   const getBodyForm = () => {
     if (isEditingMetaData === true) {
       return (
         <>
-          <div className={'form-row'}>
+          <div className={"form-row"}>
             <FormLabel label={"Name"} isRequired />
             <FormControl
               value={editingTemplate?.Name || ""}
-              placeholder={'The Name of the template'}
+              placeholder={"The Name of the template"}
               onChange={event => updateTemplate("Name", event.target.value)}
             />
           </div>
-          <div className={'form-row'}>
+          <div className={"form-row"}>
             <FormLabel label={"Description"} />
             <FormControl
               value={editingTemplate?.Description || ""}
-              placeholder={'The Description of the template'}
-              onChange={event => updateTemplate("Description", event.target.value)}
+              placeholder={"The Description of the template"}
+              onChange={event =>
+                updateTemplate("Description", event.target.value)
+              }
             />
           </div>
-          <div className={'form-row'}>
+          <div className={"form-row"}>
             <FormLabel label={"Subject"} />
             <FormControl
               value={editingTemplate?.MessageSubject || ""}
-              placeholder={'The Subject of the email'}
-              onChange={event => updateTemplate("MessageSubject", event.target.value)}
+              placeholder={"The Subject of the email"}
+              onChange={event =>
+                updateTemplate("MessageSubject", event.target.value)
+              }
             />
           </div>
         </>
@@ -135,7 +147,7 @@ console.log('isEditingMetaData', isEditingMetaData);
             <h6 style={{ margin: 0 }}>
               {`${template?.CommunicationTemplatesSeq || ""}`.trim() === ""
                 ? "Creating..."
-                : `Editing ${editingTemplate.Name || ''} ...`}
+                : `Editing ${editingTemplate.Name || ""} ...`}
             </h6>
             <ButtonGroup size={"sm"}>
               <Button
