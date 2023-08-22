@@ -53,7 +53,7 @@ const SynergeticEmailTemplateList = () => {
           },
           {
             PrivateFlag: true,
-            Owner: `${user?.SynCommunity?.NetworkLogin || ""}`
+            Owner: `MGG\\${user?.SynCommunity?.NetworkLogin || ""}`
           }
         ]
       }),
