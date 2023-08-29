@@ -2,9 +2,12 @@ import {useTable, useBlockLayout, useResizeColumns} from 'react-table';
 import { useSticky } from 'react-table-sticky';
 import styled from 'styled-components';
 import {useEffect, useMemo, useState} from 'react';
+import {Spinner} from 'react-bootstrap';
+import {FlexContainer} from '../../styles';
 
 type iReactTableWithFixedColumns = {
   hover?: boolean;
+  isLoading?: boolean;
   htmlId?: string;
   className?: string;
   data: any[];
@@ -90,6 +93,8 @@ const Wrapper = styled.div`
 
       [data-sticky-td] {
         position: sticky;
+        left: 0px !important;
+        right: 0px !important;
       }
 
       [data-sticky-last-left-td] {
@@ -111,9 +116,26 @@ const Wrapper = styled.div`
       }
     }
   }
+  
+  &.loading {
+    position: relative;
+    .loading-mask {
+      z-index: 99999;
+      color: white;
+      background-color: rgba(160, 160, 160, 0.95);
+      position: absolute;
+      height: 100%;
+      top: 0px;
+      left: 0px;
+      right: 0px;
+      bottom: 0px;
+      width: 100%;
+    }
+  }
 `
 
 const ReactTableWithFixedColumns = ({
+  isLoading,
   hover,
   htmlId,
   data,
@@ -166,8 +188,20 @@ const ReactTableWithFixedColumns = ({
     )
   }
 
+  const getLoadingMask = () => {
+    if (isLoading !== true) {
+      return null;
+    }
+    return <FlexContainer className={'loading-mask text-center justify-content-around align-items-center'}>
+      <div className={'text'}>
+        <Spinner animation={'border'} />
+        <div>Loading</div>
+      </div>
+    </FlexContainer>
+  }
+
   return (
-    <Wrapper className={className}>
+    <Wrapper className={`${className || ''} ${isLoading === true ? 'loading' : ''}`}>
       <table {...getTableProps()} className={`table sticky ${hover ? 'hover' : ''}`} id={htmlId}>
         <thead className="header">
           {headerGroups.map((headerGroup) => (
@@ -209,6 +243,7 @@ const ReactTableWithFixedColumns = ({
         </tbody>
         {getFooter()}
       </table>
+      {getLoadingMask()}
     </Wrapper>
   )
 }

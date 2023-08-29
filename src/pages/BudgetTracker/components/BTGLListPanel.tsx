@@ -92,7 +92,7 @@ const BTGLListPanel = ({ selectedYear, onChangeYear, onSelectGL, setShowingAdmin
 
   return (
     <Wrapper>
-      <FlexContainer className={'justify-content space-between align-items end'}>
+      <FlexContainer className={'justify-content space-between align-items center'}>
         <h3>Budget Tracker</h3>
         <FlexContainer className={'options justify-content space-between  align-items center'}>
           <div>

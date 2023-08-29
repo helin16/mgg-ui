@@ -17,12 +17,16 @@ import HouseAwardScoreCell from './HouseAwardScoreCell';
 import HouseAwardConfirmAwardPopupBtn from './HouseAwardConfirmAwardPopupBtn';
 import {OP_LTE} from '../../../helper/ServiceHelper';
 import SynVStudentService from '../../../services/Synergetic/SynVStudentService';
+import CSVExportBtn from '../../../components/form/CSVExportBtn';
+import {FlexContainer} from '../../../styles';
+import HouseAwardExportHelper from './HouseAwardExportHelper';
 
 type iHouseAwardScoreTable = {
   house: iSynLuHouse;
   type: iHouseAwardEventType;
   yearLevel: ISynLuYearLevel;
   fileYear: number;
+  htmlId?: string;
   events: iHouseAwardEvent[];
   isDisabled?: boolean;
   isLoadingStudents?: boolean;
@@ -31,6 +35,7 @@ const Wrapper = styled.div`
 `;
 const HouseAwardScoreTable = ({
   house,
+  htmlId,
   type,
   yearLevel,
   fileYear,
@@ -44,6 +49,7 @@ const HouseAwardScoreTable = ({
   const [studentScoreMap, setStudentScoreMap] = useState<{ [key: number]: {[key: number]: iHouseAwardScore} }>({});
   const [notAwardedScoreMap, setNotAwardedScoreMap] = useState<{ [key: number]: {[key: number]: iHouseAwardScore} }>({});
   const [loadingStudentId, setLoadingStudentId] = useState<number | null>(null);
+  const [count, setCount] = useState(0);
 
   useEffect(() => {
     let isCanceled = false;
@@ -139,14 +145,13 @@ const HouseAwardScoreTable = ({
     return () => {
       isCanceled = true;
     }
-  }, [house, type, yearLevel, events, fileYear]);
+  }, [house, type, yearLevel, events, fileYear, count]);
 
   const columnLeftFix = [
     {
       Header: "ID",
       accessor: "student.StudentID",
       sticky: "left",
-      width: 50,
     }, {
       Header: "Surname",
       accessor: "student.StudentSurname",
@@ -161,7 +166,6 @@ const HouseAwardScoreTable = ({
       Header: `Year ${fileYear - 1}`,
       accessor: 'lastYearTotal',
       sticky: "left",
-      width: 30,
     }];
 
   const onRefreshStudentYear = (studentId: number) => {
@@ -217,27 +221,8 @@ const HouseAwardScoreTable = ({
           eventType={type}
           studentId={cell.cell.row.original.student.StudentID}
           fileYear={fileYear}
-          onAddedScore={(newScore: iHouseAwardScore) => {
-            setStudentScoreMap({
-              ...studentScoreMap,
-              [newScore.StudentID]: {
-                ...studentScoreMap[newScore.StudentID],
-                [newScore.event_id]: newScore,
-              }
-            })
-            onRefreshStudentYear(cell.cell.row.original.student.StudentID);
-          }}
-          onDeletedScore={(deletedScore: iHouseAwardScore) => {
-            if (!(deletedScore.StudentID in studentScoreMap)) {
-              return;
-            }
-            if (!(deletedScore.event_id in studentScoreMap[deletedScore.StudentID])) {
-              return;
-            }
-            delete studentScoreMap[deletedScore.StudentID][deletedScore.event_id];
-            setStudentScoreMap({...studentScoreMap})
-            onRefreshStudentYear(cell.cell.row.original.student.StudentID);
-          }}
+          onAddedScore={() => setCount(MathHelper.add(count, 1))}
+          onDeletedScore={() => setCount(MathHelper.add(count, 1))}
         />
       );
     }
@@ -277,7 +262,6 @@ const HouseAwardScoreTable = ({
       },
       accessor: "total",
       sticky: 'right',
-      width: 40,
       Cell: (cell: any) => {
         const scoreMap = (cell.cell.row.original.student.StudentID in studentScoreMap ? studentScoreMap[cell.cell.row.original.student.StudentID] : {});
         const lastTotal = cell.cell.row.original.lastYearTotal || 0;
@@ -290,7 +274,6 @@ const HouseAwardScoreTable = ({
       },
       accessor: "currentYearTotal",
       sticky: 'right',
-      width: 60,
       Cell: (cell: any) => {
         const {total} = getNotWardedScores(cell);
         return (
@@ -310,7 +293,6 @@ const HouseAwardScoreTable = ({
       },
       accessor: "actions",
       sticky: 'right',
-      width: 70,
       Cell: (cell: any) => {
         const {total, scores} = getNotWardedScores(cell);
         if (total < type.points_to_be_awarded) {
@@ -332,29 +314,52 @@ const HouseAwardScoreTable = ({
       },
     }];
 
+
   const getTable = () => {
-    if (isLoading || isLoadingStudents) {
+    if ((isLoading || isLoadingStudents) && count <= 0 ) {
       return <Spinner animation={'border'} />
     }
     if (Object.values(studentMap).length <= 0) {
       return null;
     }
+
+    const students = Object.values(studentMap)
+      .sort((student1, student2) => student1.StudentSurname > student2.StudentSurname ? 1 : -1)
+      .map(student => {
+        return {
+          student,
+          lastYearTotal: (student.StudentID in lastStudentYearMap ? lastStudentYearMap[student.StudentID].total_score_minus_award : 0),
+        }
+      });
     return (
-      <ReactTableWithFixedColumns
-        data={Object.values(studentMap)
-          .sort((student1, student2) => student1.StudentSurname > student2.StudentSurname ? 1 : -1)
-          .map(student => {
-            return {
-              student,
-              lastYearTotal: (student.StudentID in lastStudentYearMap ? lastStudentYearMap[student.StudentID].total_score_minus_award : 0),
+      <>
+        <FlexContainer className={`summary-row ${house.Code.toLowerCase()} justify-content-between`}>
+          <h5>
+            ({students.length}) Student(s) in <u>Year {yearLevel?.Description}</u> {fileYear}:
+          </h5>
+          <CSVExportBtn // @ts-ignore
+            fetchingFnc={() =>
+              new Promise(resolve => {
+                resolve(students);
+              })
             }
-          })}
-        columns={[
-          ...columnLeftFix,
-          ...columnEvents,
-          ...columnRightFix,
-        ]}
-      />
+            downloadFnc={() => HouseAwardExportHelper.genExcel(students, house, yearLevel, fileYear, events, studentScoreMap)}
+            size={"sm"}
+            variant={"link"}
+          />
+        </FlexContainer>
+        <ReactTableWithFixedColumns
+          htmlId={htmlId}
+          className={'students-table'}
+          isLoading={isLoading && count > 0}
+          data={students}
+          columns={[
+            ...columnLeftFix,
+            ...columnEvents,
+            ...columnRightFix,
+          ]}
+        />
+      </>
     )
   }
 

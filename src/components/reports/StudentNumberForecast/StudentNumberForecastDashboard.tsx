@@ -25,7 +25,7 @@ import iFunnelLead, {
 import SynLuYearLevelService from "../../../services/Synergetic/Lookup/SynLuYearLevelService";
 import ISynLuYearLevel from "../../../types/Synergetic/Lookup/iSynLuYearLevel";
 import ExplanationPanel from "../../ExplanationPanel";
-import iVStudent from "../../../types/Synergetic/iVStudent";
+import iVStudent, {SYN_STUDENT_STATUS_ID_REPEATING} from "../../../types/Synergetic/iVStudent";
 import StudentNumberForecastTable from "./components/StudentNumberForecastTable";
 import StudentNumberDetailsPopupBtn from "./components/StudentNumberDetailsPopupBtn";
 import SynVDebtorFeeService from "../../../services/Synergetic/Finance/SynVDebtorFeeService";
@@ -861,8 +861,9 @@ const StudentNumberForecastDashboard = ({
             ? confirmedFutureStudentMap[code]
             : [];
         let currentYearStudentLowerLevel: iVStudent[] = [];
+        let currentYearStudentLowerLevelCode;
         if (currentIndex > 0) {
-          const currentYearStudentLowerLevelCode =
+          currentYearStudentLowerLevelCode =
             yearLevelCodes[MathHelper.sub(currentIndex, 1)];
           currentYearStudentLowerLevel =
             currentYearStudentLowerLevelCode in currentStudentMap
@@ -873,7 +874,7 @@ const StudentNumberForecastDashboard = ({
           // }
         }
         const futureNextYear = [
-          ...currentYearStudentLowerLevel
+          ...(currentYearStudentLowerLevel
             .filter(
               student => `${student.StudentLeavingDate || ""}`.trim() === ""
             )
@@ -887,15 +888,26 @@ const StudentNumberForecastDashboard = ({
                 siblingIdsMap,
                 communityMap
               )
-            ),
-          ...nextYearConfirmed
+            )),
+
         ];
         return {
           ...map,
           // @ts-ignore
-          total: [...(map.total || []), ...futureNextYear],
+          total: [...(map.total || []), ...nextYearConfirmed, ...futureNextYear],
           // @ts-ignore
-          [code]: [...(map[code] || []), ...futureNextYear]
+          [code]: [...(map[code] || []), ...nextYearConfirmed, ...futureNextYear.filter(
+            // @ts-ignore
+            student => `${student.StudentLeavingDate || ""}`.trim() === "" && `${student.StudentStatus || ''}`.trim() !== SYN_STUDENT_STATUS_ID_REPEATING
+          )],
+          ...(`${currentYearStudentLowerLevelCode || ''}`.trim() === '' ? {} : {
+            // @ts-ignore
+            [currentYearStudentLowerLevelCode]: [...(map[currentYearStudentLowerLevelCode] || []), ...futureNextYear
+              .filter(
+                // @ts-ignore
+                student => `${student.StudentLeavingDate || ""}`.trim() === "" && `${student.StudentStatus || ''}`.trim() === SYN_STUDENT_STATUS_ID_REPEATING
+              )]
+          })
         };
       }, {})
     );

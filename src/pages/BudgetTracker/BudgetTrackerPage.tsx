@@ -12,6 +12,13 @@ const initialYear = moment().year();
 const Wrapper = styled.div`
   .year-selector {
     font-size: 12px;
+    [class$='-control'] {
+      min-height: auto;
+      [class$='-indicatorContainer'] {
+        padding-top: 0px;
+        padding-bottom: 0px;
+      }
+    }
   }
 `;
 const BudgetTrackerPage = () => {
