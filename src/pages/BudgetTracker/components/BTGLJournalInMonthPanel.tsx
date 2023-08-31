@@ -78,18 +78,17 @@ const BTGLJournalInMonthPanel = ({year, gl}: iBTGLJournalInMonthPanel) => {
     ])
     .then(resp => {
       if(isCanceled) return;
-      let total = 0;
-      setJournalMap(resp[0].data.reduce((map: iSumMap, journal) => {
+
+      const jMap = resp[0].data.reduce((map: iSumMap, journal) => {
         const month = moment(journal.GLDate).format('MMMM');
         // @ts-ignore
         const subTotal = MathHelper.add(map[month] || 0, journal.GLAmount);
-        total = MathHelper.add(total, subTotal);
         return {
           ...map,
           [month]: subTotal,
         }
-      }, initSumMap))
-
+      }, initSumMap);
+      setJournalMap(jMap)
       if ((resp[1] || []).length > 0) {
         setActualBudget((resp[1] || []).reduce((sum, record) => {
           return MathHelper.add(sum, Number(record.Budget1 || 0));
@@ -98,7 +97,7 @@ const BTGLJournalInMonthPanel = ({year, gl}: iBTGLJournalInMonthPanel) => {
         setActualBudget(null);
       }
 
-      setYearToDateJournalTotal(total);
+      setYearToDateJournalTotal(Object.values(jMap).reduce((sum, subTotal) => MathHelper.add(sum, subTotal), 0));
     }).catch(err => {
       if(isCanceled) return;
       Toaster.showApiError(err)
