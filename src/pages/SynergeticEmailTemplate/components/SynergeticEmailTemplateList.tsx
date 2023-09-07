@@ -120,7 +120,7 @@ const SynergeticEmailTemplateList = () => {
         return (
           <td key={col.key} className={"message"}>
             <Button variant={'link'} size={'sm'} className={'ellipsis'} onClick={() => setEditingTemplate(data)}>
-              {data.Name || ''}
+              {data.MessageSubject || ''}
             </Button>
             <div className={"ellipsis"}>
               <i>
