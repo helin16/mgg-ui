@@ -16,10 +16,11 @@ import MathHelper from "../../../helper/MathHelper";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/makeReduxStore";
 import { OP_OR } from "../../../helper/ServiceHelper";
-import SynergeticEmailTemplateEditPopupBtn from "./SynergeticEmailTemplateEditPopupBtn";
+import SynergeticEmailTemplateEditPopup from "./SynergeticEmailTemplateEditPopup";
 import styled from "styled-components";
 import UtilsService from "../../../services/UtilsService";
 import DeleteConfirmPopupBtn from "../../../components/common/DeleteConfirm/DeleteConfirmPopupBtn";
+import {Button} from 'react-bootstrap';
 
 const Wrapper = styled.div`
   .templates-table {
@@ -30,6 +31,13 @@ const Wrapper = styled.div`
       max-width: 300px;
     }
   }
+  
+  .edit-popup {
+    .popup-panel {
+      width: calc(100vw - 20%);
+      margin: 1.2rem auto;
+    }
+  }
 `;
 const SynergeticEmailTemplateList = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -38,6 +46,7 @@ const SynergeticEmailTemplateList = () => {
     iSynCommunicationTemplate
   > | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [editingTemplate, setEditingTemplate] = useState<iSynCommunicationTemplate | null | undefined>(null);
   const { user } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
@@ -65,6 +74,7 @@ const SynergeticEmailTemplateList = () => {
           return;
         }
         setTemplateList(resp);
+        setEditingTemplate(null);
       })
       .catch(err => {
         if (isCanceled) {
@@ -91,15 +101,9 @@ const SynergeticEmailTemplateList = () => {
       cell: (col: iTableColumn, data: iSynCommunicationTemplate) => {
         return (
           <td key={col.key}>
-            <SynergeticEmailTemplateEditPopupBtn
-              template={data}
-              className={"ellipsis"}
-              onSaved={() => setCount(MathHelper.add(count, 1))}
-              variant={"link"}
-              size={"sm"}
-            >
-              {data.Name}
-            </SynergeticEmailTemplateEditPopupBtn>
+            <Button variant={'link'} size={'sm'} className={'ellipsis'} onClick={() => setEditingTemplate(data)}>
+              {data.Name || ''}
+            </Button>
             <div className={"ellipsis"}>
               <i>
                 <small>{data.Description}</small>
@@ -115,15 +119,9 @@ const SynergeticEmailTemplateList = () => {
       cell: (col: iTableColumn, data: iSynCommunicationTemplate) => {
         return (
           <td key={col.key} className={"message"}>
-            <SynergeticEmailTemplateEditPopupBtn
-              template={data}
-              className={"ellipsis"}
-              onSaved={() => setCount(MathHelper.add(count, 1))}
-              variant={"link"}
-              size={"sm"}
-            >
-              {data.MessageSubject}
-            </SynergeticEmailTemplateEditPopupBtn>
+            <Button variant={'link'} size={'sm'} className={'ellipsis'} onClick={() => setEditingTemplate(data)}>
+              {data.Name || ''}
+            </Button>
             <div className={"ellipsis"}>
               <i>
                 <small>
@@ -198,30 +196,18 @@ const SynergeticEmailTemplateList = () => {
       header: (col: iTableColumn) => {
         return (
           <th key={col.key} className={'text-right'}>
-            <SynergeticEmailTemplateEditPopupBtn
-              editingMetaData={true}
-              onSaved={() => setCount(MathHelper.add(count, 1))}
-              variant={"success"}
-              size={"sm"}
-            >
+            <Button variant={'success'} size={'sm'} onClick={() => setEditingTemplate(undefined)}>
               <Icons.Plus /> {' '} New
-            </SynergeticEmailTemplateEditPopupBtn>
+            </Button>
           </th>
         )
       },
       cell: (col: iTableColumn, data: iSynCommunicationTemplate) => {
         return (
           <td key={col.key} className={'text-right'}>
-            <SynergeticEmailTemplateEditPopupBtn
-              editingMetaData={true}
-              template={data}
-              className={"ellipsis"}
-              onSaved={() => setCount(MathHelper.add(count, 1))}
-              variant={"outline-secondary"}
-              size={"sm"}
-            >
+            <Button variant={'outline-secondary'} size={'sm'} className={'ellipsis'} onClick={() => setEditingTemplate(data)}>
               <Icons.Pencil /> {' '} Edit
-            </SynergeticEmailTemplateEditPopupBtn>
+            </Button>
             {' '}
             <DeleteConfirmPopupBtn
               variant={'danger'}
@@ -248,6 +234,18 @@ const SynergeticEmailTemplateList = () => {
       }
     }
   ];
+
+  const getEditPopup = () => {
+    if (editingTemplate === null) {
+      return null;
+    }
+    return <SynergeticEmailTemplateEditPopup
+      className={'edit-popup'}
+      onSaved={() => setCount(MathHelper.add(count, 1))}
+      template={editingTemplate}
+      onClose={() => setEditingTemplate(null)}
+    />
+  }
 
   if (isLoading === true && currentPage <= 1) {
     return <PageLoadingSpinner />;
@@ -293,6 +291,9 @@ const SynergeticEmailTemplateList = () => {
           onSetCurrentPage: (page: number) => setCurrentPage(page)
         }}
       />
+      {
+        getEditPopup()
+      }
     </Wrapper>
   );
 };
