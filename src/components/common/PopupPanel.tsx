@@ -16,7 +16,7 @@ const Wrapper = styled.div`
   right: 0px;
   top: 0px;
   background-color: rgba(100, 100, 100, 0.76);
-  z-index: 98;
+  z-index: 1002; // fixing it for school box
   
   .popup-panel {
     border-radius: 6px;
