@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FormControl } from "react-bootstrap";
+import {FormControl} from "react-bootstrap";
 import iSynCommunicationTemplate from "../../../types/Synergetic/iSynCommunicationTemplate";
 import LoadingBtn from "../../../components/common/LoadingBtn";
 import * as Icons from "react-bootstrap-icons";
@@ -14,6 +14,7 @@ import FormLabel from "../../../components/form/FormLabel";
 
 type iSynergeticEmailTemplateEditPanel = {
   template?: iSynCommunicationTemplate;
+  showEditBtnsOnTop?: boolean;
   onSaved: (newTemplate: iSynCommunicationTemplate) => void;
   onCancel: () => void;
 };
@@ -22,6 +23,7 @@ const SynergeticEmailTemplateEditPanel = ({
   onCancel,
   template,
   onSaved,
+  showEditBtnsOnTop = false
 }: iSynergeticEmailTemplateEditPanel) => {
   const [editingTemplate, setEditingTemplate] = useState<{
     [key: string]: any;
@@ -69,9 +71,43 @@ const SynergeticEmailTemplateEditPanel = ({
       });
   };
 
+  const getSavingBtns = () => {
+    return (
+      <div>
+        <LoadingBtn
+          isLoading={isSaving}
+          variant={"link"}
+          onClick={() => onCancel()} >
+          <Icons.X /> Cancel
+        </LoadingBtn>
+        <LoadingBtn
+          isLoading={isSaving}
+          variant={"primary"}
+          onClick={() => submit()} >
+          <Icons.Send /> Save
+        </LoadingBtn>
+      </div>
+    )
+  }
+
+  const getTopBtns = () => {
+    if (showEditBtnsOnTop !== true) {
+      return null;
+    }
+    return getSavingBtns();
+  }
 
   return (
     <>
+      <FlexContainer className={"justify-content-between"}>
+        <h6 style={{ margin: 0 }}>
+          {`${template?.CommunicationTemplatesSeq || ""}`.trim() === ""
+            ? "Creating..."
+            : `Editing ${template?.Name || ""} ...`}
+        </h6>
+        {getTopBtns()}
+      </FlexContainer>
+
       <div className={"form-row"}>
         <FormLabel label={"Name"} isRequired />
         <FormControl
@@ -103,27 +139,15 @@ const SynergeticEmailTemplateEditPanel = ({
       <div className={"form-row"}>
         <FormLabel label={"Body"} />
         <RichTextEditor
+          height={200}
           value={editingTemplate?.MessageBody || ""}
           onChange={text => updateTemplate("MessageBody", text)}
         />
       </div>
 
-      <FlexContainer className={"form-row justify-content-between"}>
+      <FlexContainer className={"form-row justify-content-between saving-btns"}>
         <div />
-        <div>
-          <LoadingBtn
-            isLoading={isSaving}
-            variant={"link"}
-            onClick={() => onCancel()} >
-            <Icons.X /> Cancel
-          </LoadingBtn>
-          <LoadingBtn
-            isLoading={isSaving}
-            variant={"primary"}
-            onClick={() => submit()} >
-            <Icons.Send /> Save
-          </LoadingBtn>
-        </div>
+        {getSavingBtns()}
       </FlexContainer>
     </>
   );

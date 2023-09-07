@@ -3,6 +3,7 @@ import styled from 'styled-components';
 
 type iRichTextEditor = {
   value?: string;
+  className?: string;
   height?: number;
   plugins?: string[];
   toolBar?: string;
@@ -44,10 +45,10 @@ const Wrapper = styled.div`
   }
 `;
 
-const RichTextEditor = ({value, plugins, toolBar, settings, onChange, height = 450}: iRichTextEditor) => {
+const RichTextEditor = ({value, plugins, toolBar, settings, onChange, className, height = 450}: iRichTextEditor) => {
   // const editorRef = useRef(null);
   return (
-    <Wrapper>
+    <Wrapper className={className}>
       <Editor
         initialValue={value || ''}
         apiKey={process.env.REACT_APP_TINYMCE_API_KEY || ''}
