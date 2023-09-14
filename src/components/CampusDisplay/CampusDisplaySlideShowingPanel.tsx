@@ -1,12 +1,12 @@
 import iCampusDisplaySlide from '../../types/CampusDisplay/iCampusDisplaySlide';
 import styled from 'styled-components';
-import SchoolLogo, {SchoolLogoSrc} from '../SchoolLogo';
+import SchoolLogo from '../SchoolLogo';
 import CampusDisplaySlideEditPopupBtn from './CampusDisplaySlideEditPopupBtn';
 import * as Icons from 'react-bootstrap-icons';
 import iCampusDisplay from '../../types/CampusDisplay/iCampusDisplay';
-import {Image} from 'react-bootstrap';
 import ImageWithPlaceholder from '../common/ImageWithPlaceholder';
 import PageLoadingSpinner from '../common/PageLoadingSpinner';
+import {Image} from 'react-bootstrap';
 
 type iCampusDisplaySlideShowingPanel = {
   className?: string;
@@ -104,7 +104,7 @@ const CampusDisplaySlideShowingPanel = ({slide, className, onSaved, campusDispla
     }
     return (
       <>
-        <img className={'showing-slide-mask'} src={slide.Asset?.url || ''} />
+        <Image className={'showing-slide-mask'} src={slide.Asset?.url || ''} />
         <ImageWithPlaceholder className={'showing-slide'} src={slide.Asset?.url || ''} placeholder={<PageLoadingSpinner className={'showing-slide'} />}  />
       </>
     )
