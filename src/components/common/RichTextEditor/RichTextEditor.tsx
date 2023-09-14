@@ -47,6 +47,7 @@ const Wrapper = styled.div`
 
 const RichTextEditor = ({value, plugins, toolBar, settings, onChange, className, height = 450}: iRichTextEditor) => {
   // const editorRef = useRef(null);
+  const baseUrl = window.location.protocol + '//' + window.location.host;
   return (
     <Wrapper className={className}>
       <Editor
@@ -59,6 +60,8 @@ const RichTextEditor = ({value, plugins, toolBar, settings, onChange, className,
           plugins: plugins || defaultPlugins,
           toolbar: toolBar || defaultToolBars.join('|'),
           removed_menuitems: 'newdocument',
+          base_url: baseUrl,
+          relative_urls: false,
           ...(settings || {})
         }}
       />
