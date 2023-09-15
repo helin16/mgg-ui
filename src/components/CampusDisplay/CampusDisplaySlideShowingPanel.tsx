@@ -6,7 +6,6 @@ import * as Icons from 'react-bootstrap-icons';
 import iCampusDisplay from '../../types/CampusDisplay/iCampusDisplay';
 import ImageWithPlaceholder from '../common/ImageWithPlaceholder';
 import PageLoadingSpinner from '../common/PageLoadingSpinner';
-import {Image} from 'react-bootstrap';
 
 type iCampusDisplaySlideShowingPanel = {
   className?: string;
@@ -17,13 +16,20 @@ type iCampusDisplaySlideShowingPanel = {
 
 const imgMargin = '4rem';
 const Wrapper = styled.div`
+  .blury {
+    filter: blur(3rem); /* Adjust the blur radius as needed */
+    -webkit-backdrop-filter: blur(3rem); /* For some older browsers (optional) */
+    backdrop-filter: blur(3rem); /* For modern browsers */
+  }
+
   .slide-wrapper {
     height: 100%;
     position: relative;
 
     .default-slide {
-      padding-top: 6rem;
+      padding: 13.4rem 0;
       text-align: center;
+      background: radial-gradient(circle at center, #a5a6ab 50%, #fefefe);
 
       .logo-wrapper {
         display: flex;
@@ -63,11 +69,15 @@ const Wrapper = styled.div`
       right: 0px;
       top: 0px;
       bottom: 0px;
-      filter: blur(5rem); /* Adjust the blur radius as needed */
-      -webkit-backdrop-filter: blur(5rem); /* For some older browsers (optional) */
-      backdrop-filter: blur(5rem); /* For modern browsers */
     }
 
+    .loading-mask-bg {
+      height: 100%;
+      width: 100%;
+      background-color: #aaaaaa;
+    }
+
+    .loading-showing-slide,
     .showing-slide {
       position: absolute;
       left: 0px;
@@ -77,12 +87,18 @@ const Wrapper = styled.div`
       object-fit: contain;
       object-position: center center;
       width: auto;
+      background-color: white;
       height: calc(100% - ${imgMargin} - ${imgMargin});
       filter: none; /* Reset the filter to its default value */
       -webkit-backdrop-filter: none; /* For some older browsers (optional) */
       backdrop-filter: none; /* For modern browsers */
       border: 1rem white solid;
       margin: ${imgMargin} auto;
+    }
+
+    .loading-showing-slide {
+      width: calc(100% - 20rem);
+      min-width: 200px;
     }
   }
 `;
@@ -104,8 +120,8 @@ const CampusDisplaySlideShowingPanel = ({slide, className, onSaved, campusDispla
     }
     return (
       <>
-        <Image className={'showing-slide-mask'} src={slide.Asset?.url || ''} />
-        <ImageWithPlaceholder className={'showing-slide'} src={slide.Asset?.url || ''} placeholder={<PageLoadingSpinner className={'showing-slide'} />}  />
+        <ImageWithPlaceholder className={'showing-slide-mask blury'} src={slide.Asset?.url || ''} placeholder={<div className={'loading-mask-bg blury'} />}  />
+        <ImageWithPlaceholder className={'showing-slide'} src={slide.Asset?.url || ''} placeholder={<PageLoadingSpinner className={'loading-showing-slide'} />}  />
       </>
     )
   }

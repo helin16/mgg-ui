@@ -22,11 +22,13 @@ const PopupBodyWrapper = styled.div`
 type campusDisplaySlideEditPopupBtn = ButtonProps & {
   divClassName?: string;
   display: iCampusDisplay;
+  closeOnSaved?: boolean;
   onSaved: (slides: iCampusDisplaySlide[]) => void;
 };
 const CampusDisplaySlideEditPopupBtn = ({
   divClassName,
   onSaved,
+  closeOnSaved = false,
   display,
   ...rest
 }: campusDisplaySlideEditPopupBtn) => {
@@ -44,7 +46,9 @@ const CampusDisplaySlideEditPopupBtn = ({
         },
       })
     })).then(resp => {
-      console.log('resp', resp);
+      if (closeOnSaved === true) {
+        setShowingPopup(false);
+      }
       onSaved(resp);
     }).catch(err => {
       Toaster.showApiError(err);

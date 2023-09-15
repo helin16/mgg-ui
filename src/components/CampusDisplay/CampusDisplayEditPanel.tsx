@@ -1,25 +1,26 @@
 import iCampusDisplay from "../../types/CampusDisplay/iCampusDisplay";
 import styled from "styled-components";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import iCampusDisplaySlide from "../../types/CampusDisplay/iCampusDisplaySlide";
 import iPaginatedResult from "../../types/iPaginatedResult";
 import CampusDisplaySlideService from "../../services/CampusDisplay/CampusDisplaySlideService";
 import Toaster from "../../services/Toaster";
 import PageLoadingSpinner from "../common/PageLoadingSpinner";
-import { FlexContainer } from "../../styles";
-import * as Icons from "react-bootstrap-icons";
 import CampusDisplaySlideShowingPanel from "./CampusDisplaySlideShowingPanel";
-import CampusDisplaySlideEditPopupBtn from "./CampusDisplaySlideEditPopupBtn";
 import MathHelper from "../../helper/MathHelper";
-import ImageWithPlaceholder from '../common/ImageWithPlaceholder';
+import CampusDisplayDraggableSlides from "./CampusDisplayDraggableSlides";
 
 type iCampusDisplayEditPanel = {
   campusDisplay: iCampusDisplay;
+  showingBulkOptions?: boolean;
+  onSetShowingBulkOptions?: (showing: boolean) => void;
+  selectedSlides?: iCampusDisplaySlide[];
+  onSlidesSelected: (slides: iCampusDisplaySlide[]) => void;
+  forceReload?: number;
 };
 
 const Wrapper = styled.div`
   .displaying-div {
-    background-color: #cecece;
     margin-bottom: 1rem;
     padding: 1rem;
     position: relative;
@@ -27,47 +28,11 @@ const Wrapper = styled.div`
   }
 
   .slide-list-div-wrapper {
-    background-color: #cecece;
-    padding: 0.6rem;
-    overflow-x: auto;
-    position: relative;
-
-    .slide-list-div {
-      gap: 0.4rem;
-
-      .slide-div {
-        height: 6rem;
-        width: 10rem;
-        background-color: white;
-        border-width: 4px;
-        border-style: solid;
-        border-color: white;
-        object-fit: contain;
-
-        &.selected {
-          border: 4px #c2b409 solid;
-        }
-
-        &.new-slide {
-          text-align: center;
-          font-size: 18px;
-          filter: none;
-          -webkit-backdrop-filter: none;
-          backdrop-filter: none;
-
-          .icon {
-            font-size: 26px;
-          }
-
-          &.btn:hover {
-            color: black !important;
-          }
-        }
-      }
-    }
+    background-color: #aaaaaa;
   }
 `;
-const CampusDisplayEditPanel = ({ campusDisplay }: iCampusDisplayEditPanel) => {
+
+const CampusDisplayEditPanel = ({ campusDisplay, onSlidesSelected, onSetShowingBulkOptions, selectedSlides = [], showingBulkOptions = false, forceReload = 0 }: iCampusDisplayEditPanel) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showingSlide, setShowingSlide] = useState<iCampusDisplaySlide | null>(
     null
@@ -84,7 +49,7 @@ const CampusDisplayEditPanel = ({ campusDisplay }: iCampusDisplayEditPanel) => {
     CampusDisplaySlideService.getAll({
       where: JSON.stringify({ isActive: true, displayId: campusDisplay.id }),
       include: "Asset",
-      sort: "sortOrder:DESC",
+      sort: "sortOrder:ASC",
       perPage: 9999999
     })
       .then(resp => {
@@ -94,6 +59,8 @@ const CampusDisplayEditPanel = ({ campusDisplay }: iCampusDisplayEditPanel) => {
         const slides = resp.data || [];
         setSlideList(resp);
         setShowingSlide(slides.length > 0 ? slides[0] : null);
+        onSlidesSelected([]);
+        onSetShowingBulkOptions && onSetShowingBulkOptions(false);
       })
       .catch(err => {
         if (isCanceled) {
@@ -111,7 +78,40 @@ const CampusDisplayEditPanel = ({ campusDisplay }: iCampusDisplayEditPanel) => {
     return () => {
       isCanceled = true;
     };
-  }, [campusDisplay, count]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [campusDisplay, count, forceReload]);
+
+  const handleSlidesReorder = (reorderedSlides: iCampusDisplaySlide[]) => {
+
+    // @ts-ignore
+    setSlideList({...(slideList || {}), data: reorderedSlides})
+    Promise.all(reorderedSlides.map((slide, index) => {
+      return CampusDisplaySlideService.update(slide.id, {sortOrder: index})
+    })).catch(err => {
+      setSlideList(slideList);
+      Toaster.showApiError(err);
+    })
+  }
+
+  const getDraggableSlides = () => {
+    const slides = slideList?.data || [];
+    if (slides.length <= 0) {
+      return null;
+    }
+
+    return <CampusDisplayDraggableSlides
+      className={'slide-list-div-wrapper'}
+      showOptions={showingBulkOptions === true}
+      campusDisplay={campusDisplay}
+      slides={slides}
+      onSlidesReordered={handleSlidesReorder}
+      showingSlide={showingSlide}
+      onSlideClick={(slide) => setShowingSlide(slide)}
+      onNewSlidesCreated={() => setCount(MathHelper.add(count, 1))}
+      selectedSlides={selectedSlides}
+      onSlidesSelected={(slides) => onSlidesSelected(slides)}
+    />
+  }
 
   const getContent = () => {
     if (isLoading) {
@@ -126,36 +126,7 @@ const CampusDisplayEditPanel = ({ campusDisplay }: iCampusDisplayEditPanel) => {
           campusDisplay={campusDisplay}
           onSaved={() => setCount(MathHelper.add(count, 1))}
         />
-        <div className={"slide-list-div-wrapper"}>
-          <FlexContainer className={"slide-list-div"}>
-            {(slideList?.data || []).map(slide => {
-              return (
-                <ImageWithPlaceholder
-                  thumbnail
-                  className={`cursor-pointer slide-div ${
-                    `${showingSlide?.id || ""}`.trim() === `${slide.id}`.trim()
-                      ? "selected"
-                      : ""
-                  }`}
-                  key={slide.id}
-                  src={slide.Asset?.url || ''}
-                  onClick={() => setShowingSlide(slide)}
-                />
-              );
-            })}
-            <CampusDisplaySlideEditPopupBtn
-              display={campusDisplay}
-              className={"slide-div new-slide"}
-              variant={"outline-secondary"}
-              onSaved={() => setCount(MathHelper.add(count, 1))}
-            >
-              <div className={"icon"}>
-                <Icons.Plus />
-              </div>
-              <div>New</div>
-            </CampusDisplaySlideEditPopupBtn>
-          </FlexContainer>
-        </div>
+        {getDraggableSlides()}
       </>
     );
   };

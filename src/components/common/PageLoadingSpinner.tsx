@@ -14,7 +14,7 @@ type iPageLoadingSpinner = {
 const PageLoadingSpinner = ({className, text, spinner}: iPageLoadingSpinner) => {
   return (
     <Wrapper className={className}>
-      {text || <h5>Loading...</h5>}
+      {text || <h5 className={'title'}>Loading...</h5>}
       {spinner || <Spinner animation={'border'} />}
     </Wrapper>
   )

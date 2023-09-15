@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import iPaginatedResult from "../../types/iPaginatedResult";
 import iCampusDisplay from "../../types/CampusDisplay/iCampusDisplay";
 import CampusDisplayService from "../../services/CampusDisplay/CampusDisplayService";
-import Toaster, {TOAST_TYPE_INFO} from "../../services/Toaster";
+import Toaster, {TOAST_TYPE_SUCCESS} from "../../services/Toaster";
 import PageLoadingSpinner from "../common/PageLoadingSpinner";
 import Table, { iTableColumn } from "../common/Table";
 import CampusDisplayEditPopupBtn from "./CampusDisplayEditPopupBtn";
@@ -13,8 +13,50 @@ import DeleteConfirmPopupBtn from '../common/DeleteConfirm/DeleteConfirmPopupBtn
 import {useSelector} from 'react-redux';
 import {RootState} from '../../redux/makeReduxStore';
 import moment from 'moment-timezone';
+import UserAndDateTimePanel from '../common/UserAndDateTimePanel';
+import {Spinner} from 'react-bootstrap';
+import iCampusDisplayLocation from '../../types/CampusDisplay/iCampusDisplayLocation';
+import CampusDisplayLocationService from '../../services/CampusDisplay/CampusDisplayLocationService';
 
 const Wrapper = styled.div``;
+
+type iDisplayingLocation = {
+  displayId: string;
+}
+const DisplayingLocation = ({displayId}: iDisplayingLocation) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [locations, setLocations] = useState<iCampusDisplayLocation[]>([]);
+
+  useEffect(() => {
+    let isCanceled = false;
+
+    setIsLoading(true);
+    CampusDisplayLocationService.getAll({
+        where: JSON.stringify({isActive: true, displayId}),
+        sort: 'createdAt:DESC',
+        perPage: 999999,
+      }).then(resp => {
+        if (isCanceled) { return }
+        setLocations(resp.data || []);
+      }).catch(err => {
+        if (isCanceled) { return }
+        Toaster.showApiError(err);
+      }).finally(() => {
+        if (isCanceled) { return }
+        setIsLoading(false);
+      })
+
+    return () => {
+      isCanceled = true;
+    }
+  }, [displayId]);
+
+  if (isLoading === true) {
+    return <Spinner animation={'border'} />
+  }
+
+  return <div>{locations.map(location => location.name).join(', ')}</div>;
+}
 const CampusDisplayList = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [displayList, setDisplayList] = useState<iPaginatedResult<
@@ -31,6 +73,7 @@ const CampusDisplayList = () => {
     setIsLoading(true);
     CampusDisplayService.getAll({
       where: JSON.stringify({ isActive: true }),
+      include: `CreatedBy,UpdatedBy`,
       currentPage,
       perPage,
     })
@@ -77,11 +120,24 @@ const CampusDisplayList = () => {
         }
       },
       {
+        key: "location",
+        header: "Displaying At Location",
+        cell: (column: iTableColumn, data: iCampusDisplay) => {
+          return <td key={column.key}><DisplayingLocation displayId={data.id} /></td>;
+        }
+      },
+      {
         key: "created",
         header: "Created",
         cell: (column: iTableColumn, data: iCampusDisplay) => {
           return <td key={column.key}>
-            {moment(data.createdAt).format('lll')}
+            <small>
+              <UserAndDateTimePanel
+                userString={`${data.CreatedBy?.firstName || ""} ${data.CreatedBy
+                  ?.lastName || ""}`.trim()}
+                dateTimeString={moment(data.createdAt).format('lll')}
+              />
+            </small>
           </td>;
         }
       },
@@ -90,7 +146,13 @@ const CampusDisplayList = () => {
         header: "Updated",
         cell: (column: iTableColumn, data: iCampusDisplay) => {
           return <td key={column.key}>
-            {moment(data.updatedAt).format('lll')}
+            <small>
+              <UserAndDateTimePanel
+                userString={`${data.UpdatedBy?.firstName || ""} ${data.UpdatedBy
+                  ?.lastName || ""}`.trim()}
+                dateTimeString={moment(data.updatedAt).format('lll')}
+              />
+            </small>
           </td>;
         }
       },
@@ -116,7 +178,7 @@ const CampusDisplayList = () => {
               deletingFn={() => CampusDisplayService.deactivate(data.id || '')}
               deletedCallbackFn={() => {
                 setCount(MathHelper.add(count, 1));
-                Toaster.showToast('Display Deleted.', TOAST_TYPE_INFO);
+                Toaster.showToast('Display Deleted.', TOAST_TYPE_SUCCESS);
               }}
               size={'sm'}
               description={<>You are about to delete the display <u>{data.name}</u></>}

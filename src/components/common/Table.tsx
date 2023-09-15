@@ -187,63 +187,73 @@ const Table = ({
     );
   };
 
-  const getPaginator = () => {
+  const getPageSelector = () => {
     if (
       !pagination ||
-      (pagination.totalPages || 0) <= 0 ||
+      (pagination.totalPages || 0) <= 1 ||
       (pagination.currentPage || 0) > (pagination.totalPages || 0)
     ) {
+      return <div />;
+    }
+
+    return (
+      <Pagination className={"pagination-wrapper"}>
+        {pagination.currentPage <= 1 ? null : (
+          <>
+            <Pagination.First
+              onClick={() => pagination?.onSetCurrentPage(1)}
+            />
+            <Pagination.Prev
+              onClick={() =>
+                pagination?.onSetCurrentPage(
+                  MathHelper.sub(pagination.currentPage, 1)
+                )
+              }
+            />
+          </>
+        )}
+
+        {getPaginationBtns().map(index => {
+          return (
+            <Pagination.Item
+              active={index === pagination.currentPage}
+              key={index}
+              onClick={() => pagination?.onSetCurrentPage(index)}
+            >
+              {index}
+            </Pagination.Item>
+          );
+        })}
+
+        {pagination.currentPage >= pagination.totalPages ? null : (
+          <>
+            {/*<Pagination.Ellipsis disabled/>*/}
+            <Pagination.Next
+              onClick={() =>
+                pagination?.onSetCurrentPage(
+                  MathHelper.add(pagination.currentPage, 1)
+                )
+              }
+            />
+            <Pagination.Last
+              onClick={() =>
+                pagination?.onSetCurrentPage(pagination?.totalPages)
+              }
+            />
+          </>
+        )}
+      </Pagination>
+    )
+  }
+
+  const getPaginator = () => {
+    if (!pagination) {
       return null;
     }
 
     return (
       <FlexContainer className={"justify-content-between"}>
-        <Pagination className={"pagination-wrapper"}>
-          {pagination.currentPage <= 1 ? null : (
-            <>
-              <Pagination.First
-                onClick={() => pagination?.onSetCurrentPage(1)}
-              />
-              <Pagination.Prev
-                onClick={() =>
-                  pagination?.onSetCurrentPage(
-                    MathHelper.sub(pagination.currentPage, 1)
-                  )
-                }
-              />
-            </>
-          )}
-
-          {getPaginationBtns().map(index => {
-            return (
-              <Pagination.Item
-                active={index === pagination.currentPage}
-                key={index}
-                onClick={() => pagination?.onSetCurrentPage(index)}
-              >
-                {index}
-              </Pagination.Item>
-            );
-          })}
-
-          {pagination.currentPage >= pagination.totalPages ? null : (
-            <>
-              {/*<Pagination.Ellipsis disabled/>*/}
-              <Pagination.Next
-                onClick={() =>
-                  pagination?.onSetCurrentPage(
-                    MathHelper.add(pagination.currentPage, 1)
-                  )
-                }
-              />
-              <Pagination.Last
-                onClick={() =>
-                  pagination?.onSetCurrentPage(pagination?.totalPages)
-                }
-              />
-            </>
-          )}
-        </Pagination>
+        {getPageSelector()}
         {getPageSizeSelector()}
       </FlexContainer>
     );
