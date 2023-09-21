@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {FormControl} from "react-bootstrap";
+import {Col, FormControl, Row} from "react-bootstrap";
 import iSynCommunicationTemplate from "../../../types/Synergetic/iSynCommunicationTemplate";
 import LoadingBtn from "../../../components/common/LoadingBtn";
 import * as Icons from "react-bootstrap-icons";
@@ -111,44 +111,50 @@ const SynergeticEmailTemplateEditPanel = ({
         {getTopBtns()}
       </FlexContainer>
 
-      <div className={"form-row"}>
-        <FormLabel label={"Name"} isRequired />
-        <FormControl
-          value={editingTemplate?.Name || ""}
-          placeholder={"The Name of the template"}
-          onChange={event => updateTemplate("Name", event.target.value)}
-        />
-      </div>
-      <div className={"form-row"}>
-        <FormLabel label={"Description"} />
-        <FormControl
-          value={editingTemplate?.Description || ""}
-          placeholder={"The Description of the template"}
-          onChange={event =>
-            updateTemplate("Description", event.target.value)
-          }
-        />
-      </div>
-      <div className={"form-row"}>
-        <FormLabel label={"Subject"} />
-        <FormControl
-          value={editingTemplate?.MessageSubject || ""}
-          placeholder={"The Subject of the email"}
-          onChange={event =>
-            updateTemplate("MessageSubject", event.target.value)
-          }
-        />
-      </div>
-      <div className={"form-row"}>
-        <FormLabel label={"Body"} />
-        <RichTextEditor
-          height={2200}
-          value={editingTemplate?.MessageBody || ""}
-          onEditorChange={(content: string, editor: any) => {
-            setTemplateEditor(editor);
-          }}
-        />
-      </div>
+      <Row>
+        <Col className={"form-row"}>
+          <FormLabel label={"Name"} isRequired />
+          <FormControl
+            value={editingTemplate?.Name || ""}
+            placeholder={"The Name of the template"}
+            onChange={event => updateTemplate("Name", event.target.value)}
+          />
+        </Col>
+      </Row>
+      <Row>
+        <Col className={"form-row"}>
+          <FormLabel label={"Description"} />
+          <FormControl
+            value={editingTemplate?.Description || ""}
+            placeholder={"The Description of the template"}
+            onChange={event =>
+              updateTemplate("Description", event.target.value)
+            }
+          />
+        </Col>
+        <Col className={"form-row"}>
+          <FormLabel label={"Subject"} />
+          <FormControl
+            value={editingTemplate?.MessageSubject || ""}
+            placeholder={"The Subject of the email"}
+            onChange={event =>
+              updateTemplate("MessageSubject", event.target.value)
+            }
+          />
+        </Col>
+      </Row>
+      <Row>
+        <Col className={"form-row"}>
+          <FormLabel label={"Body"} />
+          <RichTextEditor
+            height={2200}
+            value={editingTemplate?.MessageBody || ""}
+            onEditorChange={(content: string, editor: any) => {
+              setTemplateEditor(editor);
+            }}
+          />
+        </Col>
+      </Row>
 
       <FlexContainer className={"form-row justify-content-between saving-btns"}>
         <div />
