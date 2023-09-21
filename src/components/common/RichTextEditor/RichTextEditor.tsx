@@ -9,6 +9,7 @@ type iRichTextEditor = {
   toolBar?: string;
   settings?: any;
   onChange?: (text: string) => void;
+  onEditorChange?: (content: any, editor: any) => void;
 }
 
 const defaultPlugins = [
@@ -45,7 +46,7 @@ const Wrapper = styled.div`
   }
 `;
 
-const RichTextEditor = ({value, plugins, toolBar, settings, onChange, className, height = 450}: iRichTextEditor) => {
+const RichTextEditor = ({value, plugins, toolBar, settings, onChange, className, onEditorChange, height = 450}: iRichTextEditor) => {
   // const editorRef = useRef(null);
   return (
     <Wrapper className={className}>
@@ -53,6 +54,7 @@ const RichTextEditor = ({value, plugins, toolBar, settings, onChange, className,
         initialValue={value || ''}
         apiKey={process.env.REACT_APP_TINYMCE_API_KEY || ''}
         onChange={(editor) => onChange && onChange(editor.target.getContent())}
+        onEditorChange={(content: any, editor: any) => onEditorChange && onEditorChange(content, editor)}
         init={{
           height,
           menubar: true,

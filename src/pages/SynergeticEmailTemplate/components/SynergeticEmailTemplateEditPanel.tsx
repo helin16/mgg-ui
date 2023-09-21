@@ -29,6 +29,7 @@ const SynergeticEmailTemplateEditPanel = ({
     [key: string]: any;
   }>({});
   const [isSaving, setIsSaving] = useState(false);
+  const [templateEditor, setTemplateEditor] = useState<any | null>(null);
 
   useEffect(() => {
     setEditingTemplate(template || {});
@@ -46,17 +47,18 @@ const SynergeticEmailTemplateEditPanel = ({
       Toaster.showToast(`Template Name can NOT be empty.`, TOAST_TYPE_ERROR);
       return;
     }
-    if (`${editingTemplate?.MessageBody || ""}`.trim() === "") {
+    const body = `${templateEditor?.getContent() || ''}`.trim() === '' ? `${editingTemplate?.MessageBody || ""}`.trim() : `${templateEditor?.getContent() || ''}`.trim();
+    if (body === "") {
       Toaster.showToast(`Template can NOT be empty.`, TOAST_TYPE_ERROR);
       return;
     }
     setIsSaving(true);
     const func =
       `${editingTemplate.CommunicationTemplatesSeq || ""}`.trim() === ""
-        ? SynCommunicationTemplateService.create(editingTemplate)
+        ? SynCommunicationTemplateService.create({...editingTemplate, MessageBody: body})
         : SynCommunicationTemplateService.update(
             editingTemplate.CommunicationTemplatesSeq,
-            editingTemplate
+          {...editingTemplate, MessageBody: body}
           );
     func
       .then(resp => {
@@ -96,6 +98,7 @@ const SynergeticEmailTemplateEditPanel = ({
     }
     return getSavingBtns();
   }
+
 
   return (
     <>
@@ -139,9 +142,11 @@ const SynergeticEmailTemplateEditPanel = ({
       <div className={"form-row"}>
         <FormLabel label={"Body"} />
         <RichTextEditor
-          height={200}
+          height={2200}
           value={editingTemplate?.MessageBody || ""}
-          onChange={text => updateTemplate("MessageBody", text)}
+          onEditorChange={(content: string, editor: any) => {
+            setTemplateEditor(editor);
+          }}
         />
       </div>
 

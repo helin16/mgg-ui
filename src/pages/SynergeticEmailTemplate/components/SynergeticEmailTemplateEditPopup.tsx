@@ -29,7 +29,7 @@ const SynergeticEmailTemplateEditPopup = ({
   const getShowPopupDiv = () => {
     return (
       <PopupPanel className={className}>
-        <SynergeticEmailTemplateEditPanel template={template} onSaved={onSaved} onCancel={() => onClose()} showEditBtnsOnTop={true} />
+        <SynergeticEmailTemplateEditPanel template={template} onSaved={onSaved} onCancel={() => onClose()} showEditBtnsOnTop={true}/>
       </PopupPanel>
     )
   }
