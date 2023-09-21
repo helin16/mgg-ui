@@ -1,5 +1,5 @@
 import ExplanationPanel from "../../../components/ExplanationPanel";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import iPaginatedResult from "../../../types/iPaginatedResult";
 import iSynCommunicationTemplate, {
   SYN_COMMUNICATION_TEMPLATE_TYPE_HTML
@@ -16,11 +16,11 @@ import MathHelper from "../../../helper/MathHelper";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/makeReduxStore";
 import { OP_OR } from "../../../helper/ServiceHelper";
-import SynergeticEmailTemplateEditPopup from "./SynergeticEmailTemplateEditPopup";
 import styled from "styled-components";
 import UtilsService from "../../../services/UtilsService";
 import DeleteConfirmPopupBtn from "../../../components/common/DeleteConfirm/DeleteConfirmPopupBtn";
-import {Button} from 'react-bootstrap';
+import { Button } from "react-bootstrap";
+import SynergeticEmailTemplateEditPanel from "./SynergeticEmailTemplateEditPanel";
 
 const Wrapper = styled.div`
   .templates-table {
@@ -31,7 +31,7 @@ const Wrapper = styled.div`
       max-width: 300px;
     }
   }
-  
+
   .edit-popup {
     .popup-panel {
       width: calc(100vw - 20%);
@@ -39,6 +39,7 @@ const Wrapper = styled.div`
     }
   }
 `;
+
 const SynergeticEmailTemplateList = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [count, setCount] = useState(0);
@@ -46,7 +47,9 @@ const SynergeticEmailTemplateList = () => {
     iSynCommunicationTemplate
   > | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [editingTemplate, setEditingTemplate] = useState<iSynCommunicationTemplate | null | undefined>(null);
+  const [editingTemplate, setEditingTemplate] = useState<
+    iSynCommunicationTemplate | null | undefined
+  >(null);
   const { user } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
@@ -101,8 +104,13 @@ const SynergeticEmailTemplateList = () => {
       cell: (col: iTableColumn, data: iSynCommunicationTemplate) => {
         return (
           <td key={col.key}>
-            <Button variant={'link'} size={'sm'} className={'ellipsis'} onClick={() => setEditingTemplate(data)}>
-              {data.Name || ''}
+            <Button
+              variant={"link"}
+              size={"sm"}
+              className={"ellipsis"}
+              onClick={() => setEditingTemplate(data)}
+            >
+              {data.Name || ""}
             </Button>
             <div className={"ellipsis"}>
               <i>
@@ -119,8 +127,13 @@ const SynergeticEmailTemplateList = () => {
       cell: (col: iTableColumn, data: iSynCommunicationTemplate) => {
         return (
           <td key={col.key} className={"message"}>
-            <Button variant={'link'} size={'sm'} className={'ellipsis'} onClick={() => setEditingTemplate(data)}>
-              {data.MessageSubject || ''}
+            <Button
+              variant={"link"}
+              size={"sm"}
+              className={"ellipsis"}
+              onClick={() => setEditingTemplate(data)}
+            >
+              {data.MessageSubject || ""}
             </Button>
             <div className={"ellipsis"}>
               <i>
@@ -195,39 +208,52 @@ const SynergeticEmailTemplateList = () => {
       key: "operations",
       header: (col: iTableColumn) => {
         return (
-          <th key={col.key} className={'text-right'}>
-            <Button variant={'success'} size={'sm'} onClick={() => setEditingTemplate(undefined)}>
-              <Icons.Plus /> {' '} New
+          <th key={col.key} className={"text-right"}>
+            <Button
+              variant={"success"}
+              size={"sm"}
+              onClick={() => setEditingTemplate(undefined)}
+            >
+              <Icons.Plus /> New
             </Button>
           </th>
-        )
+        );
       },
       cell: (col: iTableColumn, data: iSynCommunicationTemplate) => {
         return (
-          <td key={col.key} className={'text-right'}>
-            <Button variant={'outline-secondary'} size={'sm'} className={'ellipsis'} onClick={() => setEditingTemplate(data)}>
-              <Icons.Pencil /> {' '} Edit
-            </Button>
-            {' '}
+          <td key={col.key} className={"text-right"}>
+            <Button
+              variant={"outline-secondary"}
+              size={"sm"}
+              className={"ellipsis"}
+              onClick={() => setEditingTemplate(data)}
+            >
+              <Icons.Pencil /> Edit
+            </Button>{" "}
             <DeleteConfirmPopupBtn
-              variant={'danger'}
-              size={'sm'}
+              variant={"danger"}
+              size={"sm"}
               deletingFn={() =>
                 SynCommunicationTemplateService.update(
                   data.CommunicationTemplatesSeq,
                   {
                     PrivateFlag: true,
-                    ...(`${data.Owner}`.trim() === 'zSynergeticCoreAPI' ? {} : { Owner: `MGG\\cda` }),
+                    ...(`${data.Owner}`.trim() === "zSynergeticCoreAPI"
+                      ? {}
+                      : { Owner: `MGG\\cda` })
                   }
                 )
               }
-              deletedCallbackFn = {() => {
-                Toaster.showToast(`Template Archived Successfully`, TOAST_TYPE_SUCCESS);
+              deletedCallbackFn={() => {
+                Toaster.showToast(
+                  `Template Archived Successfully`,
+                  TOAST_TYPE_SUCCESS
+                );
                 setCount(MathHelper.add(count, 1));
               }}
               confirmString={`${data.CommunicationTemplatesSeq}`}
             >
-              <Icons.Trash />{' '} Archive
+              <Icons.Trash /> Archive
             </DeleteConfirmPopupBtn>
           </td>
         );
@@ -235,20 +261,22 @@ const SynergeticEmailTemplateList = () => {
     }
   ];
 
-  const getEditPopup = () => {
-    if (editingTemplate === null) {
-      return null;
-    }
-    return <SynergeticEmailTemplateEditPopup
-      className={'edit-popup'}
-      onSaved={() => setCount(MathHelper.add(count, 1))}
-      template={editingTemplate}
-      onClose={() => setEditingTemplate(null)}
-    />
-  }
-
   if (isLoading === true && currentPage <= 1) {
     return <PageLoadingSpinner />;
+  }
+
+  if (editingTemplate !== null) {
+    return (
+      <SynergeticEmailTemplateEditPanel
+        template={editingTemplate}
+        onSaved={() => {
+          setCount(MathHelper.add(count, 1));
+          setEditingTemplate(null);
+        }}
+        onCancel={() => setEditingTemplate(null)}
+        showEditBtnsOnTop={true}
+      />
+    );
   }
 
   return (
@@ -291,9 +319,6 @@ const SynergeticEmailTemplateList = () => {
           onSetCurrentPage: (page: number) => setCurrentPage(page)
         }}
       />
-      {
-        getEditPopup()
-      }
     </Wrapper>
   );
 };
