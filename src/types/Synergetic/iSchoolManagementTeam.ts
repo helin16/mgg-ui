@@ -3,6 +3,7 @@ import iSynCommunity from './iSynCommunity';
 export const SMT_SCHOOL_ROL_CODE_HEAD_OF_YEAR = 'HOY';
 export const SMT_SCHOOL_ROL_CODE_HEAD_OF_JUNIOR_SCHOOL = 'HOJS';
 export const SMT_SCHOOL_ROL_CODE_HEAD_OF_SENIOR_SCHOOL = 'HOSS';
+export const SMT_SCHOOL_ROL_CODE_HEAD_OF_ELC = 'HOELC';
 
 type iSchoolManagementTeam = {
   SchoolSeniorTeamID: number;
