@@ -87,7 +87,8 @@ const SchoolManagementTable = ({showSearchPanel = true, showExplanation = true, 
     if (!staff) {
       return null;
     }
-    return <>({staff.ID}) {staff?.Title} {staff?.Given1} {staff?.Surname}</>
+    const preferred = `${staff?.Preferred}`.trim() !== `${staff?.Given1}`.trim() ? <i>{staff?.Preferred}</i> : staff?.Given1;
+    return <>({staff.ID}) {staff?.Title} {preferred} {staff?.Surname}</>
   }
 
   const getContent = () => {
@@ -98,7 +99,7 @@ const SchoolManagementTable = ({showSearchPanel = true, showExplanation = true, 
       <Table striped hover className={'team-table'}>
         <thead>
           <tr>
-            <th>Year - Sem</th>
+            <th>Year - Term</th>
             <th>Staff</th>
             <th>Role</th>
             <th>YearLevel</th>
@@ -198,7 +199,7 @@ const SchoolManagementTable = ({showSearchPanel = true, showExplanation = true, 
           />
         </Col>
         <Col sm={2}>
-          <FormLabel label={'File Semester'} />
+          <FormLabel label={'Term'} />
           <FileSemesterSelector
             isDisabled={isLoading === true}
             value={selectedFileSemester}

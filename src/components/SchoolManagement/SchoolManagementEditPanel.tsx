@@ -158,7 +158,7 @@ const SchoolManagementEditPanel = ({onIsSubmitting, onCancel, schoolManagementTe
               <FormErrorDisplay errorsMap={errors} fieldName={'fileYear'} />
             </Col>
             <Col md={3}>
-              <FormLabel label={'File Semester'} isRequired />
+              <FormLabel label={'Term'} isRequired />
               <FileSemesterSelector
                 isDisabled={isSubmitting}
                 value={fileSemester || undefined}
