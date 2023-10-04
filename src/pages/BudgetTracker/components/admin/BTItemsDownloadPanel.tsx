@@ -15,7 +15,7 @@ import Toaster from '../../../../services/Toaster';
 import {exportBTItemsToExcel} from '../BTItemExportBtn';
 import MathHelper from '../../../../helper/MathHelper';
 import SynGeneralLedgerService from '../../../../services/Synergetic/Finance/SynGeneralLedgerService';
-import CommunityService from '../../../../services/Synergetic/CommunityService';
+import SynCommunityService from '../../../../services/Synergetic/Community/SynCommunityService';
 
 const Wrapper = styled.div``;
 const BTItemsDownloadPanel = () => {
@@ -49,7 +49,7 @@ const BTItemsDownloadPanel = () => {
 
       const resp = await Promise.all([
         SynGeneralLedgerService.getAll({ where: JSON.stringify({ActiveFlag: true, GLYear: MathHelper.sub(year, 1), GLCode: glCodes}), perPage: '99999'}),
-        CommunityService.getCommunityProfiles({ where: JSON.stringify({ID: comIds}), perPage: '99999'}),
+        SynCommunityService.getCommunityProfiles({ where: JSON.stringify({ID: comIds}), perPage: '99999'}),
       ]);
 
       exportBTItemsToExcel({

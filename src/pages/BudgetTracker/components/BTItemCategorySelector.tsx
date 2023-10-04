@@ -18,11 +18,12 @@ type iBTItemCategorySelector = {
   allowClear?: boolean;
   showIndicator?: boolean;
   isDisabled?: boolean;
+  isInvalid?: boolean;
 };
 
 
 const Wrapper = styled.div``;
-const BTItemCategorySelector = ({ className, onSelect, value, allowClear, showIndicator, isDisabled }: iBTItemCategorySelector) => {
+const BTItemCategorySelector = ({ className, onSelect, value, allowClear, showIndicator, isInvalid, isDisabled }: iBTItemCategorySelector) => {
   const [isLoading, setIsLoading] = useState(false);
   const [categoryMap, setCategoryMap] = useState<{ [key: string]: iBTItemCategory }>({});
 
@@ -58,6 +59,7 @@ const BTItemCategorySelector = ({ className, onSelect, value, allowClear, showIn
           isDisabled={isDisabled}
           options={Object.values(categoryMap).map(category => ({label: category.name, value: category.guid, data: category}))}
           className={className}
+          isInvalid={isInvalid}
           onChange={(option) => onSelect && onSelect(option === null ? null : option)}
           value={getSelectedOption()}
           isClearable={allowClear}

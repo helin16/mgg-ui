@@ -18,6 +18,7 @@ import {OP_LIKE} from '../../helper/ServiceHelper';
 import {Button, Dropdown} from 'react-bootstrap';
 import * as Icons from 'react-bootstrap-icons'
 import * as _ from 'lodash';
+import Page401 from '../../components/Page401';
 
 const Wrapper = styled.div`
   .search-panel {
@@ -64,11 +65,10 @@ const ParentDirectoryPage = () => {
   const [contactMap, setContactMap] = useState<{ [key: string]: iSynVStudentContactAllAddress[] }>({});
   const [searchCriteria, setSearchCriteria] = useState<iParentDirectorySearchCriteria>({});
   const [showSearchPanel, setShowSearchPanel] = useState(false);
-  // const [recipientEmails, setRecipientEmails] = useState<string[]>([]);
 
   const recipientEmails = useRef('')
 
-  const canAccessPage = user?.isParent === true || user?.isStaff === true;
+  const canAccessPage = user?.isParent === true || user?.isStaff === true || user?.isCasualStaff === true;
 
   useEffect(() => {
     if (canAccessPage !== true) { return };
@@ -230,6 +230,12 @@ const ParentDirectoryPage = () => {
           })
         }
       </>
+    )
+  }
+
+  if (!canAccessPage) {
+    return (
+      <Page401 />
     )
   }
 

@@ -1,8 +1,10 @@
-# Getting Started with Create React App
+# REACT UI
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project is the UI components of the whole system.
+All UI hosted on Netlify()
 
-## Available Scripts
+
+## Local dev environment
 
 In the project directory, you can run:
 

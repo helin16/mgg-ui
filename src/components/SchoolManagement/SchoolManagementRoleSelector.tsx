@@ -1,5 +1,6 @@
 import SelectBox from '../common/SelectBox';
 import {
+  SMT_SCHOOL_ROL_CODE_HEAD_OF_ELC,
   SMT_SCHOOL_ROL_CODE_HEAD_OF_JUNIOR_SCHOOL,
   SMT_SCHOOL_ROL_CODE_HEAD_OF_SENIOR_SCHOOL, SMT_SCHOOL_ROL_CODE_HEAD_OF_YEAR
 } from '../../types/Synergetic/iSchoolManagementTeam';
@@ -16,6 +17,7 @@ type iSchoolManagementRoleSelector = {
 };
 
 export const schoolManagementRoleMap: {[key: string]: string} = {
+  [SMT_SCHOOL_ROL_CODE_HEAD_OF_ELC]: 'Head of ELC',
   [SMT_SCHOOL_ROL_CODE_HEAD_OF_JUNIOR_SCHOOL]: 'Head of Junior School',
   [SMT_SCHOOL_ROL_CODE_HEAD_OF_SENIOR_SCHOOL]: 'Head of Senior School',
   [SMT_SCHOOL_ROL_CODE_HEAD_OF_YEAR]: 'Head of Year',

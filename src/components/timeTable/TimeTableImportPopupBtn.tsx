@@ -13,7 +13,7 @@ import iMessage, {
   MESSAGE_TYPE_TIME_TABLE_IMPORT
 } from '../../types/Message/iMessage';
 import moment from 'moment-timezone';
-import MessageListPanel from '../common/MessageListPanel';
+import MessageListPanel from '../common/Message/MessageListPanel';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../redux/makeReduxStore';
 import SynVConfigUserPermissionService from '../../services/Synergetic/SynVConfigUserPermissionService';

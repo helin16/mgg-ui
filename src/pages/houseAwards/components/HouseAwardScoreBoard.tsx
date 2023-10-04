@@ -1,33 +1,38 @@
-import iSynLuHouse from '../../../types/Synergetic/iSynLuHouse';
-import iHouseAwardEventType from '../../../types/HouseAwards/iHouseAwardEventType';
-import styled from 'styled-components';
-import {HOUSE_COLOR_GR, HOUSE_COLOR_KT, HOUSE_COLOR_MC, HOUSE_COLOR_SM} from '../../../components/HouseAwards/styles';
-import * as Icon from 'react-bootstrap-icons';
-import {useSelector} from 'react-redux';
-import {RootState} from '../../../redux/makeReduxStore';
-import {useEffect, useState} from 'react';
-import {Alert, Spinner} from 'react-bootstrap';
-import Toaster from '../../../services/Toaster';
-import {CAMPUS_CODE_SENIOR} from '../../../types/Synergetic/iLuCampus';
-import iLuYearLevel from '../../../types/Synergetic/iLuYearLevel';
-import SynLuYearLevelService from '../../../services/Synergetic/SynLuYearLevelService';
-import HouseAwardScoreTable from './HouseAwardScoreTable';
-import HouseAwardEventService from '../../../services/HouseAwards/HouseAwardEventService';
-import iHouseAwardEvent from '../../../types/HouseAwards/iHouseAwardEvent';
-import moment from 'moment-timezone';
-import {FlexContainer} from '../../../styles';
-import UserService from '../../../services/UserService';
-import {MGGS_MODULE_ID_HOUSE_AWARDS} from '../../../types/modules/iModuleUser';
-import {ROLE_ID_ADMIN} from '../../../types/modules/iRole';
-import YearLevelSelector from '../../../components/student/YearLevelSelector';
-import FileYearSelector from '../../../components/student/FileYearSelector';
+import iSynLuHouse from "../../../types/Synergetic/Lookup/iSynLuHouse";
+import iHouseAwardEventType from "../../../types/HouseAwards/iHouseAwardEventType";
+import styled from "styled-components";
+import {
+  HOUSE_COLOR_GR,
+  HOUSE_COLOR_KT,
+  HOUSE_COLOR_MC,
+  HOUSE_COLOR_SM
+} from "../../../components/HouseAwards/styles";
+import * as Icon from "react-bootstrap-icons";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../redux/makeReduxStore";
+import { useEffect, useState } from "react";
+import { Alert, Col, Row, Spinner } from "react-bootstrap";
+import Toaster from "../../../services/Toaster";
+import { CAMPUS_CODE_SENIOR } from "../../../types/Synergetic/Lookup/iSynLuCampus";
+import ISynLuYearLevel from "../../../types/Synergetic/Lookup/iSynLuYearLevel";
+import SynLuYearLevelService from "../../../services/Synergetic/Lookup/SynLuYearLevelService";
+import HouseAwardScoreTable from "./HouseAwardScoreTable";
+import HouseAwardEventService from "../../../services/HouseAwards/HouseAwardEventService";
+import iHouseAwardEvent from "../../../types/HouseAwards/iHouseAwardEvent";
+import moment from "moment-timezone";
+import { FlexContainer } from "../../../styles";
+import UserService from "../../../services/UserService";
+import { MGGS_MODULE_ID_HOUSE_AWARDS } from "../../../types/modules/iModuleUser";
+import { ROLE_ID_ADMIN } from "../../../types/modules/iRole";
+import YearLevelSelector from "../../../components/student/YearLevelSelector";
+import FileYearSelector from "../../../components/student/FileYearSelector";
 
 type iHouseAwardScoreBoard = {
   house: iSynLuHouse;
   type: iHouseAwardEventType;
   campusCodes?: string[];
   onCancel: () => void;
-}
+};
 const Wrapper = styled.div`
   .title-row {
     font-size: 23px;
@@ -35,7 +40,9 @@ const Wrapper = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.4rem 0.8rem;
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
+    padding-left: calc(var(--bs-gutter-x) * 0.5);
     &.gr {
       background-color: ${HOUSE_COLOR_GR};
     }
@@ -51,22 +58,24 @@ const Wrapper = styled.div`
     .menu-div {
       display: flex;
       gap: 0.4rem;
+      padding-left: 0px;
       .icon-btn {
         cursor: pointer;
       }
     }
+    div[class^="col-"] {
+      padding-left: 0px;
+    }
   }
-  
+
   .summary-row {
     font-weight: bold;
-    padding: 1rem 0 2rem;
+    padding: 1rem 0 0.3rem;
     display: flex;
     gap: 0.4rem;
   }
-  
-  .fileYear-selector,
-  .yearLevel-selector {
-    z-index: 9999;
+
+  .selector {
     font-size: 14px;
     color: #1a1e21;
   }
@@ -86,37 +95,9 @@ const Wrapper = styled.div`
       min-height: auto;
     }
   }
-  
-  .table {
-    &.sticky {
-      .body {
-        .tr {
-          &:hover {
-            .td {
-              background-color: #ddd !important;
-            }
-          }
-          .td:last-child,
-          .td:nth-last-child(2),
-          .td:nth-last-child(3) {
-            background-color: #ededed;
-          }
-        }
-      }
 
-      [data-sticky-td] {
-        position: sticky;
-        background-color: #ededed;
-      }
-
-      [data-sticky-last-left-td] {
-        box-shadow: 2px 0px 3px #ccc;
-      }
-
-      [data-sticky-first-right-td] {
-        box-shadow: -2px 0px 3px #ccc;
-      }
-    }
+  .students-table {
+    max-height: calc(100vh - 10rem);
   }
 `;
 const HouseAwardScoreBoard = ({
@@ -125,11 +106,16 @@ const HouseAwardScoreBoard = ({
   campusCodes = [CAMPUS_CODE_SENIOR],
   onCancel
 }: iHouseAwardScoreBoard) => {
-  const {user} = useSelector((root: RootState) => root.auth);
-  const currentFileYear = Number(user?.SynCurrentFileSemester?.FileYear || moment().format('YYYY'));
+  const { user } = useSelector((root: RootState) => root.auth);
+  const currentFileYear = Number(
+    user?.SynCurrentFileSemester?.FileYear || moment().year()
+  );
 
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedYearLevel, setSelectedYearLevel] = useState<iLuYearLevel | null>(null);
+  const [
+    selectedYearLevel,
+    setSelectedYearLevel
+  ] = useState<ISynLuYearLevel | null>(null);
   const [events, setEvents] = useState<iHouseAwardEvent[]>([]);
   const [selectedFileYear, setSelectedFileYear] = useState(currentFileYear);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -141,42 +127,45 @@ const HouseAwardScoreBoard = ({
     Promise.all([
       SynLuYearLevelService.getAllYearLevels({
         where: JSON.stringify({
-          Campus: campusCodes,
+          Campus: campusCodes
         }),
-        sort: 'YearLevelSort:ASC'
+        sort: "YearLevelSort:ASC"
       }),
       HouseAwardEventService.getEvents({
         where: JSON.stringify({
-          active: 1,
+          active: 1
         }),
-        sort: 'Name:ASC',
+        sort: "Name:ASC"
       }),
       UserService.getUsers({
         where: JSON.stringify({
           Active: true,
           ModuleID: MGGS_MODULE_ID_HOUSE_AWARDS,
           RoleID: ROLE_ID_ADMIN,
-          SynergeticID: user?.synergyId || 0,
-        }),
+          SynergeticID: user?.synergyId || 0
+        })
       })
-    ]).then(resp => {
-      if (isCanceled) return;
-      if (resp[0].length > 0) {
-        setSelectedYearLevel(resp[0][0])
-      }
-      setEvents(resp[1]);
-      setIsAdmin(resp[2].length > 0);
-    }).catch(err => {
-      if (isCanceled) return;
-      Toaster.showApiError(err)
-    }).finally(() => {
-      if (isCanceled) return;
-      setIsLoading(false);
-    });
+    ])
+      .then(resp => {
+        if (isCanceled) return;
+        if (resp[0].length > 0) {
+          setSelectedYearLevel(resp[0][0]);
+        }
+        setEvents(resp[1]);
+        setIsAdmin(resp[2].length > 0);
+      })
+      .catch(err => {
+        if (isCanceled) return;
+        Toaster.showApiError(err);
+      })
+      .finally(() => {
+        if (isCanceled) return;
+        setIsLoading(false);
+      });
 
     return () => {
       isCanceled = true;
-    }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [house, type, JSON.stringify(campusCodes), user]);
 
@@ -186,7 +175,7 @@ const HouseAwardScoreBoard = ({
     }
 
     if (isAdmin) {
-      return false
+      return false;
     }
 
     if (selectedFileYear < currentFileYear) {
@@ -198,7 +187,7 @@ const HouseAwardScoreBoard = ({
     }
 
     return false;
-  }
+  };
 
   const getDisabledMsg = () => {
     if (!user || isAdmin) {
@@ -208,50 +197,59 @@ const HouseAwardScoreBoard = ({
       return null;
     }
     return (
-      <FlexContainer className={'space-below'}>
-        <Alert variant={'danger'} className={'full-width'}>
-          Board can ONLY be updated by Head of House: <b>{house.HeadOfHouse}</b> ({house.HeadOfHouseID})
+      <FlexContainer className={"space-below"}>
+        <Alert variant={"danger"} className={"full-width"}>
+          Board can ONLY be updated by Head of House: <b>{house.HeadOfHouse}</b>{" "}
+          ({house.HeadOfHouseID})
         </Alert>
       </FlexContainer>
-    )
-  }
+    );
+  };
 
   if (isLoading) {
-    return <Spinner animation={'border'} />
+    return <Spinner animation={"border"} />;
   }
 
   return (
     <Wrapper>
-      <div className={`title-row ${house.Code.toLowerCase()}`}>
-        <div className={'menu-div'}>
-          <div className={'icon-btn'} onClick={() => onCancel()} title={'back to house selection'}><Icon.ArrowLeft /></div>
-          <div><Icon.Speedometer2 /></div>
+      <Row className={`title-row ${house.Code.toLowerCase()}`}>
+        <Col className={"menu-div"} md={8}>
+          <div
+            className={"icon-btn"}
+            onClick={() => onCancel()}
+            title={"back to house selection"}
+          >
+            <Icon.ArrowLeft />
+          </div>
+          <div>
+            <Icon.Speedometer2 />
+          </div>
           <div>{`Board for ${type.name} in House: ${house.Description}`}</div>
-        </div>
-        <FlexContainer className={'withGap'}>
-          <div>(Points to be awarded: {type.points_to_be_awarded})</div>
-          <YearLevelSelector
-            campusCodes={[CAMPUS_CODE_SENIOR]}
-            classname={'yearLevel-selector'}
-            values={selectedYearLevel ? [`${selectedYearLevel?.Code}`] : []}
-            onSelect={(options) => {
-              // @ts-ignore
-              setSelectedYearLevel(options?.data || null)
-            }}
-          />
-        </FlexContainer>
-      </div>
-      <div className={`summary-row ${house.Code.toLowerCase()}`}>
-        <div>Year:</div>
-        <div>
-          <FileYearSelector
-            className={'fileYear-selector'}
-            onSelect={(newYear) => setSelectedFileYear(newYear || moment().year())}
-            value={selectedFileYear}
-            min={moment().subtract(5, 'year').year()}
-          />
-        </div>
-      </div>
+        </Col>
+        <Col md={3}>
+          <FlexContainer className={"justify-content-end with-gap lg-gap"}>
+            <FileYearSelector
+              className={"selector year-selector"}
+              onSelect={newYear =>
+                setSelectedFileYear(newYear || moment().year())
+              }
+              value={selectedFileYear}
+              min={moment()
+                .subtract(5, "year")
+                .year()}
+            />
+            <YearLevelSelector
+              campusCodes={[CAMPUS_CODE_SENIOR]}
+              classname={"selector"}
+              values={selectedYearLevel ? [`${selectedYearLevel?.Code}`] : []}
+              onSelect={options => {
+                // @ts-ignore
+                setSelectedYearLevel(options?.data || null);
+              }}
+            />
+          </FlexContainer>
+        </Col>
+      </Row>
       {getDisabledMsg()}
       {selectedYearLevel && (
         <HouseAwardScoreTable
@@ -265,6 +263,6 @@ const HouseAwardScoreBoard = ({
       )}
     </Wrapper>
   );
-}
+};
 
 export default HouseAwardScoreBoard;

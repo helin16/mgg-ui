@@ -1,7 +1,12 @@
+import iSynLuCountry from './Lookup/iSynLuCountry';
+
 export const SYN_STUDENT_STATUS_ID_NORMAL = '0';
 export const SYN_STUDENT_STATUS_ID_NEW = '1';
+export const SYN_STUDENT_STATUS_ID_REPEATING = '2';
 export const SYN_STUDENT_STATUS_ID_LEAVING = '5';
 export const SYN_STUDENT_STATUS_ID_LEFT = '4';
+export const SYN_STUDENT_STATUS_ID_FINALISED = 'F';
+export const SYN_STUDENT_STATUS_PAST = 'PAST';
 
 type iVStudent = {
   StudentID: number;
@@ -163,13 +168,13 @@ type iVStudent = {
   LegalPrivacyPolicyAgreedFlag: boolean;
   StudentBarcode: string;
   StudentMedicalAlert: string;
-  StudentSchoolFTE: boolean;
+  StudentSchoolFTE: boolean | null;
   StudentInitialSchoolingYear: string | null;
   StudentInitialSchoolingDate: string | null;
   StudentNonResidentFlag: boolean;
   DirectoryIncludeFlag: boolean;
   DirectoryProvideFlag: boolean;
-  AddressID: number;
+  AddressID: number | null;
   StudentBirthCertificateOnFileFlag: boolean;
   StudentCountryOfBirthCode: string;
   StudentCountryOfBirthCodeRaw: string;
@@ -181,7 +186,7 @@ type iVStudent = {
   ImportantCommentsFlag: boolean;
   StudentLeavingDestinationDesc: string;
   ID: number;
-  DebtorID: number;
+  DebtorID: number | null;
   MCEETYAFormReceivedDate: string | null;
   StudentNationalityCode: string;
   StudentNationalityDescription: string;
@@ -199,6 +204,12 @@ type iVStudent = {
   LearningPathway: string;
   GenderSynergyMeaning: string;
   profileUrl: string;
+  StudentPassportCountry?: iSynLuCountry;
 };
+
+export type iVPastStudent = iVStudent;
+export type iVPastAndCurrentStudent = iVStudent & {
+  StudentIsPastFlag: boolean;
+}
 
 export default iVStudent;

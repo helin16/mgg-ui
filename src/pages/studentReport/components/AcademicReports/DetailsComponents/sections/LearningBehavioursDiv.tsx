@@ -13,7 +13,7 @@ const resultTranslateMap = {
 
 const LearningBehavioursDiv = ({results}: {results: iStudentReportResult[]}) => {
   const [resultList, setResultList] = useState<iStudentReportResult[]>([]);
-
+  
   useEffect(() => {
     setResultList(
       results

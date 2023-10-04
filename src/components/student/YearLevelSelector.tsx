@@ -1,10 +1,10 @@
 import {iAutoCompleteSingle} from '../common/AutoComplete';
 import {useEffect, useState} from 'react';
 import {Spinner} from 'react-bootstrap';
-import SynLuYearLevelService from '../../services/Synergetic/SynLuYearLevelService';
-import iLuYearLevel from '../../types/Synergetic/iLuYearLevel';
+import SynLuYearLevelService from '../../services/Synergetic/Lookup/SynLuYearLevelService';
+import ISynLuYearLevel from '../../types/Synergetic/Lookup/iSynLuYearLevel';
 import SelectBox from '../common/SelectBox';
-import {CAMPUS_CODE_ELC, CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR} from '../../types/Synergetic/iLuCampus';
+import {CAMPUS_CODE_ELC, CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR} from '../../types/Synergetic/Lookup/iSynLuCampus';
 import UtilsService from '../../services/UtilsService';
 import Toaster from '../../services/Toaster';
 
@@ -20,10 +20,10 @@ type iYearLevelSelector = {
   isDisabled?: boolean;
 };
 
-const getLabel = (yearLevel: iLuYearLevel) => {
+const getLabel = (yearLevel: ISynLuYearLevel) => {
   return UtilsService.isNumeric(yearLevel.Description) ? `Year ${yearLevel.Description}` : yearLevel.Description;
 }
-export const translateYearLevelToOption = (yearLevel: iLuYearLevel) => {
+export const translateYearLevelToOption = (yearLevel: ISynLuYearLevel) => {
   return {value: yearLevel.Code, data: yearLevel, label: getLabel(yearLevel)}
 }
 

@@ -1,4 +1,4 @@
-import SectionDiv from './SectionDiv';
+import SectionDiv from '../../../../../../components/common/SectionDiv';
 import {useEffect, useState} from 'react';
 import iVStudent from '../../../../../../types/Synergetic/iVStudent';
 import iStudentReportYear from '../../../../../../types/Synergetic/iStudentReportYear';

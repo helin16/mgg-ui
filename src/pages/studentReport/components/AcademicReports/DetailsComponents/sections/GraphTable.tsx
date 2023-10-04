@@ -1,7 +1,8 @@
 import styled from 'styled-components';
 import iStudentReportResult from '../../../../../../types/Synergetic/iStudentReportResult';
 import {ProgressBar} from 'react-bootstrap';
-import SectionDiv from './SectionDiv';
+import SectionDiv from '../../../../../../components/common/SectionDiv';
+import * as _ from 'lodash';
 
 export const ResultTableWrapper = styled.div`
   .result-row {
@@ -46,10 +47,6 @@ const GraphTable = ({
   results, title, resultTranslateMap, resultTranslateFn
 }: iGraphTable) => {
 
-  if (results.length <= 0) {
-    return null;
-  }
-
   const resultTableClassName = 'text-right d-none d-xl-block d-xxl-block';
   const resultTextClassName = 'text-right d-block d-xl-none d-xxl-none';
   const resultTranslateFunction = resultTranslateFn || defaultResultTranslateFn;
@@ -74,6 +71,10 @@ const GraphTable = ({
     )
   }
 
+  if (results.length <= 0) {
+    return null;
+  }
+
   return (
     <SectionDiv>
       <ResultTableWrapper>
@@ -81,7 +82,8 @@ const GraphTable = ({
           <div className={'text-uppercase'}>{title}</div>
           {getResultColTitle()}
         </div>
-        {results.map(result => {
+        {_.uniqBy(results, (result) => result.AssessAreaHeading)
+          .map(result => {
           if (!resultTranslateMap) {
             return (
               <div key={result.AssessAreaHeading} className={'result-row'}>

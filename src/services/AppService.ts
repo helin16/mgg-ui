@@ -11,6 +11,8 @@ export type iParams = {
   [key: string]: string | boolean | number | null | undefined | string[];
 };
 
+const cancelToken = axios.CancelToken;
+
 const getEndPointUrl = (url: string) => {
   return `${process.env.REACT_APP_API_END_POINT}${url}`;
 };
@@ -48,28 +50,31 @@ const get = (url: string, params: iConfigParams = {}, config: AxiosRequestConfig
 };
 
 const post = (url: string, params: iParams, config: AxiosRequestConfig = {}) => {
+  const {headers, ...rest} = config;
   // @ts-ignore
   return axios.post(getEndPointUrl(url), params, {
-    ...config,
-    ...getHeaders()
+    ...rest,
+    ...getHeaders(headers)
   });
 };
 
 const put = (url: string, params: iConfigParams, config: AxiosRequestConfig = {}) => {
+  const {headers, ...rest} = config;
   // @ts-ignore
   return axios.put(getEndPointUrl(url), params, {
-    ...config,
-    ...getHeaders()
+    ...rest,
+    ...getHeaders(headers)
   });
 };
 
 const remove = (url: string, params: iConfigParams = {}, config: AxiosRequestConfig = {}) => {
+  const {headers, ...rest} = config;
   return axios.delete(
     `${getEndPointUrl(url)}${getUrlParams(params)}`,
     // @ts-ignore
     {
-      ...config,
-      ...getHeaders()
+      ...rest,
+      ...getHeaders(headers)
     }
   );
 };
@@ -90,12 +95,18 @@ const uploadImage = (url: string, params: FormData, config: AxiosRequestConfig =
   });
 };
 
+const cancelAll = () => {
+  return cancelToken.source().cancel();
+}
+
+
 const AppService = {
   get,
   post,
   put,
   delete: remove,
   uploadImage,
+  cancelAll,
 };
 
 export default AppService;

@@ -9,7 +9,9 @@ import BTAdminOptionsPanel, {
   BT_ADMIN_OPTION_CONSOLIDATED_REPORTS,
   BT_ADMIN_OPTION_DOWNLOAD_BT_ITEMS,
   BT_ADMIN_OPTION_EXCLUDED_GL_CODES,
-  BT_ADMIN_OPTION_LOCKDOWNS, BT_ADMIN_OPTION_NOTIFICATIONS,
+  BT_ADMIN_OPTION_FORECAST,
+  BT_ADMIN_OPTION_LOCKDOWNS,
+  BT_ADMIN_OPTION_NOTIFICATIONS,
   BT_ADMIN_OPTION_USERS,
   iBTAdminOptions
 } from './components/admin/BTAdminOptionsPanel';
@@ -22,6 +24,7 @@ import BTExcludeGLAdminPanel from './components/admin/BTExcludeGLAdminPanel';
 import BTLockDownAdminPanel from './components/admin/BTLockDownAdminPanel';
 import BTConsolidatedReportsPanel from './components/admin/BTConsolidatedReportsPanel';
 import BTNotificationsAdminPanel from './components/admin/BTNotificationsAdminPanel';
+import BudgetForecastPanel from '../../components/reports/BudgetForecast/BudgetForecastPanel';
 
 type iBTAdminPage = {
   onNavBack: () => void;
@@ -63,6 +66,9 @@ const BTAdminPage = ({onNavBack, setShowingAdminPageModule, adminPageModule}: iB
       case BT_ADMIN_OPTION_NOTIFICATIONS: {
         return ' - Notifications'
       }
+      case BT_ADMIN_OPTION_FORECAST: {
+        return ' - Forecast Next Year'
+      }
       default: {
         return '';
       }
@@ -91,6 +97,9 @@ const BTAdminPage = ({onNavBack, setShowingAdminPageModule, adminPageModule}: iB
       }
       case BT_ADMIN_OPTION_NOTIFICATIONS: {
         return <BTNotificationsAdminPanel />
+      }
+      case BT_ADMIN_OPTION_FORECAST: {
+        return <BudgetForecastPanel />
       }
       default: {
         return (

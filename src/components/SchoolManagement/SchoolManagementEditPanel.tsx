@@ -9,9 +9,9 @@ import LoadingBtn from '../common/LoadingBtn';
 import * as Icons from 'react-bootstrap-icons';
 import SchoolManagementRoleSelector from './SchoolManagementRoleSelector';
 import YearLevelSelector from '../student/YearLevelSelector';
-import {CAMPUS_CODE_SENIOR} from '../../types/Synergetic/iLuCampus';
+import {CAMPUS_CODE_SENIOR} from '../../types/Synergetic/Lookup/iSynLuCampus';
 import StaffAutoComplete from '../staff/StaffAutoComplete';
-import SectionDiv from '../../pages/studentReport/components/AcademicReports/DetailsComponents/sections/SectionDiv';
+import SectionDiv from '../common/SectionDiv';
 import moment from 'moment-timezone';
 import FormErrorDisplay from '../form/FormErrorDisplay';
 import Toaster, {TOAST_TYPE_ERROR, TOAST_TYPE_SUCCESS} from '../../services/Toaster';
@@ -158,7 +158,7 @@ const SchoolManagementEditPanel = ({onIsSubmitting, onCancel, schoolManagementTe
               <FormErrorDisplay errorsMap={errors} fieldName={'fileYear'} />
             </Col>
             <Col md={3}>
-              <FormLabel label={'File Semester'} isRequired />
+              <FormLabel label={'Term'} isRequired />
               <FileSemesterSelector
                 isDisabled={isSubmitting}
                 value={fileSemester || undefined}

@@ -1,8 +1,8 @@
 import {iAutoCompleteSingle} from '../common/AutoComplete';
 import {useEffect, useState} from 'react';
-import SynLuCampusService from '../../services/Synergetic/SynLuCampusService';
+import SynLuCampusService from '../../services/Synergetic/Lookup/SynLuCampusService';
 import {Spinner} from 'react-bootstrap';
-import iLuCampus from '../../types/Synergetic/iLuCampus';
+import ISynLuCampus from '../../types/Synergetic/Lookup/iSynLuCampus';
 import SelectBox from '../common/SelectBox';
 
 type iSynCampusSelector = {
@@ -12,13 +12,15 @@ type iSynCampusSelector = {
   allowClear?: boolean;
   showIndicator?: boolean;
   className?: string;
+  filterEmptyCodes?: boolean;
+  isDisabled?: boolean;
 };
 
-export const translateCampusToOption = (campus: iLuCampus) => {
+export const translateCampusToOption = (campus: ISynLuCampus) => {
   return {value: campus.Code, data: campus, label: campus.Description}
 }
 
-const SynCampusSelector = ({values, onSelect, allowClear, className, showIndicator = true, isMulti = false}: iSynCampusSelector) => {
+const SynCampusSelector = ({values, onSelect, allowClear, className, isDisabled = false, filterEmptyCodes = false,  showIndicator = true, isMulti = false}: iSynCampusSelector) => {
   const [optionMap, setOptionMap] = useState<{ [key: string]: iAutoCompleteSingle }>({});
   const [isLoading, setIsLoading] = useState(false);
 
@@ -33,11 +35,19 @@ const SynCampusSelector = ({values, onSelect, allowClear, className, showIndicat
       })
       .then(resp => {
         if (isCancelled === true) { return }
-        setOptionMap(resp.reduce((map, campus) => {
-          return {
-            ...map,
-            [campus.Code]: translateCampusToOption(campus),
-          }
+        setOptionMap(
+          resp
+            .filter(yearLevel => {
+              if(filterEmptyCodes !== true) {
+                return true;
+              }
+              return `${yearLevel.Code}`.trim() !== '';
+            })
+            .reduce((map, campus) => {
+              return {
+                ...map,
+                [campus.Code]: translateCampusToOption(campus),
+              }
         }, {}))
       })
       .finally(() => {
@@ -46,7 +56,7 @@ const SynCampusSelector = ({values, onSelect, allowClear, className, showIndicat
     return () => {
       isCancelled = true;
     }
-  }, [optionMap]);
+  }, [optionMap, filterEmptyCodes]);
 
   const getSelectedValues = () => {
     if (!values) {
@@ -68,6 +78,7 @@ const SynCampusSelector = ({values, onSelect, allowClear, className, showIndicat
   }
   return (
     <SelectBox
+      isDisabled={isDisabled}
       options={Object.values(optionMap)}
       isMulti={isMulti}
       className={className}

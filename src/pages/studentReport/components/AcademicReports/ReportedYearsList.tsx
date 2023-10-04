@@ -4,7 +4,7 @@ import React, {useEffect, useState} from 'react';
 import StudentReportService from '../../../../services/Synergetic/StudentReportService';
 import iStudentReportYear from '../../../../types/Synergetic/iStudentReportYear';
 import LinkBtn from '../../../../components/common/LinkBtn';
-import SectionDiv from './DetailsComponents/sections/SectionDiv';
+import SectionDiv from '../../../../components/common/SectionDiv';
 
 const ReportedYearsList = ({student, onSelect}: {student: iVStudent, onSelect: (studentReportYear: iStudentReportYear) => void}) => {
   const [reportList, setReportList] = useState<{[key: number]: iStudentReportYear[]}>({});

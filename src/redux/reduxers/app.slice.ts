@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export type AppState = {
   isProd?: boolean;
+  backendSchoolBoxUrl?: string;
 };
 /**
  * Initial State
@@ -19,6 +20,7 @@ const actions = {
   ) => ({
     ...state,
     isProd: action.payload.isProd,
+    backendSchoolBoxUrl: action.payload.backendSchoolBoxUrl,
   }),
 };
 /**

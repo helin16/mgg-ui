@@ -5,12 +5,13 @@ type iFileSemesterSelector = {
   onSelect?: (semester: number | null) => void;
   allowClear?: boolean;
   showIndicator?: boolean;
+  showIndicatorSeparator?: boolean;
   isDisabled?: boolean;
   className?: string;
   semesters?: number[];
 };
 
-const FileSemesterSelector = ({isDisabled, value, onSelect, allowClear, className, showIndicator = true, semesters = [2, 4]}: iFileSemesterSelector) => {
+const FileSemesterSelector = ({isDisabled, value, onSelect, allowClear, className, showIndicator = true, showIndicatorSeparator = true, semesters = [2, 4]}: iFileSemesterSelector) => {
   const options = semesters.map(semester => ({value: semester, label: semester}));
 
   const getSelectedOption = () => {
@@ -28,6 +29,7 @@ const FileSemesterSelector = ({isDisabled, value, onSelect, allowClear, classNam
       value={getSelectedOption()}
       isClearable={allowClear}
       showDropdownIndicator={showIndicator}
+      showIndicatorSeparator={showIndicatorSeparator}
     />
   )
 };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useReducer } from 'react';
 import { reducer, ActionKind, iState, Action } from './reducer';
-import Toaster from '../../../services/Toaster';
+import Toaster, {TOAST_TYPE_SUCCESS} from '../../../services/Toaster';
 
 type iEditState<T> = {
   isModalOpen: boolean;
@@ -27,6 +27,7 @@ type iProps = {
   perPage?: number;
   loadMoreApplied?: boolean;
   paginationApplied?: boolean;
+  forceRefreshAfterSave?: boolean;
   sort?: string;
   filter?: string;
   advancedFilter?: string;
@@ -49,6 +50,7 @@ const useListCrudHook = <T extends { id: string | number }>({
   advancedFilter,
   jsonFilter,
   notRenderWithoutFilter = false,
+  forceRefreshAfterSave = false,
   createCallBack,
   editCallBack,
 }: iProps) => {
@@ -156,6 +158,7 @@ const useListCrudHook = <T extends { id: string | number }>({
                   total: fetchResult.total,
                   currentPage: fetchResult.currentPage,
                   perPage: fetchResult.perPage,
+                  pages: fetchResult.pages,
                 }
               : { data: fetchResult },
         });
@@ -203,6 +206,7 @@ const useListCrudHook = <T extends { id: string | number }>({
         createCallBack(result.id);
         return;
       }
+      Toaster.showToast('Saved Successfully', TOAST_TYPE_SUCCESS);
       // eslint-disable-next-line
       const eagerLoadResult: any = await getFn({ where: JSON.stringify({ id: result.id }) });
       dispatch({
@@ -215,6 +219,7 @@ const useListCrudHook = <T extends { id: string | number }>({
         ...edit,
         target: undefined,
         isModalOpen: false,
+        ...(forceRefreshAfterSave === true ? {version: edit.version + 1} : {})
       });
     } catch (error) {
       dispatch({ type: ActionKind.Confirmed, payload: {} });
@@ -240,6 +245,7 @@ const useListCrudHook = <T extends { id: string | number }>({
         ...edit,
         target: undefined,
         isModalOpen: false,
+        ...(forceRefreshAfterSave === true ? {version: edit.version + 1} : {})
       });
       if (typeof createCallBack === 'function') {
         createCallBack(result.id);
@@ -267,6 +273,7 @@ const useListCrudHook = <T extends { id: string | number }>({
         ...edit,
         target: undefined,
         isModalOpen: false,
+        ...(forceRefreshAfterSave === true ? {version: edit.version + 1} : {})
       });
       if (typeof editCallBack === 'function') {
         editCallBack(result.id);

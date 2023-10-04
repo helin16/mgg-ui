@@ -11,6 +11,7 @@ type iSelectBox = {
   showDropdownIndicator?: boolean;
   showIndicatorSeparator?: boolean;
   isDisabled?: boolean;
+  isInvalid?: boolean;
 }
 
 const Wrapper = styled.div`
@@ -42,7 +43,7 @@ const Wrapper = styled.div`
 `
 
 const SelectBox = ({
-  className, options, onChange, value, isClearable, isMulti, showDropdownIndicator = true, showIndicatorSeparator = true, isDisabled
+  className, options, onChange, value, isClearable, isMulti, isInvalid = false, showDropdownIndicator = true, showIndicatorSeparator = true, isDisabled
 }: iSelectBox) => {
   const getComponents = () => {
     if (showDropdownIndicator === false) {
@@ -66,7 +67,7 @@ const SelectBox = ({
       <Select
         isDisabled={isDisabled}
         isMulti={isMulti}
-        className={className}
+        className={`${className || ''} ${isInvalid === true ? 'is-invalid form-control' : ''}`}
         options={options}
         onChange={onChange}
         value={value}

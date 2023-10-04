@@ -9,11 +9,12 @@ const Wrapper = styled.div`
 type iPageLoadingSpinner = {
   text?: any;
   spinner?: any;
+  className?: string;
 }
-const PageLoadingSpinner = ({text, spinner}: iPageLoadingSpinner) => {
+const PageLoadingSpinner = ({className, text, spinner}: iPageLoadingSpinner) => {
   return (
-    <Wrapper>
-      {text || <h5>Loading...</h5>}
+    <Wrapper className={className}>
+      {text || <h5 className={'title'}>Loading...</h5>}
       {spinner || <Spinner animation={'border'} />}
     </Wrapper>
   )

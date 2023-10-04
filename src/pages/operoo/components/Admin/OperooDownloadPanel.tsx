@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import MessageListPanel from '../../../../components/common/MessageListPanel';
+import MessageListPanel from '../../../../components/common/Message/MessageListPanel';
 import {MESSAGE_TYPE_CRON_JOBS_OPEROO_SAFETY_DOWNLOADER} from '../../../../types/Message/iMessage';
 import OperooSafetyAlertDownloadPopupBtn from '../OperooSafetyAlertDownloadPopupBtn';
 import styled from 'styled-components';

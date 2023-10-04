@@ -12,8 +12,8 @@ import FileYearSelector from '../../../../components/student/FileYearSelector';
 import FileSemesterSelector from '../../../../components/student/FileSemesterSelector';
 import SynCampusSelector, {translateCampusToOption} from '../../../../components/student/SynCampusSelector';
 import YearLevelSelector, {translateYearLevelToOption} from '../../../../components/student/YearLevelSelector';
-import iLuCampus, {CAMPUS_CODE_ELC, CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR} from '../../../../types/Synergetic/iLuCampus';
-import iLuYearLevel from '../../../../types/Synergetic/iLuYearLevel';
+import ISynLuCampus, {CAMPUS_CODE_ELC, CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR} from '../../../../types/Synergetic/Lookup/iSynLuCampus';
+import ISynLuYearLevel from '../../../../types/Synergetic/Lookup/iSynLuYearLevel';
 import ReportStyleSelector, {translateReportStyleToOption} from './ReportStyleSelector';
 import iStudentReportStyle from '../../../../types/Synergetic/iStudentReportStyle';
 
@@ -24,8 +24,8 @@ const Wrapper = styled.div`
 `
 type iQuery = {
   name?: string;
-  campus?: iLuCampus;
-  yearLevel?: iLuYearLevel;
+  campus?: ISynLuCampus;
+  yearLevel?: ISynLuYearLevel;
   style?: iStudentReportStyle;
   fileYear?: number;
   fileSemester?: number;

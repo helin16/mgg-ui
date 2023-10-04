@@ -7,6 +7,7 @@ export interface iState<T> {
   currentPage?: number;
   perPage?: number;
   total?: number;
+  pages?: number;
 }
 
 export enum ActionKind {
@@ -30,6 +31,7 @@ export type Action<T> = {
     to?: number;
     currentPage?: number;
     perPage?: number;
+    pages?: number;
     total?: number;
     targetId?: string | number;
     keyword?: string;
@@ -58,6 +60,7 @@ export const reducer = <T extends { id: string | number }>(
         currentPage: action.payload.currentPage,
         perPage: action.payload.perPage,
         total: action.payload.total,
+        pages: action.payload.pages,
       };
     case ActionKind.LoadMore:
       return {
@@ -71,6 +74,7 @@ export const reducer = <T extends { id: string | number }>(
         currentPage: action.payload.currentPage,
         perPage: action.payload.perPage,
         total: action.payload.total,
+        pages: action.payload.pages,
       };
     case ActionKind.Delete:
       return {

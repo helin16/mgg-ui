@@ -6,6 +6,17 @@ export const FlexContainer = styled.div`
   &.with-gap,
   &.withGap {
     gap: 2px;
+    &.lg-gap {
+      gap: 1rem;
+    }
+  }
+
+  &.flex-row {
+    flex-direction: row;
+  }
+
+  &.flex-col {
+    flex-direction: column;
   }
   
   &.flex-wrap {
@@ -34,6 +45,9 @@ export const FlexContainer = styled.div`
 
   &.space-below {
     margin-bottom: 0.8rem;
+  }
+  &.space-above {
+    margin-top: 0.8rem;
   }
 
   &.wrap {

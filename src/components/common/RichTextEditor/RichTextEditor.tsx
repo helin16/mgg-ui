@@ -1,12 +1,15 @@
 import {Editor} from '@tinymce/tinymce-react';
+import styled from 'styled-components';
 
 type iRichTextEditor = {
   value?: string;
+  className?: string;
   height?: number;
   plugins?: string[];
   toolBar?: string;
   settings?: any;
   onChange?: (text: string) => void;
+  onEditorChange?: (content: any, editor: any) => void;
 }
 
 const defaultPlugins = [
@@ -33,25 +36,37 @@ const defaultToolBars = [
   'alignleft aligncenter alignright alignjustify',
   'bullist numlist',
   'outdent indent',
+  'image media',
   'link',
   'removeformat fullscreen',
 ];
-const RichTextEditor = ({value, plugins, toolBar, settings, onChange, height = 450}: iRichTextEditor) => {
+const Wrapper = styled.div`
+  .tox-statusbar__branding {
+    display: none;
+  }
+`;
+
+const RichTextEditor = ({value, plugins, toolBar, settings, onChange, className, onEditorChange, height = 450}: iRichTextEditor) => {
   // const editorRef = useRef(null);
   return (
-    <Editor
-      initialValue={value || ''}
-      apiKey={process.env.REACT_APP_TINYMCE_API_KEY || ''}
-      onChange={(editor) => onChange && onChange(editor.target.getContent())}
-      init={{
-        height,
-        menubar: true,
-        plugins: plugins || defaultPlugins,
-        toolbar: toolBar || defaultToolBars.join('|'),
-        removed_menuitems: 'newdocument',
-        ...(settings || {})
-      }}
-    />
+    <Wrapper className={className}>
+      <Editor
+        initialValue={value || ''}
+        apiKey={process.env.REACT_APP_TINYMCE_API_KEY || ''}
+        onChange={(editor) => onChange && onChange(editor.target.getContent())}
+        onEditorChange={(content: any, editor: any) => onEditorChange && onEditorChange(content, editor)}
+        init={{
+          height,
+          menubar: true,
+          plugins: plugins || defaultPlugins,
+          toolbar: toolBar || defaultToolBars.join('|'),
+          removed_menuitems: 'newdocument',
+          document_base_url: '',
+          relative_urls: false,
+          ...(settings || {}),
+        }}
+      />
+    </Wrapper>
   )
 }
 

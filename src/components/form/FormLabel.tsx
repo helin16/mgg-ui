@@ -11,20 +11,26 @@ const LabelWrapper = styled.label`
   span {
     color: red;
   }
+  
+  &.space-top {
+    margin-top: 1rem;
+  }
 `;
 
 type iFormLabel = {
   label?: string | JSX.Element;
   htmlFor?: string;
   isRequired?: boolean;
+  needSpaceTop?: boolean;
 }
 const FormLabel = ({
+ needSpaceTop = false,
  label,
  htmlFor,
  isRequired = false,
 }: iFormLabel) => {
   return label ? (
-    <LabelWrapper className={'label-wrapper'} htmlFor={htmlFor || 'label'}>
+    <LabelWrapper className={`label-wrapper ${needSpaceTop ? 'space-top' : ''}`} htmlFor={htmlFor || 'label'}>
       {label}
       {isRequired && <span>*</span>}
     </LabelWrapper>

@@ -1,5 +1,5 @@
 import iStudentReportResult from '../../../../../../types/Synergetic/iStudentReportResult';
-import SectionDiv from './SectionDiv';
+import SectionDiv from '../../../../../../components/common/SectionDiv';
 import {useEffect, useState} from 'react';
 
 const CommentsDiv = ({result, title = 'Comments'}: {result: iStudentReportResult; title?: string}) => {

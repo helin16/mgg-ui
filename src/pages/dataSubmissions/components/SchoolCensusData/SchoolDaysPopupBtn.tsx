@@ -1,0 +1,50 @@
+import {Button, ButtonProps, Table} from 'react-bootstrap';
+import {useState} from 'react';
+import PopupModal from '../../../../components/common/PopupModal';
+import moment from 'moment-timezone';
+import MathHelper from '../../../../helper/MathHelper';
+
+type iSchoolDaysPopupBtn = ButtonProps & {
+  schoolDays: string[];
+}
+
+const SchoolDaysPopupBtn = ({schoolDays, ...rest}: iSchoolDaysPopupBtn) => {
+  const [isPopupShowing, setIsPopupShowing] = useState(false);
+
+  const getPopup = () => {
+    if (!isPopupShowing) {
+      return null;
+    }
+    return (
+      <PopupModal
+        header={<b>{schoolDays.length} School Day(s)</b>}
+        handleClose={() => setIsPopupShowing(false)}
+        show={isPopupShowing}
+        size={'lg'}
+      >
+        <Table>
+          <tbody>
+          {schoolDays.map((schoolDay, index) => {
+            return (
+              <tr key={schoolDay}>
+                <td>Day {MathHelper.add(index, 1)}</td>
+                <td>{moment(schoolDay).format('DD MMM YYYY')}</td>
+                <td>{moment(schoolDay).format('dddd')}</td>
+              </tr>
+            )
+          })}
+          </tbody>
+        </Table>
+      </PopupModal>
+    )
+  }
+
+  return (
+    <>
+      <Button {...rest} onClick={() => setIsPopupShowing(true)}/>
+      {getPopup()}
+    </>
+  )
+}
+
+export default SchoolDaysPopupBtn;

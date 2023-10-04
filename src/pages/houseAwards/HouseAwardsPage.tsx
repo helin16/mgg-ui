@@ -1,7 +1,7 @@
 import HouseAwardEventTypes from './components/HouseAwardEventTypes';
 import React, {useState} from 'react';
 import iHouseAwardEventType from '../../types/HouseAwards/iHouseAwardEventType';
-import iSynLuHouse from '../../types/Synergetic/iSynLuHouse';
+import iSynLuHouse from '../../types/Synergetic/Lookup/iSynLuHouse';
 import HouseAwardScoreBoard from './components/HouseAwardScoreBoard';
 import {MGGS_MODULE_ID_HOUSE_AWARDS} from '../../types/modules/iModuleUser';
 import ModuleAdminBtn from '../../components/module/ModuleAdminBtn';
@@ -33,7 +33,7 @@ const HouseAwardsPage = () => {
   const [state, setState] = useState(initial);
 
   if (viewingAdmin) {
-    return <HouseAwardAdminPage onCancel={() => setViewingAdmin(false)} />
+    return <HouseAwardAdminPage onNavBack={() => setViewingAdmin(false)} />
   }
 
   if (!state.selectedHouseAwardEventType || !state.selectedLuHouse) {

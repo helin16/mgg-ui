@@ -1,8 +1,8 @@
 import {iAutoCompleteSingle} from '../common/AutoComplete';
 import {useEffect, useState} from 'react';
 import {Spinner} from 'react-bootstrap';
-import SynLuMedicalConditionTypeService from '../../services/Synergetic/SynLuMedicalConditionTypeService';
-import iSynLuMedicalConditionType from '../../types/Synergetic/iSynLuMedicalConditionType';
+import SynLuMedicalConditionTypeService from '../../services/Synergetic/Lookup/SynLuMedicalConditionTypeService';
+import iSynLuMedicalConditionType from '../../types/Synergetic/Lookup/iSynLuMedicalConditionType';
 import SelectBox from '../common/SelectBox';
 
 type iSynMedicalConditionTypeSelector = {

@@ -1,13 +1,15 @@
 import iSynGeneralLedger from '../../../types/Synergetic/Finance/iSynGeneralLedager';
 import styled from 'styled-components';
 import {useEffect, useState} from 'react';
-import {Spinner} from 'react-bootstrap';
+import {Alert, Spinner} from 'react-bootstrap';
 import SynGeneralLedgerJournalService from '../../../services/Synergetic/Finance/SynGeneralLedgerJournalService';
 import Toaster from '../../../services/Toaster';
 import moment from 'moment-timezone';
 import MathHelper from '../../../helper/MathHelper';
 import {FlexContainer} from '../../../styles';
 import UtilsService from '../../../services/UtilsService';
+import SynGeneralLedgerMonthlyBudgetService
+  from '../../../services/Synergetic/Finance/SynGeneralLedgerMonthlyBudgetService';
 
 type iBTGLJournalInMonthPanel = {
   year: number;
@@ -16,6 +18,12 @@ type iBTGLJournalInMonthPanel = {
 
 const Wrapper = styled.div`
   margin: 1rem 0;
+  .summary-row {
+    font-weight: bold;
+    border-top: 1px #ccc solid;
+    margin-top: 0.3rem;
+    padding-top: 0.3rem;
+  }
 `;
 
 type iSumMap = {
@@ -50,27 +58,46 @@ const initSumMap: iSumMap = {
 const BTGLJournalInMonthPanel = ({year, gl}: iBTGLJournalInMonthPanel) => {
   const [isLoading, setIsLoading] = useState(false);
   const [journalMap, setJournalMap] = useState<iSumMap>(initSumMap);
+  const [actualBudget, setActualBudget] = useState<number | null>(null);
+  const [yearToDateJournalTotal, setYearToDateJournalTotal] = useState(0);
 
   useEffect(() => {
     let isCanceled = false;
 
     setIsLoading(true);
-    SynGeneralLedgerJournalService.getAll({
-      where: JSON.stringify({
-        GLCode: gl.GLCode,
-        GLYear: year,
+
+    Promise.all([
+      SynGeneralLedgerJournalService.getAll({
+        where: JSON.stringify({
+          GLCode: gl.GLCode,
+          GLYear: year,
+        }),
+        perPage: '99999',
       }),
-      perPage: '99999',
-    }).then(resp => {
+      SynGeneralLedgerMonthlyBudgetService.getAllByYearAndGLCode(year, gl.GLCode)
+    ])
+    .then(resp => {
       if(isCanceled) return;
-      setJournalMap(resp.data.reduce((map: iSumMap, journal) => {
+
+      const jMap = resp[0].data.reduce((map: iSumMap, journal) => {
         const month = moment(journal.GLDate).format('MMMM');
+        // @ts-ignore
+        const subTotal = MathHelper.add(map[month] || 0, journal.GLAmount);
         return {
           ...map,
-          // @ts-ignore
-          [month]: MathHelper.add(map[month] || 0, journal.GLAmount),
+          [month]: subTotal,
         }
-      }, initSumMap))
+      }, initSumMap);
+      setJournalMap(jMap)
+      if ((resp[1] || []).length > 0) {
+        setActualBudget((resp[1] || []).reduce((sum, record) => {
+          return MathHelper.add(sum, Number(record.Budget1 || 0));
+        }, 0))
+      } else {
+        setActualBudget(null);
+      }
+
+      setYearToDateJournalTotal(Object.values(jMap).reduce((sum, subTotal) => MathHelper.add(sum, subTotal), 0));
     }).catch(err => {
       if(isCanceled) return;
       Toaster.showApiError(err)
@@ -85,12 +112,30 @@ const BTGLJournalInMonthPanel = ({year, gl}: iBTGLJournalInMonthPanel) => {
   }, [year, gl])
 
 
+  const getBudgetPanel = () => {
+    if (actualBudget === null) {
+      return null;
+    }
+
+    return (
+      <>
+        <h4>Actual Budget</h4>
+        <Alert variant={'success'} className={'text-center'}>
+          <h4>{UtilsService.formatIntoCurrency(actualBudget)}</h4>
+          <small>Budget approved in Synergetic</small>
+        </Alert>
+      </>
+    )
+  }
+
+
   if (isLoading) {
     return <Spinner animation={'border'} />
   }
 
   return (
     <Wrapper>
+      {getBudgetPanel()}
       <h4>Actual Spent in {year}</h4>
       {
         Object.keys(journalMap).map((month: string) => {
@@ -103,6 +148,10 @@ const BTGLJournalInMonthPanel = ({year, gl}: iBTGLJournalInMonthPanel) => {
           )
         })
       }
+      <FlexContainer className={'full-width justify-content space-between summary-row'}>
+        <div><b>Total</b></div>
+        <div>{UtilsService.formatIntoCurrency(yearToDateJournalTotal)}</div>
+      </FlexContainer>
     </Wrapper>
   )
 };

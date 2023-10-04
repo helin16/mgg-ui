@@ -10,6 +10,8 @@ import * as _ from 'lodash';
 import SynGeneralLedgerMonthlyBudgetService
   from '../../../services/Synergetic/Finance/SynGeneralLedgerMonthlyBudgetService';
 import MathHelper from '../../../helper/MathHelper';
+import iBTItem from '../../../types/BudgetTacker/iBTItem';
+import iSynGeneralLedgerMonthlyBudget from '../../../types/Synergetic/Finance/iSynGeneralLedagerMonthlyBudget';
 
 type iBTGLTable = {
   selectedYear: number;
@@ -35,24 +37,34 @@ const BTGLTable = ({glCodesResults, selectedYear, onSelectGL, hideZeroBalance = 
       return;
     }
 
-    let isCanceled = false;
-    setIsLoadingItems(true);
-    Promise.all([
-      BTItemService.getAll({
+    const getData = async () => {
+      const btItems = UtilsService.uniqByObjectKey((await Promise.all(_.chunk(glCodes, 50).map(codes => BTItemService.getAll({
         where: JSON.stringify({
-          year: selectedYear + 1,
-          gl_code: glCodes,
+          year: MathHelper.add(selectedYear, 1),
+          gl_code: codes,
         }),
-        perPage: '9999'
-      }),
-      SynGeneralLedgerMonthlyBudgetService.getAll({
+        perPage: 999999
+      })))).reduce((arr: iBTItem[], resp) => {
+        return [
+          ...arr,
+          ...(resp.data || [])
+        ]
+      }, []), 'id')
+
+      const btBudgets = UtilsService.uniqByObjectKey((await Promise.all(_.chunk(glSeqs, 50).map(codes => SynGeneralLedgerMonthlyBudgetService.getAll({
         where: JSON.stringify({
           GeneralLedgerSeq: glSeqs,
-        })
-      })
-    ]).then(resp => {
-      if (isCanceled) return;
-      setBtItemMap(resp[0].data.reduce((map: iBTItemMap, item) => {
+        }),
+        perPage: '9999'
+      })))).reduce((arr: iSynGeneralLedgerMonthlyBudget[], resp) => {
+        return [
+          ...arr,
+          ...(resp.data || [])
+        ]
+      }, []), 'GeneralLedgerMonthlyBudgetsSeq')
+
+
+      setBtItemMap(btItems.reduce((map: iBTItemMap, item) => {
         const glCode = `${item.gl_code || ''}`.trim();
         if (glCode === '') {
           return map;
@@ -63,7 +75,8 @@ const BTGLTable = ({glCodesResults, selectedYear, onSelectGL, hideZeroBalance = 
           [glCode]: BTItemService.getAmountByType(item, map[glCode] || {}),
         }
       }, {}));
-      setGlMonthlyBudgetMap(resp[1].data.reduce((map: iGLMonthlyBudgetMap, budget) => {
+
+      setGlMonthlyBudgetMap(btBudgets.reduce((map: iGLMonthlyBudgetMap, budget) => {
         const glSeq = budget.GeneralLedgerSeq;
         return {
           ...map,
@@ -71,7 +84,11 @@ const BTGLTable = ({glCodesResults, selectedYear, onSelectGL, hideZeroBalance = 
           [glSeq]: MathHelper.add(map[glSeq] || 0, budget.Budget1 || 0),
         }
       }, {}))
-    }).catch(err => {
+    }
+
+    let isCanceled = false;
+    setIsLoadingItems(true);
+    getData().catch(err => {
       if (isCanceled) return;
       Toaster.showApiError(err);
     }).finally(() => {

@@ -2,7 +2,7 @@ import AppService, {iConfigParams} from './AppService';
 
 const endPoint = `/ping`;
 
-const ping = (params: iConfigParams = {}): Promise<{ data: string; isProd: boolean }> => {
+const ping = (params: iConfigParams = {}): Promise<{ data: string; isProd: boolean, schoolBoxUrl: string }> => {
   return AppService.get(`${endPoint}`, params).then(resp => resp.data);
 };
 
