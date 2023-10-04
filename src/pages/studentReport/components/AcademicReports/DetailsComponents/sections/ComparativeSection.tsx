@@ -1,7 +1,7 @@
-import SectionDiv from './SectionDiv';
 import {ResultTableWrapper} from './GraphTable';
 import ComparativeBarGraph from '../../../../../../components/support/ComparativeBarGraph';
 import React from 'react';
+import SectionDiv from '../../../../../../components/common/SectionDiv';
 
 const ComparativeSection = () => {
   return (
