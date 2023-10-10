@@ -9,8 +9,8 @@ const overLineOffset = 46;
 const pointerWidth = 12;
 const defaultHeight = 46;
 
-const maxRight = 27;
-const maxLeft = 27;
+const maxRight = 34;
+const maxLeft = 34;
 
 const Wrapper = styled.div`
     padding: 1rem;
@@ -20,30 +20,40 @@ const Wrapper = styled.div`
     
     .stacked-bars {
       width: 100%;
-      display: flex;
+      display: block;
       position: relative;
-      .start {
-        position: absolute;
-        top: -18px;
-        left: -9px;
-      }
+      border-top-left-radius: ${Math.ceil(MathHelper.sub(defaultHeight, 2))}px;
+      border-bottom-left-radius: ${Math.ceil(MathHelper.sub(defaultHeight, 2))}px;
+      border-top-right-radius: ${Math.ceil(MathHelper.sub(defaultHeight, 2))}px;
+      border-bottom-right-radius: ${Math.ceil(MathHelper.sub(defaultHeight, 2))}px;
+      background-color: ${mainRed};
+      
       .bar {
-        position: relative;
-        background-color: ${mainRed};
+        position: absolute;
+        top: 0px;
         height: ${defaultHeight}px;
-        min-width: 20px;
-        flex-grow: 1;
+        //flex-grow: 1;
         border-right: 0.1rem #eee solid;
         
-        &:nth-child(2) {
-          border-top-left-radius: ${Math.ceil(MathHelper.sub(defaultHeight, 2))}px;
-          border-bottom-left-radius: ${Math.ceil(MathHelper.sub(defaultHeight, 2))}px;
+        &.start {
+          width: 0px;
+          //.txt {display: none}
         }
-        &:nth-last-child(2) {
-          border-top-right-radius: ${Math.ceil(MathHelper.sub(defaultHeight, 2))}px;
-          border-bottom-right-radius: ${Math.ceil(MathHelper.sub(defaultHeight, 2))}px;
+
+        &:first-child {
+          border-right: none;
+          .txt {
+            left: 0px;
+          }
         }
-        
+        &:last-child {
+          border-right: none;
+          left: 100%;
+          .txt {
+            right: 0px;
+          }
+        }
+
         .txt {
           right: -15px;
           top: -12px;
@@ -56,15 +66,6 @@ const Wrapper = styled.div`
         font-size: 10px;
         transform: rotate(-45deg); /* Adjust the angle as needed */
         transform-origin: 0 0; /* Set the origin of rotation */
-      }
-
-      .pointer {
-        position: absolute;
-        color: white;
-        bottom: 2px;
-        display: inline-block;
-        width: ${pointerWidth}px;
-        text-align: center;
       }
     }
     
@@ -93,6 +94,14 @@ const Wrapper = styled.div`
       .end{
         right: -5px;
       }
+
+      .pointer {
+        position: absolute;
+        color: white;
+        display: inline-block;
+        width: ${pointerWidth}px;
+        text-align: center;
+      }
     }
 `;
 
@@ -102,19 +111,21 @@ type iComparativeBarGraphDisplay = {
   height?: number;
 }
 const ComparativeBarGraphDisplay = ({cohortScores, currentStudentScore, height = 46}: iComparativeBarGraphDisplay) => {
-  const [cohortScoreMap, setCohortScoreMap] = useState<{[key: number]: number}>({});
+  // const [cohortScoreMap, setCohortScoreMap] = useState<{[key: number]: number}>({});
   const [currentStudentScoreWidth, setCurrentStudentScoreWidth] = useState<number>(0);
+  const [sortedScores, setSortedScores] = useState<number[]>([]);
 
 
   useEffect(() => {
     const sortedCohortScores = cohortScores.sort((s1, s2) => Number(s1) > Number(s2) ? 1 : -1);
     const maxDiff = MathHelper.sub(sortedCohortScores.at(-1) || 100, sortedCohortScores[0]);
-    setCohortScoreMap(sortedCohortScores.reduce((map, score, index) => {
-      return {
-        ...map,
-        [score]: index === 0 ? 0 : MathHelper.mul(MathHelper.div(MathHelper.sub(score, sortedCohortScores[index - 1] || 0), maxDiff), 100),
-      }
-    }, {}));
+    setSortedScores(sortedCohortScores);
+    // setCohortScoreMap(sortedCohortScores.reduce((map, score, index) => {
+    //   return {
+    //     ...map,
+    //     [score]: index === 0 ? 0 : MathHelper.mul(MathHelper.div(MathHelper.sub(score, sortedCohortScores[index - 1] || 0), maxDiff), 100),
+    //   }
+    // }, {}));
     const width = MathHelper.mul(MathHelper.div(MathHelper.sub(currentStudentScore, sortedCohortScores[0]), maxDiff), 100);
 
     setCurrentStudentScoreWidth(width <= 0 ? 0 : width)
@@ -122,30 +133,26 @@ const ComparativeBarGraphDisplay = ({cohortScores, currentStudentScore, height =
 
 
   const getCurrentPointerStyle = () => {
-    const sortedCohortScores = cohortScores.sort();
-    const cohortScorePercentage = Object.values(cohortScoreMap)
-    if (currentStudentScore <= sortedCohortScores[1]) {
-      return { left: `calc(${cohortScorePercentage[1] || 0}% - ${mathHelper.add(MathHelper.div(pointerWidth, 2), 19)}px)`};
+    if (currentStudentScore <= sortedScores[0]) {
+      return { left: `-${mathHelper.sub(MathHelper.div(pointerWidth, 2), 1)}px`};
     }
-    const lastScore = sortedCohortScores.at(-2) || 100;
-    const rightPercentage = cohortScorePercentage.at(-1) || 0
+    const lastScore = sortedScores[sortedScores.length - 1] || 100;
     if (currentStudentScore >= lastScore) {
-      return { right: `max(calc(${rightPercentage}% - ${mathHelper.add(MathHelper.div(pointerWidth, 2), 19)}px), 6px)`};
+      return { right: `-${mathHelper.sub(MathHelper.div(pointerWidth, 2), 1)}px`};
     }
 
-    return {left: `${currentStudentScoreWidth}%`};
+    return {left: `calc(${currentStudentScoreWidth}% - 8px)`};
   }
 
   const getOverLineStyle = () => {
-    const cohortScorePercentage = Object.values(cohortScoreMap);
-    if (cohortScorePercentage.length <= 1) {
+    if (sortedScores.length <= 3) {
       return {};
     }
-    const leftPercentage = cohortScorePercentage[1] || 0;
-    const rightPercentage = cohortScorePercentage.at(-1) || 0
+    const leftPercentage = MathHelper.sub(sortedScores[1], sortedScores[0]);
+    const rightPercentage =  MathHelper.sub(100,(MathHelper.sub(sortedScores[sortedScores.length - 2], sortedScores[0]) || 0));
     return {
-      left: `max(calc(${leftPercentage}% - 25px), ${maxLeft}px)`,
-      right: `max(calc(${rightPercentage}% - 25px), ${maxRight}px)`,
+      left: `max(calc(${leftPercentage}% - 20px), ${maxLeft}px)`,
+      right: `max(calc(${rightPercentage}% - 20px), ${maxRight}px)`,
     }
   }
 
@@ -153,30 +160,40 @@ const ComparativeBarGraphDisplay = ({cohortScores, currentStudentScore, height =
     return Number(score).toFixed(1);
   }
 
-  if (cohortScores.length < 3 || Object.values(cohortScoreMap).length <= 0) {
+  if (cohortScores.length < 3) {
     return null;
   }
 
   return (
     <Wrapper className={'comp-graph-display-wrapper'}>
-      <div className={'stacked-bars'}>
-        {Object.keys(cohortScoreMap).map((score, index) => {
+      <div className={'stacked-bars'} style={{height: `${height}px`}}>
+        {sortedScores.map((score, index) => {
           if (index === 0) {
-            return <div className={'start'} key={index}><div className={'txt'}>{getScore(score)}</div></div>;
+            return <div className={'start bar'} key={index}>
+              <div className={'txt'}>{getScore(score)}</div>
+            </div>;
           }
+
+          if (index === (sortedScores.length - 1)) {
+            return <div className={'end bar'} key={index}>
+              <div className={'txt'}>{getScore(score)}</div>
+            </div>;
+          }
+
           return (
             // @ts-ignore
-            <div className={'bar'} key={index} style={{ width: `${cohortScoreMap[score]}%`, height: `${height}px`}}>
+            <div className={'bar'} key={index} style={{ left: `${MathHelper.sub(score, sortedScores[0])}%`}}>
               <div className={'txt'}>{getScore(score)}</div>
             </div>
-          )
+          );
+
         })}
+      </div>
+      <div className={'over-line'} style={getOverLineStyle()}>
+        <div className={'start'} />
         <div className={'pointer'} style={getCurrentPointerStyle()} title={`${currentStudentScore}`}>
           <Icons.TriangleFill />
         </div>
-      </div>
-      <div className={'over-line'} style={getOverLineStyle()}>
-        <div className={'start'}/>
         <div className={'end'}/>
       </div>
     </Wrapper>

@@ -93,13 +93,13 @@ const ComparativeGraphPage = ({
     };
   }, [student, studentReportYear]);
 
-  const getResultRow = (results: iStudentReportResult[]) => {
+  const getResultRow = (classCode: string, results: iStudentReportResult[]) => {
     if (results.length <= 0) {
       return null;
     }
 
     return (
-      <SectionDiv>
+      <SectionDiv key={classCode}>
         <ResultTableWrapper>
           <div className={"result-row"}>
             <div>
@@ -128,7 +128,7 @@ const ComparativeGraphPage = ({
     }
 
     return Object.keys(currentStudentResultMap).map(classCode => {
-      return getResultRow(currentStudentResultMap[classCode]);
+      return getResultRow(classCode, currentStudentResultMap[classCode]);
     });
   };
 

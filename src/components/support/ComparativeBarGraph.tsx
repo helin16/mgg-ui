@@ -5,6 +5,7 @@ import StudentReportService from '../../services/Synergetic/StudentReportService
 import Toaster from '../../services/Toaster';
 import {Spinner} from 'react-bootstrap';
 import iStudentReportYear from '../../types/Synergetic/iStudentReportYear';
+import * as _ from 'lodash';
 
 type iComparativeBarGraph = {
   results: iStudentReportResult[];
@@ -25,7 +26,8 @@ const ComparativeBarGraph = ({ results, studentReportYear }: iComparativeBarGrap
     StudentReportService.getStudentReportResults({
         where: JSON.stringify({
           // StudentID: student.StudentID,
-          ClassCode: results[0].ClassCode,
+          StudentYearLevel: results[0].StudentYearLevel,
+          AssessUnitName: results[0].AssessUnitName,
           FileYear: studentReportYear.FileYear,
           FileSemester: studentReportYear.FileSemester,
           AssessableFlag: true,
@@ -45,18 +47,30 @@ const ComparativeBarGraph = ({ results, studentReportYear }: iComparativeBarGrap
         const sortedScores: number[] = (resp?.data || []).map(result => Number(result.AssessResultsResult)).sort((s1, s2) => {
           return Number(s1) > Number(s2) ? 1 : -1;
         })
-        if (sortedScores.length <= 0) {
-          setCohortScores([])
-        } else {
-          setCohortScores([
-            sortedScores[0],
-            sortedScores[Math.floor(0.2 * (sortedScores.length - 1))],
-            sortedScores[Math.floor(0.4 * (sortedScores.length - 1))],
-            sortedScores[Math.floor(0.6 * (sortedScores.length - 1))],
-            sortedScores[Math.floor(0.8 * (sortedScores.length - 1))],
-            sortedScores[sortedScores.length - 1],
-          ]);
+
+        console.log('sortedScores', sortedScores);
+
+        let cScores: number[] = [];
+        if (sortedScores.length > 0) {
+          if (sortedScores.length <= 6) {
+            cScores = [
+              sortedScores[0],
+              sortedScores[Math.floor(0.33 * (sortedScores.length - 1))],
+              sortedScores[Math.floor(0.66 * (sortedScores.length - 1))],
+              sortedScores[sortedScores.length - 1],
+            ];
+          } else {
+            cScores = [
+              sortedScores[0],
+              sortedScores[Math.floor(0.2 * (sortedScores.length - 1))],
+              sortedScores[Math.floor(0.4 * (sortedScores.length - 1))],
+              sortedScores[Math.floor(0.6 * (sortedScores.length - 1))],
+              sortedScores[Math.floor(0.8 * (sortedScores.length - 1))],
+              sortedScores[sortedScores.length - 1],
+            ]
+          }
         }
+        setCohortScores(_.uniq(cScores));
       })
       .finally(() => {
         if (isCanceled) { return }
@@ -72,6 +86,7 @@ const ComparativeBarGraph = ({ results, studentReportYear }: iComparativeBarGrap
     return <Spinner animation={'border'} />
   }
 
+  console.log('cohortScores', cohortScores);
   if (results.length <= 0 || cohortScores.length <= 0) {
     return null;
   }
