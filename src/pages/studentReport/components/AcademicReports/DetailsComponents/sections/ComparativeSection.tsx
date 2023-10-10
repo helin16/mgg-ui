@@ -29,7 +29,7 @@ const ComparativeSection = ({
 
   return (
     <SectionDiv>
-      <ResultTableWrapper>
+      <ResultTableWrapper className={'responsive'}>
         <div className={"result-row"}>
           <div>
             <b>Comparative</b>

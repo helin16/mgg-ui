@@ -100,7 +100,7 @@ const ComparativeGraphPage = ({
 
     return (
       <SectionDiv key={classCode}>
-        <ResultTableWrapper>
+        <ResultTableWrapper className={'responsive'}>
           <div className={"result-row"}>
             <div>
               <b>{results[0].ClassDescription}</b>

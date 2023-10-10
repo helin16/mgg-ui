@@ -6,6 +6,7 @@ import Toaster from '../../services/Toaster';
 import {Spinner} from 'react-bootstrap';
 import iStudentReportYear from '../../types/Synergetic/iStudentReportYear';
 import * as _ from 'lodash';
+import MathHelper from '../../helper/MathHelper';
 
 type iComparativeBarGraph = {
   results: iStudentReportResult[];
@@ -19,6 +20,21 @@ const ComparativeBarGraph = ({ results, studentReportYear }: iComparativeBarGrap
     if (results.length <= 0 ){
       setCohortScores([]);
       return;
+    }
+
+    const getPercentile = (sortedNumbers: number[], percentile: number) => {
+      const percentileIndex = MathHelper.mul(percentile, (sortedNumbers.length - 1));
+      const lowerIndex = Math.floor(percentileIndex);
+      const upperIndex = Math.ceil(percentileIndex);
+      if (lowerIndex === upperIndex) {
+        return sortedNumbers[lowerIndex];
+      }
+
+      // Interpolate the percentile value between the lower and upper values.
+      const lowerValue = sortedNumbers[lowerIndex];
+      const upperValue = sortedNumbers[upperIndex];
+      const fractionalPart = percentileIndex - lowerIndex;
+      return MathHelper.add(lowerValue, MathHelper.mul(fractionalPart, MathHelper.sub(upperValue, lowerValue)));
     }
 
     let isCanceled = false;
@@ -48,24 +64,24 @@ const ComparativeBarGraph = ({ results, studentReportYear }: iComparativeBarGrap
           return Number(s1) > Number(s2) ? 1 : -1;
         })
 
-        console.log('sortedScores', sortedScores);
-
         let cScores: number[] = [];
         if (sortedScores.length > 0) {
           if (sortedScores.length <= 6) {
             cScores = [
               sortedScores[0],
-              sortedScores[Math.floor(0.33 * (sortedScores.length - 1))],
-              sortedScores[Math.floor(0.66 * (sortedScores.length - 1))],
+              getPercentile(sortedScores, 0.33),
+              getPercentile(sortedScores, 0.66),
               sortedScores[sortedScores.length - 1],
             ];
           } else {
             cScores = [
               sortedScores[0],
-              sortedScores[Math.floor(0.2 * (sortedScores.length - 1))],
-              sortedScores[Math.floor(0.4 * (sortedScores.length - 1))],
-              sortedScores[Math.floor(0.6 * (sortedScores.length - 1))],
-              sortedScores[Math.floor(0.8 * (sortedScores.length - 1))],
+
+              getPercentile(sortedScores, 0.2),
+              getPercentile(sortedScores, 0.4),
+              getPercentile(sortedScores, 0.6),
+              getPercentile(sortedScores, 0.8),
+
               sortedScores[sortedScores.length - 1],
             ]
           }

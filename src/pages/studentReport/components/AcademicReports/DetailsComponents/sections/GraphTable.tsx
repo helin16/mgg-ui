@@ -5,6 +5,22 @@ import SectionDiv from '../../../../../../components/common/SectionDiv';
 import * as _ from 'lodash';
 
 export const ResultTableWrapper = styled.div`
+  &.responsive {
+    @media only print, screen and (max-width: 40em) {
+      .result-row,
+      .result-table {
+        width: 100%;
+      }
+      .result-row {
+        display: block;
+      }
+      .result-table {
+        text-align: right;
+        padding-top: 1.6rem;
+      }
+    }
+  }
+  
   .result-row {
     display: flex;
     //padding: 2px 0;
@@ -15,8 +31,10 @@ export const ResultTableWrapper = styled.div`
       font-weight: bold;
     }
     
+    
     .result-table {
       width: 380px;
+      min-width: 320px;
       display: flex;
       justify-content: space-between;
       .progress {
