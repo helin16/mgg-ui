@@ -4,30 +4,27 @@ import React, { useEffect, useState } from "react";
 import PanelTitle from "../../../../../../components/PanelTitle";
 import SectionDiv from "../../../../../../components/common/SectionDiv";
 import iStudentReportResult from "../../../../../../types/Synergetic/iStudentReportResult";
-import { iStudentReportComparativeResultMapRow } from "../../../../../../types/Synergetic/iStudentReportComparativeResult";
-import iStudentReportComparativeResultMap from "../../../../../../types/Synergetic/iStudentReportComparativeResult";
-import StudentReportService from "../../../../../../services/Synergetic/StudentReportService";
 import styled from "styled-components";
 import StudentStatusBadge from "../../StudentStatusBadge";
 import { FlexContainer } from "../../../../../../styles";
+import { ResultTableWrapper } from "../sections/GraphTable";
+import ComparativeBarGraph from "../../../../../../components/support/ComparativeBarGraph";
+import { OP_NOT } from "../../../../../../helper/ServiceHelper";
+import StudentReportService from "../../../../../../services/Synergetic/StudentReportService";
+import Toaster from '../../../../../../services/Toaster';
 
 const Wrapper = styled.div`
   .result-row {
-    display: flex;
-    padding: 0.4rem 0;
-    justify-content: space-between;
-    border-bottom: 1px solid #ddd;
-    &.result-title {
-      font-weight: bold;
-      //background-color: transparent !important;
+    align-items: center;
+    padding: 0px 1rem;
+    &:hover {
+      background-color: #eeeeee;
     }
-    //:nth-child(2n+1) {
-    //  background-color: #f9f9f9;
-    //}
   }
 `;
 
-const ComparativeAnalysisPage = ({
+type iResultMap = { [key: string]: iStudentReportResult[] };
+const ComparativeGraphPage = ({
   student,
   studentReportYear,
   studentReportResult
@@ -35,18 +32,57 @@ const ComparativeAnalysisPage = ({
   studentReportResult: iStudentReportResult | null;
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [comparativeResults, setComparativeResults] = useState<
-    iStudentReportComparativeResultMap
-  >({});
+  const [currentStudentResultMap, setCurrentStudentResultMap] = useState<iResultMap>({});
 
   useEffect(() => {
     let isCancelled = false;
+
+    const getData = async () => {
+      const excludingLearningAreaCodes = `${studentReportYear.ComparativeExcludeCode ||
+      ""}`
+        .trim()
+        .split(",")
+        .map(code => `${code}`.trim())
+        .filter(code => code !== "");
+      const currentStudentsResults = await StudentReportService.getStudentReportResults({
+        where: JSON.stringify({
+          StudentID: student.StudentID,
+          FileYear: studentReportYear.FileYear,
+          FileSemester: studentReportYear.FileSemester,
+          AssessableFlag: true,
+          ActiveFlag: true,
+          AssessAreaNumericFlag: true,
+          AssessAreaHeading: ['OVERALL MARK'],
+          ...(excludingLearningAreaCodes.length <= 0
+            ? {}
+            : {
+              ClassLearningAreaCode: { [OP_NOT]: excludingLearningAreaCodes }
+            })
+        }),
+        perPage: 999999,
+        sort: 'ClassLearningAreaDescription:ASC',
+      });
+      const currentMap = (currentStudentsResults.data || []).reduce((map: iResultMap, result) => {
+        return {
+          ...map,
+          [result.ClassCode]: [...(result.ClassCode in map ? map[result.ClassCode] : []), result],
+        }
+      }, {});
+
+      setCurrentStudentResultMap(currentMap);
+    }
+
     setIsLoading(true);
-    StudentReportService.getStudentReportComparativeResultForAStudent(
-      `${student.ID}`,
-      `${studentReportYear.ID}`
-    ).then(resp => {
-      setComparativeResults(resp);
+    getData().then(resp => {
+      if (isCancelled === true) {
+        return;
+      }
+    }).catch(err => {
+      if (isCancelled === true) {
+        return;
+      }
+      Toaster.showApiError(err);
+    }).finally(() => {
       if (isCancelled === true) {
         return;
       }
@@ -57,49 +93,43 @@ const ComparativeAnalysisPage = ({
     };
   }, [student, studentReportYear]);
 
-  if (studentReportResult === null) {
-    return null;
-  }
+  const getResultRow = (results: iStudentReportResult[]) => {
+    if (results.length <= 0) {
+      return null;
+    }
 
-  const getComparativeResultTable = (
-    title: string,
-    row: iStudentReportComparativeResultMapRow
-  ) => {
     return (
-      <SectionDiv key={title}>
-        <div className={"result-row result-title"}>
-          <div>{title}</div>
-          <div>Percentage of Cohort</div>
-        </div>
-        {Object.keys(row)
-          .sort((code1, code2) => (code1 > code2 ? 1 : -1))
-          .map(code => {
-            return (
-              <div className={"result-row"} key={code}>
-                <div>{row[code].name}</div>
-                <div>{row[code].percentage} %</div>
+      <SectionDiv>
+        <ResultTableWrapper>
+          <div className={"result-row"}>
+            <div>
+              <b>{results[0].ClassDescription}</b>
+              <div>
+                The comparative result for this{" "}
+                {results[0].ClassDescription}. Learning Area: {results[0].ClassLearningAreaDescription}
               </div>
-            );
-          })}
+            </div>
+            <div className={"result-table"}>
+              <ComparativeBarGraph results={results} studentReportYear={studentReportYear} />
+            </div>
+          </div>
+        </ResultTableWrapper>
       </SectionDiv>
     );
   };
+
+  if (studentReportResult === null) {
+    return null;
+  }
 
   const getContent = () => {
     if (isLoading === true) {
       return <Spinner animation={"border"} />;
     }
 
-    return (
-      Object.keys(comparativeResults)
-        .sort((res1, res2) => (res1 > res2 ? 1 : -1))
-        .map(assessHeading => {
-          return getComparativeResultTable(
-            assessHeading,
-            comparativeResults[assessHeading]
-          );
-        })
-    );
+    return Object.keys(currentStudentResultMap).map(classCode => {
+      return getResultRow(currentStudentResultMap[classCode]);
+    });
   };
 
   return (
@@ -153,4 +183,4 @@ const ComparativeAnalysisPage = ({
   );
 };
 
-export default ComparativeAnalysisPage;
+export default ComparativeGraphPage;

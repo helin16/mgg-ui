@@ -18,8 +18,7 @@ const Wrapper = styled.div`
   .cover-letter {
     table {
       td {
-        border: 1px solid;
-        padding: 0px;
+        border-width: initial !important;
       }
     }
   }

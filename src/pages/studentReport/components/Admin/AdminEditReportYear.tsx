@@ -53,6 +53,7 @@ const AdminEditReportYear = ({reportYear, onCancel, onSaved}: iAdminEditReportYe
   const [editingReportYear, setEditingReportYear] = useState<any>(null);
   const [savedSuccessfully, setSavedSuccessfully] = useState(false);
   const [errorMap, setErrorMap] = useState<iAdminEditReportYearError>({});
+  const [editor, setEditor] = useState<any | null>(null);
 
   useEffect(() => {
     if (reportYear === null) { return }
@@ -120,9 +121,17 @@ const AdminEditReportYear = ({reportYear, onCancel, onSaved}: iAdminEditReportYe
   const saveReport = () => {
     if (preSaveCheck(editingReportYear) !== true) { return }
     setIsSaving(true);
+
+    const LetterOfExplanation = `${editor?.getContent() || ''}`.trim() === '' ? `${editor?.MessageBody || ""}`.trim() : `${editor?.getContent() || ''}`.trim();
     const fn = `${editingReportYear.ID || ''}`.trim() === '' ?
-      StudentReportService.createStudentReportYear(editingReportYear)
-      : StudentReportService.updateStudentReportYear(editingReportYear.ID, editingReportYear);
+      StudentReportService.createStudentReportYear({
+        ...editingReportYear,
+        LetterOfExplanation,
+      })
+      : StudentReportService.updateStudentReportYear(editingReportYear.ID, {
+        ...editingReportYear,
+        LetterOfExplanation,
+      });
     fn.then(resp => {
         setEditingReportYear(resp);
         setSavedSuccessfully(true);
@@ -379,8 +388,11 @@ const AdminEditReportYear = ({reportYear, onCancel, onSaved}: iAdminEditReportYe
               </Form.Label>
               <div>
                 <RichTextEditor
+                  height={800}
                   value={editingReportYear?.LetterOfExplanation}
-                  onChange={(newText) => changeField('LetterOfExplanation', newText)}
+                  onEditorChange={(content: string, editor: any) => {
+                    setEditor(editor);
+                  }}
                 />
               </div>
             </Form.Group>
