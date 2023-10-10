@@ -76,8 +76,8 @@ const ComparativeAnalysisPage = ({
           .map(code => {
             return (
               <div className={"result-row"} key={code}>
-                <div>{row[code].name}</div>
-                <div>{row[code].percentage} %</div>
+                <div>{row[code]?.name}</div>
+                <div>{row[code]?.percentage} %</div>
               </div>
             );
           })}

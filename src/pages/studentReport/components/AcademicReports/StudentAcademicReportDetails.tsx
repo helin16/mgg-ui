@@ -2,7 +2,7 @@ import iVStudent from '../../../../types/Synergetic/iVStudent';
 import iStudentReportYear from '../../../../types/Synergetic/iStudentReportYear';
 import {
   STUDENT_REPORT_YEAR_STYLE_JNR_GRAPH,
-  STUDENT_REPORT_YEAR_STYLE_SENIOR_COM_GRAPH
+  STUDENT_REPORT_YEAR_STYLE_COMPARATIVE_GRAPH
 } from '../../../../types/Synergetic/iStudentReportStyle';
 import CoverLetterPage from './DetailsComponents/pages/CoverLetterPage';
 import {Col, Row} from 'react-bootstrap';
@@ -70,7 +70,7 @@ const StudentAcademicReportDetails = ({
 
   const getSpecialPage = () => {
     if (selectedClassCode === STUDENT_REPORT_SUBJECT_NAME_COMPARATIVE_ANALYSIS) {
-      if (studentReportYear.styleCode === STUDENT_REPORT_YEAR_STYLE_SENIOR_COM_GRAPH) {
+      if (studentReportYear.styleCode === STUDENT_REPORT_YEAR_STYLE_COMPARATIVE_GRAPH) {
         return <ComparativeGraphPage student={student} studentReportYear={studentReportYear} studentReportResult={studentReportResult}/>
       }
       return <ComparativeAnalysisPage student={student} studentReportYear={studentReportYear} studentReportResult={studentReportResult}/>

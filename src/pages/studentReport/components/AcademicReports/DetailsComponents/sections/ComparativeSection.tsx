@@ -4,6 +4,7 @@ import React from "react";
 import SectionDiv from "../../../../../../components/common/SectionDiv";
 import iStudentReportResult from "../../../../../../types/Synergetic/iStudentReportResult";
 import iStudentReportYear from "../../../../../../types/Synergetic/iStudentReportYear";
+import {STUDENT_REPORT_YEAR_STYLE_COMPARATIVE_GRAPH} from '../../../../../../types/Synergetic/iStudentReportStyle';
 
 type iComparativeSection = {
   results: iStudentReportResult[];
@@ -22,7 +23,7 @@ const ComparativeSection = ({
     .filter(code => code !== "");
   const numberResults = results.filter((result) => result.AssessAreaNumericFlag === true && excludingLearningAreaCodes.indexOf(result.ClassLearningAreaCode) < 0);
 
-  if (numberResults.length <= 0) {
+  if (studentReportYear.styleCode !== STUDENT_REPORT_YEAR_STYLE_COMPARATIVE_GRAPH  || numberResults.length <= 0) {
     return null;
   }
 

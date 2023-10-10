@@ -39,7 +39,7 @@ const getStudentReportResults = (params: iConfigParams = {}): Promise<iPaginated
 };
 
 const getStudentReportComparativeResultForAStudent = (studentId: string | number, reportYearId: string | number, params: iConfigParams = {}): Promise<iStudentReportComparativeResultMap> => {
-  return AppService.get(`${baseEndPoint}/result/${studentId}/${reportYearId}`, params).then(resp => resp.data);
+  return AppService.get(`${baseEndPoint}/comparative/${studentId}/${reportYearId}`, params).then(resp => resp.data);
 };
 
 const getStudentReportCoCurricularForAStudent = (studentId: string | number, reportYearId: string | number, params: iConfigParams = {}): Promise<iStudentReportCoCurricular[]> => {
