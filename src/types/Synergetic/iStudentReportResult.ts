@@ -125,7 +125,7 @@ type iStudentReportResult = {
   // ClassNormalYearLevel: null,
   // AssessAreaOverallFlag: boolean;
   // AssessAreaOverallSeq: number;
-  // AssessAreaNumericFlag: boolean;
+  AssessAreaNumericFlag: boolean;
   // AssessDefaultValue: string;
   // AssessAreaEntryFlag: boolean;
   // AssessAreaPrintFlag: boolean;

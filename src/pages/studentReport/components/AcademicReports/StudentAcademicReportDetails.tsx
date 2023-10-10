@@ -1,6 +1,9 @@
 import iVStudent from '../../../../types/Synergetic/iVStudent';
 import iStudentReportYear from '../../../../types/Synergetic/iStudentReportYear';
-import {STUDENT_REPORT_YEAR_STYLE_JNR_GRAPH} from '../../../../types/Synergetic/iStudentReportStyle';
+import {
+  STUDENT_REPORT_YEAR_STYLE_JNR_GRAPH,
+  STUDENT_REPORT_YEAR_STYLE_COMPARATIVE_GRAPH
+} from '../../../../types/Synergetic/iStudentReportStyle';
 import CoverLetterPage from './DetailsComponents/pages/CoverLetterPage';
 import {Col, Row} from 'react-bootstrap';
 import StudentAcademicReportMenu from './DetailsComponents/StudentAcademicReportMenu';
@@ -13,6 +16,7 @@ import StudentAcademicSubjectPage from './DetailsComponents/pages/StudentAcademi
 import ComparativeAnalysisPage from './DetailsComponents/pages/ComparativeAnalysisPage';
 import HomeGroupPage from './DetailsComponents/pages/HomeGroupPage';
 import JnrGraphHomeGroupPage from './DetailsComponents/pages/JnrGraphHomeGroupPage';
+import ComparativeGraphPage from './DetailsComponents/pages/ComparativeGraphPage';
 
 export type StudentAcademicReportDetailsProps = {
   student: iVStudent,
@@ -66,6 +70,9 @@ const StudentAcademicReportDetails = ({
 
   const getSpecialPage = () => {
     if (selectedClassCode === STUDENT_REPORT_SUBJECT_NAME_COMPARATIVE_ANALYSIS) {
+      if (studentReportYear.styleCode === STUDENT_REPORT_YEAR_STYLE_COMPARATIVE_GRAPH) {
+        return <ComparativeGraphPage student={student} studentReportYear={studentReportYear} studentReportResult={studentReportResult}/>
+      }
       return <ComparativeAnalysisPage student={student} studentReportYear={studentReportYear} studentReportResult={studentReportResult}/>
     }
     return <CoverLetterPage student={student} studentReportYear={studentReportYear} studentReportResult={studentReportResult} />;

@@ -7,6 +7,7 @@ import iStudentReportAward from '../../types/Synergetic/iStudentReportAward';
 import iAsset from '../../types/asset/iAsset';
 import {iPowerBiReportMap} from '../../types/student/iPowerBIReports';
 import iStudentReportStyle from '../../types/Synergetic/iStudentReportStyle';
+import iPaginatedResult from '../../types/iPaginatedResult';
 
 const baseEndPoint = '/studentReport';
 const getStudentReportYears = (params: iConfigParams = {}): Promise<iStudentReportYear[]> => {
@@ -31,6 +32,10 @@ const getStudentReportYearsForAStudent = (studentId: string | number, params: iC
 
 const getStudentReportResultForAStudent = (studentId: string | number, reportYearId: string | number, params: iConfigParams = {}): Promise<iStudentReportResult[]> => {
   return AppService.get(`${baseEndPoint}/result/${studentId}/${reportYearId}`, params).then(resp => resp.data);
+};
+
+const getStudentReportResults = (params: iConfigParams = {}): Promise<iPaginatedResult<iStudentReportResult>> => {
+  return AppService.get(`${baseEndPoint}/result`, params).then(resp => resp.data);
 };
 
 const getStudentReportComparativeResultForAStudent = (studentId: string | number, reportYearId: string | number, params: iConfigParams = {}): Promise<iStudentReportComparativeResultMap> => {
@@ -69,6 +74,7 @@ const StudentReportService = {
   deleteStudentReportYear,
   getStudentReportYearsForAStudent,
   getStudentReportResultForAStudent,
+  getStudentReportResults,
   getStudentReportComparativeResultForAStudent,
   getStudentReportCoCurricularForAStudent,
   getStudentReportAwardsForAStudent,
