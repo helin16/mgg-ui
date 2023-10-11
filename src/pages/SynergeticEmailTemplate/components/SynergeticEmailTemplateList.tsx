@@ -26,6 +26,11 @@ const Wrapper = styled.div`
   .templates-table {
     .btn.btn-link {
       padding: 0px;
+      
+      &.ellipsis {
+        width: 100%;
+        text-align: left;
+      }
     }
     td.message {
       max-width: 300px;
