@@ -1,6 +1,7 @@
 import AppService, { iConfigParams } from "../AppService";
 import iPaginatedResult from "../../types/iPaginatedResult";
 import iSynCommunicationTemplate from "../../types/Synergetic/iSynCommunicationTemplate";
+import iAsset from '../../types/asset/iAsset';
 
 const baseEndPoint = "/syn/communicationTemplate";
 const getAll = async (
@@ -36,11 +37,19 @@ const update = async (
   return AppService.put(`${baseEndPoint}/${seq}`, params, options).then(resp => resp.data);
 };
 
+const upload = async (
+  params: iConfigParams = {},
+  options?: iConfigParams
+): Promise<iAsset> => {
+  return AppService.post(`${baseEndPoint}/upload`, params, options).then(resp => resp.data);
+};
+
 const SynCommunicationTemplateService = {
   getAll,
   getById,
   create,
   update,
+  upload,
 };
 
 export default SynCommunicationTemplateService;

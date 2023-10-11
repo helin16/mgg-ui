@@ -1,5 +1,9 @@
 import {Editor} from '@tinymce/tinymce-react';
 import styled from 'styled-components';
+import Toaster from '../../../services/Toaster';
+import {useState} from 'react';
+import iAsset from '../../../types/asset/iAsset';
+import {Spinner} from 'react-bootstrap';
 
 type iRichTextEditor = {
   value?: string;
@@ -10,6 +14,7 @@ type iRichTextEditor = {
   settings?: any;
   onChange?: (text: string) => void;
   onEditorChange?: (content: any, editor: any) => void;
+  imagesUploadFn?: (blobInfo: any) => Promise<iAsset>;
 }
 
 const defaultPlugins = [
@@ -41,13 +46,74 @@ const defaultToolBars = [
   'removeformat fullscreen',
 ];
 const Wrapper = styled.div`
+  position: relative;
   .tox-statusbar__branding {
     display: none;
   }
+  
+  .loading-mask {
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    top: 0px;
+    bottom: 0px;
+    width: 100%;
+    height: 100%;
+    display: block;
+    background-color: rgba(100, 100, 100, 0.65);
+    z-index: 999;
+    .txt {
+      margin: 30% auto;
+      display: block;
+      color: white;
+      width: 4rem;
+      text-align: center;
+    }
+  }
 `;
 
-const RichTextEditor = ({value, plugins, toolBar, settings, onChange, className, onEditorChange, height = 450}: iRichTextEditor) => {
+const RichTextEditor = ({value, plugins, toolBar, settings, onChange, className, onEditorChange, imagesUploadFn, height = 450}: iRichTextEditor) => {
   // const editorRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const getImageUploadSettings = () => {
+    if (!imagesUploadFn) {
+      return {};
+    }
+    return ({
+      // media_dimensions: false, // Disable automatic video size detection
+      images_upload_handler: (blobInfo: any, success: (msg: any) => void) => {
+        setIsLoading(true);
+        return imagesUploadFn(blobInfo)
+          .then(resp => {
+            const imgUrl = `${resp.url || ''}`.trim();
+            success(imgUrl);
+            return imgUrl;
+          })
+          .catch(error => {
+            Toaster.showApiError(error);
+          })
+          .finally(() => {
+            setIsLoading(false);
+          })
+      },
+    })
+  }
+
+  const getIsLoadingDiv = () => {
+    if (isLoading !== true) {
+      return null;
+    }
+    return (
+      <div className={'loading-mask'}>
+        <div className={'txt'}>
+          <Spinner animation={'border'} />
+          <h5>Loading...</h5>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <Wrapper className={className}>
       <Editor
@@ -63,9 +129,17 @@ const RichTextEditor = ({value, plugins, toolBar, settings, onChange, className,
           removed_menuitems: 'newdocument',
           document_base_url: '',
           relative_urls: false,
+          setup: (editor) => {
+            editor.on('init', () => {
+              // Set isLoading to false when TinyMCE is initialized
+              setIsLoading(false);
+            });
+          },
+          ...getImageUploadSettings(),
           ...(settings || {}),
         }}
       />
+      {getIsLoadingDiv()}
     </Wrapper>
   )
 }

@@ -107,6 +107,7 @@ const AppService = {
   delete: remove,
   uploadImage,
   cancelAll,
+  getEndPointUrl,
 };
 
 export default AppService;

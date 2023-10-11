@@ -148,6 +148,11 @@ const SynergeticEmailTemplateEditPanel = ({
           <FormLabel label={"Body"} />
           <RichTextEditor
             height={2200}
+            imagesUploadFn={(blobInfo) => {
+              const formData = new FormData();
+              formData.append('file', blobInfo.blob(), blobInfo.filename());
+              return SynCommunicationTemplateService.upload(formData)
+            }}
             value={editingTemplate?.MessageBody || ""}
             onEditorChange={(content: string, editor: any) => {
               setTemplateEditor(editor);
