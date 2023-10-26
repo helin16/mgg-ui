@@ -16,7 +16,7 @@ import MathHelper from '../../../helper/MathHelper';
 import HouseAwardScoreCell from './HouseAwardScoreCell';
 import HouseAwardConfirmAwardPopupBtn from './HouseAwardConfirmAwardPopupBtn';
 import {OP_LTE} from '../../../helper/ServiceHelper';
-import SynVStudentService from '../../../services/Synergetic/SynVStudentService';
+import SynVStudentService from '../../../services/Synergetic/Student/SynVStudentService';
 import CSVExportBtn from '../../../components/form/CSVExportBtn';
 import {FlexContainer} from '../../../styles';
 import HouseAwardExportHelper from './HouseAwardExportHelper';

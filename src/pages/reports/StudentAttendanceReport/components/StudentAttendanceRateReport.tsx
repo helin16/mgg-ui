@@ -15,7 +15,7 @@ import AppService, {
 import * as _ from "lodash";
 import SectionDiv from "../../../../components/common/SectionDiv";
 import { FormControl, ProgressBar } from "react-bootstrap";
-import SynVStudentService from "../../../../services/Synergetic/SynVStudentService";
+import SynVStudentService from "../../../../services/Synergetic/Student/SynVStudentService";
 import SynCampusSelector from "../../../../components/student/SynCampusSelector";
 import FormLabel from "../../../../components/form/FormLabel";
 import {

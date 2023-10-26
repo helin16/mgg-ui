@@ -2,13 +2,11 @@ import styled from "styled-components";
 import iVStudent from "../../../../../types/Synergetic/iVStudent";
 import { useEffect, useState } from "react";
 import SynVMedicalIncidentsAllService from "../../../../../services/Synergetic/SynVMedicalIncidentsAllService";
-import { OP_BETWEEN, OP_NOT } from "../../../../../helper/ServiceHelper";
+import {OP_BETWEEN, OP_NOT, OP_OR} from "../../../../../helper/ServiceHelper";
 import Toaster from "../../../../../services/Toaster";
 import { Spinner } from "react-bootstrap";
 import iSynVMedicalIncidentsAll from "../../../../../types/Synergetic/Medical/iSynVMedicalIncidentsAll";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../../../redux/makeReduxStore";
-import moment from "moment-timezone";
+import iSynFileSemester from '../../../../../types/Synergetic/iSynFileSemester';
 
 const Wrapper = styled.div`
   text-align: center;
@@ -55,17 +53,20 @@ const Wrapper = styled.div`
 `;
 type iWellBeingGraphNurseVisitsPanel = {
   student: iVStudent;
+  className?: string;
+  fileSemesters: iSynFileSemester[];
 };
 const WellBeingGraphNurseVisitsPanel = ({
-  student
+  student, className, fileSemesters = []
 }: iWellBeingGraphNurseVisitsPanel) => {
-  const { user: currentUser } = useSelector((state: RootState) => state.auth);
   const [incidents, setIncidents] = useState<iSynVMedicalIncidentsAll[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const currentYear =
-    currentUser?.SynCurrentFileSemester?.FileYear || moment().year();
 
   useEffect(() => {
+    if (fileSemesters.length <= 0) {
+      setIncidents([]);
+      return;
+    }
     let isCanceled = false;
     setIsLoading(true);
     SynVMedicalIncidentsAllService.getAll({
@@ -83,15 +84,16 @@ const WellBeingGraphNurseVisitsPanel = ({
             "MEDUPDATE"
           ]
         },
-        IncidentDate: {
-          [OP_BETWEEN]: ( currentUser?.SynCurrentFileSemester ? [
-            currentUser?.SynCurrentFileSemester?.StartDate,
-            currentUser?.SynCurrentFileSemester?.EndDate,
-          ] : [
-            `${currentYear}-01-01T00:00:00Z`,
-            `${currentYear}-12-31T23:59:59Z`
-          ])
-        }
+        [OP_OR]: fileSemesters.map(selectedFileSemester => {
+          return {
+            IncidentDate: {
+              [OP_BETWEEN]: [
+                selectedFileSemester.StartDate,
+                selectedFileSemester.EndDate,
+              ]
+            }
+          }
+        }),
       }),
       perPage: 9999
     })
@@ -110,7 +112,7 @@ const WellBeingGraphNurseVisitsPanel = ({
     return () => {
       isCanceled = true;
     }
-  }, [student, currentUser, currentYear]);
+  }, [student, fileSemesters]);
 
   const getContent = () => {
     if (isLoading === true) {
@@ -126,7 +128,7 @@ const WellBeingGraphNurseVisitsPanel = ({
     );
   };
 
-  return <Wrapper>{getContent()}</Wrapper>;
+  return <Wrapper className={className}>{getContent()}</Wrapper>;
 };
 
 export default WellBeingGraphNurseVisitsPanel;

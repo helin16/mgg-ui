@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import iStudentReportResult from "../../types/Synergetic/iStudentReportResult";
 import ComparativeBarGraphDisplay from "./ComparativeBarGraphDisplay";
-import StudentReportService from '../../services/Synergetic/StudentReportService';
+import StudentReportService from '../../services/Synergetic/Student/StudentReportService';
 import Toaster from '../../services/Toaster';
 import {Spinner} from 'react-bootstrap';
 import iStudentReportYear from '../../types/Synergetic/iStudentReportYear';

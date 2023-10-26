@@ -5,7 +5,7 @@ import iOperooSafetyAlert, {
 } from '../../types/Operoo/iOperooSafetyAlert';
 import OperooSafetyAlertService from '../../services/Operoo/OperooSafetyAlertService';
 import OperooSafetyAlertRow from './components/OperooSafetyAlertRow';
-import SynVStudentService from '../../services/Synergetic/SynVStudentService';
+import SynVStudentService from '../../services/Synergetic/Student/SynVStudentService';
 import iVStudent from '../../types/Synergetic/iVStudent';
 import {MGGS_MODULE_ID_OPEROO_SAFETY_ALERTS} from '../../types/modules/iModuleUser';
 import Page from '../../layouts/Page';

@@ -7,13 +7,13 @@ import Toaster, {TOAST_TYPE_ERROR} from '../../../../services/Toaster';
 import SynFileSemesterService from '../../../../services/Synergetic/SynFileSemesterService';
 import {OP_OR} from '../../../../helper/ServiceHelper';
 import * as _ from 'lodash';
-import SynVStudentService from '../../../../services/Synergetic/SynVStudentService';
+import SynVStudentService from '../../../../services/Synergetic/Student/SynVStudentService';
 import iSynFileSemester from '../../../../types/Synergetic/iSynFileSemester';
 import iSchoolCensusStudentData, {iStartAndEndDateString} from './iSchoolCensusStudentData';
 import SchoolCensusTable from './SchoolCensusTable';
 import SectionDiv from '../../../../components/common/SectionDiv';
 import SynVtudentDisabilityAdjustmentService
-  from '../../../../services/Synergetic/SynVStudentDisabilityAdjustmentService';
+  from '../../../../services/Synergetic/Student/SynVStudentDisabilityAdjustmentService';
 import CSVExportBtn from '../../../../components/form/CSVExportBtn';
 import SchoolCensusDataExportHelper from './SchoolCensusDataExportHelper';
 import ISynLuYearLevel from '../../../../types/Synergetic/Lookup/iSynLuYearLevel';

@@ -1,6 +1,6 @@
-import AppService, {iConfigParams} from '../AppService';
-import iPaginatedResult from '../../types/iPaginatedResult';
-import iSynVStudentParent from '../../types/Synergetic/Community/iSynVStudentParent';
+import AppService, {iConfigParams} from '../../AppService';
+import iPaginatedResult from '../../../types/iPaginatedResult';
+import iSynVStudentParent from '../../../types/Synergetic/Community/iSynVStudentParent';
 
 
 const endPoint = `/syn/vStudentParent`;

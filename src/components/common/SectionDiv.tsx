@@ -6,6 +6,12 @@ const Wrapper = styled.div`
   &.lg {
     margin-top: 2rem;
   }
+  &.sm-top {
+    margin-top: 0.6rem;
+  }
+  &.no-top {
+    margin-top: 0px;
+  }
   &.margin-bottom {
     margin-bottom: 1.2rem;
   }

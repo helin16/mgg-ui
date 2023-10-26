@@ -5,7 +5,7 @@ import PopupModal from '../../../../components/common/PopupModal';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../../redux/makeReduxStore';
 import LoadingBtn from '../../../../components/common/LoadingBtn';
-import StudentReportService from '../../../../services/Synergetic/StudentReportService';
+import StudentReportService from '../../../../services/Synergetic/Student/StudentReportService';
 import Toaster from '../../../../services/Toaster';
 
 const GenComparativePopupBtn = () => {

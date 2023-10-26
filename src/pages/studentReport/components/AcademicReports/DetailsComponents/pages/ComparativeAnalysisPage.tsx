@@ -6,7 +6,7 @@ import SectionDiv from "../../../../../../components/common/SectionDiv";
 import iStudentReportResult from "../../../../../../types/Synergetic/iStudentReportResult";
 import { iStudentReportComparativeResultMapRow } from "../../../../../../types/Synergetic/iStudentReportComparativeResult";
 import iStudentReportComparativeResultMap from "../../../../../../types/Synergetic/iStudentReportComparativeResult";
-import StudentReportService from "../../../../../../services/Synergetic/StudentReportService";
+import StudentReportService from "../../../../../../services/Synergetic/Student/StudentReportService";
 import styled from "styled-components";
 import StudentStatusBadge from "../../StudentStatusBadge";
 import { FlexContainer } from "../../../../../../styles";

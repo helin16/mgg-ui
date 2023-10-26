@@ -4,7 +4,7 @@ import iVStudent from '../../types/Synergetic/iVStudent';
 import StudentDetailsPage from './components/StudentDetailsPage';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../redux/makeReduxStore';
-import SynVStudentService from '../../services/Synergetic/SynVStudentService';
+import SynVStudentService from '../../services/Synergetic/Student/SynVStudentService';
 import {Button} from 'react-bootstrap';
 import Page401 from '../../components/Page401';
 import StudentGridForAParent from '../../components/student/StudentGridForAParent';

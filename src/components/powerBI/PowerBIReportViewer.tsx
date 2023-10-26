@@ -85,9 +85,7 @@ const PowerBIReportViewer = ({reportId, student}: {reportId: string; student: iV
               console.error(event);}]
           ])
         }
-
         cssClassName = { "power-bi-report-wrapper" }
-
         getEmbeddedComponent = { (embeddedReport) => {
           // @ts-ignore
           setReport(embeddedReport);

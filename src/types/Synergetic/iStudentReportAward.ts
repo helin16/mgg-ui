@@ -5,7 +5,8 @@ type iStudentReportAward = {
   AwardDescription: string;
   AwardDate: Date;
   Surname: string;
-  Preferred: string;
+  ClassificationCode: string | null;
+  ClassificationDescription: string | null;
 };
 
 export default iStudentReportAward

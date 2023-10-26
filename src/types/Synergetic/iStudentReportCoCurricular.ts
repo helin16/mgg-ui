@@ -4,6 +4,7 @@ type iStudentReportCoCurricular = {
   FileSemester: number;
   Description: string;
   FileType: string;
+  FileTypeDescription: string | null;
 };
 
 export default iStudentReportCoCurricular

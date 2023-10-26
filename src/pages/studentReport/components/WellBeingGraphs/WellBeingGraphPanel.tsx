@@ -7,13 +7,12 @@ import { mainBlue } from "../../../../AppWrapper";
 import WellBeingAbsenceByClassChart from "./components/WellBeingAbsenceByClassChart";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../redux/makeReduxStore";
-import moment from "moment-timezone";
 import WellBeingAbsenceByReasonChart from "./components/WellBeingAbsenceByReasonChart";
 import { useEffect, useState } from "react";
 import SynVAbsenceService from "../../../../services/Synergetic/Absence/SynVAbsenceService";
 import Toaster from "../../../../services/Toaster";
 import PageLoadingSpinner from "../../../../components/common/PageLoadingSpinner";
-import { OP_BETWEEN } from "../../../../helper/ServiceHelper";
+import {OP_BETWEEN, OP_OR} from "../../../../helper/ServiceHelper";
 import iSynVAbsence from "../../../../types/Synergetic/Absence/iSynVAbsence";
 import SynVAttendanceService from "../../../../services/Synergetic/Attendance/SynVAttendanceService";
 import iSynVAttendance from "../../../../types/Synergetic/Attendance/iSynVAttendance";
@@ -33,15 +32,13 @@ import {
   ABSENCE_TYPE_CODE_LATE_SIGN_IN
 } from '../../../../types/StudentAbsence/iStudentAbsence';
 import MathHelper from '../../../../helper/MathHelper';
+import ISynFileSemester from '../../../../types/Synergetic/iSynFileSemester';
+import SynFileSemesterSelector from '../../../../components/student/SynFileSemesterSelector';
 
 const Wrapper = styled.div`
   .title {
     color: ${mainBlue};
   }
-  .highcharts-credits {
-    display: none;
-  }
-
   .row {
     [class^="col-"] {
       padding-top: 1rem;
@@ -89,29 +86,33 @@ const WellBeingGraphPanel = ({ student }: iWellBeingGraphPanel) => {
   const [activities, setActivities] = useState<iSynVActivity[]>([]);
   const [studentGiftedSummaries, setStudentGiftedSummaries] = useState<iSynUStudentGiftedSummary[]>([]);
   const [pastoralCares, setPastoralCares] = useState<iSynTPastoralCare[]>([]);
-  const currentYear =
-    currentUser?.SynCurrentFileSemester?.FileYear || moment().year();
-  const currentSemester =
-    currentUser?.SynCurrentFileSemester?.FileSemester || 1;
+  const [selectedFileSemesters, setSelectedFileSemesters] = useState<ISynFileSemester[]>(currentUser?.SynCurrentFileSemester ? [currentUser?.SynCurrentFileSemester] : []);
 
   useEffect(() => {
+    if (selectedFileSemesters.length <= 0) {
+      setAbsences([]);
+      setAttendances([]);
+      setActivities([]);
+      setStudentGiftedSummaries([]);
+      setPastoralCares([]);
+      return;
+    }
     let isCanceled = false;
     setIsLoading(false);
     Promise.all([
       SynVAbsenceService.getAll({
         where: JSON.stringify({
           ID: student.StudentID,
-          AbsenceDate: {
-            [OP_BETWEEN]: currentUser?.SynCurrentFileSemester
-              ? [
-                currentUser?.SynCurrentFileSemester.StartDate,
-                currentUser?.SynCurrentFileSemester.EndDate,
-              ]
-              : [
-                  `${currentYear}-01-01T00:00:00`,
-                  `${currentYear}-12-31T23:59:59`
+          [OP_OR]: selectedFileSemesters.map(selectedFileSemester => {
+            return {
+              AbsenceDate: {
+                [OP_BETWEEN]: [
+                  selectedFileSemester.StartDate,
+                  selectedFileSemester.EndDate,
                 ]
-          }
+              }
+            }
+          })
         }),
         include: "SynLuAbsenceType,SynLuAbsenceReason",
         perPage: 999999
@@ -119,8 +120,8 @@ const WellBeingGraphPanel = ({ student }: iWellBeingGraphPanel) => {
       SynVAttendanceService.getAll({
         where: JSON.stringify({
           ID: student.StudentID,
-          FileYear: currentYear,
-          FileSemester: currentSemester
+          FileYear: selectedFileSemesters.map((selectedFileSemester: ISynFileSemester) => selectedFileSemester.FileYear),
+          FileSemester: selectedFileSemesters.map((selectedFileSemester: ISynFileSemester) => selectedFileSemester.FileSemester),
         }),
         perPage: 999999
       }),
@@ -171,7 +172,7 @@ const WellBeingGraphPanel = ({ student }: iWellBeingGraphPanel) => {
     return () => {
       isCanceled = true;
     };
-  }, [student, currentUser, currentYear, currentSemester]);
+  }, [student, selectedFileSemesters]);
 
   const getExtensionComments = () => {
     const comments = studentGiftedSummaries.filter(studentGiftedSummary => `${studentGiftedSummary.ExtensionComments || ''}`.trim() !== '');
@@ -194,14 +195,34 @@ const WellBeingGraphPanel = ({ student }: iWellBeingGraphPanel) => {
   return (
     <Wrapper>
       <Row>
-        <Col md={2} sm={4}>
+        <Col>
+          Showing Semesters
+          <SynFileSemesterSelector
+            isMulti
+            allowClear={false}
+            values={selectedFileSemesters.map(selectedFileSemester => `${selectedFileSemester.FileSemestersSeq}`)}
+            onSelect={selected => {
+              if (!selected) {
+                setSelectedFileSemesters(currentUser?.SynCurrentFileSemester ? [currentUser?.SynCurrentFileSemester] : []);
+                return;
+              }
+
+              if (Array.isArray(selected)) {
+                setSelectedFileSemesters(selected.map(option => option.data));
+              }
+            }}
+          />
+        </Col>
+      </Row>
+      <Row>
+        <Col md={2} sm={12}>
           <Image src={student.profileUrl} />
           <WellBeingGraphDetailsPanel student={student} />
-          <WellBeingGraphNurseVisitsPanel student={student} />
+          <WellBeingGraphNurseVisitsPanel student={student} fileSemesters={selectedFileSemesters}/>
         </Col>
-        <Col md={5} sm={4}>
+        <Col md={5} sm={12}>
           <h4 className={"title"}>
-            Absence By Class: {currentYear} Term {currentSemester}
+            Absence By Class:
           </h4>
           <WellBeingAbsenceByClassChart
             student={student}
@@ -248,18 +269,25 @@ const WellBeingGraphPanel = ({ student }: iWellBeingGraphPanel) => {
               <h5 className={"title text-danger"}>Day Absence Reasons</h5>
               <div className={"content"}>
                 {
-                  absences.filter(absence => `${absence.AbsencePeriod || ''}`.trim().toUpperCase() === ABSENCE_PERIOD_ALL_DAY)
-                    .map((absence, index) => {
-                      return <div key={index} ><b>{absence.SynLuAbsenceReason?.Description}</b><div><small>{absence.Description || ''}</small></div></div>
+                  Object.values(absences.filter(absence => `${absence.AbsencePeriod || ''}`.trim().toUpperCase() === ABSENCE_PERIOD_ALL_DAY)
+                    .reduce((map, absence) => {
+                      const key = `${absence.SynLuAbsenceReason?.Code || ''} - ${absence.Description || ''}`.trim();
+                      return {
+                        ...map,
+                        [key]: {reason: absence.SynLuAbsenceReason?.Description || '', description: absence.Description || ''},
+                      }
+                    }, {})).map((absence, index) => {
+                      // @ts-ignore
+                    return <div key={index} ><b>{absence.reason}</b><div><small>{absence.description}</small></div></div>
                     })
                 }
               </div>
             </div>
           </FlexContainer>
         </Col>
-        <Col md={5} sm={4}>
+        <Col md={5} sm={12}>
           <h4 className={"title"}>
-            Class Absence Reasons: {currentYear} Term {currentSemester}
+            Class Absence Reasons:
           </h4>
           <WellBeingAbsenceByReasonChart
             student={student}

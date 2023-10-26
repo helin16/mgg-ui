@@ -3,7 +3,7 @@ import LoadingBtn from '../../../../../../components/common/LoadingBtn';
 import iVStudent from '../../../../../../types/Synergetic/iVStudent';
 import iStudentReportYear from '../../../../../../types/Synergetic/iStudentReportYear';
 import {useState} from 'react';
-import StudentReportService from '../../../../../../services/Synergetic/StudentReportService';
+import StudentReportService from '../../../../../../services/Synergetic/Student/StudentReportService';
 import {Button} from 'react-bootstrap';
 import PopupModal from '../../../../../../components/common/PopupModal';
 import * as Icons from 'react-bootstrap-icons'

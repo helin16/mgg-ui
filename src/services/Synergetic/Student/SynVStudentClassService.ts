@@ -1,6 +1,6 @@
-import AppService, {iConfigParams} from '../AppService';
-import IPaginatedResult from '../../types/iPaginatedResult';
-import iSynVStudentClass from '../../types/Synergetic/iSynVStudentClass';
+import AppService, {iConfigParams} from '../../AppService';
+import IPaginatedResult from '../../../types/iPaginatedResult';
+import iSynVStudentClass from '../../../types/Synergetic/iSynVStudentClass';
 
 
 

@@ -1,6 +1,6 @@
-import AppService, {iConfigParams} from '../AppService';
-import iPaginatedResult from '../../types/iPaginatedResult';
-import iSynVStudentContactAllAddress from '../../types/Synergetic/iSynVStudentContactAllAddress';
+import AppService, {iConfigParams} from '../../AppService';
+import iPaginatedResult from '../../../types/iPaginatedResult';
+import iSynVStudentContactAllAddress from '../../../types/Synergetic/iSynVStudentContactAllAddress';
 
 const endPoint = `/syn/vStudentContactAllAddress`;
 

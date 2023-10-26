@@ -17,13 +17,13 @@ import {useSelector} from 'react-redux';
 import {RootState} from '../../../redux/makeReduxStore';
 import PageLoadingSpinner from '../../../components/common/PageLoadingSpinner';
 import {submitBtnBg, submitBtnHoverBg, submitBtnTextColor} from '../../../AppWrapper';
-import StudentContactService from '../../../services/Synergetic/StudentContactService';
+import StudentContactService from '../../../services/Synergetic/Student/StudentContactService';
 import iStudentContact, {
   STUDENT_CONTACT_TYPE_SC1,
   STUDENT_CONTACT_TYPE_SC2,
   STUDENT_CONTACT_TYPE_SC3
 } from '../../../types/Synergetic/iStudentContact';
-import SynVStudentService from '../../../services/Synergetic/SynVStudentService';
+import SynVStudentService from '../../../services/Synergetic/Student/SynVStudentService';
 
 const Wrapper = styled.div`
   .search-btn {

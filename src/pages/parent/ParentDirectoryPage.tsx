@@ -5,7 +5,7 @@ import {useSelector} from 'react-redux';
 import {RootState} from '../../redux/makeReduxStore';
 import moment from 'moment-timezone';
 import Toaster, {TOAST_TYPE_ERROR} from '../../services/Toaster';
-import SynVStudentContactAllAddressService from '../../services/Synergetic/SynVStudentContactAllAddressService';
+import SynVStudentContactAllAddressService from '../../services/Synergetic/Student/SynVStudentContactAllAddressService';
 import iSynVStudentContactAllAddress from '../../types/Synergetic/iSynVStudentContactAllAddress';
 import {
   STUDENT_CONTACT_TYPE_SC1,

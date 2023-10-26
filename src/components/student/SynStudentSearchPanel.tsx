@@ -4,7 +4,7 @@ import LoadingBtn from '../common/LoadingBtn';
 import {Search} from 'react-bootstrap-icons';
 import React, {useEffect, useState} from 'react';
 import iVStudent from '../../types/Synergetic/iVStudent';
-import SynVStudentService from '../../services/Synergetic/SynVStudentService';
+import SynVStudentService from '../../services/Synergetic/Student/SynVStudentService';
 import Toaster from '../../services/Toaster';
 import EmptyState from '../common/EmptyState';
 import PanelTitle from '../PanelTitle';

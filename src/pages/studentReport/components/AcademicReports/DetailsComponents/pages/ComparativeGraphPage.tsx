@@ -10,7 +10,7 @@ import { FlexContainer } from "../../../../../../styles";
 import { ResultTableWrapper } from "../sections/GraphTable";
 import ComparativeBarGraph from "../../../../../../components/support/ComparativeBarGraph";
 import { OP_NOT } from "../../../../../../helper/ServiceHelper";
-import StudentReportService from "../../../../../../services/Synergetic/StudentReportService";
+import StudentReportService from "../../../../../../services/Synergetic/Student/StudentReportService";
 import Toaster from '../../../../../../services/Toaster';
 
 const Wrapper = styled.div`

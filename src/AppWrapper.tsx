@@ -31,6 +31,10 @@ const AppWrapper = styled.div`
     }
   }
 
+  .highcharts-credits {
+    display: none;
+  }
+
   font-size: 13px;
 
   .flexbox {

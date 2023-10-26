@@ -9,7 +9,7 @@ import LoadingBtn from '../../../../components/common/LoadingBtn';
 import * as Icons from 'react-bootstrap-icons';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../../redux/makeReduxStore';
-import SynVStudentClassService from '../../../../services/Synergetic/SynVStudentClassService';
+import SynVStudentClassService from '../../../../services/Synergetic/Student/SynVStudentClassService';
 import Toaster from '../../../../services/Toaster';
 import moment from 'moment-timezone';
 import * as _ from 'lodash';

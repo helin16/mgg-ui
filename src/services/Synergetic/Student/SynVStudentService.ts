@@ -1,6 +1,6 @@
-import AppService, {iConfigParams} from '../AppService';
-import iVStudent, {iVPastAndCurrentStudent, iVPastStudent} from '../../types/Synergetic/iVStudent';
-import iPaginatedResult from '../../types/iPaginatedResult';
+import AppService, {iConfigParams} from '../../AppService';
+import iVStudent, {iVPastAndCurrentStudent, iVPastStudent} from '../../../types/Synergetic/iVStudent';
+import iPaginatedResult from '../../../types/iPaginatedResult';
 
 const endPoint = '/syn/vStudent';
 const searchVStudents = (searchTxt: string, params: iConfigParams = {}): Promise<iVStudent[]> => {

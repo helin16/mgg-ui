@@ -7,13 +7,13 @@ import {Alert, Button, Col, FormControl, Row, Spinner} from "react-bootstrap";
 import FormLabel from "../form/FormLabel";
 import SynCommunityService from "../../services/Synergetic/Community/SynCommunityService";
 import {OP_OR} from "../../helper/ServiceHelper";
-import StudentContactService from "../../services/Synergetic/StudentContactService";
+import StudentContactService from "../../services/Synergetic/Student/StudentContactService";
 import {
   STUDENT_CONTACT_TYPE_SC1,
   STUDENT_CONTACT_TYPE_SC2,
   STUDENT_CONTACT_TYPE_SC3
 } from "../../types/Synergetic/iStudentContact";
-import SynVStudentService from "../../services/Synergetic/SynVStudentService";
+import SynVStudentService from "../../services/Synergetic/Student/SynVStudentService";
 import * as _ from "lodash";
 import iVStudent from "../../types/Synergetic/iVStudent";
 import Toaster from "../../services/Toaster";

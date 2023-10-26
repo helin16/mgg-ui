@@ -5,7 +5,7 @@ import React, {ChangeEvent, useState} from 'react';
 import PopupModal from '../../../../../components/common/PopupModal';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../../../redux/makeReduxStore';
-import StudentReportService from '../../../../../services/Synergetic/StudentReportService';
+import StudentReportService from '../../../../../services/Synergetic/Student/StudentReportService';
 import LoadingBtn from '../../../../../components/common/LoadingBtn';
 import iAsset from '../../../../../types/asset/iAsset';
 

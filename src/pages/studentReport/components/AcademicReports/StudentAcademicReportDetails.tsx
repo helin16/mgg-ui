@@ -11,7 +11,7 @@ import {useEffect, useState} from 'react';
 import iStudentReportResult, {
   STUDENT_REPORT_SUBJECT_NAME_COMPARATIVE_ANALYSIS
 } from '../../../../types/Synergetic/iStudentReportResult';
-import StudentReportService from '../../../../services/Synergetic/StudentReportService';
+import StudentReportService from '../../../../services/Synergetic/Student/StudentReportService';
 import StudentAcademicSubjectPage from './DetailsComponents/pages/StudentAcademicSubjectPage';
 import ComparativeAnalysisPage from './DetailsComponents/pages/ComparativeAnalysisPage';
 import HomeGroupPage from './DetailsComponents/pages/HomeGroupPage';

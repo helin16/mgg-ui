@@ -1,6 +1,6 @@
-import AppService, {iConfigParams} from '../AppService';
-import iPaginatedResult from '../../types/iPaginatedResult';
-import iSynVStudentDisabilityAdjustment from '../../types/Synergetic/iSynVStudentDisabilityAdjustment';
+import AppService, {iConfigParams} from '../../AppService';
+import iPaginatedResult from '../../../types/iPaginatedResult';
+import iSynVStudentDisabilityAdjustment from '../../../types/Synergetic/iSynVStudentDisabilityAdjustment';
 
 const endPoint = '/syn/vStudentDisabilityAdjustment';
 const getAll = (params: iConfigParams = {}): Promise<iPaginatedResult<iSynVStudentDisabilityAdjustment>> => {

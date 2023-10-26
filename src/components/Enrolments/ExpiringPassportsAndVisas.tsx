@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { useEffect, useState } from "react";
-import SynVStudentService from "../../services/Synergetic/SynVStudentService";
+import SynVStudentService from "../../services/Synergetic/Student/SynVStudentService";
 import Toaster from "../../services/Toaster";
 import PageLoadingSpinner from '../common/PageLoadingSpinner';
 import iVStudent from '../../types/Synergetic/iVStudent';

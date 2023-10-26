@@ -4,7 +4,7 @@ import {Spinner} from 'react-bootstrap';
 import HighchartsReact from 'highcharts-react-official';
 import Highcharts from 'highcharts'
 import iStudentReportYear from '../../../../../types/Synergetic/iStudentReportYear';
-import StudentReportService from '../../../../../services/Synergetic/StudentReportService';
+import StudentReportService from '../../../../../services/Synergetic/Student/StudentReportService';
 import iStudentReportResult, {
   STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_MARKS,
   STUDENT_REPORT_RESULT_FILE_TYPE_ACADEMIC

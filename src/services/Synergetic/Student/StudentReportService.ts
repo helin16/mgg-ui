@@ -1,13 +1,13 @@
-import AppService, {iConfigParams} from '../AppService';
-import iStudentReportYear from '../../types/Synergetic/iStudentReportYear';
-import iStudentReportResult from '../../types/Synergetic/iStudentReportResult';
-import iStudentReportComparativeResultMap from '../../types/Synergetic/iStudentReportComparativeResult';
-import iStudentReportCoCurricular from '../../types/Synergetic/iStudentReportCoCurricular';
-import iStudentReportAward from '../../types/Synergetic/iStudentReportAward';
-import iAsset from '../../types/asset/iAsset';
-import {iPowerBiReportMap} from '../../types/student/iPowerBIReports';
-import iStudentReportStyle from '../../types/Synergetic/iStudentReportStyle';
-import iPaginatedResult from '../../types/iPaginatedResult';
+import AppService, {iConfigParams} from '../../AppService';
+import iStudentReportYear from '../../../types/Synergetic/iStudentReportYear';
+import iStudentReportResult from '../../../types/Synergetic/iStudentReportResult';
+import iStudentReportComparativeResultMap from '../../../types/Synergetic/iStudentReportComparativeResult';
+import iStudentReportCoCurricular from '../../../types/Synergetic/iStudentReportCoCurricular';
+import iStudentReportAward from '../../../types/Synergetic/iStudentReportAward';
+import iAsset from '../../../types/asset/iAsset';
+import {iPowerBiReportMap} from '../../../types/student/iPowerBIReports';
+import iStudentReportStyle from '../../../types/Synergetic/iStudentReportStyle';
+import iPaginatedResult from '../../../types/iPaginatedResult';
 
 const baseEndPoint = '/studentReport';
 const getStudentReportYears = (params: iConfigParams = {}): Promise<iStudentReportYear[]> => {

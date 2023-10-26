@@ -9,7 +9,7 @@ import ReportedYearsList from './AcademicReports/ReportedYearsList';
 import StudentAcademicReportDetails from './AcademicReports/StudentAcademicReportDetails';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../redux/makeReduxStore';
-import StudentReportService from '../../../services/Synergetic/StudentReportService';
+import StudentReportService from '../../../services/Synergetic/Student/StudentReportService';
 import {iPowerBiReportMap} from '../../../types/student/iPowerBIReports';
 import PowerBIReportViewer from '../../../components/powerBI/PowerBIReportViewer';
 import AssessmentGraph from './AssessmentGraph/AssessmentGraph';
@@ -17,6 +17,7 @@ import {mainBlue} from '../../../AppWrapper';
 import StudentStatusBadge from './AcademicReports/StudentStatusBadge';
 import {FlexContainer} from '../../../styles';
 import WellBeingGraphPanel from './WellBeingGraphs/WellBeingGraphPanel';
+import StudentParticipationPanel from './StudentParticipation/StudentParticipationPanel';
 
 const TAB_ACADEMIC_REPORTS = 'academicReports';
 const TAB_STUDENT_PARTICIPATION = 'studentParticipation';
@@ -90,7 +91,8 @@ const StudentDetailsPage = ({student ,onClearSelectedStudent}: {student: iVStude
 
   const getTabContent = () => {
     if (selectedTab === TAB_STUDENT_PARTICIPATION) {
-      return <PowerBIReportViewer reportId={powerBIReports[selectedTab].reportId || ''} student={student}/>
+      return <StudentParticipationPanel student={student}/>
+      // return <PowerBIReportViewer reportId={powerBIReports[selectedTab].reportId || ''} student={student}/>
     }
     if (selectedTab === TAB_STANDARDISED_TESTS) {
       return <PowerBIReportViewer reportId={powerBIReports[selectedTab].reportId || ''} student={student}/>

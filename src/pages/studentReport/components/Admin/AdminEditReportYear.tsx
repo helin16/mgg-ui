@@ -15,7 +15,7 @@ import DateTimePicker from '../../../../components/common/DateTimePicker';
 import FileSemesterSelector from '../../../../components/student/FileSemesterSelector';
 import LoadingBtn from '../../../../components/common/LoadingBtn';
 import EmptyState from '../../../../components/common/EmptyState';
-import StudentReportService from '../../../../services/Synergetic/StudentReportService';
+import StudentReportService from '../../../../services/Synergetic/Student/StudentReportService';
 import * as Icons from 'react-bootstrap-icons';
 import {STUDENT_REPORT_YEAR_STYLE_DOCMAN_DOWNLOAD} from '../../../../types/Synergetic/iStudentReportStyle';
 

@@ -9,7 +9,7 @@ import { Col, FormControl, Row } from "react-bootstrap";
 import MathHelper from "../../../helper/MathHelper";
 import Toaster, { TOAST_TYPE_ERROR } from "../../../services/Toaster";
 import PageLoadingSpinner from "../../common/PageLoadingSpinner";
-import SynVStudentService from "../../../services/Synergetic/SynVStudentService";
+import SynVStudentService from "../../../services/Synergetic/Student/SynVStudentService";
 import moment from "moment-timezone";
 import FunnelService from "../../../services/Funnel/FunnelService";
 import iFunnelLead, {
@@ -47,7 +47,7 @@ import {
 } from "../../../types/Synergetic/Finance/iSynLuDebtorAutoTuition";
 import iSynDebtorStudentConcession from "../../../types/Synergetic/Finance/iSynDebtorStudentConcession";
 import * as _ from "lodash";
-import SynVStudentContactsCurrentPastFutureCombinedService from "../../../services/Synergetic/SynVStudentContactsCurrentPastFutureCombinedService";
+import SynVStudentContactsCurrentPastFutureCombinedService from "../../../services/Synergetic/Student/SynVStudentContactsCurrentPastFutureCombinedService";
 import {
   STUDENT_CONTACT_STUDENT_TYPE_CURRENT,
   STUDENT_CONTACT_STUDENT_TYPE_FUTURE

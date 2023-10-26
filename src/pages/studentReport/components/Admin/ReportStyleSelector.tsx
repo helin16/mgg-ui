@@ -2,7 +2,7 @@ import {iAutoCompleteSingle} from '../../../../components/common/AutoComplete';
 import SelectBox from '../../../../components/common/SelectBox';
 import {useEffect, useState} from 'react';
 import {Spinner} from 'react-bootstrap';
-import StudentReportService from '../../../../services/Synergetic/StudentReportService';
+import StudentReportService from '../../../../services/Synergetic/Student/StudentReportService';
 import iStudentReportStyle from '../../../../types/Synergetic/iStudentReportStyle';
 
 type iReportStyleSelector = {

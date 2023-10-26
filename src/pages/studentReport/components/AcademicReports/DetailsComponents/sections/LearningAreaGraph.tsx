@@ -13,7 +13,7 @@ import {Spinner} from 'react-bootstrap';
 import ILuYearLevel from '../../../../../../types/Synergetic/Lookup/iSynLuYearLevel';
 import {CAMPUS_CODE_JUNIOR} from '../../../../../../types/Synergetic/Lookup/iSynLuCampus';
 import MathHelper from '../../../../../../helper/MathHelper';
-import StudentReportService from '../../../../../../services/Synergetic/StudentReportService';
+import StudentReportService from '../../../../../../services/Synergetic/Student/StudentReportService';
 import {OP_NOT} from '../../../../../../helper/ServiceHelper';
 
 type iLearningAreaGraph = {

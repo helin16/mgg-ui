@@ -3,7 +3,7 @@ import {useEffect, useState} from 'react';
 import iVStudent from '../../../../../../types/Synergetic/iVStudent';
 import iStudentReportYear from '../../../../../../types/Synergetic/iStudentReportYear';
 import iStudentReportCoCurricular from '../../../../../../types/Synergetic/iStudentReportCoCurricular';
-import StudentReportService from '../../../../../../services/Synergetic/StudentReportService';
+import StudentReportService from '../../../../../../services/Synergetic/Student/StudentReportService';
 import {Spinner} from 'react-bootstrap';
 
 const CoCurricularActivitiesDiv = ({student, studentReportYear}: {

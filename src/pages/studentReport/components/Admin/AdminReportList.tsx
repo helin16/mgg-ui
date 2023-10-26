@@ -2,7 +2,7 @@ import React, {ChangeEvent, useEffect, useState} from 'react';
 import iStudentReportYear, {getDataForClone} from '../../../../types/Synergetic/iStudentReportYear';
 import {Button, Col, Form, Row, Spinner, Table} from 'react-bootstrap';
 import styled from 'styled-components';
-import StudentReportService from '../../../../services/Synergetic/StudentReportService';
+import StudentReportService from '../../../../services/Synergetic/Student/StudentReportService';
 import EmptyState from '../../../../components/common/EmptyState';
 import moment from 'moment-timezone';
 import * as _ from 'lodash';
