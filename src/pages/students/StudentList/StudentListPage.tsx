@@ -34,6 +34,15 @@ const StudentListPage = () => {
     )
   }
 
+  // if (user?.isTeacher !== true) {
+  //   return (
+  //     <Page401
+  //       title={"Access to Teachers and Admins only"}
+  //       description={<h4>Please contact IT or Module Admins for assistant</h4>}
+  //     />
+  //   )
+  // }
+
   return (
     <Page>
       <Wrapper>

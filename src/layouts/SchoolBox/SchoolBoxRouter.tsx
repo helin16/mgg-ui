@@ -35,6 +35,7 @@ import EnrolmentManagementPage from "../../pages/Enrolments/EnrolmentManagementP
 import StudentListPage from "../../pages/students/StudentList/StudentListPage";
 import SynergeticEmailTemplateManagerPage from "../../pages/SynergeticEmailTemplate/SynergeticEmailTemplateManagerPage";
 import CampusDisplayManagementPage from '../../pages/CampusDisplay/CampusDisplayManagementPage';
+import PowerBIReportViewingPage from '../../pages/reports/PowerBI/PowerBIReportViewingPage';
 // import PageNotFound from '../../components/PageNotFound';
 
 const schoolBoxIframeElementId = "remote";
@@ -63,6 +64,13 @@ const SchoolBoxRouter = ({
       schoolBoxIframeElement.style.display = "block";
     }
   };
+
+  // /powerbi/report/:reportId
+  if (path.startsWith('/powerbi/report/')) {
+    removeSchoolBoxIframe();
+    const paths = path.split('/');
+    return <PowerBIReportViewingPage reportId={paths[paths.length - 1]} />;
+  }
 
   switch (path) {
     case "/bt": {

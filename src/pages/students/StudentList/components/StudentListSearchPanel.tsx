@@ -151,6 +151,7 @@ const StudentListSearchPanel = ({
             <FileYearSelector
               showIndicatorSeparator={false}
               value={criteria.FileYear}
+              max={MathHelper.add(user?.SynCurrentFileSemester?.FileYear || moment().year(), 1)}
               onSelect={year => changeSearchCriteria("FileYear", year)}
             />
             <FileSemesterSelector

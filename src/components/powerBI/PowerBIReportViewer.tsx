@@ -11,7 +11,9 @@ const Wrapper = styled.div`
     height: 100vh;
   }
 `;
-const PowerBIReportViewer = ({reportId, student}: {reportId: string; student: iVStudent}) => {
+
+type iPowerBIReportViewer = {reportId: string; student?: iVStudent};
+const PowerBIReportViewer = ({reportId, student}: iPowerBIReportViewer) => {
   const [isLoading, setIsLoading] = useState(false);
   const [accessToken, setAccessToken] = useState('');
   const [report, setReport] = useState(null);
@@ -44,23 +46,28 @@ const PowerBIReportViewer = ({reportId, student}: {reportId: string; student: iV
     return null;
   }
 
-  const getFilter = () => {
+  const getStudentFilters = () => {
+    if (!student) {
+      return {};
+    }
     return {
-      filterType: models.FilterType.Basic,
-      $schema: 'http://powerbi.com/product/schema',
-      target: {
-        table: 'vStudents',
-        column: 'ID'
-      },
-      operator: 'In',
-      values: [student.StudentID]
+      filters: [{
+        filterType: models.FilterType.Basic,
+        $schema: 'http://powerbi.com/product/schema',
+        target: {
+          table: 'vStudents',
+          column: 'ID'
+        },
+        operator: 'In',
+        values: [student.StudentID]
+      }]
     };
   }
 
   return (
     <Wrapper>
       <PowerBIEmbed
-        embedConfig = {{
+        embedConfig={{
           type: 'report',   // Supported types: report, dashboard, tile, visual and qna
           id: reportId,
           embedUrl: `https://app.powerbi.com/reportEmbed?reportId=${reportId}`,
@@ -69,11 +76,11 @@ const PowerBIReportViewer = ({reportId, student}: {reportId: string; student: iV
           settings: {
             filterPaneEnabled: false,
             navContentPaneEnabled: false,
-            background: models.BackgroundType.Transparent
+            // background: models.BackgroundType.Transparent
           },
           permissions: models.Permissions.Read,
           viewMode: models.ViewMode.View,
-          filters: [getFilter()],
+          ...getStudentFilters(),
           pageView: "oneColumn",
         }}
 
