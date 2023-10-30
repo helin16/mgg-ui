@@ -1,5 +1,7 @@
 import * as _ from 'lodash';
 import {Moment} from 'moment-timezone';
+import {Buffer} from 'buffer';
+import {THIRD_PARTY_AUTH_PATH} from '../helper/SchoolBoxHelper';
 
 const isNumeric = (str: string) => {
   return !isNaN(parseFloat(str)) && isFinite(Number(str));
@@ -73,6 +75,17 @@ const stripHTMLTags = (html: string) => {
   return el.textContent;
 }
 
+const getFullUrl = (path: string) => {
+  return `${process.env.REACT_APP_URL || ''}/${path}`;
+}
+
+const getModuleUrl = (customUrl: string, customBaseUrl?: string, customAuthPath = THIRD_PARTY_AUTH_PATH, mConnectBaseUrl?: string) => {
+  const customPathBased64 = Buffer.from(customUrl).toString('base64');
+  const url = `${customBaseUrl || (process.env.REACT_APP_URL || '')}${customAuthPath}/${customPathBased64}`;
+  const base64 = Buffer.from(url).toString('base64');
+  return `${mConnectBaseUrl || ''}/modules/remote/${base64}`;
+}
+
 const UtilsService = {
   isNumeric,
   handleEnterKeyPressed,
@@ -84,6 +97,8 @@ const UtilsService = {
   validateTime,
   letterRange,
   stripHTMLTags,
+  getFullUrl,
+  getModuleUrl,
 }
 
 export default UtilsService;

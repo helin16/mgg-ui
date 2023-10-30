@@ -12,6 +12,7 @@ type iSelectBox = {
   showIndicatorSeparator?: boolean;
   isDisabled?: boolean;
   isInvalid?: boolean;
+  renderOption?: (props: any) =>  any;
 }
 
 const Wrapper = styled.div`
@@ -43,7 +44,7 @@ const Wrapper = styled.div`
 `
 
 const SelectBox = ({
-  className, options, onChange, value, isClearable, isMulti, isInvalid = false, showDropdownIndicator = true, showIndicatorSeparator = true, isDisabled
+  className, options, onChange, value, isClearable, isMulti, renderOption, isInvalid = false, showDropdownIndicator = true, showIndicatorSeparator = true, isDisabled
 }: iSelectBox) => {
   const getComponents = () => {
     if (showDropdownIndicator === false) {
@@ -72,7 +73,10 @@ const SelectBox = ({
         onChange={onChange}
         value={value}
         isClearable={isClearable}
-        components={getComponents()}
+        components={{
+          ...getComponents(),
+          ...(renderOption ? {Option: renderOption} : {}),
+        }}
       />
     </Wrapper>
   )

@@ -34,10 +34,11 @@ const defaultPlugins = [
   'media',
   'table',
   'code',
+  'formatpainter',
 ];
 const defaultToolBars = [
   'undo redo',
-  'bold italic underline strikethrough forecolor backcolor',
+  'bold italic underline strikethrough forecolor backcolor formatpainter',
   'alignleft aligncenter alignright alignjustify',
   'bullist numlist',
   'outdent indent',

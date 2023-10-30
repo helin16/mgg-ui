@@ -10,7 +10,7 @@ import {
   MGGS_MODULE_ID_HOUSE_AWARDS,
   MGGS_MODULE_ID_MGG_APP_DEVICES,
   MGGS_MODULE_ID_ONLINE_DONATION,
-  MGGS_MODULE_ID_OPEROO_SAFETY_ALERTS,
+  MGGS_MODULE_ID_OPEROO_SAFETY_ALERTS, MGGS_MODULE_ID_POWER_BI_REPORT,
   MGGS_MODULE_ID_SCHOOL_DATA_SUBMISSION,
   MGGS_MODULE_ID_STAFF_LIST,
   MGGS_MODULE_ID_SYN_EMAIL_TEMPLATE
@@ -35,7 +35,9 @@ import EnrolmentManagementPage from "../../pages/Enrolments/EnrolmentManagementP
 import StudentListPage from "../../pages/students/StudentList/StudentListPage";
 import SynergeticEmailTemplateManagerPage from "../../pages/SynergeticEmailTemplate/SynergeticEmailTemplateManagerPage";
 import CampusDisplayManagementPage from '../../pages/CampusDisplay/CampusDisplayManagementPage';
-import PowerBIReportViewingPage from '../../pages/reports/PowerBI/PowerBIReportViewingPage';
+import PowerBIReportViewingPage from '../../pages/PowerBI/PowerBIReportViewingPage';
+import PowerBIReportManagerPage from '../../pages/PowerBI/Manager/PowerBIReportManagerPage';
+import {URL_POWER_BI_DISPLAY} from '../../Url';
 // import PageNotFound from '../../components/PageNotFound';
 
 const schoolBoxIframeElementId = "remote";
@@ -64,9 +66,8 @@ const SchoolBoxRouter = ({
       schoolBoxIframeElement.style.display = "block";
     }
   };
-
   // /powerbi/report/:reportId
-  if (path.startsWith('/powerbi/report/')) {
+  if (path.startsWith(URL_POWER_BI_DISPLAY.replace(':reportId', ''))) {
     removeSchoolBoxIframe();
     const paths = path.split('/');
     return <PowerBIReportViewingPage reportId={paths[paths.length - 1]} />;
@@ -209,6 +210,14 @@ const SchoolBoxRouter = ({
       return (
         <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_CAMPUS_DISPLAY}>
           <CampusDisplayManagementPage />
+        </ModuleAccessWrapper>
+      );
+    }
+    case "/powerbi/manager": {
+      removeSchoolBoxIframe();
+      return (
+        <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_POWER_BI_REPORT}>
+          <PowerBIReportManagerPage />
         </ModuleAccessWrapper>
       );
     }
