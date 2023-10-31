@@ -15,6 +15,7 @@ import LoadingBtn from '../common/LoadingBtn';
 import FormErrorDisplay from '../form/FormErrorDisplay';
 import {Form} from 'react-bootstrap';
 import ExplanationPanel from '../ExplanationPanel';
+import moment from 'moment-timezone';
 
 const Wrapper = styled.div``;
 
@@ -89,6 +90,20 @@ const PowerBIListItemEditPanel = ({
         onSubmitting(false);
       }
     })
+  }
+
+  const getCreatedAndUpdatedInfo = () => {
+    if (!report || `${report?.id || ''}`.trim() === '') {
+      return null;
+    }
+    return <FlexContainer className={'with-gap lg-gap created-and-updated space-above'}>
+      <div>
+        <b>Created: </b> {report.CreatedBy?.firstName || ""}{" "} {report.CreatedBy?.lastName || ""} <b>@</b> {moment(report.createdAt).format("lll")}
+      </div>
+      <div>
+        <b>Updated: </b> {report.UpdatedBy?.firstName || ""}{" "} {report.UpdatedBy?.lastName || ""} <b>@</b> {moment(report.updatedAt).format("lll")}
+      </div>
+    </FlexContainer>
   }
 
   const getAccessPanel = () => {
@@ -274,6 +289,7 @@ const PowerBIListItemEditPanel = ({
           />
         </FlexContainer>
         {getAccessPanel()}
+        {getCreatedAndUpdatedInfo()}
       </SectionDiv>
 
       <FlexContainer className={"justify-content-between space-above"}>

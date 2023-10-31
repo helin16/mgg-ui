@@ -97,6 +97,8 @@ const CommunityProfileList = ({
   return (
     <Wrapper className={className}>
       <Table
+        responsive
+        hover
         columns={[
           {
             key: "SynergeticID",

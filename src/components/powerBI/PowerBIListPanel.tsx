@@ -6,7 +6,6 @@ import PowerBIService from "../../services/PowerBIService";
 import Toaster from "../../services/Toaster";
 import PageLoadingSpinner from "../common/PageLoadingSpinner";
 import Table, { iTableColumn } from "../common/Table";
-import moment from "moment-timezone";
 import PowerBIListItemCreateOrEditPopupBtn from "./PowerBIListItemCreateOrEditPopupBtn";
 import * as Icons from "react-bootstrap-icons";
 import MathHelper from "../../helper/MathHelper";
@@ -17,7 +16,15 @@ import {Button} from 'react-bootstrap';
 import UtilsService from '../../services/UtilsService';
 import {URL_POWER_BI_DISPLAY} from '../../Url';
 
-const Wrapper = styled.div``;
+const Wrapper = styled.div`
+  .report-items {
+    .btn.btn-link {
+      padding: 0px !important;
+      text-align: left;
+      margin: 0px !important;
+    }
+  }
+`;
 
 const PowerBIListPanel = () => {
   const { user: currentUser } = useSelector((state: RootState) => state.auth);
@@ -191,40 +198,6 @@ const PowerBIListPanel = () => {
       }
     },
     {
-      key: "CreatedBy",
-      header: "CreatedBy",
-      cell: (col: iTableColumn, data: iPowerBIReport) => {
-        return (
-          <td key={col.key}>
-            <div>
-              <b>By</b> {data.CreatedBy?.firstName || ""}{" "}
-              {data.CreatedBy?.lastName || ""}
-            </div>
-            <div>
-              <b>@</b> {moment(data.createdAt).format("lll")}
-            </div>
-          </td>
-        );
-      }
-    },
-    {
-      key: "UpdatedBy",
-      header: "UpdatedBy",
-      cell: (col: iTableColumn, data: iPowerBIReport) => {
-        return (
-          <td key={col.key}>
-            <div>
-              <b>By</b> {data.UpdatedBy?.firstName || ""}{" "}
-              {data.UpdatedBy?.lastName || ""}
-            </div>
-            <div>
-              <b>@</b> {moment(data.updatedAt).format("lll")}
-            </div>
-          </td>
-        );
-      }
-    },
-    {
       key: "Operations",
       header: (column: iTableColumn) => {
         return (
@@ -279,6 +252,7 @@ const PowerBIListPanel = () => {
       <Table
         striped
         hover
+        className={'report-items'}
         columns={getColumns()}
         rows={reportList?.data || []}
       />

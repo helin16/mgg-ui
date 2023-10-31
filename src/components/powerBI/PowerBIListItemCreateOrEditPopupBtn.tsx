@@ -6,6 +6,8 @@ import { ModalProps } from "react-bootstrap/Modal";
 import UtilsService from "../../services/UtilsService";
 import { FlexContainer } from "../../styles";
 import PowerBIListItemEditPanel from "./PowerBIListItemEditPanel";
+import * as Icons from "react-bootstrap-icons";
+import { URL_POWER_BI_DISPLAY } from "../../Url";
 
 type iPowerBIListItemCreatePopupBtn = ButtonProps & {
   report?: iPowerBIReport;
@@ -20,7 +22,9 @@ const PowerBIListItemCreateOrEditPopupBtn = ({
   ...rest
 }: iPowerBIListItemCreatePopupBtn) => {
   const [showingPopup, setShowingPopup] = useState(false);
-  const [isConfirming, setIsConfirming] = useState(`${report?.id || ''}`.trim() === '');
+  const [isConfirming, setIsConfirming] = useState(
+    `${report?.id || ""}`.trim() === ""
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleClose = () => {
@@ -33,6 +37,24 @@ const PowerBIListItemCreateOrEditPopupBtn = ({
   };
 
   const getPopupHeader = () => {
+    if (report && `${report.id || ""}`.trim() !== "") {
+      return (
+        <FlexContainer className={"with-gap lg-gap align-items-center"}>
+          <h6>Editing Report</h6>
+          <Button
+            variant={"secondary"}
+            size={"sm"}
+            target={"__BLANK"}
+            href={UtilsService.getModuleUrl(
+              URL_POWER_BI_DISPLAY.replace(":reportId", report.id),
+              process.env.REACT_APP_URL || ""
+            )}
+          >
+            <Icons.Link45deg /> View Report
+          </Button>
+        </FlexContainer>
+      );
+    }
     return <h6>Integrating a new Power BI into mConnect</h6>;
   };
 
@@ -101,7 +123,7 @@ const PowerBIListItemCreateOrEditPopupBtn = ({
           }}
           isSubmitting={isSubmitting}
           onCancel={() => handleClose()}
-          onSaved={(report) => {
+          onSaved={report => {
             if (onSaved) {
               onSaved(report);
             }
@@ -134,7 +156,7 @@ const PowerBIListItemCreateOrEditPopupBtn = ({
         {...rest}
         onClick={() => {
           setShowingPopup(true);
-          setIsConfirming(`${report?.id || ''}`.trim() === '');
+          setIsConfirming(`${report?.id || ""}`.trim() === "");
         }}
       />
       {getPopupModal()}
