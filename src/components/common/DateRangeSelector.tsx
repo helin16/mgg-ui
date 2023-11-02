@@ -17,6 +17,8 @@ type iDateRangeSelector = {
   isValidEndDate?: (currentDate: Date, selectedDate: Date) => boolean;
   onStartDateSelected: (selected: Date) => void;
   onEndDateSelected: (selected: Date) => void;
+  startDateLabel?: string;
+  endDateLabel?: string;
 };
 const DateRangeSelector = ({
   startDate,
@@ -32,12 +34,14 @@ const DateRangeSelector = ({
   allowClear,
   isDisabled,
   isValidEndDate,
-  isValidStartDate
+  isValidStartDate,
+  startDateLabel = "Start",
+  endDateLabel = "End",
 }: iDateRangeSelector) => {
   return (
     <FlexContainer className={`${className} with-gap align-items end`}>
       <div>
-        <FormLabel label={"Start"} isRequired={isStartDateRequired} />
+        <FormLabel label={startDateLabel} isRequired={isStartDateRequired} />
         <DateTimePicker
           isDisabled={isDisabled}
           displayTimeZone={displayTimeZone}
@@ -50,7 +54,7 @@ const DateRangeSelector = ({
         />
       </div>
       <div>
-        <FormLabel label={"End"} isRequired={isEndDateRequired} />
+        <FormLabel label={endDateLabel} isRequired={isEndDateRequired} />
         <DateTimePicker
           isDisabled={isDisabled}
           displayTimeZone={displayTimeZone}

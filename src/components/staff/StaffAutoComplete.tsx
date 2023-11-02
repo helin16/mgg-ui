@@ -7,13 +7,12 @@ import Toaster from '../../services/Toaster';
 import {Spinner} from 'react-bootstrap';
 
 type iStaffAutoComplete = {
-  id?: string;
   onSelect?: (option: iAutoCompleteSingle | null) => void;
   value?: { ID: number } | null;
   allowClear?: boolean;
   isDisabled?: boolean;
 }
-const StaffAutoComplete = ({id, onSelect, value, allowClear, isDisabled}: iStaffAutoComplete) => {
+const StaffAutoComplete = ({onSelect, value, allowClear, isDisabled}: iStaffAutoComplete) => {
   const [isLoading, setIsLoading] = useState(false);
   const [preSelectedValue, setPreSelectedValue] = useState<iVStaff | null>(null);
 
@@ -76,6 +75,8 @@ const StaffAutoComplete = ({id, onSelect, value, allowClear, isDisabled}: iStaff
   return (
     <AutoComplete
       isDisabled={isDisabled}
+      isMulti={false}
+      // @ts-ignore
       onSelected={onSelect}
       allowClear={allowClear}
       value={preSelectedValue ? convertStaffToOption(preSelectedValue) : undefined}

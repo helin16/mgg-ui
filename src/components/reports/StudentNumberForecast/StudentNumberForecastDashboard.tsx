@@ -34,9 +34,8 @@ import iSynVDebtorFee, {
 } from "../../../types/Synergetic/Finance/iSynVDebtorFee";
 import ToggleBtn from "../../common/ToggleBtn";
 import { OP_GTE, OP_LTE } from "../../../helper/ServiceHelper";
-import SynVFutureStudentService from "../../../services/Synergetic/SynVFutureStudent";
+import SynVFutureStudentService from "../../../services/Synergetic/SynVFutureStudentService";
 import { FUTURE_STUDENT_STATUS_FINALISED } from "../../../types/Synergetic/iSynVFutureStudent";
-import SynVFutureStudent from "../../../services/Synergetic/SynVFutureStudent";
 import { FlexContainer } from "../../../styles";
 import UtilsService from "../../../services/UtilsService";
 import SynDebtorStudentConcessionService from "../../../services/Synergetic/Finance/SynDebtorStudentConcessionService";
@@ -513,7 +512,7 @@ const StudentNumberForecastDashboard = ({
 
       const confirmedSMap = confirmedStudents.reduce(
         (map: iCommunityMap, futureStudent) => {
-          const student = SynVFutureStudent.mapFutureStudentToCurrent(
+          const student = SynVFutureStudentService.mapFutureStudentToCurrent(
             futureStudent,
             yLevelMap
           );
@@ -747,7 +746,7 @@ const StudentNumberForecastDashboard = ({
         .filter(futureStudent => !(futureStudent.FutureID in currentSMap))
         .reduce((map, futureStudent) => {
           const ylCode = `${futureStudent.FutureYearLevel}`;
-          const stud = SynVFutureStudent.mapFutureStudentToCurrent(
+          const stud = SynVFutureStudentService.mapFutureStudentToCurrent(
             futureStudent,
             yLevelMap
           );

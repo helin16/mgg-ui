@@ -115,7 +115,7 @@ const CoCurricularByTypeChartWithTable = ({
           plotOptions: {
             pie: {
               shadow: false,
-              innerSize: "50%"
+              innerSize: "75%"
             }
           },
           title: {
@@ -124,6 +124,7 @@ const CoCurricularByTypeChartWithTable = ({
             align: "center",
             verticalAlign: "middle"
           },
+          colors: ['#3257A8', '#37A794', '#8B3D88', '#DD6B7F', '#6B91C9', '#F5C869', '#77C4A8'],
           series: [
             {
               type: "pie",

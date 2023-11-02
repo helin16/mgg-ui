@@ -9,7 +9,7 @@ import Toaster from '../../services/Toaster';
 
 type iCommunityAutoComplete = {
   isDisabled?: boolean;
-  onSelect?: (option: iAutoCompleteSingle | null) => void;
+  onSelect?: (option: iAutoCompleteSingle | iAutoCompleteSingle[] | null) => void;
   value?: number;
   allowClear?: boolean;
 }

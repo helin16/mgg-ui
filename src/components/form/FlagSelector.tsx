@@ -7,9 +7,10 @@ type iFlagSelector = {
   showIndicator?: boolean;
   showIndicatorSeparator?: boolean;
   classname?: string;
+  showAll?: boolean;
 };
 
-const FlagSelector = ({value, classname, showIndicator, showIndicatorSeparator = true, onSelect}: iFlagSelector) => {
+const FlagSelector = ({value, classname, showIndicator, showAll = true, showIndicatorSeparator = true, onSelect}: iFlagSelector) => {
   const getOption = (option?: string | number | boolean | null) => {
     return {
       label: option === true ? 'Yes' : (option === false ? 'No' : 'All'),
@@ -17,7 +18,7 @@ const FlagSelector = ({value, classname, showIndicator, showIndicatorSeparator =
     };
   }
   const getOptions = () => {
-    return ['', true, false].map(option => {
+    return (showAll === true ? ['', true, false] : [true, false]).map(option => {
       return getOption(option);
     })
   }

@@ -53,7 +53,7 @@ const FunnelThankYouPage = () => {
       return getPage(
         <>
           <div>
-            Thank you for completing your application, our enrolments team will be
+            Thank you for completing your application, our ENROLLMENTS team will be
             in touch soon.
           </div>
           <p>

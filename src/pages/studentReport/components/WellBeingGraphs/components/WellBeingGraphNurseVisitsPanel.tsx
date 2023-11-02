@@ -8,9 +8,10 @@ import { Spinner } from "react-bootstrap";
 import iSynVMedicalIncidentsAll from "../../../../../types/Synergetic/Medical/iSynVMedicalIncidentsAll";
 import iSynFileSemester from '../../../../../types/Synergetic/iSynFileSemester';
 
+const green = '#0C8130';
 const Wrapper = styled.div`
   text-align: center;
-  background-color: rgb(12, 129, 48);
+  background-color: ${green};
   color: white;
   padding: 1rem;
   .number-wrapper {
@@ -21,9 +22,10 @@ const Wrapper = styled.div`
       position: absolute;
       width: 100%;
       text-align: center;
-      top: 30px;
-      color: rgb(12, 129, 48);
+      top: 25px;
+      color: rgb(0, 102,0);
       z-index: 11;
+      font-size: 34px;
     }
   }
   .number-wrapper::after {

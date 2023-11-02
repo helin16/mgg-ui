@@ -3,8 +3,8 @@ import StudentReport from "../../pages/studentReport/StudentReport";
 import OperooSafetyAlertsPage from "../../pages/operoo/OperooSafetyAlertsPage";
 import ModuleAccessWrapper from "../../components/module/ModuleAccessWrapper";
 import {
-  MGGS_MODULE_ID_ALUMNI_REQUEST, MGGS_MODULE_ID_CAMPUS_DISPLAY,
-  MGGS_MODULE_ID_ENROLMENTS,
+  MGGS_MODULE_ID_ALUMNI_REQUEST, MGGS_MODULE_ID_CAMPUS_DISPLAY, MGGS_MODULE_ID_COD,
+  MGGS_MODULE_ID_ENROLLMENTS,
   MGGS_MODULE_ID_FINANCE,
   MGGS_MODULE_ID_FUNNEL,
   MGGS_MODULE_ID_HOUSE_AWARDS,
@@ -31,13 +31,14 @@ import FinancePage from "../../pages/Finance/FinancePage";
 import StudentAttendanceRateReportPage from "../../pages/reports/StudentAttendanceReport/StudentAttendanceRateReportPage";
 import OnlineDonationMangerPage from "../../pages/OnlineDonation/OnlineDonationMangerPage";
 import StaffListPage from "../../pages/Staff/StaffListPage";
-import EnrolmentManagementPage from "../../pages/Enrolments/EnrolmentManagementPage";
+import EnrolmentManagementPage from "../../pages/Enrollments/EnrolmentManagementPage";
 import StudentListPage from "../../pages/students/StudentList/StudentListPage";
 import SynergeticEmailTemplateManagerPage from "../../pages/SynergeticEmailTemplate/SynergeticEmailTemplateManagerPage";
 import CampusDisplayManagementPage from '../../pages/CampusDisplay/CampusDisplayManagementPage';
 import PowerBIReportViewingPage from '../../pages/PowerBI/PowerBIReportViewingPage';
 import PowerBIReportManagerPage from '../../pages/PowerBI/Manager/PowerBIReportManagerPage';
 import {URL_POWER_BI_DISPLAY} from '../../Url';
+import CODManagerPage from '../../pages/ConfirmationOfDetails/CODManagerPage';
 // import PageNotFound from '../../components/PageNotFound';
 
 const schoolBoxIframeElementId = "remote";
@@ -185,10 +186,10 @@ const SchoolBoxRouter = ({
         </ModuleAccessWrapper>
       );
     }
-    case "/enrolments_admin": {
+    case "/ENROLLMENTS_admin": {
       removeSchoolBoxIframe();
       return (
-        <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_ENROLMENTS}>
+        <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_ENROLLMENTS}>
           <EnrolmentManagementPage />
         </ModuleAccessWrapper>
       );
@@ -218,6 +219,14 @@ const SchoolBoxRouter = ({
       return (
         <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_POWER_BI_REPORT}>
           <PowerBIReportManagerPage />
+        </ModuleAccessWrapper>
+      );
+    }
+    case "/confirmation_of_details/admin_new": {
+      removeSchoolBoxIframe();
+      return (
+        <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_COD}>
+          <CODManagerPage />
         </ModuleAccessWrapper>
       );
     }

@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import iModule from '../../../types/modules/iModule';
 import ModuleEditPanel from '../../../components/module/ModuleEditPanel';
-import {MGGS_MODULE_ID_ENROLMENTS} from '../../../types/modules/iModuleUser';
+import {MGGS_MODULE_ID_ENROLLMENTS} from '../../../types/modules/iModuleUser';
 import {ROLE_ID_ADMIN} from '../../../types/modules/iRole';
 import SectionDiv from '../../../components/common/SectionDiv';
 import ExplanationPanel from '../../../components/ExplanationPanel';
@@ -73,7 +73,7 @@ const EnrolmentManagementAdminSettings = () => {
 
   return (
     <ModuleEditPanel
-      moduleId={MGGS_MODULE_ID_ENROLMENTS}
+      moduleId={MGGS_MODULE_ID_ENROLLMENTS}
       roleId={ROLE_ID_ADMIN}
       getChildren={getContent}
       getSubmitData={() => (settings)}

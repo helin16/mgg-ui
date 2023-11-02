@@ -3,8 +3,8 @@ import iSynCommunity from "../../types/Synergetic/iSynCommunity";
 import styled from "styled-components";
 import SynCommunityService from "../../services/Synergetic/Community/SynCommunityService";
 import Toaster from "../../services/Toaster";
-import {Button, Spinner} from "react-bootstrap";
-import Table, {iTableColumn} from "../common/Table";
+import { Button, Spinner } from "react-bootstrap";
+import Table, { iTableColumn } from "../common/Table";
 import { FlexContainer } from "../../styles";
 import CommunityAutoComplete from "./CommunityAutoComplete";
 import * as Icons from "react-bootstrap-icons";
@@ -80,11 +80,16 @@ const CommunityProfileList = ({
       <FlexContainer className={"with-gap lg-gap align-items-center"}>
         <b>Adding</b>
         <div style={{ width: "70%" }}>
-          <CommunityAutoComplete
-            onSelect={option =>
-              onCreate && onCreate(option?.value ? Number(option?.value) : "")
+          <CommunityAutoComplete onSelect={option => {
+            let value: string | number | null | undefined = '';
+            if (Array.isArray(option) && option.length > 0) {
+              value = option[0].value;
+            } else if (option) {
+              // @ts-ignore
+              value = option?.value;
             }
-          />
+            onCreate && onCreate(`${value || ''}`.trim() === '' ? Number(value) : "")
+          }} />
         </div>
       </FlexContainer>
     );
@@ -139,19 +144,27 @@ const CommunityProfileList = ({
               );
             }
           },
-          ...(showDeletingBtn === true ? [{
-            key: "Operations",
-            header: "",
-            cell: (column: iTableColumn, user: iSynCommunity) => {
-              return (
-                <td key={column.key} className={'text-right'}>
-                  <Button variant={'danger'} size={'sm'} onClick={() => onDelete && onDelete(user.ID)}>
-                    <Icons.Trash />
-                  </Button>
-                </td>
-              );
-            }
-          }] : []),
+          ...(showDeletingBtn === true
+            ? [
+                {
+                  key: "Operations",
+                  header: "",
+                  cell: (column: iTableColumn, user: iSynCommunity) => {
+                    return (
+                      <td key={column.key} className={"text-right"}>
+                        <Button
+                          variant={"danger"}
+                          size={"sm"}
+                          onClick={() => onDelete && onDelete(user.ID)}
+                        >
+                          <Icons.Trash />
+                        </Button>
+                      </td>
+                    );
+                  }
+                }
+              ]
+            : [])
         ]}
         rows={communityProfiles}
       />

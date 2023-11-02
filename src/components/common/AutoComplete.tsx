@@ -10,11 +10,12 @@ export type iAutoCompleteSingle = {
 type iAutoComplete = {
   placeholder?: string,
   allowClear?: boolean,
+  isMulti?: boolean,
   minSearchLength?: number,
   handleSearchFn: (keyword: string) => Promise<any>;
   renderOptionItemFn: (option: any) => iAutoCompleteSingle[];
-  onSelected?: (option: iAutoCompleteSingle | null) => void;
-  value?: iAutoCompleteSingle;
+  onSelected?: (option: iAutoCompleteSingle | iAutoCompleteSingle[] | null) => void;
+  value?: iAutoCompleteSingle | iAutoCompleteSingle[];
   isDisabled?: boolean;
 }
 
@@ -26,7 +27,7 @@ const Wrapper = styled.div`
 `;
 
 const AutoComplete = ({
-    placeholder, handleSearchFn, renderOptionItemFn, onSelected, value, allowClear, isDisabled
+    placeholder, handleSearchFn, renderOptionItemFn, onSelected, value, allowClear, isDisabled, isMulti
   }: iAutoComplete) => {
   const loadOptions = async (keyword: string) => {
     const results = await handleSearchFn(keyword)
@@ -42,10 +43,12 @@ const AutoComplete = ({
   return (
     <Wrapper>
       <AsyncSelect
+        isMulti={isMulti}
         isDisabled={isDisabled}
         isClearable={allowClear}
         value={value}
         placeholder={placeholder}
+        // @ts-ignore
         onChange={onChange}
         cacheOptions
         defaultOptions={false}

@@ -1,6 +1,6 @@
-import iModule from './iModule';
-import iRole from './iRole';
-import iSynCommunity from '../Synergetic/iSynCommunity';
+import iModule from "./iModule";
+import iRole from "./iRole";
+import iSynCommunity from "../Synergetic/iSynCommunity";
 
 export const MGGS_MODULE_ID_STUDENT_REPORT = 1;
 export const MGGS_MODULE_ID_COD = 2;
@@ -18,7 +18,7 @@ export const MGGS_MODULE_ID_REPORTS_STUDENT_ATTENDANCE_RATE = 13;
 
 export const MGGS_MODULE_ID_ONLINE_DONATION = 14;
 export const MGGS_MODULE_ID_STAFF_LIST = 15;
-export const MGGS_MODULE_ID_ENROLMENTS = 16;
+export const MGGS_MODULE_ID_ENROLLMENTS = 16;
 export const MGGS_MODULE_ID_SYN_EMAIL_TEMPLATE = 17;
 export const MGGS_MODULE_ID_CAMPUS_DISPLAY = 18;
 export const MGGS_MODULE_ID_POWER_BI_REPORT = 19;

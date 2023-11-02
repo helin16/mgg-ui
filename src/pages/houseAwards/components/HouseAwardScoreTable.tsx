@@ -265,7 +265,8 @@ const HouseAwardScoreTable = ({
       Cell: (cell: any) => {
         const scoreMap = (cell.cell.row.original.student.StudentID in studentScoreMap ? studentScoreMap[cell.cell.row.original.student.StudentID] : {});
         const lastTotal = cell.cell.row.original.lastYearTotal || 0;
-        return <div style={{ textAlign: 'right' }}><b>{MathHelper.add(lastTotal, Object.keys(scoreMap).length)}</b></div>;
+        const total = MathHelper.add(lastTotal, Object.keys(scoreMap).length);
+        return <div style={{ textAlign: 'right' }}><b>{total === 0 ? null : total}</b></div>;
       }
     },
     {
@@ -281,7 +282,7 @@ const HouseAwardScoreTable = ({
             {
               cell.cell.row.original.student.StudentID === loadingStudentId ?
               <Spinner animation={'border'} size={'sm'}/> :
-              <b>{total}</b>
+              <b>{total === 0 ? null : total}</b>
             }
           </div>
         );

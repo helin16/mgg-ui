@@ -6,8 +6,8 @@ import ISynLuYearLevel from '../../types/Synergetic/Lookup/iSynLuYearLevel';
 
 
 const endPoint = '/syn/vFutureStudent'
-const getAll =  (params: iConfigParams = {}): Promise<iPaginatedResult<iSynVFutureStudent>> => {
-  return AppService.get(endPoint, params).then(resp => resp.data);
+const getAll =  (params: iConfigParams = {}, config?: iConfigParams): Promise<iPaginatedResult<iSynVFutureStudent>> => {
+  return AppService.get(endPoint, params, config).then(resp => resp.data);
 };
 
 const mapFutureStudentToCurrent = (student: iSynVFutureStudent, yLevelMap: {[key: string]: ISynLuYearLevel} = {}): iVStudent => {
