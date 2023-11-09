@@ -1,47 +1,118 @@
-import AsyncSelect from 'react-select/async';
-import styled from 'styled-components';
+import AsyncSelect from "react-select/async";
+import styled from "styled-components";
+import { debounce } from "lodash";
+import InputGroup from 'react-bootstrap/InputGroup';
+import {dangerRed} from '../../AppWrapper';
 
 export type iAutoCompleteSingle = {
   label: any;
   value: string | number;
   data?: any;
-}
+};
 
 type iAutoComplete = {
-  placeholder?: string,
-  allowClear?: boolean,
-  isMulti?: boolean,
-  minSearchLength?: number,
+  inputProps?: any;
+  placeholder?: string;
+  className?: string;
+  allowClear?: boolean;
+  isMulti?: boolean;
+  minSearchLength?: number;
   handleSearchFn: (keyword: string) => Promise<any>;
   renderOptionItemFn: (option: any) => iAutoCompleteSingle[];
-  onSelected?: (option: iAutoCompleteSingle | iAutoCompleteSingle[] | null) => void;
+  onSelected?: (
+    option: iAutoCompleteSingle | iAutoCompleteSingle[] | null
+  ) => void;
   value?: iAutoCompleteSingle | iAutoCompleteSingle[];
   isDisabled?: boolean;
-}
+  postpend?: any;
+  prepend?: any;
+};
 
 const Wrapper = styled.div`
-  input[id^='react-select-'][id$='-input'] {
+  border: 1px #ced4da solid;
+  border-radius: 0.25rem;
+  margin: 0px;
+  padding: 0px;
+  
+  &.is-invalid {
+    border-color: ${dangerRed};
+  }
+  
+  input[id^="react-select-"][id$="-input"] {
     min-height: 0px;
     height: auto;
+  }
+
+  .form-control {
+    margin: 0px;
+    padding: 0px;
+    border: none;
+
+    [class$="-control"] {
+      border: none;
+    }
+  }
+  
+  .btn {
+    border: 0px;
+    height: 100%;
+  }
+  
+  .input-group-prepend {
+    .btn {
+      border-bottom-right-radius: 0px;
+      border-top-right-radius: 0px;
+    }
+  }
+
+  .input-group-append {
+    .btn {
+      border-bottom-left-radius: 0px;
+      border-top-left-radius: 0px;
+    }
   }
 `;
 
 const AutoComplete = ({
-    placeholder, handleSearchFn, renderOptionItemFn, onSelected, value, allowClear, isDisabled, isMulti
-  }: iAutoComplete) => {
+  placeholder,
+  handleSearchFn,
+  renderOptionItemFn,
+  onSelected,
+  value,
+  allowClear,
+  isDisabled,
+  isMulti,
+  postpend,
+  prepend,
+  inputProps,
+  className,
+}: iAutoComplete) => {
+  const debouncedHandleSearchFn = debounce(handleSearchFn, 600);
   const loadOptions = async (keyword: string) => {
-    const results = await handleSearchFn(keyword)
-    return renderOptionItemFn(results);
+    const results = await debouncedHandleSearchFn(keyword);
+    return renderOptionItemFn(results || []);
   };
+
+  const getPrepend = () => {
+    if (!prepend) {
+      return null;
+    }
+    return <div className={'input-group-prepend'}>{prepend}</div>
+  }
+  const getPostpend = () => {
+    if (!postpend) {
+      return null;
+    }
+    return <div className={'input-group-append'}>{postpend}</div>
+  }
 
   const onChange = (option: iAutoCompleteSingle | null) => {
     if (onSelected) {
       onSelected(option);
     }
-  }
-
-  return (
-    <Wrapper>
+  };
+  const getAutoComplete = () => {
+    return (
       <AsyncSelect
         isMulti={isMulti}
         isDisabled={isDisabled}
@@ -53,9 +124,26 @@ const AutoComplete = ({
         cacheOptions
         defaultOptions={false}
         loadOptions={loadOptions}
+        className={'form-control'}
+        {...inputProps}
       />
-    </Wrapper>
-  );
-}
+    )
+  }
+
+  const getInputGroup = () => {
+    if (!postpend && !prepend) {
+      return getAutoComplete();
+    }
+    return (
+      <InputGroup>
+        {getPrepend()}
+        {getAutoComplete()}
+        {getPostpend()}
+      </InputGroup>
+    )
+  }
+
+  return <Wrapper className={className}>{getInputGroup()}</Wrapper>;
+};
 
 export default AutoComplete;

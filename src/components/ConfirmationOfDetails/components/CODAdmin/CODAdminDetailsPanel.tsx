@@ -4,6 +4,7 @@ import {useEffect, useState} from "react";
 import iConfirmationOfDetailsResponse from "../../../../types/ConfirmationOfDetails/iConfirmationOfDetailsResponse";
 import CODAdminStudentDetailsPanel from "./DetailsPanel/CODAdminStudentDetailsPanel";
 import PageLoadingSpinner from '../../../common/PageLoadingSpinner';
+import CODAdminParentsDetailsPanel from './DetailsPanel/CODAdminParentsDetailsPanel';
 
 const Wrapper = styled.div``;
 
@@ -37,9 +38,11 @@ const CODAdminDetailsPanel = ({
     setEditingResponse({...response});
   }, [response]);
 
-  const handleSaved = (saved: iConfirmationOfDetailsResponse) => {
+  const handleSaved = (saved: iConfirmationOfDetailsResponse, externalSave = false) => {
     setEditingResponse(saved);
-    onSaved && onSaved(saved);
+    if (externalSave === true && onSaved) {
+      onSaved(saved);
+    }
   }
 
   if (!editingResponse) {
@@ -55,15 +58,28 @@ const CODAdminDetailsPanel = ({
       >
         <Tab title={TAB_STUDENT_DETAILS} eventKey={TAB_STUDENT_DETAILS}>
           <CODAdminStudentDetailsPanel
+            onNext={() => setSelectedTab(TAB_PARENT_DETAILS)}
             response={editingResponse}
             onCancel={() => onCancel && onCancel()}
             onRefreshList={onRefreshList}
-            onSaved={handleSaved}
+            onSaved={(response) => {
+              setSelectedTab(TAB_PARENT_DETAILS);
+              handleSaved(response);
+            }}
           />
         </Tab>
 
         <Tab title={TAB_PARENT_DETAILS} eventKey={TAB_PARENT_DETAILS}>
-          {TAB_PARENT_DETAILS}
+          <CODAdminParentsDetailsPanel
+            onNext={() => setSelectedTab(TAB_COURT_ORDERS)}
+            response={editingResponse}
+            onCancel={() => onCancel && onCancel()}
+            onRefreshList={onRefreshList}
+            onSaved={(response) => {
+              setSelectedTab(TAB_COURT_ORDERS);
+              handleSaved(response);
+            }}
+          />
         </Tab>
 
         <Tab title={TAB_COURT_ORDERS} eventKey={TAB_COURT_ORDERS}>

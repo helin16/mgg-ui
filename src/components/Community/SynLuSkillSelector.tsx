@@ -14,6 +14,7 @@ type iLuSkillSelector = {
   isMulti?: boolean;
   classname?: string;
   limitCodes?: string[];
+  isDisabled?: boolean;
 };
 
 const getLabel = (luSkill: iSynLuSkill) => {
@@ -23,7 +24,7 @@ export const translateLuSkillToOption = (luSkill: iSynLuSkill) => {
   return {value: luSkill.Code, data: luSkill, label: getLabel(luSkill)}
 }
 
-const SynLuSkillSelector = ({values, onSelect, limitCodes = [], allowClear, classname, showIndicator = true, isMulti = false}: iLuSkillSelector) => {
+const SynLuSkillSelector = ({isDisabled, values, onSelect, limitCodes = [], allowClear, classname, showIndicator = true, isMulti = false}: iLuSkillSelector) => {
   const [optionsMap, setOptionsMap] = useState<{[key: string]: iAutoCompleteSingle}>({});
   const [isLoading, setIsLoading] = useState(false);
 
@@ -93,6 +94,7 @@ const SynLuSkillSelector = ({values, onSelect, limitCodes = [], allowClear, clas
 
   return (
     <SelectBox
+      isDisabled={isDisabled}
       className={classname}
       options={getOptions()}
       isMulti={isMulti}

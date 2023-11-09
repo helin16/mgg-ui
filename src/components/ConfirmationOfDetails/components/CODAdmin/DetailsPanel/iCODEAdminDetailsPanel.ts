@@ -2,6 +2,7 @@ import iConfirmationOfDetailsResponse from '../../../../../types/ConfirmationOfD
 
 type iCODAdminStudentDetailsPanel = {
   response: iConfirmationOfDetailsResponse;
+  onNext: (response: iConfirmationOfDetailsResponse) => void;
   onSaved: (response: iConfirmationOfDetailsResponse) => void;
   onCancel: (response?: iConfirmationOfDetailsResponse) => void;
   onRefreshList?: () => void;

@@ -5,6 +5,8 @@ export const lightBlue = `#d9edf7`;
 export const mainRed = `#a50000`;
 export const mainGreen = `#198754`;
 export const lightGreen = `#3AC1CD`;
+export const dangerRed = `#dc3545`;
+export const borderGrey = '#ced4da';
 export const submitBtnBg = lightGreen;
 export const submitBtnHoverBg = 'rgb(97, 205, 215)';
 export const submitBtnTextColor = '#ffffff';
@@ -122,11 +124,11 @@ const AppWrapper = styled.div`
   }
 
   .form-control {
-    border: 1px solid #ced4da;
+    border: 1px solid ${borderGrey};
 
     &.is-invalid,
     &:invalid {
-      border-color: #dc3545;
+      border-color: ${dangerRed};
     }
   }
 

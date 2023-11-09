@@ -1,14 +1,14 @@
 import {iAutoCompleteSingle} from '../common/AutoComplete';
 import {useEffect, useState} from 'react';
 import {Spinner} from 'react-bootstrap';
-import iSynLuCountry from '../../types/Synergetic/Lookup/iSynLuCountry';
+import iSynLuState from '../../types/Synergetic/Lookup/iSynLuState';
 import SelectBox from '../common/SelectBox';
 import Toaster from '../../services/Toaster';
-import SynLuCountryService from '../../services/Synergetic/Lookup/SynLuCountryService';
+import SynLuStateService from '../../services/Synergetic/Lookup/SynLuStateService';
 
-type iLuCountrySelector = {
+type iLuStateSelector = {
   values?: iAutoCompleteSingle[] | string[];
-  onSelect?: (LuCountry: iAutoCompleteSingle | iAutoCompleteSingle[] | null) => void;
+  onSelect?: (LuState: iAutoCompleteSingle | iAutoCompleteSingle[] | null) => void;
   allowClear?: boolean;
   showIndicator?: boolean;
   isMulti?: boolean;
@@ -17,36 +17,33 @@ type iLuCountrySelector = {
   isDisabled?: boolean;
 };
 
-const getLabel = (LuCountry: iSynLuCountry) => {
-  return `${LuCountry.Code} - ${LuCountry.Description}`;
+const getLabel = (LuState: iSynLuState) => {
+  return `${LuState.Code} - ${LuState.Description}`;
 }
-export const translateLuCountryToOption = (LuCountry: iSynLuCountry) => {
-  return {value: LuCountry.Code, data: LuCountry, label: getLabel(LuCountry)}
+export const translateLuStateToOption = (LuState: iSynLuState) => {
+  return {value: LuState.Code, data: LuState, label: getLabel(LuState)}
 }
 
-const SynLuCountrySelector = ({isDisabled, values, onSelect, limitCodes = [], allowClear, classname, showIndicator = true, isMulti = false}: iLuCountrySelector) => {
+const SynLuStateSelector = ({isDisabled, values, onSelect, limitCodes = [], allowClear, classname, showIndicator = true, isMulti = false}: iLuStateSelector) => {
   const [optionsMap, setOptionsMap] = useState<{[key: string]: iAutoCompleteSingle}>({});
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     let isCancelled = false;
     setIsLoading(true);
-    const whereObj = {
-      ...(limitCodes?.length > 0 ? {Code: limitCodes} : {}),
-      ActiveFlag: true,
-    }
-    SynLuCountryService.getAll({
+    const whereObj = limitCodes?.length > 0 ? {Code: limitCodes} : {};
+    SynLuStateService.getAll({
         ...(Object.keys(whereObj).length > 0 ? {where: JSON.stringify(whereObj)} : {}),
         sort: 'Code:ASC',
       })
       .then(resp => {
         if (isCancelled === true) { return }
         setOptionsMap(resp
-          .filter(LuCountry => `${LuCountry.Code || ''}`.trim() !== '')
-          .reduce((map, LuCountry) => {
+          .filter(luState => `${luState.Code || ''}`.trim() !== '')
+          .reduce((map, luState) => {
           return {
             ...map,
-            [LuCountry.Code]: translateLuCountryToOption(LuCountry),
+            [luState.Code]: translateLuStateToOption(luState),
           };
         }, {}))
       })
@@ -107,4 +104,4 @@ const SynLuCountrySelector = ({isDisabled, values, onSelect, limitCodes = [], al
   )
 };
 
-export default SynLuCountrySelector;
+export default SynLuStateSelector;

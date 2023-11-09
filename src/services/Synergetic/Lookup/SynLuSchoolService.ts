@@ -7,8 +7,8 @@ const getAll = (params: iConfigParams = {}): Promise<iSynLuSchool[]> => {
   return AppService.get(endPoint, params).then(resp => resp.data);
 };
 
-const SynLuCountryService = {
+const SynLuSchoolService = {
   getAll
 }
 
-export default SynLuCountryService;
+export default SynLuSchoolService;

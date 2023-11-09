@@ -8,12 +8,13 @@ type iFlagSelector = {
   showIndicatorSeparator?: boolean;
   classname?: string;
   showAll?: boolean;
+  isDisabled?: boolean;
 };
 
-const FlagSelector = ({value, classname, showIndicator, showAll = true, showIndicatorSeparator = true, onSelect}: iFlagSelector) => {
+const FlagSelector = ({isDisabled, value, classname, showIndicator, showAll = true, showIndicatorSeparator = true, onSelect}: iFlagSelector) => {
   const getOption = (option?: string | number | boolean | null) => {
     return {
-      label: option === true ? 'Yes' : (option === false ? 'No' : 'All'),
+      label: option === true ? 'Yes' : (option === false ? 'No' : (showAll === true ? 'All' : '')),
       value: option,
     };
   }
@@ -35,6 +36,7 @@ const FlagSelector = ({value, classname, showIndicator, showAll = true, showIndi
   return (
     <SelectBox
       className={classname}
+      isDisabled={isDisabled}
       options={getOptions()}
       onChange={onSelect}
       value={getSelectedValues()}

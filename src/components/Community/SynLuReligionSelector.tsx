@@ -14,6 +14,7 @@ type iLuReligionSelector = {
   isMulti?: boolean;
   classname?: string;
   limitCodes?: string[];
+  isDisabled?: boolean;
 };
 
 const getLabel = (LuReligion: iSynLuReligion) => {
@@ -23,7 +24,7 @@ export const translateLuReligionToOption = (LuReligion: iSynLuReligion) => {
   return {value: LuReligion.Code, data: LuReligion, label: getLabel(LuReligion)}
 }
 
-const SynLuReligionSelector = ({values, onSelect, limitCodes = [], allowClear, classname, showIndicator = true, isMulti = false}: iLuReligionSelector) => {
+const SynLuReligionSelector = ({isDisabled, values, onSelect, limitCodes = [], allowClear, classname, showIndicator = true, isMulti = false}: iLuReligionSelector) => {
   const [optionsMap, setOptionsMap] = useState<{[key: string]: iAutoCompleteSingle}>({});
   const [isLoading, setIsLoading] = useState(false);
 
@@ -93,6 +94,7 @@ const SynLuReligionSelector = ({values, onSelect, limitCodes = [], allowClear, c
 
   return (
     <SelectBox
+      isDisabled={isDisabled}
       className={classname}
       options={getOptions()}
       isMulti={isMulti}

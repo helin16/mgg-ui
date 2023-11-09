@@ -1,5 +1,6 @@
 import axios, {AxiosRequestConfig} from 'axios';
 import LocalStorageService from './LocalStorageService';
+import UtilsService from './UtilsService';
 
 export const HEADER_NAME_APP_TOKEN = 'X-MGGS-TOKEN';
 export const HEADER_NAME_SELECTING_FIELDS = 'X-MGGS-SELECT-FIELDS';
@@ -29,18 +30,11 @@ const getHeaders = (extra = {}) => {
   };
 };
 
-const getUrlParams = (params: iConfigParams = {}) => {
-  const paramString =
-    typeof params === 'object' && Object.keys(params).length > 0
-      ? new URLSearchParams(params).toString()
-      : '';
-  return paramString === '' ? '' : `?${paramString}`;
-};
 
 const get = (url: string, params: iConfigParams = {}, config: AxiosRequestConfig = {}) => {
   const {headers, ...rest} = config;
   return axios.get(
-    `${getEndPointUrl(url)}${getUrlParams(params)}`,
+    `${getEndPointUrl(url)}${UtilsService.getUrlParams(params)}`,
     // @ts-ignore
     {
       ...rest,
@@ -70,7 +64,7 @@ const put = (url: string, params: iConfigParams, config: AxiosRequestConfig = {}
 const remove = (url: string, params: iConfigParams = {}, config: AxiosRequestConfig = {}) => {
   const {headers, ...rest} = config;
   return axios.delete(
-    `${getEndPointUrl(url)}${getUrlParams(params)}`,
+    `${getEndPointUrl(url)}${UtilsService.getUrlParams(params)}`,
     // @ts-ignore
     {
       ...rest,

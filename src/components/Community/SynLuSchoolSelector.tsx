@@ -14,6 +14,7 @@ type iLuSchoolSelector = {
   isMulti?: boolean;
   classname?: string;
   limitCodes?: string[];
+  isDisabled?: boolean;
 };
 
 const getLabel = (LuSchool: iSynLuSchool) => {
@@ -23,7 +24,7 @@ export const translateLuSchoolToOption = (LuSchool: iSynLuSchool) => {
   return {value: LuSchool.Code, data: LuSchool, label: getLabel(LuSchool)}
 }
 
-const SynLuSchoolSelector = ({values, onSelect, limitCodes = [], allowClear, classname, showIndicator = true, isMulti = false}: iLuSchoolSelector) => {
+const SynLuSchoolSelector = ({isDisabled, values, onSelect, limitCodes = [], allowClear, classname, showIndicator = true, isMulti = false}: iLuSchoolSelector) => {
   const [optionsMap, setOptionsMap] = useState<{[key: string]: iAutoCompleteSingle}>({});
   const [isLoading, setIsLoading] = useState(false);
 
@@ -93,6 +94,7 @@ const SynLuSchoolSelector = ({values, onSelect, limitCodes = [], allowClear, cla
 
   return (
     <SelectBox
+      isDisabled={isDisabled}
       className={classname}
       options={getOptions()}
       isMulti={isMulti}

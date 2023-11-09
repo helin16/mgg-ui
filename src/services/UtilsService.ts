@@ -2,6 +2,7 @@ import * as _ from 'lodash';
 import {Moment} from 'moment-timezone';
 import {Buffer} from 'buffer';
 import {THIRD_PARTY_AUTH_PATH} from '../helper/SchoolBoxHelper';
+import {iConfigParams} from './AppService';
 
 const isNumeric = (str: string) => {
   return !isNaN(parseFloat(str)) && isFinite(Number(str));
@@ -86,6 +87,14 @@ const getModuleUrl = (customUrl: string, customBaseUrl?: string, customAuthPath 
   return `${mConnectBaseUrl || ''}/modules/remote/${base64}`;
 }
 
+const getUrlParams = (params: iConfigParams = {}) => {
+  const paramString =
+    typeof params === 'object' && Object.keys(params).length > 0
+      ? new URLSearchParams(params).toString()
+      : '';
+  return paramString === '' ? '' : `?${paramString}`;
+};
+
 const UtilsService = {
   isNumeric,
   handleEnterKeyPressed,
@@ -99,6 +108,7 @@ const UtilsService = {
   stripHTMLTags,
   getFullUrl,
   getModuleUrl,
+  getUrlParams,
 }
 
 export default UtilsService;

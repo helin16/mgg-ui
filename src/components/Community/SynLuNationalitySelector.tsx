@@ -14,6 +14,7 @@ type iLuNationalitySelector = {
   isMulti?: boolean;
   classname?: string;
   limitCodes?: string[];
+  isDisabled?: boolean;
 };
 
 const getLabel = (LuNationality: iSynLuNationality) => {
@@ -23,7 +24,7 @@ export const translateLuNationalityToOption = (LuNationality: iSynLuNationality)
   return {value: LuNationality.Code, data: LuNationality, label: getLabel(LuNationality)}
 }
 
-const SynLuNationalitySelector = ({values, onSelect, limitCodes = [], allowClear, classname, showIndicator = true, isMulti = false}: iLuNationalitySelector) => {
+const SynLuNationalitySelector = ({isDisabled, values, onSelect, limitCodes = [], allowClear, classname, showIndicator = true, isMulti = false}: iLuNationalitySelector) => {
   const [optionsMap, setOptionsMap] = useState<{[key: string]: iAutoCompleteSingle}>({});
   const [isLoading, setIsLoading] = useState(false);
 
@@ -93,6 +94,7 @@ const SynLuNationalitySelector = ({values, onSelect, limitCodes = [], allowClear
 
   return (
     <SelectBox
+      isDisabled={isDisabled}
       className={classname}
       options={getOptions()}
       isMulti={isMulti}
