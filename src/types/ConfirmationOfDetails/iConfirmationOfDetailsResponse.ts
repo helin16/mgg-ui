@@ -32,7 +32,9 @@ export type iCODParentResponse = {
     phone: string;
     mobile: string;
     email: string | null;
-  }
+  },
+  syncToSynAt?: string | null;
+  syncToSynById?: number | null;
 }
 
 export type iCODParentsResponse = {
@@ -70,14 +72,28 @@ export type iCODStudentResponse = {
   syncToSynById?: number | null;
 }
 
+export type iCODResponseAsset = {
+  key: string | null;
+  name: string;
+  url: string;
+  mimeType?: string;
+  size?: number;
+}
+
+export type iCODCourtOrderResponse = {
+  hasCourtOrders: boolean;
+  newDetails: null | string;
+  courtOrderDate?: null | string;
+  courtOrderType?: null | string;
+  newCourtOrderFiles: iCODResponseAsset[];
+  syncToSynAt?: string | null;
+  syncToSynById?: number | null;
+}
+
 export type iCODSubmittedResponse = {
   student: iCODStudentResponse,
   parent: iCODParentsResponse,
-  // courtOrder: {
-  //   hasCourtOrders: false,
-  //   newDetails: null,
-  //   newCourtOrderFiles: []
-  // },
+  courtOrder: iCODCourtOrderResponse,
   // medicalDetails: {
   //   allowIbuprofen: yes,
   //   immunisation: {

@@ -1,7 +1,7 @@
 import Page from '../../layouts/Page';
 import {MGGS_MODULE_ID_COD} from '../../types/modules/iModuleUser';
 import CODManagerAdminPage from './CODManagerAdminPage';
-import ConfirmationOfDetailsListPanel from '../../components/ConfirmationOfDetails/ConfirmationOfDetailsListPanel';
+import ConfirmationOfDetailsListPanel from '../../components/ConfirmationOfDetails/CODAdmin/ConfirmationOfDetailsListPanel';
 
 const CODManagerPage = () => {
   return (

@@ -1,10 +1,10 @@
-import { FlexContainer } from "../../../../../styles";
+import { FlexContainer } from "../../../styles";
 import React from "react";
-import iConfirmationOfDetailsResponse from "../../../../../types/ConfirmationOfDetails/iConfirmationOfDetailsResponse";
-import LoadingBtn from "../../../../common/LoadingBtn";
+import iConfirmationOfDetailsResponse from "../../../types/ConfirmationOfDetails/iConfirmationOfDetailsResponse";
+import LoadingBtn from "../../common/LoadingBtn";
 import * as Icons from "react-bootstrap-icons";
 import {Button} from 'react-bootstrap';
-import Toaster from '../../../../../services/Toaster';
+import Toaster from '../../../services/Toaster';
 import moment from 'moment-timezone';
 
 type iCODAdminDetailsSaveBtnPanel = {

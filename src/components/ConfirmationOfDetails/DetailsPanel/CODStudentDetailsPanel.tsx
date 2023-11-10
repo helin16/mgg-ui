@@ -1,49 +1,43 @@
-import iCODAdminStudentDetailsPanel from "./iCODEAdminDetailsPanel";
+import ICODDetailsEditPanel from "./iCODDetailsEditPanel";
 import styled from "styled-components";
 import { Col, FormControl, Row } from "react-bootstrap";
 import React, { useEffect, useState } from "react";
-import iConfirmationOfDetailsResponse from "../../../../../types/ConfirmationOfDetails/iConfirmationOfDetailsResponse";
-import PageLoadingSpinner from "../../../../common/PageLoadingSpinner";
-import iVStudent from "../../../../../types/Synergetic/iVStudent";
-import SynVStudentService from "../../../../../services/Synergetic/Student/SynVStudentService";
-import Toaster, { TOAST_TYPE_SUCCESS } from "../../../../../services/Toaster";
+import {
+  iCODStudentResponse
+} from "../../../types/ConfirmationOfDetails/iConfirmationOfDetailsResponse";
+import PageLoadingSpinner from "../../common/PageLoadingSpinner";
+import iVStudent from "../../../types/Synergetic/iVStudent";
+import SynVStudentService from "../../../services/Synergetic/Student/SynVStudentService";
+import Toaster from "../../../services/Toaster";
 import moment from "moment-timezone";
-import DateTimePicker from "../../../../common/DateTimePicker";
-import CODAdminInputPanel from "./CODAdminInputPanel";
-import FlagSelector from "../../../../form/FlagSelector";
-import YearLevelSelector from "../../../../student/YearLevelSelector";
-import CODAdminDetailsSaveBtnPanel from "./CODAdminDetailsSaveBtnPanel";
-import SynLuCountrySelector from "../../../../Community/SynLuCountrySelector";
-import SynLuReligionSelector from "../../../../Community/SynLuReligionSelector";
-import SynLuNationalitySelector from "../../../../Community/SynLuNationalitySelector";
-import SynLuSchoolSelector from "../../../../Community/SynLuSchoolSelector";
-import ConfirmationOfDetailsResponseService from "../../../../../services/ConfirmationOfDetails/ConfirmationOfDetailsResponseService";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../../../redux/makeReduxStore";
-import CODAddressEditor from "../../CODAddressEditor";
-import SynAddressService from "../../../../../services/Synergetic/SynAddressService";
-import iSynAddress from '../../../../../types/Synergetic/iSynAddress';
+import DateTimePicker from "../../common/DateTimePicker";
+import CODAdminInputPanel from "../components/CODAdminInputPanel";
+import FlagSelector from "../../form/FlagSelector";
+import YearLevelSelector from "../../student/YearLevelSelector";
+import SynLuCountrySelector from "../../Community/SynLuCountrySelector";
+import SynLuReligionSelector from "../../Community/SynLuReligionSelector";
+import SynLuNationalitySelector from "../../Community/SynLuNationalitySelector";
+import SynLuSchoolSelector from "../../Community/SynLuSchoolSelector";
+import CODAddressEditor from "../components/CODAddressEditor";
+import SynAddressService from "../../../services/Synergetic/SynAddressService";
+import iSynAddress from '../../../types/Synergetic/iSynAddress';
 
 const Wrapper = styled.div``;
-const CODAdminStudentDetailsPanel = ({
+const CODStudentDetailsPanel = ({
   response,
-  onSaved,
-  onNext,
-  onCancel
-}: iCODAdminStudentDetailsPanel) => {
-  const { user: currentUser } = useSelector((state: RootState) => state.auth);
+  isDisabled
+}: ICODDetailsEditPanel) => {
   const [
     editingResponse,
     setEditingResponse
-  ] = useState<iConfirmationOfDetailsResponse | null>(null);
+  ] = useState<iCODStudentResponse | null>(null);
   const [studentFromDB, setStudentFromDB] = useState<iVStudent | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [hasBeenSyncd, setHasBeenSyncd] = useState(false);
+  const [isReadOnly, setIsReadOnly] = useState(false);
   const [studentAddressFromDB, setStudentAddressFromDB] = useState<iSynAddress | null>(null);
 
   useEffect(() => {
-    setEditingResponse({ ...response });
+    setEditingResponse(response?.response?.student || null);
     const getData = async () => {
       const studentResults = await SynVStudentService.getVPastAndCurrentStudentAll(
         {
@@ -98,25 +92,17 @@ const CODAdminStudentDetailsPanel = ({
   }, [response]);
 
   useEffect(() => {
-    setHasBeenSyncd(
-      `${editingResponse?.response?.student?.syncToSynAt || ""}`.trim() !==
-        "" &&
-        `${editingResponse?.response?.student?.syncToSynById || ""}`.trim() !==
-          ""
-    );
-  }, [editingResponse]);
+    const hasBeenSyncd = `${editingResponse?.syncToSynAt || ""}`.trim() !== "" &&
+      `${editingResponse?.syncToSynById || ""}`.trim() !==
+      "";
+    setIsReadOnly(hasBeenSyncd === true || isDisabled === true);
+  }, [editingResponse, isDisabled]);
 
   const updateStudentResponse = (fieldName: string, newValue: string) => {
+    // @ts-ignore
     setEditingResponse({
-      ...editingResponse,
-      response: {
-        ...(editingResponse?.response || {}),
-        // @ts-ignore
-        student: {
-          ...(editingResponse?.response?.student || {}),
-          [fieldName]: newValue
-        }
-      }
+      ...(editingResponse || {}),
+      [fieldName]: newValue
     });
   };
 
@@ -129,14 +115,12 @@ const CODAdminStudentDetailsPanel = ({
 
   const getStudentDetailsInputPanel = (
     label: string,
-    resp: iConfirmationOfDetailsResponse,
     fieldName: string,
     dbFieldName: string,
     isRequired?: boolean
   ) => {
-    const respStudent = resp.response?.student || {};
     // @ts-ignore
-    const value = fieldName in respStudent ? respStudent[fieldName] : "";
+    const value = fieldName in editingResponse ? editingResponse[fieldName] : "";
     return (
       <CODAdminInputPanel
         label={label}
@@ -147,7 +131,7 @@ const CODAdminStudentDetailsPanel = ({
           return (
             <FormControl
               isInvalid={!isSameFromDB}
-              disabled={hasBeenSyncd === true}
+              disabled={isReadOnly === true}
               value={value || ""}
               onChange={event => {
                 updateStudentResponse(fieldName, event.target?.value || "");
@@ -175,7 +159,6 @@ const CODAdminStudentDetailsPanel = ({
         <Col md={3} sm={6} xs={12}>
           {getStudentDetailsInputPanel(
             "First Name:",
-            editingResponse,
             "Given1",
             "StudentGiven1",
             true
@@ -184,7 +167,6 @@ const CODAdminStudentDetailsPanel = ({
         <Col md={3} sm={6} xs={12}>
           {getStudentDetailsInputPanel(
             "Last Name:",
-            editingResponse,
             "Surname",
             "StudentSurname",
             true
@@ -193,7 +175,6 @@ const CODAdminStudentDetailsPanel = ({
         <Col md={3} sm={6} xs={12}>
           {getStudentDetailsInputPanel(
             "Preferred Name:",
-            editingResponse,
             "Given2",
             "StudentPreferred",
             true
@@ -203,41 +184,41 @@ const CODAdminStudentDetailsPanel = ({
           <CODAdminInputPanel
             isRequired={true}
             label={"Date of Birth:"}
-            value={editingResponse.Student?.StudentBirthDate || ""}
+            value={editingResponse?.DateOfBirth || ""}
             valueFromDB={formatDateTimeString(
               getValueFromStudentDB("StudentBirthDate")
             )}
             getIsSameFromDBFn={() => {
-              const valueFromDB = formatDateTimeString(
-                getValueFromStudentDB("StudentBirthDate")
-              );
-              const studentObj = editingResponse?.response?.student || {};
-              const value = formatDateTimeString(
-                "DateOfBirth" in studentObj
-                  ? // @ts-ignore
-                    studentObj["DateOfBirth"]
-                  : ""
-              );
+              const valueFromDB = getValueFromStudentDB("StudentBirthDate");
+              const value = editingResponse?.DateOfBirth || '';
               return `${valueFromDB || ""}`.trim() === value.trim();
             }}
             getComponent={(isSameFromDB: boolean) => {
-              const studentObj = editingResponse?.response?.student || null;
               return (
                 <DateTimePicker
-                  isDisabled={hasBeenSyncd === true}
+                  isDisabled={isReadOnly === true}
                   className={`form-control ${
                     isSameFromDB === true ? "" : "is-invalid"
                   }`}
-                  value={studentObj?.DateOfBirth || ""}
-                  timeFormat={false}
+                  value={
+                    `${editingResponse?.DateOfBirth || ""}`.trim() === ""
+                      ? undefined
+                      : moment
+                        .tz(
+                          `${editingResponse?.DateOfBirth || ""}`.trim(),
+                          moment.tz.guess()
+                        )
+                        .toISOString()
+                  }
                   dateFormat={"DD MMM YYYY"}
+                  timeFormat={false}
                   onChange={selected => {
                     if (typeof selected !== "object") {
                       return;
                     }
                     updateStudentResponse(
                       "DateOfBirth",
-                      selected.toISOString()
+                      selected.format("YYYY-MM-DD")
                     );
                   }}
                 />
@@ -251,24 +232,24 @@ const CODAdminStudentDetailsPanel = ({
           <CODAdminInputPanel
             isRequired={true}
             label={"Country of Birth:"}
-            value={editingResponse.response?.student?.CountryOfBirthCode || ""}
+            value={editingResponse?.CountryOfBirthCode || ""}
             valueFromDB={studentFromDB?.StudentCountryOfBirthCode || ""}
             getIsSameFromDBFn={() => {
               return (
                 `${studentFromDB?.StudentCountryOfBirthCode || ""}`.trim() ===
-                `${editingResponse.response?.student?.CountryOfBirthCode ||
+                `${editingResponse?.CountryOfBirthCode ||
                   ""}`.trim()
               );
             }}
             getComponent={(isSameFromDB: boolean) => {
               return (
                 <SynLuCountrySelector
-                  isDisabled={hasBeenSyncd === true}
+                  isDisabled={isReadOnly === true}
                   classname={`form-control ${
                     isSameFromDB === true ? "" : "is-invalid"
                   }`}
                   values={[
-                    `${editingResponse.response?.student?.CountryOfBirthCode ||
+                    `${editingResponse?.CountryOfBirthCode ||
                       ""}`.trim()
                   ]}
                   onSelect={option => {
@@ -291,24 +272,24 @@ const CODAdminStudentDetailsPanel = ({
           <CODAdminInputPanel
             isRequired={true}
             label={"Religion:"}
-            value={editingResponse.response?.student?.ReligionCode || ""}
+            value={editingResponse?.ReligionCode || ""}
             valueFromDB={studentFromDB?.StudentReligionCode || ""}
             getIsSameFromDBFn={() => {
               return (
                 `${studentFromDB?.StudentReligionCode || ""}`.trim() ===
-                `${editingResponse.response?.student?.ReligionCode ||
+                `${editingResponse?.ReligionCode ||
                   ""}`.trim()
               );
             }}
             getComponent={(isSameFromDB: boolean) => {
               return (
                 <SynLuReligionSelector
-                  isDisabled={hasBeenSyncd === true}
+                  isDisabled={isReadOnly === true}
                   classname={`form-control ${
                     isSameFromDB === true ? "" : "is-invalid"
                   }`}
                   values={[
-                    `${editingResponse.response?.student?.ReligionCode ||
+                    `${editingResponse?.ReligionCode ||
                       ""}`.trim()
                   ]}
                   onSelect={option => {
@@ -330,7 +311,6 @@ const CODAdminStudentDetailsPanel = ({
         <Col md={3} sm={6} xs={12}>
           {getStudentDetailsInputPanel(
             "Mobile:",
-            editingResponse,
             "MobilePhone",
             "StudentMobilePhone"
           )}
@@ -341,24 +321,24 @@ const CODAdminStudentDetailsPanel = ({
           <CODAdminInputPanel
             isRequired={true}
             label={"Nationality:"}
-            value={editingResponse.response?.student?.NationalityCode || ""}
+            value={editingResponse?.NationalityCode || ""}
             valueFromDB={studentFromDB?.StudentNationalityCode || ""}
             getIsSameFromDBFn={() => {
               return (
                 `${studentFromDB?.StudentNationalityCode || ""}`.trim() ===
-                `${editingResponse.response?.student?.NationalityCode ||
+                `${editingResponse?.NationalityCode ||
                   ""}`.trim()
               );
             }}
             getComponent={(isSameFromDB: boolean) => {
               return (
                 <SynLuNationalitySelector
-                  isDisabled={hasBeenSyncd === true}
+                  isDisabled={isReadOnly === true}
                   classname={`form-control ${
                     isSameFromDB === true ? "" : "is-invalid"
                   }`}
                   values={[
-                    `${editingResponse.response?.student?.NationalityCode ||
+                    `${editingResponse?.NationalityCode ||
                       ""}`.trim()
                   ]}
                   onSelect={option => {
@@ -382,7 +362,7 @@ const CODAdminStudentDetailsPanel = ({
             isRequired={true}
             label={"Indigenous:"}
             value={
-              editingResponse.response?.student?.IndigenousFlag === true
+              editingResponse?.IndigenousFlag === true
                 ? "Yes"
                 : "No"
             }
@@ -390,18 +370,17 @@ const CODAdminStudentDetailsPanel = ({
             getIsSameFromDBFn={() => {
               return (
                 `${studentFromDB?.IndigenousFlag || ""}`.trim() ===
-                `${editingResponse.response?.student?.IndigenousFlag ||
+                `${editingResponse?.IndigenousFlag ||
                   ""}`.trim()
               );
             }}
             getComponent={(isSameFromDB: boolean) => {
               return (
                 <FlagSelector
-                  isDisabled={hasBeenSyncd === true}
+                  isDisabled={isReadOnly === true}
                   showAll={false}
                   value={
-                    `${editingResponse.response?.student?.IndigenousFlag ||
-                      0}`.trim() === "1"
+                    `${editingResponse?.IndigenousFlag || 0}`.trim() === "1" || editingResponse?.IndigenousFlag === true
                   }
                   classname={`form-control ${
                     isSameFromDB === true ? "" : "is-invalid"
@@ -423,7 +402,7 @@ const CODAdminStudentDetailsPanel = ({
             isRequired={true}
             label={"Torres Strait Islander:"}
             value={
-              editingResponse.response?.student?.StudentTSIFlag === true
+              editingResponse?.StudentTSIFlag === true
                 ? "Yes"
                 : "No"
             }
@@ -431,7 +410,7 @@ const CODAdminStudentDetailsPanel = ({
             getIsSameFromDBFn={() => {
               return (
                 `${studentFromDB?.StudentTSIFlag || ""}`.trim() ===
-                `${editingResponse.response?.student?.StudentTSIFlag ||
+                `${editingResponse?.StudentTSIFlag ||
                   ""}`.trim()
               );
             }}
@@ -439,10 +418,9 @@ const CODAdminStudentDetailsPanel = ({
               return (
                 <FlagSelector
                   showAll={false}
-                  isDisabled={hasBeenSyncd === true}
+                  isDisabled={isReadOnly === true}
                   value={
-                    `${editingResponse.response?.student?.StudentTSIFlag ||
-                      0}`.trim() === "1"
+                    `${editingResponse?.StudentTSIFlag || 0}`.trim() === "1" || editingResponse?.StudentTSIFlag === true
                   }
                   classname={`form-control ${
                     isSameFromDB === true ? "" : "is-invalid"
@@ -465,12 +443,11 @@ const CODAdminStudentDetailsPanel = ({
           <CODAdminInputPanel
             isRequired={true}
             label={"Entry Year Level:"}
-            value={`${editingResponse.response?.student
-              ?.StudentEntryYearLevel || ""}`.trim()}
+            value={`${editingResponse?.StudentEntryYearLevel || ""}`.trim()}
             valueFromDB={`${studentFromDB?.StudentYearLevel || ""}`.trim()}
             getIsSameFromDBFn={() => {
               return (
-                `${editingResponse.response?.student?.StudentEntryYearLevel ||
+                `${editingResponse?.StudentEntryYearLevel ||
                   ""}`.trim() ===
                 `${studentFromDB?.StudentYearLevel || ""}`.trim()
               );
@@ -478,10 +455,9 @@ const CODAdminStudentDetailsPanel = ({
             getComponent={(isSameFromDB: boolean) => {
               return (
                 <YearLevelSelector
-                  isDisabled={hasBeenSyncd === true}
+                  isDisabled={isReadOnly === true}
                   values={[
-                    `${editingResponse.response?.student
-                      ?.StudentEntryYearLevel || ""}`.trim()
+                    `${editingResponse?.StudentEntryYearLevel || ""}`.trim()
                   ]}
                   classname={`form-control ${
                     isSameFromDB === true ? "" : "is-invalid"
@@ -506,7 +482,7 @@ const CODAdminStudentDetailsPanel = ({
           <CODAdminInputPanel
             isRequired={true}
             label={"Entry Date:"}
-            value={editingResponse.response?.student?.StudentEntryDate || ""}
+            value={editingResponse?.StudentEntryDate || ""}
             valueFromDB={formatDateTimeString(
               getValueFromStudentDB("StudentEntryDate")
             )}
@@ -514,27 +490,19 @@ const CODAdminStudentDetailsPanel = ({
               const valueFromDB = formatDateTimeString(
                 getValueFromStudentDB("StudentEntryDate")
               );
-              const studentObj = editingResponse?.response?.student || {};
               return (
                 `${valueFromDB || ""}`.trim() ===
-                formatDateTimeString(
-                  "StudentEntryDate" in studentObj
-                    ? // @ts-ignore
-                      studentObj["StudentEntryDate"]
-                    : ""
-                )
+                formatDateTimeString(editingResponse?.StudentEntryDate || "")
               );
             }}
             getComponent={(isSameFromDB: boolean) => {
               return (
                 <DateTimePicker
-                  isDisabled={hasBeenSyncd === true}
+                  isDisabled={isReadOnly === true}
                   className={`form-control ${
                     isSameFromDB === true ? "" : "is-invalid"
                   }`}
-                  value={
-                    editingResponse.response?.student?.StudentEntryDate || ""
-                  }
+                  value={editingResponse?.StudentEntryDate || ""}
                   timeFormat={false}
                   dateFormat={"DD MMM YYYY"}
                   onChange={selected => {
@@ -554,13 +522,12 @@ const CODAdminStudentDetailsPanel = ({
         <Col md={6} xs={12}>
           <CODAdminInputPanel
             label={"Previous School:"}
-            value={`${editingResponse.response?.student
-              ?.StudentPreviousSchool || ""}`.trim()}
+            value={`${editingResponse?.StudentPreviousSchool || ""}`.trim()}
             valueFromDB={`${studentFromDB?.StudentPreviousSchoolDescription ||
               ""}`.trim()}
             getIsSameFromDBFn={() => {
               return (
-                `${editingResponse.response?.student?.StudentPreviousSchool ||
+                `${editingResponse?.StudentPreviousSchool ||
                   ""}`.trim() ===
                 `${studentFromDB?.StudentPreviousSchoolCode || ""}`.trim()
               );
@@ -568,13 +535,12 @@ const CODAdminStudentDetailsPanel = ({
             getComponent={(isSameFromDB: boolean) => {
               return (
                 <SynLuSchoolSelector
-                  isDisabled={hasBeenSyncd === true}
+                  isDisabled={isReadOnly === true}
                   classname={`form-control ${
                     isSameFromDB === true ? "" : "is-invalid"
                   }`}
                   values={[
-                    `${editingResponse.response?.student
-                      ?.StudentPreviousSchool || ""}`.trim()
+                    `${editingResponse?.StudentPreviousSchool || ""}`.trim()
                   ]}
                   onSelect={option => {
                     updateStudentResponse(
@@ -597,64 +563,35 @@ const CODAdminStudentDetailsPanel = ({
         <Col>
           <CODAdminInputPanel
             label={"Address:"}
-            value={SynAddressService.convertAddressObjToStr(SynAddressService.getAddressObjFromCODResponse(editingResponse?.response?.student?.address?.postal || null))}
+            value={SynAddressService.convertAddressObjToStr(SynAddressService.getAddressObjFromCODResponse(editingResponse?.address?.postal || null))}
             valueFromDB={SynAddressService.convertAddressObjToStr(SynAddressService.getAddressObjFromSynAddress(studentAddressFromDB)?.postal || null)}
             getIsSameFromDBFn={() => {
               return (
                 `${SynAddressService.convertAddressObjToStr(SynAddressService.getAddressObjFromSynAddress(studentAddressFromDB)?.postal || null)}`.trim() ===
-                `${SynAddressService.convertAddressObjToStr(SynAddressService.getAddressObjFromCODResponse(editingResponse?.response?.student?.address?.postal || null)) || ""}`.trim()
+                `${SynAddressService.convertAddressObjToStr(SynAddressService.getAddressObjFromCODResponse(editingResponse?.address?.postal || null)) || ""}`.trim()
               );
             }}
             getComponent={(isSameFromDB: boolean) => {
               return (
                 <CODAddressEditor
-                  codeRespAddr={editingResponse.response?.student?.address}
+                  codeRespAddr={editingResponse?.address}
                   synAddressId={studentFromDB?.AddressID}
-                  isDisabled={hasBeenSyncd === true}
+                  isDisabled={isReadOnly === true}
                   className={`form-control ${
                     isSameFromDB === true ? "" : "is-invalid"
                   }`}
+                  onChange={newAddress => {
+                    // @ts-ignore
+                    updateStudentResponse("address", newAddress);
+                  }}
                 />
               );
             }}
           />
         </Col>
       </Row>
-      <CODAdminDetailsSaveBtnPanel
-        onSubmitting={submitting => setIsSubmitting(submitting)}
-        isLoading={isLoading || isSubmitting}
-        onNext={onNext}
-        syncdLabel={
-          hasBeenSyncd !== true
-            ? undefined
-            : `Student Details Already Sync'd @ ${moment(
-                editingResponse.response?.student?.syncToSynAt
-              ).format("lll")} By ${
-                editingResponse.response?.student?.syncToSynById
-              }`
-        }
-        editingResponse={editingResponse}
-        onSaved={resp => {
-          Toaster.showToast(`Student Details Sync'd.`, TOAST_TYPE_SUCCESS);
-          onSaved(resp);
-        }}
-        onCancel={onCancel}
-        syncFn={resp =>
-          ConfirmationOfDetailsResponseService.update(resp.id, {
-            ...resp,
-            response: {
-              ...(resp.response || {}),
-              student: {
-                ...(resp.response?.student || {}),
-                syncToSynAt: moment().toISOString(),
-                syncToSynById: currentUser?.synergyId
-              }
-            }
-          })
-        }
-      />
     </Wrapper>
   );
 };
 
-export default CODAdminStudentDetailsPanel;
+export default CODStudentDetailsPanel;

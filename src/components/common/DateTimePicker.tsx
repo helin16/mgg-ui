@@ -24,6 +24,9 @@ const Wrapper = styled.div`
   &.form-control {
     font-size: 13px;
     padding: 0px;
+    input {
+      font-size: 1rem !important;
+    }
     &.is-invalid {
       padding-right: calc(1.5em + 0.75rem);
     }

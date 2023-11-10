@@ -3,6 +3,7 @@ import {Moment} from 'moment-timezone';
 import {Buffer} from 'buffer';
 import {THIRD_PARTY_AUTH_PATH} from '../helper/SchoolBoxHelper';
 import {iConfigParams} from './AppService';
+import Toaster, {TOAST_TYPE_WARNING} from './Toaster';
 
 const isNumeric = (str: string) => {
   return !isNaN(parseFloat(str)) && isFinite(Number(str));
@@ -95,6 +96,15 @@ const getUrlParams = (params: iConfigParams = {}) => {
   return paramString === '' ? '' : `?${paramString}`;
 };
 
+const openNewWindow = (url: string) => {
+  const newTab = window.open();
+  if (!newTab) {
+    Toaster.showToast(`Pop-up blocked. Please allow pop-ups for this website.`, TOAST_TYPE_WARNING);
+    return;
+  }
+  newTab.location.href = url;
+}
+
 const UtilsService = {
   isNumeric,
   handleEnterKeyPressed,
@@ -109,6 +119,7 @@ const UtilsService = {
   getFullUrl,
   getModuleUrl,
   getUrlParams,
+  openNewWindow,
 }
 
 export default UtilsService;

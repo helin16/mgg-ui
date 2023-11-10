@@ -1,8 +1,8 @@
 import { Button, ButtonProps } from "react-bootstrap";
-import iConfirmationOfDetailsResponse from "../../../../types/ConfirmationOfDetails/iConfirmationOfDetailsResponse";
+import iConfirmationOfDetailsResponse from "../../../types/ConfirmationOfDetails/iConfirmationOfDetailsResponse";
 import { useState } from "react";
-import PopupModal from "../../../common/PopupModal";
-import { FlexContainer } from "../../../../styles";
+import PopupModal from "../../common/PopupModal";
+import { FlexContainer } from "../../../styles";
 import moment from "moment-timezone";
 import CODAdminDetailsPanel from './CODAdminDetailsPanel';
 
@@ -53,7 +53,7 @@ const CODAdminDetailsPopupBtn = ({
         dialogClassName="modal-80w"
         header={
           <FlexContainer className="justify-content-between full-width align-items-center">
-            <h6>COD: {response.Student?.StudentNameInternal || ""}</h6>
+            <h5 style={{margin: '0px'}}>COD: {response.Student?.StudentNameInternal || ""} [{response.StudentID}]</h5>
             {getSubmittedInfo()}
           </FlexContainer>
         }

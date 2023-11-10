@@ -1,27 +1,27 @@
 import styled from "styled-components";
 import { useEffect, useState } from "react";
-import PageLoadingSpinner from "../common/PageLoadingSpinner";
-import ConfirmationOfDetailsResponseService from "../../services/ConfirmationOfDetails/ConfirmationOfDetailsResponseService";
-import { OP_BETWEEN, OP_GTE, OP_LTE, OP_NOT } from "../../helper/ServiceHelper";
-import iPaginatedResult from "../../types/iPaginatedResult";
-import iConfirmationOfDetailsResponse from "../../types/ConfirmationOfDetails/iConfirmationOfDetailsResponse";
-import Toaster from "../../services/Toaster";
-import Table, { iTableColumn } from "../common/Table";
+import PageLoadingSpinner from "../../common/PageLoadingSpinner";
+import ConfirmationOfDetailsResponseService from "../../../services/ConfirmationOfDetails/ConfirmationOfDetailsResponseService";
+import { OP_BETWEEN, OP_GTE, OP_LTE, OP_NOT } from "../../../helper/ServiceHelper";
+import iPaginatedResult from "../../../types/iPaginatedResult";
+import iConfirmationOfDetailsResponse from "../../../types/ConfirmationOfDetails/iConfirmationOfDetailsResponse";
+import Toaster from "../../../services/Toaster";
+import Table, { iTableColumn } from "../../common/Table";
 import moment from "moment-timezone";
-import SynCommunityService from "../../services/Synergetic/Community/SynCommunityService";
+import SynCommunityService from "../../../services/Synergetic/Community/SynCommunityService";
 import * as _ from "lodash";
-import iSynCommunity from "../../types/Synergetic/iSynCommunity";
-import iVStudent from "../../types/Synergetic/iVStudent";
-import SynVStudentService from "../../services/Synergetic/Student/SynVStudentService";
+import iSynCommunity from "../../../types/Synergetic/iSynCommunity";
+import iVStudent from "../../../types/Synergetic/iVStudent";
+import SynVStudentService from "../../../services/Synergetic/Student/SynVStudentService";
 import ConfirmationOfDetailsListSearchPanel, {
   iConfirmationOfDetailsListSearchCriteria
-} from "./components/ConfirmationOfDetailsListSearchPanel";
-import { FlexContainer } from "../../styles";
+} from "./ConfirmationOfDetailsListSearchPanel";
+import { FlexContainer } from "../../../styles";
 import { Button } from "react-bootstrap";
 import * as Icons from "react-bootstrap-icons";
-import MathHelper from "../../helper/MathHelper";
-import DeleteConfirmPopupBtn from "../common/DeleteConfirm/DeleteConfirmPopupBtn";
-import CODAdminDetailsPopupBtn from "./components/CODAdmin/CODAdminDetailsPopupBtn";
+import MathHelper from "../../../helper/MathHelper";
+import DeleteConfirmPopupBtn from "../../common/DeleteConfirm/DeleteConfirmPopupBtn";
+import CODAdminDetailsPopupBtn from "./CODAdminDetailsPopupBtn";
 
 const Wrapper = styled.div`
   .result-title-row {
@@ -248,6 +248,17 @@ const ConfirmationOfDetailsListPanel = () => {
                 : moment(data.response?.student?.StudentEntryDate).format(
                     "D MMM YYYY"
                   )}
+            </td>
+          );
+        }
+      },
+      {
+        key: "HasCourtOrder",
+        header: "Court Order?",
+        cell: (col: iTableColumn, data: iConfirmationOfDetailsResponse) => {
+          return (
+            <td key={col.key}>
+              {data.response?.courtOrder.hasCourtOrders === true ? <Icons.CheckSquareFill className={'text-danger'} style={{fontSize: '1.2rem'}} /> : null}
             </td>
           );
         }

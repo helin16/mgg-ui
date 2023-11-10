@@ -124,7 +124,7 @@ const AddressManualInputPanel = ({
           <Col md={4} sm={12}>
             <FormLabel label={"Suburb"} />
             <FormControl
-              onChange={event => handelOnChange('suburb', event.target.value || "")}
+              onChange={event => handelOnChange('suburb', `${event.target.value || ""}`.trim().toUpperCase())}
               disabled={isDisabled}
               placeholder={'eg: MENTONE'}
               value={editingAddress?.suburb || ''}

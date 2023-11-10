@@ -1,11 +1,14 @@
-import {FlexContainer} from '../../../../../styles';
-import FormLabel from '../../../../form/FormLabel';
+import {FlexContainer} from '../../../styles';
+import FormLabel from '../../form/FormLabel';
 import React from 'react';
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
   margin-top: 1rem;
   min-width: 200px;
+  .syn-value {
+    max-width: 250px;
+  }
 `;
 
 type iCODAdminInputPanel = {
@@ -28,16 +31,16 @@ const CODAdminInputPanel = ({getComponent, label, value, valueFromDB, getIsSameF
           className={isSameInDB === true ? "" : "text-danger"}
         />
         <small
-          title={'Synergetic Value'}
-          className={isSameInDB === true ? "text-success" : "text-danger"}
+          title={`System Value: ${valueFromDB}`}
+          className={`syn-value ellipsis ${isSameInDB === true ? "" : "text-danger"}`}
         >
-          {getSynergeticLabelFn ? getSynergeticLabelFn(isSameInDB, valueFromDB) : valueFromDB}
+          {getSynergeticLabelFn ? getSynergeticLabelFn(isSameInDB, valueFromDB) : (`${valueFromDB}`.trim() === '' ? 'NULL' : valueFromDB)}
         </small>
       </FlexContainer>
       {getComponent(isSameInDB)}
       {isSameInDB === true ? null : (
         <small className={"text-danger"}>
-          Value is different from Synergetic.
+          Value is different from the system.
         </small>
       )}
     </Wrapper>
