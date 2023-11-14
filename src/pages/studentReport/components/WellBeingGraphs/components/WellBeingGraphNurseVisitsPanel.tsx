@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import iVStudent from "../../../../../types/Synergetic/iVStudent";
 import { useEffect, useState } from "react";
-import SynVMedicalIncidentsAllService from "../../../../../services/Synergetic/SynVMedicalIncidentsAllService";
+import SynVMedicalIncidentsAllService from "../../../../../services/Synergetic/Medical/SynVMedicalIncidentsAllService";
 import {OP_BETWEEN, OP_NOT, OP_OR} from "../../../../../helper/ServiceHelper";
 import Toaster from "../../../../../services/Toaster";
 import { Spinner } from "react-bootstrap";

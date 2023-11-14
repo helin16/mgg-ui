@@ -6,7 +6,7 @@ import CODStudentDetailsPanel from "../DetailsPanel/CODStudentDetailsPanel";
 import PageLoadingSpinner from '../../common/PageLoadingSpinner';
 import CODParentsDetailsPanel from '../DetailsPanel/CODParentsDetailsPanel';
 import CODLegalPanel from '../DetailsPanel/CODLegalPanel';
-
+import CODMedicalDetailsPanel from '../DetailsPanel/CODMedicalDetailsPanel';
 const Wrapper = styled.div``;
 
 const TAB_STUDENT_DETAILS = "Student Details";
@@ -27,6 +27,9 @@ type iCODAdminDetailsPanel = {
 const CODAdminDetailsPanel = ({
   defaultTabKey,
   response,
+  onCancel,
+  onSaved,
+  onRefreshList,
 }: iCODAdminDetailsPanel) => {
   const defaultSelectedTab = defaultTabKey || TAB_STUDENT_DETAILS;
   const [selectedTab, setSelectedTab] = useState(defaultSelectedTab);
@@ -36,12 +39,12 @@ const CODAdminDetailsPanel = ({
     setEditingResponse({...response});
   }, [response]);
 
-  // const handleSaved = (saved: iConfirmationOfDetailsResponse, externalSave = false) => {
-  //   setEditingResponse(saved);
-  //   if (externalSave === true && onSaved) {
-  //     onSaved(saved);
-  //   }
-  // }
+  const handleSaved = (saved: iConfirmationOfDetailsResponse, externalSave = false) => {
+    setEditingResponse(saved);
+    if (externalSave === true && onSaved) {
+      onSaved(saved);
+    }
+  }
 
   if (!editingResponse) {
     return <PageLoadingSpinner />
@@ -57,56 +60,49 @@ const CODAdminDetailsPanel = ({
         <Tab title={TAB_STUDENT_DETAILS} eventKey={TAB_STUDENT_DETAILS}>
           <CODStudentDetailsPanel
             response={editingResponse}
-            // submitBtnPanel={<CODAdminDetailsSaveBtnPanel
-            //   onSubmitting={submitting => setIsSubmitting(submitting)}
-            //   isLoading={isLoading || isSubmitting}
-            //   onNext={() => setSelectedTab(TAB_PARENT_DETAILS)}
-            //   syncdLabel={
-            //     isReadOnly !== true
-            //       ? undefined
-            //       : `Student Details Already Sync'd @ ${moment(
-            //         editingResponse.response?.student?.syncToSynAt
-            //       ).format("lll")} By ${
-            //         editingResponse.response?.student?.syncToSynById
-            //       }`
-            //   }
-            //   editingResponse={editingResponse}
-            //   onSaved={resp => {
-            //     Toaster.showToast(`Student Details Sync'd.`, TOAST_TYPE_SUCCESS);
-            //     onSaved(resp);
-            //   }}
-            //   onCancel={onCancel}
-            //   syncFn={resp =>
-            //     ConfirmationOfDetailsResponseService.update(resp.id, {
-            //       ...resp,
-            //       response: {
-            //         ...(resp.response || {}),
-            //         student: {
-            //           ...(resp.response?.student || {}),
-            //           syncToSynAt: moment().toISOString(),
-            //           syncToSynById: currentUser?.synergyId
-            //         }
-            //       }
-            //     })
-            //   }
-            // />}
+            onCancel={onCancel}
+            onSaved={(resp) => {
+              setSelectedTab(TAB_PARENT_DETAILS);
+              handleSaved(resp);
+            }}
+            onNextStep={() => setSelectedTab(TAB_PARENT_DETAILS)}
           />
         </Tab>
 
         <Tab title={TAB_PARENT_DETAILS} eventKey={TAB_PARENT_DETAILS}>
           <CODParentsDetailsPanel
             response={editingResponse}
+            onCancel={onCancel}
+            onSaved={(resp) => {
+              setSelectedTab(TAB_COURT_ORDERS);
+              handleSaved(resp);
+            }}
+            onNextStep={() => setSelectedTab(TAB_COURT_ORDERS)}
           />
         </Tab>
 
         <Tab title={TAB_COURT_ORDERS} eventKey={TAB_COURT_ORDERS}>
           <CODLegalPanel
             response={editingResponse}
+            onCancel={onCancel}
+            onSaved={(resp) => {
+              setSelectedTab(TAB_MEDICAL_DETAILS);
+              handleSaved(resp);
+            }}
+            onNextStep={() => setSelectedTab(TAB_MEDICAL_DETAILS)}
           />
         </Tab>
 
         <Tab title={TAB_MEDICAL_DETAILS} eventKey={TAB_MEDICAL_DETAILS}>
-          {TAB_MEDICAL_DETAILS}
+          <CODMedicalDetailsPanel
+            response={editingResponse}
+            onCancel={onCancel}
+            onSaved={(resp) => {
+              setSelectedTab(TAB_MEDICAL_DETAILS);
+              handleSaved(resp);
+            }}
+            onNextStep={() => setSelectedTab(TAB_MEDICAL_DETAILS)}
+          />
         </Tab>
 
         <Tab title={TAB_SIBLINGS} eventKey={TAB_SIBLINGS}>

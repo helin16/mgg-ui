@@ -1,5 +1,5 @@
-import AppService, {iConfigParams} from '../AppService';
-import iSynVMedicalConditionStudent from '../../types/Synergetic/iSynVMedicalConditionStudent';
+import AppService, {iConfigParams} from '../../AppService';
+import iSynVMedicalConditionStudent from '../../../types/Synergetic/iSynVMedicalConditionStudent';
 
 const endPoint = '/syn/vMedicalConditionStudent';
 

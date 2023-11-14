@@ -4,7 +4,7 @@ import iSynCommunityLegal from "../../../types/Synergetic/Community/iSynCommunit
 import PageLoadingSpinner from "../../common/PageLoadingSpinner";
 import SynCommunityLegalService from "../../../services/Synergetic/Community/SynCommunityLegalService";
 import ICODDetailsEditPanel from "./iCODDetailsEditPanel";
-import Toaster from "../../../services/Toaster";
+import Toaster, {TOAST_TYPE_SUCCESS} from "../../../services/Toaster";
 import { Col, FormControl, Row } from "react-bootstrap";
 import moment from "moment-timezone";
 import { iCODCourtOrderResponse } from "../../../types/ConfirmationOfDetails/iConfirmationOfDetailsResponse";
@@ -15,11 +15,19 @@ import SectionDiv from "../../common/SectionDiv";
 import DateTimePicker from "../../common/DateTimePicker";
 import SynLuCourtOrderTypeSelector from "../../Community/SynLuCourtOrderTypeSelector";
 import CODFileListTable from "../components/CODFileListTable";
+import CODAdminDetailsSaveBtnPanel from '../CODAdmin/CODAdminDetailsSaveBtnPanel';
+import ConfirmationOfDetailsResponseService
+  from '../../../services/ConfirmationOfDetails/ConfirmationOfDetailsResponseService';
+import {FlexContainer} from '../../../styles';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../../redux/makeReduxStore';
 
 const Wrapper = styled.div``;
 
-const CODLegalPanel = ({ response, isDisabled }: ICODDetailsEditPanel) => {
+const CODLegalPanel = ({ response, isDisabled, onNextStep, onSaved, onCancel }: ICODDetailsEditPanel) => {
+  const { user: currentUser } = useSelector((state: RootState) => state.auth);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isReadOnly, setIsReadOnly] = useState(false);
   const [
     editingResponse,
@@ -84,19 +92,19 @@ const CODLegalPanel = ({ response, isDisabled }: ICODDetailsEditPanel) => {
     if (editingResponse?.hasCourtOrders === false) {
       return null;
     }
-    const files = editingResponse?.newCourtOrderFiles || [];
+    const eFiles = editingResponse?.newCourtOrderFiles || [];
     return (
       <Row>
         <Col>
           <SectionDiv>
             <CODFileListTable
-              files={files}
+              files={eFiles}
               isDisabled={isReadOnly === true}
               deletingFn={asset => {
                 return new Promise(() =>
                   handleResponseUpdated(
                     "newCourtOrderFiles",
-                    files.filter(
+                    eFiles.filter(
                       file =>
                         !(
                           file.key === asset.key &&
@@ -118,7 +126,7 @@ const CODLegalPanel = ({ response, isDisabled }: ICODDetailsEditPanel) => {
                 }
                 onFinished={files =>
                   handleResponseUpdated("newCourtOrderFiles", [
-                    ...(editingResponse?.newCourtOrderFiles || []),
+                    ...eFiles,
                     ...files.map(file => ({
                       name: file.name,
                       url: file.url,
@@ -246,6 +254,55 @@ const CODLegalPanel = ({ response, isDisabled }: ICODDetailsEditPanel) => {
     );
   };
 
+
+  const getSubmitBtnPanel = () => {
+    return (
+      <FlexContainer className={'justify-content-between'}>
+        <div />
+        {editingResponse && (
+          <CODAdminDetailsSaveBtnPanel
+            onSubmitting={submitting => setIsSubmitting(submitting)}
+            isLoading={isLoading || isSubmitting}
+            onNext={onNextStep}
+            syncdLabel={
+              isReadOnly !== true
+                ? undefined
+                : `Details Already Sync'd @ ${moment(
+                  editingResponse?.syncToSynAt
+                ).format("lll")} By ${editingResponse?.syncToSynById}`
+            }
+            editingResponse={{
+              ...response,
+              // @ts-ignore
+              response: {
+                ...(response?.response || {}),
+                courtOrder: editingResponse
+              }
+            }}
+            onSaved={resp => {
+              Toaster.showToast(`Details Sync'd.`, TOAST_TYPE_SUCCESS);
+              onSaved && onSaved(resp);
+            }}
+            onCancel={onCancel}
+            syncFn={resp =>
+              ConfirmationOfDetailsResponseService.update(resp.id, {
+                ...resp,
+                response: {
+                  ...(resp.response || {}),
+                  courtOrder: {
+                    ...(editingResponse || {}),
+                    syncToSynAt: moment().toISOString(),
+                    syncToSynById: currentUser?.synergyId
+                  }
+                }
+              })
+            }
+          />
+        )}
+      </FlexContainer>
+    )
+  }
+
   const getContent = () => {
     if (!editingResponse || isLoading === true) {
       return <PageLoadingSpinner />;
@@ -289,6 +346,7 @@ const CODLegalPanel = ({ response, isDisabled }: ICODDetailsEditPanel) => {
           {getDetailsPanel()}
         </Row>
         {getFileContents()}
+        {getSubmitBtnPanel()}
       </>
     );
   };

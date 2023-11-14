@@ -6,7 +6,7 @@ import {
   iCODParentResponse, iCODParentsResponse
 } from "../../../types/ConfirmationOfDetails/iConfirmationOfDetailsResponse";
 import PageLoadingSpinner from "../../common/PageLoadingSpinner";
-import Toaster from "../../../services/Toaster";
+import Toaster, {TOAST_TYPE_SUCCESS} from "../../../services/Toaster";
 import iSynCommunity from "../../../types/Synergetic/iSynCommunity";
 import SynCommunityService from "../../../services/Synergetic/Community/SynCommunityService";
 import CODAdminInputPanel from "../components/CODAdminInputPanel";
@@ -14,6 +14,13 @@ import CODAddressEditor from "../components/CODAddressEditor";
 import SynAddressService from "../../../services/Synergetic/SynAddressService";
 import iSynAddress from "../../../types/Synergetic/iSynAddress";
 import {dangerRed} from '../../../AppWrapper';
+import CODAdminDetailsSaveBtnPanel from '../CODAdmin/CODAdminDetailsSaveBtnPanel';
+import moment from 'moment-timezone';
+import ConfirmationOfDetailsResponseService
+  from '../../../services/ConfirmationOfDetails/ConfirmationOfDetailsResponseService';
+import {FlexContainer} from '../../../styles';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../../redux/makeReduxStore';
 
 const Wrapper = styled.div`
   margin-top: 1rem;
@@ -23,13 +30,18 @@ type iAddressMap = { [key: number]: iSynAddress };
 const CODParentsDetailsPanel = ({
   response,
   isDisabled,
+  onNextStep,
+  onCancel,
+  onSaved,
 }: ICODDetailsEditPanel) => {
+  const { user: currentUser } = useSelector((state: RootState) => state.auth);
   const [
     editingResponse,
     setEditingResponse
   ] = useState<iCODParentsResponse | null>(null);
   const [parentsFromDB, setParentsFromDB] = useState<iCommunityMap>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isReadOnly, setIsReadOnly] = useState(false);
   const [addressFromDBMap, setAddressFromDBMap] = useState<iAddressMap>({});
 
@@ -182,7 +194,8 @@ const CODParentsDetailsPanel = ({
       />
     );
   };
-
+console.log('respponse', response.response);
+console.log('editingResponse', editingResponse);
   if (!editingResponse || isLoading === true) {
     return <PageLoadingSpinner />;
   }
@@ -343,6 +356,7 @@ const CODParentsDetailsPanel = ({
                     getComponent={(isSameFromDB: boolean) => {
                       return (
                         <CODAddressEditor
+                          isDisabled={isReadOnly === true}
                           synAddressId={parentFromDB?.AddressID}
                           codeRespAddr={parent.address}
                           className={isSameFromDB === true ? "" : "is-invalid"}
@@ -360,6 +374,49 @@ const CODParentsDetailsPanel = ({
           );
         })}
       </Row>
+      <FlexContainer className={'justify-content-between'}>
+        <div />
+        {editingResponse && (
+          <CODAdminDetailsSaveBtnPanel
+            onSubmitting={submitting => setIsSubmitting(submitting)}
+            isLoading={isLoading || isSubmitting}
+            onNext={onNextStep}
+            syncdLabel={
+              isReadOnly !== true
+                ? undefined
+                : `Parent Details Already Sync'd @ ${moment(
+                  editingResponse?.syncToSynAt
+                ).format("lll")} By ${editingResponse?.syncToSynById}`
+            }
+            editingResponse={{
+              ...response,
+              // @ts-ignore
+              response: {
+                ...(response?.response || {}),
+                parent: editingResponse
+              }
+            }}
+            onSaved={resp => {
+              Toaster.showToast(`Parent Details Sync'd.`, TOAST_TYPE_SUCCESS);
+              onSaved && onSaved(resp);
+            }}
+            onCancel={onCancel}
+            syncFn={resp =>
+              ConfirmationOfDetailsResponseService.update(resp.id, {
+                ...resp,
+                response: {
+                  ...(resp.response || {}),
+                  parent: {
+                    ...(editingResponse || {}),
+                    syncToSynAt: moment().toISOString(),
+                    syncToSynById: currentUser?.synergyId
+                  }
+                }
+              })
+            }
+          />
+        )}
+      </FlexContainer>
     </Wrapper>
   );
 };

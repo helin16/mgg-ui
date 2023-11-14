@@ -3,7 +3,9 @@ import iConfirmationOfDetailsResponse from '../../../types/ConfirmationOfDetails
 type ICODDetailsEditPanel = {
   response: iConfirmationOfDetailsResponse;
   isDisabled?: boolean;
-  submitBtnPanel?: any;
+  onCancel?: () => void;
+  onNextStep?: () => void;
+  onSaved?: (resp: iConfirmationOfDetailsResponse) => void;
 }
 
 export default ICODDetailsEditPanel;

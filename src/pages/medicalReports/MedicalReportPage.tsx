@@ -7,7 +7,7 @@ import {useSelector} from 'react-redux';
 import {RootState} from '../../redux/makeReduxStore';
 import SynVStudentService from '../../services/Synergetic/Student/SynVStudentService';
 import iVStudent from '../../types/Synergetic/iVStudent';
-import SynVMedicalConditionStudentService from '../../services/Synergetic/SynVMedicalConditionStudentService';
+import SynVMedicalConditionStudentService from '../../services/Synergetic/Medical/SynVMedicalConditionStudentService';
 import iSynVMedicalConditionStudent from '../../types/Synergetic/iSynVMedicalConditionStudent';
 import {OP_LIKE, OP_OR} from '../../helper/ServiceHelper';
 import moment from 'moment-timezone';

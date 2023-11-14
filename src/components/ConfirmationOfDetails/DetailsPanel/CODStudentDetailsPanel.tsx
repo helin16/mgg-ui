@@ -2,13 +2,11 @@ import ICODDetailsEditPanel from "./iCODDetailsEditPanel";
 import styled from "styled-components";
 import { Col, FormControl, Row } from "react-bootstrap";
 import React, { useEffect, useState } from "react";
-import {
-  iCODStudentResponse
-} from "../../../types/ConfirmationOfDetails/iConfirmationOfDetailsResponse";
+import { iCODStudentResponse } from "../../../types/ConfirmationOfDetails/iConfirmationOfDetailsResponse";
 import PageLoadingSpinner from "../../common/PageLoadingSpinner";
 import iVStudent from "../../../types/Synergetic/iVStudent";
 import SynVStudentService from "../../../services/Synergetic/Student/SynVStudentService";
-import Toaster from "../../../services/Toaster";
+import Toaster, { TOAST_TYPE_SUCCESS } from "../../../services/Toaster";
 import moment from "moment-timezone";
 import DateTimePicker from "../../common/DateTimePicker";
 import CODAdminInputPanel from "../components/CODAdminInputPanel";
@@ -20,21 +18,35 @@ import SynLuNationalitySelector from "../../Community/SynLuNationalitySelector";
 import SynLuSchoolSelector from "../../Community/SynLuSchoolSelector";
 import CODAddressEditor from "../components/CODAddressEditor";
 import SynAddressService from "../../../services/Synergetic/SynAddressService";
-import iSynAddress from '../../../types/Synergetic/iSynAddress';
+import iSynAddress from "../../../types/Synergetic/iSynAddress";
+import { FlexContainer } from "../../../styles";
+import CODAdminDetailsSaveBtnPanel from "../CODAdmin/CODAdminDetailsSaveBtnPanel";
+import ConfirmationOfDetailsResponseService
+  from '../../../services/ConfirmationOfDetails/ConfirmationOfDetailsResponseService';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../../redux/makeReduxStore';
 
 const Wrapper = styled.div``;
 const CODStudentDetailsPanel = ({
   response,
-  isDisabled
+  isDisabled,
+  onSaved,
+  onCancel,
+  onNextStep,
 }: ICODDetailsEditPanel) => {
   const [
     editingResponse,
     setEditingResponse
   ] = useState<iCODStudentResponse | null>(null);
+  const { user: currentUser } = useSelector((state: RootState) => state.auth);
   const [studentFromDB, setStudentFromDB] = useState<iVStudent | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isReadOnly, setIsReadOnly] = useState(false);
-  const [studentAddressFromDB, setStudentAddressFromDB] = useState<iSynAddress | null>(null);
+  const [
+    studentAddressFromDB,
+    setStudentAddressFromDB
+  ] = useState<iSynAddress | null>(null);
 
   useEffect(() => {
     setEditingResponse(response?.response?.student || null);
@@ -61,7 +73,7 @@ const CODStudentDetailsPanel = ({
         where: JSON.stringify({ AddressID: currentOrPastStudent.AddressID }),
         perPage: 1,
         currentPage: 1,
-        include: 'Country,HomeCountry'
+        include: "Country,HomeCountry"
       });
       const addresses = addressResults.data || [];
       if (addresses.length <= 0) {
@@ -92,9 +104,9 @@ const CODStudentDetailsPanel = ({
   }, [response]);
 
   useEffect(() => {
-    const hasBeenSyncd = `${editingResponse?.syncToSynAt || ""}`.trim() !== "" &&
-      `${editingResponse?.syncToSynById || ""}`.trim() !==
-      "";
+    const hasBeenSyncd =
+      `${editingResponse?.syncToSynAt || ""}`.trim() !== "" &&
+      `${editingResponse?.syncToSynById || ""}`.trim() !== "";
     setIsReadOnly(hasBeenSyncd === true || isDisabled === true);
   }, [editingResponse, isDisabled]);
 
@@ -119,8 +131,9 @@ const CODStudentDetailsPanel = ({
     dbFieldName: string,
     isRequired?: boolean
   ) => {
-    // @ts-ignore
-    const value = fieldName in editingResponse ? editingResponse[fieldName] : "";
+    const value =
+      // @ts-ignore
+      editingResponse && (fieldName in editingResponse) ? editingResponse[fieldName] : "";
     return (
       <CODAdminInputPanel
         label={label}
@@ -190,7 +203,7 @@ const CODStudentDetailsPanel = ({
             )}
             getIsSameFromDBFn={() => {
               const valueFromDB = getValueFromStudentDB("StudentBirthDate");
-              const value = editingResponse?.DateOfBirth || '';
+              const value = editingResponse?.DateOfBirth || "";
               return `${valueFromDB || ""}`.trim() === value.trim();
             }}
             getComponent={(isSameFromDB: boolean) => {
@@ -204,11 +217,11 @@ const CODStudentDetailsPanel = ({
                     `${editingResponse?.DateOfBirth || ""}`.trim() === ""
                       ? undefined
                       : moment
-                        .tz(
-                          `${editingResponse?.DateOfBirth || ""}`.trim(),
-                          moment.tz.guess()
-                        )
-                        .toISOString()
+                          .tz(
+                            `${editingResponse?.DateOfBirth || ""}`.trim(),
+                            moment.tz.guess()
+                          )
+                          .toISOString()
                   }
                   dateFormat={"DD MMM YYYY"}
                   timeFormat={false}
@@ -237,8 +250,7 @@ const CODStudentDetailsPanel = ({
             getIsSameFromDBFn={() => {
               return (
                 `${studentFromDB?.StudentCountryOfBirthCode || ""}`.trim() ===
-                `${editingResponse?.CountryOfBirthCode ||
-                  ""}`.trim()
+                `${editingResponse?.CountryOfBirthCode || ""}`.trim()
               );
             }}
             getComponent={(isSameFromDB: boolean) => {
@@ -249,8 +261,7 @@ const CODStudentDetailsPanel = ({
                     isSameFromDB === true ? "" : "is-invalid"
                   }`}
                   values={[
-                    `${editingResponse?.CountryOfBirthCode ||
-                      ""}`.trim()
+                    `${editingResponse?.CountryOfBirthCode || ""}`.trim()
                   ]}
                   onSelect={option => {
                     updateStudentResponse(
@@ -277,8 +288,7 @@ const CODStudentDetailsPanel = ({
             getIsSameFromDBFn={() => {
               return (
                 `${studentFromDB?.StudentReligionCode || ""}`.trim() ===
-                `${editingResponse?.ReligionCode ||
-                  ""}`.trim()
+                `${editingResponse?.ReligionCode || ""}`.trim()
               );
             }}
             getComponent={(isSameFromDB: boolean) => {
@@ -288,10 +298,7 @@ const CODStudentDetailsPanel = ({
                   classname={`form-control ${
                     isSameFromDB === true ? "" : "is-invalid"
                   }`}
-                  values={[
-                    `${editingResponse?.ReligionCode ||
-                      ""}`.trim()
-                  ]}
+                  values={[`${editingResponse?.ReligionCode || ""}`.trim()]}
                   onSelect={option => {
                     updateStudentResponse(
                       "ReligionCode",
@@ -326,8 +333,7 @@ const CODStudentDetailsPanel = ({
             getIsSameFromDBFn={() => {
               return (
                 `${studentFromDB?.StudentNationalityCode || ""}`.trim() ===
-                `${editingResponse?.NationalityCode ||
-                  ""}`.trim()
+                `${editingResponse?.NationalityCode || ""}`.trim()
               );
             }}
             getComponent={(isSameFromDB: boolean) => {
@@ -337,10 +343,7 @@ const CODStudentDetailsPanel = ({
                   classname={`form-control ${
                     isSameFromDB === true ? "" : "is-invalid"
                   }`}
-                  values={[
-                    `${editingResponse?.NationalityCode ||
-                      ""}`.trim()
-                  ]}
+                  values={[`${editingResponse?.NationalityCode || ""}`.trim()]}
                   onSelect={option => {
                     updateStudentResponse(
                       "NationalityCode",
@@ -361,17 +364,12 @@ const CODStudentDetailsPanel = ({
           <CODAdminInputPanel
             isRequired={true}
             label={"Indigenous:"}
-            value={
-              editingResponse?.IndigenousFlag === true
-                ? "Yes"
-                : "No"
-            }
+            value={editingResponse?.IndigenousFlag === true ? "Yes" : "No"}
             valueFromDB={studentFromDB?.IndigenousFlag === true ? "Yes" : "No"}
             getIsSameFromDBFn={() => {
               return (
                 `${studentFromDB?.IndigenousFlag || ""}`.trim() ===
-                `${editingResponse?.IndigenousFlag ||
-                  ""}`.trim()
+                `${editingResponse?.IndigenousFlag || ""}`.trim()
               );
             }}
             getComponent={(isSameFromDB: boolean) => {
@@ -380,7 +378,8 @@ const CODStudentDetailsPanel = ({
                   isDisabled={isReadOnly === true}
                   showAll={false}
                   value={
-                    `${editingResponse?.IndigenousFlag || 0}`.trim() === "1" || editingResponse?.IndigenousFlag === true
+                    `${editingResponse?.IndigenousFlag || 0}`.trim() === "1" ||
+                    editingResponse?.IndigenousFlag === true
                   }
                   classname={`form-control ${
                     isSameFromDB === true ? "" : "is-invalid"
@@ -401,27 +400,23 @@ const CODStudentDetailsPanel = ({
           <CODAdminInputPanel
             isRequired={true}
             label={"Torres Strait Islander:"}
-            value={
-              editingResponse?.StudentTSIFlag === true
-                ? "Yes"
-                : "No"
-            }
+            value={editingResponse?.StudentTSIFlag === true ? "Yes" : "No"}
             valueFromDB={studentFromDB?.StudentTSIFlag === true ? "Yes" : "No"}
             getIsSameFromDBFn={() => {
               return (
                 `${studentFromDB?.StudentTSIFlag || ""}`.trim() ===
-                `${editingResponse?.StudentTSIFlag ||
-                  ""}`.trim()
+                `${editingResponse?.StudentTSIFlag || ""}`.trim()
               );
             }}
             getComponent={(isSameFromDB: boolean) => {
               return (
                 <FlagSelector
+                  value={
+                    `${editingResponse?.StudentTSIFlag || 0}`.trim() === "1" ||
+                    editingResponse?.StudentTSIFlag === true
+                  }
                   showAll={false}
                   isDisabled={isReadOnly === true}
-                  value={
-                    `${editingResponse?.StudentTSIFlag || 0}`.trim() === "1" || editingResponse?.StudentTSIFlag === true
-                  }
                   classname={`form-control ${
                     isSameFromDB === true ? "" : "is-invalid"
                   }`}
@@ -447,8 +442,7 @@ const CODStudentDetailsPanel = ({
             valueFromDB={`${studentFromDB?.StudentYearLevel || ""}`.trim()}
             getIsSameFromDBFn={() => {
               return (
-                `${editingResponse?.StudentEntryYearLevel ||
-                  ""}`.trim() ===
+                `${editingResponse?.StudentEntryYearLevel || ""}`.trim() ===
                 `${studentFromDB?.StudentYearLevel || ""}`.trim()
               );
             }}
@@ -527,8 +521,7 @@ const CODStudentDetailsPanel = ({
               ""}`.trim()}
             getIsSameFromDBFn={() => {
               return (
-                `${editingResponse?.StudentPreviousSchool ||
-                  ""}`.trim() ===
+                `${editingResponse?.StudentPreviousSchool || ""}`.trim() ===
                 `${studentFromDB?.StudentPreviousSchoolCode || ""}`.trim()
               );
             }}
@@ -563,12 +556,28 @@ const CODStudentDetailsPanel = ({
         <Col>
           <CODAdminInputPanel
             label={"Address:"}
-            value={SynAddressService.convertAddressObjToStr(SynAddressService.getAddressObjFromCODResponse(editingResponse?.address?.postal || null))}
-            valueFromDB={SynAddressService.convertAddressObjToStr(SynAddressService.getAddressObjFromSynAddress(studentAddressFromDB)?.postal || null)}
+            value={SynAddressService.convertAddressObjToStr(
+              SynAddressService.getAddressObjFromCODResponse(
+                editingResponse?.address?.postal || null
+              )
+            )}
+            valueFromDB={SynAddressService.convertAddressObjToStr(
+              SynAddressService.getAddressObjFromSynAddress(
+                studentAddressFromDB
+              )?.postal || null
+            )}
             getIsSameFromDBFn={() => {
               return (
-                `${SynAddressService.convertAddressObjToStr(SynAddressService.getAddressObjFromSynAddress(studentAddressFromDB)?.postal || null)}`.trim() ===
-                `${SynAddressService.convertAddressObjToStr(SynAddressService.getAddressObjFromCODResponse(editingResponse?.address?.postal || null)) || ""}`.trim()
+                `${SynAddressService.convertAddressObjToStr(
+                  SynAddressService.getAddressObjFromSynAddress(
+                    studentAddressFromDB
+                  )?.postal || null
+                )}`.trim() ===
+                `${SynAddressService.convertAddressObjToStr(
+                  SynAddressService.getAddressObjFromCODResponse(
+                    editingResponse?.address?.postal || null
+                  )
+                ) || ""}`.trim()
               );
             }}
             getComponent={(isSameFromDB: boolean) => {
@@ -590,6 +599,49 @@ const CODStudentDetailsPanel = ({
           />
         </Col>
       </Row>
+      <FlexContainer className={'justify-content-between'}>
+        <div />
+        {editingResponse && (
+          <CODAdminDetailsSaveBtnPanel
+            onSubmitting={submitting => setIsSubmitting(submitting)}
+            isLoading={isLoading || isSubmitting}
+            onNext={onNextStep}
+            syncdLabel={
+              isReadOnly !== true
+                ? undefined
+                : `Student Details Already Sync'd @ ${moment(
+                    editingResponse?.syncToSynAt
+                  ).format("lll")} By ${editingResponse?.syncToSynById}`
+            }
+            editingResponse={{
+              ...response,
+              // @ts-ignore
+              response: {
+                ...(response?.response || {}),
+                student: editingResponse
+              }
+          }}
+            onSaved={resp => {
+              Toaster.showToast(`Student Details Sync'd.`, TOAST_TYPE_SUCCESS);
+              onSaved && onSaved(resp);
+            }}
+            onCancel={onCancel}
+            syncFn={resp =>
+              ConfirmationOfDetailsResponseService.update(resp.id, {
+                ...resp,
+                response: {
+                  ...(resp.response || {}),
+                  student: {
+                    ...(editingResponse || {}),
+                    syncToSynAt: moment().toISOString(),
+                    syncToSynById: currentUser?.synergyId
+                  }
+                }
+              })
+            }
+          />
+        )}
+      </FlexContainer>
     </Wrapper>
   );
 };

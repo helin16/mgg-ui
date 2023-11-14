@@ -1,6 +1,6 @@
-import AppService, {iConfigParams} from '../AppService';
-import iPaginatedResult from '../../types/iPaginatedResult';
-import iSynVMedicalIncidentsAll from '../../types/Synergetic/Medical/iSynVMedicalIncidentsAll';
+import AppService, {iConfigParams} from '../../AppService';
+import iPaginatedResult from '../../../types/iPaginatedResult';
+import iSynVMedicalIncidentsAll from '../../../types/Synergetic/Medical/iSynVMedicalIncidentsAll';
 
 const endPoint = '/syn/vMedicalIncidentsAll';
 

@@ -258,7 +258,7 @@ const ConfirmationOfDetailsListPanel = () => {
         cell: (col: iTableColumn, data: iConfirmationOfDetailsResponse) => {
           return (
             <td key={col.key}>
-              {data.response?.courtOrder.hasCourtOrders === true ? <Icons.CheckSquareFill className={'text-danger'} style={{fontSize: '1.2rem'}} /> : null}
+              {data.response?.courtOrder?.hasCourtOrders === true ? <Icons.CheckSquareFill className={'text-danger'} style={{fontSize: '1.2rem'}} /> : null}
             </td>
           );
         }

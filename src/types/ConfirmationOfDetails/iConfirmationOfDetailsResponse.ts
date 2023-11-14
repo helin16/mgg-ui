@@ -90,23 +90,25 @@ export type iCODCourtOrderResponse = {
   syncToSynById?: number | null;
 }
 
+export type iCODMedicalResponse = {
+  allowIbuprofen: boolean;
+  immunisation: {
+    hasSetOutToAusSchedule: boolean;
+    ImmunisationFormDate?: string;
+    ImmunisationFormStatus?: string;
+    ImmunisationOtherDetails?: string;
+    historyStatementFiles?: iCODResponseAsset[];
+    gpLetterFiles?: iCODResponseAsset[];
+  },
+  syncToSynAt?: string | null;
+  syncToSynById?: number | null;
+}
+
 export type iCODSubmittedResponse = {
-  student: iCODStudentResponse,
-  parent: iCODParentsResponse,
-  courtOrder: iCODCourtOrderResponse,
-  // medicalDetails: {
-  //   allowIbuprofen: yes,
-  //   immunisation: {
-  //     hasSetOutToAusSchedule: 1,
-  //     historyStatementFiles: [
-  //       {
-  //         url: https://mconnectweb.mentonegirls.vic.edu.au/api/uploads/2021/07/12/414_EVIE_M_SPARKMAN_Immunisation_History_Statement_20210712.pdf,
-  //         name: 414_EVIE_M_SPARKMAN_Immunisation_History_Statement_20210712.pdf,
-  //         key: null
-  //       }
-  //     ]
-  //   }
-  // },
+  student?: iCODStudentResponse,
+  parent?: iCODParentsResponse,
+  courtOrder?: iCODCourtOrderResponse,
+  medicalDetails?: iCODMedicalResponse,
   // siblings: [],
   // governmentFunding: {
   //   parent1: {

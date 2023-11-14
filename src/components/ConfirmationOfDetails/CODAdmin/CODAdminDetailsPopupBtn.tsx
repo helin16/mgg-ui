@@ -49,7 +49,7 @@ const CODAdminDetailsPopupBtn = ({
     return (
       <PopupModal
         show={showingPopup === true}
-        handleClose={() => handleClose(false)}
+        handleClose={() => handleClose(true)}
         dialogClassName="modal-80w"
         header={
           <FlexContainer className="justify-content-between full-width align-items-center">
