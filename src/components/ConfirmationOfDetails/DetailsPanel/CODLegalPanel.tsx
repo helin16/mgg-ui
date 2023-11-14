@@ -259,52 +259,51 @@ const CODLegalPanel = ({ response, isDisabled, onNextStep, onSaved, onCancel }: 
     return (
       <FlexContainer className={'justify-content-between'}>
         <div />
-        {editingResponse && (
-          <CODAdminDetailsSaveBtnPanel
-            onSubmitting={submitting => setIsSubmitting(submitting)}
-            isLoading={isLoading || isSubmitting}
-            onNext={onNextStep}
-            syncdLabel={
-              isReadOnly !== true
-                ? undefined
-                : `Details Already Sync'd @ ${moment(
-                  editingResponse?.syncToSynAt
-                ).format("lll")} By ${editingResponse?.syncToSynById}`
-            }
-            editingResponse={{
-              ...response,
+        <CODAdminDetailsSaveBtnPanel
+          onSubmitting={submitting => setIsSubmitting(submitting)}
+          isLoading={isLoading || isSubmitting}
+          onNext={onNextStep}
+          syncdLabel={
+            isReadOnly !== true
+              ? undefined
+              : `Details Already Sync'd @ ${moment(
+                editingResponse?.syncToSynAt
+              ).format("lll")} By ${editingResponse?.syncToSynById}`
+          }
+          editingResponse={{
+            ...response,
+            // @ts-ignore
+            response: {
+              ...(response?.response || {}),
               // @ts-ignore
-              response: {
-                ...(response?.response || {}),
-                courtOrder: editingResponse
-              }
-            }}
-            onSaved={resp => {
-              Toaster.showToast(`Details Sync'd.`, TOAST_TYPE_SUCCESS);
-              onSaved && onSaved(resp);
-            }}
-            onCancel={onCancel}
-            syncFn={resp =>
-              ConfirmationOfDetailsResponseService.update(resp.id, {
-                ...resp,
-                response: {
-                  ...(resp.response || {}),
-                  courtOrder: {
-                    ...(editingResponse || {}),
-                    syncToSynAt: moment().toISOString(),
-                    syncToSynById: currentUser?.synergyId
-                  }
-                }
-              })
+              courtOrder: editingResponse
             }
-          />
-        )}
+          }}
+          onSaved={resp => {
+            Toaster.showToast(`Details Sync'd.`, TOAST_TYPE_SUCCESS);
+            onSaved && onSaved(resp);
+          }}
+          onCancel={onCancel}
+          syncFn={resp =>
+            ConfirmationOfDetailsResponseService.update(resp.id, {
+              ...resp,
+              response: {
+                ...(resp.response || {}),
+                courtOrder: {
+                  ...(editingResponse || {}),
+                  syncToSynAt: moment().toISOString(),
+                  syncToSynById: currentUser?.synergyId
+                }
+              }
+            })
+          }
+        />
       </FlexContainer>
     )
   }
 
   const getContent = () => {
-    if (!editingResponse || isLoading === true) {
+    if (isLoading === true) {
       return <PageLoadingSpinner />;
     }
 
@@ -331,8 +330,9 @@ const CODLegalPanel = ({ response, isDisabled, onNextStep, onSaved, onCancel }: 
                     showAll={false}
                     value={editingResponse?.hasCourtOrders === true}
                     onSelect={value =>
+                      // @ts-ignore
                       setEditingResponse({
-                        ...editingResponse,
+                        ...(editingResponse || {}),
                         hasCourtOrders:
                           // @ts-ignore
                           value && value.value === true ? true : false

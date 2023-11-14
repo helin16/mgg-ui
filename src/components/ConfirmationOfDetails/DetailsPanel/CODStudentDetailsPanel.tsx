@@ -162,7 +162,7 @@ const CODStudentDetailsPanel = ({
       : moment(dateString || "").format("DD MMM YYYY");
   };
 
-  if (!editingResponse || isLoading === true) {
+  if (isLoading === true) {
     return <PageLoadingSpinner />;
   }
 
@@ -601,46 +601,45 @@ const CODStudentDetailsPanel = ({
       </Row>
       <FlexContainer className={'justify-content-between'}>
         <div />
-        {editingResponse && (
-          <CODAdminDetailsSaveBtnPanel
-            onSubmitting={submitting => setIsSubmitting(submitting)}
-            isLoading={isLoading || isSubmitting}
-            onNext={onNextStep}
-            syncdLabel={
-              isReadOnly !== true
-                ? undefined
-                : `Student Details Already Sync'd @ ${moment(
-                    editingResponse?.syncToSynAt
-                  ).format("lll")} By ${editingResponse?.syncToSynById}`
-            }
-            editingResponse={{
-              ...response,
+        <CODAdminDetailsSaveBtnPanel
+          onSubmitting={submitting => setIsSubmitting(submitting)}
+          isLoading={isLoading || isSubmitting}
+          onNext={onNextStep}
+          syncdLabel={
+            isReadOnly !== true
+              ? undefined
+              : `Student Details Already Sync'd @ ${moment(
+                editingResponse?.syncToSynAt
+              ).format("lll")} By ${editingResponse?.syncToSynById}`
+          }
+          editingResponse={{
+            ...response,
+            // @ts-ignore
+            response: {
+              ...(response?.response || {}),
               // @ts-ignore
-              response: {
-                ...(response?.response || {}),
-                student: editingResponse
-              }
-          }}
-            onSaved={resp => {
-              Toaster.showToast(`Student Details Sync'd.`, TOAST_TYPE_SUCCESS);
-              onSaved && onSaved(resp);
-            }}
-            onCancel={onCancel}
-            syncFn={resp =>
-              ConfirmationOfDetailsResponseService.update(resp.id, {
-                ...resp,
-                response: {
-                  ...(resp.response || {}),
-                  student: {
-                    ...(editingResponse || {}),
-                    syncToSynAt: moment().toISOString(),
-                    syncToSynById: currentUser?.synergyId
-                  }
-                }
-              })
+              student: editingResponse
             }
-          />
-        )}
+          }}
+          onSaved={resp => {
+            Toaster.showToast(`Student Details Sync'd.`, TOAST_TYPE_SUCCESS);
+            onSaved && onSaved(resp);
+          }}
+          onCancel={onCancel}
+          syncFn={resp =>
+            ConfirmationOfDetailsResponseService.update(resp.id, {
+              ...resp,
+              response: {
+                ...(resp.response || {}),
+                student: {
+                  ...(editingResponse || {}),
+                  syncToSynAt: moment().toISOString(),
+                  syncToSynById: currentUser?.synergyId
+                }
+              }
+            })
+          }
+        />
       </FlexContainer>
     </Wrapper>
   );

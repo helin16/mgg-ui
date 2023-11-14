@@ -194,9 +194,8 @@ const CODParentsDetailsPanel = ({
       />
     );
   };
-console.log('respponse', response.response);
-console.log('editingResponse', editingResponse);
-  if (!editingResponse || isLoading === true) {
+
+  if (isLoading === true) {
     return <PageLoadingSpinner />;
   }
 
@@ -376,46 +375,45 @@ console.log('editingResponse', editingResponse);
       </Row>
       <FlexContainer className={'justify-content-between'}>
         <div />
-        {editingResponse && (
-          <CODAdminDetailsSaveBtnPanel
-            onSubmitting={submitting => setIsSubmitting(submitting)}
-            isLoading={isLoading || isSubmitting}
-            onNext={onNextStep}
-            syncdLabel={
-              isReadOnly !== true
-                ? undefined
-                : `Parent Details Already Sync'd @ ${moment(
-                  editingResponse?.syncToSynAt
-                ).format("lll")} By ${editingResponse?.syncToSynById}`
-            }
-            editingResponse={{
-              ...response,
+        <CODAdminDetailsSaveBtnPanel
+          onSubmitting={submitting => setIsSubmitting(submitting)}
+          isLoading={isLoading || isSubmitting}
+          onNext={onNextStep}
+          syncdLabel={
+            isReadOnly !== true
+              ? undefined
+              : `Parent Details Already Sync'd @ ${moment(
+                editingResponse?.syncToSynAt
+              ).format("lll")} By ${editingResponse?.syncToSynById}`
+          }
+          editingResponse={{
+            ...response,
+            // @ts-ignore
+            response: {
+              ...(response?.response || {}),
               // @ts-ignore
-              response: {
-                ...(response?.response || {}),
-                parent: editingResponse
-              }
-            }}
-            onSaved={resp => {
-              Toaster.showToast(`Parent Details Sync'd.`, TOAST_TYPE_SUCCESS);
-              onSaved && onSaved(resp);
-            }}
-            onCancel={onCancel}
-            syncFn={resp =>
-              ConfirmationOfDetailsResponseService.update(resp.id, {
-                ...resp,
-                response: {
-                  ...(resp.response || {}),
-                  parent: {
-                    ...(editingResponse || {}),
-                    syncToSynAt: moment().toISOString(),
-                    syncToSynById: currentUser?.synergyId
-                  }
-                }
-              })
+              parent: editingResponse
             }
-          />
-        )}
+          }}
+          onSaved={resp => {
+            Toaster.showToast(`Parent Details Sync'd.`, TOAST_TYPE_SUCCESS);
+            onSaved && onSaved(resp);
+          }}
+          onCancel={onCancel}
+          syncFn={resp =>
+            ConfirmationOfDetailsResponseService.update(resp.id, {
+              ...resp,
+              response: {
+                ...(resp.response || {}),
+                parent: {
+                  ...(editingResponse || {}),
+                  syncToSynAt: moment().toISOString(),
+                  syncToSynById: currentUser?.synergyId
+                }
+              }
+            })
+          }
+        />
       </FlexContainer>
     </Wrapper>
   );
