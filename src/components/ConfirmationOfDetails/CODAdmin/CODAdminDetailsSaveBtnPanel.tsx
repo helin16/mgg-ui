@@ -10,7 +10,7 @@ import moment from "moment-timezone";
 type iCODAdminDetailsSaveBtnPanel = {
   editingResponse: iConfirmationOfDetailsResponse;
   onNext?: () => void;
-  onSaved: (response: iConfirmationOfDetailsResponse) => void;
+  onSaved?: (response: iConfirmationOfDetailsResponse) => void;
   onCancel?: (response?: iConfirmationOfDetailsResponse) => void;
   syncFn: (
     response: iConfirmationOfDetailsResponse
@@ -37,7 +37,7 @@ const CODAdminDetailsSaveBtnPanel = ({
     }
     syncFn(editingResponse)
       .then(resp => {
-        onSaved(resp);
+        onSaved && onSaved(resp);
       })
       .catch(err => {
         Toaster.showApiError(err);
@@ -110,7 +110,7 @@ const CODAdminDetailsSaveBtnPanel = ({
 
   return (
     <FlexContainer
-      className={"justify-content-between space-above align-items-center"}
+      className={"justify-content-between space-above align-items-center cod-submit-btns-wrapper"}
     >
       <div />
       {getBtns()}

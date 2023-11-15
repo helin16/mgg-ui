@@ -11,9 +11,10 @@ import Toaster, {TOAST_TYPE_ERROR} from '../../../services/Toaster';
 type iCODFileListTable = {
   isDisabled?: boolean;
   files: iCODResponseAsset[];
-  deletingFn?: (file: iCODResponseAsset) => Promise<any>
+  deletingFn?: (file: iCODResponseAsset) => Promise<any>;
+  title?: string;
 };
-const CODFileListTable = ({ isDisabled, files, deletingFn }: iCODFileListTable) => {
+const CODFileListTable = ({ isDisabled, files, deletingFn, title }: iCODFileListTable) => {
   const { user: currentUser } = useSelector((state: RootState) => state.auth);
 
 
@@ -24,9 +25,9 @@ const CODFileListTable = ({ isDisabled, files, deletingFn }: iCODFileListTable) 
     }
     if (url.startsWith('data')) {
       const prefix = `data:${file.mimeType};base64,`;
-      console.log('prefix', prefix);
+      // console.log('prefix', prefix);
       const content = file.url.replace(prefix, '').trim();
-      console.log('content', content);
+      // console.log('content', content);
       const decodedData = atob(content);
 
       // Create an array buffer from the decoded data
@@ -40,14 +41,12 @@ const CODFileListTable = ({ isDisabled, files, deletingFn }: iCODFileListTable) 
       // Create a new Blob from the base64 string
       const blob = new Blob([arrayBuffer], { type: file.mimeType });
       // Create a data URL from the Blob
-      const dataUrl = URL.createObjectURL(blob);
-      return dataUrl;
+      return URL.createObjectURL(blob);
     }
     return null;
   }
 
   const openInNewTab = (file: iCODResponseAsset) => {
-    console.log(file.url);
     const url = `${file.url || ''}`.trim();
     const type = `${file.mimeType || ''}`.trim().toLowerCase();
     if (url === '') {
@@ -82,7 +81,7 @@ const CODFileListTable = ({ isDisabled, files, deletingFn }: iCODFileListTable) 
       columns={[
         {
           key: "file",
-          header: "Documents",
+          header: title || "Documents",
           cell: (col: iTableColumn, asset: iCODResponseAsset) => {
             return (
               <td key={col.key}>

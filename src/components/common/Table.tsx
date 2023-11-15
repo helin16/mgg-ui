@@ -24,7 +24,7 @@ export type iTableColumn = {
   isSelectable?: boolean;
   header: ((column: iTableColumn) => any) | any;
   footer?: ((column: iTableColumn) => any) | any;
-  cell?: ((column: iTableColumn, data?: any) => any) | string;
+  cell?: ((column: iTableColumn, data?: any, index?: number) => any) | string;
   sort?: number;
 };
 
@@ -259,11 +259,11 @@ const Table = ({
     );
   };
 
-  const getCell = (column: iTableColumn, data: any) => {
+  const getCell = (column: iTableColumn, data: any, index?: number) => {
     if (typeof column.cell !== "function") {
       return <td key={column.key}>{column.cell}</td>;
     }
-    const result = column.cell(column, data);
+    const result = column.cell(column, data, index);
     if (typeof result === "string") {
       return <td key={column.key}>{result}</td>;
     }
@@ -304,7 +304,7 @@ const Table = ({
           <tbody>
             {rows.map((row, index) => {
               return (
-                <tr key={index}>{cols.map(column => getCell(column, row))}</tr>
+                <tr key={index}>{cols.map(column => getCell(column, row, index))}</tr>
               );
             })}
           </tbody>

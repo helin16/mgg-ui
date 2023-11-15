@@ -31,6 +31,11 @@ const Wrapper = styled.div`
       padding: 0px;
       text-align: left;
       height: auto;
+      font-size: 11px;
+    }
+    
+    ul {
+      margin-bottom: 0px;
     }
   }
 `;
@@ -192,6 +197,7 @@ const CODMedicalDetailsPanel = ({
             )}
             <CODFileListTable
               files={eFiles}
+              title={editingResponse?.immunisation?.hasSetOutToAusSchedule === false ? 'GP Letter(s)' : 'Immunisation History Statement(s)'}
               isDisabled={isReadOnly === true}
               deletingFn={asset => {
                 return new Promise(() =>
@@ -260,159 +266,154 @@ const CODMedicalDetailsPanel = ({
     }
     return (
       <>
-        <Row>
-          <Col>
-            <CODAdminInputPanel
-              label={"Immunisation Form Date:"}
-              value={
-                `${editingResponse?.immunisation?.ImmunisationFormDate ||
-                  ""}`.trim() === ""
-                  ? "_BLANK"
-                  : moment
-                      .tz(
-                        `${editingResponse?.immunisation
-                          ?.ImmunisationFormDate || ""}`.trim(),
-                        moment.tz.guess()
-                      )
-                      .format("DD MMM YYYY")
-              }
-              valueFromDB={
-                `${medicalDetailsFromDB?.ImmunisationFormDate || ""}`.trim() ===
-                ""
-                  ? "_BLANK"
-                  : moment(
-                      `${medicalDetailsFromDB?.ImmunisationFormDate ||
-                        ""}`.trim()
-                    )
-                      .utc()
-                      .format("DD MMM YYYY")
-              }
-              getComponent={isSameFromDB => {
-                return (
-                  <DateTimePicker
-                    isDisabled={isReadOnly === true}
-                    className={`form-control ${
-                      isSameFromDB === true ? "" : "is-invalid"
-                    }`}
-                    value={
-                      `${editingResponse?.immunisation?.ImmunisationFormDate ||
-                        ""}`.trim() === ""
-                        ? undefined
-                        : moment
-                            .tz(
-                              `${editingResponse?.immunisation
-                                ?.ImmunisationFormDate || ""}`.trim(),
-                              moment.tz.guess()
-                            )
-                            .format("DD MMM YYYY")
-                    }
-                    timeFormat={false}
-                    dateFormat={"DD MMM YYYY"}
-                    onChange={selected => {
-                      if (typeof selected !== "object") {
-                        return;
-                      }
-                      updateMedicalResponse("immunisation", {
-                        ...(editingResponse?.immunisation || {}),
-                        // @ts-ignore
-                        ImmunisationFormDate: selected.format("YYYY-MM-DD")
-                      });
-                    }}
-                  />
-                );
-              }}
-            />
-          </Col>
-        </Row>
-        <Row>
-          <Col>
-            <CODAdminInputPanel
-              label={"Immunisation Form Status:"}
-              value={
-                `${editingResponse?.immunisation?.ImmunisationFormStatus ||
-                  ""}`.trim() === ""
-                  ? "_BLANK"
-                  : `${editingResponse?.immunisation?.ImmunisationFormStatus ||
-                      ""}`.trim()
-              }
-              valueFromDB={
-                `${medicalDetailsFromDB?.ImmunisationFormStatus ||
-                  ""}`.trim() === ""
-                  ? "_BLANK"
-                  : `${medicalDetailsFromDB?.ImmunisationFormStatus ||
-                      ""}`.trim()
-              }
-              getComponent={isSameFromDB => {
-                return (
-                  <SynLuImmunisationFormStatusSelector
-                    className={`form-control ${
-                      isSameFromDB === true ? "" : "is-invalid"
-                    }`}
-                    isDisabled={isReadOnly === true}
-                    values={
+        <Col md={3} sm={12}>
+          <CODAdminInputPanel
+            label={"Immunisation Form Date:"}
+            value={
+              `${editingResponse?.immunisation?.ImmunisationFormDate ||
+                ""}`.trim() === ""
+                ? "_BLANK"
+                : moment
+                    .tz(
                       `${editingResponse?.immunisation
-                        ?.ImmunisationFormStatus || ""}`.trim() === ""
-                        ? []
-                        : [
-                            `${editingResponse?.immunisation
-                              ?.ImmunisationFormStatus || ""}`.trim()
-                          ]
-                    }
-                    onSelect={option => {
-                      updateMedicalResponse("immunisation", {
-                        ...(editingResponse?.immunisation || {}),
-                        // @ts-ignore
-                        ImmunisationFormStatus:
-                          option === null
-                            ? []
-                            : Array.isArray(option)
-                            ? option.map(opt => `${opt.value}`)
-                            : [`${option.value}`]
-                      });
-                    }}
-                  />
-                );
-              }}
-            />
-          </Col>
-        </Row>
-        <Row>
-          <Col>
-            <CODAdminInputPanel
-              label={"Immunisation Details:"}
-              value={
-                `${editingResponse?.immunisation?.ImmunisationOtherDetails ||
-                  ""}`.trim() === ""
-                  ? "_BLANK"
-                  : `${editingResponse?.immunisation
-                      ?.ImmunisationOtherDetails || ""}`.trim()
-              }
-              valueFromDB={
-                `${medicalDetailsFromDB?.ImmunisationOtherDetails ||
-                  ""}`.trim() === ""
-                  ? "_BLANK"
-                  : `${medicalDetailsFromDB?.ImmunisationOtherDetails ||
+                        ?.ImmunisationFormDate || ""}`.trim(),
+                      moment.tz.guess()
+                    )
+                    .format("DD MMM YYYY")
+            }
+            valueFromDB={
+              `${medicalDetailsFromDB?.ImmunisationFormDate || ""}`.trim() ===
+              ""
+                ? "_BLANK"
+                : moment(
+                    `${medicalDetailsFromDB?.ImmunisationFormDate ||
                       ""}`.trim()
-              }
-              getComponent={isSameFromDB => {
-                return (
-                  <FormControl
-                    disabled={isReadOnly === true}
-                    as={"textarea"}
-                    isInvalid={isSameFromDB !== true}
-                    onChange={event => {
-                      updateMedicalResponse("immunisation", {
-                        ...(editingResponse?.immunisation || {}),
-                        ImmunisationOtherDetails: `${event.target.value ||
-                          ""}`.trim()
-                      });
-                    }}
-                  />
-                );
-              }}
-            />
-          </Col>
-        </Row>
+                  )
+                    .utc()
+                    .format("DD MMM YYYY")
+            }
+            getComponent={isSameFromDB => {
+              return (
+                <DateTimePicker
+                  isDisabled={isReadOnly === true}
+                  className={`form-control ${
+                    isSameFromDB === true ? "" : "is-invalid"
+                  }`}
+                  value={
+                    `${editingResponse?.immunisation?.ImmunisationFormDate ||
+                      ""}`.trim() === ""
+                      ? undefined
+                      : moment
+                          .tz(
+                            `${editingResponse?.immunisation
+                              ?.ImmunisationFormDate || ""}`.trim(),
+                            moment.tz.guess()
+                          )
+                          .format("DD MMM YYYY")
+                  }
+                  timeFormat={false}
+                  dateFormat={"DD MMM YYYY"}
+                  onChange={selected => {
+                    if (typeof selected !== "object") {
+                      return;
+                    }
+                    updateMedicalResponse("immunisation", {
+                      ...(editingResponse?.immunisation || {}),
+                      // @ts-ignore
+                      ImmunisationFormDate: selected.format("YYYY-MM-DD")
+                    });
+                  }}
+                />
+              );
+            }}
+          />
+        </Col>
+        <Col md={3} sm={12}>
+          <CODAdminInputPanel
+            label={"Immunisation Form Status:"}
+            value={
+              `${editingResponse?.immunisation?.ImmunisationFormStatus ||
+                ""}`.trim() === ""
+                ? "_BLANK"
+                : `${editingResponse?.immunisation?.ImmunisationFormStatus ||
+                    ""}`.trim()
+            }
+            valueFromDB={
+              `${medicalDetailsFromDB?.ImmunisationFormStatus ||
+                ""}`.trim() === ""
+                ? "_BLANK"
+                : `${medicalDetailsFromDB?.ImmunisationFormStatus ||
+                    ""}`.trim()
+            }
+            getComponent={isSameFromDB => {
+              return (
+                <SynLuImmunisationFormStatusSelector
+                  className={`form-control ${
+                    isSameFromDB === true ? "" : "is-invalid"
+                  }`}
+                  isDisabled={isReadOnly === true}
+                  values={
+                    `${editingResponse?.immunisation
+                      ?.ImmunisationFormStatus || ""}`.trim() === ""
+                      ? []
+                      : [
+                          `${editingResponse?.immunisation
+                            ?.ImmunisationFormStatus || ""}`.trim()
+                        ]
+                  }
+                  onSelect={option => {
+                    updateMedicalResponse("immunisation", {
+                      ...(editingResponse?.immunisation || {}),
+                      // @ts-ignore
+                      ImmunisationFormStatus:
+                        option === null
+                          ? []
+                          : Array.isArray(option)
+                          ? option.map(opt => `${opt.value}`)
+                          : [`${option.value}`]
+                    });
+                  }}
+                />
+              );
+            }}
+          />
+        </Col>
+        <Col md={12}>
+          <CODAdminInputPanel
+            label={"Immunisation Details:"}
+            value={
+              `${editingResponse?.immunisation?.ImmunisationOtherDetails ||
+                ""}`.trim() === ""
+                ? "_BLANK"
+                : `${editingResponse?.immunisation
+                    ?.ImmunisationOtherDetails || ""}`.trim()
+            }
+            valueFromDB={
+              `${medicalDetailsFromDB?.ImmunisationOtherDetails ||
+                ""}`.trim() === ""
+                ? "_BLANK"
+                : `${medicalDetailsFromDB?.ImmunisationOtherDetails ||
+                    ""}`.trim()
+            }
+            getComponent={isSameFromDB => {
+              return (
+                <FormControl
+                  disabled={isReadOnly === true}
+                  rows={3}
+                  as={"textarea"}
+                  isInvalid={isSameFromDB !== true}
+                  onChange={event => {
+                    updateMedicalResponse("immunisation", {
+                      ...(editingResponse?.immunisation || {}),
+                      ImmunisationOtherDetails: `${event.target.value ||
+                        ""}`.trim()
+                    });
+                  }}
+                />
+              );
+            }}
+          />
+        </Col>
       </>
     );
   };
@@ -466,7 +467,6 @@ const CODMedicalDetailsPanel = ({
           />
         </Col>
       </Row>
-      <hr />
       <Row>
         <Col>
           <CODAdminInputPanel
@@ -497,8 +497,8 @@ const CODMedicalDetailsPanel = ({
             }}
           />
         </Col>
+        {getImmunisationPanel()}
       </Row>
-      {getImmunisationPanel()}
       {getFileContents()}
       <FlexContainer className={"justify-content-between"}>
         <div />

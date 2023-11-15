@@ -16,11 +16,12 @@ type iCODAdminInputPanel = {
   isRequired?: boolean;
   label: string;
   value: string;
+  hint?: any;
   valueFromDB: string;
   getIsSameFromDBFn?: () => boolean;
   getSynergeticLabelFn?: (isSameFromDB: boolean, valueFromDB: string) => any;
 }
-const CODAdminInputPanel = ({getComponent, label, value, valueFromDB, getIsSameFromDBFn, isRequired, getSynergeticLabelFn} : iCODAdminInputPanel) => {
+const CODAdminInputPanel = ({getComponent, label, value, valueFromDB, getIsSameFromDBFn, isRequired, getSynergeticLabelFn, hint} : iCODAdminInputPanel) => {
   const isSameInDB = getIsSameFromDBFn ? getIsSameFromDBFn() : `${value || ""}`.trim() === `${valueFromDB}`.trim();
   return (
     <Wrapper className={`input-div ${isSameInDB === true ? "" : "has-error"}`}>
@@ -38,6 +39,7 @@ const CODAdminInputPanel = ({getComponent, label, value, valueFromDB, getIsSameF
         </small>
       </FlexContainer>
       {getComponent(isSameInDB)}
+      <div className={'hint-wrapper'}>{hint}</div>
       {isSameInDB === true ? null : (
         <small className={"text-danger"}>
           Value is different from the system.
