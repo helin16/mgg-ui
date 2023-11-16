@@ -1,8 +1,8 @@
 import PageLoadingSpinner from '../../../../components/common/PageLoadingSpinner';
-import iVStudent from '../../../../types/Synergetic/iVStudent';
+import iVStudent from '../../../../types/Synergetic/Student/iVStudent';
 import {Image, Table} from 'react-bootstrap';
 import styled from 'styled-components';
-import iSynVStudentClass from '../../../../types/Synergetic/iSynVStudentClass';
+import iSynVStudentClass from '../../../../types/Synergetic/Student/iSynVStudentClass';
 import StudentListExportBtn from './StudentListExportBtn';
 import moment from 'moment-timezone';
 

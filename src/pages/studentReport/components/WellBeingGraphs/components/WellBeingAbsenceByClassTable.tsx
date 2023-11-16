@@ -1,4 +1,4 @@
-import iVStudent from "../../../../../types/Synergetic/iVStudent";
+import iVStudent from "../../../../../types/Synergetic/Student/iVStudent";
 import { useEffect, useState } from "react";
 import iSynVAttendance from "../../../../../types/Synergetic/Attendance/iSynVAttendance";
 import Table, { iTableColumn } from "../../../../../components/common/Table";

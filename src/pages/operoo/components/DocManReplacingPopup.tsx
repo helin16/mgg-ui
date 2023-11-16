@@ -5,7 +5,7 @@ import {Form} from 'react-bootstrap';
 import iOperooSafetyAlert from '../../../types/Operoo/iOperooSafetyAlert';
 import {useState} from 'react';
 import OperooSafetyAlertService from '../../../services/Operoo/OperooSafetyAlertService';
-import iVStudent from '../../../types/Synergetic/iVStudent';
+import iVStudent from '../../../types/Synergetic/Student/iVStudent';
 import OperooExisitingDocViewer from './OperooExisitingDocViewer';
 import OperooNewDocViewer from './OperooNewDocViewer';
 import moment from 'moment-timezone';

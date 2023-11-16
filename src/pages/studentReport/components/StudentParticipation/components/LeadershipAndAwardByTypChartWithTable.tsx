@@ -1,5 +1,5 @@
-import iVStudent from "../../../../../types/Synergetic/iVStudent";
-import iStudentReportAward from "../../../../../types/Synergetic/iStudentReportAward";
+import iVStudent from "../../../../../types/Synergetic/Student/iVStudent";
+import iStudentReportAward from "../../../../../types/Synergetic/Student/iStudentReportAward";
 import styled from "styled-components";
 import Chart from "../../../../../components/chart/Chart";
 import {useEffect, useState} from 'react';

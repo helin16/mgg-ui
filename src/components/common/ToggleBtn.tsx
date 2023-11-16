@@ -14,6 +14,17 @@ type iToggle = {
 }
 const Wrapper = styled.div`
   display: inline-block;
+  
+  &.disabled {
+    .btn {
+      cursor: initial !important;
+    }
+    .btn-success {
+      background-color: #777 !important;
+      border-color:  #777 !important;
+    }
+  }
+  
   .switch {
     span {
       position: absolute;
@@ -56,7 +67,7 @@ const ToggleBtn = ({
 }: iToggle) => {
 
   return (
-    <Wrapper className={className} style={style}>
+    <Wrapper className={`${className || ''} ${isDisabled === true ? 'disabled' : ''}`} style={style}>
       <BootstrapSwitchButton
         disabled={isDisabled}
         checked={checked}

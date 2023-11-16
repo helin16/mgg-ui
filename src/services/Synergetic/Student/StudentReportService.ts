@@ -1,12 +1,12 @@
 import AppService, {iConfigParams} from '../../AppService';
-import iStudentReportYear from '../../../types/Synergetic/iStudentReportYear';
-import iStudentReportResult from '../../../types/Synergetic/iStudentReportResult';
-import iStudentReportComparativeResultMap from '../../../types/Synergetic/iStudentReportComparativeResult';
-import iStudentReportCoCurricular from '../../../types/Synergetic/iStudentReportCoCurricular';
-import iStudentReportAward from '../../../types/Synergetic/iStudentReportAward';
+import iStudentReportYear from '../../../types/Synergetic/Student/iStudentReportYear';
+import iStudentReportResult from '../../../types/Synergetic/Student/iStudentReportResult';
+import iStudentReportComparativeResultMap from '../../../types/Synergetic/Student/iStudentReportComparativeResult';
+import iStudentReportCoCurricular from '../../../types/Synergetic/Student/iStudentReportCoCurricular';
+import iStudentReportAward from '../../../types/Synergetic/Student/iStudentReportAward';
 import iAsset from '../../../types/asset/iAsset';
 import {iPowerBiReportMap} from '../../../types/student/iPowerBIReports';
-import iStudentReportStyle from '../../../types/Synergetic/iStudentReportStyle';
+import iStudentReportStyle from '../../../types/Synergetic/Student/iStudentReportStyle';
 import iPaginatedResult from '../../../types/iPaginatedResult';
 
 const baseEndPoint = '/studentReport';

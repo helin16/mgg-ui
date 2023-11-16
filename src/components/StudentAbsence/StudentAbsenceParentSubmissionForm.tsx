@@ -12,10 +12,10 @@ import {
   STUDENT_CONTACT_TYPE_SC1,
   STUDENT_CONTACT_TYPE_SC2,
   STUDENT_CONTACT_TYPE_SC3
-} from "../../types/Synergetic/iStudentContact";
+} from "../../types/Synergetic/Student/iStudentContact";
 import SynVStudentService from "../../services/Synergetic/Student/SynVStudentService";
 import * as _ from "lodash";
-import iVStudent from "../../types/Synergetic/iVStudent";
+import iVStudent from "../../types/Synergetic/Student/iVStudent";
 import Toaster from "../../services/Toaster";
 import SelectBox from "../common/SelectBox";
 import SectionDiv from '../common/SectionDiv';

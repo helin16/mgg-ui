@@ -4,7 +4,7 @@ import { Col, FormControl, Row } from "react-bootstrap";
 import React, { useEffect, useState } from "react";
 import { iCODStudentResponse } from "../../../types/ConfirmationOfDetails/iConfirmationOfDetailsResponse";
 import PageLoadingSpinner from "../../common/PageLoadingSpinner";
-import iVStudent from "../../../types/Synergetic/iVStudent";
+import iVStudent from "../../../types/Synergetic/Student/iVStudent";
 import SynVStudentService from "../../../services/Synergetic/Student/SynVStudentService";
 import Toaster, { TOAST_TYPE_SUCCESS } from "../../../services/Toaster";
 import moment from "moment-timezone";

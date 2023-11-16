@@ -1,7 +1,7 @@
 import iSynVFutureStudent from '../../types/Synergetic/iSynVFutureStudent';
 import AppService, {iConfigParams} from '../AppService';
 import iPaginatedResult from '../../types/iPaginatedResult';
-import iVStudent from '../../types/Synergetic/iVStudent';
+import iVStudent from '../../types/Synergetic/Student/iVStudent';
 import ISynLuYearLevel from '../../types/Synergetic/Lookup/iSynLuYearLevel';
 
 

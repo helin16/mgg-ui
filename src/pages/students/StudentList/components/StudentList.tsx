@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import iPaginatedResult from "../../../../types/iPaginatedResult";
-import { iVPastAndCurrentStudent } from "../../../../types/Synergetic/iVStudent";
+import { iVPastAndCurrentStudent } from "../../../../types/Synergetic/Student/iVStudent";
 import SynVStudentService from "../../../../services/Synergetic/Student/SynVStudentService";
 import Toaster from "../../../../services/Toaster";
 import PageLoadingSpinner from "../../../../components/common/PageLoadingSpinner";

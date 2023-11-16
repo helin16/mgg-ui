@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import iStudentReportYear, {getDataForClone} from '../../../../types/Synergetic/iStudentReportYear';
+import iStudentReportYear, {getDataForClone} from '../../../../types/Synergetic/Student/iStudentReportYear';
 import {Alert, Button, Col, Form, Row} from 'react-bootstrap';
 import FileYearSelector from '../../../../components/student/FileYearSelector';
 import SynCampusSelector from '../../../../components/student/SynCampusSelector';
@@ -17,7 +17,7 @@ import LoadingBtn from '../../../../components/common/LoadingBtn';
 import EmptyState from '../../../../components/common/EmptyState';
 import StudentReportService from '../../../../services/Synergetic/Student/StudentReportService';
 import * as Icons from 'react-bootstrap-icons';
-import {STUDENT_REPORT_YEAR_STYLE_DOCMAN_DOWNLOAD} from '../../../../types/Synergetic/iStudentReportStyle';
+import {STUDENT_REPORT_YEAR_STYLE_DOCMAN_DOWNLOAD} from '../../../../types/Synergetic/Student/iStudentReportStyle';
 
 const Wrapper = styled.div`
   .form-control.is-invalid {

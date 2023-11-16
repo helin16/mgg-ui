@@ -3,7 +3,7 @@ import iOperooSafetyAlert, {
   OPEROO_STATUS_SAFETY_ALERT_UPDATED
 } from '../../../types/Operoo/iOperooSafetyAlert';
 import styled from 'styled-components';
-import iVStudent from '../../../types/Synergetic/iVStudent';
+import iVStudent from '../../../types/Synergetic/Student/iVStudent';
 import {Badge, Button, Image, Spinner, Table} from 'react-bootstrap';
 import OperooSafetyAlertActionRow from './OperooSafetyAlertActionRow';
 import {useState} from 'react';

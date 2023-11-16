@@ -1,10 +1,10 @@
-import iVStudent from '../../../types/Synergetic/iVStudent';
+import iVStudent from '../../../types/Synergetic/Student/iVStudent';
 import PageTitle from '../../../components/PageTitle';
 import {Button, Spinner, Tab, Tabs} from 'react-bootstrap';
 import {useEffect, useState} from 'react';
 import styled from 'styled-components';
 import * as Icon from 'react-bootstrap-icons';
-import iStudentReportYear from '../../../types/Synergetic/iStudentReportYear';
+import iStudentReportYear from '../../../types/Synergetic/Student/iStudentReportYear';
 import ReportedYearsList from './AcademicReports/ReportedYearsList';
 import StudentAcademicReportDetails from './AcademicReports/StudentAcademicReportDetails';
 import {useSelector} from 'react-redux';

@@ -1,6 +1,6 @@
 import AppService, {iConfigParams} from '../AppService';
 import iPaginatedResult from '../../types/iPaginatedResult';
-import iPastStudent from '../../types/Synergetic/iPastStudent';
+import iPastStudent from '../../types/Synergetic/Student/iPastStudent';
 
 const endPoint = '/syn/pastStudent';
 const getAll = (params: iConfigParams = {}): Promise<iPaginatedResult<iPastStudent>> => {

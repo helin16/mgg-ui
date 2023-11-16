@@ -1,6 +1,6 @@
 import AppService, {iConfigParams} from '../../AppService';
 import iSynVStudentContactsCurrentPastFutureCombined
-  from '../../../types/Synergetic/iSynVStudentContactsCurrentPastFutureCombined';
+  from '../../../types/Synergetic/Student/iSynVStudentContactsCurrentPastFutureCombined';
 import iPaginatedResult from '../../../types/iPaginatedResult';
 
 const endPoint = `/syn/vStudentContactsCurrentPastFutureCombined`;

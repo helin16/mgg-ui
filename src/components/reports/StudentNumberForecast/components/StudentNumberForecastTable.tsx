@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import * as _ from "lodash";
 import ISynLuYearLevel from "../../../../types/Synergetic/Lookup/iSynLuYearLevel";
 import Table, { iTableColumn } from "../../../common/Table";
-import iVStudent from "../../../../types/Synergetic/iVStudent";
+import iVStudent from "../../../../types/Synergetic/Student/iVStudent";
 import iFunnelLead from "../../../../types/Funnel/iFunnelLead";
 import StudentNumberDetailsPopupBtn from "./StudentNumberDetailsPopupBtn";
 import styled from "styled-components";

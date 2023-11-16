@@ -1,7 +1,7 @@
 import iVStudent, {
   SYN_STUDENT_STATUS_ID_LEAVING,
   SYN_STUDENT_STATUS_ID_LEFT
-} from '../../../../types/Synergetic/iVStudent';
+} from '../../../../types/Synergetic/Student/iVStudent';
 import {Badge} from 'react-bootstrap';
 import React from 'react';
 import styled from 'styled-components';

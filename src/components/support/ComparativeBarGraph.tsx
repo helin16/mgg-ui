@@ -1,10 +1,10 @@
 import {useEffect, useState} from "react";
-import iStudentReportResult from "../../types/Synergetic/iStudentReportResult";
+import iStudentReportResult from "../../types/Synergetic/Student/iStudentReportResult";
 import ComparativeBarGraphDisplay from "./ComparativeBarGraphDisplay";
 import StudentReportService from '../../services/Synergetic/Student/StudentReportService';
 import Toaster from '../../services/Toaster';
 import {Spinner} from 'react-bootstrap';
-import iStudentReportYear from '../../types/Synergetic/iStudentReportYear';
+import iStudentReportYear from '../../types/Synergetic/Student/iStudentReportYear';
 import * as _ from 'lodash';
 import MathHelper from '../../helper/MathHelper';
 

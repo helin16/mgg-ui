@@ -5,7 +5,7 @@ import {
   iRecordType,
 } from '../../../types/StudentAbsence/iStudentAbsence';
 import StudentAbsenceService from '../../../services/StudentAbsences/StudentAbsenceService';
-import iVStudent from '../../../types/Synergetic/iVStudent';
+import iVStudent from '../../../types/Synergetic/Student/iVStudent';
 import iStudentAbsenceSchedule from '../../../types/StudentAbsence/iStudentAbsenceSchedule';
 import StudentScheduledAbsenceEditPanel from './StudentScheduledAbsenceEditPanel';
 

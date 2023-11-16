@@ -1,7 +1,7 @@
 import * as Icon from 'react-bootstrap-icons';
 import LoadingBtn from '../../../../../../components/common/LoadingBtn';
-import iVStudent from '../../../../../../types/Synergetic/iVStudent';
-import iStudentReportYear from '../../../../../../types/Synergetic/iStudentReportYear';
+import iVStudent from '../../../../../../types/Synergetic/Student/iVStudent';
+import iStudentReportYear from '../../../../../../types/Synergetic/Student/iStudentReportYear';
 import {useState} from 'react';
 import StudentReportService from '../../../../../../services/Synergetic/Student/StudentReportService';
 import {Button} from 'react-bootstrap';

@@ -6,11 +6,11 @@ import {RootState} from '../../redux/makeReduxStore';
 import moment from 'moment-timezone';
 import Toaster, {TOAST_TYPE_ERROR} from '../../services/Toaster';
 import SynVStudentContactAllAddressService from '../../services/Synergetic/Student/SynVStudentContactAllAddressService';
-import iSynVStudentContactAllAddress from '../../types/Synergetic/iSynVStudentContactAllAddress';
+import iSynVStudentContactAllAddress from '../../types/Synergetic/Student/iSynVStudentContactAllAddress';
 import {
   STUDENT_CONTACT_TYPE_SC1,
   STUDENT_CONTACT_TYPE_SC2,
-} from '../../types/Synergetic/iStudentContact';
+} from '../../types/Synergetic/Student/iStudentContact';
 import ParentDirectoryRow from './components/ParentDirectoryRow';
 import {HEADER_NAME_SELECTING_FIELDS} from '../../services/AppService';
 import ParentDirectorySearchPanel, {iParentDirectorySearchCriteria} from './components/ParentDirectorySearchPanel';

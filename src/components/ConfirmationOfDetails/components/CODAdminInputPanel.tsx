@@ -17,12 +17,27 @@ type iCODAdminInputPanel = {
   label: string;
   value: string;
   hint?: any;
-  valueFromDB: string;
+  valueFromDB?: string;
   getIsSameFromDBFn?: () => boolean;
   getSynergeticLabelFn?: (isSameFromDB: boolean, valueFromDB: string) => any;
 }
 const CODAdminInputPanel = ({getComponent, label, value, valueFromDB, getIsSameFromDBFn, isRequired, getSynergeticLabelFn, hint} : iCODAdminInputPanel) => {
   const isSameInDB = getIsSameFromDBFn ? getIsSameFromDBFn() : `${value || ""}`.trim() === `${valueFromDB}`.trim();
+
+  const getValueFromDBPanel = () => {
+    if (!valueFromDB) {
+      return null;
+    }
+    return (
+      <small
+        title={`System Value: ${valueFromDB}`}
+        className={`syn-value ellipsis ${isSameInDB === true ? "" : "text-danger"}`}
+      >
+        {getSynergeticLabelFn ? getSynergeticLabelFn(isSameInDB, valueFromDB) : (`${valueFromDB}`.trim() === '' ? 'NULL' : valueFromDB)}
+      </small>
+    )
+  }
+
   return (
     <Wrapper className={`input-div ${isSameInDB === true ? "" : "has-error"}`}>
       <FlexContainer className={"justify-content-between"}>
@@ -31,12 +46,7 @@ const CODAdminInputPanel = ({getComponent, label, value, valueFromDB, getIsSameF
           isRequired={isRequired}
           className={isSameInDB === true ? "" : "text-danger"}
         />
-        <small
-          title={`System Value: ${valueFromDB}`}
-          className={`syn-value ellipsis ${isSameInDB === true ? "" : "text-danger"}`}
-        >
-          {getSynergeticLabelFn ? getSynergeticLabelFn(isSameInDB, valueFromDB) : (`${valueFromDB}`.trim() === '' ? 'NULL' : valueFromDB)}
-        </small>
+        {getValueFromDBPanel()}
       </FlexContainer>
       {getComponent(isSameInDB)}
       <div className={'hint-wrapper'}>{hint}</div>

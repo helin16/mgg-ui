@@ -3,11 +3,11 @@ import * as _ from 'lodash';
 import iStudentReportResult, {
   STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_OVERALL_GRADE,
   STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_OVERALL_GRADE_JNR
-} from '../../../../../../types/Synergetic/iStudentReportResult';
+} from '../../../../../../types/Synergetic/Student/iStudentReportResult';
 import styled from 'styled-components';
 import SectionDiv from '../../../../../../components/common/SectionDiv';
-import iStudentReportYear from '../../../../../../types/Synergetic/iStudentReportYear';
-import iVStudent from '../../../../../../types/Synergetic/iVStudent';
+import iStudentReportYear from '../../../../../../types/Synergetic/Student/iStudentReportYear';
+import iVStudent from '../../../../../../types/Synergetic/Student/iVStudent';
 import SynLuYearLevelService from '../../../../../../services/Synergetic/Lookup/SynLuYearLevelService';
 import {Spinner} from 'react-bootstrap';
 import ILuYearLevel from '../../../../../../types/Synergetic/Lookup/iSynLuYearLevel';

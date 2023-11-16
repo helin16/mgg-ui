@@ -1,6 +1,6 @@
 import AppService, {iConfigParams} from '../../AppService';
 import IPaginatedResult from '../../../types/iPaginatedResult';
-import iStudentReportCoCurricular from '../../../types/Synergetic/iStudentReportCoCurricular';
+import iStudentReportCoCurricular from '../../../types/Synergetic/Student/iStudentReportCoCurricular';
 
 
 

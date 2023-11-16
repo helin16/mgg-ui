@@ -7,7 +7,7 @@ import Toaster from '../../../services/Toaster';
 import ReactTableWithFixedColumns from '../../../components/common/ReactTableWithFixedColumns';
 import ISynLuYearLevel from '../../../types/Synergetic/Lookup/iSynLuYearLevel';
 import iHouseAwardEvent from '../../../types/HouseAwards/iHouseAwardEvent';
-import iVStudent from '../../../types/Synergetic/iVStudent';
+import iVStudent from '../../../types/Synergetic/Student/iVStudent';
 import HouseAwardStudentYearService from '../../../services/HouseAwards/HouseAwardStudentYearService';
 import iHouseAwardStudentYear from '../../../types/HouseAwards/iHouseAwardStudentYear';
 import iHouseAwardScore from '../../../types/HouseAwards/iHouseAwardScore';

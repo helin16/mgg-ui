@@ -1,4 +1,4 @@
-import iVStudent from "../../../../../types/Synergetic/iVStudent";
+import iVStudent from "../../../../../types/Synergetic/Student/iVStudent";
 import { useEffect, useState } from "react";
 import Chart from "../../../../../components/chart/Chart";
 import styled from "styled-components";

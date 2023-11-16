@@ -1,4 +1,4 @@
-import iSynLuCountry from './Lookup/iSynLuCountry';
+import iSynLuCountry from '../Lookup/iSynLuCountry';
 
 export const SYN_STUDENT_STATUS_ID_NORMAL = '0';
 export const SYN_STUDENT_STATUS_ID_NEW = '1';

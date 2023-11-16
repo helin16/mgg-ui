@@ -1,5 +1,5 @@
 import {Button, ButtonProps, Dropdown, Table} from 'react-bootstrap';
-import {iVPastAndCurrentStudent} from '../../../../types/Synergetic/iVStudent';
+import {iVPastAndCurrentStudent} from '../../../../types/Synergetic/Student/iVStudent';
 import {iAttendanceMap} from './StudentAttendanceRateReportTable';
 import React, {useState} from 'react';
 import PopupModal from '../../../../components/common/PopupModal';

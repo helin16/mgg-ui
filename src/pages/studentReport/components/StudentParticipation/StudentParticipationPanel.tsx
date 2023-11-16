@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { Col, Row } from "react-bootstrap";
-import iVStudent from "../../../../types/Synergetic/iVStudent";
+import iVStudent from "../../../../types/Synergetic/Student/iVStudent";
 import { mainRed } from "../../../../AppWrapper";
 import { FlexContainer } from "../../../../styles";
 import SectionDiv from "../../../../components/common/SectionDiv";
@@ -23,9 +23,9 @@ import {
 } from "../../../../types/HouseAwards/iHouseAwardEventType";
 import SynFileSemesterSelector from "../../../../components/student/SynFileSemesterSelector";
 import SynVStudentAwardService from "../../../../services/Synergetic/Student/SynVStudentAwardService";
-import iStudentReportAward from "../../../../types/Synergetic/iStudentReportAward";
+import iStudentReportAward from "../../../../types/Synergetic/Student/iStudentReportAward";
 import SynVStudentCoCurricularService from "../../../../services/Synergetic/Student/SynVStudentCoCurricularService";
-import iStudentReportCoCurricular from "../../../../types/Synergetic/iStudentReportCoCurricular";
+import iStudentReportCoCurricular from "../../../../types/Synergetic/Student/iStudentReportCoCurricular";
 import CoCurricularByTypeChartWithTable from "./components/CoCurricularByTypeChartWithTable";
 import LeadershipAndAwardByTypChartWithTable from "./components/LeadershipAndAwardByTypChartWithTable";
 

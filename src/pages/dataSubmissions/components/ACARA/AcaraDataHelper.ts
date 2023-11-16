@@ -6,7 +6,7 @@ import * as _ from 'lodash';
 // 3 = Another term/Non-binary (including use a different term)
 // 9 = Where not stated or adequately described."
 
-import {iVPastAndCurrentStudent} from '../../../../types/Synergetic/iVStudent';
+import {iVPastAndCurrentStudent} from '../../../../types/Synergetic/Student/iVStudent';
 import iAcaraData from './iAcaraData';
 
 const translateGender = (student: iVPastAndCurrentStudent): string => {

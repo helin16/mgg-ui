@@ -1,4 +1,4 @@
-import iVStudent from '../Synergetic/iVStudent';
+import iVStudent from '../Synergetic/Student/iVStudent';
 import iSynCommunity from '../Synergetic/iSynCommunity';
 
 export type iCODAddressInfo = {

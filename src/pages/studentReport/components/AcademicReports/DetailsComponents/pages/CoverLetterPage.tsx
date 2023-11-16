@@ -3,7 +3,7 @@ import {StudentAcademicReportDetailsProps} from '../../StudentAcademicReportDeta
 import React from 'react';
 import SectionDiv from '../../../../../../components/common/SectionDiv';
 import styled from 'styled-components';
-import iStudentReportResult from '../../../../../../types/Synergetic/iStudentReportResult';
+import iStudentReportResult from '../../../../../../types/Synergetic/Student/iStudentReportResult';
 import PageTitleDivider from '../sections/PageTitleDivider';
 import StudentStatusBadge from '../../StudentStatusBadge';
 import {FlexContainer} from '../../../../../../styles';

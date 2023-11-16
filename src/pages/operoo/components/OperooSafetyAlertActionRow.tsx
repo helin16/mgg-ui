@@ -1,6 +1,6 @@
 import iOperooSafetyAlert from '../../../types/Operoo/iOperooSafetyAlert';
 import styled from 'styled-components';
-import iVStudent from '../../../types/Synergetic/iVStudent';
+import iVStudent from '../../../types/Synergetic/Student/iVStudent';
 import {Button, Dropdown, Spinner} from 'react-bootstrap';
 import iSynVDocument from '../../../types/Synergetic/iSynVDocument';
 import {useState} from 'react';

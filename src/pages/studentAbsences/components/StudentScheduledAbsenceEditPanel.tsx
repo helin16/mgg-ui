@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react';
 import styled from 'styled-components';
 import {Alert, Col, FormControl, Row, Spinner} from 'react-bootstrap';
-import iVStudent from '../../../types/Synergetic/iVStudent';
+import iVStudent from '../../../types/Synergetic/Student/iVStudent';
 import {FlexContainer} from '../../../styles';
 import FormLabel from '../../../components/form/FormLabel';
 import DateTimePicker from '../../../components/common/DateTimePicker';

@@ -1,6 +1,6 @@
 import Dropdown from 'react-bootstrap/Dropdown';
 import styled from 'styled-components';
-import iVStudent from '../../../types/Synergetic/iVStudent';
+import iVStudent from '../../../types/Synergetic/Student/iVStudent';
 import iSynVMedicalConditionStudent from '../../../types/Synergetic/iSynVMedicalConditionStudent';
 import * as Icons from 'react-bootstrap-icons';
 import * as XLSX from 'sheetjs-style';

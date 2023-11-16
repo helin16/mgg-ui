@@ -8,12 +8,22 @@ import CODAdminDetailsSaveBtnPanel from "../CODAdmin/CODAdminDetailsSaveBtnPanel
 import ConfirmationOfDetailsResponseService from "../../../services/ConfirmationOfDetails/ConfirmationOfDetailsResponseService";
 import moment from "moment-timezone";
 import Toaster from "../../../services/Toaster";
-import { Button, Col, Row } from "react-bootstrap";
+import { Alert, Button, Col, Row } from "react-bootstrap";
 import CODAdminInputPanel from "../components/CODAdminInputPanel";
 import ToggleBtn from "../../common/ToggleBtn";
-import {useSelector} from 'react-redux';
-import {RootState} from '../../../redux/makeReduxStore';
-import SectionDiv from '../../common/SectionDiv';
+import { useSelector } from "react-redux";
+import { RootState } from "../../../redux/makeReduxStore";
+import SectionDiv from "../../common/SectionDiv";
+import SignaturePad, { iSignatureCanvas } from "../../common/SignaturePad";
+import SynCommunityLegalService from "../../../services/Synergetic/Community/SynCommunityLegalService";
+import iSynCommunityLegal from "../../../types/Synergetic/Community/iSynCommunityLegal";
+import SynCommunityService from "../../../services/Synergetic/Community/SynCommunityService";
+import iSynCommunity from "../../../types/Synergetic/iSynCommunity";
+import SynStudentStaticService from "../../../services/Synergetic/Student/SynStudentStaticService";
+import iSynStudentStatics from "../../../types/Synergetic/Student/iSynStudentStatics";
+import SynStudentYearService from "../../../services/Synergetic/Student/SynStudentYearService";
+import iSynStudentYear from "../../../types/Synergetic/Student/iSynStudentYear";
+import { SYN_LU_LEARNING_PATHWAY_IB } from "../../../types/Synergetic/Lookup/iSynLuLearningPathway";
 
 const Wrapper = styled.div`
   .input-div {
@@ -25,10 +35,12 @@ const Wrapper = styled.div`
     }
   }
 `;
+
+type iCommunityMap = { [key: number | string]: iSynCommunity };
 const CODPermissionsPanel = ({
   response,
   isDisabled,
-  onSaved,
+  isForParent,
   onCancel,
   onNextStep
 }: ICODDetailsEditPanel) => {
@@ -39,16 +51,81 @@ const CODPermissionsPanel = ({
   ] = useState<iCODPermissionsResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isReadOnly, setIsReadOnly] = useState(false);
+  const [
+    signatureCanvas,
+    setSignatureCanvas
+  ] = useState<iSignatureCanvas | null>(null);
+  const [
+    communityLegalFromDB,
+    setCommunityLegalFromDB
+  ] = useState<iSynCommunityLegal | null>(null);
+  const [
+    studentStaticFromDB,
+    setStudentStaticFromDB
+  ] = useState<iSynStudentStatics | null>(null);
+  const [
+    studentYearFromDB,
+    setStudentYearFromDB
+  ] = useState<iSynStudentYear | null>(null);
+  const [parentCommunityMapFromDB, setPrentCommunityMapFromDB] = useState<
+    iCommunityMap
+  >({});
 
   useEffect(() => {
     setEditingResponse(response?.response?.permissions || null);
     let isCanceled = false;
     setIsLoading(true);
-    Promise.all([])
+    Promise.all([
+      SynCommunityLegalService.getAll({
+        where: JSON.stringify({ ID: response.StudentID }),
+        perPage: 1,
+        sort: "ModifiedDate:DESC"
+      }),
+      SynCommunityService.getCommunityProfiles({
+        where: JSON.stringify({
+          ID: [currentUser?.synergyId, currentUser?.SynCommunity?.SpouseID]
+        })
+      }),
+      SynStudentStaticService.getAll({
+        where: JSON.stringify({
+          ID: response.StudentID
+        }),
+        perPage: 1
+      }),
+      SynStudentYearService.getAll({
+        where: JSON.stringify({
+          ID: response.StudentID
+        }),
+        perPage: 1
+      })
+    ])
       .then(resp => {
         if (isCanceled) {
           return;
         }
+        const communityLegals = resp[0].data || [];
+        setCommunityLegalFromDB(
+          communityLegals.length <= 0 ? null : communityLegals[0]
+        );
+
+        const parents = resp[1].data || [];
+        setPrentCommunityMapFromDB(
+          parents.reduce(
+            (map, parent) => ({
+              ...map,
+              [parent.ID]: parent
+            }),
+            {}
+          )
+        );
+
+        const studentStatics = resp[2].data || [];
+        setStudentStaticFromDB(
+          studentStatics.length > 0 ? studentStatics[0] : null
+        );
+
+        const studentYears = resp[3].data || [];
+        setStudentYearFromDB(studentYears.length > 0 ? studentYears[0] : null);
       })
       .catch(err => {
         if (isCanceled) {
@@ -66,7 +143,7 @@ const CODPermissionsPanel = ({
     return () => {
       isCanceled = true;
     };
-  }, [response]);
+  }, [response, currentUser]);
 
   useEffect(() => {
     const hasBeenSyncd =
@@ -84,6 +161,18 @@ const CODPermissionsPanel = ({
     });
   };
 
+  const getWarningPanel = () => {
+    if (studentYearFromDB) {
+      return null;
+    }
+    return (
+      <Alert variant={"warning"}>
+        Can't find any records in the StudentYears table, this student may not
+        be current yet. <b>PLEASE MANUALLY UPDATE HER RECORD</b> in Synergetic after Sync.
+      </Alert>
+    );
+  };
+
   const getContent = () => {
     if (isLoading === true) {
       return <PageLoadingSpinner />;
@@ -95,14 +184,24 @@ const CODPermissionsPanel = ({
             <CODAdminInputPanel
               label={"Excursion Permission:"}
               value={editingResponse?.excursionChecked === true ? "YES" : "NO"}
-              valueFromDB={""}
+              valueFromDB={
+                !studentStaticFromDB
+                  ? undefined
+                  : studentYearFromDB?.IBFlag === true &&
+                    studentYearFromDB?.LearningPathway ===
+                      SYN_LU_LEARNING_PATHWAY_IB
+                  ? "YES"
+                  : "NO"
+              }
               getComponent={isSameFromDB => {
                 return (
                   <FlexContainer
                     className={"with-gap lg-gap align-items-center"}
                   >
                     <FlexContainer
-                      className={"with-gap align-items-center"}
+                      className={`with-gap align-items-center ${
+                        isSameFromDB !== true ? "text-danger" : ""
+                      }`}
                     >
                       <div>I/We have read and agree with</div>
                       <Button
@@ -119,6 +218,7 @@ const CODPermissionsPanel = ({
                       isDisabled={isReadOnly === true}
                       on={"Yes"}
                       off={"No"}
+                      size={"sm"}
                       checked={editingResponse?.excursionChecked === true}
                       onChange={checked =>
                         updatePermissionResponse("excursionChecked", checked)
@@ -128,6 +228,7 @@ const CODPermissionsPanel = ({
                 );
               }}
             />
+            {getWarningPanel()}
 
             <hr />
             <CODAdminInputPanel
@@ -135,13 +236,19 @@ const CODPermissionsPanel = ({
               value={
                 editingResponse?.allowParentAssociation === true ? "YES" : "NO"
               }
-              valueFromDB={""}
+              valueFromDB={
+                Object.values(parentCommunityMapFromDB).filter(
+                  community => community.DirectoryIncludeFlag !== true
+                ).length <= 0
+                  ? "YES"
+                  : "NO"
+              }
               getComponent={isSameFromDB => {
                 return (
                   <FlexContainer
-                    className={"with-gap lg-gap align-items-center"}
+                    className={`with-gap lg-gap align-items-center`}
                   >
-                    <div>
+                    <div className={isSameFromDB !== true ? "text-danger" : ""}>
                       I/We agree to share my/our contact details with Mentone
                       Girls' Grammar Parents' Association
                     </div>
@@ -149,6 +256,7 @@ const CODPermissionsPanel = ({
                       isDisabled={isReadOnly === true}
                       on={"Yes"}
                       off={"No"}
+                      size={"sm"}
                       checked={editingResponse?.allowParentAssociation === true}
                       onChange={checked =>
                         updatePermissionResponse(
@@ -166,13 +274,17 @@ const CODPermissionsPanel = ({
             <CODAdminInputPanel
               label={"Greet to receive SMS:"}
               value={editingResponse?.allowReceivingSMS === true ? "YES" : "NO"}
-              valueFromDB={""}
+              valueFromDB={
+                studentStaticFromDB?.TertiaryAchievedFlag === true
+                  ? "YES"
+                  : "NO"
+              }
               getComponent={isSameFromDB => {
                 return (
                   <FlexContainer
-                    className={"with-gap lg-gap align-items-center"}
+                    className={`with-gap lg-gap align-items-center`}
                   >
-                    <div>
+                    <div className={isSameFromDB !== true ? "text-danger" : ""}>
                       To Manage student attendance and/or in the event of an
                       emergency (eg. fires, critical incidents), I/We agree to
                       the School using my mobile phone number to broadcast SMS
@@ -182,6 +294,7 @@ const CODPermissionsPanel = ({
                       isDisabled={isReadOnly === true}
                       on={"Yes"}
                       off={"No"}
+                      size={"sm"}
                       checked={editingResponse?.allowReceivingSMS === true}
                       onChange={checked =>
                         updatePermissionResponse("allowReceivingSMS", checked)
@@ -195,15 +308,25 @@ const CODPermissionsPanel = ({
             <hr />
             <CODAdminInputPanel
               label={"Parent Consent:"}
-              value={editingResponse?.allowReceivingSMS === true ? "YES" : "NO"}
-              valueFromDB={""}
+              value={
+                editingResponse?.agreeParentConsent === true ? "YES" : "NO"
+              }
+              valueFromDB={
+                communityLegalFromDB?.PhotoPromFlag === true &&
+                communityLegalFromDB?.PhotoPublicationFlag === true &&
+                communityLegalFromDB?.PhotoWebFlag === true
+                  ? "YES"
+                  : "NO"
+              }
               getComponent={isSameFromDB => {
                 return (
                   <FlexContainer
                     className={"with-gap lg-gap align-items-center"}
                   >
                     <FlexContainer
-                      className={"with-gap align-items-center"}
+                      className={`with-gap align-items-center ${
+                        isSameFromDB !== true ? "text-danger" : ""
+                      }`}
                     >
                       <div>I/We have read</div>
                       <Button
@@ -214,12 +337,13 @@ const CODPermissionsPanel = ({
                       >
                         Parental Consent for Use of Images
                       </Button>
-                      <div>and agree to give my/our consent.</div>
+                      <div>and agree to give my / our consent.</div>
                     </FlexContainer>
                     <ToggleBtn
                       isDisabled={isReadOnly === true}
                       on={"Yes"}
                       off={"No"}
+                      size={"sm"}
                       checked={editingResponse?.agreeParentConsent === true}
                       onChange={checked =>
                         updatePermissionResponse("agreeParentConsent", checked)
@@ -236,13 +360,21 @@ const CODPermissionsPanel = ({
               value={
                 editingResponse?.agreeSchoolCommitment === true ? "YES" : "NO"
               }
-              valueFromDB={""}
+              valueFromDB={
+                studentStaticFromDB?.EnrolmentContractFlag === true
+                  ? "YES"
+                  : "NO"
+              }
               getComponent={isSameFromDB => {
                 return (
                   <FlexContainer
                     className={"with-gap lg-gap align-items-center"}
                   >
-                    <FlexContainer className={"with-gap align-items-center"}>
+                    <FlexContainer
+                      className={`with-gap align-items-center ${
+                        isSameFromDB !== true ? "text-danger" : ""
+                      }`}
+                    >
                       <div>I/We have read and agree with</div>
                       <Button
                         href="https://mconnect.mentonegirls.vic.edu.au/send.php?id=56899"
@@ -259,6 +391,7 @@ const CODPermissionsPanel = ({
                       isDisabled={isReadOnly === true}
                       on={"Yes"}
                       off={"No"}
+                      size={"sm"}
                       checked={editingResponse?.agreeSchoolCommitment === true}
                       onChange={checked =>
                         updatePermissionResponse(
@@ -278,13 +411,16 @@ const CODPermissionsPanel = ({
               value={
                 editingResponse?.agreeLawfulAuthority === true ? "YES" : "NO"
               }
-              valueFromDB={""}
               getComponent={isSameFromDB => {
                 return (
                   <FlexContainer
                     className={"with-gap lg-gap align-items-center"}
                   >
-                    <FlexContainer className={"with-gap align-items-center"}>
+                    <FlexContainer
+                      className={`with-gap align-items-center ${
+                        isSameFromDB !== true ? "text-danger" : ""
+                      }`}
+                    >
                       <div>I/We have read and agree with</div>
                       <Button
                         href="https://mconnect.mentonegirls.vic.edu.au/send.php?id=56898"
@@ -300,6 +436,7 @@ const CODPermissionsPanel = ({
                       isDisabled={isReadOnly === true}
                       on={"Yes"}
                       off={"No"}
+                      size={"sm"}
                       checked={editingResponse?.agreeLawfulAuthority === true}
                       onChange={checked =>
                         updatePermissionResponse(
@@ -319,14 +456,22 @@ const CODPermissionsPanel = ({
               value={
                 editingResponse?.agreePrivacyPolicy === true ? "YES" : "NO"
               }
-              valueFromDB={""}
+              valueFromDB={
+                communityLegalFromDB?.PrivacyPolicyAgreedFlag === true
+                  ? "YES"
+                  : "NO"
+              }
               getComponent={isSameFromDB => {
                 return (
                   <FlexContainer
                     className={"with-gap lg-gap align-items-center"}
                   >
-                    <FlexContainer className={"with-gap align-items-center"}>
-                      <div>I/We have read and agree with</div>
+                    <FlexContainer
+                      className={`with-gap align-items-center ${
+                        isSameFromDB !== true ? "text-danger" : ""
+                      }`}
+                    >
+                      <div>I / We have read and agree with</div>
                       <Button
                         href="https://www.mentonegirls.vic.edu.au/uploaded/documents/About/guiding_principals/Privacy_Policy_Jan_2018.pdf"
                         target="_blank"
@@ -341,12 +486,10 @@ const CODPermissionsPanel = ({
                       isDisabled={isReadOnly === true}
                       on={"Yes"}
                       off={"No"}
+                      size={"sm"}
                       checked={editingResponse?.agreePrivacyPolicy === true}
                       onChange={checked =>
-                        updatePermissionResponse(
-                          "agreePrivacyPolicy",
-                          checked
-                        )
+                        updatePermissionResponse("agreePrivacyPolicy", checked)
                       }
                     />
                   </FlexContainer>
@@ -357,19 +500,63 @@ const CODPermissionsPanel = ({
             <hr />
             <SectionDiv>
               <div>
-                I, {currentUser?.firstName || ''} {currentUser?.lastName},
-                A person with lawful authority of {response?.Student?.StudentNameExternal || ''},
+                I,{" "}
+                <b>
+                  {currentUser?.firstName || ""} {currentUser?.lastName}
+                </b>
+                , A person with lawful authority of{" "}
+                <b>{response?.Student?.StudentNameExternal || ""}</b>,
               </div>
               <ul>
-                <li>Declare that the information in this enrolment form is true and undertake to immediately inform Metone Girls' Grammar School in the event of any change to this information.</li>
-                <li>Agree to collect or make arrangements for the collection of <b>{response?.Student?.StudentNameExternal || ''}</b> if she becomes unwell at the School.</li>
-                <li>Consent to the educator to seek medical treatment for <b>{response?.Student?.StudentNameExternal || ''}</b> from a registered medical practitioner, hospital or ambulance service and seek transportation of <b>{response?.Student?.StudentNameExternal || ''}</b> by an ambulance service.</li>
-                <li>I am responsible for any necessary expenses incurred during a medical emergency in relation to <b>{response?.Student?.StudentNameExternal || ''}</b>.</li>
-                <li>Understand that in an emergency situation or fire drill where evacuation is necessary that <b>{response?.Student?.StudentNameExternal || ''}</b> may need to leave Mentone Girls' Grammar School under the direction and supervision of educators.</li>
-                <li>Have read and understood the Mentone Girls' Grammar School policies and fees.</li>
+                <li>
+                  Declare that the information in this enrolment form is true
+                  and undertake to immediately inform Metone Girls' Grammar
+                  School in the event of any change to this information.
+                </li>
+                <li>
+                  Agree to collect or make arrangements for the collection of{" "}
+                  <b>{response?.Student?.StudentNameExternal || ""}</b> if she
+                  becomes unwell at the School.
+                </li>
+                <li>
+                  Consent to the educator to seek medical treatment for{" "}
+                  <b>{response?.Student?.StudentNameExternal || ""}</b> from a
+                  registered medical practitioner, hospital or ambulance service
+                  and seek transportation of{" "}
+                  <b>{response?.Student?.StudentNameExternal || ""}</b> by an
+                  ambulance service.
+                </li>
+                <li>
+                  I am responsible for any necessary expenses incurred during a
+                  medical emergency in relation to{" "}
+                  <b>{response?.Student?.StudentNameExternal || ""}</b>.
+                </li>
+                <li>
+                  Understand that in an emergency situation or fire drill where
+                  evacuation is necessary that{" "}
+                  <b>{response?.Student?.StudentNameExternal || ""}</b> may need
+                  to leave Mentone Girls' Grammar School under the direction and
+                  supervision of educators.
+                </li>
+                <li>
+                  Have read and understood the Mentone Girls' Grammar School
+                  policies and fees.
+                </li>
               </ul>
-              <div className="alert alert-warning">Please note that your signature will not be saved on drafts and you will need to sign on your final submission</div>
+              <div className="alert alert-warning">
+                Please note that your signature will not be saved on drafts and
+                you will need to sign on your final submission
+              </div>
               <div>Please sign below in the box:</div>
+              <SignaturePad
+                isDisabled={isReadOnly === true || isForParent !== true}
+                className={"signature"}
+                setCanvas={canvas => setSignatureCanvas(canvas)}
+                signature={editingResponse?.signature || ""}
+                onClear={() => {
+                  updatePermissionResponse("signature", undefined);
+                }}
+              />
             </SectionDiv>
           </Col>
         </Row>
@@ -390,7 +577,10 @@ const CODPermissionsPanel = ({
               response: {
                 ...(response?.response || {}),
                 // @ts-ignore
-                permissions: editingResponse
+                permissions: {
+                  ...editingResponse,
+                  ...(signatureCanvas ? {signature: signatureCanvas.toDataURL()} : {}),
+                }
               }
             }}
             onCancel={onCancel}
@@ -399,7 +589,10 @@ const CODPermissionsPanel = ({
                 ...resp,
                 response: {
                   ...(resp.response || {}),
-                  permissions: editingResponse
+                  permissions: {
+                    ...editingResponse,
+                    ...(signatureCanvas ? {signature: signatureCanvas.toDataURL()} : {}),
+                  }
                 }
               })
             }

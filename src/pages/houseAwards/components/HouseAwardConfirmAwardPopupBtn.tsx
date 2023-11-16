@@ -5,7 +5,7 @@ import LoadingBtn from "../../../components/common/LoadingBtn";
 import styled from "styled-components";
 import { useState } from "react";
 import PopupModal from "../../../components/common/PopupModal";
-import iVStudent from "../../../types/Synergetic/iVStudent";
+import iVStudent from "../../../types/Synergetic/Student/iVStudent";
 import { FlexContainer } from "../../../styles";
 import { Alert, Button } from "react-bootstrap";
 import HouseAwardScoreService from "../../../services/HouseAwards/HouseAwardScoreService";

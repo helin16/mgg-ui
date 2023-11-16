@@ -25,7 +25,7 @@ import iFunnelLead, {
 import SynLuYearLevelService from "../../../services/Synergetic/Lookup/SynLuYearLevelService";
 import ISynLuYearLevel from "../../../types/Synergetic/Lookup/iSynLuYearLevel";
 import ExplanationPanel from "../../ExplanationPanel";
-import iVStudent, {SYN_STUDENT_STATUS_ID_REPEATING} from "../../../types/Synergetic/iVStudent";
+import iVStudent, {SYN_STUDENT_STATUS_ID_REPEATING} from "../../../types/Synergetic/Student/iVStudent";
 import StudentNumberForecastTable from "./components/StudentNumberForecastTable";
 import StudentNumberDetailsPopupBtn from "./components/StudentNumberDetailsPopupBtn";
 import SynVDebtorFeeService from "../../../services/Synergetic/Finance/SynVDebtorFeeService";
@@ -50,8 +50,8 @@ import SynVStudentContactsCurrentPastFutureCombinedService from "../../../servic
 import {
   STUDENT_CONTACT_STUDENT_TYPE_CURRENT,
   STUDENT_CONTACT_STUDENT_TYPE_FUTURE
-} from "../../../types/Synergetic/iSynVStudentContactsCurrentPastFutureCombined";
-import { STUDENT_CONTACT_TYPE_SC1 } from "../../../types/Synergetic/iStudentContact";
+} from "../../../types/Synergetic/Student/iSynVStudentContactsCurrentPastFutureCombined";
+import { STUDENT_CONTACT_TYPE_SC1 } from "../../../types/Synergetic/Student/iStudentContact";
 
 const Wrapper = styled.div`
   .title-row {

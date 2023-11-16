@@ -31,7 +31,7 @@ import StudentAttendanceRateReportTable, {
 import PageLoadingSpinner from "../../../../components/common/PageLoadingSpinner";
 import YearLevelSelector from "../../../../components/student/YearLevelSelector";
 import MathHelper from "../../../../helper/MathHelper";
-import { iVPastAndCurrentStudent } from "../../../../types/Synergetic/iVStudent";
+import { iVPastAndCurrentStudent } from "../../../../types/Synergetic/Student/iVStudent";
 import UtilsService from '../../../../services/UtilsService';
 import SynFileSemesterService, {iSchoolDay} from '../../../../services/Synergetic/SynFileSemesterService';
 import SchoolDaysAllPopupBtn from '../../../dataSubmissions/components/SchoolCensusData/SchoolDaysAllPopupBtn';

@@ -1,6 +1,6 @@
 import iStudentReportResult, {
   STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_LEARNING_BEHAVIORS,
-} from '../../../../../../types/Synergetic/iStudentReportResult';
+} from '../../../../../../types/Synergetic/Student/iStudentReportResult';
 import {useEffect, useState} from 'react';
 import GraphTable from './GraphTable';
 
@@ -13,7 +13,7 @@ const resultTranslateMap = {
 
 const LearningBehavioursDiv = ({results}: {results: iStudentReportResult[]}) => {
   const [resultList, setResultList] = useState<iStudentReportResult[]>([]);
-  
+
   useEffect(() => {
     setResultList(
       results

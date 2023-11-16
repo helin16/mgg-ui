@@ -21,7 +21,7 @@ import SynLuYearLevelService from '../../../../services/Synergetic/Lookup/SynLuY
 import SchoolCensusDataSummaryDiv from './SchoolCensusDataSummaryDiv';
 import {
   DISABILITY_ADJUSTMENT_LEVEL_CODES_FOR_CENSUS_REPORT
-} from '../../../../types/Synergetic/iSynVStudentDisabilityAdjustment';
+} from '../../../../types/Synergetic/Student/iSynVStudentDisabilityAdjustment';
 import SchoolCensusDataSearchPanel, {iSchoolCensusDataSearchCriteria} from './SchoolCensusDataSearchPanel';
 import ExplanationPanel from '../../../../components/ExplanationPanel';
 import SynVAbsenceService from '../../../../services/Synergetic/Absence/SynVAbsenceService';

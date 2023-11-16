@@ -1,6 +1,6 @@
 import iStudentReportResult, {
   STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_ACHIEVEMENT_STANDARDS
-} from '../../../../../../types/Synergetic/iStudentReportResult';
+} from '../../../../../../types/Synergetic/Student/iStudentReportResult';
 import React, {useEffect, useState} from 'react';
 import GraphTable from './GraphTable';
 import OverallAchievementStandardsDiv from './OverallAchievementStandardsDiv';

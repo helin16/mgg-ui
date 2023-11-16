@@ -6,7 +6,7 @@ import Toaster from '../../services/Toaster';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../redux/makeReduxStore';
 import SynVStudentService from '../../services/Synergetic/Student/SynVStudentService';
-import iVStudent from '../../types/Synergetic/iVStudent';
+import iVStudent from '../../types/Synergetic/Student/iVStudent';
 import SynVMedicalConditionStudentService from '../../services/Synergetic/Medical/SynVMedicalConditionStudentService';
 import iSynVMedicalConditionStudent from '../../types/Synergetic/iSynVMedicalConditionStudent';
 import {OP_LIKE, OP_OR} from '../../helper/ServiceHelper';

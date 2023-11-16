@@ -19,7 +19,7 @@ import SynVStudentParentService from "../../../../services/Synergetic/Student/Sy
 import iSynVStudentParent from "../../../../types/Synergetic/Community/iSynVStudentParent";
 import SynCommunityService from "../../../../services/Synergetic/Community/SynCommunityService";
 import iSynCommunity from "../../../../types/Synergetic/iSynCommunity";
-import { iVPastAndCurrentStudent } from "../../../../types/Synergetic/iVStudent";
+import { iVPastAndCurrentStudent } from "../../../../types/Synergetic/Student/iVStudent";
 import iSynLuLanguage from "../../../../types/Synergetic/Lookup/iSynLuLanguage";
 import iSynLuQualificationLevel from "../../../../types/Synergetic/Lookup/iSynLuQualificationLevel";
 import SynLuQualificationLevelService from "../../../../services/Synergetic/Lookup/SynLuQualificationLevelService";

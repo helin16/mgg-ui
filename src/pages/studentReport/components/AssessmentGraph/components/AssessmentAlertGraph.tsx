@@ -1,4 +1,4 @@
-import iVStudent from '../../../../../types/Synergetic/iVStudent';
+import iVStudent from '../../../../../types/Synergetic/Student/iVStudent';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../../../redux/makeReduxStore';
 import {useEffect, useState} from 'react';

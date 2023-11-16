@@ -1,7 +1,7 @@
 import { Table } from "react-bootstrap";
 import moment from "moment-timezone";
 import styled from "styled-components";
-import iVStudent from "../../../../../types/Synergetic/iVStudent";
+import iVStudent from "../../../../../types/Synergetic/Student/iVStudent";
 
 const Wrapper = styled.div`
   padding: 0.8rem;

@@ -1,6 +1,6 @@
 import * as XLSX from 'sheetjs-style';
 import moment from 'moment-timezone';
-import {iVPastAndCurrentStudent} from '../../../../types/Synergetic/iVStudent';
+import {iVPastAndCurrentStudent} from '../../../../types/Synergetic/Student/iVStudent';
 import iSynVStudentAttendanceHistory from '../../../../types/Synergetic/Attendance/iSynVStudentAttendanceHistory';
 
 const downloadStudentsWithRate = (data: any[]) => {

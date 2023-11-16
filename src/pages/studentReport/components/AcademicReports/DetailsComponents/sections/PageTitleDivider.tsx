@@ -1,7 +1,7 @@
 import PanelTitle from '../../../../../../components/PanelTitle';
 import React from 'react';
-import iVStudent from '../../../../../../types/Synergetic/iVStudent';
-import iStudentReportResult from '../../../../../../types/Synergetic/iStudentReportResult';
+import iVStudent from '../../../../../../types/Synergetic/Student/iVStudent';
+import iStudentReportResult from '../../../../../../types/Synergetic/Student/iStudentReportResult';
 import styled from 'styled-components';
 
 const Wrapper = styled.div`

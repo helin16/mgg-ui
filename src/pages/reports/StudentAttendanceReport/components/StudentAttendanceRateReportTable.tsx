@@ -1,6 +1,6 @@
 import ISynLuYearLevel from "../../../../types/Synergetic/Lookup/iSynLuYearLevel";
 import Table, { iTableColumn } from "../../../../components/common/Table";
-import { iVPastAndCurrentStudent } from "../../../../types/Synergetic/iVStudent";
+import { iVPastAndCurrentStudent } from "../../../../types/Synergetic/Student/iVStudent";
 import { useEffect, useState } from "react";
 import StudentAttendanceRatePopup from "./StudentAttendanceRatePopup";
 import styled from "styled-components";

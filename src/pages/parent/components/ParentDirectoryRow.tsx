@@ -1,4 +1,4 @@
-import iSynVStudentContactAllAddress from '../../../types/Synergetic/iSynVStudentContactAllAddress';
+import iSynVStudentContactAllAddress from '../../../types/Synergetic/Student/iSynVStudentContactAllAddress';
 import {useEffect, useState} from 'react';
 import iSynCommunity from '../../../types/Synergetic/iSynCommunity';
 import SynCommunityService from '../../../services/Synergetic/Community/SynCommunityService';

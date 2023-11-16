@@ -26,7 +26,7 @@ const Wrapper = styled.div`
   align-items: flex-end;
   
   .student-search-div {
-    width: 60%;
+    width: 50%;
     min-width: 200px;
   }
 `;

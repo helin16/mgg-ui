@@ -79,6 +79,7 @@ const CODAdminDetailsPanel = ({
               setSelectedTab(TAB_PARENT_DETAILS);
               handleSaved(resp);
             }}
+            isForParent={false}
             onNextStep={() => setSelectedTab(TAB_PARENT_DETAILS)}
           />
         </Tab>
@@ -87,6 +88,7 @@ const CODAdminDetailsPanel = ({
           <CODParentsDetailsPanel
             response={editingResponse}
             onCancel={onCancel}
+            isForParent={false}
             onSaved={resp => {
               setSelectedTab(TAB_COURT_ORDERS);
               handleSaved(resp);
@@ -99,6 +101,7 @@ const CODAdminDetailsPanel = ({
           <CODLegalPanel
             response={editingResponse}
             onCancel={onCancel}
+            isForParent={false}
             onSaved={resp => {
               setSelectedTab(TAB_MEDICAL_DETAILS);
               handleSaved(resp);
@@ -111,6 +114,7 @@ const CODAdminDetailsPanel = ({
           <CODMedicalDetailsPanel
             response={editingResponse}
             onCancel={onCancel}
+            isForParent={false}
             onSaved={resp => {
               setSelectedTab(TAB_MEDICAL_DETAILS);
               handleSaved(resp);
@@ -125,6 +129,7 @@ const CODAdminDetailsPanel = ({
             onCancel={onCancel}
             onNextStep={() => setSelectedTab(TAB_GOVERNMENT_FUNDING)}
             isDisabled={true}
+            isForParent={false}
             description={
               <Alert variant={"warning"}>
                 As the restrictions in Synergetic, please manually copy and
@@ -139,6 +144,7 @@ const CODAdminDetailsPanel = ({
           <CODGovernmentFundingPanel
             response={editingResponse}
             onCancel={onCancel}
+            isForParent={false}
             onSaved={resp => {
               setSelectedTab(TAB_PERMISSIONS);
               handleSaved(resp);
@@ -151,6 +157,7 @@ const CODAdminDetailsPanel = ({
           <CODPermissionsPanel
             response={editingResponse}
             onCancel={onCancel}
+            isForParent={false}
             onSaved={resp => {
               handleSaved(resp);
             }}

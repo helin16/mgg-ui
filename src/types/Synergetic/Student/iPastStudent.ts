@@ -1,4 +1,4 @@
-import iSynCommunity from './iSynCommunity';
+import iSynCommunity from '../iSynCommunity';
 
 type iPastStudent = {
   ID: number;

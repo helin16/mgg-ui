@@ -8,7 +8,7 @@ import {
 import styled from "styled-components";
 import { Alert, Button, Col, FormControl, Row, Spinner } from "react-bootstrap";
 import StudentAbsenceService from "../../../services/StudentAbsences/StudentAbsenceService";
-import iVStudent from "../../../types/Synergetic/iVStudent";
+import iVStudent from "../../../types/Synergetic/Student/iVStudent";
 import { FlexContainer } from "../../../styles";
 import FormLabel from "../../../components/form/FormLabel";
 import DateTimePicker from "../../../components/common/DateTimePicker";

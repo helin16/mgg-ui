@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import SynVStudentService from "../../services/Synergetic/Student/SynVStudentService";
 import Toaster from "../../services/Toaster";
 import PageLoadingSpinner from '../common/PageLoadingSpinner';
-import iVStudent from '../../types/Synergetic/iVStudent';
+import iVStudent from '../../types/Synergetic/Student/iVStudent';
 import moment from 'moment-timezone';
 import Table, {iTableColumn} from '../common/Table';
 import ExplanationPanel from '../ExplanationPanel';

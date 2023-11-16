@@ -1,5 +1,5 @@
 import React, {ChangeEvent, useEffect, useState} from 'react';
-import iStudentReportYear, {getDataForClone} from '../../../../types/Synergetic/iStudentReportYear';
+import iStudentReportYear, {getDataForClone} from '../../../../types/Synergetic/Student/iStudentReportYear';
 import {Button, Col, Form, Row, Spinner, Table} from 'react-bootstrap';
 import styled from 'styled-components';
 import StudentReportService from '../../../../services/Synergetic/Student/StudentReportService';
@@ -15,7 +15,7 @@ import YearLevelSelector, {translateYearLevelToOption} from '../../../../compone
 import ISynLuCampus, {CAMPUS_CODE_ELC, CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR} from '../../../../types/Synergetic/Lookup/iSynLuCampus';
 import ISynLuYearLevel from '../../../../types/Synergetic/Lookup/iSynLuYearLevel';
 import ReportStyleSelector, {translateReportStyleToOption} from './ReportStyleSelector';
-import iStudentReportStyle from '../../../../types/Synergetic/iStudentReportStyle';
+import iStudentReportStyle from '../../../../types/Synergetic/Student/iStudentReportStyle';
 
 const Wrapper = styled.div`
   .result-wrapper {

@@ -1,16 +1,16 @@
-import iVStudent from '../../../../types/Synergetic/iVStudent';
-import iStudentReportYear from '../../../../types/Synergetic/iStudentReportYear';
+import iVStudent from '../../../../types/Synergetic/Student/iVStudent';
+import iStudentReportYear from '../../../../types/Synergetic/Student/iStudentReportYear';
 import {
   STUDENT_REPORT_YEAR_STYLE_JNR_GRAPH,
   STUDENT_REPORT_YEAR_STYLE_COMPARATIVE_GRAPH
-} from '../../../../types/Synergetic/iStudentReportStyle';
+} from '../../../../types/Synergetic/Student/iStudentReportStyle';
 import CoverLetterPage from './DetailsComponents/pages/CoverLetterPage';
 import {Col, Row} from 'react-bootstrap';
 import StudentAcademicReportMenu from './DetailsComponents/StudentAcademicReportMenu';
 import {useEffect, useState} from 'react';
 import iStudentReportResult, {
   STUDENT_REPORT_SUBJECT_NAME_COMPARATIVE_ANALYSIS
-} from '../../../../types/Synergetic/iStudentReportResult';
+} from '../../../../types/Synergetic/Student/iStudentReportResult';
 import StudentReportService from '../../../../services/Synergetic/Student/StudentReportService';
 import StudentAcademicSubjectPage from './DetailsComponents/pages/StudentAcademicSubjectPage';
 import ComparativeAnalysisPage from './DetailsComponents/pages/ComparativeAnalysisPage';

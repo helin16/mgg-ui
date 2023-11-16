@@ -2,9 +2,9 @@ import { ResultTableWrapper } from "./GraphTable";
 import ComparativeBarGraph from "../../../../../../components/support/ComparativeBarGraph";
 import React from "react";
 import SectionDiv from "../../../../../../components/common/SectionDiv";
-import iStudentReportResult from "../../../../../../types/Synergetic/iStudentReportResult";
-import iStudentReportYear from "../../../../../../types/Synergetic/iStudentReportYear";
-import {STUDENT_REPORT_YEAR_STYLE_COMPARATIVE_GRAPH} from '../../../../../../types/Synergetic/iStudentReportStyle';
+import iStudentReportResult from "../../../../../../types/Synergetic/Student/iStudentReportResult";
+import iStudentReportYear from "../../../../../../types/Synergetic/Student/iStudentReportYear";
+import {STUDENT_REPORT_YEAR_STYLE_COMPARATIVE_GRAPH} from '../../../../../../types/Synergetic/Student/iStudentReportStyle';
 
 type iComparativeSection = {
   results: iStudentReportResult[];

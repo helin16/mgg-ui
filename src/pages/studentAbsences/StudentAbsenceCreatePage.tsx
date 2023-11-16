@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import {Button, Col, Dropdown, Row, DropdownButton} from 'react-bootstrap';
 import * as Icons from 'react-bootstrap-icons';
 import SynStudentSearchPanel from '../../components/student/SynStudentSearchPanel';
-import iVStudent from '../../types/Synergetic/iVStudent';
+import iVStudent from '../../types/Synergetic/Student/iVStudent';
 import {FlexContainer} from '../../styles';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import StudentAbsenceService from '../../services/StudentAbsences/StudentAbsenceService';

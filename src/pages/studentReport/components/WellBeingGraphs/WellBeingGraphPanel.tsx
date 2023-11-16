@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import iVStudent from "../../../../types/Synergetic/iVStudent";
+import iVStudent from "../../../../types/Synergetic/Student/iVStudent";
 import { Col, Image, Row } from "react-bootstrap";
 import WellBeingGraphDetailsPanel from "./components/WellBeingGraphDetailsPanel";
 import WellBeingGraphNurseVisitsPanel from "./components/WellBeingGraphNurseVisitsPanel";

@@ -12,12 +12,12 @@ import StudentAcademicEmailPopup from "./StudentAcademicEmailPopup";
 import iStudentReportResult, {
   STUDENT_REPORT_RESULT_FILE_TYPE_ACADEMIC,
   STUDENT_REPORT_SUBJECT_NAME_COMPARATIVE_ANALYSIS
-} from "../../../../../types/Synergetic/iStudentReportResult";
+} from "../../../../../types/Synergetic/Student/iStudentReportResult";
 import LinkBtn from "../../../../../components/common/LinkBtn";
 import StudentReportDownloadBtn from "./Helpers/StudentReportDownloadBtn";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../../redux/makeReduxStore";
-import { STUDENT_REPORT_YEAR_STYLE_DOCMAN_DOWNLOAD } from "../../../../../types/Synergetic/iStudentReportStyle";
+import { STUDENT_REPORT_YEAR_STYLE_DOCMAN_DOWNLOAD } from "../../../../../types/Synergetic/Student/iStudentReportStyle";
 import StudentAcademicDocManList from "./StudentAcademicDocManList";
 
 const Wrapper = styled.div`

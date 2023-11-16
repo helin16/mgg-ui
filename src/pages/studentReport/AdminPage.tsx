@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {Alert, Button} from 'react-bootstrap';
 import * as Icons from 'react-bootstrap-icons';
 import AdminReportList from './components/Admin/AdminReportList';
-import iStudentReportYear from '../../types/Synergetic/iStudentReportYear';
+import iStudentReportYear from '../../types/Synergetic/Student/iStudentReportYear';
 import AdminEditReportYear from './components/Admin/AdminEditReportYear';
 import AdminEditingLockList from './components/Admin/AdminEditingLockList';
 import AdminPageHeader from './components/Admin/AdminPageHeader';

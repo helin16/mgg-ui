@@ -1,4 +1,4 @@
-import iVStudent from '../../../../types/Synergetic/iVStudent';
+import iVStudent from '../../../../types/Synergetic/Student/iVStudent';
 import AssessmentAlertGraph from './components/AssessmentAlertGraph';
 import AssessmentSubjectCharts from './components/AssessmentSubjectCharts';
 import SemesterOverallScoresChart from './components/SemesterOverallScoresChart';

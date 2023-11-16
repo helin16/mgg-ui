@@ -3,7 +3,7 @@ import { StudentAcademicReportDetailsProps } from "../../StudentAcademicReportDe
 import React, { useEffect, useState } from "react";
 import PanelTitle from "../../../../../../components/PanelTitle";
 import SectionDiv from "../../../../../../components/common/SectionDiv";
-import iStudentReportResult from "../../../../../../types/Synergetic/iStudentReportResult";
+import iStudentReportResult from "../../../../../../types/Synergetic/Student/iStudentReportResult";
 import styled from "styled-components";
 import StudentStatusBadge from "../../StudentStatusBadge";
 import { FlexContainer } from "../../../../../../styles";

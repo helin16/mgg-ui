@@ -1,5 +1,5 @@
-import iVStudent from '../../../../../types/Synergetic/iVStudent';
-import iStudentReportYear from '../../../../../types/Synergetic/iStudentReportYear';
+import iVStudent from '../../../../../types/Synergetic/Student/iVStudent';
+import iStudentReportYear from '../../../../../types/Synergetic/Student/iStudentReportYear';
 import {useEffect, useState} from 'react';
 import iSynVDocument from '../../../../../types/Synergetic/iSynVDocument';
 import SynFileSemesterService from '../../../../../services/Synergetic/SynFileSemesterService';

@@ -1,4 +1,4 @@
-import iVStudent from '../../../types/Synergetic/iVStudent';
+import iVStudent from '../../../types/Synergetic/Student/iVStudent';
 import * as XLSX from 'sheetjs-style';
 import moment from 'moment-timezone';
 import iSynLuHouse from '../../../types/Synergetic/Lookup/iSynLuHouse';

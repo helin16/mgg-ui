@@ -1,6 +1,6 @@
 import AppService, {iConfigParams} from '../AppService';
 import iPaginatedResult from '../../types/iPaginatedResult';
-import iSynStudentClassesHistory from '../../types/Synergetic/iSynStudentClassesHistory';
+import iSynStudentClassesHistory from '../../types/Synergetic/Student/iSynStudentClassesHistory';
 
 const endPoint = '/syn/studentClassesHistory';
 

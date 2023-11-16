@@ -22,7 +22,7 @@ import iStudentContact, {
   STUDENT_CONTACT_TYPE_SC1,
   STUDENT_CONTACT_TYPE_SC2,
   STUDENT_CONTACT_TYPE_SC3
-} from '../../../types/Synergetic/iStudentContact';
+} from '../../../types/Synergetic/Student/iStudentContact';
 import SynVStudentService from '../../../services/Synergetic/Student/SynVStudentService';
 
 const Wrapper = styled.div`

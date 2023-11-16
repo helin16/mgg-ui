@@ -1,14 +1,14 @@
-import iVStudent from '../../../../../types/Synergetic/iVStudent';
+import iVStudent from '../../../../../types/Synergetic/Student/iVStudent';
 import {useEffect, useState} from 'react';
 import {Spinner} from 'react-bootstrap';
 import HighchartsReact from 'highcharts-react-official';
 import Highcharts from 'highcharts'
-import iStudentReportYear from '../../../../../types/Synergetic/iStudentReportYear';
+import iStudentReportYear from '../../../../../types/Synergetic/Student/iStudentReportYear';
 import StudentReportService from '../../../../../services/Synergetic/Student/StudentReportService';
 import iStudentReportResult, {
   STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_MARKS,
   STUDENT_REPORT_RESULT_FILE_TYPE_ACADEMIC
-} from '../../../../../types/Synergetic/iStudentReportResult';
+} from '../../../../../types/Synergetic/Student/iStudentReportResult';
 import * as _ from 'lodash';
 import MathHelper from '../../../../../helper/MathHelper';
 

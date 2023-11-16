@@ -1,5 +1,5 @@
 import AppService, {iConfigParams} from '../../AppService';
-import iVStudent, {iVPastAndCurrentStudent, iVPastStudent} from '../../../types/Synergetic/iVStudent';
+import iVStudent, {iVPastAndCurrentStudent, iVPastStudent} from '../../../types/Synergetic/Student/iVStudent';
 import iPaginatedResult from '../../../types/iPaginatedResult';
 
 const endPoint = '/syn/vStudent';

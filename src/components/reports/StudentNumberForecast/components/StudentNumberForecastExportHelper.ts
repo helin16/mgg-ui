@@ -1,6 +1,6 @@
 import iVStudent, {
   SYN_STUDENT_STATUS_ID_FINALISED
-} from "../../../../types/Synergetic/iVStudent";
+} from "../../../../types/Synergetic/Student/iVStudent";
 import iFunnelLead from "../../../../types/Funnel/iFunnelLead";
 import moment from "moment-timezone";
 import * as XLSX from "sheetjs-style";

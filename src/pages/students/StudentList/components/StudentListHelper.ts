@@ -1,5 +1,5 @@
 import {iTableColumn} from '../../../../components/common/Table';
-import {iVPastAndCurrentStudent} from '../../../../types/Synergetic/iVStudent';
+import {iVPastAndCurrentStudent} from '../../../../types/Synergetic/Student/iVStudent';
 import moment from 'moment-timezone';
 import * as XLSX from 'sheetjs-style';
 

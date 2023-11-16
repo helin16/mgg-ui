@@ -11,7 +11,7 @@ import moment from "moment-timezone";
 import SynCommunityService from "../../../services/Synergetic/Community/SynCommunityService";
 import * as _ from "lodash";
 import iSynCommunity from "../../../types/Synergetic/iSynCommunity";
-import iVStudent from "../../../types/Synergetic/iVStudent";
+import iVStudent from "../../../types/Synergetic/Student/iVStudent";
 import SynVStudentService from "../../../services/Synergetic/Student/SynVStudentService";
 import ConfirmationOfDetailsListSearchPanel, {
   iConfirmationOfDetailsListSearchCriteria

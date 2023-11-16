@@ -1,4 +1,4 @@
-import iStudentReportResult from '../../../../../../types/Synergetic/iStudentReportResult';
+import iStudentReportResult from '../../../../../../types/Synergetic/Student/iStudentReportResult';
 import SectionDiv from '../../../../../../components/common/SectionDiv';
 import {useEffect, useState} from 'react';
 

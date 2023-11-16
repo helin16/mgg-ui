@@ -7,7 +7,7 @@ import {
 } from '../../../types/StudentAbsence/iStudentAbsence';
 import StudentAbsenceEditPanel from './StudentAbsenceEditPanel';
 import StudentAbsenceService from '../../../services/StudentAbsences/StudentAbsenceService';
-import iVStudent from '../../../types/Synergetic/iVStudent';
+import iVStudent from '../../../types/Synergetic/Student/iVStudent';
 
 type iStudentAbsenceEditPopupBtn = ButtonProps & {
   recordType: iRecordType;

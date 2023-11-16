@@ -1,6 +1,6 @@
 import { Table } from "react-bootstrap";
 import styled from "styled-components";
-import iVStudent from "../../../../../types/Synergetic/iVStudent";
+import iVStudent from "../../../../../types/Synergetic/Student/iVStudent";
 import iSynVActivity from '../../../../../types/Synergetic/iSynVActivity';
 import iSynUStudentGiftedSummary from '../../../../../types/Synergetic/iSynUStudentGiftedSummary';
 

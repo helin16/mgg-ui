@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button, Form } from "react-bootstrap";
-import iVStudent from "../../../types/Synergetic/iVStudent";
+import iVStudent from "../../../types/Synergetic/Student/iVStudent";
 import styled from "styled-components";
 import ModuleAdminBtn from "../../../components/module/ModuleAdminBtn";
 import AdminPage from "../AdminPage";

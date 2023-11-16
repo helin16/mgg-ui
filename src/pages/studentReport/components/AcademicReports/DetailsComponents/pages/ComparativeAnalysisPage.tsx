@@ -3,9 +3,9 @@ import { StudentAcademicReportDetailsProps } from "../../StudentAcademicReportDe
 import React, { useEffect, useState } from "react";
 import PanelTitle from "../../../../../../components/PanelTitle";
 import SectionDiv from "../../../../../../components/common/SectionDiv";
-import iStudentReportResult from "../../../../../../types/Synergetic/iStudentReportResult";
-import { iStudentReportComparativeResultMapRow } from "../../../../../../types/Synergetic/iStudentReportComparativeResult";
-import iStudentReportComparativeResultMap from "../../../../../../types/Synergetic/iStudentReportComparativeResult";
+import iStudentReportResult from "../../../../../../types/Synergetic/Student/iStudentReportResult";
+import { iStudentReportComparativeResultMapRow } from "../../../../../../types/Synergetic/Student/iStudentReportComparativeResult";
+import iStudentReportComparativeResultMap from "../../../../../../types/Synergetic/Student/iStudentReportComparativeResult";
 import StudentReportService from "../../../../../../services/Synergetic/Student/StudentReportService";
 import styled from "styled-components";
 import StudentStatusBadge from "../../StudentStatusBadge";

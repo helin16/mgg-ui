@@ -1,5 +1,5 @@
 import AppService, {iConfigParams} from '../../AppService';
-import iStudentContact from '../../../types/Synergetic/iStudentContact';
+import iStudentContact from '../../../types/Synergetic/Student/iStudentContact';
 import iPaginatedResult from '../../../types/iPaginatedResult';
 
 const getStudentContacts = (params: iConfigParams = {}, options?: iConfigParams): Promise<iPaginatedResult<iStudentContact>> => {
