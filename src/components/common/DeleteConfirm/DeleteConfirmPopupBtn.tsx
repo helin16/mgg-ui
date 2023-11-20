@@ -58,6 +58,7 @@ const DeleteConfirmPopupBtn = ({
         isDeleting={isSubmitting}
         isOpen={isShowingPopup}
         confirmString={confirmString}
+        confirmBtnString={confirmBtnString}
         onClose={() => closePopup ? closePopup() : setIsShowingPopup(false)}
       />
     </>

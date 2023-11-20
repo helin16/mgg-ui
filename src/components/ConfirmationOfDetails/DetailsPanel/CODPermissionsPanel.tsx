@@ -5,8 +5,6 @@ import { iCODPermissionsResponse } from "../../../types/ConfirmationOfDetails/iC
 import PageLoadingSpinner from "../../common/PageLoadingSpinner";
 import { FlexContainer } from "../../../styles";
 import CODAdminDetailsSaveBtnPanel from "../CODAdmin/CODAdminDetailsSaveBtnPanel";
-import ConfirmationOfDetailsResponseService from "../../../services/ConfirmationOfDetails/ConfirmationOfDetailsResponseService";
-import moment from "moment-timezone";
 import Toaster from "../../../services/Toaster";
 import { Alert, Button, Col, Row } from "react-bootstrap";
 import CODAdminInputPanel from "../components/CODAdminInputPanel";
@@ -41,8 +39,9 @@ const CODPermissionsPanel = ({
   response,
   isDisabled,
   isForParent,
-  onCancel,
-  onNextStep
+  getCancelBtn,
+  getSubmitBtn,
+  responseFieldName
 }: ICODDetailsEditPanel) => {
   const { user: currentUser } = useSelector((state: RootState) => state.auth);
   const [
@@ -72,7 +71,9 @@ const CODPermissionsPanel = ({
   >({});
 
   useEffect(() => {
-    setEditingResponse(response?.response?.permissions || null);
+    const res = response?.response || {};
+    // @ts-ignore
+    setEditingResponse(responseFieldName in res ? res[responseFieldName] : null);
     let isCanceled = false;
     setIsLoading(true);
     Promise.all([
@@ -168,7 +169,8 @@ const CODPermissionsPanel = ({
     return (
       <Alert variant={"warning"}>
         Can't find any records in the StudentYears table, this student may not
-        be current yet. <b>PLEASE MANUALLY UPDATE HER RECORD</b> in Synergetic after Sync.
+        be current yet. <b>PLEASE MANUALLY UPDATE HER RECORD</b> in Synergetic
+        after Sync.
       </Alert>
     );
   };
@@ -560,44 +562,21 @@ const CODPermissionsPanel = ({
             </SectionDiv>
           </Col>
         </Row>
-        <FlexContainer className={"justify-content-between"}>
-          <div />
-          <CODAdminDetailsSaveBtnPanel
-            onNext={onNextStep}
-            syncdLabel={
-              isReadOnly !== true
-                ? undefined
-                : `Details Already Sync'd @ ${moment(
-                    editingResponse?.syncToSynAt
-                  ).format("lll")} By ${editingResponse?.syncToSynById}`
-            }
-            editingResponse={{
-              ...response,
+        <CODAdminDetailsSaveBtnPanel
+          isLoading={isLoading}
+          responseFieldName={responseFieldName}
+          editingResponse={{
+            ...response,
+            // @ts-ignore
+            response: {
+              ...(response?.response || {}),
               // @ts-ignore
-              response: {
-                ...(response?.response || {}),
-                // @ts-ignore
-                permissions: {
-                  ...editingResponse,
-                  ...(signatureCanvas ? {signature: signatureCanvas.toDataURL()} : {}),
-                }
-              }
-            }}
-            onCancel={onCancel}
-            syncFn={resp =>
-              ConfirmationOfDetailsResponseService.update(resp.id, {
-                ...resp,
-                response: {
-                  ...(resp.response || {}),
-                  permissions: {
-                    ...editingResponse,
-                    ...(signatureCanvas ? {signature: signatureCanvas.toDataURL()} : {}),
-                  }
-                }
-              })
+              [responseFieldName]: editingResponse
             }
-          />
-        </FlexContainer>
+          }}
+          getCancelBtn={getCancelBtn}
+          getSubmitBtn={getSubmitBtn}
+        />
       </>
     );
   };

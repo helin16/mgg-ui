@@ -10,6 +10,15 @@ import CODMedicalDetailsPanel from "../DetailsPanel/CODMedicalDetailsPanel";
 import CODSiblingsPanel from "../DetailsPanel/CODSiblingsPanel";
 import CODGovernmentFundingPanel from '../DetailsPanel/CODGovernmentFundingPanel';
 import CODPermissionsPanel from '../DetailsPanel/CODPermissionsPanel';
+import {
+  COD_TAB_COURT_ORDERS, COD_TAB_GOVERNMENT_FUNDING, COD_TAB_MEDICAL_DETAILS,
+  COD_TAB_PARENT_DETAILS, COD_TAB_PERMISSIONS, COD_TAB_SIBLINGS,
+  COD_TAB_STUDENT_DETAILS
+} from '../DetailsPanel/iCODDetailsEditPanel';
+import LoadingBtn from '../../common/LoadingBtn';
+import * as Icons from "react-bootstrap-icons";
+import moment from 'moment-timezone';
+import {FlexContainer} from '../../../styles';
 
 const Wrapper = styled.div`
   .cod-submit-btns-wrapper {
@@ -17,13 +26,6 @@ const Wrapper = styled.div`
   }
 `;
 
-const TAB_STUDENT_DETAILS = "Student Details";
-const TAB_PARENT_DETAILS = "Parent Details";
-const TAB_COURT_ORDERS = "Court Orders";
-const TAB_MEDICAL_DETAILS = "Medical Details";
-const TAB_SIBLINGS = "Siblings";
-const TAB_GOVERNMENT_FUNDING = "Government Funding";
-const TAB_PERMISSIONS = "Permissions";
 
 type iCODAdminDetailsPanel = {
   defaultTabKey?: string;
@@ -39,7 +41,7 @@ const CODAdminDetailsPanel = ({
   onSaved,
   onRefreshList
 }: iCODAdminDetailsPanel) => {
-  const defaultSelectedTab = defaultTabKey || TAB_STUDENT_DETAILS;
+  const defaultSelectedTab = defaultTabKey || COD_TAB_STUDENT_DETAILS;
   const [selectedTab, setSelectedTab] = useState(defaultSelectedTab);
   const [
     editingResponse,
@@ -60,6 +62,35 @@ const CODAdminDetailsPanel = ({
     }
   };
 
+  const getCancelBtn = (editingResponse: iConfirmationOfDetailsResponse, responseFieldName: string, isLoading?: boolean) => {
+    if (!onCancel) {
+      return null;
+    }
+
+    return <LoadingBtn isLoading={isLoading === true} onClick={() => onCancel && onCancel()} variant={'link'}>
+      <Icons.XLg /> Cancel
+    </LoadingBtn>
+  }
+
+  const getSubmitBtn = (editingResponse: iConfirmationOfDetailsResponse, responseFieldName: string, isLoading?: boolean) => {
+    if (
+      `${editingResponse.syncToSynAt || ""}`.trim() !== "" ||
+      `${editingResponse.syncToSynById || ""}`.trim() !== ""
+    ) {
+      return (
+        <FlexContainer
+          className={"justify-content-end with-gap lg-gap align-items-baseline"}
+        >
+          <small className={"text-muted"}>
+            Sync'd @ {moment(editingResponse.syncToSynAt).format("lll")} By{" "}
+            {editingResponse.SyncToSynBy?.NameInternal || ""}
+          </small>
+          {getCancelBtn && getCancelBtn(editingResponse, responseFieldName, isLoading)}
+        </FlexContainer>
+      );
+    }
+  }
+
   if (!editingResponse) {
     return <PageLoadingSpinner />;
   }
@@ -71,96 +102,73 @@ const CODAdminDetailsPanel = ({
         onSelect={k => setSelectedTab(k || defaultSelectedTab)}
         unmountOnExit
       >
-        <Tab title={TAB_STUDENT_DETAILS} eventKey={TAB_STUDENT_DETAILS}>
+        <Tab title={COD_TAB_STUDENT_DETAILS} eventKey={COD_TAB_STUDENT_DETAILS}>
           <CODStudentDetailsPanel
             response={editingResponse}
-            onCancel={onCancel}
-            onSaved={resp => {
-              setSelectedTab(TAB_PARENT_DETAILS);
-              handleSaved(resp);
-            }}
+            getCancelBtn={getCancelBtn}
+            getSubmitBtn={getSubmitBtn}
+            responseFieldName={'student'}
             isForParent={false}
-            onNextStep={() => setSelectedTab(TAB_PARENT_DETAILS)}
           />
         </Tab>
 
-        <Tab title={TAB_PARENT_DETAILS} eventKey={TAB_PARENT_DETAILS}>
+        <Tab title={COD_TAB_PARENT_DETAILS} eventKey={COD_TAB_PARENT_DETAILS}>
           <CODParentsDetailsPanel
             response={editingResponse}
-            onCancel={onCancel}
+            getCancelBtn={getCancelBtn}
+            getSubmitBtn={getSubmitBtn}
+            responseFieldName={'parents'}
             isForParent={false}
-            onSaved={resp => {
-              setSelectedTab(TAB_COURT_ORDERS);
-              handleSaved(resp);
-            }}
-            onNextStep={() => setSelectedTab(TAB_COURT_ORDERS)}
           />
         </Tab>
 
-        <Tab title={TAB_COURT_ORDERS} eventKey={TAB_COURT_ORDERS}>
+        <Tab title={COD_TAB_COURT_ORDERS} eventKey={COD_TAB_COURT_ORDERS}>
           <CODLegalPanel
             response={editingResponse}
-            onCancel={onCancel}
+            getCancelBtn={getCancelBtn}
+            getSubmitBtn={getSubmitBtn}
+            responseFieldName={'courtOrder'}
             isForParent={false}
-            onSaved={resp => {
-              setSelectedTab(TAB_MEDICAL_DETAILS);
-              handleSaved(resp);
-            }}
-            onNextStep={() => setSelectedTab(TAB_MEDICAL_DETAILS)}
           />
         </Tab>
 
-        <Tab title={TAB_MEDICAL_DETAILS} eventKey={TAB_MEDICAL_DETAILS}>
+        <Tab title={COD_TAB_MEDICAL_DETAILS} eventKey={COD_TAB_MEDICAL_DETAILS}>
           <CODMedicalDetailsPanel
             response={editingResponse}
-            onCancel={onCancel}
+            getCancelBtn={getCancelBtn}
+            getSubmitBtn={getSubmitBtn}
+            responseFieldName={'medicalDetails'}
             isForParent={false}
-            onSaved={resp => {
-              setSelectedTab(TAB_MEDICAL_DETAILS);
-              handleSaved(resp);
-            }}
-            onNextStep={() => setSelectedTab(TAB_MEDICAL_DETAILS)}
           />
         </Tab>
 
-        <Tab title={TAB_SIBLINGS} eventKey={TAB_SIBLINGS}>
+        <Tab title={COD_TAB_SIBLINGS} eventKey={COD_TAB_SIBLINGS}>
           <CODSiblingsPanel
             response={editingResponse}
-            onCancel={onCancel}
-            onNextStep={() => setSelectedTab(TAB_GOVERNMENT_FUNDING)}
-            isDisabled={true}
+            getCancelBtn={getCancelBtn}
+            getSubmitBtn={getSubmitBtn}
+            responseFieldName={'siblings'}
             isForParent={false}
-            description={
-              <Alert variant={"warning"}>
-                As the restrictions in Synergetic, please manually copy and
-                paste the information below into Synergetic and click on the
-                button "Next" below.
-              </Alert>
-            }
           />
         </Tab>
 
-        <Tab title={TAB_GOVERNMENT_FUNDING} eventKey={TAB_GOVERNMENT_FUNDING}>
+        <Tab title={COD_TAB_GOVERNMENT_FUNDING} eventKey={COD_TAB_GOVERNMENT_FUNDING}>
           <CODGovernmentFundingPanel
             response={editingResponse}
-            onCancel={onCancel}
+            getCancelBtn={getCancelBtn}
+            getSubmitBtn={getSubmitBtn}
+            responseFieldName={'governmentFunding'}
             isForParent={false}
-            onSaved={resp => {
-              setSelectedTab(TAB_PERMISSIONS);
-              handleSaved(resp);
-            }}
-            onNextStep={() => setSelectedTab(TAB_PERMISSIONS)}
           />
         </Tab>
 
-        <Tab title={TAB_PERMISSIONS} eventKey={TAB_PERMISSIONS}>
+        <Tab title={COD_TAB_PERMISSIONS} eventKey={COD_TAB_PERMISSIONS}>
           <CODPermissionsPanel
             response={editingResponse}
-            onCancel={onCancel}
+            getCancelBtn={getCancelBtn}
+            getSubmitBtn={getSubmitBtn}
+            responseFieldName={'permissions'}
             isForParent={false}
-            onSaved={resp => {
-              handleSaved(resp);
-            }}
           />
         </Tab>
       </Tabs>

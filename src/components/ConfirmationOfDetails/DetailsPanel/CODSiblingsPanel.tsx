@@ -4,10 +4,8 @@ import { Col, FormControl, Row } from "react-bootstrap";
 import React, { useEffect, useState } from "react";
 import { iCODSiblingResponse } from "../../../types/ConfirmationOfDetails/iConfirmationOfDetailsResponse";
 import PageLoadingSpinner from "../../common/PageLoadingSpinner";
-import { FlexContainer } from "../../../styles";
 import CODAdminDetailsSaveBtnPanel from "../CODAdmin/CODAdminDetailsSaveBtnPanel";
 import moment from "moment-timezone";
-import ConfirmationOfDetailsResponseService from "../../../services/ConfirmationOfDetails/ConfirmationOfDetailsResponseService";
 import Table, { iTableColumn } from "../../common/Table";
 import SynLuGenderSelector, {
   translateDescriptionToCode
@@ -26,9 +24,9 @@ const Wrapper = styled.div`
 const CODSiblingsPanel = ({
   response,
   isDisabled,
-  onSaved,
-  onCancel,
-  onNextStep,
+  responseFieldName,
+  getCancelBtn,
+  getSubmitBtn,
   description
 }: ICODDetailsEditPanel & { description?: any }) => {
   const { user: currentUser } = useSelector((state: RootState) => state.auth);
@@ -39,7 +37,9 @@ const CODSiblingsPanel = ({
   const [isReadOnly, setIsReadOnly] = useState(false);
 
   useEffect(() => {
-    setEditingResponse(response?.response?.siblings || []);
+    const res = response?.response || {};
+    // @ts-ignore
+    setEditingResponse(responseFieldName in res ? res[responseFieldName] : []);
   }, [response]);
 
   useEffect(() => {
@@ -280,7 +280,8 @@ const CODSiblingsPanel = ({
                                   setEditingResponse(siblings);
                                 })
                               }
-                              confirmString={`${currentUser?.synergyId || 'na'}`}
+                              confirmString={`${currentUser?.synergyId ||
+                                "na"}`}
                               variant={"danger"}
                               size={"sm"}
                             >
@@ -308,34 +309,21 @@ const CODSiblingsPanel = ({
         <Col>{description}</Col>
       </Row>
       {getSiblingsTable()}
-      <FlexContainer className={"justify-content-between"}>
-        <div />
-        <CODAdminDetailsSaveBtnPanel
-          onNext={onNextStep}
-          syncdLabel={
-            onSaved ? undefined : "After manually update Synergetic, and then"
-          }
-          editingResponse={{
-            ...response,
+      <CODAdminDetailsSaveBtnPanel
+        isLoading={isLoading}
+        responseFieldName={responseFieldName}
+        editingResponse={{
+          ...response,
+          // @ts-ignore
+          response: {
+            ...(response?.response || {}),
             // @ts-ignore
-            response: {
-              ...(response?.response || {}),
-              // @ts-ignore
-              siblings: editingResponse
-            }
-          }}
-          onCancel={onCancel}
-          syncFn={resp =>
-            ConfirmationOfDetailsResponseService.update(resp.id, {
-              ...resp,
-              response: {
-                ...(resp.response || {}),
-                siblings: editingResponse || []
-              }
-            })
+            [responseFieldName]: editingResponse
           }
-        />
-      </FlexContainer>
+        }}
+        getCancelBtn={getCancelBtn}
+        getSubmitBtn={getSubmitBtn}
+      />
     </Wrapper>
   );
 };

@@ -7,11 +7,8 @@ import {
   iCODStudentResponse
 } from "../../../types/ConfirmationOfDetails/iConfirmationOfDetailsResponse";
 import PageLoadingSpinner from "../../common/PageLoadingSpinner";
-import { FlexContainer } from "../../../styles";
 import CODAdminDetailsSaveBtnPanel from "../CODAdmin/CODAdminDetailsSaveBtnPanel";
-import ConfirmationOfDetailsResponseService from "../../../services/ConfirmationOfDetails/ConfirmationOfDetailsResponseService";
-import moment from "moment-timezone";
-import {Button, Col, Row} from "react-bootstrap";
+import { Button, Col, Row } from "react-bootstrap";
 import CODAdminInputPanel from "../components/CODAdminInputPanel";
 import Toaster from "../../../services/Toaster";
 import SynCommunityService from "../../../services/Synergetic/Community/SynCommunityService";
@@ -27,9 +24,9 @@ type iCommunityMap = { [key: number | string]: iSynCommunity };
 const CODGovernmentFundingPanel = ({
   response,
   isDisabled,
-  onSaved,
-  onCancel,
-  onNextStep
+  getCancelBtn,
+  getSubmitBtn,
+  responseFieldName,
 }: ICODDetailsEditPanel) => {
   const [
     editingResponse,
@@ -45,7 +42,9 @@ const CODGovernmentFundingPanel = ({
 
   useEffect(() => {
     const studentResp = response?.response?.student || null;
-    const govResp = response?.response?.governmentFunding || null;
+    const res = response?.response || {};
+    // @ts-ignore
+    const govResp = responseFieldName in res ? res[responseFieldName] : null;
 
     setEditingResponse(govResp);
     setStudentResponse(studentResp);
@@ -255,7 +254,9 @@ const CODGovernmentFundingPanel = ({
                   <div>Occupation Group Instructions:</div>
                   <div>
                     Please click on the
-                    <Button size={'sm'} variant={'link'}
+                    <Button
+                      size={"sm"}
+                      variant={"link"}
                       href="https://mconnect.mentonegirls.vic.edu.au/send.php?id=50393"
                       target="_blank"
                     >
@@ -359,41 +360,25 @@ const CODGovernmentFundingPanel = ({
           </Col>
         </Row>
         <Row>{["parent1", "parent2"].map(key => getParentDiv(key))}</Row>
-        <FlexContainer className={"justify-content-between"}>
-          <div />
+        {isReadOnly === true ? null : (
           <CODAdminDetailsSaveBtnPanel
-            onNext={onNextStep}
-            syncdLabel={
-              isReadOnly !== true
-                ? undefined
-                : `Details Already Sync'd @ ${moment(
-                    editingResponse?.syncToSynAt
-                  ).format("lll")} By ${editingResponse?.syncToSynById}`
-            }
+            getSubmitBtn={getSubmitBtn}
+            getCancelBtn={getCancelBtn}
+            isLoading={isLoading}
+            responseFieldName={responseFieldName}
             editingResponse={{
               ...response,
               // @ts-ignore
               response: {
                 ...(response?.response || {}),
                 // @ts-ignore
-                governmentFunding: editingResponse,
+                [responseFieldName]: editingResponse,
                 // @ts-ignore
                 student: studentResponse
               }
             }}
-            onCancel={onCancel}
-            syncFn={resp =>
-              ConfirmationOfDetailsResponseService.update(resp.id, {
-                ...resp,
-                response: {
-                  ...(resp.response || {}),
-                  governmentFunding: editingResponse,
-                  student: studentResponse
-                }
-              })
-            }
           />
-        </FlexContainer>
+        )}
       </>
     );
   };

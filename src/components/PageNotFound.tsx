@@ -35,10 +35,10 @@ const PageNotFound = ({title, description, primaryBtn, secondaryBtn}: iPageNotFo
       <SchoolLogo />
     </div>
     <div className={'description'}>
-      <h4 className={'title'}>{title || 'Requested page can\'t be found.'}</h4>
-      <p>
+      <h4 className={'title'}>{title || `Requested page can't be found.`}</h4>
+      <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
         {description || `This page might have been removed or temporarily unavailable.`}
-      </p>
+      </div>
     </div>
     <div className={'actions'}>
       { primaryBtn || <Button variant={'primary'} size="sm" onClick={() => reloadPage()}>Reload Page</Button>}

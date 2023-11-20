@@ -39,6 +39,7 @@ import PowerBIReportViewingPage from '../../pages/PowerBI/PowerBIReportViewingPa
 import PowerBIReportManagerPage from '../../pages/PowerBI/Manager/PowerBIReportManagerPage';
 import {URL_POWER_BI_DISPLAY} from '../../Url';
 import CODManagerPage from '../../pages/ConfirmationOfDetails/CODManagerPage';
+import CODParentPage from '../../pages/ConfirmationOfDetails/CODParentPage';
 // import PageNotFound from '../../components/PageNotFound';
 
 const schoolBoxIframeElementId = "remote";
@@ -228,6 +229,12 @@ const SchoolBoxRouter = ({
         <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_COD}>
           <CODManagerPage />
         </ModuleAccessWrapper>
+      );
+    }
+    case "/confirmation_of_details/register_new": {
+      removeSchoolBoxIframe();
+      return (
+        <CODParentPage />
       );
     }
     default: {

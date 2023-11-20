@@ -1,3 +1,7 @@
+
+export const SYN_ACTIVITY_CODE_CD_READY = 'CDREADY';
+export const SYN_ACTIVITY_CODE_CD_SUBMITTED = 'CDSUBMITTED';
+
 type iSynVActivity = {
   ActivitySeq: number;
   ID: number;

@@ -17,6 +17,7 @@ import FormErrorDisplay from '../form/FormErrorDisplay';
 import Toaster, {TOAST_TYPE_ERROR, TOAST_TYPE_SUCCESS} from '../../services/Toaster';
 import SchoolManagementTeamService from '../../services/Synergetic/SchoolManagementTeamService';
 import ExplanationPanel from '../ExplanationPanel';
+import MathHelper from '../../helper/MathHelper';
 
 type iSchoolManagementEditPanel = {
   title?: any;
@@ -152,6 +153,7 @@ const SchoolManagementEditPanel = ({onIsSubmitting, onCancel, schoolManagementTe
             <Col md={3}>
               <FormLabel label={'File Year'} isRequired/>
               <FileYearSelector
+                max={MathHelper.add(moment().year(), 1)}
                 isDisabled={isSubmitting}
                 value={fileYear} onSelect={(year) => setFileYear(year || moment().year())}
               />

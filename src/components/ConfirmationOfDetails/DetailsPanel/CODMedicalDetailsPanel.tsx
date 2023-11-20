@@ -4,13 +4,11 @@ import { Button, Col, FormControl, Row } from "react-bootstrap";
 import React, { useEffect, useState } from "react";
 import { iCODMedicalResponse } from "../../../types/ConfirmationOfDetails/iConfirmationOfDetailsResponse";
 import PageLoadingSpinner from "../../common/PageLoadingSpinner";
-import Toaster, { TOAST_TYPE_SUCCESS } from "../../../services/Toaster";
+import Toaster from "../../../services/Toaster";
 import moment from "moment-timezone";
 import CODAdminInputPanel from "../components/CODAdminInputPanel";
 import FlagSelector from "../../form/FlagSelector";
-import { FlexContainer } from "../../../styles";
 import CODAdminDetailsSaveBtnPanel from "../CODAdmin/CODAdminDetailsSaveBtnPanel";
-import ConfirmationOfDetailsResponseService from "../../../services/ConfirmationOfDetails/ConfirmationOfDetailsResponseService";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/makeReduxStore";
 import iSynMedicalDetails from "../../../types/Synergetic/Medical/iSynMedicalDetails";
@@ -33,7 +31,7 @@ const Wrapper = styled.div`
       height: auto;
       font-size: 11px;
     }
-    
+
     ul {
       margin-bottom: 0px;
     }
@@ -42,15 +40,14 @@ const Wrapper = styled.div`
 const CODMedicalDetailsPanel = ({
   response,
   isDisabled,
-  onSaved,
-  onCancel,
-  onNextStep
+  responseFieldName,
+  getCancelBtn,
+  getSubmitBtn
 }: ICODDetailsEditPanel) => {
   const [
     editingResponse,
     setEditingResponse
   ] = useState<iCODMedicalResponse | null>(null);
-  const { user: currentUser } = useSelector((state: RootState) => state.auth);
   const [
     medicalDetailsFromDB,
     setMedicalDetailsFromDB
@@ -60,11 +57,12 @@ const CODMedicalDetailsPanel = ({
     setCommunityConsentFromDB
   ] = useState<iSynCommunityConsent | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isReadOnly, setIsReadOnly] = useState(false);
 
   useEffect(() => {
-    setEditingResponse(response?.response?.medicalDetails || null);
+    const res = response?.response || {};
+      // @ts-ignore
+    setEditingResponse(responseFieldName in res ? res[responseFieldName] : null);
     let isCanceled = false;
     setIsLoading(true);
     Promise.all([
@@ -141,16 +139,16 @@ const CODMedicalDetailsPanel = ({
     return (
       <Row>
         <Col>
-          <SectionDiv >
+          <SectionDiv>
             {editingResponse?.immunisation?.hasSetOutToAusSchedule === false ? (
-              <div className={'file-uploader-desc'}>
+              <div className={"file-uploader-desc"}>
                 Please provide a letter from the a registered medical
                 practitioner stating the child has a medical condition
                 preventing them from bing fully vaccinated OR they are on the
                 vaccine catch-up schedule.
               </div>
             ) : (
-              <div className={'file-uploader-desc'}>
+              <div className={"file-uploader-desc"}>
                 Please attach the{" "}
                 <strong>Immunisation History Statement</strong>
                 <small>
@@ -197,7 +195,11 @@ const CODMedicalDetailsPanel = ({
             )}
             <CODFileListTable
               files={eFiles}
-              title={editingResponse?.immunisation?.hasSetOutToAusSchedule === false ? 'GP Letter(s)' : 'Immunisation History Statement(s)'}
+              title={
+                editingResponse?.immunisation?.hasSetOutToAusSchedule === false
+                  ? "GP Letter(s)"
+                  : "Immunisation History Statement(s)"
+              }
               isDisabled={isReadOnly === true}
               deletingFn={asset => {
                 return new Promise(() =>
@@ -275,8 +277,8 @@ const CODMedicalDetailsPanel = ({
                 ? "_BLANK"
                 : moment
                     .tz(
-                      `${editingResponse?.immunisation
-                        ?.ImmunisationFormDate || ""}`.trim(),
+                      `${editingResponse?.immunisation?.ImmunisationFormDate ||
+                        ""}`.trim(),
                       moment.tz.guess()
                     )
                     .format("DD MMM YYYY")
@@ -286,8 +288,7 @@ const CODMedicalDetailsPanel = ({
               ""
                 ? "_BLANK"
                 : moment(
-                    `${medicalDetailsFromDB?.ImmunisationFormDate ||
-                      ""}`.trim()
+                    `${medicalDetailsFromDB?.ImmunisationFormDate || ""}`.trim()
                   )
                     .utc()
                     .format("DD MMM YYYY")
@@ -339,11 +340,10 @@ const CODMedicalDetailsPanel = ({
                     ""}`.trim()
             }
             valueFromDB={
-              `${medicalDetailsFromDB?.ImmunisationFormStatus ||
-                ""}`.trim() === ""
+              `${medicalDetailsFromDB?.ImmunisationFormStatus || ""}`.trim() ===
+              ""
                 ? "_BLANK"
-                : `${medicalDetailsFromDB?.ImmunisationFormStatus ||
-                    ""}`.trim()
+                : `${medicalDetailsFromDB?.ImmunisationFormStatus || ""}`.trim()
             }
             getComponent={isSameFromDB => {
               return (
@@ -353,8 +353,8 @@ const CODMedicalDetailsPanel = ({
                   }`}
                   isDisabled={isReadOnly === true}
                   values={
-                    `${editingResponse?.immunisation
-                      ?.ImmunisationFormStatus || ""}`.trim() === ""
+                    `${editingResponse?.immunisation?.ImmunisationFormStatus ||
+                      ""}`.trim() === ""
                       ? []
                       : [
                           `${editingResponse?.immunisation
@@ -385,8 +385,8 @@ const CODMedicalDetailsPanel = ({
               `${editingResponse?.immunisation?.ImmunisationOtherDetails ||
                 ""}`.trim() === ""
                 ? "_BLANK"
-                : `${editingResponse?.immunisation
-                    ?.ImmunisationOtherDetails || ""}`.trim()
+                : `${editingResponse?.immunisation?.ImmunisationOtherDetails ||
+                    ""}`.trim()
             }
             valueFromDB={
               `${medicalDetailsFromDB?.ImmunisationOtherDetails ||
@@ -500,48 +500,21 @@ const CODMedicalDetailsPanel = ({
         {getImmunisationPanel()}
       </Row>
       {getFileContents()}
-      <FlexContainer className={"justify-content-between"}>
-        <div />
-        <CODAdminDetailsSaveBtnPanel
-          onSubmitting={submitting => setIsSubmitting(submitting)}
-          isLoading={isLoading || isSubmitting}
-          onNext={onNextStep}
-          syncdLabel={
-            isReadOnly !== true
-              ? undefined
-              : `Details Already Sync'd @ ${moment(
-                editingResponse?.syncToSynAt
-              ).format("lll")} By ${editingResponse?.syncToSynById}`
-          }
-          editingResponse={{
-            ...response,
+      <CODAdminDetailsSaveBtnPanel
+        isLoading={isLoading}
+        responseFieldName={responseFieldName}
+        editingResponse={{
+          ...response,
+          // @ts-ignore
+          response: {
+            ...(response?.response || {}),
             // @ts-ignore
-            response: {
-              ...(response?.response || {}),
-              // @ts-ignore
-              medicalDetails: editingResponse
-            }
-          }}
-          onSaved={resp => {
-            Toaster.showToast(`Details Sync'd.`, TOAST_TYPE_SUCCESS);
-            onSaved && onSaved(resp);
-          }}
-          onCancel={onCancel}
-          syncFn={resp =>
-            ConfirmationOfDetailsResponseService.update(resp.id, {
-              ...resp,
-              response: {
-                ...(resp.response || {}),
-                student: {
-                  ...(editingResponse || {}),
-                  syncToSynAt: moment().toISOString(),
-                  syncToSynById: currentUser?.synergyId
-                }
-              }
-            })
+            [responseFieldName]: editingResponse
           }
-        />
-      </FlexContainer>
+        }}
+        getCancelBtn={getCancelBtn}
+        getSubmitBtn={getSubmitBtn}
+      />
     </Wrapper>
   );
 };

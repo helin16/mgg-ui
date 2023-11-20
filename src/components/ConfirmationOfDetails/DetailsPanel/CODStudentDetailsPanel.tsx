@@ -6,7 +6,7 @@ import { iCODStudentResponse } from "../../../types/ConfirmationOfDetails/iConfi
 import PageLoadingSpinner from "../../common/PageLoadingSpinner";
 import iVStudent from "../../../types/Synergetic/Student/iVStudent";
 import SynVStudentService from "../../../services/Synergetic/Student/SynVStudentService";
-import Toaster, { TOAST_TYPE_SUCCESS } from "../../../services/Toaster";
+import Toaster from "../../../services/Toaster";
 import moment from "moment-timezone";
 import DateTimePicker from "../../common/DateTimePicker";
 import CODAdminInputPanel from "../components/CODAdminInputPanel";
@@ -21,24 +21,19 @@ import SynAddressService from "../../../services/Synergetic/SynAddressService";
 import iSynAddress from "../../../types/Synergetic/iSynAddress";
 import { FlexContainer } from "../../../styles";
 import CODAdminDetailsSaveBtnPanel from "../CODAdmin/CODAdminDetailsSaveBtnPanel";
-import ConfirmationOfDetailsResponseService
-  from '../../../services/ConfirmationOfDetails/ConfirmationOfDetailsResponseService';
-import {useSelector} from 'react-redux';
-import {RootState} from '../../../redux/makeReduxStore';
 
 const Wrapper = styled.div``;
 const CODStudentDetailsPanel = ({
   response,
   isDisabled,
-  onSaved,
-  onCancel,
-  onNextStep,
+  getCancelBtn,
+  getSubmitBtn,
+  responseFieldName
 }: ICODDetailsEditPanel) => {
   const [
     editingResponse,
     setEditingResponse
   ] = useState<iCODStudentResponse | null>(null);
-  const { user: currentUser } = useSelector((state: RootState) => state.auth);
   const [studentFromDB, setStudentFromDB] = useState<iVStudent | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -49,7 +44,8 @@ const CODStudentDetailsPanel = ({
   ] = useState<iSynAddress | null>(null);
 
   useEffect(() => {
-    setEditingResponse(response?.response?.student || null);
+    const res: any = (response?.response || {});
+    setEditingResponse(responseFieldName in res ? res[responseFieldName] : null);
     const getData = async () => {
       const studentResults = await SynVStudentService.getVPastAndCurrentStudentAll(
         {
@@ -132,8 +128,10 @@ const CODStudentDetailsPanel = ({
     isRequired?: boolean
   ) => {
     const value =
-      // @ts-ignore
-      editingResponse && (fieldName in editingResponse) ? editingResponse[fieldName] : "";
+      editingResponse && fieldName in editingResponse
+        // @ts-ignore
+        ? editingResponse[fieldName]
+        : "";
     return (
       <CODAdminInputPanel
         label={label}
@@ -599,46 +597,22 @@ const CODStudentDetailsPanel = ({
           />
         </Col>
       </Row>
-      <FlexContainer className={'justify-content-between'}>
+      <FlexContainer className={"justify-content-between"}>
         <div />
         <CODAdminDetailsSaveBtnPanel
-          onSubmitting={submitting => setIsSubmitting(submitting)}
           isLoading={isLoading || isSubmitting}
-          onNext={onNextStep}
-          syncdLabel={
-            isReadOnly !== true
-              ? undefined
-              : `Student Details Already Sync'd @ ${moment(
-                editingResponse?.syncToSynAt
-              ).format("lll")} By ${editingResponse?.syncToSynById}`
-          }
+          responseFieldName={responseFieldName}
           editingResponse={{
             ...response,
             // @ts-ignore
             response: {
               ...(response?.response || {}),
               // @ts-ignore
-              student: editingResponse
+              [responseFieldName]: editingResponse
             }
           }}
-          onSaved={resp => {
-            Toaster.showToast(`Student Details Sync'd.`, TOAST_TYPE_SUCCESS);
-            onSaved && onSaved(resp);
-          }}
-          onCancel={onCancel}
-          syncFn={resp =>
-            ConfirmationOfDetailsResponseService.update(resp.id, {
-              ...resp,
-              response: {
-                ...(resp.response || {}),
-                student: {
-                  ...(editingResponse || {}),
-                  syncToSynAt: moment().toISOString(),
-                  syncToSynById: currentUser?.synergyId
-                }
-              }
-            })
-          }
+          getCancelBtn={getCancelBtn}
+          getSubmitBtn={getSubmitBtn}
         />
       </FlexContainer>
     </Wrapper>

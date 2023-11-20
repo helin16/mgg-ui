@@ -35,9 +35,10 @@ const Wrapper = styled.div`
 type iStudentGridForAParent = {
   parentSynId: string | number;
   onSelect?: (student: iVStudent) => void;
+  contactTypes?: string[];
 };
 const StudentGridForAParent = ({
-    parentSynId, onSelect
+    parentSynId, onSelect, contactTypes = [STUDENT_CONTACT_TYPE_SC1]
  }: iStudentGridForAParent) => {
   const [students, setStudents] = useState<iVStudent[]>([]);
   const [parentIds, setParentIds] = useState<number[]>([]);
@@ -78,7 +79,7 @@ const StudentGridForAParent = ({
     StudentContactService.getStudentContacts({
       where: JSON.stringify({
         LinkedID: parentIds,
-        ContactType: [STUDENT_CONTACT_TYPE_SC1, STUDENT_CONTACT_TYPE_SC2, STUDENT_CONTACT_TYPE_SC3],
+        ContactType: contactTypes,
       }),
     })
       .then(res => {
@@ -91,7 +92,7 @@ const StudentGridForAParent = ({
     return () => {
       isCancelled = true;
     }
-  }, [parentIds]);
+  }, [parentIds, contactTypes]);
 
   useEffect(() => {
     let isCancelled = false;

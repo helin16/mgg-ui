@@ -3,24 +3,19 @@ import styled from "styled-components";
 import { Col, FormControl, Row } from "react-bootstrap";
 import React, { useEffect, useState } from "react";
 import {
-  iCODParentResponse, iCODParentsResponse
+  iCODParentResponse,
+  iCODParentsResponse
 } from "../../../types/ConfirmationOfDetails/iConfirmationOfDetailsResponse";
 import PageLoadingSpinner from "../../common/PageLoadingSpinner";
-import Toaster, {TOAST_TYPE_SUCCESS} from "../../../services/Toaster";
+import Toaster from "../../../services/Toaster";
 import iSynCommunity from "../../../types/Synergetic/iSynCommunity";
 import SynCommunityService from "../../../services/Synergetic/Community/SynCommunityService";
 import CODAdminInputPanel from "../components/CODAdminInputPanel";
 import CODAddressEditor from "../components/CODAddressEditor";
 import SynAddressService from "../../../services/Synergetic/SynAddressService";
 import iSynAddress from "../../../types/Synergetic/iSynAddress";
-import {dangerRed} from '../../../AppWrapper';
-import CODAdminDetailsSaveBtnPanel from '../CODAdmin/CODAdminDetailsSaveBtnPanel';
-import moment from 'moment-timezone';
-import ConfirmationOfDetailsResponseService
-  from '../../../services/ConfirmationOfDetails/ConfirmationOfDetailsResponseService';
-import {FlexContainer} from '../../../styles';
-import {useSelector} from 'react-redux';
-import {RootState} from '../../../redux/makeReduxStore';
+import { dangerRed } from "../../../AppWrapper";
+import CODAdminDetailsSaveBtnPanel from "../CODAdmin/CODAdminDetailsSaveBtnPanel";
 
 const Wrapper = styled.div`
   margin-top: 1rem;
@@ -30,27 +25,33 @@ type iAddressMap = { [key: number]: iSynAddress };
 const CODParentsDetailsPanel = ({
   response,
   isDisabled,
-  onNextStep,
-  onCancel,
-  onSaved,
+  responseFieldName,
+  getCancelBtn,
+  getSubmitBtn
 }: ICODDetailsEditPanel) => {
-  const { user: currentUser } = useSelector((state: RootState) => state.auth);
   const [
     editingResponse,
     setEditingResponse
   ] = useState<iCODParentsResponse | null>(null);
   const [parentsFromDB, setParentsFromDB] = useState<iCommunityMap>({});
   const [isLoading, setIsLoading] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isReadOnly, setIsReadOnly] = useState(false);
   const [addressFromDBMap, setAddressFromDBMap] = useState<iAddressMap>({});
 
   useEffect(() => {
-    setEditingResponse(response?.response?.parent || null);
-    const parentIds = Object.values(response.response?.parent || {})
-        // @ts-ignore
-      .filter(parent => `${parent?.id || ""}`.trim() !== "" && `${parent?.id || ""}`.trim() !== "0")
-        // @ts-ignore
+    const res = response?.response || {};
+    // @ts-ignore
+    const parentRes = responseFieldName in res ? res[responseFieldName] : {};
+    setEditingResponse(parentRes);
+    const parentIds = Object.values(parentRes)
+      .filter(
+        parent =>
+          // @ts-ignore
+          `${parent?.id || ""}`.trim() !== "" &&
+          // @ts-ignore
+          `${parent?.id || ""}`.trim() !== "0"
+      )
+      // @ts-ignore
       .map(parent => Number(parent.id));
     if (parentIds.length <= 0) {
       return;
@@ -120,9 +121,9 @@ const CODParentsDetailsPanel = ({
   }, [response]);
 
   useEffect(() => {
-    const hasBeenSyncd = `${editingResponse?.syncToSynAt || ""}`.trim() !== "" &&
-      `${editingResponse?.syncToSynById || ""}`.trim() !==
-      "";
+    const hasBeenSyncd =
+      `${editingResponse?.syncToSynAt || ""}`.trim() !== "" &&
+      `${editingResponse?.syncToSynById || ""}`.trim() !== "";
     setIsReadOnly(hasBeenSyncd === true || isDisabled === true);
   }, [editingResponse, isDisabled]);
 
@@ -131,7 +132,7 @@ const CODParentsDetailsPanel = ({
     fieldName: string,
     newValue: string
   ) => {
-    const object = (editingResponse || {});
+    const object = editingResponse || {};
     // @ts-ignore
     const keyObj = roleName in object ? object[roleName] : {};
     // @ts-ignore
@@ -149,7 +150,7 @@ const CODParentsDetailsPanel = ({
     fieldName: string,
     newValue: string
   ) => {
-    const object = (editingResponse || {});
+    const object = editingResponse || {};
     // @ts-ignore
     const keyObj = roleName in object ? object[roleName] : {};
     // @ts-ignore
@@ -209,7 +210,10 @@ const CODParentsDetailsPanel = ({
           }
           // @ts-ignore
           const parent: iCODParentResponse = parents[key];
-          if (`${parent.id || ''}`.trim() === '' || `${parent.id || ''}`.trim() === '0') {
+          if (
+            `${parent.id || ""}`.trim() === "" ||
+            `${parent.id || ""}`.trim() === "0"
+          ) {
             return null;
           }
           const parentFromDB: iSynCommunity | null =
@@ -339,17 +343,47 @@ const CODParentsDetailsPanel = ({
                     value={postalAddr}
                     valueFromDB={postalAddrFromDB}
                     getIsSameFromDBFn={() => {
-                      return postalAddr.toUpperCase() === postalAddrFromDB.toUpperCase() && homeAddr.toUpperCase() === homeAddrFromDB.toUpperCase();
+                      return (
+                        postalAddr.toUpperCase() ===
+                          postalAddrFromDB.toUpperCase() &&
+                        homeAddr.toUpperCase() === homeAddrFromDB.toUpperCase()
+                      );
                     }}
                     getSynergeticLabelFn={(isSameFromDB, valueFromDB) => {
                       if (isSameFromDB === true) {
                         return valueFromDB;
                       }
                       if (postalAddr !== postalAddrFromDB) {
-                        return <><span style={{backgroundColor: dangerRed, color: 'white', padding: '0 0.25rem'}}>P</span> {postalAddrFromDB}</>;
+                        return (
+                          <>
+                            <span
+                              style={{
+                                backgroundColor: dangerRed,
+                                color: "white",
+                                padding: "0 0.25rem"
+                              }}
+                            >
+                              P
+                            </span>{" "}
+                            {postalAddrFromDB}
+                          </>
+                        );
                       }
                       if (homeAddr !== homeAddrFromDB) {
-                        return <><span style={{backgroundColor: dangerRed, color: 'white', padding: '0 0.25rem'}}>H</span> {homeAddrFromDB}</>;
+                        return (
+                          <>
+                            <span
+                              style={{
+                                backgroundColor: dangerRed,
+                                color: "white",
+                                padding: "0 0.25rem"
+                              }}
+                            >
+                              H
+                            </span>{" "}
+                            {homeAddrFromDB}
+                          </>
+                        );
                       }
                     }}
                     getComponent={(isSameFromDB: boolean) => {
@@ -373,48 +407,21 @@ const CODParentsDetailsPanel = ({
           );
         })}
       </Row>
-      <FlexContainer className={'justify-content-between'}>
-        <div />
-        <CODAdminDetailsSaveBtnPanel
-          onSubmitting={submitting => setIsSubmitting(submitting)}
-          isLoading={isLoading || isSubmitting}
-          onNext={onNextStep}
-          syncdLabel={
-            isReadOnly !== true
-              ? undefined
-              : `Parent Details Already Sync'd @ ${moment(
-                editingResponse?.syncToSynAt
-              ).format("lll")} By ${editingResponse?.syncToSynById}`
-          }
-          editingResponse={{
-            ...response,
+      <CODAdminDetailsSaveBtnPanel
+        isLoading={isLoading}
+        responseFieldName={responseFieldName}
+        editingResponse={{
+          ...response,
+          // @ts-ignore
+          response: {
+            ...(response?.response || {}),
             // @ts-ignore
-            response: {
-              ...(response?.response || {}),
-              // @ts-ignore
-              parent: editingResponse
-            }
-          }}
-          onSaved={resp => {
-            Toaster.showToast(`Parent Details Sync'd.`, TOAST_TYPE_SUCCESS);
-            onSaved && onSaved(resp);
-          }}
-          onCancel={onCancel}
-          syncFn={resp =>
-            ConfirmationOfDetailsResponseService.update(resp.id, {
-              ...resp,
-              response: {
-                ...(resp.response || {}),
-                parent: {
-                  ...(editingResponse || {}),
-                  syncToSynAt: moment().toISOString(),
-                  syncToSynById: currentUser?.synergyId
-                }
-              }
-            })
+            [responseFieldName]: editingResponse
           }
-        />
-      </FlexContainer>
+        }}
+        getCancelBtn={getCancelBtn}
+        getSubmitBtn={getSubmitBtn}
+      />
     </Wrapper>
   );
 };

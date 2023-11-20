@@ -4,7 +4,7 @@ import iSynCommunityLegal from "../../../types/Synergetic/Community/iSynCommunit
 import PageLoadingSpinner from "../../common/PageLoadingSpinner";
 import SynCommunityLegalService from "../../../services/Synergetic/Community/SynCommunityLegalService";
 import ICODDetailsEditPanel from "./iCODDetailsEditPanel";
-import Toaster, {TOAST_TYPE_SUCCESS} from "../../../services/Toaster";
+import Toaster from "../../../services/Toaster";
 import { Col, FormControl, Row } from "react-bootstrap";
 import moment from "moment-timezone";
 import { iCODCourtOrderResponse } from "../../../types/ConfirmationOfDetails/iConfirmationOfDetailsResponse";
@@ -16,18 +16,11 @@ import DateTimePicker from "../../common/DateTimePicker";
 import SynLuCourtOrderTypeSelector from "../../Community/SynLuCourtOrderTypeSelector";
 import CODFileListTable from "../components/CODFileListTable";
 import CODAdminDetailsSaveBtnPanel from '../CODAdmin/CODAdminDetailsSaveBtnPanel';
-import ConfirmationOfDetailsResponseService
-  from '../../../services/ConfirmationOfDetails/ConfirmationOfDetailsResponseService';
-import {FlexContainer} from '../../../styles';
-import {useSelector} from 'react-redux';
-import {RootState} from '../../../redux/makeReduxStore';
 
 const Wrapper = styled.div``;
 
-const CODLegalPanel = ({ response, isDisabled, onNextStep, onSaved, onCancel }: ICODDetailsEditPanel) => {
-  const { user: currentUser } = useSelector((state: RootState) => state.auth);
+const CODLegalPanel = ({ response, isDisabled, getSubmitBtn, getCancelBtn, responseFieldName }: ICODDetailsEditPanel) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isReadOnly, setIsReadOnly] = useState(false);
   const [
     editingResponse,
@@ -40,7 +33,9 @@ const CODLegalPanel = ({ response, isDisabled, onNextStep, onSaved, onCancel }: 
   ] = useState<iSynCommunityLegal | null>(null);
 
   useEffect(() => {
-    setEditingResponse(response?.response?.courtOrder || null);
+    const res = response?.response || {};
+    // @ts-ignore
+    setEditingResponse(responseFieldName in res ? res[responseFieldName] : null);
     let isCanceled = false;
     setIsLoading(true);
     SynCommunityLegalService.getAll({
@@ -255,53 +250,6 @@ const CODLegalPanel = ({ response, isDisabled, onNextStep, onSaved, onCancel }: 
   };
 
 
-  const getSubmitBtnPanel = () => {
-    return (
-      <FlexContainer className={'justify-content-between'}>
-        <div />
-        <CODAdminDetailsSaveBtnPanel
-          onSubmitting={submitting => setIsSubmitting(submitting)}
-          isLoading={isLoading || isSubmitting}
-          onNext={onNextStep}
-          syncdLabel={
-            isReadOnly !== true
-              ? undefined
-              : `Details Already Sync'd @ ${moment(
-                editingResponse?.syncToSynAt
-              ).format("lll")} By ${editingResponse?.syncToSynById}`
-          }
-          editingResponse={{
-            ...response,
-            // @ts-ignore
-            response: {
-              ...(response?.response || {}),
-              // @ts-ignore
-              courtOrder: editingResponse
-            }
-          }}
-          onSaved={resp => {
-            Toaster.showToast(`Details Sync'd.`, TOAST_TYPE_SUCCESS);
-            onSaved && onSaved(resp);
-          }}
-          onCancel={onCancel}
-          syncFn={resp =>
-            ConfirmationOfDetailsResponseService.update(resp.id, {
-              ...resp,
-              response: {
-                ...(resp.response || {}),
-                courtOrder: {
-                  ...(editingResponse || {}),
-                  syncToSynAt: moment().toISOString(),
-                  syncToSynById: currentUser?.synergyId
-                }
-              }
-            })
-          }
-        />
-      </FlexContainer>
-    )
-  }
-
   const getContent = () => {
     if (isLoading === true) {
       return <PageLoadingSpinner />;
@@ -346,7 +294,21 @@ const CODLegalPanel = ({ response, isDisabled, onNextStep, onSaved, onCancel }: 
           {getDetailsPanel()}
         </Row>
         {getFileContents()}
-        {getSubmitBtnPanel()}
+        <CODAdminDetailsSaveBtnPanel
+          isLoading={isLoading}
+          responseFieldName={responseFieldName}
+          editingResponse={{
+            ...response,
+            // @ts-ignore
+            response: {
+              ...(response?.response || {}),
+              // @ts-ignore
+              [responseFieldName]: editingResponse
+            }
+          }}
+          getCancelBtn={getCancelBtn}
+          getSubmitBtn={getSubmitBtn}
+        />
       </>
     );
   };
