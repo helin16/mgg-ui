@@ -32,7 +32,7 @@ const CODAdminInputPanel = ({getComponent, label, value, valueFromDB, getIsSameF
   const isSameInDB = getIsSameFromDBFn ? getIsSameFromDBFn() : `${value || ""}`.trim() === `${valueFromDB}`.trim();
 
   const getValueFromDBPanel = () => {
-    if (!valueFromDB) {
+    if (valueFromDB === undefined) {
       return null;
     }
     return (
@@ -40,7 +40,7 @@ const CODAdminInputPanel = ({getComponent, label, value, valueFromDB, getIsSameF
         title={`System Value: ${valueFromDB}`}
         className={`syn-value ellipsis ${isSameInDB === true ? "" : "bg-warning"}`}
       >
-        {getSynergeticLabelFn ? getSynergeticLabelFn(isSameInDB, valueFromDB) : (`${valueFromDB}`.trim() === '' ? 'NULL' : valueFromDB)}
+        {getSynergeticLabelFn ? getSynergeticLabelFn(isSameInDB, valueFromDB) : (`${valueFromDB || ''}`.trim() === '' ? 'NULL' : valueFromDB)}
       </small>
     )
   }

@@ -4,13 +4,11 @@ import { Button, Col, FormControl, Row } from "react-bootstrap";
 import React, { useEffect, useState } from "react";
 import { iCODMedicalResponse } from "../../../types/ConfirmationOfDetails/iConfirmationOfDetailsResponse";
 import PageLoadingSpinner from "../../common/PageLoadingSpinner";
-import Toaster from "../../../services/Toaster";
+import Toaster, { TOAST_TYPE_ERROR } from "../../../services/Toaster";
 import moment from "moment-timezone";
 import CODAdminInputPanel from "../components/CODAdminInputPanel";
 import FlagSelector from "../../form/FlagSelector";
 import CODAdminDetailsSaveBtnPanel from "../CODAdmin/CODAdminDetailsSaveBtnPanel";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../redux/makeReduxStore";
 import iSynMedicalDetails from "../../../types/Synergetic/Medical/iSynMedicalDetails";
 import iSynCommunityConsent from "../../../types/Synergetic/Community/iSynCommunityConsent";
 import SynCommunityConsentService from "../../../services/Synergetic/Community/SynCommunityConsentService";
@@ -21,6 +19,7 @@ import SynLuImmunisationFormStatusSelector from "../../Community/SynLuImmunisati
 import SectionDiv from "../../common/SectionDiv";
 import CODFileListTable from "../components/CODFileListTable";
 import ClientSideFileReader from "../../common/ClientSideFileReader";
+import FormErrorDisplay, { iErrorMap } from "../../form/FormErrorDisplay";
 
 const Wrapper = styled.div`
   .file-uploader-desc {
@@ -42,7 +41,8 @@ const CODMedicalDetailsPanel = ({
   isDisabled,
   responseFieldName,
   getCancelBtn,
-  getSubmitBtn
+  getSubmitBtn,
+  isForParent
 }: ICODDetailsEditPanel) => {
   const [
     editingResponse,
@@ -58,17 +58,48 @@ const CODMedicalDetailsPanel = ({
   ] = useState<iSynCommunityConsent | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isReadOnly, setIsReadOnly] = useState(false);
+  const [errorMap, setErrorMap] = useState<iErrorMap>({});
 
   useEffect(() => {
+    const studentId = 41198; //response.StudentID,
     const res = response?.response || {};
-      // @ts-ignore
-    setEditingResponse(responseFieldName in res ? res[responseFieldName] : null);
+    // @ts-ignore
+    const resp = responseFieldName in res ? res[responseFieldName] : {};
+
+    const setEditingResponseForParentForm = (
+      med?: iSynMedicalDetails | null,
+      comConsent?: iSynCommunityConsent | null
+    ) => {
+      if (isForParent !== true || Object.keys(resp).length > 0) {
+        return;
+      }
+      setEditingResponse({
+        allowIbuprofen: comConsent !== null && comConsent !== undefined,
+        immunisation: {
+          hasSetOutToAusSchedule: med?.ImmunisationFormFlag === true,
+          ImmunisationFormDate:
+            `${med?.ImmunisationFormDate || ""}`.trim() === ""
+              ? ""
+              : moment(`${med?.ImmunisationFormDate || ""}`.trim())
+                  .utc()
+                  .format("YYYY-MM-DD"),
+          ImmunisationFormStatus: `${med?.ImmunisationFormStatus || ""}`.trim(),
+          ImmunisationOtherDetails: `${med?.ImmunisationOtherDetails ||
+            ""}`.trim(),
+          historyStatementFiles: [],
+          gpLetterFiles: []
+        }
+      });
+      return;
+    };
+
+    setEditingResponse(resp);
     let isCanceled = false;
     setIsLoading(true);
     Promise.all([
       SynMedicalDetailsService.getAll({
         where: JSON.stringify({
-          ID: response.StudentID,
+          ID: studentId,
           ImmunisationFormFlag: true
         }),
         sort: "ImmunisationFormDate:DESC",
@@ -78,7 +109,7 @@ const CODMedicalDetailsPanel = ({
       SynCommunityConsentService.getAll({
         where: JSON.stringify({
           ActiveFlag: true,
-          ID: response.StudentID,
+          ID: studentId,
           ConsentCode: SYN_CONSENT_CODE_PARACETAMOL
         }),
         perPage: 1,
@@ -89,14 +120,16 @@ const CODMedicalDetailsPanel = ({
         if (isCanceled) {
           return;
         }
-        const medicalDetails = resp[0].data || [];
-        setMedicalDetailsFromDB(
-          medicalDetails.length > 0 ? medicalDetails[0] : null
-        );
+        const medicalDetailArr = resp[0].data || [];
+        const medicalDetails =
+          medicalDetailArr.length > 0 ? medicalDetailArr[0] : null;
         const communityConsents = resp[1].data || [];
-        setCommunityConsentFromDB(
-          communityConsents.length > 0 ? communityConsents[0] : null
-        );
+        const communityConsent =
+          communityConsents.length > 0 ? communityConsents[0] : null;
+
+        setMedicalDetailsFromDB(medicalDetails);
+        setCommunityConsentFromDB(communityConsent);
+        setEditingResponseForParentForm(medicalDetails, communityConsent);
       })
       .catch(err => {
         if (isCanceled) {
@@ -114,7 +147,7 @@ const CODMedicalDetailsPanel = ({
     return () => {
       isCanceled = true;
     };
-  }, [response]);
+  }, [response, isForParent, responseFieldName]);
 
   useEffect(() => {
     const hasBeenSyncd =
@@ -221,31 +254,42 @@ const CODMedicalDetailsPanel = ({
               }}
             />
             {isReadOnly === true ? null : (
-              <ClientSideFileReader
-                isMulti
-                description={
-                  <p>
-                    <small>Only allow images and pdf files</small>
-                  </p>
-                }
-                onFinished={files =>
-                  updateMedicalResponse("immunisation", {
-                    ...(editingResponse?.immunisation || {}),
-                    [editingResponse?.immunisation?.hasSetOutToAusSchedule ===
+              <>
+                <ClientSideFileReader
+                  isMulti
+                  description={
+                    <p>
+                      <small>Only allow images and pdf files</small>
+                    </p>
+                  }
+                  onFinished={files =>
+                    updateMedicalResponse("immunisation", {
+                      ...(editingResponse?.immunisation || {}),
+                      [editingResponse?.immunisation?.hasSetOutToAusSchedule ===
+                      false
+                        ? `gpLetterFiles`
+                        : "historyStatementFiles"]: [
+                        ...eFiles,
+                        ...files.map(file => ({
+                          name: file.name,
+                          url: file.url,
+                          mimeType: file.mimeType,
+                          size: file.size
+                        }))
+                      ]
+                    })
+                  }
+                />
+                <FormErrorDisplay
+                  errorsMap={errorMap}
+                  fieldName={
+                    editingResponse?.immunisation?.hasSetOutToAusSchedule ===
                     false
                       ? `gpLetterFiles`
-                      : "historyStatementFiles"]: [
-                      ...eFiles,
-                      ...files.map(file => ({
-                        name: file.name,
-                        url: file.url,
-                        mimeType: file.mimeType,
-                        size: file.size
-                      }))
-                    ]
-                  })
-                }
-              />
+                      : "historyStatementFiles"
+                  }
+                />
+              </>
             )}
           </SectionDiv>
         </Col>
@@ -271,10 +315,16 @@ const CODMedicalDetailsPanel = ({
         <Col md={3} sm={12}>
           <CODAdminInputPanel
             label={"Immunisation Form Date:"}
+            isRequired
+            errMsg={
+              "ImmunisationFormDate" in errorMap
+                ? errorMap["ImmunisationFormDate"]
+                : null
+            }
             value={
               `${editingResponse?.immunisation?.ImmunisationFormDate ||
                 ""}`.trim() === ""
-                ? "_BLANK"
+                ? ""
                 : moment
                     .tz(
                       `${editingResponse?.immunisation?.ImmunisationFormDate ||
@@ -286,7 +336,7 @@ const CODMedicalDetailsPanel = ({
             valueFromDB={
               `${medicalDetailsFromDB?.ImmunisationFormDate || ""}`.trim() ===
               ""
-                ? "_BLANK"
+                ? ""
                 : moment(
                     `${medicalDetailsFromDB?.ImmunisationFormDate || ""}`.trim()
                   )
@@ -332,19 +382,16 @@ const CODMedicalDetailsPanel = ({
         <Col md={3} sm={12}>
           <CODAdminInputPanel
             label={"Immunisation Form Status:"}
-            value={
-              `${editingResponse?.immunisation?.ImmunisationFormStatus ||
-                ""}`.trim() === ""
-                ? "_BLANK"
-                : `${editingResponse?.immunisation?.ImmunisationFormStatus ||
-                    ""}`.trim()
+            isRequired
+            errMsg={
+              "ImmunisationFormStatus" in errorMap
+                ? errorMap["ImmunisationFormStatus"]
+                : null
             }
-            valueFromDB={
-              `${medicalDetailsFromDB?.ImmunisationFormStatus || ""}`.trim() ===
-              ""
-                ? "_BLANK"
-                : `${medicalDetailsFromDB?.ImmunisationFormStatus || ""}`.trim()
-            }
+            value={`${editingResponse?.immunisation?.ImmunisationFormStatus ||
+              ""}`.trim()}
+            valueFromDB={`${medicalDetailsFromDB?.ImmunisationFormStatus ||
+              ""}`.trim()}
             getComponent={isSameFromDB => {
               return (
                 <SynLuImmunisationFormStatusSelector
@@ -381,20 +428,10 @@ const CODMedicalDetailsPanel = ({
         <Col md={12}>
           <CODAdminInputPanel
             label={"Immunisation Details:"}
-            value={
-              `${editingResponse?.immunisation?.ImmunisationOtherDetails ||
-                ""}`.trim() === ""
-                ? "_BLANK"
-                : `${editingResponse?.immunisation?.ImmunisationOtherDetails ||
-                    ""}`.trim()
-            }
-            valueFromDB={
-              `${medicalDetailsFromDB?.ImmunisationOtherDetails ||
-                ""}`.trim() === ""
-                ? "_BLANK"
-                : `${medicalDetailsFromDB?.ImmunisationOtherDetails ||
-                    ""}`.trim()
-            }
+            value={`${editingResponse?.immunisation?.ImmunisationOtherDetails ||
+              ""}`.trim()}
+            valueFromDB={`${medicalDetailsFromDB?.ImmunisationOtherDetails ||
+              ""}`.trim()}
             getComponent={isSameFromDB => {
               return (
                 <FormControl
@@ -418,105 +455,163 @@ const CODMedicalDetailsPanel = ({
     );
   };
 
-  if (isLoading === true) {
-    return <PageLoadingSpinner />;
-  }
+  const preSubmit = () => {
+    const errors: iErrorMap = {};
 
-  return (
-    <Wrapper>
-      <Row>
-        <Col>
-          <CODAdminInputPanel
-            isRequired
-            label={
-              "The School provides Ibuprofen medications, Do you give permission for you daughter to be given these under the supervision of the School Nurse?"
-            }
-            value={
-              editingResponse?.allowIbuprofen === true ||
-              `${editingResponse?.allowIbuprofen || "no"}`
-                .trim()
-                .toLowerCase() === "yes"
-                ? "YES"
-                : "NO"
-            }
-            valueFromDB={communityConsentFromDB !== null ? "YES" : "NO"}
-            getComponent={isSameFromDB => {
-              return (
-                <FlagSelector
-                  value={
-                    editingResponse?.allowIbuprofen === true ||
-                    `${editingResponse?.allowIbuprofen || "no"}`
-                      .trim()
-                      .toLowerCase() === "yes"
-                  }
-                  showAll={false}
-                  isDisabled={isReadOnly === true}
-                  classname={`form-control ${
-                    isSameFromDB === true ? "" : "is-invalid"
-                  }`}
-                  onSelect={option => {
-                    updateMedicalResponse(
-                      "allowIbuprofen",
-                      // @ts-ignore
-                      option?.value === true
-                    );
-                  }}
-                />
-              );
-            }}
-          />
-        </Col>
-      </Row>
-      <Row>
-        <Col>
-          <CODAdminInputPanel
-            isRequired
-            label={
-              "Has the child been immunised as set out in the Australian Immunisation Schedule?"
-            }
-            value={getIsImmunised() ? "YES" : "NO"}
-            valueFromDB={communityConsentFromDB !== null ? "YES" : "NO"}
-            getComponent={isSameFromDB => {
-              return (
-                <FlagSelector
-                  value={getIsImmunised()}
-                  showAll={false}
-                  isDisabled={isReadOnly === true}
-                  classname={`form-control ${
-                    isSameFromDB === true ? "" : "is-invalid"
-                  }`}
-                  onSelect={option => {
-                    updateMedicalResponse("immunisation", {
-                      ...(editingResponse?.immunisation || {}),
-                      // @ts-ignore
-                      hasSetOutToAusSchedule: option?.value === true
-                    });
-                  }}
-                />
-              );
-            }}
-          />
-        </Col>
-        {getImmunisationPanel()}
-      </Row>
-      {getFileContents()}
-      <CODAdminDetailsSaveBtnPanel
-        isLoading={isLoading}
-        responseFieldName={responseFieldName}
-        editingResponse={{
-          ...response,
-          // @ts-ignore
-          response: {
-            ...(response?.response || {}),
+    if (getIsImmunised() === true) {
+      if (
+        `${editingResponse?.immunisation?.ImmunisationFormDate ||
+          ""}`.trim() === ""
+      ) {
+        errors.ImmunisationFormDate = "Immunisation Form Date is required";
+      }
+      if (
+        `${editingResponse?.immunisation?.ImmunisationFormStatus ||
+          ""}`.trim() === ""
+      ) {
+        errors.ImmunisationFormStatus = "Immunisation Form Status is required";
+      }
+      // if (
+      //   (editingResponse?.immunisation?.historyStatementFiles || []).length <= 0
+      // ) {
+      //   errors.historyStatementFiles =
+      //     "Immunisation History Statement File(s) is required";
+      // }
+    }
+    // else {
+    //   if ((editingResponse?.immunisation?.gpLetterFiles || []).length <= 0) {
+    //     errors.gpLetterFiles = "GP Letter File(s) is required";
+    //   }
+    // }
+
+    setErrorMap(errors);
+    const hasPassed = Object.keys(errors).length <= 0;
+    if (hasPassed !== true) {
+      Toaster.showToast(
+        "Some errors in the form, please correct them before you move to the next step.",
+        TOAST_TYPE_ERROR
+      );
+    }
+    return hasPassed;
+  };
+
+  const getContent = () => {
+    if (isLoading === true) {
+      return <PageLoadingSpinner />;
+    }
+    return (
+      <>
+        <Row>
+          <Col>
+            <CODAdminInputPanel
+              isRequired
+              label={
+                "The School provides Ibuprofen medications, Do you give permission for you daughter to be given these under the supervision of the School Nurse?"
+              }
+              value={
+                editingResponse?.allowIbuprofen === true ||
+                `${editingResponse?.allowIbuprofen || "no"}`
+                  .trim()
+                  .toLowerCase() === "yes"
+                  ? "YES"
+                  : "NO"
+              }
+              valueFromDB={communityConsentFromDB !== null ? "YES" : "NO"}
+              errMsg={
+                "allowIbuprofen" in errorMap ? errorMap["allowIbuprofen"] : null
+              }
+              getComponent={isSameFromDB => {
+                return (
+                  <FlagSelector
+                    value={
+                      editingResponse?.allowIbuprofen === true ||
+                      `${editingResponse?.allowIbuprofen || "no"}`
+                        .trim()
+                        .toLowerCase() === "yes"
+                    }
+                    showAll={false}
+                    isDisabled={isReadOnly === true}
+                    classname={`form-control ${
+                      isSameFromDB === true ? "" : "is-invalid"
+                    }`}
+                    onSelect={option => {
+                      updateMedicalResponse(
+                        "allowIbuprofen",
+                        // @ts-ignore
+                        option?.value === true
+                      );
+                    }}
+                  />
+                );
+              }}
+            />
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <CODAdminInputPanel
+              isRequired
+              label={
+                "Has the child been immunised as set out in the Australian Immunisation Schedule?"
+              }
+              value={getIsImmunised() ? "YES" : "NO"}
+              valueFromDB={
+                medicalDetailsFromDB?.ImmunisationFormFlag === true
+                  ? "YES"
+                  : "NO"
+              }
+              errMsg={
+                "ImmunisationFormFlag" in errorMap
+                  ? errorMap["ImmunisationFormFlag"]
+                  : null
+              }
+              getComponent={isSameFromDB => {
+                return (
+                  <FlagSelector
+                    value={getIsImmunised()}
+                    showAll={false}
+                    isDisabled={isReadOnly === true}
+                    classname={`form-control ${
+                      isSameFromDB === true ? "" : "is-invalid"
+                    }`}
+                    onSelect={option => {
+                      updateMedicalResponse("immunisation", {
+                        ...(editingResponse?.immunisation || {}),
+                        // @ts-ignore
+                        hasSetOutToAusSchedule: option?.value === true
+                      });
+                    }}
+                  />
+                );
+              }}
+            />
+          </Col>
+          {getImmunisationPanel()}
+        </Row>
+        {getFileContents()}
+        <CODAdminDetailsSaveBtnPanel
+          isLoading={isLoading}
+          responseFieldName={responseFieldName}
+          editingResponse={{
+            ...response,
             // @ts-ignore
-            [responseFieldName]: editingResponse
+            response: {
+              ...(response?.response || {}),
+              // @ts-ignore
+              [responseFieldName]: editingResponse
+            }
+          }}
+          getCancelBtn={getCancelBtn}
+          getSubmitBtn={(res, fName) =>
+            getSubmitBtn &&
+            getSubmitBtn(res, responseFieldName, isLoading, preSubmit)
           }
-        }}
-        getCancelBtn={getCancelBtn}
-        getSubmitBtn={getSubmitBtn}
-      />
-    </Wrapper>
-  );
+        />
+      </>
+    );
+  };
+
+  return <Wrapper>{getContent()}</Wrapper>;
 };
 
 export default CODMedicalDetailsPanel;

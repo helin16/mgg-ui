@@ -4,8 +4,8 @@ import iSynCommunityLegal from "../../../types/Synergetic/Community/iSynCommunit
 import PageLoadingSpinner from "../../common/PageLoadingSpinner";
 import SynCommunityLegalService from "../../../services/Synergetic/Community/SynCommunityLegalService";
 import ICODDetailsEditPanel from "./iCODDetailsEditPanel";
-import Toaster from "../../../services/Toaster";
-import { Col, FormControl, Row } from "react-bootstrap";
+import Toaster, {TOAST_TYPE_ERROR} from "../../../services/Toaster";
+import {Alert, Col, FormControl, Row} from "react-bootstrap";
 import moment from "moment-timezone";
 import { iCODCourtOrderResponse } from "../../../types/ConfirmationOfDetails/iConfirmationOfDetailsResponse";
 import CODAdminInputPanel from "../components/CODAdminInputPanel";
@@ -16,12 +16,14 @@ import DateTimePicker from "../../common/DateTimePicker";
 import SynLuCourtOrderTypeSelector from "../../Community/SynLuCourtOrderTypeSelector";
 import CODFileListTable from "../components/CODFileListTable";
 import CODAdminDetailsSaveBtnPanel from '../CODAdmin/CODAdminDetailsSaveBtnPanel';
+import {iErrorMap} from '../../form/FormErrorDisplay';
 
 const Wrapper = styled.div``;
 
-const CODLegalPanel = ({ response, isDisabled, getSubmitBtn, getCancelBtn, responseFieldName }: ICODDetailsEditPanel) => {
+const CODLegalPanel = ({ response, isDisabled, getSubmitBtn, getCancelBtn, responseFieldName, isForParent }: ICODDetailsEditPanel) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isReadOnly, setIsReadOnly] = useState(false);
+  const [errorMap, setErrorMap] = useState<iErrorMap>({});
   const [
     editingResponse,
     setEditingResponse
@@ -35,7 +37,23 @@ const CODLegalPanel = ({ response, isDisabled, getSubmitBtn, getCancelBtn, respo
   useEffect(() => {
     const res = response?.response || {};
     // @ts-ignore
-    setEditingResponse(responseFieldName in res ? res[responseFieldName] : null);
+    const resp = responseFieldName in res ? res[responseFieldName] : {};
+    setEditingResponse(resp);
+
+    const setEditingResponseForParentForm = (comLegal?: iSynCommunityLegal | null) => {
+      if (isForParent !== true || Object.keys(resp).length > 0) {
+        return;
+      }
+      setEditingResponse({
+        hasCourtOrders: `${comLegal?.CourtOrderDate || ""}`.trim() !== '',
+        courtOrderType: `${comLegal?.CourtOrderType || ''}`.trim(),
+        courtOrderDate: `${comLegal?.CourtOrderDate || ""}`.trim(),
+        newDetails: `${comLegal?.CourtOrderDetails || ""}`.trim(),
+        newCourtOrderFiles: [],
+      });
+      return;
+    }
+
     let isCanceled = false;
     setIsLoading(true);
     SynCommunityLegalService.getAll({
@@ -48,7 +66,14 @@ const CODLegalPanel = ({ response, isDisabled, getSubmitBtn, getCancelBtn, respo
           return;
         }
         const results = resp.data || [];
-        setCommunityLegal(results.length <= 0 ? null : results[0]);
+        const legal = results.length <= 0 ? null : {
+          ...results[0],
+          CourtOrderDate: moment(`${results[0]?.CourtOrderDate || ""}`.trim()).year() <= 1900 ? '' : `${results[0]?.CourtOrderDate || ""}`.trim(),
+        };
+        // @ts-ignore
+        setCommunityLegal(legal);
+        // @ts-ignore
+        setEditingResponseForParentForm(legal)
       })
       .catch(err => {
         if (isCanceled) {
@@ -66,7 +91,7 @@ const CODLegalPanel = ({ response, isDisabled, getSubmitBtn, getCancelBtn, respo
     return () => {
       isCanceled = true;
     };
-  }, [response]);
+  }, [response, isForParent, responseFieldName]);
 
   useEffect(() => {
     const hasBeenSyncd =
@@ -84,7 +109,7 @@ const CODLegalPanel = ({ response, isDisabled, getSubmitBtn, getCancelBtn, respo
   };
 
   const getFileContents = () => {
-    if (editingResponse?.hasCourtOrders === false) {
+    if (editingResponse?.hasCourtOrders !== true) {
       return null;
     }
     const eFiles = editingResponse?.newCourtOrderFiles || [];
@@ -92,6 +117,7 @@ const CODLegalPanel = ({ response, isDisabled, getSubmitBtn, getCancelBtn, respo
       <Row>
         <Col>
           <SectionDiv>
+            <Alert variant={'warning'}>For privacy reasons, your previous court order files won't be displayed here.</Alert>
             <CODFileListTable
               files={eFiles}
               isDisabled={isReadOnly === true}
@@ -114,6 +140,7 @@ const CODLegalPanel = ({ response, isDisabled, getSubmitBtn, getCancelBtn, respo
             {isReadOnly === true ? null : (
               <ClientSideFileReader
                 isMulti
+                title={<h6>Drag and drop your court order files here</h6>}
                 description={
                   <p>
                     <small>Only allow images and pdf files</small>
@@ -138,8 +165,35 @@ const CODLegalPanel = ({ response, isDisabled, getSubmitBtn, getCancelBtn, respo
     );
   };
 
+  const preSubmit = () => {
+    const errors: iErrorMap = {};
+    if (editingResponse?.hasCourtOrders === undefined) {
+      errors.hasCourtOrders = 'Required';
+    }
+
+    if (editingResponse?.hasCourtOrders === true) {
+      if (`${editingResponse.courtOrderType || ''}`.trim() === '') {
+        errors.courtOrderType = 'Court Order Type is required';
+      }
+      if (`${editingResponse.courtOrderDate || ''}`.trim() === '') {
+        errors.courtOrderDate = 'Court Order Date is required';
+      }
+    }
+
+    setErrorMap(errors);
+    const hasPassed = Object.keys(errors).length <= 0;
+    if (hasPassed !== true) {
+      Toaster.showToast(
+        "Some errors in the form, please correct them before you move to the next step.",
+        TOAST_TYPE_ERROR
+      );
+    }
+    return hasPassed;
+  };
+
+
   const getDetailsPanel = () => {
-    if (editingResponse?.hasCourtOrders === false) {
+    if (editingResponse?.hasCourtOrders !== true) {
       return null;
     }
     return (
@@ -150,6 +204,7 @@ const CODLegalPanel = ({ response, isDisabled, getSubmitBtn, getCancelBtn, respo
             isRequired
             value={`${editingResponse?.courtOrderType || ""}`.trim()}
             valueFromDB={`${communityLegal?.CourtOrderType || ""}`.trim()}
+            errMsg={'courtOrderType' in errorMap ? errorMap['courtOrderType'] : null}
             getComponent={isSameFromDB => {
               return (
                 <SynLuCourtOrderTypeSelector
@@ -181,6 +236,7 @@ const CODLegalPanel = ({ response, isDisabled, getSubmitBtn, getCancelBtn, respo
           <CODAdminInputPanel
             label={"Court Order Date"}
             isRequired
+            errMsg={'courtOrderDate' in errorMap ? errorMap['courtOrderDate'] : null}
             value={`${editingResponse?.courtOrderDate || ""}`.trim()}
             valueFromDB={
               `${communityLegal?.CourtOrderDate || ""}`.trim() === ""
@@ -262,9 +318,10 @@ const CODLegalPanel = ({ response, isDisabled, getSubmitBtn, getCancelBtn, respo
             <CODAdminInputPanel
               label={"Has Court Order?"}
               isRequired
+              errMsg={'hasCourtOrders' in errorMap ? errorMap['hasCourtOrders'] : null}
               value={editingResponse?.hasCourtOrders === true ? "YES" : "NO"}
               valueFromDB={
-                `${communityLegal?.CourtOrderDate || ""}`.trim() !== ""
+                `${communityLegal?.CourtOrderDate || ""}`.trim() !== ''
                   ? "YES"
                   : "NO"
               }
@@ -307,7 +364,10 @@ const CODLegalPanel = ({ response, isDisabled, getSubmitBtn, getCancelBtn, respo
             }
           }}
           getCancelBtn={getCancelBtn}
-          getSubmitBtn={getSubmitBtn}
+          getSubmitBtn={(res, fName) =>
+            getSubmitBtn &&
+            getSubmitBtn(res, responseFieldName, isLoading, preSubmit)
+          }
         />
       </>
     );
