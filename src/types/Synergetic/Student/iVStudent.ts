@@ -205,6 +205,7 @@ type iVStudent = {
   GenderSynergyMeaning: string;
   profileUrl: string;
   StudentPassportCountry?: iSynLuCountry;
+  isFuture?: boolean;
 };
 
 export type iVPastStudent = iVStudent;

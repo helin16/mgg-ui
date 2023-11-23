@@ -31,6 +31,7 @@ const CODAddressEditor = ({
         if (onChange) {
           const addressObj = SynAddressService.getAddressObjFromSynAddress(newAddress);
           onChange({
+            AddressID: Number(synAddressId),
             homeAndPostalSame: newAddress.HomeAddressSameFlag === true,
             postal: {
               full: SynAddressService.convertAddressObjToStr(addressObj?.postal || null),

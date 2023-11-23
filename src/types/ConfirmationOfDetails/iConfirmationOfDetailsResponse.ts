@@ -13,6 +13,7 @@ export type iCODAddressInfo = {
 }
 
 export type iCODAddressResponse =  {
+  AddressID?: number,
   homeAndPostalSame: boolean,
   home: iCODAddressInfo,
   postal: iCODAddressInfo

@@ -9,6 +9,12 @@ const Wrapper = styled.div`
   .syn-value {
     max-width: 250px;
   }
+  
+  .invalid-tooltip {
+    display: block;
+    top: 320%;
+    right: 4px;
+  }
 `;
 
 type iCODAdminInputPanel = {
@@ -20,8 +26,9 @@ type iCODAdminInputPanel = {
   valueFromDB?: string;
   getIsSameFromDBFn?: () => boolean;
   getSynergeticLabelFn?: (isSameFromDB: boolean, valueFromDB: string) => any;
+  errMsg?: string;
 }
-const CODAdminInputPanel = ({getComponent, label, value, valueFromDB, getIsSameFromDBFn, isRequired, getSynergeticLabelFn, hint} : iCODAdminInputPanel) => {
+const CODAdminInputPanel = ({getComponent, label, value, valueFromDB, getIsSameFromDBFn, isRequired, getSynergeticLabelFn, hint, errMsg} : iCODAdminInputPanel) => {
   const isSameInDB = getIsSameFromDBFn ? getIsSameFromDBFn() : `${value || ""}`.trim() === `${valueFromDB}`.trim();
 
   const getValueFromDBPanel = () => {
@@ -31,27 +38,41 @@ const CODAdminInputPanel = ({getComponent, label, value, valueFromDB, getIsSameF
     return (
       <small
         title={`System Value: ${valueFromDB}`}
-        className={`syn-value ellipsis ${isSameInDB === true ? "" : "text-danger"}`}
+        className={`syn-value ellipsis ${isSameInDB === true ? "" : "bg-warning"}`}
       >
         {getSynergeticLabelFn ? getSynergeticLabelFn(isSameInDB, valueFromDB) : (`${valueFromDB}`.trim() === '' ? 'NULL' : valueFromDB)}
       </small>
     )
   }
 
+  const getErrorMsgPanel = () => {
+    const errMsgString = `${errMsg || ''}`.trim();
+    if (errMsgString === '') {
+      return null;
+    }
+    return (
+      <div className="invalid-tooltip">
+        {errMsgString}
+      </div>
+    )
+  }
+
   return (
-    <Wrapper className={`input-div ${isSameInDB === true ? "" : "has-error"}`}>
-      <FlexContainer className={"justify-content-between"}>
-        <FormLabel
-          label={label}
-          isRequired={isRequired}
-          className={isSameInDB === true ? "" : "text-danger"}
-        />
-        {getValueFromDBPanel()}
-      </FlexContainer>
+    <Wrapper className={`input-div`}>
+      <div className={'position-relative'}>
+        <FlexContainer className={"justify-content-between"}>
+          <FormLabel
+            label={label}
+            isRequired={isRequired}
+          />
+          {getValueFromDBPanel()}
+        </FlexContainer>
+        {getErrorMsgPanel()}
+      </div>
       {getComponent(isSameInDB)}
       <div className={'hint-wrapper'}>{hint}</div>
       {isSameInDB === true ? null : (
-        <small className={"text-danger"}>
+        <small className={"bg-warning"}>
           Value is different from the system.
         </small>
       )}

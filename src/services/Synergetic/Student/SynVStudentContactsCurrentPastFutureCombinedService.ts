@@ -5,8 +5,8 @@ import iPaginatedResult from '../../../types/iPaginatedResult';
 
 const endPoint = `/syn/vStudentContactsCurrentPastFutureCombined`;
 
-const getAll = (params: iConfigParams = {}): Promise<iPaginatedResult<iSynVStudentContactsCurrentPastFutureCombined>> => {
-  return AppService.get(endPoint, params).then(resp => resp.data);
+const getAll = (params: iConfigParams = {}, config?: iConfigParams): Promise<iPaginatedResult<iSynVStudentContactsCurrentPastFutureCombined>> => {
+  return AppService.get(endPoint, params, config).then(resp => resp.data);
 };
 
 const SynVStudentContactsCurrentPastFutureCombinedService = {

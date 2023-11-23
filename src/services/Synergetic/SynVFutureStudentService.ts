@@ -208,6 +208,7 @@ const mapFutureStudentToCurrent = (student: iSynVFutureStudent, yLevelMap: {[key
     LearningPathway: student.LearningPathway,
     GenderSynergyMeaning: student.GenderSynergyMeaning,
     profileUrl: '',
+    isFuture: true,
   }
 }
 
