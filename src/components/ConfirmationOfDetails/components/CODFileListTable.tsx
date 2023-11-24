@@ -7,6 +7,7 @@ import React from "react";
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../redux/makeReduxStore';
 import Toaster, {TOAST_TYPE_ERROR} from '../../../services/Toaster';
+import MathHelper from '../../../helper/MathHelper';
 
 type iCODFileListTable = {
   isDisabled?: boolean;
@@ -93,6 +94,21 @@ const CODFileListTable = ({ isDisabled, files, deletingFn, title }: iCODFileList
                 >
                   {asset.name}
                 </Button>
+              </td>
+            );
+          }
+        },
+        {
+          key: "fileSize",
+          header: "Size",
+          cell: (col: iTableColumn, asset: iCODResponseAsset) => {
+            const size = asset.size || '';
+            if (size === '') {
+              return <td key={col.key}></td>;
+            }
+            return (
+              <td key={col.key}>
+                {size > 1000000 ? `${MathHelper.div(size, 1000000).toFixed(2)}M` : (size > 1000 ? `${MathHelper.div(size, 1000).toFixed(2)}K` : size)}
               </td>
             );
           }

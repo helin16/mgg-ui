@@ -106,11 +106,12 @@ export type iCODMedicalResponse = {
 }
 
 export type iCODSiblingResponse = {
-  birthDate: string;
-  gender: string;
   name: string;
-  schoolCode: string;
-  yearLevelCode: string;
+  id?: string | number;
+  birthDate?: string;
+  gender?: string;
+  schoolCode?: string;
+  yearLevelCode?: string;
 }
 
 export type iCODGovernmentFundingParentResponse = {

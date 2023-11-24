@@ -1,4 +1,5 @@
 export const SYN_RELATIONSHIP_CODE_SISTER = 'SR';
+export const SYN_RELATIONSHIP_CODE_BROTHER = 'BR';
 
 type iSynLuRelationship = {
   Code: string;
