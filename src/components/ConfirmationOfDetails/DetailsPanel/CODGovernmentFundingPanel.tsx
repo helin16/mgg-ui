@@ -10,7 +10,7 @@ import PageLoadingSpinner from "../../common/PageLoadingSpinner";
 import CODAdminDetailsSaveBtnPanel from "../CODAdmin/CODAdminDetailsSaveBtnPanel";
 import { Button, Col, Row } from "react-bootstrap";
 import CODAdminInputPanel from "../components/CODAdminInputPanel";
-import Toaster from "../../../services/Toaster";
+import Toaster, { TOAST_TYPE_ERROR } from "../../../services/Toaster";
 import SynCommunityService from "../../../services/Synergetic/Community/SynCommunityService";
 import iSynCommunity from "../../../types/Synergetic/iSynCommunity";
 import SynLuLanguageSelector from "../../Community/SynLuLanguageSelector";
@@ -18,15 +18,23 @@ import SectionDiv from "../../common/SectionDiv";
 import YearLevelSelector from "../../student/YearLevelSelector";
 import SynLuQualificationLevelSelector from "../../Community/SynLuQualificationLevelSelector";
 import SynLuOccupationPositionSelector from "../../Community/SynLuOccupationPositionSelector";
+import { iErrorMap } from "../../form/FormErrorDisplay";
+import SynVStudentContactsCurrentPastFutureCombinedService from "../../../services/Synergetic/Student/SynVStudentContactsCurrentPastFutureCombinedService";
+import { STUDENT_CONTACT_TYPE_SC1 } from "../../../types/Synergetic/Student/iStudentContact";
+import MathHelper from '../../../helper/MathHelper';
+import SynRelationshipService from '../../../services/Synergetic/Community/SynRelationshipService';
+import iSynRelationship from '../../../types/Synergetic/Community/iSynRelationship';
 
 const Wrapper = styled.div``;
 type iCommunityMap = { [key: number | string]: iSynCommunity };
+type iRelationshipMap = { [key: number | string]: iSynRelationship };
 const CODGovernmentFundingPanel = ({
   response,
   isDisabled,
   getCancelBtn,
   getSubmitBtn,
   responseFieldName,
+  isForParent
 }: ICODDetailsEditPanel) => {
   const [
     editingResponse,
@@ -39,42 +47,141 @@ const CODGovernmentFundingPanel = ({
   const [communityMap, setCommunityMap] = useState<iCommunityMap>({});
   const [isLoading, setIsLoading] = useState(false);
   const [isReadOnly, setIsReadOnly] = useState(false);
+  const [errorMap, setErrorMap] = useState<iErrorMap>({});
 
   useEffect(() => {
+    const studentId = response?.StudentID;
     const studentResp = response?.response?.student || null;
     const res = response?.response || {};
     // @ts-ignore
-    const govResp = responseFieldName in res ? res[responseFieldName] : null;
+    const govResp = responseFieldName in res ? res[responseFieldName] : {};
 
     setEditingResponse(govResp);
     setStudentResponse(studentResp);
+
+    const getParentIds = async () => {
+      if (isForParent === true) {
+        const results =
+          (
+            await SynVStudentContactsCurrentPastFutureCombinedService.getAll({
+              where: JSON.stringify({
+                StudentID: studentId,
+                ContactType: STUDENT_CONTACT_TYPE_SC1
+              }),
+              sort: "FileYear:DESC",
+              perPage: 1
+            })
+          ).data || [];
+
+        if (!govResp?.parent1 && results.length > 0) {
+          return (
+            [results[0].ContactID, results[0].StudentContactSpouseID]
+              .filter(
+                id =>
+                  // @ts-ignore
+                  `${id || ""}`.trim() !== "" &&
+                  // @ts-ignore
+                  `${id || ""}`.trim() !== "0"
+              )
+              // @ts-ignore
+              .map(id => Number(id))
+          );
+        }
+      }
+
+      return (
+        [
+          `${govResp?.parent1?.ID || ""}`.trim(),
+          `${govResp?.parent2?.ID || ""}`.trim()
+        ]
+          .filter(
+            parent =>
+              // @ts-ignore
+              `${parent?.id || ""}`.trim() !== "" &&
+              // @ts-ignore
+              `${parent?.id || ""}`.trim() !== "0"
+          )
+          // @ts-ignore
+          .map(parent => Number(parent.id))
+      );
+    };
+
+    const setEditingResponseForParentForm = (
+      parentIds: number[],
+      comMap: iCommunityMap,
+      relMap: iRelationshipMap
+    ) => {
+      if (isForParent !== true || Object.keys(govResp).length > 0) {
+        return;
+      }
+
+      // @ts-ignore
+      const governmentResponse: iCODGovernmentFundingResponse = parentIds
+        .map(parentId => {
+          const parent = parentId in comMap ? comMap[parentId] : null;
+          if (!parent) {
+            return null;
+          }
+          const relationship = parentId in relMap ? relMap[parentId] : null;
+          return {
+            ID: parentId,
+            full_name: `${parent.NameInternal || ''}`.trim(),
+            relationship: `${relationship?.SynLuRelationship?.Description || ''}`.trim(),
+            homeLanguageCode: `${parent.HomeLanguageCode || ''}`.trim(),
+            secondary: `${parent.HighestSecondaryYearLevel || ''}`.trim(),
+            tertiary: `${parent.HighestQualificationLevel || ''}`.trim(),
+            occupationGroup: `${parent.OccupPositionCode || ''}`.trim(),
+          }
+        })
+        .filter(info => info !== null)
+        .reduce((map, parent, currentIndex) => {
+          return {
+            ...map,
+            [`parent${MathHelper.add(currentIndex, 1)}`]: parent
+          }
+        }, {})
+      setEditingResponse(governmentResponse);
+      return;
+    };
+
+    const getData = async () => {
+      const parentIds = await getParentIds();
+      const results = await Promise.all([
+        SynCommunityService.getCommunityProfiles({
+          where: JSON.stringify({
+            ID: [studentId, ...parentIds]
+          }),
+        }),
+        SynRelationshipService.getAll({
+          where: JSON.stringify({
+            ID: studentId,
+            RelatedID: parentIds,
+          }),
+          include: 'SynLuRelationship',
+        })
+      ])
+      const communityProfiles = results[0].data || [];
+      const relationships = results[1].data || [];
+
+      const comMap = communityProfiles.reduce((map, communityProfile) => {
+        return {
+          ...map,
+          [communityProfile.ID]: communityProfile
+        };
+      }, {});
+      const relationshipMap = relationships.reduce((map, relationship) => {
+        return {
+          ...map,
+          [relationship.RelatedID]: relationship
+        };
+      }, {});
+      setCommunityMap(comMap);
+      setEditingResponseForParentForm(parentIds, comMap, relationshipMap);
+    };
+
     let isCanceled = false;
     setIsLoading(true);
-    Promise.all([
-      SynCommunityService.getCommunityProfiles({
-        where: JSON.stringify({
-          ID: [
-            response.StudentID,
-            `${govResp?.parent1?.ID}`.trim(),
-            `${govResp?.parent2?.ID}`.trim()
-          ].filter(id => `${id || ""}`.trim() !== "")
-        })
-      })
-    ])
-      .then(resp => {
-        if (isCanceled) {
-          return;
-        }
-        const communityProfiles = resp[0].data || [];
-        setCommunityMap(
-          communityProfiles.reduce((map, communityProfile) => {
-            return {
-              ...map,
-              [communityProfile.ID]: communityProfile
-            };
-          }, {})
-        );
-      })
+    getData()
       .catch(err => {
         if (isCanceled) {
           return;
@@ -91,7 +198,7 @@ const CODGovernmentFundingPanel = ({
     return () => {
       isCanceled = true;
     };
-  }, [response]);
+  }, [response, responseFieldName, isForParent]);
 
   useEffect(() => {
     const hasBeenSyncd =
@@ -141,13 +248,15 @@ const CODGovernmentFundingPanel = ({
           </div>
           <CODAdminInputPanel
             label={"Home Language:"}
+            isRequired
             value={`${parentResponse?.homeLanguageCode || ""}`.trim()}
             valueFromDB={`${parentFromDB?.HomeLanguageCode || ""}`.trim()}
+            errMsg={`${key}_HomeLanguageCode` in errorMap ? errorMap[`${key}_HomeLanguageCode`] : null}
             getComponent={isSameFromDB => {
               return (
                 <SynLuLanguageSelector
                   className={`form-control ${
-                    isSameFromDB === true ? "" : "is-invalid"
+                    isSameFromDB === true && !(`${key}_HomeLanguageCode` in errorMap) ? "" : "is-invalid"
                   }`}
                   isDisabled={isReadOnly === true}
                   values={
@@ -172,7 +281,9 @@ const CODGovernmentFundingPanel = ({
           />
 
           <CODAdminInputPanel
+            isRequired
             label={"Highest Secondary Education:"}
+            errMsg={`${key}_HighestSecondaryYearLevel` in errorMap ? errorMap[`${key}_HighestSecondaryYearLevel`] : null}
             value={`${parentResponse?.secondary || ""}`.trim()}
             valueFromDB={`${parentFromDB?.HighestSecondaryYearLevel ||
               ""}`.trim()}
@@ -186,7 +297,7 @@ const CODGovernmentFundingPanel = ({
               return (
                 <YearLevelSelector
                   classname={`form-control ${
-                    isSameFromDB === true ? "" : "is-invalid"
+                    isSameFromDB === true && !(`${key}_HighestSecondaryYearLevel` in errorMap) ? "" : "is-invalid"
                   }`}
                   limitCodes={["12", "11", "10", "9"]}
                   isDisabled={isReadOnly === true}
@@ -212,7 +323,9 @@ const CODGovernmentFundingPanel = ({
           />
 
           <CODAdminInputPanel
+            isRequired
             label={"Highest Tertiary Education:"}
+            errMsg={`${key}_HighestQualificationLevel` in errorMap ? errorMap[`${key}_HighestQualificationLevel`] : null}
             value={`${parentResponse?.tertiary || ""}`.trim()}
             valueFromDB={`${parentFromDB?.HighestQualificationLevel ||
               ""}`.trim()}
@@ -220,7 +333,7 @@ const CODGovernmentFundingPanel = ({
               return (
                 <SynLuQualificationLevelSelector
                   className={`form-control ${
-                    isSameFromDB === true ? "" : "is-invalid"
+                    isSameFromDB === true && !(`${key}_HighestQualificationLevel` in errorMap) ? "" : "is-invalid"
                   }`}
                   isDisabled={isReadOnly === true}
                   values={
@@ -245,7 +358,9 @@ const CODGovernmentFundingPanel = ({
           />
 
           <CODAdminInputPanel
+            isRequired
             label={"Occupation Group:"}
+            errMsg={`${key}_OccupPositionCode` in errorMap ? errorMap[`${key}_OccupPositionCode`] : null}
             value={`${parentResponse?.occupationGroup || ""}`.trim()}
             valueFromDB={`${parentFromDB?.OccupPositionCode || ""}`.trim()}
             hint={
@@ -285,7 +400,7 @@ const CODGovernmentFundingPanel = ({
               return (
                 <SynLuOccupationPositionSelector
                   className={`form-control ${
-                    isSameFromDB === true ? "" : "is-invalid"
+                    isSameFromDB === true && !(`${key}_OccupPositionCode` in errorMap) ? "" : "is-invalid"
                   }`}
                   isDisabled={isReadOnly === true}
                   values={
@@ -313,6 +428,41 @@ const CODGovernmentFundingPanel = ({
     );
   };
 
+  const preSubmit = () => {
+    const errors: iErrorMap = {};
+
+    if (`${studentResponse?.HomeLanguageCode || ''}`.trim() === '') {
+      errors.StudentHomeLanguageCode = 'Student Home Language is required.';
+    }
+    const resp = editingResponse || {};
+    Object.keys(resp).forEach(key => {
+      // @ts-ignore
+      const parent = resp[key];
+      if (`${parent?.homeLanguageCode || ''}`.trim() === '') {
+        errors[`${key}_HomeLanguageCode`] = 'Home Language is required';
+      }
+      if (`${parent?.secondary || ''}`.trim() === '') {
+        errors[`${key}_HighestSecondaryYearLevel`] = 'Highest Secondary Education is required';
+      }
+      if (`${parent?.tertiary || ''}`.trim() === '') {
+        errors[`${key}_HighestQualificationLevel`] = 'Highest Tertiary Education is required';
+      }
+      if (`${parent?.occupationGroup || ''}`.trim() === '') {
+        errors[`${key}_OccupPositionCode`] = 'Occupation Group is required';
+      }
+    })
+
+    setErrorMap(errors);
+    const hasPassed = Object.keys(errors).length <= 0;
+    if (hasPassed !== true) {
+      Toaster.showToast(
+        "Some errors in the form, please correct them before you move to the next step.",
+        TOAST_TYPE_ERROR
+      );
+    }
+    return hasPassed;
+  };
+
   const getContent = () => {
     if (isLoading === true) {
       return <PageLoadingSpinner />;
@@ -326,14 +476,16 @@ const CODGovernmentFundingPanel = ({
         <Row>
           <Col>
             <CODAdminInputPanel
+              isRequired
               label={"Student Home Language:"}
               value={`${studentResponse?.HomeLanguageCode || ""}`.trim()}
               valueFromDB={`${studentFromDB?.HomeLanguageCode || ""}`.trim()}
+              errMsg={'StudentHomeLanguageCode' in errorMap ? errorMap['StudentHomeLanguageCode'] : null}
               getComponent={isSameFromDB => {
                 return (
                   <SynLuLanguageSelector
                     className={`form-control ${
-                      isSameFromDB === true ? "" : "is-invalid"
+                      isSameFromDB === true && !('StudentHomeLanguageCode' in errorMap) ? "" : "is-invalid"
                     }`}
                     isDisabled={isReadOnly === true}
                     values={
@@ -360,25 +512,24 @@ const CODGovernmentFundingPanel = ({
           </Col>
         </Row>
         <Row>{["parent1", "parent2"].map(key => getParentDiv(key))}</Row>
-        {isReadOnly === true ? null : (
-          <CODAdminDetailsSaveBtnPanel
-            getSubmitBtn={getSubmitBtn}
-            getCancelBtn={getCancelBtn}
-            isLoading={isLoading}
-            responseFieldName={responseFieldName}
-            editingResponse={{
-              ...response,
+        <CODAdminDetailsSaveBtnPanel
+          isLoading={isLoading}
+          responseFieldName={responseFieldName}
+          editingResponse={{
+            ...response,
+            // @ts-ignore
+            response: {
+              ...(response?.response || {}),
               // @ts-ignore
-              response: {
-                ...(response?.response || {}),
-                // @ts-ignore
-                [responseFieldName]: editingResponse,
-                // @ts-ignore
-                student: studentResponse
-              }
-            }}
-          />
-        )}
+              [responseFieldName]: editingResponse
+            }
+          }}
+          getCancelBtn={getCancelBtn}
+          getSubmitBtn={(res, fName) =>
+            getSubmitBtn &&
+            getSubmitBtn(res, responseFieldName, isLoading, preSubmit)
+          }
+        />
       </>
     );
   };
