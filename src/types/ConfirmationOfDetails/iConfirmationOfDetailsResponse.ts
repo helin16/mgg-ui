@@ -12,6 +12,12 @@ export type iCODAddressInfo = {
   }
 }
 
+export type iCODExtraResponse = {
+  syncToSynAt?: string | null;
+  syncToSynById?: number | null;
+  readyForSubmission?: boolean;
+}
+
 export type iCODAddressResponse =  {
   AddressID?: number,
   homeAndPostalSame: boolean,
@@ -38,14 +44,12 @@ export type iCODParentResponse = {
   syncToSynById?: number | null;
 }
 
-export type iCODParentsResponse = {
+export type iCODParentsResponse = iCODExtraResponse & {
   main: iCODParentResponse;
   spouse?: iCODParentResponse | null;
-  syncToSynAt?: string | null;
-  syncToSynById?: number | null;
 }
 
-export type iCODStudentResponse = {
+export type iCODStudentResponse = iCODExtraResponse & {
   is_future: boolean;
   is_international: boolean;
   ID: number;
@@ -71,6 +75,7 @@ export type iCODStudentResponse = {
   isAustralian: boolean;
   syncToSynAt?: string | null;
   syncToSynById?: number | null;
+  readyForSubmission?: boolean;
 }
 
 export type iCODResponseAsset = {
@@ -81,7 +86,7 @@ export type iCODResponseAsset = {
   size?: number;
 }
 
-export type iCODCourtOrderResponse = {
+export type iCODCourtOrderResponse = iCODExtraResponse & {
   hasCourtOrders: boolean;
   newDetails: null | string;
   courtOrderDate?: null | string;
@@ -91,7 +96,7 @@ export type iCODCourtOrderResponse = {
   syncToSynById?: number | null;
 }
 
-export type iCODMedicalResponse = {
+export type iCODMedicalResponse = iCODExtraResponse & {
   allowIbuprofen: boolean;
   immunisation: {
     hasSetOutToAusSchedule: boolean;
@@ -124,14 +129,12 @@ export type iCODGovernmentFundingParentResponse = {
   occupationGroup: string;
 }
 
-export type iCODGovernmentFundingResponse = {
+export type iCODGovernmentFundingResponse = iCODExtraResponse & {
   parent1: iCODGovernmentFundingParentResponse;
   parent2?: iCODGovernmentFundingParentResponse;
-  syncToSynAt?: string | null;
-  syncToSynById?: number | null;
 }
 
-export type iCODPermissionsResponse = {
+export type iCODPermissionsResponse = iCODExtraResponse & {
   excursionChecked: boolean;
   allowParentAssociation: boolean
   allowReceivingSMS: boolean
@@ -140,8 +143,6 @@ export type iCODPermissionsResponse = {
   agreeLawfulAuthority: boolean
   agreePrivacyPolicy: boolean
   signature: string;
-  syncToSynAt?: string | null;
-  syncToSynById?: number | null;
 }
 
 export type iCODSubmittedResponse = {

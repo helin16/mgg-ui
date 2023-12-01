@@ -44,8 +44,8 @@ const PageNotFound = ({title, description, primaryBtn, secondaryBtn}: iPageNotFo
       { primaryBtn || <Button variant={'primary'} size="sm" onClick={() => reloadPage()}>Reload Page</Button>}
       {
         secondaryBtn ||
-        <ContactSupportPopupBtn>
-          <Button variant="link">Support</Button>
+        <ContactSupportPopupBtn variant="link">
+          Support
         </ContactSupportPopupBtn>
       }
     </div>

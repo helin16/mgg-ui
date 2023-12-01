@@ -5,7 +5,7 @@ import { iCODPermissionsResponse } from "../../../types/ConfirmationOfDetails/iC
 import PageLoadingSpinner from "../../common/PageLoadingSpinner";
 import { FlexContainer } from "../../../styles";
 import CODAdminDetailsSaveBtnPanel from "../CODAdmin/CODAdminDetailsSaveBtnPanel";
-import Toaster from "../../../services/Toaster";
+import Toaster, {TOAST_TYPE_ERROR} from "../../../services/Toaster";
 import { Alert, Button, Col, Row } from "react-bootstrap";
 import CODAdminInputPanel from "../components/CODAdminInputPanel";
 import ToggleBtn from "../../common/ToggleBtn";
@@ -22,6 +22,10 @@ import iSynStudentStatics from "../../../types/Synergetic/Student/iSynStudentSta
 import SynStudentYearService from "../../../services/Synergetic/Student/SynStudentYearService";
 import iSynStudentYear from "../../../types/Synergetic/Student/iSynStudentYear";
 import { SYN_LU_LEARNING_PATHWAY_IB } from "../../../types/Synergetic/Lookup/iSynLuLearningPathway";
+import FormErrorDisplay, {iErrorMap} from '../../form/FormErrorDisplay';
+import {mainRed} from '../../../AppWrapper';
+import MggsModuleService from '../../../services/Module/MggsModuleService';
+import {MGGS_MODULE_ID_COD} from '../../../types/modules/iModuleUser';
 
 const Wrapper = styled.div`
   .input-div {
@@ -32,9 +36,25 @@ const Wrapper = styled.div`
       text-decoration: underline !important;
     }
   }
+  
+  .invalid-tooltip {
+    display: block;
+    * {
+      color: white !important;
+    }
+  }
+  
+  .signature {
+    &.has-error {
+      canvas {
+        border: 2px ${mainRed} solid;
+      }
+    }
+  }
 `;
 
 type iCommunityMap = { [key: number | string]: iSynCommunity };
+type iUrlMap = { [key: string]: string };
 const CODPermissionsPanel = ({
   response,
   isDisabled,
@@ -50,6 +70,8 @@ const CODPermissionsPanel = ({
   ] = useState<iCODPermissionsResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isReadOnly, setIsReadOnly] = useState(false);
+  const [errorMap, setErrorMap] = useState<iErrorMap>({});
+  const [urlMap, setUrlMap] = useState<iUrlMap>({});
   const [
     signatureCanvas,
     setSignatureCanvas
@@ -73,7 +95,12 @@ const CODPermissionsPanel = ({
   useEffect(() => {
     const res = response?.response || {};
     // @ts-ignore
-    setEditingResponse(responseFieldName in res ? res[responseFieldName] : null);
+    const existingResp = responseFieldName in res ? res[responseFieldName] : {};
+    setEditingResponse({
+      ...existingResp,
+      // force the default value,
+      //...(existingResp.agreeSchoolCommitment === undefined ? {agreeSchoolCommitment: true} : {}),
+    });
     let isCanceled = false;
     setIsLoading(true);
     Promise.all([
@@ -98,7 +125,8 @@ const CODPermissionsPanel = ({
           ID: response.StudentID
         }),
         perPage: 1
-      })
+      }),
+      MggsModuleService.getModule(MGGS_MODULE_ID_COD),
     ])
       .then(resp => {
         if (isCanceled) {
@@ -127,6 +155,9 @@ const CODPermissionsPanel = ({
 
         const studentYears = resp[3].data || [];
         setStudentYearFromDB(studentYears.length > 0 ? studentYears[0] : null);
+
+        const urls = resp[4].settings?.permissionUrls || {};
+        setUrlMap(urls);
       })
       .catch(err => {
         if (isCanceled) {
@@ -144,7 +175,7 @@ const CODPermissionsPanel = ({
     return () => {
       isCanceled = true;
     };
-  }, [response, currentUser]);
+  }, [response, currentUser, responseFieldName]);
 
   useEffect(() => {
     const hasBeenSyncd =
@@ -175,6 +206,61 @@ const CODPermissionsPanel = ({
     );
   };
 
+  const getToggleBtn = (onChange: (checked: boolean) => void, value?: boolean) => {
+    if (value === undefined) {
+      return <Button className={'check-box-no-value-yet'} variant={'outline-secondary'} size={'sm'} onClick={() => onChange(true)}>click here provide your answer</Button>
+    }
+    return (
+      <ToggleBtn
+        isDisabled={isReadOnly === true}
+        on={"Yes"}
+        off={"No"}
+        size={"sm"}
+        checked={value === true}
+        onChange={onChange}
+      />
+    )
+  }
+
+  const preSubmit = (submittingData?: iCODPermissionsResponse) => {
+    const errors: iErrorMap = {};
+
+    if (`${submittingData?.excursionChecked || ''}`.trim() === '') {
+      errors.excursionChecked = 'Excursion permission: answer is required.';
+    }
+    if (`${submittingData?.allowParentAssociation || ''}`.trim() === '') {
+      errors.allowParentAssociation = `Parents' Association: answer is required.`;
+    }
+    if (`${submittingData?.allowReceivingSMS || ''}`.trim() === '') {
+      errors.allowReceivingSMS = `Greet to receive SMS: answer is required.`;
+    }
+    if (`${submittingData?.agreeParentConsent || ''}`.trim() === '') {
+      errors.agreeParentConsent = `Parent Consent: answer is required.`;
+    }
+    if (submittingData?.agreeSchoolCommitment !== true) {
+      errors.agreeSchoolCommitment = `Need to read and agree to our School Commitment.`;
+    }
+    if (submittingData?.agreeLawfulAuthority !== true) {
+      errors.agreeLawfulAuthority = `Need to read and agree to our Lawful Authority.`;
+    }
+    if (submittingData?.agreePrivacyPolicy !== true) {
+      errors.agreePrivacyPolicy = `Need to read and agree to our Privacy Policy.`;
+    }
+    if (`${submittingData?.signature || ''}`.trim() === '') {
+      errors.signature = `Signature is required.`;
+    }
+
+    setErrorMap(errors);
+    const hasPassed = Object.keys(errors).length <= 0;
+    if (hasPassed !== true) {
+      Toaster.showToast(
+        "Some errors in the form, please correct them before submit.",
+        TOAST_TYPE_ERROR
+      );
+    }
+    return hasPassed;
+  };
+
   const getContent = () => {
     if (isLoading === true) {
       return <PageLoadingSpinner />;
@@ -185,7 +271,9 @@ const CODPermissionsPanel = ({
           <Col>
             <CODAdminInputPanel
               label={"Excursion Permission:"}
+              isRequired
               value={editingResponse?.excursionChecked === true ? "YES" : "NO"}
+              errMsg={'excursionChecked' in errorMap ? errorMap['excursionChecked'] : null}
               valueFromDB={
                 !studentStaticFromDB
                   ? undefined
@@ -202,13 +290,13 @@ const CODPermissionsPanel = ({
                   >
                     <FlexContainer
                       className={`with-gap align-items-center ${
-                        isSameFromDB !== true ? "text-danger" : ""
+                        (isSameFromDB !== true || 'excursionChecked' in errorMap) ? "text-danger" : ""
                       }`}
                     >
                       <div>I/We have read and agree with</div>
                       <Button
                         target="_blank"
-                        href="https://mconnect.mentonegirls.vic.edu.au/send.php?id=87102"
+                        href={urlMap.excursion || ''}
                         size={"sm"}
                         variant={"link"}
                       >
@@ -216,16 +304,10 @@ const CODPermissionsPanel = ({
                       </Button>
                       <div>.</div>
                     </FlexContainer>
-                    <ToggleBtn
-                      isDisabled={isReadOnly === true}
-                      on={"Yes"}
-                      off={"No"}
-                      size={"sm"}
-                      checked={editingResponse?.excursionChecked === true}
-                      onChange={checked =>
-                        updatePermissionResponse("excursionChecked", checked)
-                      }
-                    />
+                    {getToggleBtn(checked =>
+                        updatePermissionResponse("excursionChecked", checked),
+                        editingResponse?.excursionChecked
+                    )}
                   </FlexContainer>
                 );
               }}
@@ -234,7 +316,9 @@ const CODPermissionsPanel = ({
 
             <hr />
             <CODAdminInputPanel
+              isRequired
               label={"Parents' Association:"}
+              errMsg={'allowParentAssociation' in errorMap ? errorMap['allowParentAssociation'] : null}
               value={
                 editingResponse?.allowParentAssociation === true ? "YES" : "NO"
               }
@@ -250,23 +334,14 @@ const CODPermissionsPanel = ({
                   <FlexContainer
                     className={`with-gap lg-gap align-items-center`}
                   >
-                    <div className={isSameFromDB !== true ? "text-danger" : ""}>
+                    <div className={(isSameFromDB !== true || 'allowParentAssociation' in errorMap) ? "text-danger" : ""}>
                       I/We agree to share my/our contact details with Mentone
                       Girls' Grammar Parents' Association
                     </div>
-                    <ToggleBtn
-                      isDisabled={isReadOnly === true}
-                      on={"Yes"}
-                      off={"No"}
-                      size={"sm"}
-                      checked={editingResponse?.allowParentAssociation === true}
-                      onChange={checked =>
-                        updatePermissionResponse(
-                          "allowParentAssociation",
-                          checked
-                        )
-                      }
-                    />
+                    {getToggleBtn(checked =>
+                        updatePermissionResponse("allowParentAssociation", checked),
+                      editingResponse?.allowParentAssociation
+                    )}
                   </FlexContainer>
                 );
               }}
@@ -281,6 +356,8 @@ const CODPermissionsPanel = ({
                   ? "YES"
                   : "NO"
               }
+              isRequired
+              errMsg={'allowReceivingSMS' in errorMap ? errorMap['allowReceivingSMS'] : null}
               getComponent={isSameFromDB => {
                 return (
                   <FlexContainer
@@ -292,16 +369,10 @@ const CODPermissionsPanel = ({
                       the School using my mobile phone number to broadcast SMS
                       messages.
                     </div>
-                    <ToggleBtn
-                      isDisabled={isReadOnly === true}
-                      on={"Yes"}
-                      off={"No"}
-                      size={"sm"}
-                      checked={editingResponse?.allowReceivingSMS === true}
-                      onChange={checked =>
-                        updatePermissionResponse("allowReceivingSMS", checked)
-                      }
-                    />
+                    {getToggleBtn(checked =>
+                        updatePermissionResponse("allowReceivingSMS", checked),
+                      editingResponse?.allowReceivingSMS
+                    )}
                   </FlexContainer>
                 );
               }}
@@ -309,6 +380,8 @@ const CODPermissionsPanel = ({
 
             <hr />
             <CODAdminInputPanel
+              isRequired
+              errMsg={'agreeParentConsent' in errorMap ? errorMap['agreeParentConsent'] : null}
               label={"Parent Consent:"}
               value={
                 editingResponse?.agreeParentConsent === true ? "YES" : "NO"
@@ -332,7 +405,7 @@ const CODPermissionsPanel = ({
                     >
                       <div>I/We have read</div>
                       <Button
-                        href="https://mconnect.mentonegirls.vic.edu.au/send.php?id=87099"
+                        href={urlMap.imageConsent || ''}
                         target="_blank"
                         variant={"link"}
                         size={"sm"}
@@ -341,16 +414,10 @@ const CODPermissionsPanel = ({
                       </Button>
                       <div>and agree to give my / our consent.</div>
                     </FlexContainer>
-                    <ToggleBtn
-                      isDisabled={isReadOnly === true}
-                      on={"Yes"}
-                      off={"No"}
-                      size={"sm"}
-                      checked={editingResponse?.agreeParentConsent === true}
-                      onChange={checked =>
-                        updatePermissionResponse("agreeParentConsent", checked)
-                      }
-                    />
+                    {getToggleBtn(checked =>
+                        updatePermissionResponse("agreeParentConsent", checked),
+                      editingResponse?.agreeParentConsent
+                    )}
                   </FlexContainer>
                 );
               }}
@@ -358,6 +425,8 @@ const CODPermissionsPanel = ({
 
             <hr />
             <CODAdminInputPanel
+              isRequired
+              errMsg={'agreeSchoolCommitment' in errorMap ? errorMap['agreeSchoolCommitment'] : null}
               label={"School Commitment:"}
               value={
                 editingResponse?.agreeSchoolCommitment === true ? "YES" : "NO"
@@ -379,7 +448,7 @@ const CODPermissionsPanel = ({
                     >
                       <div>I/We have read and agree with</div>
                       <Button
-                        href="https://mconnect.mentonegirls.vic.edu.au/send.php?id=56899"
+                        href={urlMap.schoolCommitment || ''}
                         target="_blank"
                         variant={"link"}
                         size={"sm"}
@@ -388,20 +457,10 @@ const CODPermissionsPanel = ({
                       </Button>
                       <div>.</div>
                     </FlexContainer>
-
-                    <ToggleBtn
-                      isDisabled={isReadOnly === true}
-                      on={"Yes"}
-                      off={"No"}
-                      size={"sm"}
-                      checked={editingResponse?.agreeSchoolCommitment === true}
-                      onChange={checked =>
-                        updatePermissionResponse(
-                          "agreeSchoolCommitment",
-                          checked
-                        )
-                      }
-                    />
+                    {getToggleBtn(checked =>
+                        updatePermissionResponse("agreeSchoolCommitment", checked),
+                      editingResponse?.agreeSchoolCommitment
+                    )}
                   </FlexContainer>
                 );
               }}
@@ -409,6 +468,8 @@ const CODPermissionsPanel = ({
 
             <hr />
             <CODAdminInputPanel
+              isRequired
+              errMsg={'agreeLawfulAuthority' in errorMap ? errorMap['agreeLawfulAuthority'] : null}
               label={"Lawful Authority:"}
               value={
                 editingResponse?.agreeLawfulAuthority === true ? "YES" : "NO"
@@ -425,7 +486,7 @@ const CODPermissionsPanel = ({
                     >
                       <div>I/We have read and agree with</div>
                       <Button
-                        href="https://mconnect.mentonegirls.vic.edu.au/send.php?id=56898"
+                        href={urlMap.lawfulAuthority || ''}
                         target="_blank"
                         variant={"link"}
                         size={"sm"}
@@ -434,19 +495,10 @@ const CODPermissionsPanel = ({
                       </Button>
                       <div>.</div>
                     </FlexContainer>
-                    <ToggleBtn
-                      isDisabled={isReadOnly === true}
-                      on={"Yes"}
-                      off={"No"}
-                      size={"sm"}
-                      checked={editingResponse?.agreeLawfulAuthority === true}
-                      onChange={checked =>
-                        updatePermissionResponse(
-                          "agreeLawfulAuthority",
-                          checked
-                        )
-                      }
-                    />
+                    {getToggleBtn(checked =>
+                        updatePermissionResponse("agreeLawfulAuthority", checked),
+                      editingResponse?.agreeLawfulAuthority
+                    )}
                   </FlexContainer>
                 );
               }}
@@ -454,6 +506,8 @@ const CODPermissionsPanel = ({
 
             <hr />
             <CODAdminInputPanel
+              isRequired
+              errMsg={'agreePrivacyPolicy' in errorMap ? errorMap['agreePrivacyPolicy'] : null}
               label={"Privacy Policy:"}
               value={
                 editingResponse?.agreePrivacyPolicy === true ? "YES" : "NO"
@@ -475,7 +529,7 @@ const CODPermissionsPanel = ({
                     >
                       <div>I / We have read and agree with</div>
                       <Button
-                        href="https://www.mentonegirls.vic.edu.au/uploaded/documents/About/guiding_principals/Privacy_Policy_Jan_2018.pdf"
+                        href={urlMap.privacyPolicy || ''}
                         target="_blank"
                         variant={"link"}
                         size={"sm"}
@@ -484,16 +538,10 @@ const CODPermissionsPanel = ({
                       </Button>
                       <div>.</div>
                     </FlexContainer>
-                    <ToggleBtn
-                      isDisabled={isReadOnly === true}
-                      on={"Yes"}
-                      off={"No"}
-                      size={"sm"}
-                      checked={editingResponse?.agreePrivacyPolicy === true}
-                      onChange={checked =>
-                        updatePermissionResponse("agreePrivacyPolicy", checked)
-                      }
-                    />
+                    {getToggleBtn(checked =>
+                        updatePermissionResponse("agreePrivacyPolicy", checked),
+                      editingResponse?.agreePrivacyPolicy
+                    )}
                   </FlexContainer>
                 );
               }}
@@ -506,7 +554,7 @@ const CODPermissionsPanel = ({
                 <b>
                   {currentUser?.firstName || ""} {currentUser?.lastName}
                 </b>
-                , A person with lawful authority of{" "}
+                , a person with lawful authority of{" "}
                 <b>{response?.Student?.StudentNameExternal || ""}</b>,
               </div>
               <ul>
@@ -552,13 +600,16 @@ const CODPermissionsPanel = ({
               <div>Please sign below in the box:</div>
               <SignaturePad
                 isDisabled={isReadOnly === true || isForParent !== true}
-                className={"signature"}
+                className={`signature ${'signature' in errorMap ? 'has-error' : ''}`}
                 setCanvas={canvas => setSignatureCanvas(canvas)}
                 signature={editingResponse?.signature || ""}
                 onClear={() => {
                   updatePermissionResponse("signature", undefined);
                 }}
               />
+              <div style={{position: 'relative'}}>
+                <FormErrorDisplay errorsMap={errorMap} fieldName={'signature'} className={'invalid-tooltip'}/>
+              </div>
             </SectionDiv>
           </Col>
         </Row>
@@ -575,7 +626,21 @@ const CODPermissionsPanel = ({
             }
           }}
           getCancelBtn={getCancelBtn}
-          getSubmitBtn={getSubmitBtn}
+          getSubmitBtn={(res) =>
+            getSubmitBtn &&
+            getSubmitBtn({
+              ...response,
+              // @ts-ignore
+              response: {
+                ...(response?.response || {}),
+                // @ts-ignore
+                [responseFieldName]: {
+                  ...editingResponse,
+                  signature: (signatureCanvas?.isEmpty() !== true ? signatureCanvas?.toDataURL() : undefined),
+                }
+              }
+            }, responseFieldName, isLoading, preSubmit)
+          }
         />
       </>
     );

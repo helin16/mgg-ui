@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import PopupModal from '../common/PopupModal';
-import {FloatingLabel, Form, Alert, Button} from 'react-bootstrap';
+import {FloatingLabel, Form, Alert, Button, ButtonProps} from 'react-bootstrap';
 import styled from 'styled-components';
 import LoadingBtn from '../common/LoadingBtn';
 import SupportService from '../../services/SupportService';
@@ -13,7 +13,8 @@ const FormWrapper = styled.div`
   }
 `;
 type iEmailData = {email?: string; messages?: string;};
-const ContactSupportPopupBtn = ({children}: {children: React.ReactNode}) => {
+type iContactSupportPopupBtn = ButtonProps;
+const ContactSupportPopupBtn = (props: iContactSupportPopupBtn) => {
   const {user: currentUser} = useSelector((state: RootState) => state.auth);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -122,7 +123,7 @@ const ContactSupportPopupBtn = ({children}: {children: React.ReactNode}) => {
   }
 
   return <>
-    <span onClick={() => setShowingPopup(true)}>{children}</span>
+    <Button {...props} onClick={() => setShowingPopup(true)} />
     <PopupModal
       title={'Contact Support'}
       show={showingPopup}

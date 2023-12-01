@@ -5,7 +5,6 @@ import StudentDetailsPage from "./components/StudentDetailsPage";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/makeReduxStore";
 import SynVStudentService from "../../services/Synergetic/Student/SynVStudentService";
-import { Button } from "react-bootstrap";
 import Page401 from "../../components/Page401";
 import StudentGridForAParent from "../../components/student/StudentGridForAParent";
 import AuthService from "../../services/AuthService";
@@ -127,8 +126,8 @@ const StudentReport = () => {
             </span>
           }
           secondaryBtn={
-            <ContactSupportPopupBtn>
-              <Button variant="link">Report this issue</Button>
+            <ContactSupportPopupBtn variant="link">
+              Report this issue
             </ContactSupportPopupBtn>
           }
         />

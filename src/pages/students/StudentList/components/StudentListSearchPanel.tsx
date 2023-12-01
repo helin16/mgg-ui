@@ -69,7 +69,7 @@ const StudentListSearchPanel = ({
       return null;
     }
     return (
-      <Row>
+      <>
         <Col md={4} sm={6}>
           <FormLabel label={'Form'} />
           <SynFormSelector
@@ -118,7 +118,7 @@ const StudentListSearchPanel = ({
             }
           />
         </Col>
-      </Row>
+      </>
     )
   }
 
@@ -134,10 +134,10 @@ const StudentListSearchPanel = ({
             }
           />
         </Col>
-        <Col md={1} sm={4} xs={6}>
+        <Col md={1} sm={4} xs={4}>
           <ActiveFlagSelector
             showIndicatorSeparator={false}
-            value={criteria.StudentActiveFlag || true}
+            value={criteria.StudentActiveFlag}
             onSelect={value =>
               changeSearchCriteria(
                 "StudentActiveFlag",
@@ -146,7 +146,7 @@ const StudentListSearchPanel = ({
             }
           />
         </Col>
-        <Col md={2} sm={4} xs={6}>
+        <Col md={2} sm={4} xs={5}>
           <FlexContainer className={"with-gap"}>
             <FileYearSelector
               showIndicatorSeparator={false}
@@ -162,11 +162,17 @@ const StudentListSearchPanel = ({
             />
           </FlexContainer>
         </Col>
-        <Col md={2} sm={4} className={"text-right"}>
-          <LoadingBtn variant={'link'} onClick={() => setShowingAdvancedPanel(!showingAdvancedPanel)}>
-            {!showingAdvancedPanel ? <Icons.ChevronDown /> : <Icons.ChevronUp />} Adv.
+        <Col md={1} sm={4} xs={3} className={"text-right"}>
+          <LoadingBtn variant={'link'} onClick={() => setShowingAdvancedPanel(!showingAdvancedPanel)} className={'ellipsis'}>
+            {!showingAdvancedPanel ? <Icons.ChevronDown /> : <Icons.ChevronUp />} Advanced
           </LoadingBtn>
+        </Col>
+
+        {getAdvancedPanel()}
+
+        <Col md={1} sm={2} className={"text-right"}>
           <LoadingBtn
+            style={{width: '100%'}}
             onClick={() =>
               onSearch({
                 ...criteria,
@@ -179,7 +185,6 @@ const StudentListSearchPanel = ({
           </LoadingBtn>
         </Col>
       </Row>
-      {getAdvancedPanel()}
     </Wrapper>
   );
 };

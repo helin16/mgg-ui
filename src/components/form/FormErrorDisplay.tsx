@@ -4,6 +4,7 @@ type iFormErrorDisplay = {
   errorsMap: iErrorMap,
   fieldName: string;
   errorMsg?: string;
+  className?: string;
 }
 
 export const getErrorClass = (errorsMap: iErrorMap, fieldName: string) => {
@@ -13,7 +14,7 @@ export const getErrorClass = (errorsMap: iErrorMap, fieldName: string) => {
   return `is-invalid`;
 }
 
-const FormErrorDisplay = ({fieldName, errorsMap, errorMsg}: iFormErrorDisplay) => {
+const FormErrorDisplay = ({fieldName, errorsMap, errorMsg, className}: iFormErrorDisplay) => {
   if (!(fieldName in errorsMap)) {
     return null;
   }
@@ -29,7 +30,7 @@ const FormErrorDisplay = ({fieldName, errorsMap, errorMsg}: iFormErrorDisplay) =
     }
     return errorsMap[fieldName];
   }
-  return <div><small className={'text-danger'}><b>{getErrorString()}</b></small></div>
+  return <div className={className}><small className={'text-danger'}><b>{getErrorString()}</b></small></div>
 }
 
 export default FormErrorDisplay;

@@ -58,8 +58,8 @@ const Page401 = ({title, description, btns, variant = 'danger', showLogo = true}
         {btns || (
           <>
             <Button variant={variant} size="sm" onClick={() => reloadPage()}>Reload Page</Button>
-            <ContactSupportPopupBtn>
-              <Button variant="link">Support</Button>
+            <ContactSupportPopupBtn variant={'link'}>
+              Support
             </ContactSupportPopupBtn>
           </>
         )}

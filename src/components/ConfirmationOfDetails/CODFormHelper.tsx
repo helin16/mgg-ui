@@ -13,13 +13,13 @@ import CODPermissionsPanel from './DetailsPanel/CODPermissionsPanel';
 
 const getSteps = () => {
   return [
-    {key: COD_TAB_STUDENT_DETAILS, Component: CODStudentDetailsPanel, responseFieldName: 'student'},
-    {key: COD_TAB_PARENT_DETAILS, Component: CODParentsDetailsPanel, responseFieldName: 'parents'},
-    {key: COD_TAB_COURT_ORDERS, Component: CODLegalPanel, responseFieldName: 'courtOrder'},
-    {key: COD_TAB_MEDICAL_DETAILS, Component: CODMedicalDetailsPanel, responseFieldName: 'medicalDetails'},
+    {key: COD_TAB_STUDENT_DETAILS, Component: CODStudentDetailsPanel, responseFieldName: 'student', isRequired: true},
+    {key: COD_TAB_PARENT_DETAILS, Component: CODParentsDetailsPanel, responseFieldName: 'parents', isRequired: true},
+    {key: COD_TAB_COURT_ORDERS, Component: CODLegalPanel, responseFieldName: 'courtOrder', isRequired: true},
+    {key: COD_TAB_MEDICAL_DETAILS, Component: CODMedicalDetailsPanel, responseFieldName: 'medicalDetails', isRequired: true},
     {key: COD_TAB_SIBLINGS, Component: CODSiblingsPanel, responseFieldName: 'siblings'},
-    {key: COD_TAB_GOVERNMENT_FUNDING, Component: CODGovernmentFundingPanel, responseFieldName: 'governmentFunding'},
-    {key: COD_TAB_PERMISSIONS, Component: CODPermissionsPanel, responseFieldName: 'permissions'},
+    {key: COD_TAB_GOVERNMENT_FUNDING, Component: CODGovernmentFundingPanel, responseFieldName: 'governmentFunding', isRequired: true},
+    {key: COD_TAB_PERMISSIONS, Component: CODPermissionsPanel, responseFieldName: 'permissions', isRequired: true },
   ]
 }
 
