@@ -50,7 +50,7 @@ const loadAll = () => {
   if (match) {
     const studentSchoolBoxId = match[1];
     load(
-      '#content > .row > div:last-child"]',
+      '#content > .row > div:last-child',
       getElement(<AcademicReportsForSchoolBoxId  schoolBoxId={studentSchoolBoxId} />)
     );
   }
