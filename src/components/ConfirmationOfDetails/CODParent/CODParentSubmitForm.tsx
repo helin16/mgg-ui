@@ -121,6 +121,7 @@ const CODParentSubmitForm = ({ studentId }: iCODParentSubmitForm) => {
     return () => {
       isCanceled = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [studentId]);
 
   const handleCreateNewCOD = () => {

@@ -17,6 +17,7 @@ import {URL_ALUMNI_REGISTRATION, URL_ASSET_PICK_UP, URL_FUNNEL_THANK_YOU_PAGE, U
 import OnlineDonationPage from './pages/OnlineDonation/OnlineDonationPage';
 import FunnelThankYouPage from './pages/funnel/FunnelThankYouPage';
 import PageNotFoundWithTechSupport from './components/PageNotFoundWithTechSupport';
+import AcademicReportsForSchoolBoxId from './pages/studentReport/components/AcademicReportsForSchoolBoxId';
 
 const Router = () => {
   const {isProd} = useSelector((state: RootState) => state.app);
@@ -39,6 +40,7 @@ const Router = () => {
           <Route path={URL_ALUMNI_REGISTRATION} element={<AlumniRegistrationPage />} />
           <Route path={URL_ONLINE_DONATION} element={<OnlineDonationPage />} />
           <Route path={URL_FUNNEL_THANK_YOU_PAGE} element={<FunnelThankYouPage />} />
+          <Route path="/user/profile/documents/reports/:schoolBoxId" element={<AcademicReportsForSchoolBoxId  schoolBoxId={'5639'} />} />
           <Route path="/modules/remote/:code" element={<SchoolBoxLayout />} />
           <Route path="*" element={<PageNotFound />} />
         </Routes>

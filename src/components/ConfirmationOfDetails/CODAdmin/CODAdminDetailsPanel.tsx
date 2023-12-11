@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { Alert, Tab, Tabs } from "react-bootstrap";
+import { Tab, Tabs } from "react-bootstrap";
 import React, { useEffect, useState } from "react";
 import iConfirmationOfDetailsResponse from "../../../types/ConfirmationOfDetails/iConfirmationOfDetailsResponse";
 import CODStudentDetailsPanel from "../DetailsPanel/CODStudentDetailsPanel";
@@ -38,8 +38,6 @@ const CODAdminDetailsPanel = ({
   defaultTabKey,
   response,
   onCancel,
-  onSaved,
-  onRefreshList
 }: iCODAdminDetailsPanel) => {
   const defaultSelectedTab = defaultTabKey || COD_TAB_STUDENT_DETAILS;
   const [selectedTab, setSelectedTab] = useState(defaultSelectedTab);
@@ -52,15 +50,15 @@ const CODAdminDetailsPanel = ({
     setEditingResponse({ ...response });
   }, [response]);
 
-  const handleSaved = (
-    saved: iConfirmationOfDetailsResponse,
-    externalSave = false
-  ) => {
-    setEditingResponse(saved);
-    if (externalSave === true && onSaved) {
-      onSaved(saved);
-    }
-  };
+  // const handleSaved = (
+  //   saved: iConfirmationOfDetailsResponse,
+  //   externalSave = false
+  // ) => {
+  //   setEditingResponse(saved);
+  //   if (externalSave === true && onSaved) {
+  //     onSaved(saved);
+  //   }
+  // };
 
   const getCancelBtn = (editingResponse: iConfirmationOfDetailsResponse, responseFieldName: string, isLoading?: boolean) => {
     if (!onCancel) {

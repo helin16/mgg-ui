@@ -20,6 +20,8 @@ import StudentListHelper from './StudentListHelper';
 import {iStudentListSearchCriteria} from './StudentListSearchPanel';
 import UtilsService from '../../../../services/UtilsService';
 import {OP_LIKE, OP_OR} from '../../../../helper/ServiceHelper';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../../../redux/makeReduxStore';
 
 
 
@@ -33,6 +35,7 @@ type iStudentList = {
 const Wrapper = styled.div``;
 
 const StudentList = ({ className, searchCriteria, isSearching, onSearching }: iStudentList) => {
+  const {backendSchoolBoxUrl} = useSelector((state: RootState) => state.app);
   const [isLoading, setIsLoading] = useState(isSearching || false);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   const [isLoadingColumns, setIsLoadingColumns] = useState(false);
@@ -93,7 +96,7 @@ const StudentList = ({ className, searchCriteria, isSearching, onSearching }: iS
               header: `${name}`,
               isDefault: index < 5,
               isSelectable: name !== "StudentID",
-              cell: StudentListHelper.getCell(name),
+              cell: StudentListHelper.getCell(name, false, backendSchoolBoxUrl || ''),
             }
           });
         setColumns(cols);
@@ -125,7 +128,7 @@ const StudentList = ({ className, searchCriteria, isSearching, onSearching }: iS
     return () => {
       isCanceled = true;
     };
-  }, [isFirstLoad]);
+  }, [isFirstLoad, backendSchoolBoxUrl]);
 
   useEffect(() => {
     if (Object.keys(searchCriteria).length <= 0) {

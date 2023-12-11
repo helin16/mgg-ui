@@ -3,7 +3,8 @@ import {iVPastAndCurrentStudent} from '../../../../types/Synergetic/Student/iVSt
 import moment from 'moment-timezone';
 import * as XLSX from 'sheetjs-style';
 
-const getCell = (columnName: string, forExport = false) =>  (col: iTableColumn, data: iVPastAndCurrentStudent) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const getCell = (columnName: string, forExport = false, _schoolBoxUrl: string | null = null) =>  (col: iTableColumn, data: iVPastAndCurrentStudent) => {
   // @ts-ignore
   const value = `${data[columnName] || ""}`.trim();
   if (value.toLowerCase() === "true") {

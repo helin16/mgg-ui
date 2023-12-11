@@ -48,7 +48,9 @@ const Wrapper = styled.div`
 `;
 
 
-const StudentDetailsPage = ({student ,onClearSelectedStudent}: {student: iVStudent; onClearSelectedStudent: () => void}) => {
+type iStudentDetailsPage = {student: iVStudent; onClearSelectedStudent?: () => void; showTitle?: boolean}
+
+const StudentDetailsPage = ({student ,onClearSelectedStudent, showTitle = true}: iStudentDetailsPage) => {
   const {user} = useSelector((state: RootState) => state.auth);
   const [selectedTab, setSelectedTab] = useState(TAB_ACADEMIC_REPORTS);
   const [selectedStudentReportYear, setSelectedStudentReportYear] = useState<iStudentReportYear | null>(null);
@@ -119,7 +121,7 @@ const StudentDetailsPage = ({student ,onClearSelectedStudent}: {student: iVStude
           student={student}
           studentReportYear={selectedStudentReportYear}
           onClearReportYear={() => setSelectedStudentReportYear(null) }
-          onClearSelectedStudent={() => onClearSelectedStudent() }
+          onClearSelectedStudent={onClearSelectedStudent }
         />
       );
     }
@@ -128,15 +130,22 @@ const StudentDetailsPage = ({student ,onClearSelectedStudent}: {student: iVStude
       if (user?.isStudent === true) {
         return null;
       }
-      return (
-        <Button variant={'link'} title={'back to search'} size={'sm'} onClick={() => onClearSelectedStudent()}>
-          <Icon.ArrowLeft />
-        </Button>
-      )
+
+      if (onClearSelectedStudent) {
+        return (
+          <Button variant={'link'} title={'back to search'} size={'sm'} onClick={() => onClearSelectedStudent()}>
+            <Icon.ArrowLeft />
+          </Button>
+        )
+      }
     }
 
-    return (
-      <>
+    const getPageTitle = () => {
+      if (showTitle !== true) {
+        return null;
+      }
+
+      return (
         <PageTitle
           operations={
             <FlexContainer className={'withGap justify-content flex-end align-items center'}>
@@ -155,7 +164,12 @@ const StudentDetailsPage = ({student ,onClearSelectedStudent}: {student: iVStude
             Reports
           </h3>
         </PageTitle>
+      )
+    }
 
+    return (
+      <>
+        {getPageTitle()}
         {getTabs()}
         {getTabContent()}
       </>

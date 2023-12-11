@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react';
 import iVStudent from '../../types/Synergetic/Student/iVStudent';
 import StudentContactService from '../../services/Synergetic/Student/StudentContactService';
-import {STUDENT_CONTACT_TYPE_SC1, STUDENT_CONTACT_TYPE_SC2, STUDENT_CONTACT_TYPE_SC3} from '../../types/Synergetic/Student/iStudentContact';
+import {STUDENT_CONTACT_TYPE_SC1} from '../../types/Synergetic/Student/iStudentContact';
 import {Image, Spinner} from 'react-bootstrap';
 import SynCommunityService from '../../services/Synergetic/Community/SynCommunityService';
 import {OP_OR} from '../../helper/ServiceHelper';
