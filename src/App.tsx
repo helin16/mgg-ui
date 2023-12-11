@@ -17,7 +17,6 @@ import {URL_ALUMNI_REGISTRATION, URL_ASSET_PICK_UP, URL_FUNNEL_THANK_YOU_PAGE, U
 import OnlineDonationPage from './pages/OnlineDonation/OnlineDonationPage';
 import FunnelThankYouPage from './pages/funnel/FunnelThankYouPage';
 import PageNotFoundWithTechSupport from './components/PageNotFoundWithTechSupport';
-import AcademicReportsForSchoolBoxId from './pages/studentReport/components/AcademicReportsForSchoolBoxId';
 
 const Router = () => {
   const {isProd} = useSelector((state: RootState) => state.app);
