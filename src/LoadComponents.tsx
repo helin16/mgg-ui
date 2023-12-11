@@ -13,12 +13,11 @@ const load = (query: string, component: ReactComponentElement<any>) => {
   }
 };
 
-const loadAllElements = () => {
-  load(
-    '[mgg-app-loader="online-donation"]',
+const getElement = (element: any) => {
+  return (
     // @ts-ignore
     <React.StrictMode>
-      <OnlineDonation />
+      {element}
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -31,25 +30,18 @@ const loadAllElements = () => {
         pauseOnHover
       />
     </React.StrictMode>
+  )
+}
+
+const loadAll = () => {
+  load(
+    '[mgg-app-loader="online-donation"]',
+    getElement(<OnlineDonation />)
   );
 
   load(
     '[mgg-app-loader="alumni-reg-form"]',
-    // @ts-ignore
-    <React.StrictMode>
-      <AlumniRegistrationForm />
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
-    </React.StrictMode>
+    getElement(<AlumniRegistrationForm />)
   );
 
   // Student Academic Report
@@ -59,31 +51,9 @@ const loadAllElements = () => {
     const studentSchoolBoxId = match[1];
     load(
       '#content > .row > div:last-child"]',
-      // @ts-ignore
-      <React.StrictMode>
-        <AcademicReportsForSchoolBoxId  schoolBoxId={studentSchoolBoxId} />
-        <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-        />
-      </React.StrictMode>
+      getElement(<AcademicReportsForSchoolBoxId  schoolBoxId={studentSchoolBoxId} />)
     );
   }
-}
-
-const loadAll = () => {
-  document.addEventListener('DOMContentLoaded', function() {
-    // Your code here
-    console.log("Document is ready!");
-    loadAllElements();
-  });
 }
 
 const LoadComponents = {
