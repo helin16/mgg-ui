@@ -45,15 +45,15 @@ const loadAll = () => {
   );
 
   // Student Academic Report
-  const urlPattern = /^\/user\/profile\/documents\/reports\/\d+$/;
-  const match = window.location.pathname.match(urlPattern);
-  if (match) {
-    const studentSchoolBoxId = match[1];
-    load(
-      '#content > .row',
-      getElement(<AcademicReportsForSchoolBoxId  schoolBoxId={studentSchoolBoxId} />)
-    );
-  }
+  // const urlPattern = /^\/user\/profile\/documents\/reports\/\d+$/;
+  // const match = window.location.pathname.match(urlPattern);
+  // if (match) {
+  //   const studentSchoolBoxId = match[1];
+  //   load(
+  //     '#content > .row',
+  //     getElement(<AcademicReportsForSchoolBoxId  schoolBoxId={studentSchoolBoxId} />)
+  //   );
+  // }
 }
 
 const LoadComponents = {
