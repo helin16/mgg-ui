@@ -13,7 +13,7 @@ const load = (query: string, component: ReactComponentElement<any>) => {
   }
 };
 
-const loadAll = () => {
+const loadAllElements = () => {
   load(
     '[mgg-app-loader="online-donation"]',
     // @ts-ignore
@@ -76,6 +76,14 @@ const loadAll = () => {
       </React.StrictMode>
     );
   }
+}
+
+const loadAll = () => {
+  document.addEventListener('DOMContentLoaded', function() {
+    // Your code here
+    console.log("Document is ready!");
+    loadAllElements();
+  });
 }
 
 const LoadComponents = {
