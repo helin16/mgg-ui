@@ -203,7 +203,7 @@ const StudentAcademicReportMenu = ({
         </Button>
       );
     }
-    if (user?.isParent === true) {
+    if (user?.isParent === true && onClearSelectedStudent) {
       return (
         <Button
           variant={"danger"}
