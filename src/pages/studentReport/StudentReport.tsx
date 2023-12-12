@@ -34,12 +34,16 @@ const StudentReport = () => {
       return;
     }
     setIsLoading(true);
-    SynVStudentService.getCurrentVStudent(user?.synergyId)
+    SynVStudentService.getVPastAndCurrentStudentAll({
+      where: JSON.stringify({StudentID: user?.synergyId || ''}),
+      perPage: 1,
+    })
       .then(resp => {
         if (isCancelled) {
           return;
         }
-        setSelectedStudent(resp);
+        const students = resp.data || [];
+        setSelectedStudent(students.length > 0 ? students[0] : null);
       })
       .finally(() => {
         if (isCancelled) {
@@ -115,14 +119,16 @@ const StudentReport = () => {
     if (user?.isStudent === true && !selectedStudent) {
       return (
         <PageNotFound
-          title={`Opps, we can NOT find your profile.`}
+          title={`Ops, we can NOT find your profile.`}
           description={
             <span>
               Sorry we can't find your profile as a current student. <br />
               This may be caused by your session timed out, please try to
               refresh this page to reconnect <br />
               If you believe there is an issue, please report this to the
-              School.
+              School.<br />
+              If you are student left the school, please click on "Report this issue" button,
+              we will email you a copy of your report.
             </span>
           }
           secondaryBtn={

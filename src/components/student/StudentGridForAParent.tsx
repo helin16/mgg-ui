@@ -1,5 +1,5 @@
-import {useEffect, useState} from 'react';
-import iVStudent from '../../types/Synergetic/Student/iVStudent';
+import React, {useEffect, useState} from 'react';
+import iVStudent, {iVPastAndCurrentStudent} from '../../types/Synergetic/Student/iVStudent';
 import StudentContactService from '../../services/Synergetic/Student/StudentContactService';
 import {STUDENT_CONTACT_TYPE_SC1} from '../../types/Synergetic/Student/iStudentContact';
 import {Image, Spinner} from 'react-bootstrap';
@@ -10,6 +10,8 @@ import SynVStudentService from '../../services/Synergetic/Student/SynVStudentSer
 import styled from 'styled-components';
 import StudentStatusBadge from '../../pages/studentReport/components/AcademicReports/StudentStatusBadge';
 import {FlexContainer} from '../../styles';
+import ContactSupportPopupBtn from '../support/ContactSupportPopupBtn';
+import PageNotFound from '../PageNotFound';
 
 const Wrapper = styled.div`
   .student-div {
@@ -100,11 +102,24 @@ const StudentGridForAParent = ({
 
     setIsLoadingStudents(true);
     Promise.all(studentIds.map(studentId => {
-        return SynVStudentService.getCurrentVStudent(studentId)
+        return SynVStudentService.getVPastAndCurrentStudentAll({
+          where: JSON.stringify({StudentId: studentIds}),
+          perPage: 1,
+        })
       }))
       .then(resp => {
         if (isCancelled === true) { return }
-        setStudents(resp);
+        const studentsMap = resp.reduce(
+          (map: { [key: number]: iVPastAndCurrentStudent }, res) => {
+            const arr = res.data || [];
+            return {
+              ...map,
+              ...(arr.length <= 0 ? {} : {[arr[0].StudentID]: arr[0]}),
+            }
+          },
+          {}
+        );
+        setStudents(Object.values(studentsMap));
       })
       .finally(() => {
         setIsLoadingStudents(false);
@@ -129,6 +144,26 @@ const StudentGridForAParent = ({
 
   if (isLoadingCommunity === true || isLoadingContacts === true || isLoadingStudents === true) {
     return <Spinner animation={'border'} size={'sm'}/>
+  }
+
+  if (students.length <= 0) {
+    return <PageNotFound
+      title={`Ops, we can NOT find your daughter(s)' profile.`}
+      description={
+        <span>
+              Sorry we can't find your daughter(s)' profile. <br />
+              If you believe there is an issue, please report this to the
+              School.<br />
+              If she is a student left the school, please click on "Report this issue" button,
+              we will email you a copy of her report.
+            </span>
+      }
+      secondaryBtn={
+        <ContactSupportPopupBtn variant="link">
+          Report this issue
+        </ContactSupportPopupBtn>
+      }
+    />
   }
 
   return (
