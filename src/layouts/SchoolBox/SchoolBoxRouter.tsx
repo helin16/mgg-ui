@@ -37,9 +37,10 @@ import SynergeticEmailTemplateManagerPage from "../../pages/SynergeticEmailTempl
 import CampusDisplayManagementPage from '../../pages/CampusDisplay/CampusDisplayManagementPage';
 import PowerBIReportViewingPage from '../../pages/PowerBI/PowerBIReportViewingPage';
 import PowerBIReportManagerPage from '../../pages/PowerBI/Manager/PowerBIReportManagerPage';
-import {URL_POWER_BI_DISPLAY} from '../../Url';
+import {URL_POWER_BI_DISPLAY, URL_STUDENT_REPORT_SCHOOL_BOX_ID} from '../../Url';
 import CODManagerPage from '../../pages/ConfirmationOfDetails/CODManagerPage';
 import CODParentPage from '../../pages/ConfirmationOfDetails/CODParentPage';
+import AcademicReportsForSchoolBoxId from '../../pages/studentReport/components/AcademicReportsForSchoolBoxId';
 // import PageNotFound from '../../components/PageNotFound';
 
 const schoolBoxIframeElementId = "remote";
@@ -73,6 +74,13 @@ const SchoolBoxRouter = ({
     removeSchoolBoxIframe();
     const paths = path.split('/');
     return <PowerBIReportViewingPage reportId={paths[paths.length - 1]} />;
+  }
+
+  // /reports/student/:schoolBoxId
+  if (path.startsWith(URL_STUDENT_REPORT_SCHOOL_BOX_ID.replace(':schoolBoxId', ''))) {
+    removeSchoolBoxIframe();
+    const paths = path.split('/');
+    return <AcademicReportsForSchoolBoxId  schoolBoxId={paths[paths.length - 1]} />;
   }
 
   switch (path) {

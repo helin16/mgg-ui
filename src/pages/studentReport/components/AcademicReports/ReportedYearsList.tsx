@@ -18,7 +18,7 @@ const ReportedYearsList = ({student, onSelect}: {student: iVStudent, onSelect: (
         if (isCancelled === true) return;
         const listMap = resp
           .sort((reportYear1, reportYear2) => {
-            return reportYear1.FileYear > reportYear2.FileYear && reportYear1.FileSemester > reportYear2.FileSemester ? -1 : 1
+            return reportYear1.FileYear > reportYear2.FileYear && reportYear1.FileSemester > reportYear2.FileSemester ? 1 : -1
           })
           .reduce((map, reportYear) => {
             return {
@@ -56,7 +56,7 @@ const ReportedYearsList = ({student, onSelect}: {student: iVStudent, onSelect: (
     if (Object.keys(reportList).length <= 0) {
       return null;
     }
-    return Object.keys(reportList).map(fileYear => {
+    return Object.keys(reportList).reverse().map(fileYear => {
       return (
         <SectionDiv key={fileYear}>
           <h6>{fileYear}</h6>

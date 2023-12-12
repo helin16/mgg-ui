@@ -3,7 +3,8 @@ import React, {ReactComponentElement} from "react";
 import OnlineDonation from './pages/OnlineDonation/OnlineDonation';
 import {ToastContainer} from 'react-toastify';
 import AlumniRegistrationForm from './pages/alumni/components/AlumniRegistrationForm';
-import AcademicReportsForSchoolBoxId from './pages/studentReport/components/AcademicReportsForSchoolBoxId';
+import {URL_STUDENT_REPORT_SCHOOL_BOX_ID} from './Url';
+import UtilsService from './services/UtilsService';
 
 const load = (query: string, component: ReactComponentElement<any>) => {
   const roots = document.querySelectorAll(query) || [];
@@ -45,15 +46,15 @@ const loadAll = () => {
   );
 
   // Student Academic Report
-  // const urlPattern = /^\/user\/profile\/documents\/reports\/\d+$/;
-  // const match = window.location.pathname.match(urlPattern);
-  // if (match) {
-  //   const studentSchoolBoxId = match[1];
-  //   load(
-  //     '#content > .row',
-  //     getElement(<AcademicReportsForSchoolBoxId  schoolBoxId={studentSchoolBoxId} />)
-  //   );
-  // }
+  const urlPattern = /\/user\/profile\/documents\/reports\/\d+$/;
+  document.querySelectorAll('a').forEach(element => {
+    const match = `${element.href || ''}`.trim().match(urlPattern);
+    if (`${element.textContent || ''}`.trim().includes('Academic Reports') && match !== null) {
+      const studentSchoolBoxId = match[1];
+      const newUrl = URL_STUDENT_REPORT_SCHOOL_BOX_ID.replace(':schoolBoxId', studentSchoolBoxId);
+      element.href = UtilsService.getModuleUrl(newUrl);
+    }
+  });
 }
 
 const LoadComponents = {

@@ -7,6 +7,12 @@ import PageLoadingSpinner from '../../../components/common/PageLoadingSpinner';
 import SynVStudentService from '../../../services/Synergetic/Student/SynVStudentService';
 import Page401 from '../../../components/Page401';
 import StudentDetailsPage from './StudentDetailsPage';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../../redux/makeReduxStore';
+import StudentContactService from '../../../services/Synergetic/Student/StudentContactService';
+import SynCommunityService from '../../../services/Synergetic/Community/SynCommunityService';
+import {OP_OR} from '../../../helper/ServiceHelper';
+import {STUDENT_CONTACT_TYPE_SC1} from '../../../types/Synergetic/Student/iStudentContact';
 
 const Wrapper = styled.div``;
 
@@ -14,11 +20,16 @@ type iAcademicReportsForSchoolBoxId = {
   schoolBoxId: string;
 }
 const AcademicReportsForSchoolBoxId = ({schoolBoxId}: iAcademicReportsForSchoolBoxId) => {
-
-  const [student, setStudent] = useState<iVStudent | null>(null);
+  const { user } = useSelector((state: RootState) => state.auth);
+  const [selectedStudent, setSelectedStudent] = useState<iVStudent | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    const currentUserSynId = `${user?.synergyId || ''}`.trim()
+    if (!user || currentUserSynId === '' || (user?.isStaff !== true && user?.isParent !== true && user?.isStudent !== true)) {
+      return;
+    }
+
     let isCanceled = false;
 
     const getData = async () => {
@@ -36,7 +47,38 @@ const AcademicReportsForSchoolBoxId = ({schoolBoxId}: iAcademicReportsForSchoolB
       const students = (await SynVStudentService.getVPastAndCurrentStudentAll({
         where: JSON.stringify({ID: sbUser.synergy_id})
       })).data || [];
-      setStudent(students.length > 0 ? students[0] : null)
+      const student = students.length > 0 ? students[0] : null;
+
+      // if the current user is a student and not the selected student, then not showing.
+      if(user?.isStudent === true && student?.ID !== user.synergyId && `${student?.ID || ''}`.trim() !== '') {
+        return;
+      }
+
+      // if the current user is a student and not the selected student, then not showing.
+      if(user?.isParent === true && `${student?.ID || ''}`.trim() !== '') {
+        const resp = await SynCommunityService.getCommunityProfiles({
+          where: JSON.stringify({ [OP_OR]: [ {SpouseID: currentUserSynId}, {ID: currentUserSynId} ] })
+        });
+        const parentIds: number[] = [];
+        resp.data.forEach(community => { // @ts-ignore
+          parentIds.push(Number(community.ID));
+          parentIds.push(Number(community.SpouseID));
+        });
+        const parents = (await StudentContactService.getStudentContacts({
+          where: JSON.stringify({
+            ID: `${student?.ID || ''}`.trim(),
+            LinkedID: parentIds,
+            ContactType: [STUDENT_CONTACT_TYPE_SC1],
+          }),
+        })).data || [];
+
+        if (parents.length <= 0) {
+          return;
+        }
+      }
+
+      if (isCanceled) { return }
+      setSelectedStudent(student);
     }
 
     setIsLoading(true);
@@ -51,18 +93,17 @@ const AcademicReportsForSchoolBoxId = ({schoolBoxId}: iAcademicReportsForSchoolB
     return () => {
       isCanceled = true;
     }
-  }, [schoolBoxId]);
+  }, [schoolBoxId, user]);
 
   const getContent = () => {
     if (isLoading === true) {
       return <PageLoadingSpinner />
     }
-    if (student) {
-      return <StudentDetailsPage
-        student={student}
-        showTitle={false}
-      />
+
+    if (selectedStudent) {
+      return <StudentDetailsPage student={selectedStudent} />
     }
+
     return <Page401 />;
   }
 
