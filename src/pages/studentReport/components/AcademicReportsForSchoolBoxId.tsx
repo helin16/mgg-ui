@@ -49,6 +49,12 @@ const AcademicReportsForSchoolBoxId = ({schoolBoxId}: iAcademicReportsForSchoolB
       })).data || [];
       const student = students.length > 0 ? students[0] : null;
 
+      if (student === null) {
+        if (isCanceled) { return }
+        setErrorMsg(`Can't find a student profile for ${schoolBoxId}.`);
+        return;
+      }
+
       // if the current user is a student and not the selected student, then not showing.
       if(user?.isStudent === true && student?.ID !== user.synergyId && `${student?.ID || ''}`.trim() !== '') {
         if (isCanceled) { return }

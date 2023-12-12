@@ -49,7 +49,6 @@ const loadAll = () => {
   const urlPattern = /\/user\/profile\/documents\/reports\/\d+$/;
   document.querySelectorAll('a').forEach(element => {
     const match = `${element.href || ''}`.trim().match(urlPattern);
-    console.log('match', match);
     if (`${element.textContent || ''}`.trim().includes('Academic Reports') && match !== null) {
       const studentSchoolBoxId = match[0];
       console.log('match1', match);
