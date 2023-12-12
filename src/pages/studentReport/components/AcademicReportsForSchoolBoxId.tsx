@@ -23,10 +23,11 @@ const AcademicReportsForSchoolBoxId = ({schoolBoxId}: iAcademicReportsForSchoolB
   const { user } = useSelector((state: RootState) => state.auth);
   const [selectedStudent, setSelectedStudent] = useState<iVStudent | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
-    const currentUserSynId = `${user?.synergyId || ''}`.trim()
-    if (!user || currentUserSynId === '' || (user?.isStaff !== true && user?.isParent !== true && user?.isStudent !== true)) {
+    const currentUserSynId = `${user?.synergyId || ''}`.trim();
+    if (currentUserSynId === '' || (user?.isStaff !== true && user?.isParent !== true && user?.isStudent !== true)) {
       return;
     }
 
@@ -39,7 +40,6 @@ const AcademicReportsForSchoolBoxId = ({schoolBoxId}: iAcademicReportsForSchoolB
       });
       const sbUsers = (result.data || []);
       const sbUser = sbUsers.length > 0 ? sbUsers[0] : null;
-
       if (!sbUser) {
         return;
       }
@@ -51,6 +51,8 @@ const AcademicReportsForSchoolBoxId = ({schoolBoxId}: iAcademicReportsForSchoolB
 
       // if the current user is a student and not the selected student, then not showing.
       if(user?.isStudent === true && student?.ID !== user.synergyId && `${student?.ID || ''}`.trim() !== '') {
+        if (isCanceled) { return }
+        setErrorMsg(`You can't access someone else' report.`);
         return;
       }
 
@@ -73,6 +75,8 @@ const AcademicReportsForSchoolBoxId = ({schoolBoxId}: iAcademicReportsForSchoolB
         })).data || [];
 
         if (parents.length <= 0) {
+          if (isCanceled) { return }
+          setErrorMsg(`You don't access her report.`);
           return;
         }
       }
@@ -104,7 +108,7 @@ const AcademicReportsForSchoolBoxId = ({schoolBoxId}: iAcademicReportsForSchoolB
       return <StudentDetailsPage student={selectedStudent} />
     }
 
-    return <Page401 />;
+    return <Page401 description={errorMsg || ''}/>;
   }
 
   return (
