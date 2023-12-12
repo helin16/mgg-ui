@@ -119,7 +119,7 @@ const StudentReport = () => {
     if (user?.isStudent === true && !selectedStudent) {
       return (
         <PageNotFound
-          title={`Ops, we can NOT find your profile.`}
+          title={`Oops, we can NOT find your profile.`}
           description={
             <span>
               Sorry we can't find your profile as a current student. <br />

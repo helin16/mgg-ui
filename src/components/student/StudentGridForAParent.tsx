@@ -148,7 +148,7 @@ const StudentGridForAParent = ({
 
   if (students.length <= 0) {
     return <PageNotFound
-      title={`Ops, we can NOT find your daughter(s)' profile.`}
+      title={`Oops, we can NOT find your daughter(s)' profile.`}
       description={
         <span>
               Sorry we can't find your daughter(s)' profile. <br />
