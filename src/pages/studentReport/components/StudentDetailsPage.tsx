@@ -153,8 +153,7 @@ const StudentDetailsPage = ({student ,onClearSelectedStudent, showTitle = true}:
               <h3 className={'text-right'}>
                 {student.StudentGiven1} {' '}
                 {student.StudentSurname} {' '}
-                ({student.StudentID}) {' '}
-                {student.StudentFormHomeRoom}
+                ({student.StudentID})
               </h3>
             </FlexContainer>
           }
