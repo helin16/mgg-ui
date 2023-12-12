@@ -12,7 +12,11 @@ import {RootState} from '../../../redux/makeReduxStore';
 import StudentContactService from '../../../services/Synergetic/Student/StudentContactService';
 import SynCommunityService from '../../../services/Synergetic/Community/SynCommunityService';
 import {OP_OR} from '../../../helper/ServiceHelper';
-import {STUDENT_CONTACT_TYPE_SC1} from '../../../types/Synergetic/Student/iStudentContact';
+import {
+  STUDENT_CONTACT_TYPE_SC1,
+  STUDENT_CONTACT_TYPE_SC2,
+  STUDENT_CONTACT_TYPE_SC3
+} from '../../../types/Synergetic/Student/iStudentContact';
 
 const Wrapper = styled.div``;
 
@@ -76,7 +80,11 @@ const AcademicReportsForSchoolBoxId = ({schoolBoxId}: iAcademicReportsForSchoolB
           where: JSON.stringify({
             ID: `${student?.ID || ''}`.trim(),
             LinkedID: parentIds,
-            ContactType: [STUDENT_CONTACT_TYPE_SC1],
+            ContactType: [
+              STUDENT_CONTACT_TYPE_SC1,
+              STUDENT_CONTACT_TYPE_SC2,
+              STUDENT_CONTACT_TYPE_SC3,
+            ],
           }),
         })).data || [];
 
