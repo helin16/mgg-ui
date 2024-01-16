@@ -239,7 +239,7 @@ const SchoolBoxRouter = ({
         </ModuleAccessWrapper>
       );
     }
-    case "/confirmation_of_details/register_new": {
+    case "/confirmation_of_details/register": {
       removeSchoolBoxIframe();
       return (
         <CODParentPage />

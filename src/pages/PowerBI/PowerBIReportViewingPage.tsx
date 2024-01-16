@@ -2,15 +2,28 @@ import styled from 'styled-components';
 import PageNotFound from '../../components/PageNotFound';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../redux/makeReduxStore';
-import {useEffect, useState} from 'react';
+import {useEffect, useState, useCallback} from 'react';
 import iPowerBIReport from '../../types/PowerBI/iPowerBIReport';
 import PowerBIService from '../../services/PowerBIService';
 import Toaster from '../../services/Toaster';
 import PageLoadingSpinner from '../../components/common/PageLoadingSpinner';
 import PowerBIReportViewer from '../../components/powerBI/PowerBIReportViewer';
 import Page401 from '../../components/Page401';
+import {FlexContainer} from '../../styles';
+import {Button} from 'react-bootstrap';
+import * as Icons from "react-bootstrap-icons";
 
-const Wrapper = styled.div``;
+const Wrapper = styled.div`
+    .full-page {
+        position: absolute;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom: 0px;
+        height: 100vh !important;
+        width: 100% !important;
+    }
+`;
 
 type iPowerBIReportViewingPage = {
   reportId?: string;
@@ -19,6 +32,7 @@ const PowerBIReportViewingPage = ({reportId}: iPowerBIReportViewingPage) => {
   const { user: currentUser } = useSelector((state: RootState) => state.auth);
   const [reportObj, setReportObj] = useState<iPowerBIReport | undefined | null>(undefined);
   const [isLoading, setIsLoading] = useState(false);
+  const [isShowingFullPage, setIsShowingFullPage] = useState(false);
 
   useEffect(() => {
     if (!reportId || `${reportId || ''}`.trim() === '') {
@@ -48,6 +62,23 @@ const PowerBIReportViewingPage = ({reportId}: iPowerBIReportViewingPage) => {
     }
 
   }, [reportId])
+
+  const handleEscKeyPress = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsShowingFullPage(false);
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleEscKeyPress);
+
+    return () => {
+      document.removeEventListener('keydown', handleEscKeyPress);
+    };
+  }, [handleEscKeyPress]);
 
   const checkAccess = () => {
     if (!currentUser?.id) {
@@ -100,8 +131,16 @@ const PowerBIReportViewingPage = ({reportId}: iPowerBIReportViewingPage) => {
 
   return (
     <Wrapper>
-      <h3>{reportObj?.name || ''}</h3>
-      <PowerBIReportViewer reportId={reportObj.externalId} />
+      <FlexContainer className={'justify-content-between'}>
+        <h3>{reportObj?.name || ''}</h3>
+        <div>
+          <Button size={'sm'} variant={'link'} onClick={() => setIsShowingFullPage(true)} style={{lineHeight: 1}}>
+            <Icons.ArrowsFullscreen /> Full screen<br />
+            <small>(ESC key to exit full screen mode after)</small>
+          </Button>
+        </div>
+      </FlexContainer>
+      <PowerBIReportViewer reportId={reportObj.externalId} className={isShowingFullPage === true ? 'full-page' : undefined}/>
     </Wrapper>
   )
 }

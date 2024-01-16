@@ -64,14 +64,14 @@ const PowerBIListItemCreateOrEditPopupBtn = ({
         <>
           <Alert variant={"warning"}>
             <b>Step 1: Need to publish your Power BI report</b>, please make
-            sure your new / existing report published onto cloud.
+            sure your new / existing report published onto cloud under <b>Student Profiles</b>.
           </Alert>
           <p>
             Please make sure your new / existing report published onto cloud
             from your Power BI Desktop program.
             <Image
               src={UtilsService.getFullUrl(
-                "images/powerBI/PowerBIReportPublish.png"
+                "images/powerBI/PowerBIReportPublish.jpg"
               )}
               style={{ width: "100%", height: "auto" }}
             />

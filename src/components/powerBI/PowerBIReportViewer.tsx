@@ -12,8 +12,8 @@ const Wrapper = styled.div`
   }
 `;
 
-type iPowerBIReportViewer = {reportId: string; student?: iVStudent};
-const PowerBIReportViewer = ({reportId, student}: iPowerBIReportViewer) => {
+type iPowerBIReportViewer = {reportId: string; student?: iVStudent; className?: string};
+const PowerBIReportViewer = ({reportId, student, className}: iPowerBIReportViewer) => {
   const [isLoading, setIsLoading] = useState(false);
   const [accessToken, setAccessToken] = useState('');
   const [report, setReport] = useState(null);
@@ -65,7 +65,7 @@ const PowerBIReportViewer = ({reportId, student}: iPowerBIReportViewer) => {
   }
 
   return (
-    <Wrapper>
+    <Wrapper className={className}>
       <PowerBIEmbed
         embedConfig={{
           type: 'report',   // Supported types: report, dashboard, tile, visual and qna
