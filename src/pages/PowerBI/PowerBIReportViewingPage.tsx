@@ -22,6 +22,7 @@ const Wrapper = styled.div`
         bottom: 0px;
         height: 100vh !important;
         width: 100% !important;
+        z-index: 99999999999;
     }
 `;
 
