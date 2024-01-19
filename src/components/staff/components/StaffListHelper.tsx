@@ -211,6 +211,11 @@ const getListColumns = ({
     }
   },
   {
+    key: "StaffExtension",
+    header: "Staff Extension",
+    cell: (column: iTableColumn, data: iVStaff) => `${data.StaffExtension || ''}`.trim()
+  },
+  {
     key: `${COLUMN_KEY_PREFIX_JP_POS}JobPositionCode`,
     header: "Position Code",
     group: COLUMN_GROUP_JOB_POSITION,
