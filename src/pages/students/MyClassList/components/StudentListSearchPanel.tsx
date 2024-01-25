@@ -51,7 +51,7 @@ const StudentListSearchPanel = ({isLoading = false, preSelectedClassCodes = [], 
           FileYear: (user?.SynCurrentFileSemester?.FileYear || moment().year()),
           FileSemester: (user?.SynCurrentFileSemester?.FileSemester || 1),
         }),
-        perPage: '9999'
+        perPage: 9999999
       }, {
         headers: { [HEADER_NAME_SELECTING_FIELDS]: JSON.stringify(['ClassCode'])}
       }).then(resp => {
@@ -81,7 +81,7 @@ const StudentListSearchPanel = ({isLoading = false, preSelectedClassCodes = [], 
             onKeyUp={(event) => UtilsService.handleEnterKeyPressed(event, () => onSearch && onSearch(searchCriteria))}
           />
         </Col>
-        <Col sm={9}>
+        <Col sm={8}>
           <FormLabel label={'Classes'} />
           <SynSubjectClassSelector
             pageSize={9999}
@@ -96,9 +96,9 @@ const StudentListSearchPanel = ({isLoading = false, preSelectedClassCodes = [], 
             })}
           />
         </Col>
-        <Col sm={1} className={'btns'}>
+        <Col sm={2} className={'btns'}>
           <FormLabel label={' '} />
-          <div className={'text-right'}>
+          <div className={'justify-content-between align-content-end'}>
             <LoadingBtn
               isLoading={isLoading || isSearching}
               variant={'primary'}
