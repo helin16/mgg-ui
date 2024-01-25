@@ -87,7 +87,7 @@ const RichTextEditor = ({value, plugins, toolBar, settings, onChange, className,
         setIsLoading(true);
         return imagesUploadFn(blobInfo)
           .then(resp => {
-            const imgUrl = `${resp.url || ''}`.trim().replace('&amp;', '&');
+            const imgUrl = `${resp.url || ''}`.trim();
             success(imgUrl);
             return imgUrl;
           })
@@ -98,6 +98,7 @@ const RichTextEditor = ({value, plugins, toolBar, settings, onChange, className,
             setIsLoading(false);
           })
       },
+      convert_urls: false,
     })
   }
 
