@@ -87,7 +87,7 @@ const RichTextEditor = ({value, plugins, toolBar, settings, onChange, className,
         setIsLoading(true);
         return imagesUploadFn(blobInfo)
           .then(resp => {
-            const imgUrl = `${resp.url || ''}`.trim();
+            const imgUrl = `${resp.url || ''}`.trim().replace('&amp;', '&');
             success(imgUrl);
             return imgUrl;
           })
