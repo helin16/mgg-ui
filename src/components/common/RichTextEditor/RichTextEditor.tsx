@@ -98,7 +98,6 @@ const RichTextEditor = ({value, plugins, toolBar, settings, onChange, className,
             setIsLoading(false);
           })
       },
-      convert_urls: false,
     })
   }
 
@@ -131,6 +130,8 @@ const RichTextEditor = ({value, plugins, toolBar, settings, onChange, className,
           removed_menuitems: 'newdocument',
           document_base_url: '',
           relative_urls: false,
+          convert_urls: false,
+          automatic_uploads: false,
           setup: (editor) => {
             editor.on('init', () => {
               // Set isLoading to false when TinyMCE is initialized
