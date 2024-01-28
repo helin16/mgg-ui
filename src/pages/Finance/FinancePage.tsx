@@ -29,6 +29,7 @@ const FinancePage = () => {
         <Tab eventKey={TAB_EXPIRING_FORECAST} title={`Forecast ${MathHelper.add(moment().year(), 1)}`}>
           <BudgetForecastPanel />
         </Tab>
+
       </Tabs>
     </Page>
   );
