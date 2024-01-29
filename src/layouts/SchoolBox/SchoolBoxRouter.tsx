@@ -231,7 +231,7 @@ const SchoolBoxRouter = ({
         </ModuleAccessWrapper>
       );
     }
-    case "/confirmation_of_details/admin": {
+    case "/confirmation_of_details/admin_new": {
       removeSchoolBoxIframe();
       return (
         <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_COD}>
@@ -239,7 +239,7 @@ const SchoolBoxRouter = ({
         </ModuleAccessWrapper>
       );
     }
-    case "/confirmation_of_details/register": {
+    case "/confirmation_of_details/register_new": {
       removeSchoolBoxIframe();
       return (
         <CODParentPage />
