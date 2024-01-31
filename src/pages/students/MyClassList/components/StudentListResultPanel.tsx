@@ -14,6 +14,9 @@ import CSVExportFromHtmlTableBtn from "../../../../components/form/CSVExportFrom
 import { FlexContainer } from "../../../../styles";
 import MathHelper from "../../../../helper/MathHelper";
 import iSynVStudentContactAllAddress from "../../../../types/Synergetic/Student/iSynVStudentContactAllAddress";
+import iSynAddress from "../../../../types/Synergetic/iSynAddress";
+import SynAddressService from "../../../../services/Synergetic/SynAddressService";
+import Toaster from "../../../../services/Toaster";
 
 type iStudentListResultPanel = {
   isLoading: boolean;
@@ -32,6 +35,7 @@ const Wrapper = styled.div`
   }
 `;
 
+type iAddressMap = { [key: number]: iSynAddress };
 const StudentListResultPanel = ({
   isLoading = false,
   students,
@@ -43,6 +47,52 @@ const StudentListResultPanel = ({
   const [resultTableHtmlId] = useState(
     `mcl-${moment().unix()}-${Math.random()}`
   );
+  const [isGettingData, setIsGettingData] = useState(false);
+  const [addressMap, setAddressMap] = useState<iAddressMap>({});
+
+  useEffect(() => {
+    let isCanceled = false;
+    const addressIds = students.map(student => student.AddressID);
+    if (addressIds.length <= 0) {
+      setAddressMap({});
+      return;
+    }
+
+    setIsGettingData(true);
+    SynAddressService.getAll({
+      where: JSON.stringify({ AddressID: addressIds }),
+      perPage: 9999999
+    })
+      .then(resp => {
+        if (isCanceled) {
+          return;
+        }
+        setAddressMap(
+          (resp.data || []).reduce((map, address) => {
+            return {
+              ...map,
+              [address.AddressID]: address
+            };
+          }, {})
+        );
+      })
+      .catch(err => {
+        if (isCanceled) {
+          return;
+        }
+        Toaster.showApiError(err);
+      })
+      .finally(() => {
+        if (isCanceled) {
+          return;
+        }
+        setIsGettingData(false);
+      });
+
+    return () => {
+      isCanceled = true;
+    };
+  }, [students]);
 
   useEffect(() => {
     const cols: iTableColumn[] = [
@@ -74,14 +124,81 @@ const StudentListResultPanel = ({
         }
       },
       {
-        key: "dob",
-        header: "DOB",
+        key: "student-given1",
+        header: "Student Given",
+        group: "Student",
+        cell: (col: iTableColumn, data: iVStudent) => {
+          return (
+            <td key={col.key} className={col.key}>
+              {data.StudentGiven1 || ""}
+            </td>
+          );
+        }
+      },
+      {
+        key: "student-preferred",
+        header: "Student Preferred Name",
+        group: "Student",
+        cell: (col: iTableColumn, data: iVStudent) => {
+          return (
+            <td key={col.key} className={col.key}>
+              {data.StudentPreferred || ""}
+            </td>
+          );
+        }
+      },
+      {
+        key: "student-surname",
+        header: "Student Surname",
+        group: "Student",
+        cell: (col: iTableColumn, data: iVStudent) => {
+          return (
+            <td key={col.key} className={col.key}>
+              {data.StudentSurname || ""}
+            </td>
+          );
+        }
+      },
+      {
+        key: "student-internal",
+        header: "Student Internal Name",
         isDefault: true,
         group: "Student",
         cell: (col: iTableColumn, data: iVStudent) => {
           return (
             <td key={col.key} className={col.key}>
-              {moment(data.StudentBirthDate).format("DD MMM YYYY")}
+              {data.StudentNameInternal || ""}
+            </td>
+          );
+        }
+      },
+      {
+        key: "dob",
+        header: "Student D.O.B.",
+        isDefault: true,
+        group: "Student",
+        cell: (col: iTableColumn, data: iVStudent) => {
+          return (
+            <td key={col.key} className={col.key}>
+              {`${data.StudentBirthDate || ""}`
+                .trim()
+                .replace("T00:00:00.000Z", "")}
+            </td>
+          );
+        }
+      },
+      {
+        key: "student-age",
+        header: "Student Age",
+        isDefault: true,
+        group: "Student",
+        cell: (col: iTableColumn, data: iVStudent) => {
+          const dob = `${data.StudentBirthDate || ""}`
+            .trim()
+            .replace("T00:00:00.000Z", "");
+          return (
+            <td key={col.key} className={col.key}>
+              {dob === '' ? '' : moment().diff(dob, 'years')}
             </td>
           );
         }
@@ -99,6 +216,99 @@ const StudentListResultPanel = ({
                   {data.StudentOccupEmail}
                 </a>
               )}
+            </td>
+          );
+        }
+      },
+      {
+        key: "student-entry-date",
+        header: "Student Entry Date",
+        group: "Student",
+        cell: (col: iTableColumn, data: iVStudent) => {
+          return (
+            <td key={col.key} className={col.key}>
+              {`${data.StudentEntryDate || ""}`
+                .trim()
+                .replace("T00:00:00.000Z", "")}
+            </td>
+          );
+        }
+      },
+      {
+        key: "student-full-fee",
+        header: "Student Full Fee",
+        group: "Student",
+        cell: (col: iTableColumn, data: iVStudent) => {
+          return (
+            <td key={col.key} className={col.key}>
+              {data.FullFeeFlag === true ? "Y" : ""}
+            </td>
+          );
+        }
+      },
+      {
+        key: "address-full",
+        header: "Home Address Full",
+        group: "Address",
+        cell: (col: iTableColumn, data: iVStudent) => {
+          return (
+            <td key={col.key} className={col.key}>
+              {data.AddressID && data.AddressID in addressMap
+                ? addressMap[data.AddressID].HomeAddressFull
+                : ""}
+            </td>
+          );
+        }
+      },
+      {
+        key: "address-street",
+        header: "Home Street",
+        group: "Address",
+        cell: (col: iTableColumn, data: iVStudent) => {
+          return (
+            <td key={col.key} className={col.key}>
+              {data.AddressID && data.AddressID in addressMap
+                ? addressMap[data.AddressID].HomeAddress1
+                : ""}
+            </td>
+          );
+        }
+      },{
+        key: "address-suburb",
+        header: "Home Suburb",
+        group: "Address",
+        cell: (col: iTableColumn, data: iVStudent) => {
+          return (
+            <td key={col.key} className={col.key}>
+              {data.AddressID && data.AddressID in addressMap
+                ? addressMap[data.AddressID].HomeSuburb
+                : ""}
+            </td>
+          );
+        }
+      },{
+        key: "address-state",
+        header: "Home State",
+        group: "Address",
+        cell: (col: iTableColumn, data: iVStudent) => {
+          return (
+            <td key={col.key} className={col.key}>
+              {data.AddressID && data.AddressID in addressMap
+                ? addressMap[data.AddressID].HomeState
+                : ""}
+            </td>
+          );
+        }
+      },{
+        key: "address-postcode",
+        header: "Home PostCode",
+        group: "Address",
+        cell: (col: iTableColumn, data: iVStudent) => {
+          return (
+            <td key={col.key} className={col.key}>
+              {data.AddressID && data.AddressID in addressMap
+                ? addressMap[data.AddressID].HomePostCode
+                : ""}
             </td>
           );
         }
@@ -155,6 +365,30 @@ const StudentListResultPanel = ({
         }
       },
       {
+        key: "previousSchoolCode",
+        header: "Previous School Code",
+        group: "School",
+        cell: (col: iTableColumn, data: iVStudent) => {
+          return (
+            <td key={col.key} className={col.key}>
+              {data.StudentPreviousSchoolCode}
+            </td>
+          );
+        }
+      },
+      {
+        key: "previousSchool",
+        header: "Previous School",
+        group: "School",
+        cell: (col: iTableColumn, data: iVStudent) => {
+          return (
+            <td key={col.key} className={col.key}>
+              {data.StudentPreviousSchoolDescription}
+            </td>
+          );
+        }
+      },
+      {
         key: "parent1-id",
         header: "Parent ID",
         group: "Parent",
@@ -178,7 +412,7 @@ const StudentListResultPanel = ({
             data.StudentID in parentMap ? parentMap[data.StudentID] : null;
           return (
             <td key={col.key} className={col.key}>
-              {parent?.StudentContactTitle || ""}{' '}
+              {parent?.StudentContactTitle || ""}{" "}
               {parent?.StudentContactNameExternal || ""}
             </td>
           );
@@ -211,7 +445,11 @@ const StudentListResultPanel = ({
         cell: (col: iTableColumn, data: iVStudent) => {
           const parent =
             data.StudentID in parentMap ? parentMap[data.StudentID] : null;
-          return <td key={col.key} className={col.key}>{parent?.StudentContactDefaultMobilePhone || ""}</td>;
+          return (
+            <td key={col.key} className={col.key}>
+              {parent?.StudentContactDefaultMobilePhone || ""}
+            </td>
+          );
         }
       },
       {
@@ -221,7 +459,11 @@ const StudentListResultPanel = ({
         cell: (col: iTableColumn, data: iVStudent) => {
           const parent =
             data.StudentID in parentMap ? parentMap[data.StudentID] : null;
-          return <td key={col.key} className={col.key}>{parent?.StudentContactSpouseID || ''}</td>;
+          return (
+            <td key={col.key} className={col.key}>
+              {parent?.StudentContactSpouseID || ""}
+            </td>
+          );
         }
       },
       {
@@ -234,7 +476,7 @@ const StudentListResultPanel = ({
             data.StudentID in parentMap ? parentMap[data.StudentID] : null;
           return (
             <td key={col.key} className={col.key}>
-              {parent?.StudentContactSpouseTitle || ""}{' '}
+              {parent?.StudentContactSpouseTitle || ""}{" "}
               {parent?.StudentContactSpouseNameExternal || ""}
             </td>
           );
@@ -249,7 +491,7 @@ const StudentListResultPanel = ({
           const parent =
             data.StudentID in parentMap ? parentMap[data.StudentID] : null;
           const parentEmail = `${parent?.StudentContactSpouseDefaultEmail ||
-          ""}`.trim();
+            ""}`.trim();
           return (
             <td key={col.key} className={col.key}>
               {parentEmail === "" ? null : (
@@ -267,7 +509,11 @@ const StudentListResultPanel = ({
         cell: (col: iTableColumn, data: iVStudent) => {
           const parent =
             data.StudentID in parentMap ? parentMap[data.StudentID] : null;
-          return <td key={col.key} className={col.key}>{parent?.StudentContactSpouseDefaultMobilePhone || ''}</td>;
+          return (
+            <td key={col.key} className={col.key}>
+              {parent?.StudentContactSpouseDefaultMobilePhone || ""}
+            </td>
+          );
         }
       },
       {
@@ -278,7 +524,18 @@ const StudentListResultPanel = ({
         cell: (col: iTableColumn, data: iVStudent) => {
           const parent =
             data.StudentID in parentMap ? parentMap[data.StudentID] : null;
-          return <td key={col.key} className={`${col.key} ${parent?.StudentParentsSeparatedFlag === true ? 'bg-danger text-white' : ''}`}>{parent?.StudentParentsSeparatedFlag === true ? 'YES' : ''}</td>;
+          return (
+            <td
+              key={col.key}
+              className={`${col.key} ${
+                parent?.StudentParentsSeparatedFlag === true
+                  ? "bg-danger text-white"
+                  : ""
+              }`}
+            >
+              {parent?.StudentParentsSeparatedFlag === true ? "YES" : ""}
+            </td>
+          );
         }
       },
       {
@@ -304,6 +561,54 @@ const StudentListResultPanel = ({
             </td>
           );
         }
+      },
+      {
+        key: "StudentDoctorName",
+        header: "Student Doctor Name",
+        group: "Emergency",
+        cell: (col: iTableColumn, data: iVStudent) => {
+          return (
+            <td key={col.key} className={col.key}>
+              {data.StudentDoctorName || ""}
+            </td>
+          );
+        }
+      },
+      {
+        key: "StudentDoctorPhone",
+        header: "Student Doctor Phone",
+        group: "Emergency",
+        cell: (col: iTableColumn, data: iVStudent) => {
+          return (
+            <td key={col.key} className={col.key}>
+              {data.StudentDoctorPhone || ""}
+            </td>
+          );
+        }
+      },
+      {
+        key: "StudentEmergencyName",
+        header: "Student Emergency Name",
+        group: "Emergency",
+        cell: (col: iTableColumn, data: iVStudent) => {
+          return (
+            <td key={col.key} className={col.key}>
+              {data.StudentEmergencyName || ""}
+            </td>
+          );
+        }
+      },
+      {
+        key: "StudentEmergencyPhone",
+        header: "Student Emergency Phone",
+        group: "Emergency",
+        cell: (col: iTableColumn, data: iVStudent) => {
+          return (
+            <td key={col.key} className={col.key}>
+              {data.StudentEmergencyPhone || ""}
+            </td>
+          );
+        }
       }
     ];
 
@@ -317,9 +622,9 @@ const StudentListResultPanel = ({
         ? selectedCols
         : cols.filter(column => column.isDefault === true)
     );
-  }, [studentClassCodeMap, parentMap]);
+  }, [studentClassCodeMap, parentMap, addressMap]);
 
-  if (isLoading) {
+  if (isLoading === true || isGettingData === true) {
     return <PageLoadingSpinner />;
   }
 
