@@ -10,10 +10,11 @@ type iModuleAccessWrapper = {
   moduleId: number;
   roleId?: number;
   silentMode?: boolean;
+  accessDenyPanel?: React.ReactElement | null;
   children: React.ReactElement | null;
   btns?: any;
 }
-const ModuleAccessWrapper = ({moduleId, roleId, silentMode = false, children, btns}: iModuleAccessWrapper) => {
+const ModuleAccessWrapper = ({moduleId, roleId, silentMode = false, accessDenyPanel, children, btns}: iModuleAccessWrapper) => {
   const {user} = useSelector((state: RootState) => state.auth);
   const [canAccess, setCanAccess] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -59,6 +60,11 @@ const ModuleAccessWrapper = ({moduleId, roleId, silentMode = false, children, bt
     if (silentMode) {
       return null;
     }
+
+    if (accessDenyPanel) {
+      return accessDenyPanel;
+    }
+
     return <Page401 description={<h4>Please contact IT or Module Admins for assistant</h4>} btns={btns} />
   }
 

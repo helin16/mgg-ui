@@ -16,6 +16,7 @@ type iSynSubjectClassSelector = {
   FileYear: number;
   FileSemester: number;
   pageSize?: number;
+  limitedClassCodes?: string[];
 };
 
 export const translateSubjectClassToOption = (SubjectClass: iSynSubjectClass) => {
@@ -23,7 +24,7 @@ export const translateSubjectClassToOption = (SubjectClass: iSynSubjectClass) =>
 }
 
 const SynSubjectClassSelector = ({
-  values, onSelect, allowClear, className, FileYear, FileSemester, pageSize, showIndicator = true, isMulti = false
+  values, onSelect, allowClear, className, FileYear, FileSemester, pageSize, limitedClassCodes, showIndicator = true, isMulti = false
 }: iSynSubjectClassSelector) => {
   const [optionMap, setOptionMap] = useState<{ [key: string]: iAutoCompleteSingle }>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -36,6 +37,7 @@ const SynSubjectClassSelector = ({
         where: JSON.stringify({
           FileYear: FileYear,
           FileSemester: FileSemester,
+          ...((limitedClassCodes || []).length <= 0 ? {} : {ClassCode: limitedClassCodes})
         }),
         ...(pageSize ? {perPage: `${pageSize}`} : {})
       }, {
@@ -56,7 +58,7 @@ const SynSubjectClassSelector = ({
     return () => {
       isCancelled = true;
     }
-  }, [optionMap, FileYear, FileSemester, pageSize]);
+  }, [optionMap, FileYear, FileSemester, pageSize, limitedClassCodes]);
 
   const getSelectedValues = () => {
     if (!values) {
