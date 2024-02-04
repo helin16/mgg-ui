@@ -3,7 +3,7 @@ import StudentReport from "../../pages/studentReport/StudentReport";
 import OperooSafetyAlertsPage from "../../pages/operoo/OperooSafetyAlertsPage";
 import ModuleAccessWrapper from "../../components/module/ModuleAccessWrapper";
 import {
-  MGGS_MODULE_ID_ALUMNI_REQUEST, MGGS_MODULE_ID_CAMPUS_DISPLAY, MGGS_MODULE_ID_COD,
+  MGGS_MODULE_ID_ALUMNI_REQUEST, MGGS_MODULE_ID_CAMPUS_DISPLAY,
   MGGS_MODULE_ID_ENROLLMENTS,
   MGGS_MODULE_ID_FINANCE,
   MGGS_MODULE_ID_FUNNEL,
@@ -38,8 +38,6 @@ import CampusDisplayManagementPage from '../../pages/CampusDisplay/CampusDisplay
 import PowerBIReportViewingPage from '../../pages/PowerBI/PowerBIReportViewingPage';
 import PowerBIReportManagerPage from '../../pages/PowerBI/Manager/PowerBIReportManagerPage';
 import {URL_POWER_BI_DISPLAY, URL_STUDENT_REPORT_SCHOOL_BOX_ID} from '../../Url';
-import CODManagerPage from '../../pages/ConfirmationOfDetails/CODManagerPage';
-import CODParentPage from '../../pages/ConfirmationOfDetails/CODParentPage';
 import AcademicReportsForSchoolBoxId from '../../pages/studentReport/components/AcademicReportsForSchoolBoxId';
 // import PageNotFound from '../../components/PageNotFound';
 
@@ -229,20 +227,6 @@ const SchoolBoxRouter = ({
         <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_POWER_BI_REPORT}>
           <PowerBIReportManagerPage />
         </ModuleAccessWrapper>
-      );
-    }
-    case "/confirmation_of_details/admin_new": {
-      removeSchoolBoxIframe();
-      return (
-        <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_COD}>
-          <CODManagerPage />
-        </ModuleAccessWrapper>
-      );
-    }
-    case "/confirmation_of_details/register_new": {
-      removeSchoolBoxIframe();
-      return (
-        <CODParentPage />
       );
     }
     default: {
