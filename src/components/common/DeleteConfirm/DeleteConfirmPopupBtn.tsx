@@ -38,7 +38,6 @@ const DeleteConfirmPopupBtn = ({
     setIsSubmitting(true);
     return deletingFn()
       .then(resp => {
-        console.log('here');
         setIsShowingPopup(false);
         if (deletedCallbackFn) {
           deletedCallbackFn(resp);

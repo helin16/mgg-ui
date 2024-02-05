@@ -102,7 +102,6 @@ const ComparativeBarGraph = ({ results, studentReportYear }: iComparativeBarGrap
     return <Spinner animation={'border'} />
   }
 
-  console.log('cohortScores', cohortScores);
   if (results.length <= 0 || cohortScores.length <= 0) {
     return null;
   }

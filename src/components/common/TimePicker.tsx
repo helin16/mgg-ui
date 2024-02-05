@@ -38,7 +38,7 @@ const TimePicker = ({
 
   useEffect(() => {
     if (!UtilsService.validateTime(`${value || ''}`.trim())) {
-      console.error(`Invalid time(=${value}).`);
+      // console.error(`Invalid time(=${value}).`);
       return;
     }
     setTime(`${value || ''}`.trim() === '' ? moment() : moment(`${moment().format('YYYY-MM-DD')}T${value}`));
