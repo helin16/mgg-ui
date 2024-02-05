@@ -15,6 +15,8 @@ import { RootState } from "../../redux/makeReduxStore";
 import moment from "moment-timezone";
 import YearLevelSelector from "./YearLevelSelector";
 import LuFormSelector from "./SynFormSelector";
+import { OP_LIKE, OP_OR } from "../../helper/ServiceHelper";
+import UtilsService from "../../services/UtilsService";
 
 const Wrapper = styled.div`
   .row {
@@ -45,9 +47,7 @@ const SynStudentSearchPanel = ({
   const [searchYearLevel, setSearchYearLevel] = useState<string | undefined>(
     undefined
   );
-  const [searchForm, setSearchForm] = useState<string | undefined>(
-    undefined
-  );
+  const [searchForm, setSearchForm] = useState<string | undefined>(undefined);
   const [isSearching, setIsSearching] = useState(false);
   const [students, setStudents] = useState<iVStudent[] | undefined>(undefined);
   const { user } = useSelector((state: RootState) => state.auth);
@@ -61,20 +61,38 @@ const SynStudentSearchPanel = ({
 
   const onSearch = () => {
     setIsSearching(true);
+
+    const searchTxtObj =
+      `${searchTxt || ""}`.trim() === ""
+        ? {}
+        : UtilsService.isNumeric(`${searchTxt || ""}`.trim())
+        ? {StudentID: `${searchTxt || ""}`.trim()}
+        : {
+            [OP_OR]: [
+              { StudentForm: { [OP_LIKE]: `%${searchTxt}%` } },
+              { StudentGiven1: { [OP_LIKE]: `%${searchTxt}%` } },
+              { StudentPreferred: { [OP_LIKE]: `%${searchTxt}%` } },
+              { StudentSurname: { [OP_LIKE]: `%${searchTxt}%` } },
+              { StudentNameExternal: { [OP_LIKE]: `%${searchTxt}%` } },
+              { StudentNameInternal: { [OP_LIKE]: `%${searchTxt}%` } }
+            ]
+          };
+
     SynVStudentService.getVStudentAll({
       where: JSON.stringify({
-        ...(`${searchFileYear || ''}`.trim() === ""
+        ...searchTxtObj,
+        ...(`${searchFileYear || ""}`.trim() === ""
           ? {}
           : { FileYear: `${searchFileYear}` }),
-        ...(`${searchFileSemester || ''}`.trim() === ""
+        ...(`${searchFileSemester || ""}`.trim() === ""
           ? {}
           : { FileSemester: `${searchFileSemester}` }),
-        ...(`${searchYearLevel || ''}`.trim() === ""
+        ...(`${searchYearLevel || ""}`.trim() === ""
           ? {}
           : { StudentYearLevel: `${searchYearLevel}` }),
-        ...(`${searchForm || ''}`.trim() === ""
+        ...(`${searchForm || ""}`.trim() === ""
           ? {}
-          : { StudentForm: `${searchForm}` }),
+          : { StudentForm: `${searchForm}` })
       }),
       perPage: 9999999
     })
