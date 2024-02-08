@@ -9,7 +9,7 @@ import * as Icons from "react-bootstrap-icons";
 import Toaster, { TOAST_TYPE_ERROR } from "../../../../services/Toaster";
 import SynFileSemesterService from "../../../../services/Synergetic/SynFileSemesterService";
 import moment from "moment-timezone";
-import { OP_LTE, OP_OR } from "../../../../helper/ServiceHelper";
+import {OP_GTE, OP_LTE, OP_OR} from "../../../../helper/ServiceHelper";
 import SynVStudentService from "../../../../services/Synergetic/Student/SynVStudentService";
 import {
   CAMPUS_CODE_JUNIOR,
@@ -97,7 +97,11 @@ const StudentStatusMatrix = () => {
           where: JSON.stringify({
             FileYear: lastFileSemester.FileYear,
             FileSemester: lastFileSemester.FileSemester,
-            StudentCampus: selectedCampusCodes
+            StudentCampus: selectedCampusCodes,
+            [OP_OR]: [
+              { StudentLeavingDate: null },
+              { StudentLeavingDate: { [OP_GTE]: date } }
+            ]
           }),
           perPage: 999999
         }),
@@ -105,7 +109,11 @@ const StudentStatusMatrix = () => {
           where: JSON.stringify({
             FileYear: lastFileSemester.FileYear,
             FileSemester: lastFileSemester.FileSemester,
-            StudentCampus: selectedCampusCodes
+            StudentCampus: selectedCampusCodes,
+            [OP_OR]: [
+              { StudentLeavingDate: null },
+              { StudentLeavingDate: { [OP_GTE]: date } }
+            ]
           }),
           perPage: 999999
         }),
@@ -248,6 +256,7 @@ const StudentStatusMatrix = () => {
             status at any time of the year. It's a snapshot of the student list
             for a provided date.
             <div>The age is calculated based on the Reporting Date and student's date of birth</div>
+            <div>The left date of the student needs to empty, equal or after the Reporting Date to be included.</div>
           </>
         }
       />
