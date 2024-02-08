@@ -3,9 +3,11 @@ import SchoolCensusDataPanel from './SchoolCensusData/SchoolCensusDataPanel';
 import {useState} from 'react';
 import {Tab, Tabs} from 'react-bootstrap';
 import AcaraDataPanel from './ACARA/AcaraDataPanel';
+import StudentStatusMatrix from './StudentStatus/StudentStatusMatrix';
 
 const TAB_NAME_CENSUS = 'census';
 const TAB_NAME_ACARA = 'ACARA';
+const TAB_NAME_STUDENT_STATUS_MATRIX = 'STUDENT_STATUS_MATRIX';
 
 
 const Wrapper = styled.div`
@@ -28,6 +30,12 @@ const SchoolDataSubmissionsPanel = () => {
         <Tab eventKey={TAB_NAME_ACARA} title={'ACARA / SFOE'}>
           <AcaraDataPanel />
         </Tab>
+
+        <Tab eventKey={TAB_NAME_STUDENT_STATUS_MATRIX} title={'Student Status Matrix'}>
+          <StudentStatusMatrix />
+        </Tab>
+
+
       </Tabs>
     </Wrapper>
   )
