@@ -1,24 +1,27 @@
-import iCampusDisplaySlide from '../../types/CampusDisplay/iCampusDisplaySlide';
-import styled from 'styled-components';
-import SchoolLogo from '../SchoolLogo';
-import CampusDisplaySlideEditPopupBtn from './CampusDisplaySlideEditPopupBtn';
-import * as Icons from 'react-bootstrap-icons';
-import iCampusDisplay from '../../types/CampusDisplay/iCampusDisplay';
-import ImageWithPlaceholder from '../common/ImageWithPlaceholder';
-import PageLoadingSpinner from '../common/PageLoadingSpinner';
+import iCampusDisplaySlide from "../../types/CampusDisplay/iCampusDisplaySlide";
+import styled from "styled-components";
+import SchoolLogo from "../SchoolLogo";
+import CampusDisplaySlideEditPopupBtn from "./CampusDisplaySlideEditPopupBtn";
+import * as Icons from "react-bootstrap-icons";
+import iCampusDisplay from "../../types/CampusDisplay/iCampusDisplay";
+import ImageWithPlaceholder from "../common/ImageWithPlaceholder";
+import PageLoadingSpinner from "../common/PageLoadingSpinner";
+import VideoWithPlaceholder from "../common/VideoWithPlaceholder";
 
 type iCampusDisplaySlideShowingPanel = {
   className?: string;
   slide?: iCampusDisplaySlide | null;
   onSaved: (saved: iCampusDisplaySlide[]) => void;
   campusDisplay: iCampusDisplay;
-}
+};
 
-const imgMargin = '4rem';
+const imgMargin = "4rem";
 const Wrapper = styled.div`
   .blury {
     filter: blur(3rem); /* Adjust the blur radius as needed */
-    -webkit-backdrop-filter: blur(3rem); /* For some older browsers (optional) */
+    -webkit-backdrop-filter: blur(
+      3rem
+    ); /* For some older browsers (optional) */
     backdrop-filter: blur(3rem); /* For modern browsers */
   }
 
@@ -102,36 +105,75 @@ const Wrapper = styled.div`
     }
   }
 `;
-const CampusDisplaySlideShowingPanel = ({slide, className, onSaved, campusDisplay}: iCampusDisplaySlideShowingPanel) => {
-
+const CampusDisplaySlideShowingPanel = ({
+  slide,
+  className,
+  onSaved,
+  campusDisplay
+}: iCampusDisplaySlideShowingPanel) => {
   const getContent = () => {
     if (!slide) {
       return (
-        <div className={'default-slide'}>
-          <div className={'logo-wrapper'}>
-            <SchoolLogo className={'logo'} />
+        <div className={"default-slide"}>
+          <div className={"logo-wrapper"}>
+            <SchoolLogo className={"logo"} />
           </div>
-          <h5 className={'text-muted'}>This is the default slide</h5>
-          <CampusDisplaySlideEditPopupBtn variant={'success'} onSaved={onSaved} display={campusDisplay}>
+          <h5 className={"text-muted"}>This is the default slide</h5>
+          <CampusDisplaySlideEditPopupBtn
+            variant={"success"}
+            onSaved={onSaved}
+            display={campusDisplay}
+          >
             <Icons.Plus /> New
           </CampusDisplaySlideEditPopupBtn>
         </div>
-      )
+      );
     }
+
+    if (
+      `${slide.Asset?.mimeType || ""}`
+        .trim()
+        .toLowerCase()
+        .startsWith("video")
+    ) {
+      return (
+        <>
+          <ImageWithPlaceholder
+            className={"showing-slide-mask blury"}
+            src={`${slide.Asset?.url || ""}`.trim().toLowerCase().replace('.mp4', '.jpg')}
+            placeholder={<div className={"loading-mask-bg blury"} />}
+          />
+          <VideoWithPlaceholder
+            className={"showing-slide"}
+            src={slide.Asset?.url || ""}
+            autoPlay
+          />
+        </>
+      );
+    }
+
     return (
       <>
-        <ImageWithPlaceholder className={'showing-slide-mask blury'} src={slide.Asset?.url || ''} placeholder={<div className={'loading-mask-bg blury'} />}  />
-        <ImageWithPlaceholder className={'showing-slide'} src={slide.Asset?.url || ''} placeholder={<PageLoadingSpinner className={'loading-showing-slide'} />}  />
+        <ImageWithPlaceholder
+          className={"showing-slide-mask blury"}
+          src={slide.Asset?.url || ""}
+          placeholder={<div className={"loading-mask-bg blury"} />}
+        />
+        <ImageWithPlaceholder
+          className={"showing-slide"}
+          src={slide.Asset?.url || ""}
+          placeholder={
+            <PageLoadingSpinner className={"loading-showing-slide"} />
+          }
+        />
       </>
-    )
-  }
+    );
+  };
   return (
     <Wrapper className={className}>
-      <div className={'slide-wrapper'}>
-        {getContent()}
-      </div>
+      <div className={"slide-wrapper"}>{getContent()}</div>
     </Wrapper>
-  )
-}
+  );
+};
 
 export default CampusDisplaySlideShowingPanel;

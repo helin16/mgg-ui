@@ -8,6 +8,7 @@ import iCampusDisplay from "../../types/CampusDisplay/iCampusDisplay";
 import ImageWithPlaceholder from "../common/ImageWithPlaceholder";
 import styled from "styled-components";
 import PageLoadingSpinner from "../common/PageLoadingSpinner";
+import VideoWithPlaceholder from '../common/VideoWithPlaceholder';
 
 type iCampusDisplayDraggableSlides = {
   className?: string;
@@ -27,6 +28,24 @@ const Wrapper = styled.div`
   padding: 0.6rem;
   overflow-x: auto;
   position: relative;
+    
+  .video-thumbnail-wrapper {
+      position: relative;
+      .video-thumbnail-indicator {
+          position: absolute;
+          left: 0px;
+          top: 0px;
+          bottom: 0px;
+          right: 0px;
+          height: 100%;
+          width: 100%;
+          text-align: center;
+          font-size: 38px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+      }
+  }
 
   .slide-list-div {
     .slide-div {
@@ -114,11 +133,30 @@ const DraggableItem = React.forwardRef(
         {...provided.dragHandleProps}
         onClick={onClick}
       >
-        <ImageWithPlaceholder
-          thumbnail
-          src={slide.Asset?.url || ""}
-          placeholder={<PageLoadingSpinner className={"img-placeholder"} />}
-        />
+        {`${slide.Asset?.mimeType || ''}`.trim().startsWith('video/') ? (
+          <VideoWithPlaceholder
+            src={slide.Asset?.url || ""}
+            thumbnail
+            coverImg={
+              <div className={'video-thumbnail-wrapper'}>
+                <ImageWithPlaceholder
+                  thumbnail
+                  src={`${slide.Asset?.url || ""}`.trim().replace('.mp4', '.jpg')}
+                  placeholder={<PageLoadingSpinner className={"img-placeholder"} />}
+                />
+                <div className={'video-thumbnail-indicator'}>
+                  <Icons.Play className={'thumbnail-indicator'} />
+                </div>
+              </div>
+            }
+          />
+        ) : (
+          <ImageWithPlaceholder
+            thumbnail
+            src={slide.Asset?.url || ""}
+            placeholder={<PageLoadingSpinner className={"img-placeholder"} />}
+          />
+        )}
         {showOptions === true ? (
           <div className={"options-wrapper"}>
             <input

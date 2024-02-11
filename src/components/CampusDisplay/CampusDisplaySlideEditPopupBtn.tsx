@@ -72,7 +72,7 @@ const CampusDisplaySlideEditPopupBtn = ({
           description={"Click here to upload files or drag them here"}
           uploadFn={uploadFiles}
           allowMultiple={true}
-          acceptFileTypes={["image/*"]}
+          acceptFileTypes={["image/*", 'video/*']}
         />
       )
     }
