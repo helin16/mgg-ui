@@ -4,6 +4,7 @@ import {Spinner} from 'react-bootstrap';
 import SelectBox from '../common/SelectBox';
 import iCampusDisplayLocation from '../../types/CampusDisplay/iCampusDisplayLocation';
 import CampusDisplayLocationService from '../../services/CampusDisplay/CampusDisplayLocationService';
+import Toaster from '../../services/Toaster';
 
 type iCampusDisplayLocationSelector = {
   isMulti?: boolean;
@@ -46,7 +47,12 @@ const CampusDisplayLocationSelector = ({values, onSelect, allowClear, className,
           }, {})
         )
       })
+      .catch(err => {
+        if (isCancelled === true) { return }
+        Toaster.showApiError(err);
+      })
       .finally(() => {
+        if (isCancelled === true) { return }
         setIsLoading(false);
       })
     return () => {
