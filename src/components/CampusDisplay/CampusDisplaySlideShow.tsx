@@ -7,6 +7,7 @@ import CampusDisplaySlideService from "../../services/CampusDisplay/CampusDispla
 import Toaster from "../../services/Toaster";
 import PageLoadingSpinner from "../common/PageLoadingSpinner";
 import { Carousel } from "react-bootstrap";
+import MathHelper from '../../helper/MathHelper';
 
 type iCampusDisplaySlideShowPanel = {
   campusDisplay: iCampusDisplay;
@@ -40,12 +41,15 @@ const CampusDisplaySlideShow = ({
 }: iCampusDisplaySlideShowPanel) => {
   const slideShowingTime = 5000;
   const [isLoading, setIsLoading] = useState(false);
+  const [count, setCount] = useState(0);
   const [cdSlides, setCdSlides] = useState<iCampusDisplaySlide[]>([]);
 
   useEffect(() => {
     let isCanceled = false;
 
-    setIsLoading(true);
+    if (count <= 0) {
+      setIsLoading(true);
+    }
     CampusDisplaySlideService.getAll({
       where: JSON.stringify({
         isActive: true,
@@ -59,7 +63,15 @@ const CampusDisplaySlideShow = ({
         if (isCanceled) {
           return;
         }
-        setCdSlides(resp.data || []);
+        const slidesFromDB = resp.data || [];
+        const slideIdsFromDB = slidesFromDB.map(slide => slide.id);
+        setCdSlides(prevSlides => {
+          const currentSlideIds = prevSlides.map(slide => slide.id);
+          if (currentSlideIds !== slideIdsFromDB) {
+            return resp.data || [];
+          }
+          return prevSlides;
+        });
       })
       .catch(err => {
         if (isCanceled) {
@@ -77,7 +89,20 @@ const CampusDisplaySlideShow = ({
     return () => {
       isCanceled = true;
     };
-  }, [campusDisplay.id]);
+  }, [campusDisplay.id, count]);
+
+  useEffect(() => {
+    const dbRefreshInterval = setInterval(() => {
+      setCount(prevCount => {
+        const newCount = MathHelper.add(prevCount, 1);
+        return newCount > 10 ? 1 : newCount
+      })
+    }, 600000); //every 10 minutes
+
+    return () => {
+      clearInterval(dbRefreshInterval)
+    }
+  }, []);
 
   const getSlideImage = (slide: iCampusDisplaySlide) => {
     if (slide.settings?.isFullScreen === true) {
