@@ -16,7 +16,7 @@ import AlumniRegistrationPage from './pages/alumni/AlumniRegistrationPage';
 import {
   URL_ALUMNI_REGISTRATION,
   URL_ASSET_PICK_UP,
-  URL_CAMPUS_DISPLAY_PAGE,
+  URL_CAMPUS_DISPLAY_PAGE, URL_CAMPUS_DISPLAY_SLIDE_SHOW_BY_LOCATION_PAGE,
   URL_FUNNEL_THANK_YOU_PAGE,
   URL_ONLINE_DONATION
 } from './Url';
@@ -24,6 +24,7 @@ import OnlineDonationPage from './pages/OnlineDonation/OnlineDonationPage';
 import FunnelThankYouPage from './pages/funnel/FunnelThankYouPage';
 import PageNotFoundWithTechSupport from './components/PageNotFoundWithTechSupport';
 import CampusDisplayPage from './pages/CampusDisplay/CampusDisplayPage';
+import CampusDisplayByLocationIdPage from './pages/CampusDisplay/CampusDisplayByLocationIdPage';
 
 const Router = () => {
   const {isProd} = useSelector((state: RootState) => state.app);
@@ -45,6 +46,7 @@ const Router = () => {
           <Route path={URL_ASSET_PICK_UP} element={<AssetPickupPage />} />
 
           <Route path={URL_CAMPUS_DISPLAY_PAGE} element={<CampusDisplayPage />} />
+          <Route path={URL_CAMPUS_DISPLAY_SLIDE_SHOW_BY_LOCATION_PAGE} element={<CampusDisplayByLocationIdPage />} />
 
 
           <Route path={URL_ALUMNI_REGISTRATION} element={<AlumniRegistrationPage />} />

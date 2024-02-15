@@ -21,15 +21,17 @@ type iCampusDisplaySlideShowPanel = {
   locationId: string;
   className?: string;
   onCancel?: () => void;
+  onLocationLoaded?: (location: iCampusDisplayLocation | null) => void;
 };
 
 const Wrapper = styled.div`
   background-color: transparent;
   height: 100%;
+  max-height: 100vh !important;
 
   .carousel-item {
-    width: 100% !important;
-    height: 100% !important;
+    width: 100%;
+    height: 100%;
   }
 
   .no-display {
@@ -40,6 +42,7 @@ const Wrapper = styled.div`
 const CampusDisplaySlideShow = ({
   locationId,
   onCancel,
+  onLocationLoaded,
   className
 }: iCampusDisplaySlideShowPanel) => {
   const slideShowingTime = 5000;
@@ -134,6 +137,11 @@ const CampusDisplaySlideShow = ({
       isCanceled = true;
     };
   }, [locationId, count]);
+
+  useEffect(() => {
+    onLocationLoaded && onLocationLoaded(displayLocation);
+  }, [displayLocation, onLocationLoaded]);
+
 
   useEffect(() => {
     const calculateTimeUntilMidnight = () => {

@@ -1,68 +1,116 @@
-import { useState } from "react";
-import CampusDisplayLocationSelector from "../../components/CampusDisplay/DisplayLocation/CampusDisplayLocationSelector";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { FlexContainer } from "../../styles";
 import FormLabel from "../../components/form/FormLabel";
 import SchoolLogo from "../../components/SchoolLogo";
 import SectionDiv from "../../components/common/SectionDiv";
-import CampusDisplaySlideShow from '../../components/CampusDisplay/DisplaySlide/CampusDisplaySlideShow';
+import { Button } from "react-bootstrap";
+import CampusDisplayLocationService from "../../services/CampusDisplay/CampusDisplayLocationService";
+import Toaster from "../../services/Toaster";
+import iCampusDisplayLocation from "../../types/CampusDisplay/iCampusDisplayLocation";
+import PageLoadingSpinner from "../../components/common/PageLoadingSpinner";
+import UtilsService from '../../services/UtilsService';
+import {URL_CAMPUS_DISPLAY_SLIDE_SHOW_BY_LOCATION_PAGE} from '../../Url';
 
 const Wrapper = styled.div`
   height: 100vh;
+  .logo-wrapper {
+    width: 200px;
+    img {
+      width: 100% !important;
+      height: auto;
+    }
+  }
   .location-selector {
-    height: 100vh;
-    .logo-wrapper {
-      img {
-        width: 300px;
-        height: auto;
-      }
+    gap: 8px;
+    .location-selector-item {
+      width: calc(50% - 8px);
     }
   }
 `;
 const CampusDisplayPage = () => {
-  const [locationId, setLocationId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [locations, setLocations] = useState<iCampusDisplayLocation[]>([]);
 
-  const getContent = () => {
-    if (!locationId || `${locationId || ""}`.trim() === "") {
-      return (
-        <FlexContainer
-          className={
-            "location-selector justify-content-center align-content-center align-items-center"
-          }
-        >
-          <div>
-            <SectionDiv className={"logo-wrapper space-below"}>
-              <SchoolLogo />
-            </SectionDiv>
-            <FormLabel
-              label={"Please select a location to display:"}
-              isRequired
-            />
-            <CampusDisplayLocationSelector
-              values={
-                `${locationId || ""}`.trim() !== ""
-                  ? [`${locationId || ""}`.trim()]
-                  : undefined
-              }
-              onSelect={option => {
-                setLocationId(
-                  // @ts-ignore
-                  `${option?.value || ""}`.trim() === ""
-                    ? null
-                    : // @ts-ignore
-                      option.data.id
-                );
-              }}
-            />
-          </div>
-        </FlexContainer>
-      );
+  useEffect(() => {
+    let isCancelled = false;
+    setIsLoading(true);
+    CampusDisplayLocationService.getAll({
+      where: JSON.stringify({
+        isActive: true
+      }),
+      sort: "name:ASC",
+      perPage: 999999,
+      include: "CampusDisplay"
+    })
+      .then(resp => {
+        if (isCancelled === true) {
+          return;
+        }
+        setLocations(resp.data || []);
+      })
+      .catch(err => {
+        if (isCancelled === true) {
+          return;
+        }
+        Toaster.showApiError(err);
+      })
+      .finally(() => {
+        if (isCancelled === true) {
+          return;
+        }
+        setIsLoading(false);
+      });
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
+
+  const getLocationList = () => {
+    if (isLoading === true) {
+      return <PageLoadingSpinner />;
     }
 
-    return <CampusDisplaySlideShow locationId={locationId} onCancel={() => setLocationId(null)}/>;
+    return (
+      <>
+        <FormLabel label={"Please select a location to display:"} isRequired />
+        <FlexContainer
+          className={
+            "location-selector flex-wrap justify-content-between align-items-start"
+          }
+        >
+          {locations.map(location => {
+            return (
+              <Button
+                variant={"outline-secondary"}
+                size={"lg"}
+                key={location.id}
+                className={"location-selector-item"}
+                href={UtilsService.getFullUrl(URL_CAMPUS_DISPLAY_SLIDE_SHOW_BY_LOCATION_PAGE).replace(':locationId', location.id)}
+              >
+                {location.name}
+              </Button>
+            );
+          })}
+        </FlexContainer>
+      </>
+    );
   };
 
-  return <Wrapper>{getContent()}</Wrapper>;
+  return (
+    <Wrapper>
+      <FlexContainer
+        className={
+          "justify-content-center align-content-center align-items-center flex-column h-100 gap-2 "
+        }
+      >
+        <SectionDiv className={"logo-wrapper space-below"}>
+          <SchoolLogo />
+        </SectionDiv>
+        {getLocationList()}
+      </FlexContainer>
+    </Wrapper>
+  );
 };
 
 export default CampusDisplayPage;
