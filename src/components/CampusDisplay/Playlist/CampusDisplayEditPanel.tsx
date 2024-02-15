@@ -170,9 +170,14 @@ const CampusDisplayEditPanel = ({
         >
           <Icons.Pencil /> Edit
         </CampusDisplaySlideEditPopupBtn>
+
         <CampusDisplayShowSlide
           slide={showingSlide}
           campusDisplay={campusDisplay}
+          videoProps={{
+            controls: true,
+            autoPlay: false,
+          }}
         />
       </>
     );
