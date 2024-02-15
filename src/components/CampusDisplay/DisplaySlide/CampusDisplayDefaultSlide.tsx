@@ -8,6 +8,7 @@ import iCampusDisplay from '../../../types/CampusDisplay/iCampusDisplay';
 
 const Wrapper = styled.div`
     height: 100%;
+    width: 100%;
     padding: 13.4rem 0;
     display: flex;
     text-align: center;

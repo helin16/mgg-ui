@@ -8,6 +8,10 @@ const getAll = (params: iConfigParams = {}, config?: iConfigParams): Promise<iPa
   return AppService.get(endPoint, params, config).then(resp => resp.data);
 }
 
+const getById = (id: string, params: iConfigParams = {}, config?: iConfigParams): Promise<iCampusDisplayLocation> => {
+  return AppService.get(`${endPoint}/${id}`, params, config).then(resp => resp.data);
+}
+
 const create = (params: iConfigParams, config?: iConfigParams): Promise<iCampusDisplayLocation> => {
   return AppService.post(endPoint, params, config).then(resp => resp.data);
 }
@@ -22,6 +26,7 @@ const deactivate = (id: string, params?: iConfigParams, config?: iConfigParams):
 
 const CampusDisplaySlideService = {
   getAll,
+  getById,
   create,
   update,
   deactivate,

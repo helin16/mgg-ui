@@ -12,7 +12,8 @@ import CampusDisplayLocationService from "../../../services/CampusDisplay/Campus
 import Page401 from "../../Page401";
 import { FlexContainer } from "../../../styles";
 import moment from "moment-timezone";
-import CampusDisplayShowSlide from './CampusDisplayShowSlide';
+import CampusDisplayShowSlide from "./CampusDisplayShowSlide";
+import iCampusDisplayLocation from "../../../types/CampusDisplay/iCampusDisplayLocation";
 
 type iCampusDisplaySlideShowPanel = {
   locationId: string;
@@ -22,7 +23,7 @@ type iCampusDisplaySlideShowPanel = {
 
 const Wrapper = styled.div`
   background-color: black;
-    
+
   .carousel-item {
     width: 100vw !important;
     height: 100vh !important;
@@ -45,6 +46,10 @@ const CampusDisplaySlideShow = ({
   const [campusDisplay, setCampusDisplay] = useState<iCampusDisplay | null>(
     null
   );
+  const [
+    displayLocation,
+    setDisplayLocation
+  ] = useState<iCampusDisplayLocation | null>(null);
 
   useEffect(() => {
     let isCanceled = false;
@@ -59,15 +64,16 @@ const CampusDisplaySlideShow = ({
         include: "CampusDisplay"
       });
 
-      const displays = result.data || [];
+      const locations = result.data || [];
       if (
-        displays.length <= 0 ||
-        `${displays[0].displayId || ""}`.trim() === ""
+        locations.length <= 0 ||
+        `${locations[0].displayId || ""}`.trim() === ""
       ) {
         return;
       }
 
-      const display = displays[0].CampusDisplay;
+      const location = locations[0];
+      const display = location.CampusDisplay;
 
       const slidesFromDB =
         (
@@ -87,6 +93,7 @@ const CampusDisplaySlideShow = ({
       }
 
       setCampusDisplay(display || null);
+      setDisplayLocation(location || null);
       const slideIdsFromDB = slidesFromDB.map(slide => slide.id);
       setCdSlides(prevSlides => {
         const currentSlideIds = prevSlides.map(slide => slide.id);
@@ -136,19 +143,51 @@ const CampusDisplaySlideShow = ({
     };
 
     reloadAtMidnight(); // Initial schedule
+  }, []);
 
-    // Update count every 10 minutes to ensure that reloadAtMidnight is called at midnight
-    const dbRefreshInterval = setInterval(() => {
-      setCount(prevCount => {
-        const newCount = MathHelper.add(prevCount, 1);
-        return newCount > 10 ? 1 : newCount;
-      });
-    }, 600000); // every 10 minutes
+  useEffect(() => {
+    if (!displayLocation) {
+      return;
+    }
+    let isCanceled = false;
+    const getData = () => {
+      return CampusDisplayLocationService.getById(displayLocation.id)
+        .then(resp => {
+          if (isCanceled) {
+            return;
+          }
+          // console.log('resp', resp, 'displayLocation', displayLocation);
+          if (
+            `${resp.id || ""}`.trim() === "" ||
+            resp.isActive !== true ||
+            (resp?.version || 0) <= (displayLocation?.version || 0)
+          ) {
+            // console.log('here');
+            return;
+          }
+
+          // console.log('here1');
+          setCount(prev => MathHelper.add(prev, 1));
+          return;
+        })
+        .catch(() => {
+          // don't do anything when you catch an error
+        })
+        .finally(() => {
+          if (isCanceled) {
+            return;
+          }
+          setTimeout(() => getData(), 30000);
+        });
+    };
+
+    getData();
 
     return () => {
-      clearInterval(dbRefreshInterval);
+      clearTimeout();
+      isCanceled = true;
     };
-  }, []);
+  }, [displayLocation]);
 
   const getContent = () => {
     if (isLoading === true) {
@@ -191,7 +230,10 @@ const CampusDisplaySlideShow = ({
         {cdSlides.map(slide => {
           return (
             <Carousel.Item key={slide.id}>
-              <CampusDisplayShowSlide slide={slide} campusDisplay={campusDisplay} />
+              <CampusDisplayShowSlide
+                slide={slide}
+                campusDisplay={campusDisplay}
+              />
             </Carousel.Item>
           );
         })}

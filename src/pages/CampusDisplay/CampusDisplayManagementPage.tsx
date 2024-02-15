@@ -129,7 +129,13 @@ const CampusDisplayManagementPage = () => {
       <FlexContainer className={"with-gap lg-gap align-items-center"}>
         <FlexContainer
           className={"cursor-pointer with-gap align-items-center"}
-          onClick={() => setShowBulkOptions(!showBulkOptions)}
+          onClick={() => {
+            const option = !showBulkOptions
+            if(option !== true) {
+              setSelectedSlides([])
+            }
+            setShowBulkOptions(option);
+          }}
         >
           {showBulkOptions === true ? (
             <Icons.CheckSquareFill />
@@ -203,7 +209,8 @@ const CampusDisplayManagementPage = () => {
     if (
       !showingDisplay ||
       `${showingDisplay?.id || ""}`.trim() === "" ||
-      selectedSlides.length <= 0
+      selectedSlides.length <= 0 ||
+      showBulkOptions !== true
     ) {
       return null;
     }

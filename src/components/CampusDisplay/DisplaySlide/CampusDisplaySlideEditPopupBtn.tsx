@@ -50,7 +50,6 @@ const CampusDisplaySlideEditPopupBtn = ({
         }
       })
     })).then(resp => {
-      console.log('resp', resp);
       if (closeOnSaved === true) {
         setShowingPopup(false);
       }
@@ -91,13 +90,12 @@ const CampusDisplaySlideEditPopupBtn = ({
     return (
       <PopupModal
         show={showingPopup}
-        centered
+        size={'lg'}
         title={
           <h5>
             Updating {slides.length} slide{slides.length > 1 ? "s" : ""}
           </h5>
         }
-        dialogClassName="modal-80w"
         handleClose={() => handleClose()}
         footer={
           <FlexContainer className={"justify-content-between"}>

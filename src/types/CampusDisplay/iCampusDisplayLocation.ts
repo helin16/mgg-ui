@@ -5,6 +5,7 @@ type iCampusDisplayLocation = iBaseType & {
   displayId: string;
   name: string;
   settings?: any | null;
+  version?: number | null;
   CampusDisplay?: iCampusDisplay;
 };
 

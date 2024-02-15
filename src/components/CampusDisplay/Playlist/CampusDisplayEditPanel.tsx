@@ -154,6 +154,19 @@ const CampusDisplayEditPanel = ({
           display={campusDisplay}
           divClassName={"edit-btn"}
           variant={'secondary'}
+          closeOnSaved
+          onSaved={(updatedSlides) => {
+            const updatedSlide = {
+              ...updatedSlides[0],
+              Asset: showingSlide?.Asset
+            };
+            setShowingSlide(updatedSlide);
+            // @ts-ignore
+            setSlideList({
+              ...(slideList || {}),
+              data: (slideList?.data || []).map(slide => slide.id === updatedSlide.id ? updatedSlide : slide),
+            })
+          }}
         >
           <Icons.Pencil /> Edit
         </CampusDisplaySlideEditPopupBtn>

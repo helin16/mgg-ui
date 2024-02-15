@@ -115,7 +115,6 @@ const CampusDisplaySlideCreatePopupBtn = ({
     return (
       <PopupModal
         show={showingPopup}
-        centered
         title={
           <FlexContainer className={"with-gap lg-gap align-items-baseline"}>
             <h5 style={{ marginBottom: "0px" }}>Create new slide(s)</h5>
@@ -133,7 +132,7 @@ const CampusDisplaySlideCreatePopupBtn = ({
             </div>
           </FlexContainer>
         }
-        dialogClassName="modal-90w"
+        dialogClassName="modal-80w"
         handleClose={() => handleClose()}
       >
         <PopupBodyWrapper>
