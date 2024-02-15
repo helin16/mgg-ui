@@ -1,8 +1,13 @@
 import {Image, ImageProps} from 'react-bootstrap';
-import {useState} from 'react';
+import React, {useState} from 'react';
+import PageLoadingSpinner from './PageLoadingSpinner';
 
 interface iImageWithPlaceholder extends ImageProps {
   placeholder?: any;
+}
+
+export const getImagePlaceHolder = (className?: string) => {
+  return <PageLoadingSpinner className={`img-placeholder ${className || ''}`} />;
 }
 
 const ImageWithPlaceholder = ({placeholder, ...props}: iImageWithPlaceholder) => {

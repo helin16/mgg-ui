@@ -1,7 +1,8 @@
-import Select from 'react-select';
-import styled from 'styled-components';
+import Select from "react-select";
+import styled from "styled-components";
 
-type iSelectBox = {
+export type iSelectBox = {
+  placeholder?: string;
   isMulti?: boolean;
   className?: string;
   options: any;
@@ -12,74 +13,88 @@ type iSelectBox = {
   showIndicatorSeparator?: boolean;
   isDisabled?: boolean;
   isInvalid?: boolean;
-  renderOption?: (props: any) =>  any;
-}
+  renderOption?: (props: any) => any;
+};
 
 const Wrapper = styled.div`
-  input[id^='react-select-'][id$='-input'] {
+  input[id^="react-select-"][id$="-input"] {
     min-height: 0px;
     height: auto;
   }
 
-  div[class$='-menu'] {
+  div[class$="-menu"] {
     z-index: 99999;
   }
-  
+
   .form-control {
     padding: 0px;
     &.is-invalid {
       padding-right: calc(1.5em + 0.75rem);
-      div[class$='-control']:hover {
+      div[class$="-control"]:hover {
         border: none;
         box-shadow: none;
         outline: none;
       }
     }
-    
-    div[class$='-control'] {
+
+    div[class$="-control"] {
       border: none;
       outline: none;
     }
   }
-`
+`;
 
 const SelectBox = ({
-  className, options, onChange, value, isClearable, isMulti, renderOption, isInvalid = false, showDropdownIndicator = true, showIndicatorSeparator = true, isDisabled
+  className,
+  placeholder,
+  options,
+  onChange,
+  value,
+  isClearable,
+  isMulti,
+  renderOption,
+  isInvalid = false,
+  showDropdownIndicator = true,
+  showIndicatorSeparator = true,
+  isDisabled
 }: iSelectBox) => {
   const getComponents = () => {
     if (showDropdownIndicator === false) {
       return {
-        DropdownIndicator:() => null,
-        IndicatorSeparator:() => null,
+        DropdownIndicator: () => null,
+        IndicatorSeparator: () => null
       };
     }
 
     if (showIndicatorSeparator === false) {
       return {
-        IndicatorSeparator:() => null,
+        IndicatorSeparator: () => null
       };
     }
 
     return undefined;
-  }
+  };
 
   return (
     <Wrapper>
       <Select
+        placeholder={placeholder}
         isDisabled={isDisabled}
         isMulti={isMulti}
-        className={`${className || ''} ${isInvalid === true ? 'is-invalid form-control' : ''}`}
+        className={`${className || ""} ${
+          isInvalid === true ? "is-invalid form-control" : ""
+        }`}
         options={options}
         onChange={onChange}
         value={value}
         isClearable={isClearable}
         components={{
           ...getComponents(),
-          ...(renderOption ? {Option: renderOption} : {}),
+          ...(renderOption ? { Option: renderOption } : {})
         }}
       />
     </Wrapper>
-  )
-}
+  );
+};
 
-export default SelectBox
+export default SelectBox;

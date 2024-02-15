@@ -1,22 +1,22 @@
 import styled from "styled-components";
 import { useEffect, useState } from "react";
-import iPaginatedResult from "../../types/iPaginatedResult";
-import iCampusDisplay from "../../types/CampusDisplay/iCampusDisplay";
-import CampusDisplayService from "../../services/CampusDisplay/CampusDisplayService";
-import Toaster, {TOAST_TYPE_SUCCESS} from "../../services/Toaster";
-import PageLoadingSpinner from "../common/PageLoadingSpinner";
-import Table, { iTableColumn } from "../common/Table";
+import iPaginatedResult from "../../../types/iPaginatedResult";
+import iCampusDisplay from "../../../types/CampusDisplay/iCampusDisplay";
+import CampusDisplayService from "../../../services/CampusDisplay/CampusDisplayService";
+import Toaster, {TOAST_TYPE_SUCCESS} from "../../../services/Toaster";
+import PageLoadingSpinner from "../../common/PageLoadingSpinner";
+import Table, { iTableColumn } from "../../common/Table";
 import CampusDisplayEditPopupBtn from "./CampusDisplayEditPopupBtn";
 import * as Icons from "react-bootstrap-icons";
-import MathHelper from "../../helper/MathHelper";
-import DeleteConfirmPopupBtn from '../common/DeleteConfirm/DeleteConfirmPopupBtn';
+import MathHelper from "../../../helper/MathHelper";
+import DeleteConfirmPopupBtn from '../../common/DeleteConfirm/DeleteConfirmPopupBtn';
 import {useSelector} from 'react-redux';
-import {RootState} from '../../redux/makeReduxStore';
+import {RootState} from '../../../redux/makeReduxStore';
 import moment from 'moment-timezone';
-import UserAndDateTimePanel from '../common/UserAndDateTimePanel';
+import UserAndDateTimePanel from '../../common/UserAndDateTimePanel';
 import {Spinner} from 'react-bootstrap';
-import iCampusDisplayLocation from '../../types/CampusDisplay/iCampusDisplayLocation';
-import CampusDisplayLocationService from '../../services/CampusDisplay/CampusDisplayLocationService';
+import iCampusDisplayLocation from '../../../types/CampusDisplay/iCampusDisplayLocation';
+import CampusDisplayLocationService from '../../../services/CampusDisplay/CampusDisplayLocationService';
 
 const Wrapper = styled.div``;
 

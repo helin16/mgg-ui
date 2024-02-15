@@ -1,15 +1,20 @@
-import SchoolLogo from '../SchoolLogo';
-import CampusDisplaySlideEditPopupBtn from './CampusDisplaySlideEditPopupBtn';
+import SchoolLogo from '../../SchoolLogo';
+import CampusDisplaySlideEditPopupBtn from './CampusDisplaySlideCreatePopupBtn';
 import * as Icons from 'react-bootstrap-icons';
 import styled from 'styled-components';
-import iCampusDisplaySlide from '../../types/CampusDisplay/iCampusDisplaySlide';
-import iCampusDisplay from '../../types/CampusDisplay/iCampusDisplay';
+import iCampusDisplaySlide from '../../../types/CampusDisplay/iCampusDisplaySlide';
+import iCampusDisplay from '../../../types/CampusDisplay/iCampusDisplay';
 
 
 const Wrapper = styled.div`
+    height: 100%;
     padding: 13.4rem 0;
+    display: flex;
     text-align: center;
     background: radial-gradient(circle at center, #a5a6ab 50%, #fefefe);
+    justify-content: center;
+    align-items: center;
+    justify-items: center;
 
     .logo-wrapper {
         display: flex;
@@ -21,7 +26,7 @@ const Wrapper = styled.div`
 
     .logo {
         min-width: 100px;
-        width: 50%;
+        width: 80%;
         max-width: 270px;
         margin-bottom: 1rem;
         height: auto; /* Maintain image aspect ratio */
@@ -61,11 +66,13 @@ const CampusDisplayDefaultSlide = ({onSaved, campusDisplay} : iCampusDisplayDefa
 
   return (
     <Wrapper className={"default-slide"}>
-      <div className={"logo-wrapper"}>
-        <SchoolLogo className={"logo"}/>
+      <div>
+        <div className={"logo-wrapper"}>
+          <SchoolLogo className={"logo"}/>
+        </div>
+        <h5 className={"text-muted"}>This is the default slide</h5>
+        {getNewBtn()}
       </div>
-      <h5 className={"text-muted"}>This is the default slide</h5>
-      {getNewBtn()}
     </Wrapper>
   )
 }

@@ -1,8 +1,8 @@
 import AdminPage, { AdminPageProps } from "../../layouts/AdminPage";
 import { MGGS_MODULE_ID_CAMPUS_DISPLAY } from "../../types/modules/iModuleUser";
 import AdminPageTabs from "../../layouts/AdminPageTabs";
-import CampusDisplayList from "../../components/CampusDisplay/CampusDisplayList";
-import CampusDisplayLocationList from '../../components/CampusDisplay/CampusDisplayLocationList';
+import CampusDisplayList from "../../components/CampusDisplay/Playlist/CampusDisplayList";
+import CampusDisplayLocationList from '../../components/CampusDisplay/DisplayLocation/CampusDisplayLocationList';
 
 const CampusDisplayManagementAdminPage = ({ onNavBack }: AdminPageProps) => {
   return (
@@ -20,8 +20,8 @@ const CampusDisplayManagementAdminPage = ({ onNavBack }: AdminPageProps) => {
             component: <CampusDisplayLocationList />,
           },
           {
-            key: 'displays',
-            title: "Displays",
+            key: 'playLists',
+            title: "PlayLists",
             component: <CampusDisplayList />,
           }
         ]}

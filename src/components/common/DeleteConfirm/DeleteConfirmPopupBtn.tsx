@@ -2,6 +2,8 @@ import { useState} from 'react';
 import {Button, ButtonProps} from 'react-bootstrap';
 import DeleteConfirmPopup from './DeleteConfirmPopup';
 import Toaster from '../../../services/Toaster';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../../redux/makeReduxStore';
 
 
 type iDeleteConfirmPopupBtnProps = ButtonProps & {
@@ -9,7 +11,7 @@ type iDeleteConfirmPopupBtnProps = ButtonProps & {
   onOpenDelete?: () => void;
   deletingFn: () => Promise<any>;
   deletedCallbackFn?: (resp: any) => void;
-  confirmString: string;
+  confirmString?: string;
   confirmBtnString?: string;
   title?: any;
   description?: any;
@@ -31,6 +33,7 @@ const DeleteConfirmPopupBtn = ({
   isDeleting = false,
   ...props
 }: iDeleteConfirmPopupBtnProps) => {
+  const {user: currentUser} = useSelector((state: RootState) => state.auth);
   const [isShowingPopup, setIsShowingPopup] = useState(isShowing);
   const [isSubmitting, setIsSubmitting] = useState(isDeleting);
 
@@ -57,7 +60,7 @@ const DeleteConfirmPopupBtn = ({
         onConfirm={submitDeletion}
         isDeleting={isSubmitting}
         isOpen={isShowingPopup}
-        confirmString={confirmString}
+        confirmString={confirmString || `${currentUser?.synergyId || 'na'}`.trim()}
         confirmBtnString={confirmBtnString}
         onClose={() => closePopup ? closePopup() : setIsShowingPopup(false)}
       />

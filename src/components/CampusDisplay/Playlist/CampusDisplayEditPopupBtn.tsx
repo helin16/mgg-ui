@@ -1,16 +1,16 @@
 import { Button, ButtonProps, FormControl } from "react-bootstrap";
-import iCampusDisplay from "../../types/CampusDisplay/iCampusDisplay";
+import iCampusDisplay from "../../../types/CampusDisplay/iCampusDisplay";
 import { useEffect, useState } from "react";
-import PopupModal from "../common/PopupModal";
-import FormLabel from "../form/FormLabel";
-import { FlexContainer } from "../../styles";
-import LoadingBtn from "../common/LoadingBtn";
+import PopupModal from "../../common/PopupModal";
+import FormLabel from "../../form/FormLabel";
+import { FlexContainer } from "../../../styles";
+import LoadingBtn from "../../common/LoadingBtn";
 import * as Icons from "react-bootstrap-icons";
 import FormErrorDisplay, {
   iErrorMap
-} from "../form/FormErrorDisplay";
-import CampusDisplayService from "../../services/CampusDisplay/CampusDisplayService";
-import Toaster, {TOAST_TYPE_SUCCESS} from '../../services/Toaster';
+} from "../../form/FormErrorDisplay";
+import CampusDisplayService from "../../../services/CampusDisplay/CampusDisplayService";
+import Toaster, {TOAST_TYPE_SUCCESS} from '../../../services/Toaster';
 
 type iCampusDisplayPopupBtn = ButtonProps & {
   campusDisplay?: iCampusDisplay;

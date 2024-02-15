@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import {Alert, Button, ButtonProps, Spinner} from "react-bootstrap";
-import iCampusDisplayLocation from "../../types/CampusDisplay/iCampusDisplayLocation";
-import CampusDisplayLocationService from "../../services/CampusDisplay/CampusDisplayLocationService";
-import Toaster, { TOAST_TYPE_SUCCESS } from "../../services/Toaster";
-import { FlexContainer } from "../../styles";
-import LoadingBtn from "../common/LoadingBtn";
+import iCampusDisplayLocation from "../../../types/CampusDisplay/iCampusDisplayLocation";
+import CampusDisplayLocationService from "../../../services/CampusDisplay/CampusDisplayLocationService";
+import Toaster, { TOAST_TYPE_SUCCESS } from "../../../services/Toaster";
+import { FlexContainer } from "../../../styles";
+import LoadingBtn from "../../common/LoadingBtn";
 import * as Icons from "react-bootstrap-icons";
-import FormLabel from "../form/FormLabel";
-import PopupModal from "../common/PopupModal";
+import FormLabel from "../../form/FormLabel";
+import PopupModal from "../../common/PopupModal";
 import CampusDisplayLocationSelector from "./CampusDisplayLocationSelector";
-import MathHelper from "../../helper/MathHelper";
+import MathHelper from "../../../helper/MathHelper";
 
 type iCampusDisplayingAtLocationPopupBtn = ButtonProps & {
   displayId: string;

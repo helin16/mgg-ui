@@ -8,8 +8,12 @@ const getAll = (params: iConfigParams = {}, config?: iConfigParams): Promise<iPa
   return AppService.get(endPoint, params, config).then(resp => resp.data);
 }
 
-const create = (displayId: string, params: iConfigParams, config?: iConfigParams): Promise<iCampusDisplaySlide> => {
-  return AppService.post(`${endPoint}/${displayId}`, params, config).then(resp => resp.data);
+const create = (params: iConfigParams, config?: iConfigParams): Promise<iCampusDisplaySlide> => {
+  return AppService.post(endPoint, params, config).then(resp => resp.data);
+}
+
+const upload = (displayId: string, params: iConfigParams, config?: iConfigParams): Promise<iCampusDisplaySlide> => {
+  return AppService.post(`${endPoint}/upload/${displayId}`, params, config).then(resp => resp.data);
 }
 
 const update = (id: string, params: iConfigParams, config?: iConfigParams): Promise<iCampusDisplaySlide> => {
@@ -24,6 +28,7 @@ const CampusDisplaySlideService = {
   getAll,
   create,
   update,
+  upload,
   deactivate,
 }
 

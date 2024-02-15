@@ -1,16 +1,16 @@
 import { Button, ButtonProps, FormControl } from "react-bootstrap";
-import iCampusDisplayLocation from "../../types/CampusDisplay/iCampusDisplayLocation";
+import iCampusDisplayLocation from "../../../types/CampusDisplay/iCampusDisplayLocation";
 import { useEffect, useState } from "react";
-import PopupModal from "../common/PopupModal";
-import FormLabel from "../form/FormLabel";
-import { FlexContainer } from "../../styles";
-import LoadingBtn from "../common/LoadingBtn";
+import PopupModal from "../../common/PopupModal";
+import FormLabel from "../../form/FormLabel";
+import { FlexContainer } from "../../../styles";
+import LoadingBtn from "../../common/LoadingBtn";
 import * as Icons from "react-bootstrap-icons";
-import FormErrorDisplay, { iErrorMap } from "../form/FormErrorDisplay";
-import Toaster, { TOAST_TYPE_SUCCESS } from "../../services/Toaster";
-import CampusDisplayLocationService from "../../services/CampusDisplay/CampusDisplayLocationService";
-import SectionDiv from "../common/SectionDiv";
-import CampusDisplaySelector from "./CampusDisplaySelector";
+import FormErrorDisplay, { iErrorMap } from "../../form/FormErrorDisplay";
+import Toaster, { TOAST_TYPE_SUCCESS } from "../../../services/Toaster";
+import CampusDisplayLocationService from "../../../services/CampusDisplay/CampusDisplayLocationService";
+import SectionDiv from "../../common/SectionDiv";
+import CampusDisplaySelector from "../Playlist/CampusDisplaySelector";
 
 type iCampusDisplayLocationPopupBtn = ButtonProps & {
   campusDisplayLocation?: iCampusDisplayLocation;

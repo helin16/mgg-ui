@@ -1,10 +1,10 @@
-import {iAutoCompleteSingle} from '../common/AutoComplete';
+import {iAutoCompleteSingle} from '../../common/AutoComplete';
 import {useEffect, useState} from 'react';
 import {Spinner} from 'react-bootstrap';
-import SelectBox from '../common/SelectBox';
-import iCampusDisplayLocation from '../../types/CampusDisplay/iCampusDisplayLocation';
-import CampusDisplayLocationService from '../../services/CampusDisplay/CampusDisplayLocationService';
-import Toaster from '../../services/Toaster';
+import SelectBox from '../../common/SelectBox';
+import iCampusDisplayLocation from '../../../types/CampusDisplay/iCampusDisplayLocation';
+import CampusDisplayLocationService from '../../../services/CampusDisplay/CampusDisplayLocationService';
+import Toaster from '../../../services/Toaster';
 
 type iCampusDisplayLocationSelector = {
   isMulti?: boolean;

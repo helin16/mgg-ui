@@ -1,19 +1,19 @@
 import styled from "styled-components";
 import { useEffect, useState } from "react";
-import iPaginatedResult from "../../types/iPaginatedResult";
-import iCampusDisplayLocation from "../../types/CampusDisplay/iCampusDisplayLocation";
-import Toaster, {TOAST_TYPE_SUCCESS} from "../../services/Toaster";
-import PageLoadingSpinner from "../common/PageLoadingSpinner";
-import Table, { iTableColumn } from "../common/Table";
+import iPaginatedResult from "../../../types/iPaginatedResult";
+import iCampusDisplayLocation from "../../../types/CampusDisplay/iCampusDisplayLocation";
+import Toaster, {TOAST_TYPE_SUCCESS} from "../../../services/Toaster";
+import PageLoadingSpinner from "../../common/PageLoadingSpinner";
+import Table, { iTableColumn } from "../../common/Table";
 import * as Icons from "react-bootstrap-icons";
-import MathHelper from "../../helper/MathHelper";
-import DeleteConfirmPopupBtn from "../common/DeleteConfirm/DeleteConfirmPopupBtn";
+import MathHelper from "../../../helper/MathHelper";
+import DeleteConfirmPopupBtn from "../../common/DeleteConfirm/DeleteConfirmPopupBtn";
 import { useSelector } from "react-redux";
-import { RootState } from "../../redux/makeReduxStore";
+import { RootState } from "../../../redux/makeReduxStore";
 import moment from "moment-timezone";
-import CampusDisplayLocationService from "../../services/CampusDisplay/CampusDisplayLocationService";
-import UserAndDateTimePanel from "../common/UserAndDateTimePanel";
-import iCampusDisplay from '../../types/CampusDisplay/iCampusDisplay';
+import CampusDisplayLocationService from "../../../services/CampusDisplay/CampusDisplayLocationService";
+import UserAndDateTimePanel from "../../common/UserAndDateTimePanel";
+import iCampusDisplay from '../../../types/CampusDisplay/iCampusDisplay';
 import CampusDisplayLocationEditPopupBtn from './CampusDisplayLocationEditPopupBtn';
 
 const Wrapper = styled.div``;
@@ -66,8 +66,8 @@ const CampusDisplayLocationList = () => {
   const getColumns = (): iTableColumn[] => {
     return [
       {
-        key: "name",
-        header: "Name",
+        key: "location",
+        header: "Location",
         cell: (column: iTableColumn, data: iCampusDisplayLocation) => {
           return (
             <td key={column.key}>
@@ -84,8 +84,8 @@ const CampusDisplayLocationList = () => {
         }
       },
       {
-        key: "display",
-        header: "Showing Display",
+        key: "playList",
+        header: "Playing List",
         cell: (column: iTableColumn, data: iCampusDisplayLocation) => {
           return <td key={column.key}>{data.CampusDisplay?.name || ""}</td>;
         }

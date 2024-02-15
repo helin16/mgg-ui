@@ -35,14 +35,15 @@ const reloadPage = () => {
 
 type iPage401 = {
   title?: string;
+  className?: string;
   description?: any;
   btns?: any;
   variant?: string;
   showLogo?: boolean;
 }
-const Page401 = ({title, description, btns, variant = 'danger', showLogo = true}: iPage401) => {
+const Page401 = ({className, title, description, btns, variant = 'danger', showLogo = true}: iPage401) => {
   return (
-    <Wrapper>
+    <Wrapper className={className}>
       {showLogo ? (
         <div className={'logo'}>
           <SchoolLogo />

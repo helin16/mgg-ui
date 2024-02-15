@@ -1,14 +1,12 @@
-import iCampusDisplaySlide from "../../types/CampusDisplay/iCampusDisplaySlide";
-import { FlexContainer } from "../../styles";
+import iCampusDisplaySlide from "../../../types/CampusDisplay/iCampusDisplaySlide";
+import { FlexContainer } from "../../../styles";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
-import CampusDisplaySlideEditPopupBtn from "./CampusDisplaySlideEditPopupBtn";
+import CampusDisplaySlideEditPopupBtn from "./CampusDisplaySlideCreatePopupBtn";
 import * as Icons from "react-bootstrap-icons";
 import React from "react";
-import iCampusDisplay from "../../types/CampusDisplay/iCampusDisplay";
-import ImageWithPlaceholder from "../common/ImageWithPlaceholder";
+import iCampusDisplay from "../../../types/CampusDisplay/iCampusDisplay";
 import styled from "styled-components";
-import PageLoadingSpinner from "../common/PageLoadingSpinner";
-import VideoWithPlaceholder from '../common/VideoWithPlaceholder';
+import AssetThumbnail from '../../Asset/AssetThumbnail';
 
 type iCampusDisplayDraggableSlides = {
   className?: string;
@@ -29,76 +27,28 @@ const Wrapper = styled.div`
   overflow-x: auto;
   position: relative;
     
-  .video-thumbnail-wrapper {
-      position: relative;
-      .video-thumbnail-indicator {
-          position: absolute;
-          left: 0px;
-          top: 0px;
-          bottom: 0px;
-          right: 0px;
-          height: 100%;
-          width: 100%;
-          text-align: center;
-          font-size: 38px;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-      }
-  }
-
   .slide-list-div {
     .slide-div {
       height: 6rem;
       width: 10rem;
-      background-color: white;
-      border-width: 4px;
-      border-style: solid;
-      border-color: white;
-      margin-right: 0.4rem;
+      background-color: transparent;
+      margin-right: 0.6rem;
       position: relative;
-
-      .img-placeholder {
-        text-align: center;
-        margin-top: 0.4rem;
-
-        .title {
-          font-size: 12px;
-        }
-      }
-
-      img {
-        height: 100%;
-        width: 100%;
-        object-fit: contain;
-        border: none;
-        padding: 0px;
-      }
 
       &.selected {
         border: 4px #ffe55a solid;
-      }
-
-      &.new-slide {
-        text-align: center;
-        font-size: 18px;
-        filter: none;
-        -webkit-backdrop-filter: none;
-        backdrop-filter: none;
-
-        .icon {
-          font-size: 26px;
-        }
-
-        &.btn:hover {
-          color: black !important;
-        }
       }
 
       .options-wrapper {
         position: absolute;
         top: 2px;
         left: 2px;
+        z-index: 1000;
+      }
+        
+      .thumbnail {
+          min-height: auto;
+          min-width: auto;
       }
     }
   }
@@ -109,6 +59,8 @@ const DraggableItem = React.forwardRef(
     {
       // @ts-ignore
       slide,
+      // @ts-ignore
+      campusDisplay,
       // @ts-ignore
       className,
       // @ts-ignore
@@ -133,30 +85,7 @@ const DraggableItem = React.forwardRef(
         {...provided.dragHandleProps}
         onClick={onClick}
       >
-        {`${slide.Asset?.mimeType || ''}`.trim().startsWith('video/') ? (
-          <VideoWithPlaceholder
-            src={slide.Asset?.url || ""}
-            thumbnail
-            coverImg={
-              <div className={'video-thumbnail-wrapper'}>
-                <ImageWithPlaceholder
-                  thumbnail
-                  src={`${slide.Asset?.url || ""}`.trim().replace('.mp4', '.jpg')}
-                  placeholder={<PageLoadingSpinner className={"img-placeholder"} />}
-                />
-                <div className={'video-thumbnail-indicator'}>
-                  <Icons.Play className={'thumbnail-indicator'} />
-                </div>
-              </div>
-            }
-          />
-        ) : (
-          <ImageWithPlaceholder
-            thumbnail
-            src={slide.Asset?.url || ""}
-            placeholder={<PageLoadingSpinner className={"img-placeholder"} />}
-          />
-        )}
+        <AssetThumbnail asset={slide.Asset} className={'thumbnail'}/>
         {showOptions === true ? (
           <div className={"options-wrapper"}>
             <input
@@ -265,6 +194,7 @@ const CampusDisplayDraggableSlides = ({
                             : ""
                         }`}
                         slide={slide}
+                        campusDisplay={campusDisplay}
                         index={index}
                         showOptions={showOptions}
                         isSelected={selectedSlideIds.indexOf(slide.id) >= 0}
