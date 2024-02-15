@@ -15,7 +15,7 @@ import CampusDisplaySlideEditPopupBtn from "../../components/CampusDisplay/Displ
 import MathHelper from "../../helper/MathHelper";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 import DeleteConfirmPopupBtn from "../../components/common/DeleteConfirm/DeleteConfirmPopupBtn";
-import { Alert } from "react-bootstrap";
+import {Alert, Button} from "react-bootstrap";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/makeReduxStore";
 import CampusDisplaySlideService from "../../services/CampusDisplay/CampusDisplaySlideService";
@@ -23,6 +23,8 @@ import CampusDisplayingAtLocationPopupBtn from "../../components/CampusDisplay/D
 import CampusDisplaySlideCreatePopupBtn from "../../components/CampusDisplay/DisplaySlide/CampusDisplaySlideCreatePopupBtn";
 import * as _ from "lodash";
 import Toaster, {TOAST_TYPE_SUCCESS} from '../../services/Toaster';
+import UtilsService from '../../services/UtilsService';
+import {URL_CAMPUS_DISPLAY_PAGE} from '../../Url';
 
 const Wrapper = styled.div`
   h6 {
@@ -249,6 +251,13 @@ const CampusDisplayManagementPage = () => {
       title={<h3>Campus Display Management</h3>}
       AdminPage={CampusDisplayManagementAdminPage}
       moduleId={MGGS_MODULE_ID_CAMPUS_DISPLAY}
+      extraBtns={
+        <ButtonGroup>
+          <Button variant={'link'} size={'sm'} target={'__BLANK'} href={UtilsService.getFullUrl(URL_CAMPUS_DISPLAY_PAGE)}>
+            <Icons.PlayBtnFill /> Player
+          </Button>
+        </ButtonGroup>
+      }
     >
       <Wrapper>
         <PanelTitle>

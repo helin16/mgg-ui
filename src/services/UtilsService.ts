@@ -78,7 +78,11 @@ const stripHTMLTags = (html: string) => {
 }
 
 const getFullUrl = (path: string) => {
-  return `${process.env.REACT_APP_URL || ''}/${path}`;
+  const p = `${path || ''}`.trim();
+  const newPath = p.startsWith('/') ? p.substring(1) : p;
+  const appUrl = `${process.env.REACT_APP_URL || ''}`.trim();
+  const apUrl = appUrl.endsWith('/') ? appUrl.slice(0, -1) : appUrl;
+  return `${apUrl}/${newPath}`;
 }
 
 const getModuleUrl = (customUrl: string, customBaseUrl?: string, customAuthPath = THIRD_PARTY_AUTH_PATH, mConnectBaseUrl?: string) => {
