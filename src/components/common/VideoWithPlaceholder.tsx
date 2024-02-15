@@ -7,6 +7,7 @@ interface VideoWithPlaceholderProps {
   src: string;
   coverImg?: any;
   thumbnail?: boolean;
+  placeHolder?: any;
 }
 
 const VideoWithPlaceholder: React.FC<VideoWithPlaceholderProps> = ({

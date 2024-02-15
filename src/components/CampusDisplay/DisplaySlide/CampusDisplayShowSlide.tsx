@@ -12,6 +12,7 @@ type iCampusDisplayShowSlide = {
   campusDisplay: iCampusDisplay;
   thumbnail?: boolean;
   className?: string;
+  videoProps?: any
   onSaved?: () => void;
 };
 
@@ -41,7 +42,8 @@ const Wrapper = styled.div`
     backdrop-filter: blur(3rem); /* For modern browsers */
     z-index: 998;
   }
-
+    
+  video,
   img {
     height: 90% !important;
     width: 90% !important;
@@ -66,6 +68,10 @@ const Wrapper = styled.div`
       img.${CD_DISPLAY_MODE_FULL_SCREEN_FILL} {
           object-fit: cover !important;
       }
+      video {
+          width: 100% !important;
+          height: 100% !important;
+      }
   }
 `;
 
@@ -74,7 +80,8 @@ const CampusDisplayShowSlide = ({
   thumbnail,
   campusDisplay,
   onSaved,
-  className
+  className,
+  videoProps,
 }: iCampusDisplayShowSlide) => {
   const isFullScreen = () => {
     return `${slide?.settings?.displayMode || ""}`
@@ -83,7 +90,28 @@ const CampusDisplayShowSlide = ({
       .startsWith("fullscreen");
   };
 
-  ;
+  const getImgDiv = (url: string, className?: string) => {
+    if (`${slide?.Asset?.mimeType}`.trim().toLowerCase().startsWith('video')) {
+      return (
+        <video
+          className={className}
+          autoPlay={videoProps?.autoPlay || false}
+          controls={false}
+          // onEnded={handleVideoEnd}
+          style={{zIndex: 999}}
+          {...videoProps}
+        >
+          <source src={slide?.Asset?.url || ''} type={`${slide?.Asset?.mimeType}`.trim()}/>
+        </video>
+      )
+    }
+    return <ImageWithPlaceholder
+      className={className}
+      src={url}
+      alt="Slide"
+      placeholder={getImagePlaceHolder()}
+    />
+  }
 
   const getContent = () => {
     const url =
@@ -100,14 +128,7 @@ const CampusDisplayShowSlide = ({
     }
 
     if (isFullScreen() === true) {
-      return (
-        <ImageWithPlaceholder
-          className={slide.settings?.displayMode || ''}
-          src={url}
-          alt="Slide"
-          placeholder={getImagePlaceHolder()}
-        />
-      );
+      return getImgDiv(url, slide.settings?.displayMode || '');
     }
 
     return (
@@ -118,11 +139,7 @@ const CampusDisplayShowSlide = ({
             backgroundImage: `url(${url})`
           }}
         />
-        <ImageWithPlaceholder
-          src={url}
-          alt="Slide"
-          placeholder={getImagePlaceHolder()}
-        />
+        {getImgDiv(url)}
       </>
     );
   };

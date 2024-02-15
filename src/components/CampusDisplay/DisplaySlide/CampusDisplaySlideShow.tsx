@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useRef, useState} from "react";
 import iCampusDisplaySlide from "../../../types/CampusDisplay/iCampusDisplaySlide";
 import CampusDisplayDefaultSlide from "./CampusDisplayDefaultSlide";
 import iCampusDisplay from "../../../types/CampusDisplay/iCampusDisplay";
@@ -40,6 +40,10 @@ const CampusDisplaySlideShow = ({
   className
 }: iCampusDisplaySlideShowPanel) => {
   const slideShowingTime = 5000;
+
+  const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(0);
+  // @ts-ignore
+  const carouselRef = useRef<Carousel>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [count, setCount] = useState(0);
   const [cdSlides, setCdSlides] = useState<iCampusDisplaySlide[]>([]);
@@ -50,6 +54,8 @@ const CampusDisplaySlideShow = ({
     displayLocation,
     setDisplayLocation
   ] = useState<iCampusDisplayLocation | null>(null);
+
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
 
   useEffect(() => {
     let isCanceled = false;
@@ -189,6 +195,26 @@ const CampusDisplaySlideShow = ({
     };
   }, [displayLocation]);
 
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      if (!isVideoPlaying) {
+        carouselRef.current?.next();
+      }
+    }, slideShowingTime);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [isVideoPlaying, slideShowingTime]);
+
+  const handleSlideTransition = () => {
+    setIsVideoPlaying(true);
+  }
+
+  const handleSlide = (selectedIndex: number, e: any) => {
+    setCurrentSlideIndex(selectedIndex);
+  };
+
   const getContent = () => {
     if (isLoading === true) {
       return <PageLoadingSpinner />;
@@ -221,11 +247,14 @@ const CampusDisplaySlideShow = ({
     return (
       <Carousel
         pause={false}
+        activeIndex={currentSlideIndex}
         indicators={false}
-        fade={true}
         controls={false}
-        interval={slideShowingTime}
+        onSlide={handleSlideTransition}
+        onSelect={handleSlide}
+        interval={null} // Disable built-in interval
         variant={"dark"}
+        ref={carouselRef}
       >
         {cdSlides.map(slide => {
           return (
@@ -233,6 +262,15 @@ const CampusDisplaySlideShow = ({
               <CampusDisplayShowSlide
                 slide={slide}
                 campusDisplay={campusDisplay}
+                videoProps={{
+                  key: currentSlideIndex,
+                  autoPlay: isVideoPlaying,
+                  onEnded: () => {
+                    setIsVideoPlaying(false);
+                    carouselRef.current?.next();
+                  },
+                  onPlay: () => setIsVideoPlaying(true),
+                }}
               />
             </Carousel.Item>
           );
