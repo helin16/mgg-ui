@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import React, {useEffect, useRef, useState} from "react";
+import React, { useEffect, useRef, useState } from "react";
 import iCampusDisplaySlide from "../../../types/CampusDisplay/iCampusDisplaySlide";
 import CampusDisplayDefaultSlide from "./CampusDisplayDefaultSlide";
 import iCampusDisplay from "../../../types/CampusDisplay/iCampusDisplay";
@@ -14,6 +14,8 @@ import { FlexContainer } from "../../../styles";
 import moment from "moment-timezone";
 import CampusDisplayShowSlide from "./CampusDisplayShowSlide";
 import iCampusDisplayLocation from "../../../types/CampusDisplay/iCampusDisplayLocation";
+import SchoolLogo from '../../SchoolLogo';
+import SectionDiv from '../../common/SectionDiv';
 
 type iCampusDisplaySlideShowPanel = {
   locationId: string;
@@ -22,11 +24,12 @@ type iCampusDisplaySlideShowPanel = {
 };
 
 const Wrapper = styled.div`
-  background-color: black;
+  background-color: transparent;
+  height: 100%;
 
   .carousel-item {
-    width: 100vw !important;
-    height: 100vh !important;
+    width: 100% !important;
+    height: 100% !important;
   }
 
   .no-display {
@@ -207,9 +210,9 @@ const CampusDisplaySlideShow = ({
     };
   }, [isVideoPlaying, slideShowingTime]);
 
-  const handleSlideTransition = () => {
-    setIsVideoPlaying(true);
-  }
+  // const handleSlideTransition = () => {
+  //   setIsVideoPlaying(true);
+  // };
 
   const handleSlide = (selectedIndex: number, e: any) => {
     setCurrentSlideIndex(selectedIndex);
@@ -217,7 +220,16 @@ const CampusDisplaySlideShow = ({
 
   const getContent = () => {
     if (isLoading === true) {
-      return <PageLoadingSpinner />;
+      return (
+        <FlexContainer
+          className={"no-display justify-content-center align-items-center flex-column"}
+        >
+          <SchoolLogo />
+          <SectionDiv>
+            <PageLoadingSpinner />
+          </SectionDiv>
+        </FlexContainer>
+      );
     }
 
     if (!campusDisplay || `${campusDisplay?.id || ""}`.trim() === "") {
@@ -250,13 +262,13 @@ const CampusDisplaySlideShow = ({
         activeIndex={currentSlideIndex}
         indicators={false}
         controls={false}
-        onSlide={handleSlideTransition}
+        // onSlide={handleSlideTransition}
         onSelect={handleSlide}
         interval={null} // Disable built-in interval
         variant={"dark"}
         ref={carouselRef}
       >
-        {cdSlides.map(slide => {
+        {cdSlides.map((slide, index) => {
           return (
             <Carousel.Item key={slide.id}>
               <CampusDisplayShowSlide
@@ -264,12 +276,12 @@ const CampusDisplaySlideShow = ({
                 campusDisplay={campusDisplay}
                 videoProps={{
                   key: currentSlideIndex,
-                  autoPlay: isVideoPlaying,
+                  autoPlay: currentSlideIndex === index,
                   onEnded: () => {
                     setIsVideoPlaying(false);
                     carouselRef.current?.next();
                   },
-                  onPlay: () => setIsVideoPlaying(true),
+                  onPlay: () => setIsVideoPlaying(true)
                 }}
               />
             </Carousel.Item>

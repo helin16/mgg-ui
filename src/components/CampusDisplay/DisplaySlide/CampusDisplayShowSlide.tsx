@@ -13,6 +13,7 @@ type iCampusDisplayShowSlide = {
   thumbnail?: boolean;
   className?: string;
   videoProps?: any
+  imageProps?: any
   onSaved?: () => void;
 };
 
@@ -82,6 +83,7 @@ const CampusDisplayShowSlide = ({
   onSaved,
   className,
   videoProps,
+  imageProps,
 }: iCampusDisplayShowSlide) => {
   const isFullScreen = () => {
     return `${slide?.settings?.displayMode || ""}`

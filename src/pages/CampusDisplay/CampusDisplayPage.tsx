@@ -8,6 +8,7 @@ import SectionDiv from "../../components/common/SectionDiv";
 import CampusDisplaySlideShow from '../../components/CampusDisplay/DisplaySlide/CampusDisplaySlideShow';
 
 const Wrapper = styled.div`
+  height: 100vh;
   .location-selector {
     height: 100vh;
     .logo-wrapper {

@@ -1,16 +1,22 @@
-import {Image, ImageProps} from 'react-bootstrap';
-import React, {useState} from 'react';
-import PageLoadingSpinner from './PageLoadingSpinner';
+import { Image, ImageProps } from "react-bootstrap";
+import React, { useState } from "react";
+import PageLoadingSpinner from "./PageLoadingSpinner";
 
 interface iImageWithPlaceholder extends ImageProps {
   placeholder?: any;
 }
 
 export const getImagePlaceHolder = (className?: string) => {
-  return <PageLoadingSpinner className={`img-placeholder ${className || ''}`} />;
-}
+  return (
+    <PageLoadingSpinner className={`img-placeholder ${className || ""}`} />
+  );
+};
 
-const ImageWithPlaceholder = ({placeholder, ...props}: iImageWithPlaceholder) => {
+const ImageWithPlaceholder = ({
+  placeholder,
+  onLoad,
+  ...props
+}: iImageWithPlaceholder) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const getPlaceholder = () => {
@@ -18,14 +24,21 @@ const ImageWithPlaceholder = ({placeholder, ...props}: iImageWithPlaceholder) =>
       return null;
     }
     return placeholder;
-  }
+  };
 
   return (
     <>
       {getPlaceholder()}
-      <Image {...props} onLoad={() => setIsLoading(false)} style={{display: isLoading === true ? 'none' : 'block'}}/>
+      <Image
+        {...props}
+        onLoad={(e) => {
+          setIsLoading(false);
+          onLoad && onLoad(e);
+        }}
+        style={{ display: isLoading === true ? "none" : "block" }}
+      />
     </>
-  )
-}
+  );
+};
 
 export default ImageWithPlaceholder;
