@@ -272,7 +272,7 @@ const CampusDisplayManagementPage = () => {
             className={"justify-content-between align-items-center"}
           >
             <FlexContainer className={"with-gap lg-gap align-items-center"}>
-              <h6>Playlist</h6>
+              <h6 className={'text-white'}>Playlist</h6>
               <CampusDisplaySelector
                 placeholder={"Select a play list ..."}
                 className={"campus-display-selector"}

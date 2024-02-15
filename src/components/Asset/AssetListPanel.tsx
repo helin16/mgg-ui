@@ -1,8 +1,10 @@
 import styled from "styled-components";
-import {useEffect, useRef, useState} from "react";
+import { useEffect, useRef, useState } from "react";
 import iPaginatedResult from "../../types/iPaginatedResult";
 import iAsset from "../../types/asset/iAsset";
-import AssetService, {HEADER_NAME_ASSET_TYPE} from "../../services/Asset/AssetService";
+import AssetService, {
+  HEADER_NAME_ASSET_TYPE
+} from "../../services/Asset/AssetService";
 import Toaster from "../../services/Toaster";
 import * as Icons from "react-bootstrap-icons";
 import { Button, Spinner } from "react-bootstrap";
@@ -49,6 +51,11 @@ const Wrapper = styled.div`
     .load-more {
       width: 12rem;
       height: 8rem;
+      .btn {
+        width: 100%;
+        height: 100%;
+        color: white;
+      }
     }
   }
 
@@ -176,15 +183,17 @@ const AssetListPanel = ({
       return null;
     }
     return (
-      <Button
-        variant={"secondary load-more"}
-        onClick={() => setCurrentPage(MathHelper.add(currentPage, 1))}
-      >
-        <div style={{ fontSize: "24px" }}>
-          <Icons.ArrowDown />
-        </div>
-        <h6>Load more</h6>
-      </Button>
+      <div className={'load-more'}>
+        <Button
+          variant={"secondary"}
+          onClick={() => setCurrentPage(MathHelper.add(currentPage, 1))}
+        >
+          <div style={{ fontSize: "24px" }}>
+            <Icons.ArrowDown />
+          </div>
+          <h6>Load more</h6>
+        </Button>
+      </div>
     );
   };
 
@@ -273,12 +282,14 @@ const AssetListPanel = ({
             Clear
           </>
         ) : null}{" "}
-        {(selectedAssetIds || []).length} selected {' '}
+        {(selectedAssetIds || []).length} selected{" "}
         {allowDeletion === true ? (
           <DeleteConfirmPopupBtn
             size={"sm"}
-            className={'delete-btn'}
-            variant={(selectedAssetIds || []).length <= 0 ? 'secondary' : "danger"}
+            className={"delete-btn"}
+            variant={
+              (selectedAssetIds || []).length <= 0 ? "secondary" : "danger"
+            }
             disabled={(selectedAssetIds || []).length <= 0}
             deletingFn={() =>
               Promise.all(
@@ -288,9 +299,11 @@ const AssetListPanel = ({
               )
             }
             deletedCallbackFn={() => {
-              const assetIds = (selectedAssetIds || []);
-              const currentAssets = (assetsList?.data || []).filter(asset => assetIds.indexOf(asset.id) < 0);
-              if(currentAssets.length <= 0) {
+              const assetIds = selectedAssetIds || [];
+              const currentAssets = (assetsList?.data || []).filter(
+                asset => assetIds.indexOf(asset.id) < 0
+              );
+              if (currentAssets.length <= 0) {
                 setAssetList(null);
                 onSelect && onSelect([]);
                 return;
@@ -298,12 +311,15 @@ const AssetListPanel = ({
               // @ts-ignore
               setAssetList({
                 ...(assetsList || {}),
-                data: currentAssets,
+                data: currentAssets
               });
               onSelect && onSelect([]);
             }}
           >
-            <Icons.Trash /> Delete {(selectedAssetIds || []).length <= 0 ? '' : `${(selectedAssetIds || []).length} Asset(s)`}
+            <Icons.Trash /> Delete{" "}
+            {(selectedAssetIds || []).length <= 0
+              ? ""
+              : `${(selectedAssetIds || []).length} Asset(s)`}
           </DeleteConfirmPopupBtn>
         ) : null}
       </>
@@ -322,7 +338,7 @@ const AssetListPanel = ({
     return AssetService.upload(formData, {
       headers: {
         "Content-Type": "multipart/form-data",
-        ...(asType !== "" ? {[HEADER_NAME_ASSET_TYPE]: asType} : {}),
+        ...(asType !== "" ? { [HEADER_NAME_ASSET_TYPE]: asType } : {})
       }
     })
       .then(resp => {

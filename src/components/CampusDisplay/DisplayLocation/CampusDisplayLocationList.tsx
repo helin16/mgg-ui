@@ -91,6 +91,13 @@ const CampusDisplayLocationList = () => {
         }
       },
       {
+        key: "version",
+        header: "Current Version",
+        cell: (column: iTableColumn, data: iCampusDisplayLocation) => {
+          return <td key={column.key}>{data.version || "0"}</td>;
+        }
+      },
+      {
         key: "created",
         header: "Created",
         cell: (column: iTableColumn, data: iCampusDisplay) => {
