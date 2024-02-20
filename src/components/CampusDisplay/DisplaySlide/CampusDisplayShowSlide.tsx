@@ -1,19 +1,21 @@
 import iCampusDisplaySlide from "../../../types/CampusDisplay/iCampusDisplaySlide";
-import ImageWithPlaceholder, {getImagePlaceHolder} from "../../common/ImageWithPlaceholder";
+import ImageWithPlaceholder, {
+  getImagePlaceHolder
+} from "../../common/MultiMedia/ImageWithPlaceholder";
 import React from "react";
 import styled from "styled-components";
 import iCampusDisplay from "../../../types/CampusDisplay/iCampusDisplay";
 import CampusDisplayDefaultSlide from "./CampusDisplayDefaultSlide";
 import CloudinaryHelper from "../../../helper/CloudinaryHelper";
-import {CD_DISPLAY_MODE_FULL_SCREEN_FILL} from './CDSlideDisplayModeSelector';
+import { CD_DISPLAY_MODE_FULL_SCREEN_FILL } from "./CDSlideDisplayModeSelector";
 
 type iCampusDisplayShowSlide = {
   slide?: iCampusDisplaySlide | null;
   campusDisplay: iCampusDisplay;
   thumbnail?: boolean;
   className?: string;
-  videoProps?: any
-  imageProps?: any
+  videoProps?: any;
+  imageProps?: any;
   onSaved?: () => void;
 };
 
@@ -43,9 +45,8 @@ const Wrapper = styled.div`
     backdrop-filter: blur(3rem); /* For modern browsers */
     z-index: 998;
   }
-    
-  video,
-  img {
+
+  .slide-content {
     height: 90% !important;
     width: 90% !important;
     object-fit: contain;
@@ -66,13 +67,13 @@ const Wrapper = styled.div`
   }
 
   &.fullscreen {
-      img.${CD_DISPLAY_MODE_FULL_SCREEN_FILL} {
-          object-fit: cover !important;
-      }
-      video {
-          width: 100% !important;
-          height: 100% !important;
-      }
+    img.${CD_DISPLAY_MODE_FULL_SCREEN_FILL} {
+      object-fit: cover !important;
+    }
+    video {
+      width: 100% !important;
+      height: 100% !important;
+    }
   }
 `;
 
@@ -83,7 +84,7 @@ const CampusDisplayShowSlide = ({
   onSaved,
   className,
   videoProps,
-  imageProps,
+  imageProps
 }: iCampusDisplayShowSlide) => {
   const isFullScreen = () => {
     return `${slide?.settings?.displayMode || ""}`
@@ -93,32 +94,49 @@ const CampusDisplayShowSlide = ({
   };
 
   const getImgDiv = (url: string, className?: string) => {
-    if (`${slide?.Asset?.mimeType}`.trim().toLowerCase().startsWith('video')) {
+    if (
+      `${slide?.Asset?.mimeType}`
+        .trim()
+        .toLowerCase()
+        .startsWith("video")
+    ) {
       return (
-        <video
-          className={className}
-          autoPlay={videoProps?.autoPlay || false}
-          controls={false}
-          // onEnded={handleVideoEnd}
-          style={{zIndex: 999}}
-          {...videoProps}
-        >
-          <source src={slide?.Asset?.url || ''} type={`${slide?.Asset?.mimeType}`.trim()}/>
-        </video>
-      )
+        <iframe
+          className={`${className || ""} slide-content`}
+          title={'test-video'}
+          src={
+            "https://player.vimeo.com/video/855199899?autoplay=1&muted=1&loop=1&controls=0"
+          }
+        />
+        // <VideoPlayer src={slide?.Asset?.url || ''} autoPlay className={`${className || ''}`} />
+        // <video
+        //   className={className}
+        //   autoPlay={videoProps?.autoPlay || false}
+        //   controls={false}
+        //   // onEnded={handleVideoEnd}
+        //   style={{zIndex: 999}}
+        //   {...videoProps}
+        // >
+        //   <source src={slide?.Asset?.url || ''} type={`${slide?.Asset?.mimeType}`.trim()}/>
+        // </video>
+      );
     }
-    return <ImageWithPlaceholder
-      className={className}
-      src={url}
-      alt="Slide"
-      placeholder={getImagePlaceHolder()}
-    />
-  }
+    return (
+      <ImageWithPlaceholder
+        className={`${className || ""} slide-content`}
+        src={url}
+        alt="Slide"
+        placeholder={getImagePlaceHolder()}
+      />
+    );
+  };
 
   const getContent = () => {
     const url =
       thumbnail === true
-        ? CloudinaryHelper.getThumbnailUrl(slide?.Asset?.url || "")
+        ? CloudinaryHelper.getScaledImgUrl(slide?.Asset?.url || "", {
+            progressive: true
+          })
         : CloudinaryHelper.getImgUrl(slide?.Asset?.url || "");
     if (!slide || url === "") {
       return (
@@ -130,7 +148,7 @@ const CampusDisplayShowSlide = ({
     }
 
     if (isFullScreen() === true) {
-      return getImgDiv(url, slide.settings?.displayMode || '');
+      return getImgDiv(url, slide.settings?.displayMode || "");
     }
 
     return (

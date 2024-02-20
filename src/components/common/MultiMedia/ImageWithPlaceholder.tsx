@@ -1,6 +1,6 @@
 import { Image, ImageProps } from "react-bootstrap";
 import React, { useState } from "react";
-import PageLoadingSpinner from "./PageLoadingSpinner";
+import PageLoadingSpinner from "../PageLoadingSpinner";
 
 interface iImageWithPlaceholder extends ImageProps {
   placeholder?: any;

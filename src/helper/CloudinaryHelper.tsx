@@ -9,12 +9,14 @@ type iImgScale = {
   showThumb?: boolean;
   showFit?: boolean;
   showFill?: boolean;
+  progressive?: boolean;
 }
 const getScaledImgUrl = (assetUrl: string, scale: iImgScale = {} ) => {
   const url = getImgUrl(assetUrl);
   const scaleParams = [
     ...(scale.showThumb !== true ? [] : [`c_thumb`]),
     ...(scale.showFit !== true ? [] : [`c_fit`]),
+    ...(scale.progressive !== true ? [] : [`fl_progressive`]),
     ...(scale.showFill !== true ? [] : [`c_fill`]),
     ...(`${scale.width || ''}`.trim() === '' ? [] : [`w_${`${(scale.width || '')}`.trim()}`]),
     ...(`${scale.height || ''}`.trim() === '' ? [] : [`h_${`${(scale.height || '')}`.trim()}`]),
