@@ -104,9 +104,7 @@ const CampusDisplayShowSlide = ({
         <iframe
           className={`${className || ""} slide-content`}
           title={'test-video'}
-          src={
-            "https://player.vimeo.com/video/855199899?autoplay=1&muted=1&loop=1&controls=0"
-          }
+          src={slide?.Asset?.url || ''}
         />
         // <VideoPlayer src={slide?.Asset?.url || ''} autoPlay className={`${className || ''}`} />
         // <video
