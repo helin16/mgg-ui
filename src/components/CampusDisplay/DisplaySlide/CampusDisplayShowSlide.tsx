@@ -1,13 +1,14 @@
 import iCampusDisplaySlide from "../../../types/CampusDisplay/iCampusDisplaySlide";
-import ImageWithPlaceholder, {
-  getImagePlaceHolder
-} from "../../common/MultiMedia/ImageWithPlaceholder";
+// import ImageWithPlaceholder, {
+//   getImagePlaceHolder
+// } from "../../common/MultiMedia/ImageWithPlaceholder";
 import React from "react";
 import styled from "styled-components";
 import iCampusDisplay from "../../../types/CampusDisplay/iCampusDisplay";
 import CampusDisplayDefaultSlide from "./CampusDisplayDefaultSlide";
 import CloudinaryHelper from "../../../helper/CloudinaryHelper";
 import { CD_DISPLAY_MODE_FULL_SCREEN_FILL } from "./CDSlideDisplayModeSelector";
+import YouTubePlayer from '../../common/MultiMedia/YouTubePlayer';
 
 type iCampusDisplayShowSlide = {
   slide?: iCampusDisplaySlide | null;
@@ -94,39 +95,48 @@ const CampusDisplayShowSlide = ({
   };
 
   const getImgDiv = (url: string, className?: string) => {
-    if (
-      `${slide?.Asset?.mimeType}`
-        .trim()
-        .toLowerCase()
-        .startsWith("video")
-    ) {
-      return (
-        <iframe
-          className={`${className || ""} slide-content`}
-          title={'test-video'}
-          src={slide?.Asset?.url || ''}
-        />
-        // <VideoPlayer src={slide?.Asset?.url || ''} autoPlay className={`${className || ''}`} />
-        // <video
-        //   className={className}
-        //   autoPlay={videoProps?.autoPlay || false}
-        //   controls={false}
-        //   // onEnded={handleVideoEnd}
-        //   style={{zIndex: 999}}
-        //   {...videoProps}
-        // >
-        //   <source src={slide?.Asset?.url || ''} type={`${slide?.Asset?.mimeType}`.trim()}/>
-        // </video>
-      );
-    }
-    return (
-      <ImageWithPlaceholder
-        className={`${className || ""} slide-content`}
-        src={url}
-        alt="Slide"
-        placeholder={getImagePlaceHolder()}
-      />
-    );
+    return <YouTubePlayer
+      className={`${className || ""} slide-content`}
+      src={'https://www.youtube.com/embed/M2FrvorYxJo?autoplay=1'}
+      onStart={() => alert('start')}
+      onEnd={() => alert('end')}
+    />;
+
+    // if (
+    //   `${slide?.Asset?.mimeType}`
+    //     .trim()
+    //     .toLowerCase()
+    //     .startsWith("video")
+    // ) {
+    //   return (
+    //
+    //     <YouTubePlayer
+    //       className={`${className || ""} slide-content`}
+    //       src={'https://www.youtube.com/embed/M2FrvorYxJo?autoplay=1&enablejsapi=1'}
+    //       onStart={() => console.log('start')}
+    //       onEnd={() => console.log('onEnd')}
+    //     />
+    //     // <VideoPlayer src={slide?.Asset?.url || ''} autoPlay className={`${className || ''}`} />
+    //     // <video
+    //     //   className={className}
+    //     //   autoPlay={videoProps?.autoPlay || false}
+    //     //   controls={false}
+    //     //   // onEnded={handleVideoEnd}
+    //     //   style={{zIndex: 999}}
+    //     //   {...videoProps}
+    //     // >
+    //     //   <source src={slide?.Asset?.url || ''} type={`${slide?.Asset?.mimeType}`.trim()}/>
+    //     // </video>
+    //   );
+    // }
+    // return (
+    //   <ImageWithPlaceholder
+    //     className={`${className || ""} slide-content`}
+    //     src={url}
+    //     alt="Slide"
+    //     placeholder={getImagePlaceHolder()}
+    //   />
+    // );
   };
 
   const getContent = () => {
