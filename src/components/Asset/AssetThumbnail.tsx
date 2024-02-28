@@ -80,7 +80,7 @@ const AssetThumbnail = ({ asset, className, onClick }: iAssetThumbnail) => {
       }}
     >
       <ImageWithPlaceholder
-        src={CloudinaryHelper.getThumbnailUrl(asset.url || "")}
+        src={asset.url || ""}
         className={"asset-img"}
         placeholder={getImagePlaceHolder()}
       />
