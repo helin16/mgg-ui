@@ -3,18 +3,18 @@ import React from "react";
 import styled from "styled-components";
 import iCampusDisplay from "../../../types/CampusDisplay/iCampusDisplay";
 import CampusDisplayDefaultSlide from "./CampusDisplayDefaultSlide";
-import CloudinaryHelper from "../../../helper/CloudinaryHelper";
 import { CD_DISPLAY_MODE_FULL_SCREEN_FILL } from "./CDSlideDisplayModeSelector";
 import ImageWithPlaceholder, {
   getImagePlaceHolder
 } from "../../common/MultiMedia/ImageWithPlaceholder";
+import VideoWithPlaceholder, {iVideoWithPlaceholder} from "../../common/MultiMedia/VideoWithPlaceholder";
 
 type iCampusDisplayShowSlide = {
   slide?: iCampusDisplaySlide | null;
   campusDisplay: iCampusDisplay;
   thumbnail?: boolean;
   className?: string;
-  videoProps?: any;
+  videoProps?: iVideoWithPlaceholder;
   imageProps?: any;
   onSaved?: () => void;
 };
@@ -101,19 +101,12 @@ const CampusDisplayShowSlide = ({
         .startsWith("video")
     ) {
       return (
-        <video
-          className={className}
-          autoPlay={videoProps?.autoPlay || false}
-          controls={false}
-          // onEnded={handleVideoEnd}
-          style={{ zIndex: 999 }}
+        <VideoWithPlaceholder
+          className={`${className || ""} slide-content`}
+          src={slide?.Asset?.url || ""}
+          // mimeType={slide?.Asset?.mimeType}
           {...videoProps}
-        >
-          <source
-            src={slide?.Asset?.url || ""}
-            type={`${slide?.Asset?.mimeType}`.trim()}
-          />
-        </video>
+        />
       );
     }
     return (
@@ -127,12 +120,6 @@ const CampusDisplayShowSlide = ({
   };
 
   const getContent = () => {
-    // const url =
-    //   thumbnail === true
-    //     ? CloudinaryHelper.getScaledImgUrl(slide?.Asset?.url || "", {
-    //         progressive: true
-    //       })
-    //     : CloudinaryHelper.getImgUrl(slide?.Asset?.url || "");
     const url = slide?.Asset?.url || "";
     if (!slide || url === "") {
       return (

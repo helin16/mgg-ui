@@ -95,6 +95,7 @@ const DateTimePicker = ({
     <Wrapper className={className}>
       {
         <>
+          {/*// @ts-ignore*/}
           <Datetime
             isValidDate={isValidDate}
             inputProps={{placeholder: 'Pick a date and time...'}}

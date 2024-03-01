@@ -1,6 +1,5 @@
 import iAsset from "../../types/asset/iAsset";
 import styled from "styled-components";
-import CloudinaryHelper from "../../helper/CloudinaryHelper";
 import ImageWithPlaceholder from "../common/MultiMedia/ImageWithPlaceholder";
 import { FlexContainer } from "../../styles";
 import { Spinner } from "react-bootstrap";

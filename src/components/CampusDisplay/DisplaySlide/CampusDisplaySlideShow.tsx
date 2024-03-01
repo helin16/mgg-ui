@@ -16,6 +16,7 @@ import CampusDisplayShowSlide from "./CampusDisplayShowSlide";
 import iCampusDisplayLocation from "../../../types/CampusDisplay/iCampusDisplayLocation";
 import SchoolLogo from '../../SchoolLogo';
 import SectionDiv from '../../common/SectionDiv';
+import {VideoPlayer} from '../../common/MultiMedia/VideoWithPlaceholder';
 
 type iCampusDisplaySlideShowPanel = {
   locationId: string;
@@ -144,6 +145,8 @@ const CampusDisplaySlideShow = ({
 
 
   useEffect(() => {
+
+    let reloadTimeOut: NodeJS.Timeout | null = null;
     const calculateTimeUntilMidnight = () => {
       const now = moment();
       const midnight = moment().endOf("day");
@@ -154,12 +157,16 @@ const CampusDisplaySlideShow = ({
     const reloadAtMidnight = () => {
       const timeUntilMidnight = calculateTimeUntilMidnight();
 
-      setTimeout(() => {
+      reloadTimeOut = setTimeout(() => {
         window.location.reload(); // Reload the page
       }, timeUntilMidnight);
     };
 
     reloadAtMidnight(); // Initial schedule
+
+    return () => {
+      reloadTimeOut && clearTimeout(reloadTimeOut);
+    }
   }, []);
 
   useEffect(() => {
@@ -167,6 +174,7 @@ const CampusDisplaySlideShow = ({
       return;
     }
     let isCanceled = false;
+    let timeout: NodeJS.Timeout | null = null;
     const getData = () => {
       return CampusDisplayLocationService.getById(displayLocation.id)
         .then(resp => {
@@ -194,21 +202,21 @@ const CampusDisplaySlideShow = ({
           if (isCanceled) {
             return;
           }
-          setTimeout(() => getData(), 30000);
+          timeout = setTimeout(() => getData(), 30000);
         });
     };
 
     getData();
 
     return () => {
-      clearTimeout();
+      timeout && clearTimeout(timeout);
       isCanceled = true;
     };
   }, [displayLocation]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      if (!isVideoPlaying) {
+      if (isVideoPlaying !== true) {
         carouselRef.current?.next();
       }
     }, slideShowingTime);
@@ -217,10 +225,6 @@ const CampusDisplaySlideShow = ({
       clearInterval(intervalId);
     };
   }, [isVideoPlaying, slideShowingTime]);
-
-  // const handleSlideTransition = () => {
-  //   setIsVideoPlaying(true);
-  // };
 
   const handleSlide = (selectedIndex: number, e: any) => {
     setCurrentSlideIndex(selectedIndex);
@@ -283,13 +287,23 @@ const CampusDisplaySlideShow = ({
                 slide={slide}
                 campusDisplay={campusDisplay}
                 videoProps={{
-                  key: currentSlideIndex,
-                  autoPlay: currentSlideIndex === index,
+                  controls: false,
+                  playsinline: true,
+                  playing: index === currentSlideIndex,
+                  muted: true,
                   onEnded: () => {
                     setIsVideoPlaying(false);
                     carouselRef.current?.next();
+                    return;
                   },
-                  onPlay: () => setIsVideoPlaying(true)
+                  onBuffer: () => {
+                    setIsVideoPlaying(true);
+                    return;
+                  },
+                  onPlay: () => {
+                    setIsVideoPlaying(true);
+                    return;
+                  }
                 }}
               />
             </Carousel.Item>

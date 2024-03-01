@@ -117,6 +117,7 @@ const RichTextEditor = ({value, plugins, toolBar, settings, onChange, className,
 
   return (
     <Wrapper className={className}>
+      {/*// @ts-ignore*/}
       <Editor
         initialValue={value || ''}
         apiKey={process.env.REACT_APP_TINYMCE_API_KEY || ''}
@@ -139,6 +140,13 @@ const RichTextEditor = ({value, plugins, toolBar, settings, onChange, className,
           ...getImageUploadSettings(),
           ...(settings || {}),
         }}
+        // onAddUndo={() => null}
+        // onActivate={() => null}
+        // onBeforeAddUndo={() => null}
+        // onBeforeExecCommand={() => null}
+        // onBeforeGetContent={() => null}
+        // onBeforePaste={() => null}
+        // onBeforeRenderUI={() => null}
       />
       {getIsLoadingDiv()}
     </Wrapper>

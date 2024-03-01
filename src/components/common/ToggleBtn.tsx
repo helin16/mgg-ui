@@ -68,6 +68,7 @@ const ToggleBtn = ({
 
   return (
     <Wrapper className={`${className || ''} ${isDisabled === true ? 'disabled' : ''}`} style={style}>
+      {/*// @ts-ignore*/}
       <BootstrapSwitchButton
         disabled={isDisabled}
         checked={checked}
