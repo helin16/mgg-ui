@@ -4,6 +4,7 @@ import ImageWithPlaceholder from "../common/MultiMedia/ImageWithPlaceholder";
 import { FlexContainer } from "../../styles";
 import { Spinner } from "react-bootstrap";
 import * as Icons from "react-bootstrap-icons";
+import VideoWithPlaceholder from "../common/MultiMedia/VideoWithPlaceholder";
 
 type iAssetThumbnail = {
   asset: iAsset;
@@ -21,6 +22,7 @@ const Wrapper = styled.div`
 
   .asset-img,
   .img-placeholder,
+  .video-thumb,
   .video-tag-bg {
     position: absolute;
     left: 0px;
@@ -29,12 +31,18 @@ const Wrapper = styled.div`
     width: 100%;
   }
 
+  .video-thumb {
+    z-index: 9;
+  }
+
   .asset-img {
     object-fit: contain;
   }
   .video-tag-bg {
     font-size: 42px;
     color: white;
+    z-index: 10;
+    background-color: rgba(100, 100, 100, 0.75);
   }
 `;
 const AssetThumbnail = ({ asset, className, onClick }: iAssetThumbnail) => {
@@ -50,7 +58,7 @@ const AssetThumbnail = ({ asset, className, onClick }: iAssetThumbnail) => {
     );
   };
 
-  const getVideoTag = () => {
+  const getThumbnail = () => {
     if (
       `${asset.mimeType}`
         .trim()
@@ -58,17 +66,32 @@ const AssetThumbnail = ({ asset, className, onClick }: iAssetThumbnail) => {
         .startsWith("video")
     ) {
       return (
-        <FlexContainer
-          className={
-            "video-tag-bg justify-content-center align-items-center flex-column"
-          }
-        >
-          <Icons.Play />
-        </FlexContainer>
+        <>
+          <VideoWithPlaceholder
+            coverImg={getImagePlaceHolder()}
+            src={asset.url || ""}
+            width={"100%"}
+            height={"100%"}
+            className={"video-thumb"}
+          />
+          <FlexContainer
+            className={
+              "video-tag-bg justify-content-center align-items-center flex-column"
+            }
+          >
+            <Icons.Play />
+          </FlexContainer>
+        </>
       );
     }
 
-    return null;
+    return (
+      <ImageWithPlaceholder
+        src={asset.url || ""}
+        className={"asset-img"}
+        placeholder={getImagePlaceHolder()}
+      />
+    );
   };
 
   return (
@@ -78,12 +101,7 @@ const AssetThumbnail = ({ asset, className, onClick }: iAssetThumbnail) => {
         onClick && onClick(asset);
       }}
     >
-      <ImageWithPlaceholder
-        src={asset.url || ""}
-        className={"asset-img"}
-        placeholder={getImagePlaceHolder()}
-      />
-      {getVideoTag()}
+      {getThumbnail()}
     </Wrapper>
   );
 };

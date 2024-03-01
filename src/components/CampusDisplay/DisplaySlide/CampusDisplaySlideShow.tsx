@@ -16,7 +16,6 @@ import CampusDisplayShowSlide from "./CampusDisplayShowSlide";
 import iCampusDisplayLocation from "../../../types/CampusDisplay/iCampusDisplayLocation";
 import SchoolLogo from '../../SchoolLogo';
 import SectionDiv from '../../common/SectionDiv';
-import {VideoPlayer} from '../../common/MultiMedia/VideoWithPlaceholder';
 
 type iCampusDisplaySlideShowPanel = {
   locationId: string;

@@ -7,7 +7,9 @@ import { CD_DISPLAY_MODE_FULL_SCREEN_FILL } from "./CDSlideDisplayModeSelector";
 import ImageWithPlaceholder, {
   getImagePlaceHolder
 } from "../../common/MultiMedia/ImageWithPlaceholder";
-import VideoWithPlaceholder, {iVideoWithPlaceholder} from "../../common/MultiMedia/VideoWithPlaceholder";
+import VideoWithPlaceholder, {
+  iVideoWithPlaceholder
+} from "../../common/MultiMedia/VideoWithPlaceholder";
 
 type iCampusDisplayShowSlide = {
   slide?: iCampusDisplaySlide | null;
@@ -70,6 +72,7 @@ const Wrapper = styled.div`
     img.${CD_DISPLAY_MODE_FULL_SCREEN_FILL} {
       object-fit: cover !important;
     }
+    .${CD_DISPLAY_MODE_FULL_SCREEN_FILL},
     video {
       width: 100% !important;
       height: 100% !important;
@@ -86,6 +89,14 @@ const CampusDisplayShowSlide = ({
   videoProps,
   imageProps
 }: iCampusDisplayShowSlide) => {
+
+  const isVideo = () => {
+    return `${slide?.Asset?.mimeType}`
+      .trim()
+      .toLowerCase()
+      .startsWith("video");
+  };
+
   const isFullScreen = () => {
     return `${slide?.settings?.displayMode || ""}`
       .trim()
@@ -93,18 +104,13 @@ const CampusDisplayShowSlide = ({
       .startsWith("fullscreen");
   };
 
-  const getImgDiv = (url: string, className?: string) => {
-    if (
-      `${slide?.Asset?.mimeType}`
-        .trim()
-        .toLowerCase()
-        .startsWith("video")
-    ) {
+  const getContentDiv = (url: string, className?: string) => {
+    if (isVideo() === true) {
       return (
         <VideoWithPlaceholder
           className={`${className || ""} slide-content`}
           src={slide?.Asset?.url || ""}
-          // mimeType={slide?.Asset?.mimeType}
+          controls={true}
           {...videoProps}
         />
       );
@@ -115,6 +121,7 @@ const CampusDisplayShowSlide = ({
         src={url}
         alt="Slide"
         placeholder={getImagePlaceHolder()}
+        {...imageProps}
       />
     );
   };
@@ -131,18 +138,22 @@ const CampusDisplayShowSlide = ({
     }
 
     if (isFullScreen() === true) {
-      return getImgDiv(url, slide.settings?.displayMode || "");
+      return getContentDiv(url, slide.settings?.displayMode || "");
     }
 
     return (
       <>
         <div
           className={"bg-blurry"}
-          style={{
-            backgroundImage: `url(${url})`
-          }}
+          style={
+            isVideo() === true
+              ? { backgroundColor: "black" }
+              : {
+                  backgroundImage: `url(${url})`
+                }
+          }
         />
-        {getImgDiv(url)}
+        {getContentDiv(url)}
       </>
     );
   };

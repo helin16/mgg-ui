@@ -176,7 +176,6 @@ const CampusDisplayEditPanel = ({
           campusDisplay={campusDisplay}
           videoProps={{
             controls: true,
-            autoPlay: false,
           }}
         />
       </>
