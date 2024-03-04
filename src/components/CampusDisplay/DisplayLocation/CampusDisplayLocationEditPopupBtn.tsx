@@ -134,7 +134,7 @@ const CampusDisplayLocationEditPopupBtn = ({
             <FormErrorDisplay errorsMap={errors} fieldName={"name"} />
           </div>
           <SectionDiv>
-            <FormLabel label={"Displaying"} />
+            <FormLabel label={"Default Play List:"} />
             <CampusDisplaySelector
               values={
                 editingDisplayLocation?.displayId

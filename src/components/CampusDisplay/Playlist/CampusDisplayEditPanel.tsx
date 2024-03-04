@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import iCampusDisplaySlide from "../../../types/CampusDisplay/iCampusDisplaySlide";
 import iPaginatedResult from "../../../types/iPaginatedResult";
 import CampusDisplaySlideService from "../../../services/CampusDisplay/CampusDisplaySlideService";
-import Toaster from "../../../services/Toaster";
+import Toaster, {TOAST_TYPE_SUCCESS} from "../../../services/Toaster";
 import PageLoadingSpinner from "../../common/PageLoadingSpinner";
 import MathHelper from "../../../helper/MathHelper";
 import CampusDisplayDraggableSlides from "../DisplaySlide/CampusDisplayDraggableSlides";
@@ -12,6 +12,11 @@ import CampusDisplayDefaultSlide from "../DisplaySlide/CampusDisplayDefaultSlide
 import CampusDisplayShowSlide from "../DisplaySlide/CampusDisplayShowSlide";
 import CampusDisplaySlideEditPopupBtn from "../DisplaySlide/CampusDisplaySlideEditPopupBtn";
 import * as Icons from 'react-bootstrap-icons'
+import {Alert} from 'react-bootstrap';
+import DeleteConfirmPopupBtn from '../../common/DeleteConfirm/DeleteConfirmPopupBtn';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../../redux/makeReduxStore';
+import {FlexContainer} from '../../../styles';
 
 type iCampusDisplayEditPanel = {
   campusDisplay: iCampusDisplay;
@@ -30,7 +35,7 @@ const Wrapper = styled.div`
     border: 0.6rem solid #333;
     background-color: black;
 
-    .edit-btn {
+    .edit-btns {
       position: absolute;
       right: 0.6rem;
       top: 0.6rem;
@@ -53,6 +58,7 @@ const CampusDisplayEditPanel = ({
   showingBulkOptions = false,
   forceReload = 0
 }: iCampusDisplayEditPanel) => {
+  const { user } = useSelector((state: RootState) => state.auth);
   const [isLoading, setIsLoading] = useState(false);
   const [showingSlide, setShowingSlide] = useState<iCampusDisplaySlide | null>(
     null
@@ -149,28 +155,50 @@ const CampusDisplayEditPanel = ({
 
     return (
       <>
-        <CampusDisplaySlideEditPopupBtn
-          slides={[showingSlide]}
-          display={campusDisplay}
-          divClassName={"edit-btn"}
-          variant={'secondary'}
-          closeOnSaved
-          onSaved={(updatedSlides) => {
-            const updatedSlide = {
-              ...updatedSlides[0],
-              Asset: showingSlide?.Asset
-            };
-            setShowingSlide(updatedSlide);
-            // @ts-ignore
-            setSlideList({
-              ...(slideList || {}),
-              data: (slideList?.data || []).map(slide => slide.id === updatedSlide.id ? updatedSlide : slide),
-            })
-          }}
-        >
-          <Icons.Pencil /> Edit
-        </CampusDisplaySlideEditPopupBtn>
+        <FlexContainer className={'edit-btns with-gap lg-gap justify-content-end'}>
+          <DeleteConfirmPopupBtn
+            variant={"danger"}
+            deletingFn={() => CampusDisplaySlideService.deactivate(showingSlide.id)}
+            deletedCallbackFn={() => {
+              Toaster.showToast('Slide deleted.', TOAST_TYPE_SUCCESS);
+              setCount(MathHelper.add(count, 1));
+            }}
+            size={"sm"}
+            description={
+              <>
+                <h5>
+                  You are about to permanently delete this slide.
+                </h5>
+                <Alert variant={"danger"}>This action can NOT be reversed.</Alert>
+              </>
+            }
+            confirmString={`${user?.synergyId || "na"}`}
+          >
+            <Icons.Trash /> Delete
+          </DeleteConfirmPopupBtn>
 
+          <CampusDisplaySlideEditPopupBtn
+            slides={[showingSlide]}
+            display={campusDisplay}
+            variant={'secondary'}
+            closeOnSaved
+            onSaved={(updatedSlides) => {
+              const updatedSlide = {
+                ...updatedSlides[0],
+                Asset: showingSlide?.Asset
+              };
+              setShowingSlide(updatedSlide);
+              // @ts-ignore
+              setSlideList({
+                ...(slideList || {}),
+                data: (slideList?.data || []).map(slide => slide.id === updatedSlide.id ? updatedSlide : slide),
+              })
+            }}
+          >
+            <Icons.Pencil /> Edit
+          </CampusDisplaySlideEditPopupBtn>
+
+        </FlexContainer>
         <CampusDisplayShowSlide
           slide={showingSlide}
           campusDisplay={campusDisplay}

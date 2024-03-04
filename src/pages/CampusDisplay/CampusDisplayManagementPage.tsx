@@ -1,255 +1,233 @@
 import Page from "../../layouts/Page";
 import CampusDisplayManagementAdminPage from "./CampusDisplayManagementAdminPage";
 import { MGGS_MODULE_ID_CAMPUS_DISPLAY } from "../../types/modules/iModuleUser";
-import PanelTitle from "../../components/PanelTitle";
-import { FlexContainer } from "../../styles";
-import CampusDisplaySelector from "../../components/CampusDisplay/Playlist/CampusDisplaySelector";
 import styled from "styled-components";
 import React, { useEffect, useState } from "react";
-import iCampusDisplay from "../../types/CampusDisplay/iCampusDisplay";
-import SchoolLogo from "../../components/SchoolLogo";
-import CampusDisplayEditPanel from "../../components/CampusDisplay/Playlist/CampusDisplayEditPanel";
-import iCampusDisplaySlide from "../../types/CampusDisplay/iCampusDisplaySlide";
 import * as Icons from "react-bootstrap-icons";
-import CampusDisplaySlideEditPopupBtn from "../../components/CampusDisplay/DisplaySlide/CampusDisplaySlideEditPopupBtn";
-import MathHelper from "../../helper/MathHelper";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
-import DeleteConfirmPopupBtn from "../../components/common/DeleteConfirm/DeleteConfirmPopupBtn";
-import {Alert, Button} from "react-bootstrap";
-import { useSelector } from "react-redux";
-import { RootState } from "../../redux/makeReduxStore";
-import CampusDisplaySlideService from "../../services/CampusDisplay/CampusDisplaySlideService";
-import CampusDisplayingAtLocationPopupBtn from "../../components/CampusDisplay/DisplayLocation/CampusDisplayingAtLocationPopupBtn";
-import CampusDisplaySlideCreatePopupBtn from "../../components/CampusDisplay/DisplaySlide/CampusDisplaySlideCreatePopupBtn";
-import * as _ from "lodash";
-import Toaster, {TOAST_TYPE_SUCCESS} from '../../services/Toaster';
-import UtilsService from '../../services/UtilsService';
-import {URL_CAMPUS_DISPLAY_PAGE} from '../../Url';
+import { Button } from "react-bootstrap";
+import UtilsService from "../../services/UtilsService";
+import { URL_CAMPUS_DISPLAY_PAGE } from "../../Url";
+import PlayListEditPanel from "../../components/CampusDisplay/Playlist/PlayListEditPanel";
+import iCampusDisplayLocation from "../../types/CampusDisplay/iCampusDisplayLocation";
+import PageLoadingSpinner from "../../components/common/PageLoadingSpinner";
+import { FlexContainer } from "../../styles";
+import CampusDisplayLocationSelector from "../../components/CampusDisplay/DisplayLocation/CampusDisplayLocationSelector";
+import PageNotFound from "../../components/PageNotFound";
+import CampusDisplayLocationService from "../../services/CampusDisplay/CampusDisplayLocationService";
+import Toaster from "../../services/Toaster";
+import iCampusDisplay from "../../types/CampusDisplay/iCampusDisplay";
+import PanelTitle from "../../components/PanelTitle";
+import Table, { iTableColumn } from "../../components/common/Table";
+import MathHelper from "../../helper/MathHelper";
+import CampusDisplayLocationEditPopupBtn from "../../components/CampusDisplay/DisplayLocation/CampusDisplayLocationEditPopupBtn";
 
 const Wrapper = styled.div`
-  h6 {
-    margin: 0px;
+  .init-page {
+    width: 40%;
+    min-width: 400px;
+    margin: 2rem auto;
+    padding-left: 0px;
+    padding-right: 0px;
+  }
+  .location-list-panel {
+    flex: 1;
   }
 
-  .content-wrapper {
-    margin-top: 1rem;
+  .playlist-panel {
+    flex: auto;
+    padding-left: 1rem;
   }
 
-  .selecting-display {
-    margin: 0px auto;
-    text-align: center;
-    .logo {
-      width: 80%;
-      max-width: 200px;
-      min-width: 120px;
-      margin-bottom: 1.3rem;
-    }
-  }
-
-  .campus-display-selector {
-    width: 200px;
+  .location-selector {
+    min-width: 280px;
     [class$="-menu"] {
-      [class$="-option"] {
-        color: black;
-      }
+      color: black;
     }
   }
-  .showing-at-location {
-    color: white !important;
+
+  .playlist-panel {
+    .panel-title {
+      background-color: rgb(90, 90, 90);
+    }
+    .content-wrapper {
+      margin-top: 4px;
+    }
   }
 `;
 const CampusDisplayManagementPage = () => {
-  const { user } = useSelector((state: RootState) => state.auth);
-  const [showingDisplay, setShowingDisplay] = useState<iCampusDisplay | null>(
+  const [isLoading, setIsLoading] = useState(false);
+  const [location, setLocation] = useState<iCampusDisplayLocation | null>(null);
+  const [count, setCount] = useState(0);
+  const [playLists, setPlayLists] = useState<iCampusDisplay[]>([]);
+  const [defaultPlayList, setDefaultPlayList] = useState<iCampusDisplay | null>(
     null
   );
-  const [count, setCount] = useState(0);
-  const [showBulkOptions, setShowBulkOptions] = useState(false);
-  const [slides, setSlides] = useState<iCampusDisplaySlide[]>([]);
-  const [selectedSlides, setSelectedSlides] = useState<iCampusDisplaySlide[]>(
-    []
-  );
+  const [
+    selectedPlayList,
+    setSelectedPlayList
+  ] = useState<iCampusDisplay | null>(null);
 
   useEffect(() => {
-    setShowBulkOptions(false);
-    setSelectedSlides([]);
-  }, [showingDisplay]);
+    let isCancelled = false;
+    setIsLoading(true);
+    CampusDisplayLocationService.getAll({
+      where: JSON.stringify({
+        id: location?.id,
+        isActive: true
+      }),
+      include: "CampusDisplay"
+    })
+      .then(resp => {
+        if (isCancelled === true) {
+          return;
+        }
+        const data = resp.data || [];
+        const lists = (data.length > 0 ? [data[0].CampusDisplay] : []).filter(
+          list => list !== null
+        );
+        setSelectedPlayList(null);
+        // @ts-ignore
+        setPlayLists([]);
+        // @ts-ignore
+        setDefaultPlayList(lists.length > 0 ? lists[0] : null);
+      })
+      .catch(err => {
+        if (isCancelled === true) {
+          return;
+        }
+        Toaster.showApiError(err);
+      })
+      .finally(() => {
+        if (isCancelled === true) {
+          return;
+        }
+        setIsLoading(false);
+      });
+    return () => {
+      isCancelled = true;
+    };
+  }, [location?.id, count]);
+
+  const getLocationSelector = () => {
+    return (
+      <CampusDisplayLocationSelector
+        className={"location-selector"}
+        values={
+          // @ts-ignore
+          `${location?.id || ""}`.trim() !== ""
+            ? // @ts-ignore
+              [`${location?.id || ""}`.trim()]
+            : undefined
+        }
+        onSelect={option => {
+          setLocation(
+            // @ts-ignore
+            `${option?.value || ""}`.trim() === ""
+              ? null
+              : // @ts-ignore
+                option.data
+          );
+        }}
+      />
+    );
+  };
 
   const getContent = () => {
-    if (!showingDisplay || `${showingDisplay?.id || ""}`.trim() === "") {
+    if (isLoading === true) {
+      return <PageLoadingSpinner />;
+    }
+
+    if (location === null) {
       return (
-        <div className={"selecting-display"}>
-          <div>
-            <SchoolLogo className={"logo"} />
-            <h3 className={"text-center text-muted"}>
-              Please select a play list above to edit
-            </h3>
-          </div>
-        </div>
+        <PageNotFound
+          className={"init-page"}
+          title={"select a location"}
+          description={"Please select a location below:"}
+          primaryBtn={getLocationSelector()}
+          secondaryBtn={<div />}
+        />
       );
     }
+
     return (
-      <CampusDisplayEditPanel
-        campusDisplay={showingDisplay}
-        onSetShowingBulkOptions={showing => setShowBulkOptions(showing)}
-        onSlidesSelected={slides => setSelectedSlides(slides)}
-        selectedSlides={selectedSlides}
-        showingBulkOptions={showBulkOptions}
-        onSlidesLoaded={sls => setSlides(sls)}
-        forceReload={count}
-      />
-    );
-  };
+      <FlexContainer className={"justify-content-between"}>
+        <div className={"location-list-panel"}>
+          <PanelTitle>
+            <FlexContainer className={"align-items-center with-gap lg-gap"}>
+              <div>Location: </div>
+              {getLocationSelector()}
+              {location ? (
+                <CampusDisplayLocationEditPopupBtn
+                  variant={"secondary"}
+                  campusDisplayLocation={location}
+                  size={"sm"}
+                  onSaved={() => setCount(MathHelper.add(count, 1))}
+                >
+                  <Icons.Pencil /> Edit
+                </CampusDisplayLocationEditPopupBtn>
+              ) : null}
+            </FlexContainer>
+          </PanelTitle>
+          <Table
+            hover
+            rows={playLists}
+            columns={[
+              {
+                key: "playlist",
+                header: (col: iTableColumn) => {
+                  return <th key={col.key}>Play List </th>;
+                },
+                cell: (col, data: iCampusDisplay) => {
+                  return (
+                    <td key={col.key}>
+                      <Button
+                        variant={"link"}
+                        size={"sm"}
+                        onClick={() => setSelectedPlayList(data)}
+                      >
+                        {data.name}
+                      </Button>{" "}
+                    </td>
+                  );
+                }
+              }
+            ]}
+          />
 
-  const getAllSlidesSelected = () => {
-    if (slides.length <= 0 || selectedSlides.length <= 0) {
-      return 0;
-    }
-
-    const selectedIds = _.uniqBy(selectedSlides, slide => slide.id);
-    const slideIds = _.uniqBy(slides, slide => slide.id);
-    if (selectedIds.length >= slideIds.length) {
-      return 1;
-    }
-
-    return 0.5; // not all selected
-  };
-
-  const getShowBulkOptionCheck = () => {
-    if (
-      !showingDisplay ||
-      `${showingDisplay?.id || ""}`.trim() === "" ||
-      slides.length <= 0
-    ) {
-      return null;
-    }
-
-    const isAllSelected = getAllSlidesSelected();
-    return (
-      <FlexContainer className={"with-gap lg-gap align-items-center"}>
-        <FlexContainer
-          className={"cursor-pointer with-gap align-items-center"}
-          onClick={() => {
-            const option = !showBulkOptions
-            if(option !== true) {
-              setSelectedSlides([])
-            }
-            setShowBulkOptions(option);
-          }}
-        >
-          {showBulkOptions === true ? (
-            <Icons.CheckSquareFill />
-          ) : (
-            <Icons.Square />
-          )}
-          <div style={{ marginLeft: "4px" }}>Bulk Actions</div>
-        </FlexContainer>
-
-        {(showBulkOptions === true && slides.length > 0) ? (
-          <FlexContainer
-            className={"cursor-pointer with-gap align-items-center"}
-            onClick={() => {
-              setSelectedSlides(isAllSelected !== 1 ? slides : []);
-            }}
-          >
-            {isAllSelected === 1 ? (
-              <Icons.CheckSquareFill />
-            ) : isAllSelected === 0 ? (
-              <Icons.Square />
-            ) : (
-              <Icons.SquareHalf />
-            )}
-            <div style={{ marginLeft: "4px" }}>Select all</div>
-          </FlexContainer>
-        ) : null}
+          <Table
+            hover
+            rows={defaultPlayList ? [defaultPlayList] : []}
+            columns={[
+              {
+                key: "playlist",
+                header: (col: iTableColumn) => {
+                  return <th key={col.key}>Default <small className={'text-muted'}>Change it via Edit btn above</small> </th>;
+                },
+                cell: (col, data: iCampusDisplay) => {
+                  return (
+                    <td key={col.key}>
+                      <Button
+                        variant={"link"}
+                        size={"sm"}
+                        onClick={() => setSelectedPlayList(data)}
+                      >
+                        {data.name}
+                      </Button>{" "}
+                    </td>
+                  );
+                }
+              }
+            ]}
+          />
+        </div>
+        {selectedPlayList === null ? null : (
+          <PlayListEditPanel
+            className={"playlist-panel"}
+            playList={selectedPlayList}
+          />
+        )}
       </FlexContainer>
-    );
-  };
-
-  const getNewSlidesBtn = () => {
-    if (!showingDisplay || `${showingDisplay?.id || ""}`.trim() === "") {
-      return null;
-    }
-    return (
-      <CampusDisplaySlideCreatePopupBtn
-        display={showingDisplay}
-        variant={"success"}
-        size={"sm"}
-        closeOnSaved
-        onSaved={() => setCount(MathHelper.add(count, 1))}
-      >
-        <Icons.Plus /> New Slide(s)
-      </CampusDisplaySlideCreatePopupBtn>
-    );
-  };
-
-  const getDisplayToLocationSelector = () => {
-    if (!showingDisplay || `${showingDisplay?.id || ""}`.trim() === "") {
-      return null;
-    }
-    return (
-      <CampusDisplayingAtLocationPopupBtn
-        displayId={showingDisplay?.id}
-        variant={"link"}
-        size={"sm"}
-        className={"showing-at-location"}
-      />
-    );
-  };
-
-  const doDelete = (slides: iCampusDisplaySlide[]) => {
-    return Promise.all(
-      slides.map(slide => {
-        return CampusDisplaySlideService.deactivate(slide.id);
-      })
-    );
-  };
-
-  const getBulkOptions = () => {
-    if (
-      !showingDisplay ||
-      `${showingDisplay?.id || ""}`.trim() === "" ||
-      selectedSlides.length <= 0 ||
-      showBulkOptions !== true
-    ) {
-      return null;
-    }
-    return (
-      <ButtonGroup className={"bulk-options-btns"}>
-        <DeleteConfirmPopupBtn
-          variant={"danger"}
-          deletingFn={() => doDelete(selectedSlides)}
-          deletedCallbackFn={() => {
-            Toaster.showToast('Slides deleted.', TOAST_TYPE_SUCCESS);
-            setCount(MathHelper.add(count, 1));
-          }}
-          size={"sm"}
-          description={
-            <>
-              <h5>
-                You are about to permanently delete these{" "}
-                {selectedSlides.length} slide(s)
-              </h5>
-              <Alert variant={"danger"}>This action can NOT be reversed.</Alert>
-            </>
-          }
-          confirmString={`${user?.synergyId || "na"}`}
-        >
-          <Icons.Trash /> Delete {selectedSlides.length} slide
-          {selectedSlides.length > 1 ? "s" : ""}
-        </DeleteConfirmPopupBtn>
-
-        <CampusDisplaySlideEditPopupBtn
-          display={showingDisplay}
-          size={"sm"}
-          slides={selectedSlides}
-          onSaved={() => setCount(MathHelper.add(count, 1))}
-          variant={"secondary"}
-        >
-          <Icons.Pencil /> Edit {selectedSlides.length} slide
-          {selectedSlides.length > 1 ? "s" : ""}
-        </CampusDisplaySlideEditPopupBtn>
-      </ButtonGroup>
     );
   };
 
@@ -260,45 +238,18 @@ const CampusDisplayManagementPage = () => {
       moduleId={MGGS_MODULE_ID_CAMPUS_DISPLAY}
       extraBtns={
         <ButtonGroup>
-          <Button variant={'link'} size={'sm'} target={'__BLANK'} href={UtilsService.getFullUrl(URL_CAMPUS_DISPLAY_PAGE)}>
+          <Button
+            variant={"link"}
+            size={"sm"}
+            target={"__BLANK"}
+            href={UtilsService.getFullUrl(URL_CAMPUS_DISPLAY_PAGE)}
+          >
             <Icons.PlayBtnFill /> Player
           </Button>
         </ButtonGroup>
       }
     >
-      <Wrapper>
-        <PanelTitle>
-          <FlexContainer
-            className={"justify-content-between align-items-center"}
-          >
-            <FlexContainer className={"with-gap lg-gap align-items-center"}>
-              <h6 className={'text-white'}>Playlist</h6>
-              <CampusDisplaySelector
-                placeholder={"Select a play list ..."}
-                className={"campus-display-selector"}
-                values={showingDisplay ? [showingDisplay?.id] : undefined}
-                onSelect={option => {
-                  // @ts-ignore
-                  setShowingDisplay(option.data || null);
-                }}
-              />
-              {getNewSlidesBtn()}
-              {getDisplayToLocationSelector()}
-            </FlexContainer>
-
-            <FlexContainer
-              className={
-                "justify-content-between align-items-center with-gap lg-gap"
-              }
-            >
-              {getShowBulkOptionCheck()}
-              {getBulkOptions()}
-            </FlexContainer>
-          </FlexContainer>
-        </PanelTitle>
-
-        <div className={"content-wrapper"}>{getContent()}</div>
-      </Wrapper>
+      <Wrapper>{getContent()}</Wrapper>
     </Page>
   );
 };

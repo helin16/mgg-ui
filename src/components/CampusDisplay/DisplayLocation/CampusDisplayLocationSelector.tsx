@@ -78,6 +78,7 @@ const CampusDisplayLocationSelector = ({values, onSelect, allowClear, className,
   if (isLoading === true) {
     return <Spinner animation={'border'} size={'sm'}/>;
   }
+
   return (
     <SelectBox
       isDisabled={isDisabled}

@@ -72,7 +72,7 @@ const CampusDisplayLocationList = () => {
           return (
             <td key={column.key}>
               <CampusDisplayLocationEditPopupBtn
-                variant={"link"}
+                variant={"secondary"}
                 campusDisplayLocation={data}
                 size={"sm"}
                 onSaved={() => setCount(MathHelper.add(count, 1))}

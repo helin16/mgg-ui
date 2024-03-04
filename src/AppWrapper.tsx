@@ -3,6 +3,7 @@ import styled from 'styled-components';
 export const mainBlue = `#0066b0`;
 export const lightBlue = `#d9edf7`;
 export const mainRed = `#a50000`;
+export const mainGray = `#cecece`;
 export const mainGreen = `#198754`;
 export const lightGreen = `#3AC1CD`;
 export const dangerRed = `#dc3545`;

@@ -25,12 +25,13 @@ const reloadPage = () => {
 
 type iPageNotFound = {
   title?: string | React.ReactElement;
+  className?: string;
   description?: string | React.ReactElement;
   secondaryBtn?: React.ReactElement;
   primaryBtn?: React.ReactElement
 }
-const PageNotFound = ({title, description, primaryBtn, secondaryBtn}: iPageNotFound) => {
-  return <Wrapper>
+const PageNotFound = ({className, title, description, primaryBtn, secondaryBtn}: iPageNotFound) => {
+  return <Wrapper className={className}>
     <div className={'logo'}>
       <SchoolLogo />
     </div>

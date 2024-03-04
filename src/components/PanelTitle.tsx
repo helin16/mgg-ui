@@ -10,7 +10,7 @@ const Wrapper = styled.div`
 type iPanelTitle = {children: any, className?: string};
 const PanelTitle = ({children, className}: iPanelTitle) => {
   return (
-    <Wrapper className={className}>{children}</Wrapper>
+    <Wrapper className={`${className || ''} panel-title`}>{children}</Wrapper>
   )
 };
 

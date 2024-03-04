@@ -87,12 +87,8 @@ const DraggableItem = React.forwardRef(
       >
         <AssetThumbnail asset={slide.Asset} className={'thumbnail'}/>
         {showOptions === true ? (
-          <div className={"options-wrapper"}>
-            <input
-              type={"checkbox"}
-              checked={isSelected}
-              onChange={event => onSelected(slide, event.target.checked)}
-            />
+          <div className={`options-wrapper`}>
+            {isSelected === true ? <Icons.CheckSquareFill className={'bg-primary'}/> : <Icons.Square style={{backgroundColor: 'white'}}/>}
           </div>
         ) : null}
       </div>
@@ -199,7 +195,10 @@ const CampusDisplayDraggableSlides = ({
                         showOptions={showOptions}
                         isSelected={selectedSlideIds.indexOf(slide.id) >= 0}
                         onSelected={handleChecked}
-                        onClick={() => onSlideClick && onSlideClick(slide)}
+                        onClick={() => {
+                          onSlideClick && onSlideClick(slide);
+                          handleChecked && handleChecked(slide, selectedSlideIds.indexOf(slide.id) < 0)
+                        }}
                       />
                     )}
                   </Draggable>
