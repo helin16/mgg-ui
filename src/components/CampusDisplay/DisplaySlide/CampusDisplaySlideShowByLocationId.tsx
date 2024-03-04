@@ -249,6 +249,10 @@ const CampusDisplaySlideShowByLocationId = ({
     onLocationLoaded && onLocationLoaded(displayLocation);
   }, [displayLocation, onLocationLoaded]);
 
+  const reloadWindow = () => {
+    window.location.reload(); // Reload the page
+  }
+
   useEffect(() => {
     let reloadTimeOut: NodeJS.Timeout | null = null;
     const calculateTimeUntilMidnight = () => {
@@ -262,7 +266,31 @@ const CampusDisplaySlideShowByLocationId = ({
       const timeUntilMidnight = calculateTimeUntilMidnight();
 
       reloadTimeOut = setTimeout(() => {
-        window.location.reload(); // Reload the page
+        reloadWindow(); // Reload the page
+      }, timeUntilMidnight);
+    };
+
+    reloadAtMidnight(); // Initial schedule
+
+    return () => {
+      reloadTimeOut && clearTimeout(reloadTimeOut);
+    };
+  }, []);
+
+  useEffect(() => {
+    let reloadTimeOut: NodeJS.Timeout | null = null;
+    const calculateTimeUntilMidnight = () => {
+      const now = moment();
+      const midnight = moment().endOf("day");
+
+      return midnight.diff(now);
+    };
+
+    const reloadAtMidnight = () => {
+      const timeUntilMidnight = calculateTimeUntilMidnight();
+
+      reloadTimeOut = setTimeout(() => {
+        reloadWindow(); // Reload the page
       }, timeUntilMidnight);
     };
 
@@ -295,7 +323,7 @@ const CampusDisplaySlideShowByLocationId = ({
           if ((resp.settings?.forceReload || 0) > (displayLocation?.version || 0)) {
             Toaster.showToast('Reloaded', TOAST_TYPE_SUCCESS);
             LocalStorageService.removeItem(STORAGE_COLUMN_KEY_CAMPUS_DISPLAY_SLIDES);
-            window.location.reload();
+            reloadWindow();
             return;
           }
           setCount(prev => MathHelper.add(prev, 1));
@@ -361,7 +389,7 @@ const CampusDisplaySlideShowByLocationId = ({
     }
 
     return (
-      <CampusDisplaySlideShow slides={cdSlides} playList={campusDisplay} />
+      <CampusDisplaySlideShow slides={cdSlides} playList={campusDisplay} onError={() => reloadWindow()}/>
     );
   };
 
