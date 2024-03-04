@@ -15,7 +15,7 @@ const AlumniRequestPage = () => {
       moduleId={MGGS_MODULE_ID_ALUMNI_REQUEST}
       AdminPage={AlumniRequestAdminPage}
       extraBtns={
-        <Button variant={'link'} href={`${process.env.REACT_APP_URL || ''}${URL_ALUMNI_REGISTRATION}`} target={'__BLANK'}>
+        <Button variant={'link'} href={`${process.env.PUBLIC_URL || ''}${URL_ALUMNI_REGISTRATION}`} target={'__BLANK'}>
           <Icons.Link45deg /> Registration Page
         </Button>
       }

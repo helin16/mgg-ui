@@ -222,7 +222,7 @@ const PowerBIListPanel = () => {
               size={"sm"}
               title={'View the report in mConnect'}
               target={'__BLANK'}
-              href={UtilsService.getModuleUrl(URL_POWER_BI_DISPLAY.replace(':reportId', data.id), process.env.REACT_APP_URL || '')}
+              href={UtilsService.getModuleUrl(URL_POWER_BI_DISPLAY.replace(':reportId', data.id), process.env.PUBLIC_URL || '')}
             >
               <Icons.Link45deg />
             </Button>

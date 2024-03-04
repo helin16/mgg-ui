@@ -47,7 +47,7 @@ const PowerBIListItemCreateOrEditPopupBtn = ({
             target={"__BLANK"}
             href={UtilsService.getModuleUrl(
               URL_POWER_BI_DISPLAY.replace(":reportId", report.id),
-              process.env.REACT_APP_URL || ""
+              process.env.PUBLIC_URL || ""
             )}
           >
             <Icons.Link45deg /> View Report
