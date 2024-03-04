@@ -29,7 +29,7 @@ class AppLoader {
       mainCss.id = cssId;
       mainCss.rel = "stylesheet";
       mainCss.type = "text/css";
-      mainCss.href = `${BASE_URL}${mainCssUrl}`;
+      mainCss.href = `${BASE_URL.replace(BASE_URL, '')}${mainCssUrl}`;
       header.appendChild(mainCss);
     }
 
@@ -38,7 +38,7 @@ class AppLoader {
       mainJs.id = jsId;
       mainJs.defer = true;
       mainJs.async = true;
-      mainJs.src = `${BASE_URL}${mainJsUrl}`;
+      mainJs.src = `${BASE_URL.replace(BASE_URL, '')}${mainJsUrl}`;
       document.body.appendChild(mainJs);
     }
   };
