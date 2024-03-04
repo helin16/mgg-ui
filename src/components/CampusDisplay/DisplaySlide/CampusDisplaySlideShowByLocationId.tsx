@@ -251,7 +251,10 @@ const CampusDisplaySlideShowByLocationId = ({
           ) {
             return;
           }
-
+          if ((resp.settings?.forceReload || 0) > (displayLocation?.version || 0)) {
+            window.location.reload();
+            return;
+          }
           setCount(prev => MathHelper.add(prev, 1));
           return;
         })
