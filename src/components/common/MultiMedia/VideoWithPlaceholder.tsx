@@ -29,7 +29,7 @@ const VideoWithPlaceholder = ({
           const data = await response.json();
           // Assuming the file you need is named reactPlayerFilePlayer.js
           const scriptUrl = data['reactPlayerFilePlayer.js'];
-          setScriptUrl(scriptUrl);
+          setScriptUrl(`${process.env.REACT_APP_URL || ''}${scriptUrl}`);
         } else {
           console.error('Failed to fetch asset manifest');
         }
