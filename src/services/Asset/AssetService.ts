@@ -34,11 +34,12 @@ const readBlobAsDataURL = (blob: Blob) => {
   });
 };
 
-const downloadAssetToBeBase64 = async (url: string) => {
-  const response = await axios.get(url, {
+const downloadAssetToBeBase64 = (url: string) => {
+  return axios.get(url, {
     responseType: "blob"
-  });
-  return await readBlobAsDataURL(response.data);
+  }).then(resp => {
+    return readBlobAsDataURL(resp.data)
+  })
 }
 
 const AssetService = {

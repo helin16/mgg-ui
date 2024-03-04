@@ -4,7 +4,7 @@ import iCampusDisplaySlide from "../../../types/CampusDisplay/iCampusDisplaySlid
 import CampusDisplayDefaultSlide from "./CampusDisplayDefaultSlide";
 import iCampusDisplay from "../../../types/CampusDisplay/iCampusDisplay";
 import CampusDisplaySlideService from "../../../services/CampusDisplay/CampusDisplaySlideService";
-import Toaster from "../../../services/Toaster";
+import Toaster, {TOAST_TYPE_SUCCESS} from "../../../services/Toaster";
 import PageLoadingSpinner from "../../common/PageLoadingSpinner";
 import { Button } from "react-bootstrap";
 import MathHelper from "../../../helper/MathHelper";
@@ -159,6 +159,7 @@ const CampusDisplaySlideShowByLocationId = ({
           };
         }, {})
     };
+    // console.log('localSlides', localSlides);
 
     LocalStorageService.setItem(STORAGE_COLUMN_KEY_CAMPUS_DISPLAY_SLIDES, localSlides);
     setCdSlides(prevSlides => {
@@ -172,7 +173,7 @@ const CampusDisplaySlideShowByLocationId = ({
       }
       return prevSlides;
     });
-  }, []);
+  }, [locationId]);
 
   useEffect(() => {
     let isCanceled = false;
@@ -252,6 +253,7 @@ const CampusDisplaySlideShowByLocationId = ({
             return;
           }
           if ((resp.settings?.forceReload || 0) > (displayLocation?.version || 0)) {
+            Toaster.showToast('Reloaded', TOAST_TYPE_SUCCESS);
             window.location.reload();
             return;
           }

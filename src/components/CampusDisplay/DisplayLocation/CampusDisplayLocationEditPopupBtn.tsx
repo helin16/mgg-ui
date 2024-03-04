@@ -11,6 +11,7 @@ import Toaster, { TOAST_TYPE_SUCCESS } from "../../../services/Toaster";
 import CampusDisplayLocationService from "../../../services/CampusDisplay/CampusDisplayLocationService";
 import SectionDiv from "../../common/SectionDiv";
 import CampusDisplaySelector from "../Playlist/CampusDisplaySelector";
+import moment from 'moment-timezone';
 
 type iCampusDisplayLocationPopupBtn = ButtonProps & {
   campusDisplayLocation?: iCampusDisplayLocation;
@@ -24,6 +25,7 @@ const CampusDisplayLocationEditPopupBtn = ({
 }: iCampusDisplayLocationPopupBtn) => {
   const [isSaving, setIsSaving] = useState(false);
   const [showingPopup, setShowingPopup] = useState(false);
+  const [forceReload, setForceReload] = useState(false);
   const [errors, setErrors] = useState<iErrorMap>({});
   const [
     editingDisplayLocation,
@@ -56,12 +58,20 @@ const CampusDisplayLocationEditPopupBtn = ({
       return;
     }
 
+    const editing = editingDisplayLocation || {settings: {}};
+    const data = {
+      ...editing,
+      settings: {
+        ...(editing?.settings || {}),
+        ...(forceReload === true ? {forceReload: moment().unix()} : {}),
+      }
+    }
     const func =
       `${editingDisplayLocation?.id || ""}`.trim() === ""
-        ? CampusDisplayLocationService.create(editingDisplayLocation || {})
+        ? CampusDisplayLocationService.create(data)
         : CampusDisplayLocationService.update(
             editingDisplayLocation?.id || "",
-            editingDisplayLocation || {}
+            data
           );
     setIsSaving(true);
     func
@@ -131,11 +141,24 @@ const CampusDisplayLocationEditPopupBtn = ({
                   ? [editingDisplayLocation?.displayId]
                   : undefined
               }
-              onSelect={(option) => {
+              onSelect={option => {
                 // @ts-ignore
-                setDisplayValue("displayId", option.value || "")
+                setDisplayValue("displayId", option.value || "");
               }}
             />
+          </SectionDiv>
+          <SectionDiv>
+            <FormLabel label={"Force Reload?"} />
+            <h5
+              className={"cursor-pointer"}
+              onClick={() => setForceReload(!forceReload)}
+            >
+              {forceReload === true ? (
+                <Icons.Check2Square className={"text-danger"} />
+              ) : (
+                <Icons.Square />
+              )}
+            </h5>
           </SectionDiv>
         </div>
       </PopupModal>
