@@ -14,6 +14,7 @@ type iAsset = iBaseType & {
   comments?: string | null;
   url?: string | null;
   downloadUrl?: string;
+  streamUrl?: string | null;
   externalObj?: any | null;
   externalId?: string | null;
 };

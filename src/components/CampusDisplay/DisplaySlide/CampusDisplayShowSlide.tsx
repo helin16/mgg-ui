@@ -110,8 +110,7 @@ const CampusDisplayShowSlide = ({
       return (
         <VideoWithPlaceholder
           className={`${className || ""} slide-content`}
-          src={`${slide?.Asset?.url || ""}`.trim().replace('/view/external/', '/stream/external/')}
-          // src={slide?.Asset?.url || ""}
+          src={slide?.Asset?.streamUrl || ""}
           controls={true}
           {...videoProps}
         />
