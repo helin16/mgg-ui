@@ -3,7 +3,7 @@ import React from "react";
 import styled from "styled-components";
 import iCampusDisplay from "../../../types/CampusDisplay/iCampusDisplay";
 import CampusDisplayDefaultSlide from "./CampusDisplayDefaultSlide";
-import { CD_DISPLAY_MODE_FULL_SCREEN_FILL } from "./CDSlideDisplayModeSelector";
+import {CD_DISPLAY_MODE_FULL_SCREEN_FILL, CD_DISPLAY_MODE_FULL_SCREEN_FIT} from "./CDSlideDisplayModeSelector";
 import ImageWithPlaceholder, {
   getImagePlaceHolder
 } from "../../common/MultiMedia/ImageWithPlaceholder";
@@ -73,6 +73,7 @@ const Wrapper = styled.div`
       object-fit: cover !important;
     }
     .${CD_DISPLAY_MODE_FULL_SCREEN_FILL},
+    .${CD_DISPLAY_MODE_FULL_SCREEN_FIT},
     video {
       width: 100% !important;
       height: 100% !important;
@@ -145,13 +146,9 @@ const CampusDisplayShowSlide = ({
       <>
         <div
           className={"bg-blurry"}
-          style={
-            isVideo() === true
-              ? { backgroundColor: "black" }
-              : {
-                  backgroundImage: `url(${url})`
-                }
-          }
+          style={{
+            backgroundImage: `url(${url}${isVideo() === true ? '?thumb=1' : ''})`
+          }}
         />
         {getContentDiv(url)}
       </>

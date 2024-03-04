@@ -4,7 +4,6 @@ import ImageWithPlaceholder from "../common/MultiMedia/ImageWithPlaceholder";
 import { FlexContainer } from "../../styles";
 import { Spinner } from "react-bootstrap";
 import * as Icons from "react-bootstrap-icons";
-import VideoWithPlaceholder from "../common/MultiMedia/VideoWithPlaceholder";
 
 type iAssetThumbnail = {
   asset: iAsset;
@@ -67,12 +66,10 @@ const AssetThumbnail = ({ asset, className, onClick }: iAssetThumbnail) => {
     ) {
       return (
         <>
-          <VideoWithPlaceholder
-            coverImg={getImagePlaceHolder()}
-            src={asset.url || ""}
-            width={"100%"}
-            height={"100%"}
-            className={"video-thumb"}
+          <ImageWithPlaceholder
+            src={`${asset.url || ""}?thumb=1`}
+            className={"asset-img"}
+            placeholder={getImagePlaceHolder()}
           />
           <FlexContainer
             className={

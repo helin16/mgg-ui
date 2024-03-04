@@ -34,11 +34,6 @@ const VideoWithPlaceholder = ({
         className={className}
         ref={playerRef}
         url={src}
-        config={{
-          file: {
-            forceHLS: true,
-          }
-        }}
         {...props}
       />
     );
