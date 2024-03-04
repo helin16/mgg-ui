@@ -1,7 +1,8 @@
 import styled from "styled-components";
-import CampusDisplaySlideShow from '../../components/CampusDisplay/DisplaySlide/CampusDisplaySlideShow';
 import {useParams} from 'react-router-dom';
 import {URL_CAMPUS_DISPLAY_PAGE} from '../../Url';
+import CampusDisplaySlideShowByLocationId
+  from '../../components/CampusDisplay/DisplaySlide/CampusDisplaySlideShowByLocationId';
 
 const Wrapper = styled.div`
   height: 100vh;
@@ -14,7 +15,7 @@ const CampusDisplayByLocationIdPage = () => {
   const { locationId } = useParams();
   return (
     <Wrapper>
-      <CampusDisplaySlideShow
+      <CampusDisplaySlideShowByLocationId
         locationId={locationId || ''}
         onCancel={() => {
           window.location.href = URL_CAMPUS_DISPLAY_PAGE

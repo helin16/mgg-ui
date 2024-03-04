@@ -1,6 +1,7 @@
 import AppService, {iConfigParams} from '../AppService';
 import iPaginatedResult from '../../types/iPaginatedResult';
 import iAsset from '../../types/asset/iAsset';
+import axios from 'axios';
 
 export const HEADER_NAME_ASSET_TYPE = 'X-MGGS-ASSET-TYPE';
 
@@ -14,15 +15,37 @@ const upload = (params: iConfigParams = {}, config?: iConfigParams): Promise<iAs
   return AppService.post(`${endPoint}/upload`, params, config).then(resp => resp.data);
 }
 
-
 const deactivate = (id: string, params?: iConfigParams, config?: iConfigParams): Promise<iAsset> => {
   return AppService.delete(`${endPoint}/${id}`, params, config).then(resp => resp.data);
+}
+
+const readBlobAsDataURL = (blob: Blob) => {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (reader.result) {
+        resolve(reader.result as string);
+      } else {
+        reject(new Error("Failed to read the blob as Data URL."));
+      }
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+};
+
+const downloadAssetToBeBase64 = async (url: string) => {
+  const response = await axios.get(url, {
+    responseType: "blob"
+  });
+  return await readBlobAsDataURL(response.data);
 }
 
 const AssetService = {
   upload,
   getAll,
   deactivate,
+  downloadAssetToBeBase64,
 }
 
 export default AssetService;

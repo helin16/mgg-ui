@@ -2,26 +2,15 @@ import styled from "styled-components";
 import React, { useEffect, useRef, useState } from "react";
 import iCampusDisplaySlide from "../../../types/CampusDisplay/iCampusDisplaySlide";
 import CampusDisplayDefaultSlide from "./CampusDisplayDefaultSlide";
-import iCampusDisplay from "../../../types/CampusDisplay/iCampusDisplay";
-import CampusDisplaySlideService from "../../../services/CampusDisplay/CampusDisplaySlideService";
-import Toaster from "../../../services/Toaster";
-import PageLoadingSpinner from "../../common/PageLoadingSpinner";
-import { Button, Carousel } from "react-bootstrap";
-import MathHelper from "../../../helper/MathHelper";
-import CampusDisplayLocationService from "../../../services/CampusDisplay/CampusDisplayLocationService";
-import Page401 from "../../Page401";
-import { FlexContainer } from "../../../styles";
+import { Carousel } from "react-bootstrap";
 import moment from "moment-timezone";
 import CampusDisplayShowSlide from "./CampusDisplayShowSlide";
-import iCampusDisplayLocation from "../../../types/CampusDisplay/iCampusDisplayLocation";
-import SchoolLogo from '../../SchoolLogo';
-import SectionDiv from '../../common/SectionDiv';
+import iCampusDisplay from '../../../types/CampusDisplay/iCampusDisplay';
 
-type iCampusDisplaySlideShowPanel = {
-  locationId: string;
+type iCampusDisplaySlideShow = {
   className?: string;
-  onCancel?: () => void;
-  onLocationLoaded?: (location: iCampusDisplayLocation | null) => void;
+  slides: iCampusDisplaySlide[];
+  playList: iCampusDisplay;
 };
 
 const Wrapper = styled.div`
@@ -40,111 +29,19 @@ const Wrapper = styled.div`
   }
 `;
 const CampusDisplaySlideShow = ({
-  locationId,
-  onCancel,
-  onLocationLoaded,
+  slides,
+  playList,
   className
-}: iCampusDisplaySlideShowPanel) => {
-  const slideShowingTime = 5000;
+}: iCampusDisplaySlideShow) => {
+  const defaultSlideShowingTime = 5000;
 
   const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(0);
   // @ts-ignore
   const carouselRef = useRef<Carousel>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [count, setCount] = useState(0);
-  const [cdSlides, setCdSlides] = useState<iCampusDisplaySlide[]>([]);
-  const [campusDisplay, setCampusDisplay] = useState<iCampusDisplay | null>(
-    null
-  );
-  const [
-    displayLocation,
-    setDisplayLocation
-  ] = useState<iCampusDisplayLocation | null>(null);
 
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
 
   useEffect(() => {
-    let isCanceled = false;
-
-    const getData = async () => {
-      const result = await CampusDisplayLocationService.getAll({
-        where: JSON.stringify({
-          isActive: true,
-          id: locationId
-        }),
-        perPage: 1,
-        include: "CampusDisplay"
-      });
-
-      const locations = result.data || [];
-      if (
-        locations.length <= 0 ||
-        `${locations[0].displayId || ""}`.trim() === ""
-      ) {
-        return;
-      }
-
-      const location = locations[0];
-      const display = location.CampusDisplay;
-
-      const slidesFromDB =
-        (
-          await CampusDisplaySlideService.getAll({
-            where: JSON.stringify({
-              isActive: true,
-              displayId: `${display?.id || ""}`.trim()
-            }),
-            include: "Asset",
-            perPage: 999999,
-            sort: "sortOrder:ASC"
-          })
-        ).data || [];
-
-      if (isCanceled) {
-        return;
-      }
-
-      setCampusDisplay(display || null);
-      setDisplayLocation(location || null);
-      const slideIdsFromDB = slidesFromDB.map(slide => slide.id);
-      setCdSlides(prevSlides => {
-        const currentSlideIds = prevSlides.map(slide => slide.id);
-        if (currentSlideIds !== slideIdsFromDB) {
-          return slidesFromDB;
-        }
-        return prevSlides;
-      });
-    };
-
-    if (count <= 0) {
-      setIsLoading(true);
-    }
-    getData()
-      .catch(err => {
-        if (isCanceled) {
-          return;
-        }
-        Toaster.showApiError(err);
-      })
-      .finally(() => {
-        if (isCanceled) {
-          return;
-        }
-        setIsLoading(false);
-      });
-
-    return () => {
-      isCanceled = true;
-    };
-  }, [locationId, count]);
-
-  useEffect(() => {
-    onLocationLoaded && onLocationLoaded(displayLocation);
-  }, [displayLocation, onLocationLoaded]);
-
-
-  useEffect(() => {
-
     let reloadTimeOut: NodeJS.Timeout | null = null;
     const calculateTimeUntilMidnight = () => {
       const now = moment();
@@ -165,106 +62,29 @@ const CampusDisplaySlideShow = ({
 
     return () => {
       reloadTimeOut && clearTimeout(reloadTimeOut);
-    }
+    };
   }, []);
-
-  useEffect(() => {
-    if (!displayLocation) {
-      return;
-    }
-    let isCanceled = false;
-    let timeout: NodeJS.Timeout | null = null;
-    const getData = () => {
-      return CampusDisplayLocationService.getById(displayLocation.id)
-        .then(resp => {
-          if (isCanceled) {
-            return;
-          }
-          // console.log('resp', resp, 'displayLocation', displayLocation);
-          if (
-            `${resp.id || ""}`.trim() === "" ||
-            resp.isActive !== true ||
-            (resp?.version || 0) <= (displayLocation?.version || 0)
-          ) {
-            // console.log('here');
-            return;
-          }
-
-          // console.log('here1');
-          setCount(prev => MathHelper.add(prev, 1));
-          return;
-        })
-        .catch(() => {
-          // don't do anything when you catch an error
-        })
-        .finally(() => {
-          if (isCanceled) {
-            return;
-          }
-          timeout = setTimeout(() => getData(), 30000);
-        });
-    };
-
-    getData();
-
-    return () => {
-      timeout && clearTimeout(timeout);
-      isCanceled = true;
-    };
-  }, [displayLocation]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
       if (isVideoPlaying !== true) {
         carouselRef.current?.next();
       }
-    }, slideShowingTime);
+    }, playList.settings?.slideInterval || defaultSlideShowingTime);
 
     return () => {
       clearInterval(intervalId);
     };
-  }, [isVideoPlaying, slideShowingTime]);
+  }, [isVideoPlaying, playList.settings?.slideInterval]);
 
   const handleSlide = (selectedIndex: number, e: any) => {
     setCurrentSlideIndex(selectedIndex);
   };
 
   const getContent = () => {
-    if (isLoading === true) {
-      return (
-        <FlexContainer
-          className={"no-display justify-content-center align-items-center flex-column"}
-        >
-          <SchoolLogo />
-          <SectionDiv>
-            <PageLoadingSpinner />
-          </SectionDiv>
-        </FlexContainer>
-      );
-    }
 
-    if (!campusDisplay || `${campusDisplay?.id || ""}`.trim() === "") {
-      return (
-        <FlexContainer
-          className={"no-display justify-content-center align-items-center"}
-        >
-          <Page401
-            title={"Can NOT find the campus display related to this location"}
-            btns={
-              <Button
-                variant={"primary"}
-                onClick={() => onCancel && onCancel()}
-              >
-                Select again
-              </Button>
-            }
-          />
-        </FlexContainer>
-      );
-    }
-
-    if (cdSlides.length <= 0) {
-      return <CampusDisplayDefaultSlide campusDisplay={campusDisplay} />;
+    if (slides.length <= 0) {
+      return <CampusDisplayDefaultSlide campusDisplay={playList} />;
     }
 
     return (
@@ -279,12 +99,12 @@ const CampusDisplaySlideShow = ({
         variant={"dark"}
         ref={carouselRef}
       >
-        {cdSlides.map((slide, index) => {
+        {slides.map((slide, index) => {
           return (
             <Carousel.Item key={slide.id}>
               <CampusDisplayShowSlide
                 slide={slide}
-                campusDisplay={campusDisplay}
+                campusDisplay={playList}
                 videoProps={{
                   controls: false,
                   playsinline: true,
@@ -294,7 +114,7 @@ const CampusDisplaySlideShow = ({
                     setIsVideoPlaying(false);
                     setTimeout(() => {
                       carouselRef.current?.next();
-                    }, 1000)
+                    }, 1000);
                     return;
                   },
                   onBuffer: () => {

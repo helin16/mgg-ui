@@ -2,6 +2,7 @@
 export const STORAGE_COLUMN_KEY_STAFF_LIST = 'cols_staff_list';
 export const STORAGE_COLUMN_KEY_STUDENT_LIST = 'cols_student_list';
 export const STORAGE_COLUMN_KEY_MY_CLASS_LIST = 'cols_my_class_list';
+export const STORAGE_COLUMN_KEY_CAMPUS_DISPLAY_SLIDES = 'cd_slides';
 
 const getTokenName = () => {
   return process.env.REACT_APP_LOCAL_USER_TOKEN_NAME || 'token';
