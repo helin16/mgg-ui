@@ -32,7 +32,8 @@ const getItem = (name: string) => {
 const setItem = (name: string, value: any) => {
   try {
     return localStorage.setItem(name, JSON.stringify(value));
-  } catch {
+  } catch (err) {
+    console.error('LocalStorageService.setItem', err);
     return localStorage.setItem(name, value);
   }
 };
