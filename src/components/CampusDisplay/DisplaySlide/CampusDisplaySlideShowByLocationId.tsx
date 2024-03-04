@@ -177,6 +177,11 @@ const CampusDisplaySlideShowByLocationId = ({
   useEffect(() => {
     let isCanceled = false;
 
+    if (count === 0) {
+      // clear all LocalStorage before start the initial load;
+      LocalStorageService.removeItem(STORAGE_COLUMN_KEY_CAMPUS_DISPLAY_SLIDES);
+    }
+
     if (count <= 0) {
       setIsLoading(true);
     }
