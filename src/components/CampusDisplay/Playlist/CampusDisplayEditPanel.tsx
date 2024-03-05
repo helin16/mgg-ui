@@ -201,7 +201,6 @@ const CampusDisplayEditPanel = ({
         </FlexContainer>
         <CampusDisplayShowSlide
           slide={showingSlide}
-          campusDisplay={campusDisplay}
           videoProps={{
             controls: true,
           }}

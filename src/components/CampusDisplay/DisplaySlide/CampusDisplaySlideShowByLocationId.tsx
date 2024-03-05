@@ -2,9 +2,8 @@ import styled from "styled-components";
 import React, { useCallback, useEffect, useState } from "react";
 import iCampusDisplaySlide from "../../../types/CampusDisplay/iCampusDisplaySlide";
 import CampusDisplayDefaultSlide from "./CampusDisplayDefaultSlide";
-import iCampusDisplay from "../../../types/CampusDisplay/iCampusDisplay";
 import CampusDisplaySlideService from "../../../services/CampusDisplay/CampusDisplaySlideService";
-import Toaster, {TOAST_TYPE_SUCCESS} from "../../../services/Toaster";
+import Toaster, { TOAST_TYPE_SUCCESS } from "../../../services/Toaster";
 import PageLoadingSpinner from "../../common/PageLoadingSpinner";
 import { Button } from "react-bootstrap";
 import MathHelper from "../../../helper/MathHelper";
@@ -16,6 +15,11 @@ import iCampusDisplayLocation from "../../../types/CampusDisplay/iCampusDisplayL
 import SchoolLogo from "../../SchoolLogo";
 import SectionDiv from "../../common/SectionDiv";
 import CampusDisplaySlideShow from "./CampusDisplaySlideShow";
+import CampusDisplayScheduleService from "../../../services/CampusDisplay/CampusDisplayScheduleService";
+import {OP_GTE, OP_LTE} from "../../../helper/ServiceHelper";
+import * as _ from "lodash";
+import iCampusDisplaySchedule from '../../../types/CampusDisplay/iCampusDisplaySchedule';
+
 type iCampusDisplaySlideShowPanel = {
   locationId: string;
   className?: string;
@@ -48,41 +52,74 @@ const CampusDisplaySlideShowByLocationId = ({
   const [isLoading, setIsLoading] = useState(false);
   const [count, setCount] = useState(0);
   const [cdSlides, setCdSlides] = useState<iCampusDisplaySlide[]>([]);
-  const [campusDisplay, setCampusDisplay] = useState<iCampusDisplay | null>(
-    null
-  );
+  const [playListIds, setPlayListIds] = useState<string[]>([]);
   const [
     displayLocation,
     setDisplayLocation
   ] = useState<iCampusDisplayLocation | null>(null);
 
-  const getSlidesFromDB = useCallback(async () => {
-    const result = await CampusDisplayLocationService.getAll({
-      where: JSON.stringify({
-        isActive: true,
-        id: locationId
-      }),
-      perPage: 1,
-      include: "CampusDisplay"
-    });
+  const filterScheduleToBeCurrent = (schedule: iCampusDisplaySchedule) => {
+    console.log('checking....');
+    if (moment(schedule.startDate).isAfter(moment().endOf('day'))) {
+      return false;
+    }
 
-    const locations = result.data || [];
-    if (
-      locations.length <= 0 ||
-      `${locations[0].displayId || ""}`.trim() === ""
-    ) {
+    if (schedule.endDate && moment(schedule.endDate).isBefore(moment().startOf('day'))) {
+      return false;
+    }
+
+    const weekDay = moment().format('dddd').substring(0,3).toLowerCase();
+    // @ts-ignore
+    console.log('weekDay', weekDay, schedule[weekDay], !(weekDay in schedule) || schedule[weekDay] !== true);
+    // @ts-ignore
+    if(!(weekDay in schedule) || schedule[weekDay] !== true) {
+      return false;
+    }
+
+    // const
+    // if (schedule.startTime && moment(schedule.startTime).set({}).isBefore(moment()))
+    return true;
+  }
+
+  const getSlidesFromDB = useCallback(async () => {
+    const result = await Promise.all([
+      CampusDisplayLocationService.getAll({
+        where: JSON.stringify({
+          isActive: true,
+          id: locationId
+        }),
+        perPage: 1
+      }),
+      CampusDisplayScheduleService.getAll({
+        where: JSON.stringify({
+          isActive: true,
+          locationId,
+          // just trying to cover all in case of UTC time.
+          startDate: { [OP_LTE]: moment().add(1, 'day').format("YYYY-MM-DD") }
+        }),
+        perPage: 999999
+      })
+    ]);
+
+    const locations = result[0].data || [];
+    const schedules = result[1].data || [];
+    console.log('schedules', schedules);
+    if (locations.length <= 0) {
       return;
     }
 
     const location = locations[0];
-    const display = location.CampusDisplay;
+    const playListIds = [
+      ..._.uniq(schedules.filter(filterScheduleToBeCurrent).map(schedule => schedule.displayId)),
+      location.displayId || ""
+    ].filter(id => `${id || ""}`.trim() !== "");
 
     const slidesFromDB =
       (
         await CampusDisplaySlideService.getAll({
           where: JSON.stringify({
             isActive: true,
-            displayId: `${display?.id || ""}`.trim()
+            displayId: playListIds
           }),
           include: "Asset",
           perPage: 999999,
@@ -90,8 +127,9 @@ const CampusDisplaySlideShowByLocationId = ({
         })
       ).data || [];
 
-    setCampusDisplay(display || null);
     setDisplayLocation(location || null);
+    setPlayListIds(playListIds);
+
     const slideIdsFromDB = slidesFromDB.map(slide => slide.id);
     setCdSlides(prevSlides => {
       const currentSlideIds = prevSlides.map(slide => slide.id);
@@ -133,7 +171,7 @@ const CampusDisplaySlideShowByLocationId = ({
 
   const reloadWindow = () => {
     window.location.reload(); // Reload the page
-  }
+  };
 
   useEffect(() => {
     let reloadTimeOut: NodeJS.Timeout | null = null;
@@ -202,8 +240,10 @@ const CampusDisplaySlideShowByLocationId = ({
           ) {
             return;
           }
-          if ((resp.settings?.forceReload || 0) > (displayLocation?.version || 0)) {
-            Toaster.showToast('Reloaded', TOAST_TYPE_SUCCESS);
+          if (
+            (resp.settings?.forceReload || 0) > (displayLocation?.version || 0)
+          ) {
+            Toaster.showToast("Reloaded", TOAST_TYPE_SUCCESS);
             reloadWindow();
             return;
           }
@@ -217,7 +257,7 @@ const CampusDisplaySlideShowByLocationId = ({
           if (isCanceled) {
             return;
           }
-          timeout = setTimeout(() => getData(), 30000);
+          timeout = setTimeout(() => getData(), 1000);
         });
     };
 
@@ -245,7 +285,7 @@ const CampusDisplaySlideShowByLocationId = ({
       );
     }
 
-    if (!campusDisplay || `${campusDisplay?.id || ""}`.trim() === "") {
+    if (playListIds.length <= 0) {
       return (
         <FlexContainer
           className={"no-display justify-content-center align-items-center"}
@@ -266,12 +306,10 @@ const CampusDisplaySlideShowByLocationId = ({
     }
 
     if (cdSlides.length <= 0) {
-      return <CampusDisplayDefaultSlide campusDisplay={campusDisplay} />;
+      return <CampusDisplayDefaultSlide />;
     }
 
-    return (
-      <CampusDisplaySlideShow slides={cdSlides} playList={campusDisplay} />
-    );
+    return <CampusDisplaySlideShow slides={cdSlides} />;
   };
 
   return (

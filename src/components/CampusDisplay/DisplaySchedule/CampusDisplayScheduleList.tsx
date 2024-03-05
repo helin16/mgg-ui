@@ -1,21 +1,21 @@
 import styled from "styled-components";
 import Table, { iTableColumn } from "../../common/Table";
 import iCampusDisplay from "../../../types/CampusDisplay/iCampusDisplay";
-import {Alert, Button} from "react-bootstrap";
+import { Alert, Button } from "react-bootstrap";
 import React, { useEffect, useState } from "react";
-import Toaster, {TOAST_TYPE_SUCCESS} from "../../../services/Toaster";
+import Toaster, { TOAST_TYPE_SUCCESS } from "../../../services/Toaster";
 import CampusDisplayScheduleService from "../../../services/CampusDisplay/CampusDisplayScheduleService";
 import PageLoadingSpinner from "../../common/PageLoadingSpinner";
 import CampusDisplayScheduleEditPopupBtn from "./CampusDisplayScheduleEditPopupBtn";
 import * as Icons from "react-bootstrap-icons";
 import MathHelper from "../../../helper/MathHelper";
 import iCampusDisplaySchedule from "../../../types/CampusDisplay/iCampusDisplaySchedule";
-import {FlexContainer} from '../../../styles';
-import moment from 'moment-timezone';
-import UtilsService from '../../../services/UtilsService';
-import DeleteConfirmPopupBtn from '../../common/DeleteConfirm/DeleteConfirmPopupBtn';
-import {useSelector} from 'react-redux';
-import {RootState} from '../../../redux/makeReduxStore';
+import { FlexContainer } from "../../../styles";
+import moment from "moment-timezone";
+import UtilsService from "../../../services/UtilsService";
+import DeleteConfirmPopupBtn from "../../common/DeleteConfirm/DeleteConfirmPopupBtn";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../redux/makeReduxStore";
 
 const Wrapper = styled.div``;
 
@@ -37,7 +37,8 @@ const CampusDisplayScheduleList = ({
     setIsLoading(true);
     CampusDisplayScheduleService.getAll({
       where: JSON.stringify({
-        isActive: true
+        isActive: true,
+        locationId
       }),
       sort: "startDate:ASC,startTime:ASC",
       perPage: 999999,
@@ -66,30 +67,39 @@ const CampusDisplayScheduleList = ({
     };
   }, [locationId, count]);
 
-  const getContent = () => {
-    if (isLoading === true) {
-      return <PageLoadingSpinner />;
-    }
+  const getListTable = (
+    schs: iCampusDisplaySchedule[],
+    title: any,
+    canCreate = false
+  ) => {
     return (
       <Table
         hover
-        rows={schedules.filter(schedule => schedule.CampusDisplay)}
+        rows={schs}
         columns={[
           {
             key: "playlist",
             header: (col: iTableColumn) => {
-              return <th key={col.key}>Play List </th>;
+              return <th key={col.key}>{title}</th>;
             },
             cell: (col, data: iCampusDisplaySchedule) => {
               return (
                 <td key={col.key}>
-                  <Button
-                    variant={"link"}
-                    size={"sm"}
-                    onClick={() => data.CampusDisplay && onSelected && onSelected(data.CampusDisplay)}
-                  >
-                    {data.CampusDisplay?.name}
-                  </Button>{" "}
+                  {onSelected ? (
+                    <Button
+                      variant={"link"}
+                      size={"sm"}
+                      onClick={() =>
+                        data.CampusDisplay &&
+                        onSelected &&
+                        onSelected(data.CampusDisplay)
+                      }
+                    >
+                      {data.CampusDisplay?.name}
+                    </Button>
+                  ) : (
+                    `${data.CampusDisplay?.name || ""}`
+                  )}
                 </td>
               );
             }
@@ -99,51 +109,72 @@ const CampusDisplayScheduleList = ({
             header: (col: iTableColumn) => {
               return (
                 <th key={col.key} className={"text-right"}>
-                  <CampusDisplayScheduleEditPopupBtn
-                    size={"sm"}
-                    variant={"success"}
-                    locationId={locationId}
-                    onSaved={() => {
-                      setCount(MathHelper.add(count, 1));
-                    }}
-                  >
-                    <Icons.Plus /> List
-                  </CampusDisplayScheduleEditPopupBtn>
+                  {canCreate === true ? (
+                    <CampusDisplayScheduleEditPopupBtn
+                      size={"sm"}
+                      variant={"success"}
+                      locationId={locationId}
+                      onSaved={() => {
+                        setCount(MathHelper.add(count, 1));
+                      }}
+                    >
+                      <Icons.Plus /> List
+                    </CampusDisplayScheduleEditPopupBtn>
+                  ) : null}
                 </th>
               );
             },
             cell: (col, data: iCampusDisplaySchedule) => {
               return (
                 <td key={col.key}>
-                  <FlexContainer className={'justify-content-between align-items-start'}>
+                  <FlexContainer
+                    className={"justify-content-between align-items-start"}
+                  >
                     <div>
-                      <FlexContainer className={'with-gap lg-gap'}>
+                      <FlexContainer className={"with-gap lg-gap"}>
                         <b>Date: </b>
-                        <FlexContainer className={'with-gap'}>
-                          <div>{moment(data.startDate).format('DD MMM YYYY')}</div>
+                        <FlexContainer className={"with-gap"}>
+                          <div>
+                            {moment(data.startDate).format("DD MMM YYYY")}
+                          </div>
                           <div>~</div>
-                          <div>{data.endDate ? moment(data.endDate).format('DD MMM YYYY') : null}</div>
+                          <div>
+                            {data.endDate
+                              ? moment(data.endDate).format("DD MMM YYYY")
+                              : null}
+                          </div>
                         </FlexContainer>
-
                       </FlexContainer>
-                      <FlexContainer className={'with-gap lg-gap'}>
+                      <FlexContainer className={"with-gap lg-gap"}>
                         <b>Time: </b>
-                        <FlexContainer className={'with-gap'}>
-                          <div>{moment(data.startTime).format('HH:mm:ss')}</div>
-                          <div>~</div>
-                          <div>{data.endTime ? moment(data.endTime).format('HH:mm:ss') : null}</div>
+                        <FlexContainer className={"with-gap"}>
+                          {data.startTime || data.endTime ? (
+                            <>
+                              <div>
+                                {data.startTime
+                                  ? moment(data.startTime).format("HH:mm:ss")
+                                  : null}
+                              </div>
+                              <div>~</div>
+                              <div>
+                                {data.endTime
+                                  ? moment(data.endTime).format("HH:mm:ss")
+                                  : null}
+                              </div>
+                            </>
+                          ) : null}
                         </FlexContainer>
-
                       </FlexContainer>
-                      <FlexContainer className={'with-gap lg-gap'}>
+                      <FlexContainer className={"with-gap lg-gap"}>
                         <b>Day: </b>
-                        <FlexContainer className={'with-gap'}>
+                        <FlexContainer className={"with-gap"}>
                           {UtilsService.getWeekDaysShort().map(day => {
                             // @ts-ignore
-                            return day in data && data[day] === true ? <small key={day}>{day.toUpperCase()}</small> : null
+                            return day in data && data[day] === true ? (
+                              <small key={day}>{day.toUpperCase()}</small>
+                            ) : null;
                           })}
                         </FlexContainer>
-
                       </FlexContainer>
                     </div>
                     <div>
@@ -157,8 +188,7 @@ const CampusDisplayScheduleList = ({
                         }}
                       >
                         <Icons.Pencil />
-                      </CampusDisplayScheduleEditPopupBtn>
-                      {' '}
+                      </CampusDisplayScheduleEditPopupBtn>{" "}
                       <DeleteConfirmPopupBtn
                         variant={"danger"}
                         deletingFn={() =>
@@ -166,12 +196,18 @@ const CampusDisplayScheduleList = ({
                         }
                         deletedCallbackFn={() => {
                           setCount(MathHelper.add(count, 1));
-                          Toaster.showToast("Schedule Deleted.", TOAST_TYPE_SUCCESS);
+                          Toaster.showToast(
+                            "Schedule Deleted.",
+                            TOAST_TYPE_SUCCESS
+                          );
                         }}
                         size={"sm"}
                         description={
                           <>
-                            You are about to delete the Schedule.<Alert variant={'danger'}>You are NOT deleting the play list</Alert>
+                            You are about to delete the Schedule.
+                            <Alert variant={"danger"}>
+                              You are NOT deleting the play list
+                            </Alert>
                           </>
                         }
                         confirmString={`${user?.synergyId || "na"}`}
@@ -186,6 +222,46 @@ const CampusDisplayScheduleList = ({
           }
         ]}
       />
+    );
+  };
+
+  const getContent = () => {
+    if (isLoading === true) {
+      return <PageLoadingSpinner />;
+    }
+
+    const scheduleWithPlayList = schedules
+      .filter(schedule => schedule.CampusDisplay)
+      .sort((schedule1, schedule2) =>
+        `${moment(schedule1.startDate).format("YYYY-MM-DD")}${
+          schedule1.startTime
+            ? moment(schedule1.startTime).format("HH:mm:ss")
+            : ""
+        }` >
+        `${moment(schedule2.startDate).format("YYYY-MM-DD")}${
+          schedule2.startTime
+            ? moment(schedule2.startTime).format("HH:mm:ss")
+            : ""
+        }`
+          ? 1
+          : -1
+      );
+    const pastList = scheduleWithPlayList.filter(
+      schedule =>
+        schedule.endDate && moment(schedule.endDate).isBefore(moment())
+    );
+    const pastListIds = pastList.map(s => s.id);
+    const currentList = scheduleWithPlayList.filter(
+      schedule => pastListIds.indexOf(schedule.id) < 0
+    );
+
+    return (
+      <>
+        {getListTable(currentList, "Play List", true)}
+        {pastList.length > 0
+          ? getListTable(pastList, <b className={"text-danger"}>Past</b>)
+          : null}
+      </>
     );
   };
 

@@ -46,12 +46,12 @@ const Wrapper = styled.div`
 `;
 type iCampusDisplayDefaultSlide = {
   onSaved?: (saved: iCampusDisplaySlide[]) => void;
-  campusDisplay: iCampusDisplay;
+  campusDisplay?: iCampusDisplay;
 }
 const CampusDisplayDefaultSlide = ({onSaved, campusDisplay} : iCampusDisplayDefaultSlide) => {
 
   const getNewBtn = () => {
-    if (!onSaved) {
+    if (!onSaved || !campusDisplay) {
       return null;
     }
     return (

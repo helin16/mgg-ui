@@ -14,7 +14,6 @@ import AssetHelper from '../../../helper/AssetHelper';
 
 type iCampusDisplayShowSlide = {
   slide?: iCampusDisplaySlide | null;
-  campusDisplay: iCampusDisplay;
   thumbnail?: boolean;
   className?: string;
   videoProps?: iVideoWithPlaceholder;
@@ -86,7 +85,6 @@ const Wrapper = styled.div`
 const CampusDisplayShowSlide = ({
   slide,
   thumbnail,
-  campusDisplay,
   onSaved,
   className,
   videoProps,
@@ -135,7 +133,6 @@ const CampusDisplayShowSlide = ({
       return (
         <CampusDisplayDefaultSlide
           onSaved={() => onSaved && onSaved()}
-          campusDisplay={campusDisplay}
         />
       );
     }

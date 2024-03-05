@@ -24,7 +24,10 @@ const Wrapper = styled.div`
   .location-selector {
     gap: 8px;
     .location-selector-item {
+      display: flex;
+      align-items: center;
       width: calc(50% - 8px);
+      //min-width: 150px;
     }
   }
 `;
@@ -76,7 +79,7 @@ const CampusDisplayPage = () => {
         <FormLabel label={"Please select a location to display:"} isRequired />
         <FlexContainer
           className={
-            "location-selector flex-wrap justify-content-between align-items-start"
+            "location-selector flex-wrap justify-content-between align-items-stretch"
           }
         >
           {locations.map(location => {

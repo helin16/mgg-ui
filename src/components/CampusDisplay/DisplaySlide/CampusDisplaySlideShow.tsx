@@ -9,7 +9,6 @@ import iCampusDisplay from '../../../types/CampusDisplay/iCampusDisplay';
 type iCampusDisplaySlideShow = {
   className?: string;
   slides: iCampusDisplaySlide[];
-  playList: iCampusDisplay;
   onError?: () => void;
 };
 
@@ -30,11 +29,10 @@ const Wrapper = styled.div`
 `;
 const CampusDisplaySlideShow = ({
   slides,
-  playList,
   className,
   onError,
 }: iCampusDisplaySlideShow) => {
-  const defaultSlideShowingTime = 5000;
+  const defaultSlideShowingTime = 8000;
 
   const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(0);
   // @ts-ignore
@@ -47,12 +45,12 @@ const CampusDisplaySlideShow = ({
       if (isVideoPlaying !== true) {
         carouselRef.current?.next();
       }
-    }, playList.settings?.slideInterval || defaultSlideShowingTime);
+    }, defaultSlideShowingTime);
 
     return () => {
       clearInterval(intervalId);
     };
-  }, [isVideoPlaying, playList.settings?.slideInterval]);
+  }, [isVideoPlaying]);
 
   const handleSlide = (selectedIndex: number, e: any) => {
     setCurrentSlideIndex(selectedIndex);
@@ -61,7 +59,7 @@ const CampusDisplaySlideShow = ({
   const getContent = () => {
 
     if (slides.length <= 0) {
-      return <CampusDisplayDefaultSlide campusDisplay={playList} />;
+      return <CampusDisplayDefaultSlide />;
     }
 
     return (
@@ -81,7 +79,6 @@ const CampusDisplaySlideShow = ({
             <Carousel.Item key={slide.id}>
               <CampusDisplayShowSlide
                 slide={slide}
-                campusDisplay={playList}
                 videoProps={{
                   controls: true,
                   // playsinline: true,
