@@ -131,6 +131,10 @@ const CampusDisplayManagementPage = () => {
     );
   };
 
+  const handleSelectAPlayList = (selected: iCampusDisplay) => {
+    setSelectedPlayList(selected.id === selectedPlayList?.id ? null : selected);
+  }
+
   const getContent = () => {
     if (isLoading === true) {
       return <PageLoadingSpinner />;
@@ -169,7 +173,7 @@ const CampusDisplayManagementPage = () => {
           </PanelTitle>
           <CampusDisplayScheduleList
             locationId={location.id}
-            onSelected={playList => setSelectedPlayList(playList)}
+            onSelected={playList => handleSelectAPlayList(playList)}
           />
           <Table
             hover
@@ -183,7 +187,7 @@ const CampusDisplayManagementPage = () => {
                       Default{" "}
                       <small className={"text-muted"}>
                         Change it via Edit btn above
-                      </small>{" "}
+                      </small>
                     </th>
                   );
                 },
@@ -193,7 +197,7 @@ const CampusDisplayManagementPage = () => {
                       <Button
                         variant={"link"}
                         size={"sm"}
-                        onClick={() => setSelectedPlayList(data)}
+                        onClick={() => handleSelectAPlayList(data)}
                       >
                         {data.name}
                       </Button>{" "}
@@ -208,6 +212,18 @@ const CampusDisplayManagementPage = () => {
           <PlayListEditPanel
             className={"playlist-panel"}
             playList={selectedPlayList}
+            extraBtns={
+              <>
+                <Button
+                  variant={"secondary"}
+                  size={"sm"}
+                  title={"Close"}
+                  onClick={() => setSelectedPlayList(null)}
+                >
+                  <Icons.X />
+                </Button>
+              </>
+            }
           />
         )}
       </FlexContainer>

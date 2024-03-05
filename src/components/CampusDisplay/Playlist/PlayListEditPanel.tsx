@@ -57,8 +57,9 @@ const Wrapper = styled.div`
 type iPlayListEditPanel = {
   playList?: iCampusDisplay;
   className?: string;
+  extraBtns?: any;
 }
-const PlayListEditPanel = ({playList, className} : iPlayListEditPanel) => {
+const PlayListEditPanel = ({playList, className, extraBtns} : iPlayListEditPanel) => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [showingDisplay, setShowingDisplay] = useState<iCampusDisplay | null>(
     null
@@ -271,6 +272,7 @@ const PlayListEditPanel = ({playList, className} : iPlayListEditPanel) => {
           >
             {getShowBulkOptionCheck()}
             {getBulkOptions()}
+            {extraBtns ? <div className={'extra-btns'}>{extraBtns}</div> : null}
           </FlexContainer>
         </FlexContainer>
       </PanelTitle>
