@@ -108,7 +108,6 @@ const CampusDisplaySlideShowByLocationId = ({
 
     const locations = result[0].data || [];
     const schedules = result[1].data || [];
-    console.log('schedules', schedules);
     if (locations.length <= 0) {
       return;
     }
@@ -116,7 +115,8 @@ const CampusDisplaySlideShowByLocationId = ({
     const location = locations[0];
     const playListIds = [
       ..._.uniq(schedules.filter(filterScheduleToBeCurrent).map(schedule => schedule.displayId)),
-      location.displayId || ""
+      // get default playlist, Only when there is no scheduled.
+      ...(schedules.length > 0 ? [] : [location.displayId || ""])
     ].filter(id => `${id || ""}`.trim() !== "");
 
     const slidesFromDB =
