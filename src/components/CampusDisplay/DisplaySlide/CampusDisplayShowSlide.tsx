@@ -53,6 +53,7 @@ const Wrapper = styled.div`
     width: 90% !important;
     object-fit: contain;
     z-index: 999;
+    position: absolute;
   }
 
   &.fullscreen,
@@ -110,7 +111,7 @@ const CampusDisplayShowSlide = ({
       return (
         <VideoWithPlaceholder
           className={`${className || ""} slide-content`}
-          src={slide?.Asset?.streamUrl || ""}
+          src={slide?.Asset?.url || ""}
           controls={true}
           {...videoProps}
         />

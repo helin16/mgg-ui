@@ -16,12 +16,6 @@ import iCampusDisplayLocation from "../../../types/CampusDisplay/iCampusDisplayL
 import SchoolLogo from "../../SchoolLogo";
 import SectionDiv from "../../common/SectionDiv";
 import CampusDisplaySlideShow from "./CampusDisplaySlideShow";
-import LocalStorageService, {
-  STORAGE_COLUMN_KEY_CAMPUS_DISPLAY_SLIDES
-} from "../../../services/LocalStorageService";
-// import AssetService from "../../../services/Asset/AssetService";
-
-// type iCampusSlideMap = { [key: string]: iCampusDisplaySlide };
 type iCampusDisplaySlideShowPanel = {
   locationId: string;
   className?: string;
@@ -61,118 +55,6 @@ const CampusDisplaySlideShowByLocationId = ({
     displayLocation,
     setDisplayLocation
   ] = useState<iCampusDisplayLocation | null>(null);
-
-//   const getSlidesFromDB = useCallback(async () => {
-//     const result = await CampusDisplayLocationService.getAll({
-//       where: JSON.stringify({
-//         isActive: true,
-//         id: locationId
-//       }),
-//       perPage: 1,
-//       include: "CampusDisplay"
-//     });
-//
-//     const locations = result.data || [];
-//     if (
-//       locations.length <= 0 ||
-//       `${locations[0].displayId || ""}`.trim() === ""
-//     ) {
-//       return;
-//     }
-//
-//     const location = locations[0];
-//     const display = location.CampusDisplay;
-//
-//     const slidesFromDB =
-//       (
-//         await CampusDisplaySlideService.getAll({
-//           where: JSON.stringify({
-//             isActive: true,
-//             displayId: `${display?.id || ""}`.trim()
-//           }),
-//           include: "Asset",
-//           perPage: 999999,
-//           sort: "sortOrder:ASC"
-//         })
-//       ).data || [];
-//
-//     setCampusDisplay(display || null);
-//     setDisplayLocation(location || null);
-//     const slideIdsFromDB = slidesFromDB.map(slide => slide.id);
-//
-//     const previousLocalSlides: iCampusSlideMap = {};
-// console.log('previousLocalSlides', Object.keys(previousLocalSlides));
-//
-//     const slidesFromDBWithLocalStorage = await Promise.all(
-//       slidesFromDB
-//         .filter(slideFromDB => {
-//           return !(
-//             !slideFromDB.Asset ||
-//             !slideFromDB.Asset?.externalId ||
-//             `${slideFromDB.Asset?.externalId || ""}`.trim() === "" ||
-//             `${slideFromDB.Asset?.externalId || ""}` in previousLocalSlides
-//           );
-//         })
-//         .map(async slideFromDB => {
-//           if (
-//             !slideFromDB.Asset ||
-//             !slideFromDB.Asset?.externalId ||
-//             `${slideFromDB.Asset?.externalId || ""}`.trim() === ""
-//           ) {
-//             return null;
-//           }
-//           try {
-//             return {
-//               [slideFromDB.Asset?.externalId]: {
-//                 ...slideFromDB,
-//                 Asset: {
-//                   ...(slideFromDB.Asset || {}),
-//                   url: await AssetService.downloadAssetToBeBase64(
-//                     slideFromDB.Asset?.url || ""
-//                   )
-//                 }
-//               }
-//             };
-//           } catch (error) {
-//             console.error("Error fetching image:", error);
-//             return null;
-//           }
-//         })
-//     );
-//
-//     const localSlides = {
-//       ...Object.keys(previousLocalSlides)
-//         .filter(id => slideIdsFromDB.indexOf(id) >= 0)
-//         .reduce((map: iCampusSlideMap, key) => {
-//           return {
-//             ...map,
-//             [key]: previousLocalSlides[key],
-//           };
-//         }, {}),
-//       ...slidesFromDBWithLocalStorage
-//         .filter(slide => slide !== null)
-//         .reduce((map: iCampusSlideMap, arr) => {
-//           return {
-//             ...map,
-//             ...arr
-//           };
-//         }, {})
-//     };
-//     console.log('localSlides', localSlides);
-//
-//     LocalStorageService.setItem(STORAGE_COLUMN_KEY_CAMPUS_DISPLAY_SLIDES, localSlides);
-//     setCdSlides(prevSlides => {
-//       const currentSlideIds = prevSlides.map(slide => slide.id);
-//       if (currentSlideIds !== slideIdsFromDB) {
-//         return Object.values(localSlides)
-//           .filter(slide => slide)
-//           .sort((slide1: iCampusDisplaySlide, slide2: iCampusDisplaySlide) =>
-//             (slide1.sortOrder || 0) > (slide2.sortOrder || 0) ? 1 : -1
-//           );
-//       }
-//       return prevSlides;
-//     });
-//   }, [locationId]);
 
   const getSlidesFromDB = useCallback(async () => {
     const result = await CampusDisplayLocationService.getAll({
@@ -322,7 +204,6 @@ const CampusDisplaySlideShowByLocationId = ({
           }
           if ((resp.settings?.forceReload || 0) > (displayLocation?.version || 0)) {
             Toaster.showToast('Reloaded', TOAST_TYPE_SUCCESS);
-            LocalStorageService.removeItem(STORAGE_COLUMN_KEY_CAMPUS_DISPLAY_SLIDES);
             reloadWindow();
             return;
           }
@@ -389,7 +270,7 @@ const CampusDisplaySlideShowByLocationId = ({
     }
 
     return (
-      <CampusDisplaySlideShow slides={cdSlides} playList={campusDisplay} onError={() => reloadWindow()}/>
+      <CampusDisplaySlideShow slides={cdSlides} playList={campusDisplay} />
     );
   };
 

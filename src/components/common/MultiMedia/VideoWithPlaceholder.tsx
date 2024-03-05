@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, {useRef} from "react";
 import ReactPlayer, { ReactPlayerProps } from "react-player";
 export type VideoPlayer = ReactPlayer;
 
@@ -6,7 +6,6 @@ export type iVideoWithPlaceholder = ReactPlayerProps & {
   className?: string;
   src?: string;
   coverImg?: any;
-  thumbnail?: boolean;
   placeHolder?: any;
 };
 
@@ -19,23 +18,30 @@ const VideoWithPlaceholder = ({
   ...props
 }: iVideoWithPlaceholder) => {
   const playerRef = useRef<ReactPlayer>(null);
+  // const [isBuffering, setIsBuffering] = useState(true);
 
   const getContent = () => {
     if (!src || src.trim() === "") {
       return null;
     }
 
-    if (thumbnail === true) {
-      return coverImg || null;
-    }
     return (
-      // @ts-ignore
-      <ReactPlayer
-        className={className}
-        ref={playerRef}
-        url={src}
-        {...props}
-      />
+      <>
+        {/*// @ts-ignore*/}
+        <ReactPlayer
+          className={className}
+          ref={playerRef}
+          url={src}
+          // onBuffer={() => {
+          //   setIsBuffering(true);
+          // }}
+          // onBufferEnd={() => {
+          //   setIsBuffering(false);
+          // }}
+          {...props}
+        />
+        {/*{isBuffering === true ? (coverImg || null) : null}*/}
+      </>
     );
   };
 

@@ -6,9 +6,9 @@ interface iImageWithPlaceholder extends ImageProps {
   placeholder?: any;
 }
 
-export const getImagePlaceHolder = (className?: string) => {
+export const getImagePlaceHolder = (className?: string, text?: any) => {
   return (
-    <PageLoadingSpinner className={`img-placeholder ${className || ""}`} />
+    <PageLoadingSpinner className={`img-placeholder ${className || ""}`} text={text} />
   );
 };
 

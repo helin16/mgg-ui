@@ -15,6 +15,7 @@ import { OP_NOT } from "../../helper/ServiceHelper";
 import UploadFilePanel from "./UploadFilePanel";
 import AssetThumbnail from "./AssetThumbnail";
 import DeleteConfirmPopupBtn from "../common/DeleteConfirm/DeleteConfirmPopupBtn";
+import AssetUrlEditPopupBtn from "./AssetUrlEditPopupBtn";
 
 const Wrapper = styled.div`
   height: 100%;
@@ -84,6 +85,11 @@ const Wrapper = styled.div`
     height: 100%;
     min-height: 300px;
   }
+
+  .create-from-url-btn {
+    padding: 2px 12px;
+    font-size: 11px;
+  }
 `;
 
 type iAssetListPanel = {
@@ -111,7 +117,7 @@ const AssetListPanel = ({
   excludeAssetIds = [],
   onSelect
 }: iAssetListPanel) => {
-  const [count] = useState(0);
+  const [count, setCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [uploadingAssets, setUploadingAssets] = useState<iUpLoadingAsset[]>([]);
@@ -183,7 +189,7 @@ const AssetListPanel = ({
       return null;
     }
     return (
-      <div className={'load-more'}>
+      <div className={"load-more"}>
         <Button
           variant={"secondary"}
           onClick={() => setCurrentPage(MathHelper.add(currentPage, 1))}
@@ -405,12 +411,25 @@ const AssetListPanel = ({
       return null;
     }
     return (
-      <UploadFilePanel
-        className={"uploader-btn"}
-        uploadFn={uploadFiles}
-        description={"Click here to upload files or drag file(s) to below area"}
-        allowMultiple
-      />
+      <>
+        <UploadFilePanel
+          className={"uploader-btn"}
+          uploadFn={uploadFiles}
+          description={
+            "Click here to upload files or drag file(s) to below area"
+          }
+          allowMultiple
+        />
+        <AssetUrlEditPopupBtn
+          size={"sm"}
+          assetType={assetType}
+          mimeType={'video/youtube'}
+          className={"create-from-url-btn"}
+          onSaved={() => setCount(MathHelper.add(count, 1))}
+        >
+          Create from Link
+        </AssetUrlEditPopupBtn>
+      </>
     );
   };
 

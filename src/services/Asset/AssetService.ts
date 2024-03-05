@@ -7,6 +7,10 @@ export const HEADER_NAME_ASSET_TYPE = 'X-MGGS-ASSET-TYPE';
 
 const endPoint = '/asset';
 
+const create = (params: iConfigParams = {}, config?: iConfigParams): Promise<iAsset> => {
+  return AppService.post(endPoint, params, config).then(resp => resp.data);
+}
+
 const getAll = (params: iConfigParams = {}, config?: iConfigParams): Promise<iPaginatedResult<iAsset>> => {
   return AppService.get(endPoint, params, config).then(resp => resp.data);
 }
@@ -43,6 +47,7 @@ const downloadAssetToBeBase64 = (url: string) => {
 }
 
 const AssetService = {
+  create,
   upload,
   getAll,
   deactivate,

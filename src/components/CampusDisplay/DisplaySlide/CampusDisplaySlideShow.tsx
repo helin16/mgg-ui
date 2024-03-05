@@ -83,8 +83,8 @@ const CampusDisplaySlideShow = ({
                 slide={slide}
                 campusDisplay={playList}
                 videoProps={{
-                  controls: false,
-                  playsinline: true,
+                  controls: true,
+                  // playsinline: true,
                   playing: index === currentSlideIndex,
                   muted: true,
                   onEnded: () => {

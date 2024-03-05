@@ -1,5 +1,7 @@
 import styled from "styled-components";
 import React, { useRef, useState } from "react";
+import Toaster, {TOAST_TYPE_ERROR} from '../../services/Toaster';
+import UtilsService from '../../services/UtilsService';
 
 const Wrapper = styled.div`
   text-align: center;
@@ -31,6 +33,7 @@ const UploadFilePanel = ({
 }: iUploadFilePanel) => {
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const fileInputRef = useRef(null);
+  const MAX_FILE_SIZE = 20 * 1024 * 1024;
 
   const handleSelectedFiles = (fileList: FileList) => {
     if (fileList.length <= 0) {
@@ -42,6 +45,11 @@ const UploadFilePanel = ({
     const isMatchingExtensions =
       allowTypes.filter(type => type.startsWith(".")).length > 0;
     const files = Array.from(fileList).filter(file => {
+      if (file.size > MAX_FILE_SIZE) {
+        Toaster.showToast(`${file.name} is larger than ${UtilsService.formatBytesToHuman(MAX_FILE_SIZE)}.`, TOAST_TYPE_ERROR)
+        return false;
+      }
+
       if (allowTypes?.length <= 0) {
         return true;
       }
