@@ -15,6 +15,7 @@ type iDateTimePicker = {
   allowClear?: boolean;
   isDisabled?: boolean;
   inputClassName?: string;
+  placeholder?: string;
   isValidDate?: (currentDate: Date, selectedDate: Date) => boolean;
 }
 
@@ -66,7 +67,7 @@ const Wrapper = styled.div`
   }
 `
 const DateTimePicker = ({
-  onChange, value, isValidDate, displayTimeZone, inputClassName, className, allowClear, isDisabled, timeFormat = true, dateFormat = 'DD / MMM / YYYY h:m a'
+  onChange, value, isValidDate, displayTimeZone, inputClassName, className, allowClear, isDisabled, placeholder, timeFormat = true, dateFormat = 'DD / MMM / YYYY h:m a'
 }: iDateTimePicker) => {
 
   const getValue = () => {
@@ -98,7 +99,7 @@ const DateTimePicker = ({
           {/*// @ts-ignore*/}
           <Datetime
             isValidDate={isValidDate}
-            inputProps={{placeholder: 'Pick a date and time...'}}
+            inputProps={{placeholder: placeholder || 'Pick a date and time...'}}
             className={'datetime-picker'}
             onChange={onChange}
             value={getValue()}

@@ -119,6 +119,10 @@ const formatBytesToHuman = (bytes: number): string =>  {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
+const getWeekDaysShort = () => {
+  return ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+}
+
 const UtilsService = {
   formatBytesToHuman,
   isNumeric,
@@ -135,6 +139,7 @@ const UtilsService = {
   getModuleUrl,
   getUrlParams,
   openNewWindow,
+  getWeekDaysShort,
 }
 
 export default UtilsService;

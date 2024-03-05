@@ -71,14 +71,7 @@ const CampusDisplayLocationList = () => {
         cell: (column: iTableColumn, data: iCampusDisplayLocation) => {
           return (
             <td key={column.key}>
-              <CampusDisplayLocationEditPopupBtn
-                variant={"secondary"}
-                campusDisplayLocation={data}
-                size={"sm"}
-                onSaved={() => setCount(MathHelper.add(count, 1))}
-              >
-                {data.name}
-              </CampusDisplayLocationEditPopupBtn>
+              {data.name}
             </td>
           );
         }
@@ -145,6 +138,15 @@ const CampusDisplayLocationList = () => {
         cell: (column: iTableColumn, data: iCampusDisplayLocation) => {
           return (
             <td key={column.key} className={"text-right"}>
+              <CampusDisplayLocationEditPopupBtn
+                variant={"secondary"}
+                campusDisplayLocation={data}
+                size={"sm"}
+                onSaved={() => setCount(MathHelper.add(count, 1))}
+              >
+                <Icons.Pencil />
+              </CampusDisplayLocationEditPopupBtn>
+              {' '}
               <DeleteConfirmPopupBtn
                 variant={"danger"}
                 deletingFn={() =>

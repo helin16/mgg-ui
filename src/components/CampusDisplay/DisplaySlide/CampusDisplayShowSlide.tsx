@@ -10,6 +10,7 @@ import ImageWithPlaceholder, {
 import VideoWithPlaceholder, {
   iVideoWithPlaceholder
 } from "../../common/MultiMedia/VideoWithPlaceholder";
+import AssetHelper from '../../../helper/AssetHelper';
 
 type iCampusDisplayShowSlide = {
   slide?: iCampusDisplaySlide | null;
@@ -148,7 +149,7 @@ const CampusDisplayShowSlide = ({
         <div
           className={"bg-blurry"}
           style={{
-            backgroundImage: `url(${url}${isVideo() === true ? '?thumb=1' : ''})`
+            backgroundImage: `url(${url}${isVideo() === true ? AssetHelper.getThumbnail(url) : ''})`
           }}
         />
         {getContentDiv(url)}

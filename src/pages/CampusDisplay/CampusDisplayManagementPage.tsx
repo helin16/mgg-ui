@@ -21,6 +21,7 @@ import PanelTitle from "../../components/PanelTitle";
 import Table, { iTableColumn } from "../../components/common/Table";
 import MathHelper from "../../helper/MathHelper";
 import CampusDisplayLocationEditPopupBtn from "../../components/CampusDisplay/DisplayLocation/CampusDisplayLocationEditPopupBtn";
+import CampusDisplayScheduleList from "../../components/CampusDisplay/DisplaySchedule/CampusDisplayScheduleList";
 
 const Wrapper = styled.div`
   .init-page {
@@ -169,30 +170,9 @@ const CampusDisplayManagementPage = () => {
               ) : null}
             </FlexContainer>
           </PanelTitle>
-          <Table
-            hover
-            rows={playLists}
-            columns={[
-              {
-                key: "playlist",
-                header: (col: iTableColumn) => {
-                  return <th key={col.key}>Play List </th>;
-                },
-                cell: (col, data: iCampusDisplay) => {
-                  return (
-                    <td key={col.key}>
-                      <Button
-                        variant={"link"}
-                        size={"sm"}
-                        onClick={() => setSelectedPlayList(data)}
-                      >
-                        {data.name}
-                      </Button>{" "}
-                    </td>
-                  );
-                }
-              }
-            ]}
+          <CampusDisplayScheduleList
+            locationId={location.id}
+            onSelected={playList => setSelectedPlayList(playList)}
           />
 
           <Table
@@ -202,7 +182,14 @@ const CampusDisplayManagementPage = () => {
               {
                 key: "playlist",
                 header: (col: iTableColumn) => {
-                  return <th key={col.key}>Default <small className={'text-muted'}>Change it via Edit btn above</small> </th>;
+                  return (
+                    <th key={col.key}>
+                      Default{" "}
+                      <small className={"text-muted"}>
+                        Change it via Edit btn above
+                      </small>{" "}
+                    </th>
+                  );
                 },
                 cell: (col, data: iCampusDisplay) => {
                   return (
