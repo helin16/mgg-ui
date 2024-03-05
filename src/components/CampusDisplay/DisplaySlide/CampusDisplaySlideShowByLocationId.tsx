@@ -16,7 +16,7 @@ import SchoolLogo from "../../SchoolLogo";
 import SectionDiv from "../../common/SectionDiv";
 import CampusDisplaySlideShow from "./CampusDisplaySlideShow";
 import CampusDisplayScheduleService from "../../../services/CampusDisplay/CampusDisplayScheduleService";
-import {OP_GTE, OP_LTE} from "../../../helper/ServiceHelper";
+import {OP_LTE} from "../../../helper/ServiceHelper";
 import * as _ from "lodash";
 import iCampusDisplaySchedule from '../../../types/CampusDisplay/iCampusDisplaySchedule';
 
@@ -59,7 +59,6 @@ const CampusDisplaySlideShowByLocationId = ({
   ] = useState<iCampusDisplayLocation | null>(null);
 
   const filterScheduleToBeCurrent = (schedule: iCampusDisplaySchedule) => {
-    console.log('checking....');
     if (moment(schedule.startDate).isAfter(moment().endOf('day'))) {
       return false;
     }
@@ -70,14 +69,20 @@ const CampusDisplaySlideShowByLocationId = ({
 
     const weekDay = moment().format('dddd').substring(0,3).toLowerCase();
     // @ts-ignore
-    console.log('weekDay', weekDay, schedule[weekDay], !(weekDay in schedule) || schedule[weekDay] !== true);
+    // console.log('weekDay', weekDay, schedule[weekDay], !(weekDay in schedule) || schedule[weekDay] !== true);
     // @ts-ignore
     if(!(weekDay in schedule) || schedule[weekDay] !== true) {
       return false;
     }
 
-    // const
-    // if (schedule.startTime && moment(schedule.startTime).set({}).isBefore(moment()))
+    const timeFormat = 'HH:mm';
+    if (schedule.startTime && moment(schedule.startTime).format(timeFormat) > moment().format(timeFormat)) {
+      return false;
+    }
+
+    if (schedule.endTime && moment(schedule.endTime).format(timeFormat) < moment().format(timeFormat)) {
+      return false;
+    }
     return true;
   }
 

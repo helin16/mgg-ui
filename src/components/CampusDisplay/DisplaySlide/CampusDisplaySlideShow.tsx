@@ -4,7 +4,6 @@ import iCampusDisplaySlide from "../../../types/CampusDisplay/iCampusDisplaySlid
 import CampusDisplayDefaultSlide from "./CampusDisplayDefaultSlide";
 import { Carousel } from "react-bootstrap";
 import CampusDisplayShowSlide from "./CampusDisplayShowSlide";
-import iCampusDisplay from '../../../types/CampusDisplay/iCampusDisplay';
 
 type iCampusDisplaySlideShow = {
   className?: string;

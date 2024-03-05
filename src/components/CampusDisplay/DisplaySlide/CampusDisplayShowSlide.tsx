@@ -1,7 +1,6 @@
 import iCampusDisplaySlide from "../../../types/CampusDisplay/iCampusDisplaySlide";
 import React from "react";
 import styled from "styled-components";
-import iCampusDisplay from "../../../types/CampusDisplay/iCampusDisplay";
 import CampusDisplayDefaultSlide from "./CampusDisplayDefaultSlide";
 import {CD_DISPLAY_MODE_FULL_SCREEN_FILL, CD_DISPLAY_MODE_FULL_SCREEN_FIT} from "./CDSlideDisplayModeSelector";
 import ImageWithPlaceholder, {

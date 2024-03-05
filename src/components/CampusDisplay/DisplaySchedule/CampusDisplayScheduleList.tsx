@@ -248,7 +248,7 @@ const CampusDisplayScheduleList = ({
       );
     const pastList = scheduleWithPlayList.filter(
       schedule =>
-        schedule.endDate && moment(schedule.endDate).isBefore(moment())
+        schedule.endDate && moment(schedule.endDate).isBefore(moment().startOf('day'))
     );
     const pastListIds = pastList.map(s => s.id);
     const currentList = scheduleWithPlayList.filter(

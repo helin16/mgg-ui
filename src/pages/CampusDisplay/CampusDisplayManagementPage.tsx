@@ -60,7 +60,6 @@ const CampusDisplayManagementPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [location, setLocation] = useState<iCampusDisplayLocation | null>(null);
   const [count, setCount] = useState(0);
-  const [playLists, setPlayLists] = useState<iCampusDisplay[]>([]);
   const [defaultPlayList, setDefaultPlayList] = useState<iCampusDisplay | null>(
     null
   );
@@ -88,8 +87,6 @@ const CampusDisplayManagementPage = () => {
           list => list !== null
         );
         setSelectedPlayList(null);
-        // @ts-ignore
-        setPlayLists([]);
         // @ts-ignore
         setDefaultPlayList(lists.length > 0 ? lists[0] : null);
       })
@@ -174,7 +171,6 @@ const CampusDisplayManagementPage = () => {
             locationId={location.id}
             onSelected={playList => setSelectedPlayList(playList)}
           />
-
           <Table
             hover
             rows={defaultPlayList ? [defaultPlayList] : []}
