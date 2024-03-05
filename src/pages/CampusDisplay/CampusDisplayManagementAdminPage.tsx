@@ -6,12 +6,17 @@ import CampusDisplayLocationList from "../../components/CampusDisplay/DisplayLoc
 import React, { useState } from "react";
 import iCampusDisplay from "../../types/CampusDisplay/iCampusDisplay";
 import PlayListEditPanel from "../../components/CampusDisplay/Playlist/PlayListEditPanel";
-import {Col, Row} from 'react-bootstrap';
+import {Button, Col, Row} from 'react-bootstrap';
+import * as Icons from 'react-bootstrap-icons';
 
 const CampusDisplayManagementAdminPage = ({ onNavBack }: AdminPageProps) => {
   const [selectedDisplay, setSelectedDisplay] = useState<iCampusDisplay | null>(
     null
   );
+
+  const handleSelectAPlayList = (selected: iCampusDisplay) => {
+    setSelectedDisplay(selected.id === selectedDisplay?.id ? null : selected);
+  }
 
   return (
     <AdminPage
@@ -34,7 +39,7 @@ const CampusDisplayManagementAdminPage = ({ onNavBack }: AdminPageProps) => {
               <Row>
                 <Col lg={selectedDisplay !== null ? 4 : 12}>
                   <CampusDisplayList
-                    onSelect={playList => setSelectedDisplay(playList)}
+                    onSelect={playList => handleSelectAPlayList(playList)}
                     onDeleted={() => setSelectedDisplay(null)}
                     narrowMode={selectedDisplay !== null}
                   />
@@ -44,6 +49,18 @@ const CampusDisplayManagementAdminPage = ({ onNavBack }: AdminPageProps) => {
                     <PlayListEditPanel
                       className={"playlist-panel"}
                       playList={selectedDisplay}
+                      extraBtns={
+                        <>
+                          <Button
+                            variant={"secondary"}
+                            size={"sm"}
+                            title={"Close"}
+                            onClick={() => setSelectedDisplay(null)}
+                          >
+                            <Icons.X />
+                          </Button>
+                        </>
+                      }
                     />
                   </Col>
                 )}
