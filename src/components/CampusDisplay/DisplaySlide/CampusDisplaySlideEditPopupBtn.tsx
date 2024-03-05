@@ -15,7 +15,7 @@ import Toaster from "../../../services/Toaster";
 const Wrapper = styled.div``;
 const PopupBodyWrapper = styled.div``;
 
-type campusDisplaySlideCreatePopupBtn = ButtonProps & {
+type iCampusDisplaySlideEditPopupBtn = ButtonProps & {
   slides: iCampusDisplaySlide[];
   divClassName?: string;
   closeOnSaved?: boolean;
@@ -29,7 +29,7 @@ const CampusDisplaySlideEditPopupBtn = ({
   onSaved,
   display,
   ...rest
-}: campusDisplaySlideCreatePopupBtn) => {
+}: iCampusDisplaySlideEditPopupBtn) => {
   const [showingPopup, setShowingPopup] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [changingSettings, setChangingSettings] = useState<{
@@ -38,6 +38,7 @@ const CampusDisplaySlideEditPopupBtn = ({
 
   const handleClose = () => {
     setShowingPopup(false);
+    setChangingSettings({});
   };
 
   const doSave = () => {
@@ -51,7 +52,7 @@ const CampusDisplaySlideEditPopupBtn = ({
       })
     })).then(resp => {
       if (closeOnSaved === true) {
-        setShowingPopup(false);
+        handleClose();
       }
       if(onSaved) {
         onSaved(resp);
