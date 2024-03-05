@@ -262,7 +262,7 @@ const CampusDisplaySlideShowByLocationId = ({
           if (isCanceled) {
             return;
           }
-          timeout = setTimeout(() => getData(), 1000);
+          timeout = setTimeout(() => getData(), 10000);
         });
     };
 
