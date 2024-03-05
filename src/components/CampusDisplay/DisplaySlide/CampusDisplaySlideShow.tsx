@@ -87,7 +87,7 @@ const CampusDisplaySlideShow = ({
                     setIsVideoPlaying(false);
                     setTimeout(() => {
                       carouselRef.current?.next();
-                    }, 500);
+                    }, 300);
                     return;
                   },
                   onBuffer: () => {
