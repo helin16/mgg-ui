@@ -12,6 +12,7 @@ import {ASSET_TYPE_CAMPUS_DISPLAY} from '../../types/asset/iAsset';
 import AssetListPanel from '../../components/Asset/AssetListPanel';
 import AssetInfoPanel from '../../components/Asset/AssetInfoPanel';
 import * as _ from 'lodash';
+import SectionDiv from '../../components/common/SectionDiv';
 
 const CampusDisplayManagementAdminPage = ({ onNavBack }: AdminPageProps) => {
   const [selectedAssetIds, setSelectedAssetIds] = useState<string[]>([]);
@@ -77,41 +78,43 @@ const CampusDisplayManagementAdminPage = ({ onNavBack }: AdminPageProps) => {
             key: "assets",
             title: "Media Library",
             component: (
-              <Row>
-                <Col lg={`${viewingAssetId || ''}`.trim() !== '' ? 8 : 12}>
-                  <AssetListPanel
-                    allowCreation
-                    allowDeletion={true}
-                    assetType={ASSET_TYPE_CAMPUS_DISPLAY}
-                    selectedAssetIds={selectedAssetIds}
-                    onSelect={newIds => {
-                      const diff = _.difference(newIds, selectedAssetIds);
-                      setViewingAssetId(diff.length > 0 ? diff[0]  : null);
-                      setSelectedAssetIds(newIds);
-                    }}
-                  />
-                </Col>
-                {`${viewingAssetId || ''}`.trim() === '' ? null : (
-                  <Col lg={4}>
-                    <AssetInfoPanel
-                      className={"asset-info"}
-                      assetId={`${viewingAssetId || ''}`.trim()}
-                      extraBtns={
-                        <>
-                          <Button
-                            variant={"secondary"}
-                            size={"sm"}
-                            title={"Close"}
-                            onClick={() => setViewingAssetId(null)}
-                          >
-                            <Icons.X />
-                          </Button>
-                        </>
-                      }
+              <SectionDiv>
+                <Row>
+                  <Col lg={`${viewingAssetId || ''}`.trim() !== '' ? 8 : 12}>
+                    <AssetListPanel
+                      allowCreation
+                      allowDeletion={true}
+                      assetType={ASSET_TYPE_CAMPUS_DISPLAY}
+                      selectedAssetIds={selectedAssetIds}
+                      onSelect={newIds => {
+                        const diff = _.difference(newIds, selectedAssetIds);
+                        setViewingAssetId(diff.length > 0 ? diff[0]  : null);
+                        setSelectedAssetIds(newIds);
+                      }}
                     />
                   </Col>
-                )}
-              </Row>
+                  {`${viewingAssetId || ''}`.trim() === '' ? null : (
+                    <Col lg={4}>
+                      <AssetInfoPanel
+                        className={"asset-info"}
+                        assetId={`${viewingAssetId || ''}`.trim()}
+                        extraBtns={
+                          <>
+                            <Button
+                              variant={"secondary"}
+                              size={"sm"}
+                              title={"Close"}
+                              onClick={() => setViewingAssetId(null)}
+                            >
+                              <Icons.X />
+                            </Button>
+                          </>
+                        }
+                      />
+                    </Col>
+                  )}
+                </Row>
+              </SectionDiv>
             )
           }
         ]}
