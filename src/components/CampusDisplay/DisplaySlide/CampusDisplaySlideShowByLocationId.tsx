@@ -81,7 +81,7 @@ const CampusDisplaySlideShowByLocationId = ({
       return false;
     }
 
-    const timeFormat = "HH:mm";
+    const timeFormat = "HH:mm:ss";
     if (
       schedule.startTime &&
       moment(schedule.startTime).format(timeFormat) >
