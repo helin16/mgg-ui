@@ -10,7 +10,7 @@ const getThumbnail = (url: string) => {
 
       return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
     } catch (error) {
-      console.error('Error parsing URL:', error);
+      // console.error('Error parsing URL:', error);
       return url;
     }
   }

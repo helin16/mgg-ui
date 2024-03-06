@@ -16,9 +16,9 @@ import SchoolLogo from "../../SchoolLogo";
 import SectionDiv from "../../common/SectionDiv";
 import CampusDisplaySlideShow from "./CampusDisplaySlideShow";
 import CampusDisplayScheduleService from "../../../services/CampusDisplay/CampusDisplayScheduleService";
-import {OP_LTE} from "../../../helper/ServiceHelper";
+import { OP_LTE } from "../../../helper/ServiceHelper";
 import * as _ from "lodash";
-import iCampusDisplaySchedule from '../../../types/CampusDisplay/iCampusDisplaySchedule';
+import iCampusDisplaySchedule from "../../../types/CampusDisplay/iCampusDisplaySchedule";
 
 type iCampusDisplaySlideShowPanel = {
   locationId: string;
@@ -59,32 +59,45 @@ const CampusDisplaySlideShowByLocationId = ({
   ] = useState<iCampusDisplayLocation | null>(null);
 
   const filterScheduleToBeCurrent = (schedule: iCampusDisplaySchedule) => {
-    if (moment(schedule.startDate).isAfter(moment().endOf('day'))) {
+    if (moment(schedule.startDate).isAfter(moment().endOf("day"))) {
       return false;
     }
 
-    if (schedule.endDate && moment(schedule.endDate).isBefore(moment().startOf('day'))) {
+    if (
+      schedule.endDate &&
+      moment(schedule.endDate).isBefore(moment().startOf("day"))
+    ) {
       return false;
     }
 
-    const weekDay = moment().format('dddd').substring(0,3).toLowerCase();
+    const weekDay = moment()
+      .format("dddd")
+      .substring(0, 3)
+      .toLowerCase();
     // @ts-ignore
     // console.log('weekDay', weekDay, schedule[weekDay], !(weekDay in schedule) || schedule[weekDay] !== true);
     // @ts-ignore
-    if(!(weekDay in schedule) || schedule[weekDay] !== true) {
+    if (!(weekDay in schedule) || schedule[weekDay] !== true) {
       return false;
     }
 
-    const timeFormat = 'HH:mm';
-    if (schedule.startTime && moment(schedule.startTime).format(timeFormat) > moment().format(timeFormat)) {
+    const timeFormat = "HH:mm";
+    if (
+      schedule.startTime &&
+      moment(schedule.startTime).format(timeFormat) >
+        moment().format(timeFormat)
+    ) {
       return false;
     }
 
-    if (schedule.endTime && moment(schedule.endTime).format(timeFormat) < moment().format(timeFormat)) {
+    if (
+      schedule.endTime &&
+      moment(schedule.endTime).format(timeFormat) < moment().format(timeFormat)
+    ) {
       return false;
     }
     return true;
-  }
+  };
 
   const getSlidesFromDB = useCallback(async () => {
     const result = await Promise.all([
@@ -100,7 +113,11 @@ const CampusDisplaySlideShowByLocationId = ({
           isActive: true,
           locationId,
           // just trying to cover all in case of UTC time.
-          startDate: { [OP_LTE]: moment().add(1, 'day').format("YYYY-MM-DD") }
+          startDate: {
+            [OP_LTE]: moment()
+              .add(1, "day")
+              .format("YYYY-MM-DD")
+          }
         }),
         perPage: 999999
       })
@@ -113,10 +130,15 @@ const CampusDisplaySlideShowByLocationId = ({
     }
 
     const location = locations[0];
-    const playListIds = [
-      ..._.uniq(schedules.filter(filterScheduleToBeCurrent).map(schedule => schedule.displayId)),
+    const scheduledPlayListIds = _.uniq(
+      schedules
+        .filter(filterScheduleToBeCurrent)
+        .map(schedule => schedule.displayId)
+    );
+    const pListIds = [
+      ...scheduledPlayListIds,
       // get default playlist, Only when there is no scheduled.
-      ...(schedules.length > 0 ? [] : [location.displayId || ""])
+      ...(scheduledPlayListIds.length > 0 ? [] : [location.displayId || ""])
     ].filter(id => `${id || ""}`.trim() !== "");
 
     const slidesFromDB =
@@ -124,7 +146,7 @@ const CampusDisplaySlideShowByLocationId = ({
         await CampusDisplaySlideService.getAll({
           where: JSON.stringify({
             isActive: true,
-            displayId: playListIds
+            displayId: pListIds
           }),
           include: "Asset",
           perPage: 999999,
@@ -133,7 +155,7 @@ const CampusDisplaySlideShowByLocationId = ({
       ).data || [];
 
     setDisplayLocation(location || null);
-    setPlayListIds(playListIds);
+    setPlayListIds(pListIds);
 
     const slideIdsFromDB = slidesFromDB.map(slide => slide.id);
     setCdSlides(prevSlides => {
@@ -233,25 +255,61 @@ const CampusDisplaySlideShowByLocationId = ({
     let isCanceled = false;
     let timeout: NodeJS.Timeout | null = null;
     const getData = () => {
-      return CampusDisplayLocationService.getById(displayLocation.id)
+      return Promise.all([
+        CampusDisplayLocationService.getById(displayLocation.id),
+        CampusDisplayScheduleService.getAll({
+          where: JSON.stringify({
+            isActive: true,
+            locationId: displayLocation.id,
+            // just trying to cover all in case of UTC time.
+            startDate: {
+              [OP_LTE]: moment()
+                .add(1, "day")
+                .format("YYYY-MM-DD")
+            }
+          }),
+          perPage: 999999
+        })
+      ])
         .then(resp => {
+          const locationFromDB = resp[0];
           if (isCanceled) {
             return;
           }
+
           if (
-            `${resp.id || ""}`.trim() === "" ||
-            resp.isActive !== true ||
-            (resp?.version || 0) <= (displayLocation?.version || 0)
+            `${locationFromDB.id || ""}`.trim() === "" ||
+            locationFromDB.isActive !== true
           ) {
             return;
           }
+
           if (
-            (resp.settings?.forceReload || 0) > (displayLocation?.version || 0)
+            (locationFromDB.settings?.forceReload || 0) >
+            (displayLocation?.settings?.forceReload || 0)
           ) {
             Toaster.showToast("Reloaded", TOAST_TYPE_SUCCESS);
             reloadWindow();
             return;
           }
+
+          const scheduledPlayListIds = _.uniq(
+            (resp[1].data || [])
+              .filter(filterScheduleToBeCurrent)
+              .map(schedule => schedule.displayId)
+          );
+          const pListIds = [
+            ...scheduledPlayListIds,
+            // get default playlist, Only when there is no scheduled.
+            ...(scheduledPlayListIds.length > 0
+              ? []
+              : [locationFromDB.displayId || ""])
+          ].filter(id => `${id || ""}`.trim() !== "");
+
+          if ((locationFromDB?.version || 0) <= (displayLocation?.version || 0) && _.difference(pListIds, playListIds).length === 0) {
+            return;
+          }
+
           setCount(prev => MathHelper.add(prev, 1));
           return;
         })
@@ -272,7 +330,7 @@ const CampusDisplaySlideShowByLocationId = ({
       timeout && clearTimeout(timeout);
       isCanceled = true;
     };
-  }, [displayLocation]);
+  }, [displayLocation, playListIds]);
 
   const getContent = () => {
     if (isLoading === true) {
