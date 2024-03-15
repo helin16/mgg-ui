@@ -1,4 +1,5 @@
 import iSynCommunity from '../iSynCommunity';
+import iSynLuAbsenceType from '../Absence/iSynLuAbsenceType';
 
 type iSynVAttendance = {
   AttendanceSeq: number;
@@ -37,6 +38,7 @@ type iSynVAttendance = {
   AttendanceDayNumber: null | null;
   ClassCancelledFlag: boolean;
   SynCommunity?: iSynCommunity;
+  PossibleAbsenceType?: iSynLuAbsenceType;
 }
 
 export default iSynVAttendance;

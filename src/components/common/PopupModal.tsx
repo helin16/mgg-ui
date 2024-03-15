@@ -6,7 +6,6 @@ import {ModalProps} from 'react-bootstrap/Modal';
 export type iPopupModal = ModalProps & {
   handleClose?: () => void;
   footer?: any;
-  body?: any;
   header?: any;
   title?: any;
   fullWidth?: boolean

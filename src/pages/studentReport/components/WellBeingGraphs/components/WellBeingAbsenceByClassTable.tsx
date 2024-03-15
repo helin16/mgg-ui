@@ -3,7 +3,9 @@ import { useEffect, useState } from "react";
 import iSynVAttendance from "../../../../../types/Synergetic/Attendance/iSynVAttendance";
 import Table, { iTableColumn } from "../../../../../components/common/Table";
 import styled from "styled-components";
-import iSynVAbsence from '../../../../../types/Synergetic/Absence/iSynVAbsence';
+import iSynVAbsence from "../../../../../types/Synergetic/Absence/iSynVAbsence";
+import AttendanceTablePopupBtn from "../../../../../components/Attendance/AttendanceTablePopupBtn";
+import AttendanceHelper from '../../../../../components/Attendance/AttendanceHelper';
 
 type iWellBeingAbsenceByClassPanel = {
   student: iVStudent;
@@ -21,31 +23,39 @@ const WellBeingAbsenceByClassChart = ({
   }>({});
 
   useEffect(() => {
-    const approvedAbsences = absences.filter(absence => absence.ApprovedFlag === true);
+    const approvedAbsences = absences.filter(
+      absence => absence.ApprovedFlag === true
+    );
     setAbsencesByClassMap(
-      attendances
-        .reduce(
-          (map, attendance) => {
-            const classCode = attendance.ClassCode;
-            const matchAbsences = approvedAbsences.filter(absence => attendance.AttendanceDate === absence.AbsenceDate && absence.AbsencePeriod === attendance.AttendancePeriod);
-            return {
-              ...map,
-              // @ts-ignore
-              [classCode]: [...(map[classCode] || []), {
-                ...attendance,
-                isApproved: matchAbsences.length > 0 ? matchAbsences[0].ApprovedFlag : false,
-              }]
+      attendances.reduce((map, attendance) => {
+        const classCode = attendance.ClassCode;
+        const matchAbsences = approvedAbsences.filter(absence => {
+          return (
+            attendance.AttendanceDate === absence.AbsenceDate &&
+            absence.AbsencePeriod === attendance.AttendancePeriod
+          );
+        });
+        return {
+          ...map,
+          [classCode]: [
+            // @ts-ignore
+            ...(map[classCode] || []),
+            {
+              ...attendance,
+              isApproved:
+                matchAbsences.length > 0 ? matchAbsences[0].ApprovedFlag : false
             }
-          },
-          {}
-        )
+          ]
+        };
+      }, {})
     );
   }, [student, attendances, absences]);
 
   const getColumns = (): iTableColumn[] => [
     {
       key: "classCode",
-      header: "Code",
+      header: "Class",
+      footer: 'Total',
       cell: (column, classCode: string) => {
         return <td key={column.key}>{classCode}</td>;
       }
@@ -54,13 +64,38 @@ const WellBeingAbsenceByClassChart = ({
       key: "NoOfClasses",
       header: "Total Classes",
       cell: (column, classCode: string) => {
+        const atts = attendances.filter(
+          attendance => attendance.ClassCode === classCode
+        );
         return (
           <td key={column.key}>
-            {
-              attendances.filter(
-                attendance => attendance.ClassCode === classCode
-              ).length
-            }
+            <AttendanceTablePopupBtn
+              showStudentID={false}
+              attendances={atts}
+              variant={"link"}
+              size={'sm'}
+              className={"no-padding"}
+              popupTitle={<>Class (<u>{classCode}</u>) Attendances for <u>{student.StudentNameExternal}</u>: {atts.length} </>}
+            >
+              {atts.length}
+            </AttendanceTablePopupBtn>
+          </td>
+        );
+      },
+      footer: (column: iTableColumn) => {
+        const atts = attendances;
+        return (
+          <td key={column.key}>
+            <AttendanceTablePopupBtn
+              showStudentID={false}
+              attendances={atts}
+              variant={"link"}
+              size={'sm'}
+              className={"no-padding"}
+              popupTitle={<>All Attendances for <u>{student.StudentNameExternal}</u>: {atts.length} </>}
+            >
+              {atts.length}
+            </AttendanceTablePopupBtn>
           </td>
         );
       }
@@ -69,13 +104,43 @@ const WellBeingAbsenceByClassChart = ({
       key: "attended",
       header: "Attended",
       cell: (column, classCode: string) => {
+        const atts = attendances.filter(
+          attendance =>
+            attendance.ClassCode === classCode &&
+            attendance.AttendedFlag === true
+        );
         return (
           <td key={column.key}>
-            {
-              attendances.filter(
-                attendance => attendance.ClassCode === classCode && attendance.AttendedFlag === true
-              ).length
-            }
+            <AttendanceTablePopupBtn
+              showStudentID={false}
+              attendances={atts}
+              variant={"link"}
+              size={'sm'}
+              className={"no-padding"}
+              popupTitle={<>Class (<u>{classCode}</u>) Attendances for <u>{student.StudentNameExternal}</u>, <u>attended</u>: {atts.length} </>}
+            >
+              {atts.length}
+            </AttendanceTablePopupBtn>
+          </td>
+        );
+      },
+      footer: (column: iTableColumn) => {
+        const atts = attendances.filter(
+          attendance =>
+            attendance.AttendedFlag === true
+        );
+        return (
+          <td key={column.key}>
+            <AttendanceTablePopupBtn
+              showStudentID={false}
+              attendances={atts}
+              variant={"link"}
+              size={'sm'}
+              className={"no-padding"}
+              popupTitle={<>All Attended for <u>{student.StudentNameExternal}</u>: {atts.length} </>}
+            >
+              {atts.length}
+            </AttendanceTablePopupBtn>
           </td>
         );
       }
@@ -84,13 +149,43 @@ const WellBeingAbsenceByClassChart = ({
       key: "markedAsAbsence",
       header: "Marked Absence",
       cell: (column, classCode: string) => {
+        const atts = attendances.filter(
+          attendance =>
+            attendance.ClassCode === classCode &&
+            attendance.AttendedFlag === false
+        );
         return (
           <td key={column.key}>
-            {
-              attendances.filter(
-                attendance => attendance.ClassCode === classCode && attendance.AttendedFlag === false
-              ).length
-            }
+            <AttendanceTablePopupBtn
+              showStudentID={false}
+              attendances={atts}
+              variant={"link"}
+              size={'sm'}
+              className={"no-padding"}
+              popupTitle={<>Class (<u>{classCode}</u>) Attendances for <u>{student.StudentNameExternal}</u>, <u>marked absences</u>: {atts.length} </>}
+            >
+              {atts.length}
+            </AttendanceTablePopupBtn>
+          </td>
+        );
+      },
+      footer: (column: iTableColumn) => {
+        const atts = attendances.filter(
+          attendance =>
+            attendance.AttendedFlag !== true
+        );
+        return (
+          <td key={column.key}>
+            <AttendanceTablePopupBtn
+              showStudentID={false}
+              attendances={atts}
+              variant={"link"}
+              size={'sm'}
+              className={"no-padding"}
+              popupTitle={<>All Marked Absence for <u>{student.StudentNameExternal}</u>: {atts.length} </>}
+            >
+              {atts.length}
+            </AttendanceTablePopupBtn>
           </td>
         );
       }
@@ -99,14 +194,46 @@ const WellBeingAbsenceByClassChart = ({
       key: "approvedAbsence",
       header: "Approved Absence",
       cell: (column, classCode: string) => {
+        const atts = (classCode in absencesByClassMap
+            ? absencesByClassMap[classCode]
+            : []
+        ).filter(
+          // @ts-ignore
+          attendance => attendance.isApproved === true
+        );
         return (
           <td key={column.key}>
-            {
-              (classCode in absencesByClassMap ? absencesByClassMap[classCode] : []).filter(
-                // @ts-ignore
-                attendance =>attendance.isApproved === true
-              ).length
-            }
+            <AttendanceTablePopupBtn
+              showStudentID={false}
+              attendances={atts}
+              variant={"link"}
+              size={'sm'}
+              className={"no-padding"}
+              popupTitle={<>Class (<u>{classCode}</u>) Attendances for <u>{student.StudentNameExternal}</u>, <u>approved absences</u>: {atts.length} </>}
+            >
+              {atts.length}
+            </AttendanceTablePopupBtn>
+          </td>
+        );
+      },
+      footer: (column: iTableColumn) => {
+        const atts = attendances.filter(
+          attendance =>
+            // @ts-ignore
+            attendance.isApproved === true
+        );
+        return (
+          <td key={column.key}>
+            <AttendanceTablePopupBtn
+              showStudentID={false}
+              attendances={atts}
+              variant={"link"}
+              size={'sm'}
+              className={"no-padding"}
+              popupTitle={<>All Approved Absence for <u>{student.StudentNameExternal}</u>: {atts.length} </>}
+            >
+              {atts.length}
+            </AttendanceTablePopupBtn>
           </td>
         );
       }
@@ -115,13 +242,47 @@ const WellBeingAbsenceByClassChart = ({
       key: "reportableAbsence",
       header: "Reportable Absence",
       cell: (column, classCode: string) => {
+        const atts= attendances.filter(
+          attendance => {
+            if (attendance.ClassCode !== classCode) {
+              return false;
+            }
+            return AttendanceHelper.isReportableAbsence(attendance);
+          }
+
+        )
         return (
           <td key={column.key}>
-            {
-              attendances.filter(
-                attendance => attendance.ClassCode === classCode && attendance.AttendedFlag === false
-              ).length
-            }
+            <AttendanceTablePopupBtn
+              showStudentID={false}
+              attendances={atts}
+              variant={"link"}
+              size={'sm'}
+              className={"no-padding"}
+              popupTitle={<>Class (<u>{classCode}</u>) Attendances for <u>{student.StudentNameExternal}</u>, <u>reportable absences</u>: {atts.length} </>}
+            >
+              {atts.length}
+            </AttendanceTablePopupBtn>
+          </td>
+        );
+      },
+      footer: (column: iTableColumn) => {
+        const atts = attendances.filter(
+          attendance =>
+            AttendanceHelper.isReportableAbsence(attendance)
+        );
+        return (
+          <td key={column.key}>
+            <AttendanceTablePopupBtn
+              showStudentID={false}
+              attendances={atts}
+              variant={"link"}
+              size={'sm'}
+              className={"no-padding"}
+              popupTitle={<>All Reportable Absence for <u>{student.StudentNameExternal}</u>: {atts.length} </>}
+            >
+              {atts.length}
+            </AttendanceTablePopupBtn>
           </td>
         );
       }
@@ -132,9 +293,10 @@ const WellBeingAbsenceByClassChart = ({
     <Wrapper>
       <Table
         columns={getColumns()}
-        rows={Object.keys(absencesByClassMap)}
+        rows={Object.keys(absencesByClassMap).sort((classCode1, classCode2) => classCode1 > classCode2 ? 1 : -1)}
         hover
         striped
+        responsive
       />
     </Wrapper>
   );

@@ -20,6 +20,7 @@ const WellBeingAbsenceByClassChart = ({
   useEffect(() => {
     setAbsencesByClassMap(
       attendances
+        .filter(attendance => !attendance.PossibleAbsenceType || attendance.PossibleAbsenceType?.CountAsAbsenceFlag === true)
         .filter(attendance => attendance.AttendedFlag !== true)
         .reduce(
           (map, absence) => ({

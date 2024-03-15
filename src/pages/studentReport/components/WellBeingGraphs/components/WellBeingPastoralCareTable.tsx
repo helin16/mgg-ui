@@ -82,7 +82,7 @@ const WellBeingPastoralCareTable = ({
 
   return (
     <Wrapper className={"pastoral-care-table"}>
-      <Table columns={getColumns()} rows={pastoralCares} />
+      <Table columns={getColumns()} rows={pastoralCares} responsive/>
       {getPopup()}
     </Wrapper>
   );

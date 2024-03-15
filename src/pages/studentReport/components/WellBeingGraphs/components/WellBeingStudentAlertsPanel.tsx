@@ -15,7 +15,7 @@ const WellBeingStudentAlertsPanel = ({
 }: iWellBeingStudentAlertsPanel) => {
   return (
     <Wrapper className={"alerts-table"}>
-      <Table>
+      <Table responsive>
         <tbody>
           <tr>
             <td>Learning Support</td>

@@ -28,7 +28,7 @@ export type iTableColumn = {
   sort?: number;
 };
 
-type iTable = TableProps & {
+export type iTable = TableProps & {
   isLoading?: boolean;
   showPaginator?: boolean;
   columns: iTableColumn[];
