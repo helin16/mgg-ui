@@ -114,9 +114,6 @@ const StudentReport = () => {
         />
       );
     }
-    console.log('user?.isTeacher', user?.isTeacher);
-    console.log('isAdminUser', isAdminUser);
-    console.log('user?.isTeacher === true || isAdminUser === true', user?.isTeacher === true || isAdminUser === true);
     if (user?.isTeacher === true || isAdminUser === true) {
       return <SearchPage onSelect={student => setSelectedStudent(student)} />;
     }
