@@ -155,8 +155,11 @@ const getListColumns = ({
     key: "ActiveFlag",
     header: "Active Flag",
     format: TABLE_COLUMN_FORMAT_BOOLEAN,
-    cell: (column: iTableColumn, data: iVStaff) =>
-      `${data.ActiveFlag === true ? "Y" : "N"}`
+    cell: (column: iTableColumn, data: iVStaff) => {
+      console.log('data.ActiveFlag', data.ActiveFlag);
+      return `${data.ActiveFlag === true ? "Y" : "N"}`
+    }
+
   },
   {
     key: "StartDate",

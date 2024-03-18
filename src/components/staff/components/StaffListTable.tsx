@@ -55,7 +55,7 @@ const StaffListTable = ({
   const getFormatCell = (column: iTableColumn, value: any, data?: any) => {
     switch (column.format) {
       case TABLE_COLUMN_FORMAT_BOOLEAN: {
-        return `${value === true ? "Y" : "N"}`;
+        return `${(value === true || value.trim().toLowerCase() === 'true') ? "Y" : "N"}`;
       }
       case TABLE_COLUMN_FORMAT_DATE: {
         const string =`${value || ""}`.trim();
