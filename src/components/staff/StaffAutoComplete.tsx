@@ -52,7 +52,8 @@ const StaffAutoComplete = ({onSelect, value, allowClear, isDisabled}: iStaffAuto
           {StaffLegalFullName: { [OP_LIKE]: `%${searchText}%` }},
           {StaffID: { [OP_LIKE]: `%${searchText}%` }},
         ]
-      })
+      }),
+      perPage: 10
     })
   }
 

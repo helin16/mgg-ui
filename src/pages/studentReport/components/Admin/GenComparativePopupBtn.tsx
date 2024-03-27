@@ -19,7 +19,7 @@ const GenComparativePopupBtn = () => {
     if ((user?.SynCurrentFileSemester?.FileSemester || 0) < 4 && (user?.SynCurrentFileSemester?.FileSemester || 0) % 2 !== 0) {
       setGenFileSemester(null)
     }
-    setGenFileSemester(Math.floor((user?.SynCurrentFileSemester?.FileSemester || 0) / 2) * 2);
+    setGenFileSemester(user?.SynCurrentFileSemester?.FileSemester || 0);
   }, [user?.SynCurrentFileSemester?.FileSemester])
 
 
@@ -57,21 +57,12 @@ const GenComparativePopupBtn = () => {
       )
     }
 
-    if (genFileSemester === null) {
-      return (
-        <Alert variant="danger">
-          <p>
-            You can ONLY run Comparative Gen on Semester 2 or 4.
-          </p>
-        </Alert>
-      );
-    }
     return (
       <Alert variant="danger">
         <Alert.Heading>ACTION CAN NOT BE REVERSED!</Alert.Heading>
         <p>
           You are about to generate comparative result for all students in {user?.SynCurrentFileSemester?.FileYear}{' '}
-          Semester { genFileSemester }
+          Term { genFileSemester }
         </p>
       </Alert>
     )

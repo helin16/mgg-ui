@@ -9,7 +9,6 @@ import Page401 from "../../components/Page401";
 import StudentGridForAParent from "../../components/student/StudentGridForAParent";
 import AuthService from "../../services/AuthService";
 import { MGGS_MODULE_ID_STUDENT_REPORT } from "../../types/modules/iModuleUser";
-import { ROLE_ID_ADMIN } from "../../types/modules/iRole";
 import PageNotFound from "../../components/PageNotFound";
 import ContactSupportPopupBtn from "../../components/support/ContactSupportPopupBtn";
 import Page from "../../layouts/Page";
@@ -25,7 +24,7 @@ const StudentReport = () => {
   const [selectedStudent, setSelectedStudent] = useState<iVStudent | null>(
     null
   );
-  const [isAdminUser, setIsAdminUser] = useState(false);
+  const [isModuleUser, setIsModuleUser] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -67,9 +66,8 @@ const StudentReport = () => {
         if (isCancelled === true) {
           return;
         }
-        setIsAdminUser(
-          // @ts-ignore
-          Object.keys(resp).filter(roleId => `${roleId}` === `${ROLE_ID_ADMIN}` && resp[`${roleId || ''}`].canAccess === true)
+        setIsModuleUser(
+          Object.values(resp).filter(userRole => userRole.canAccess === true)
             .length > 0
         );
       })
@@ -114,7 +112,7 @@ const StudentReport = () => {
         />
       );
     }
-    if (user?.isTeacher === true || isAdminUser === true) {
+    if (user?.isTeacher === true || isModuleUser === true) {
       return <SearchPage onSelect={student => setSelectedStudent(student)} />;
     }
     if (user?.isStudent === true && !selectedStudent) {

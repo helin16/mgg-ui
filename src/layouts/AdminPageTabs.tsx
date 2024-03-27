@@ -2,6 +2,7 @@ import {useState} from 'react';
 import {Tab, Tabs} from 'react-bootstrap';
 import ModuleUserList from '../components/module/ModuleUserList';
 import {ROLE_ID_ADMIN, ROLE_ID_NORMAL} from '../types/modules/iRole';
+import styled from 'styled-components';
 
 type iAdminPageTab = {
   title: string;
@@ -14,30 +15,40 @@ type iAdminPageTabs = {
   extraTabs?: iAdminPageTab[];
   usersTab?: any;
   adminsTab?: any;
+  className?: string;
 }
 
 const TAB_USERS = 'Users';
 const TAB_ADMINS = 'Admins';
-const AdminPageTabs = ({moduleId, defaultTabKey, usersTab, adminsTab, extraTabs = []}: iAdminPageTabs) => {
+const Wrapper = styled.div`
+    &.top-gap {
+        .tab-content {
+            padding-top: 1rem;
+        }
+    }
+`;
+const AdminPageTabs = ({moduleId, defaultTabKey, usersTab, adminsTab, className, extraTabs = []}: iAdminPageTabs) => {
   const defaultSelectedTab = defaultTabKey || TAB_USERS;
   const [selectedTab, setSelectedTab] = useState(defaultSelectedTab);
 
   return (
-    <Tabs
-      activeKey={selectedTab}
-      onSelect={k => setSelectedTab(k || defaultSelectedTab)}
-      unmountOnExit
-    >
-      <Tab title={TAB_USERS} eventKey={TAB_USERS}>
-        {usersTab || <ModuleUserList moduleId={moduleId} roleId={ROLE_ID_NORMAL} showDeletingBtn showCreatingPanel />}
-      </Tab>
-      <Tab title={TAB_ADMINS} eventKey={TAB_ADMINS}>
-        {adminsTab || <ModuleUserList moduleId={moduleId} roleId={ROLE_ID_ADMIN} showDeletingBtn showCreatingPanel />}
-      </Tab>
-      {extraTabs.map(extraTab => {
-        return <Tab key={extraTab.key} title={extraTab.title} eventKey={extraTab.key}>{extraTab.component}</Tab>
-      })}
-    </Tabs>
+    <Wrapper className={className}>
+      <Tabs
+        activeKey={selectedTab}
+        onSelect={k => setSelectedTab(k || defaultSelectedTab)}
+        unmountOnExit
+      >
+        <Tab title={TAB_USERS} eventKey={TAB_USERS}>
+          {usersTab || <ModuleUserList moduleId={moduleId} roleId={ROLE_ID_NORMAL} showDeletingBtn showCreatingPanel />}
+        </Tab>
+        <Tab title={TAB_ADMINS} eventKey={TAB_ADMINS}>
+          {adminsTab || <ModuleUserList moduleId={moduleId} roleId={ROLE_ID_ADMIN} showDeletingBtn showCreatingPanel />}
+        </Tab>
+        {extraTabs.map(extraTab => {
+          return <Tab key={extraTab.key} title={extraTab.title} eventKey={extraTab.key}>{extraTab.component}</Tab>
+        })}
+      </Tabs>
+    </Wrapper>
   )
 }
 

@@ -7,12 +7,12 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../redux/makeReduxStore";
 import DeleteConfirmPopupBtn from "../common/DeleteConfirm/DeleteConfirmPopupBtn";
 import styled from "styled-components";
-import StaffAutoComplete from "../staff/StaffAutoComplete";
 import { iAutoCompleteSingle } from "../common/AutoComplete";
 import Toaster, { TOAST_TYPE_SUCCESS } from "../../services/Toaster";
 import Table, { iTableColumn } from "../common/Table";
 import PopupModal from "../common/PopupModal";
 import PageLoadingSpinner from '../common/PageLoadingSpinner';
+import StaffSelector from '../staff/StaffSelector';
 
 const Wrapper = styled.div``;
 type iModuleUserList = {
@@ -222,7 +222,7 @@ const ModuleUserList = ({
           <Spinner animation={"border"} size={"sm"} />
         ) : (
           <div style={{ width: "100%" }}>
-            <StaffAutoComplete onSelect={onCreate} />
+            <StaffSelector onSelect={(option) => onCreate(Array.isArray(option)  ? option[0] : option)} />
           </div>
         )}
         <p></p>

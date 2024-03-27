@@ -3,11 +3,12 @@ import { Button, Form } from "react-bootstrap";
 import iVStudent from "../../../types/Synergetic/Student/iVStudent";
 import styled from "styled-components";
 import ModuleAdminBtn from "../../../components/module/ModuleAdminBtn";
-import AdminPage from "../AdminPage";
+import StudentReportAdminPage from "../StudentReportAdminPage";
 import { MGGS_MODULE_ID_STUDENT_REPORT } from "../../../types/modules/iModuleUser";
 import StudentStatusBadge from "./AcademicReports/StudentStatusBadge";
 import SynStudentSearchPanel from "../../../components/student/SynStudentSearchPanel";
 import * as Icons from "react-bootstrap-icons";
+import ExplanationPanel from '../../../components/ExplanationPanel';
 
 const Wrapper = styled.div`
   .form-label {
@@ -49,7 +50,7 @@ const SearchPage = ({
   const [isShowingAdvanced, setIsShowingAdvanced] = useState(false);
 
   if (isShowAdminPage === true) {
-    return <AdminPage backToReportFn={() => setIsShowAdminPage(false)} />;
+    return <StudentReportAdminPage backToReportFn={() => setIsShowAdminPage(false)} />;
   }
 
   return (
@@ -64,7 +65,9 @@ const SearchPage = ({
         </span>
       </h3>
 
-      <p>
+      <ExplanationPanel text={'All teachers & nominated users of this module can see this page.'} dismissible/>
+
+      <div>
         Welcome to the student academic report viewer. Type the homeroom or name
         of the student you want to locate below.
         <Button
@@ -80,7 +83,8 @@ const SearchPage = ({
             <Icons.ChevronDown />
           )}
         </Button>
-      </p>
+      </div>
+
       <SynStudentSearchPanel
         showAdvancedSearch={isShowingAdvanced}
         label={<Form.Label>Search</Form.Label>}
