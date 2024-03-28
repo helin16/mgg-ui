@@ -38,6 +38,7 @@ const Wrapper = styled.div`
   .playlist-panel {
     flex: auto;
     padding-left: 1rem;
+    max-width: 80%;
   }
 
   .location-selector {
