@@ -6,6 +6,8 @@ import iPaginatedResult from '../../types/iPaginatedResult';
 
 const endPoint = '/funnel';
 
+export const FUNNEL_ADMIN_URL = 'https://mggs-au-vic-254.app.digistorm.com/admin/login';
+
 const getAll = (params?: iConfigParams, config: AxiosRequestConfig = {}): Promise<iPaginatedResult<iFunnelLead>> => {
   return appService.get(endPoint, params, config).then(({data}) => data);
 };

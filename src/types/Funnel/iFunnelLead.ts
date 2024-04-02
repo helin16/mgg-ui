@@ -16,6 +16,7 @@ type iFunnelLead = {
   updated_at: Date | string | null;
   student_starting_year: string | null;
   student_starting_year_level: string | null;
+  student_starting_year_level_code: string | null;
   student_first_name: string;
   student_last_name: string;
   student_date_of_birth: string | null;
