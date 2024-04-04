@@ -134,6 +134,15 @@ const FunnelLeadsTable = ({
           }
         },
         {
+          key: "ET",
+          header: "Enquiry Tracker",
+          cell: (col: iTableColumn, data: IFunnelLead) => {
+            const etId = `${data.enquiryTrackerId || ''}`.trim();
+            const content = (etId === '' ? null : <a href={`https://app.enquirytracker.net/enquiries/edit-student;studentId=${etId}`} target={'__BLANK'}>{etId}</a>);
+            return <td key={col.key}>{content}</td>;
+          }
+        },
+        {
           key: "Operations",
           header: "",
           cell: (col: iTableColumn, data: IFunnelLead) => {

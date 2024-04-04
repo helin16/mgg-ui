@@ -38,6 +38,10 @@ type iFunnelLead = {
   isActive: boolean;
   checkSum: string | null;
   StudentYearLevel?: number;
+  enquiryTrackerId: string | null;
+  enquiryTrackerObj: any;
+  enquiryTrackerUpdatedAt: Date | string | null;
+  enquiryTrackerCheckSum: string | null;
 }
 
 export default iFunnelLead;

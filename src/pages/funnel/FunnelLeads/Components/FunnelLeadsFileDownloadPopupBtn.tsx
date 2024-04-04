@@ -30,6 +30,9 @@ const getFileInfo = (info: any): iFileInfo | null => {
 };
 
 export const getFunnelLeadFiles = (files: any) => {
+  if (!files) {
+    return [];
+  }
   let filePaths: (iFileInfo | null)[] = [];
   Object.values(files).forEach(file => {
     if (Array.isArray(file)) {
