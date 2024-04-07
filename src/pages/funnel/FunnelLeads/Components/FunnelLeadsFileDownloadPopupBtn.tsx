@@ -1,5 +1,5 @@
 import IFunnelLead from "../../../../types/Funnel/iFunnelLead";
-import {Button, ButtonProps, FormControl} from "react-bootstrap";
+import { Button, ButtonProps } from "react-bootstrap";
 import PopupModal from "../../../../components/common/PopupModal";
 import { useState } from "react";
 import Table, { iTableColumn } from "../../../../components/common/Table";
@@ -7,8 +7,10 @@ import UtilsService from "../../../../services/UtilsService";
 import ExplanationPanel from "../../../../components/ExplanationPanel";
 import { FUNNEL_ADMIN_URL } from "../../../../services/Funnel/FunnelService";
 import * as Icons from "react-bootstrap-icons";
-import { FlexContainer } from "../../../../styles";
 import LoadingBtn from "../../../../components/common/LoadingBtn";
+import SynergeticIDCheckPanel from "../../../../components/Community/SynergeticIDCheckPanel";
+import SectionDiv from "../../../../components/common/SectionDiv";
+import iSynCommunity from "../../../../types/Synergetic/iSynCommunity";
 
 type iFunnelLeadsFileDownloadPopupBtn = ButtonProps & {
   lead: IFunnelLead;
@@ -53,16 +55,12 @@ const FunnelLeadsFileDownloadPopupBtn = ({
 }: iFunnelLeadsFileDownloadPopupBtn) => {
   const [isShowingPopup, setIsShowingPopup] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<iFileInfo[]>([]);
-  const [synId, setSynId] = useState<string>('');
+  const [synCommunity, setSynCommunity] = useState<iSynCommunity | null>(null);
 
   const handleClose = () => {
     setSelectedFiles([]);
     setIsShowingPopup(false);
   };
-
-  const isSynIdValid = () => {
-    return `${synId || ''}`.trim().length >= 5;
-  }
 
   const isFilesSelected = (sFiles: iFileInfo[]) => {
     const sFileIds = sFiles
@@ -105,6 +103,23 @@ const FunnelLeadsFileDownloadPopupBtn = ({
         size={"lg"}
         handleClose={handleClose}
         title={"Choose a file / files to download to DocMan:"}
+        footer={
+          <>
+            <LoadingBtn variant={"link"} onClick={() => handleClose()}>
+              <Icons.XLg /> Cancel
+            </LoadingBtn>
+            <LoadingBtn
+              variant={"primary"}
+              onClick={() => handleClose()}
+              disabled={
+                selectedFiles.length <= 0 ||
+                `${synCommunity?.ID || ""}`.trim() === ""
+              }
+            >
+              <Icons.Send /> Download {selectedFiles.length} file(s) to DocMan
+            </LoadingBtn>
+          </>
+        }
       >
         <ExplanationPanel
           dismissible
@@ -126,104 +141,95 @@ const FunnelLeadsFileDownloadPopupBtn = ({
             </>
           }
         />
-        <Table
-          hover
-          striped
-          responsive
-          columns={[
-            {
-              key: "selected",
-              header: (col: iTableColumn) => {
-                return (
-                  <th key={col.key}>
-                    <span
-                      onClick={() => handleSelectedFiles(files)}
-                      className={"cursor-pointer"}
-                    >
-                      {isFilesSelected(files) === true ? (
-                        <Icons.CheckSquareFill className={"text-success"} />
-                      ) : (
-                        <Icons.Square />
-                      )}
-                    </span>
-                  </th>
-                );
+        <SectionDiv>
+          <h6>Step 1: Choose a file/ files</h6>
+          <Table
+            hover
+            striped
+            responsive
+            columns={[
+              {
+                key: "selected",
+                header: (col: iTableColumn) => {
+                  return (
+                    <th key={col.key}>
+                      <span
+                        onClick={() => handleSelectedFiles(files)}
+                        className={"cursor-pointer"}
+                      >
+                        {isFilesSelected(files) === true ? (
+                          <Icons.CheckSquareFill className={"text-success"} />
+                        ) : (
+                          <Icons.Square />
+                        )}
+                      </span>
+                    </th>
+                  );
+                },
+                cell: (col: iTableColumn, data: iFileInfo) => {
+                  return (
+                    <td key={col.key}>
+                      <span
+                        onClick={() => handleSelectedFiles([data])}
+                        className={"cursor-pointer"}
+                      >
+                        {isFilesSelected([data]) === true ? (
+                          <Icons.CheckSquareFill className={"text-success"} />
+                        ) : (
+                          <Icons.Square />
+                        )}
+                      </span>
+                    </td>
+                  );
+                }
               },
-              cell: (col: iTableColumn, data: iFileInfo) => {
-                return (
-                  <td key={col.key}>
-                    <span
-                      onClick={() => handleSelectedFiles([data])}
-                      className={"cursor-pointer"}
-                    >
-                      {isFilesSelected([data]) === true ? (
-                        <Icons.CheckSquareFill className={"text-success"} />
-                      ) : (
-                        <Icons.Square />
-                      )}
-                    </span>
-                  </td>
-                );
+              {
+                key: "name",
+                header: "File Name",
+                cell: (col: iTableColumn, data: iFileInfo) => {
+                  return (
+                    <td key={col.key} className={"ellipsis"}>
+                      <a href={`${data.download_url || ""}`} target={"__BLANK"}>
+                        {data.name}
+                      </a>
+                    </td>
+                  );
+                }
+              },
+              {
+                key: "type",
+                header: "File Type",
+                cell: (col: iTableColumn, data: iFileInfo) => {
+                  return (
+                    <td key={col.key} className={"ellipsis"}>
+                      {data.type}
+                    </td>
+                  );
+                }
+              },
+              {
+                key: "size",
+                header: "File Size",
+                cell: (col: iTableColumn, data: iFileInfo) => {
+                  return (
+                    <td key={col.key} className={"ellipsis"}>
+                      {UtilsService.formatBytesToHuman(data.size || 0)}
+                    </td>
+                  );
+                }
               }
-            },
-            {
-              key: "name",
-              header: "File Name",
-              cell: (col: iTableColumn, data: iFileInfo) => {
-                return (
-                  <td key={col.key} className={"ellipsis"}>
-                    <a href={`${data.download_url || ""}`} target={"__BLANK"}>
-                      {data.name}
-                    </a>
-                  </td>
-                );
-              }
-            },
-            {
-              key: "type",
-              header: "File Type",
-              cell: (col: iTableColumn, data: iFileInfo) => {
-                return (
-                  <td key={col.key} className={"ellipsis"}>
-                    {data.type}
-                  </td>
-                );
-              }
-            },
-            {
-              key: "size",
-              header: "File Size",
-              cell: (col: iTableColumn, data: iFileInfo) => {
-                return (
-                  <td key={col.key} className={"ellipsis"}>
-                    {UtilsService.formatBytesToHuman(data.size || 0)}
-                  </td>
-                );
-              }
-            }
-          ]}
-          rows={files}
-        />
-        <FlexContainer className={"justify-content-between space-above"}>
-          <div className={''}>
-            <FormControl placeholder={'Synergetic ID'} value={synId} onChange={event => setSynId(event.target.value || '')}/>
-          </div>
-          <div>
-            <LoadingBtn
-              variant={"link"}
-              onClick={() => handleClose()}
-            >
-              <Icons.XLg /> Cancel
-            </LoadingBtn>
-            <LoadingBtn
-              variant={"primary"}
-              onClick={() => handleClose()}
-              disabled={selectedFiles.length <= 0 || isSynIdValid() !== true}
-            >
-              <Icons.Send /> Download {selectedFiles.length} file(s)
-            </LoadingBtn>
-          </div>
-        </FlexContainer>
+            ]}
+            rows={files}
+          />
+        </SectionDiv>
+        <SectionDiv>
+          <h6>Step2: Provide a valid Synergetic ID</h6>
+          <SynergeticIDCheckPanel
+            onValid={profile => setSynCommunity(profile)}
+            onClear={() => setSynCommunity(null)}
+            onInvalid={() => setSynCommunity(null)}
+          />
+        </SectionDiv>
       </PopupModal>
     );
   };

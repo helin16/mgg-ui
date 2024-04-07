@@ -8,6 +8,11 @@ export const FUNNEL_STAGE_NAME_ENQUIRY = 'Enquiry';
 export const FUNNEL_STAGE_NAME_SCHOOL_VISIT = 'School Visit';
 export const FUNNEL_STAGE_NAME_APPLICATION_RECEIVED = 'Application Received';
 
+export const FUNNEL_LEAD_STATUS_NEW = 'NEW';
+export const FUNNEL_LEAD_STATUS_UPDATED = 'UPDATED';
+export const FUNNEL_LEAD_STATUS_IGNORED = 'IGNORED';
+export const FUNNEL_LEAD_STATUS_SYNCD_WITH_SYNERGETIC = 'SYNCD_WITH_SYNERGETIC';
+
 type iFunnelLead = {
   id: number;
   externalId: string;
@@ -42,6 +47,9 @@ type iFunnelLead = {
   enquiryTrackerObj: any;
   enquiryTrackerUpdatedAt: Date | string | null;
   enquiryTrackerCheckSum: string | null;
+  status: string;
+  statusMeaning: string;
+  updatedById: number | null;
 }
 
 export default iFunnelLead;
