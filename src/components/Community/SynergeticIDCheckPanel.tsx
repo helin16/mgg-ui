@@ -10,7 +10,16 @@ import Toaster from "../../services/Toaster";
 import iSynCommunity from '../../types/Synergetic/iSynCommunity';
 import UtilsService from '../../services/UtilsService';
 
-const Wrapper = styled.div``;
+const Wrapper = styled.div`
+    .input-panel {
+        height: 40px;
+        
+        button,
+        input {
+            height: 100% !important;
+        }
+    }
+`;
 
 type iSynergeticIDCheckPanel = {
   className?: string;
@@ -111,7 +120,7 @@ const SynergeticIDCheckPanel = ({
 
   return (
     <Wrapper className={className}>
-      <InputGroup>
+      <InputGroup className={'input-panel'}>
         <FormControl
           placeholder={"Synergetic ID"}
           value={synId}
