@@ -1,5 +1,5 @@
 import IFunnelLead from "../../../../types/Funnel/iFunnelLead";
-import { Button, ButtonProps } from "react-bootstrap";
+import {Alert, Button, ButtonProps, Spinner} from "react-bootstrap";
 import PopupModal from "../../../../components/common/PopupModal";
 import { useState } from "react";
 import Table, { iTableColumn } from "../../../../components/common/Table";
@@ -11,6 +11,8 @@ import LoadingBtn from "../../../../components/common/LoadingBtn";
 import SynergeticIDCheckPanel from "../../../../components/Community/SynergeticIDCheckPanel";
 import SectionDiv from "../../../../components/common/SectionDiv";
 import iSynCommunity from "../../../../types/Synergetic/iSynCommunity";
+import { FlexContainer } from "../../../../styles";
+import AssetService from '../../../../services/Asset/AssetService';
 
 type iFunnelLeadsFileDownloadPopupBtn = ButtonProps & {
   lead: IFunnelLead;
@@ -22,7 +24,11 @@ type iFileInfo = {
   name: string;
   type: string;
   size: number;
+  processing?: string;
 };
+
+type iFileInfoMap = { [key: string]: iFileInfo };
+
 const getFileInfo = (info: any): iFileInfo | null => {
   if (`${info?.download_url || ""}`.trim() !== "") {
     return info;
@@ -54,11 +60,15 @@ const FunnelLeadsFileDownloadPopupBtn = ({
   ...props
 }: iFunnelLeadsFileDownloadPopupBtn) => {
   const [isShowingPopup, setIsShowingPopup] = useState(false);
-  const [selectedFiles, setSelectedFiles] = useState<iFileInfo[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<iFileInfoMap>({});
   const [synCommunity, setSynCommunity] = useState<iSynCommunity | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleClose = () => {
-    setSelectedFiles([]);
+    if (isProcessing === true) {
+      return null;
+    }
+    setSelectedFiles({});
     setIsShowingPopup(false);
   };
 
@@ -67,9 +77,8 @@ const FunnelLeadsFileDownloadPopupBtn = ({
       .map(f => `${f.id || ""}`.trim())
       .filter(id => `${id || ""}`.trim() !== "");
     return (
-      selectedFiles.filter(
-        file => sFileIds.indexOf(`${file.id || ""}`.trim()) >= 0
-      ).length > 0
+      Object.keys(selectedFiles).filter(fileId => sFileIds.indexOf(fileId) >= 0)
+        .length > 0
     );
   };
 
@@ -79,13 +88,77 @@ const FunnelLeadsFileDownloadPopupBtn = ({
       .filter(id => `${id || ""}`.trim() !== "");
     if (isFilesSelected(sFiles) === true) {
       setSelectedFiles(
-        selectedFiles.filter(
-          file => sFileIds.indexOf(`${file.id || ""}`.trim()) < 0
-        )
+        Object.values(selectedFiles)
+          .filter(file => sFileIds.indexOf(`${file.id || ""}`.trim()) < 0)
+          .reduce(
+            (map, file) => ({
+              ...map,
+              [file.id]: file
+            }),
+            {}
+          )
       );
       return;
     }
-    setSelectedFiles([...selectedFiles, ...sFiles]);
+    setSelectedFiles({
+      ...selectedFiles,
+      ...sFiles.reduce(
+        (map, file) => ({
+          ...map,
+          [file.id]: file
+        }),
+        {}
+      )
+    });
+  };
+
+  const getProcessingTd = (data: iFileInfo) => {
+    const processingFiles = Object.values(selectedFiles).filter(file => data.id === file.id);
+    if (processingFiles.length <= 0) {
+      return null;
+    }
+    const processingFile = processingFiles[0];
+
+    if (`${processingFile.processing || ""}`.trim() === "") {
+      return null;
+    }
+
+    return (
+      <FlexContainer className={"justify-content-start gap-1"}>
+        <Spinner size={"sm"} />
+        <div>{`${processingFile.processing || ""}`.trim()}</div>
+      </FlexContainer>
+    );
+  };
+
+  const canBeProcessed = () => {
+    return (
+      Object.keys(selectedFiles).length > 0 && `${synCommunity?.ID || ""}`.trim() !== ""
+    );
+  };
+
+  const processOne = async (selectedFile: iFileInfo) => {
+    setSelectedFiles(prev => ({
+      ...prev,
+      [selectedFile.id]: {
+        ...selectedFile,
+        processing: 'downloading from funnel...',
+      }
+    }))
+    const result = await AssetService.downloadFromUrl(selectedFile.download_url);
+    console.log('result', result);
+  };
+
+  const process = () => {
+    if (canBeProcessed() !== true) {
+      return null;
+    }
+
+    setIsProcessing(true);
+    Promise.all(Object.values(selectedFiles).map(selectedFile => processOne(selectedFile)))
+      .finally(() => {
+        setIsProcessing(false);
+      })
   };
 
   const getPopup = () => {
@@ -105,16 +178,14 @@ const FunnelLeadsFileDownloadPopupBtn = ({
         title={"Choose a file / files to download to DocMan:"}
         footer={
           <>
-            <LoadingBtn variant={"link"} onClick={() => handleClose()}>
+            <LoadingBtn variant={"link"} onClick={() => handleClose()} isLoading={isProcessing === true}>
               <Icons.XLg /> Cancel
             </LoadingBtn>
             <LoadingBtn
+              isLoading={isProcessing === true}
               variant={"primary"}
-              onClick={() => handleClose()}
-              disabled={
-                selectedFiles.length <= 0 ||
-                `${synCommunity?.ID || ""}`.trim() === ""
-              }
+              onClick={() => process()}
+              disabled={canBeProcessed() !== true}
             >
               <Icons.Send /> Download {selectedFiles.length} file(s) to DocMan
             </LoadingBtn>
@@ -141,6 +212,15 @@ const FunnelLeadsFileDownloadPopupBtn = ({
             </>
           }
         />
+        {isProcessing !== true ? null : (
+          <Alert
+            variant={'danger'}
+          >
+            <h6 style={{margin: '0px'}}>
+              <Spinner size={'sm'}/> Process started. DO NOT CLOSE THIS WINDOW UNTIL IT'S FINISHED.
+            </h6>
+          </Alert>
+        )}
         <SectionDiv>
           <h6>Step 1: Choose a file/ files</h6>
           <Table
@@ -217,7 +297,18 @@ const FunnelLeadsFileDownloadPopupBtn = ({
                     </td>
                   );
                 }
-              }
+              },
+              ...(isProcessing !== true
+                ? []
+                : [
+                    {
+                      key: "isProcessing",
+                      header: "",
+                      cell: (col: iTableColumn, data: iFileInfo) => {
+                        return <td key={col.key}>{getProcessingTd(data)}</td>;
+                      }
+                    }
+                  ])
             ]}
             rows={files}
           />

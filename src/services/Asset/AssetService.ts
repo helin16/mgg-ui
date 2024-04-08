@@ -38,10 +38,14 @@ const readBlobAsDataURL = (blob: Blob) => {
   });
 };
 
-const downloadAssetToBeBase64 = (url: string) => {
+const downloadFromUrl = (url: string) => {
   return axios.get(url, {
-    responseType: "blob"
-  }).then(resp => {
+    responseType: "blob",
+  })
+}
+
+const downloadAssetToBeBase64 = (url: string) => {
+  return downloadFromUrl(url).then(resp => {
     return readBlobAsDataURL(resp.data)
   })
 }
@@ -51,6 +55,7 @@ const AssetService = {
   upload,
   getAll,
   deactivate,
+  downloadFromUrl,
   downloadAssetToBeBase64,
 }
 
