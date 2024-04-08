@@ -7,18 +7,18 @@ import LoadingBtn from "../common/LoadingBtn";
 import SynCommunityService from "../../services/Synergetic/Community/SynCommunityService";
 import FormErrorDisplay, { iErrorMap } from "../form/FormErrorDisplay";
 import Toaster from "../../services/Toaster";
-import iSynCommunity from '../../types/Synergetic/iSynCommunity';
-import UtilsService from '../../services/UtilsService';
+import iSynCommunity from "../../types/Synergetic/iSynCommunity";
+import UtilsService from "../../services/UtilsService";
 
 const Wrapper = styled.div`
-    .input-panel {
-        height: 40px;
-        
-        button,
-        input {
-            height: 100% !important;
-        }
+  .input-panel {
+    height: 40px;
+
+    button,
+    input {
+      height: 100% !important;
     }
+  }
 `;
 
 type iSynergeticIDCheckPanel = {
@@ -26,14 +26,16 @@ type iSynergeticIDCheckPanel = {
   onValid: (communityProfile: iSynCommunity) => void;
   onInvalid: () => void;
   onClear?: () => void;
+  defaultValue?: string;
 };
 const SynergeticIDCheckPanel = ({
   className,
   onClear,
   onValid,
-                                  onInvalid
+  onInvalid,
+  defaultValue = ''
 }: iSynergeticIDCheckPanel) => {
-  const [synId, setSynId] = useState("");
+  const [synId, setSynId] = useState(defaultValue);
   const [synProfile, setSynProfile] = useState<iSynCommunity | null>(null);
   const [isChecking, setIsChecking] = useState(false);
   const [errorMap, setErrorMap] = useState<iErrorMap>({});
@@ -72,7 +74,6 @@ const SynergeticIDCheckPanel = ({
       errors.synId = "Synergetic ID is a number.";
     }
 
-
     setErrorMap(errors);
     return Object.keys(errors).length === 0;
   };
@@ -95,8 +96,8 @@ const SynergeticIDCheckPanel = ({
         if (data.length <= 0) {
           setErrorMap({
             ...errorMap,
-            synId: `Invalid Syn ID: ${synId}`,
-          })
+            synId: `Invalid Syn ID: ${synId}`
+          });
           onInvalid();
           return;
         }
@@ -115,12 +116,21 @@ const SynergeticIDCheckPanel = ({
       return null;
     }
 
-    return <div className={'text-success'}>Valid: <small>{synProfile.Given1} {synProfile.Given2} {synProfile.Surname} ({synProfile.Preferred}). DOB: {synProfile.BirthDate?.replace('T00:00:00.000Z', '')}</small></div>
-  }
+    return (
+      <div className={"text-success"}>
+        Valid:{" "}
+        <small>
+          {synProfile.Given1} {synProfile.Given2} {synProfile.Surname} (
+          {synProfile.Preferred}). DOB:{" "}
+          {synProfile.BirthDate?.replace("T00:00:00.000Z", "")}
+        </small>
+      </div>
+    );
+  };
 
   return (
     <Wrapper className={className}>
-      <InputGroup className={'input-panel'}>
+      <InputGroup className={"input-panel"}>
         <FormControl
           placeholder={"Synergetic ID"}
           value={synId}

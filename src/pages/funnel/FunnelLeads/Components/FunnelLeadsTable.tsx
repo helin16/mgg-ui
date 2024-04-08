@@ -1,5 +1,8 @@
 import Table, { iTableColumn } from "../../../../components/common/Table";
-import IFunnelLead from "../../../../types/Funnel/iFunnelLead";
+import IFunnelLead, {
+  FUNNEL_LEAD_STATUS_IGNORED,
+  FUNNEL_LEAD_STATUS_SYNCD_WITH_SYNERGETIC
+} from "../../../../types/Funnel/iFunnelLead";
 import iPaginatedResult from "../../../../types/iPaginatedResult";
 import FunnelLeadsFileDownloadPopupBtn, {
   getFunnelLeadFiles
@@ -12,9 +15,13 @@ import {RootState} from '../../../../redux/makeReduxStore';
 
 const Wrapper = styled.div`
   td.status {
-    &.IGNORED {
+    &.${FUNNEL_LEAD_STATUS_IGNORED} {
       background-color: red;
       color: white;
+    }
+    &.${FUNNEL_LEAD_STATUS_SYNCD_WITH_SYNERGETIC} {
+        background-color: green;
+        color: white;
     }
   }
 `;

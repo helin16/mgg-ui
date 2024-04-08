@@ -106,6 +106,7 @@ const FunnelLeadsFileDownloadPopupBtn = ({
     setIsShowingPopup(false);
     setIsProcessing(false);
     setCurrentStep(1);
+    setStepStatusMap(defaultStepStatusMap);
   };
 
   const isFilesSelected = (sFiles: iFileInfo[]) => {
@@ -410,6 +411,7 @@ const FunnelLeadsFileDownloadPopupBtn = ({
               )}
             </FlexContainer>,
             <SynergeticIDCheckPanel
+              defaultValue={`${lead.synergeticId || ''}`.trim()}
               onValid={profile => {
                 setSynCommunity(profile);
                 nextStep();
