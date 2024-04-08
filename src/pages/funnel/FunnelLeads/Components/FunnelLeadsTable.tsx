@@ -43,34 +43,47 @@ const FunnelLeadsTable = ({
   isLoading = false
 }: iFunnelLeadsTable) => {
   const { user } = useSelector((state: RootState) => state.auth);
-  const getParentTd = (data: IFunnelLead, key: string) => {
+  const getParentTd = (data: IFunnelLead, key: string, index: number) => {
     // @ts-ignore
     const parentEmail = `${data[`${key}_email`] || ""}`.trim();
     // @ts-ignore
     const parentPhone = `${data[`${key}_phone_number`] || ""}`.trim();
+
+    const gardians = data.externalObj?.child?.guardians || [];
+    const guardian = gardians.length <= 0 ? null : gardians[index];
+    const addresses = guardian?.addresses || [];
+    const address = addresses.length > 0 ? addresses[0] : null;
+    const addressStr = [
+      `${address?.line_1 || ""}`.trim(),
+      `${address?.line_2 || ""}`.trim(),
+      `${address?.locality || ""}`.trim(),
+      `${address?.administrative_area || ""}`.trim(),
+      `${address?.postal_code || ""}`.trim(),
+    ].join(" ").trim();
+
     return (
       <>
         <div>
           {`
               ${
-                // @ts-ignore
-                `${data[`${key}_relationship`] || ""}`.trim() === ""
-                  ? ""
-                  : // @ts-ignore
-                    `[${data[`${key}_relationship`] || ""}]`
-              } 
+            // @ts-ignore
+            `${data[`${key}_relationship`] || ""}`.trim() === ""
+              ? ""
+              : // @ts-ignore
+              `[${data[`${key}_relationship`] || ""}]`
+          } 
               ${
-                // @ts-ignore
-                data[`${key}_salutation`] || ""
-              } 
+            // @ts-ignore
+            data[`${key}_salutation`] || ""
+          } 
               ${
-                // @ts-ignore
-                data[`${key}_first_name`] || ""
-              } 
+            // @ts-ignore
+            data[`${key}_first_name`] || ""
+          } 
               ${
-                // @ts-ignore
-                data[`${key}_last_name`] || ""
-              } 
+            // @ts-ignore
+            data[`${key}_last_name`] || ""
+          } 
             `.trim()}
         </div>
         {parentEmail === "" ? (
@@ -91,6 +104,12 @@ const FunnelLeadsTable = ({
             </a>
           </div>
         )}
+
+        {
+          addressStr !== '' ? (
+            <div>{addressStr}</div>
+          ) : null
+        }
       </>
     );
   };
@@ -149,14 +168,14 @@ const FunnelLeadsTable = ({
             key: "Guardian1",
             header: "Guardian 1",
             cell: (col: iTableColumn, data: IFunnelLead) => {
-              return <td key={col.key}>{getParentTd(data, "parent")}</td>;
+              return <td key={col.key}>{getParentTd(data, "parent", 0)}</td>;
             }
           },
           {
             key: "Guardian2",
             header: "Guardian 2",
             cell: (col: iTableColumn, data: IFunnelLead) => {
-              return <td key={col.key}>{getParentTd(data, "parent1")}</td>;
+              return <td key={col.key}>{getParentTd(data, "parent1", 1)}</td>;
             }
           },
           {
