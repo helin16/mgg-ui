@@ -1,4 +1,6 @@
-import IFunnelLead from "../../../../types/Funnel/iFunnelLead";
+import IFunnelLead, {
+  FUNNEL_LEAD_STATUS_SYNCD_WITH_SYNERGETIC
+} from "../../../../types/Funnel/iFunnelLead";
 import {
   Accordion,
   Alert,
@@ -12,7 +14,9 @@ import { useState } from "react";
 import Table, { iTableColumn } from "../../../../components/common/Table";
 import UtilsService from "../../../../services/UtilsService";
 import ExplanationPanel from "../../../../components/ExplanationPanel";
-import { FUNNEL_ADMIN_URL } from "../../../../services/Funnel/FunnelService";
+import FunnelService, {
+  FUNNEL_ADMIN_URL
+} from "../../../../services/Funnel/FunnelService";
 import * as Icons from "react-bootstrap-icons";
 import LoadingBtn from "../../../../components/common/LoadingBtn";
 import SynergeticIDCheckPanel from "../../../../components/Community/SynergeticIDCheckPanel";
@@ -23,11 +27,12 @@ import UploadFilePanel from "../../../../components/Asset/UploadFilePanel";
 import LocalFilesTable from "../../../../components/Asset/LocalFilesTable";
 import SectionDiv from "../../../../components/common/SectionDiv";
 import SynVDocumentService from "../../../../services/Synergetic/SynVDocumentService";
-import Toaster from "../../../../services/Toaster";
-import {DOCUMENT_CLASSIFICATION_CODE_ADMISSION_CONFIDENTIAL} from '../../../../types/Synergetic/iSynVDocument';
+import Toaster, {TOAST_TYPE_SUCCESS} from "../../../../services/Toaster";
+import { DOCUMENT_CLASSIFICATION_CODE_ADMISSION_CONFIDENTIAL } from "../../../../types/Synergetic/iSynVDocument";
 
 type iFunnelLeadsFileDownloadPopupBtn = ButtonProps & {
   lead: IFunnelLead;
+  onUpdated: (updated: IFunnelLead) => void;
 };
 
 type iFileInfo = {
@@ -66,35 +71,41 @@ export const getFunnelLeadFiles = (files: any) => {
   return filePaths.filter(filePath => filePath !== null);
 };
 
+type iStatusMap = {
+  [key: number]: {
+    processed: boolean;
+  };
+};
+const defaultStepStatusMap: iStatusMap = [1, 2].reduce((map, step) => {
+  return {
+    ...map,
+    [step]: { processed: false }
+  };
+}, {});
+
 const FunnelLeadsFileDownloadPopupBtn = ({
   lead,
+  onUpdated,
   ...props
 }: iFunnelLeadsFileDownloadPopupBtn) => {
   const [isShowingPopup, setIsShowingPopup] = useState(false);
-  const [uploadingFiles, setUploadingFiles] = useState<any[]>([]);
+  const [uploadingFiles, setUploadingFiles] = useState<File[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<iFileInfoMap>({});
   const [synCommunity, setSynCommunity] = useState<iSynCommunity | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
-  const [stepStatusMap, setStepStatusMap] = useState<{
-    [key: number]: {
-      processed: boolean;
-    };
-  }>(
-    [1, 2].reduce((map, step) => {
-      return {
-        ...map,
-        [step]: { processed: false }
-      };
-    }, {})
-  );
+  const [stepStatusMap, setStepStatusMap] = useState(defaultStepStatusMap);
 
   const handleClose = () => {
     if (isProcessing === true) {
       return null;
     }
+    setUploadingFiles([]);
     setSelectedFiles({});
+    setSynCommunity(null);
     setIsShowingPopup(false);
+    setIsProcessing(false);
+    setCurrentStep(1);
   };
 
   const isFilesSelected = (sFiles: iFileInfo[]) => {
@@ -152,26 +163,44 @@ const FunnelLeadsFileDownloadPopupBtn = ({
     );
   };
 
-  const updatedLead = () => {
+  const updatedLead = async () => {
     if (!synCommunity) {
       return;
     }
-    setIsProcessing(true);
-    Promise.all(
-      uploadingFiles.map(uploadingFile => {
-        const formData = new FormData();
-        formData.append("file", uploadingFile);
-        formData.append("fileName", uploadingFile.name);
-        formData.append("classificationCode", DOCUMENT_CLASSIFICATION_CODE_ADMISSION_CONFIDENTIAL);
-        return SynVDocumentService.createVDocument(synCommunity?.ID, formData);
-      })
-    )
-      .catch(err => {
-        Toaster.showApiError(err);
-      })
-      .finally(() => {
-        setIsProcessing(false);
+    try {
+      setIsProcessing(true);
+      await Promise.all(
+        uploadingFiles.map(uploadingFile => {
+          const formData = new FormData();
+          formData.append("fileName", uploadingFile.name);
+          formData.append("description", 'Imported from Funnel');
+          formData.append(
+            "classificationCode",
+            DOCUMENT_CLASSIFICATION_CODE_ADMISSION_CONFIDENTIAL
+          );
+          formData.append(
+            "documentType",
+            SynVDocumentService.getFileExtensionFromFileName(uploadingFile.name)
+          );
+          formData.append("file", uploadingFile);
+          return SynVDocumentService.createVDocument(
+            synCommunity?.ID,
+            formData
+          );
+        })
+      );
+
+      const updatedLead = await FunnelService.update(lead.id, {
+        status: FUNNEL_LEAD_STATUS_SYNCD_WITH_SYNERGETIC,
+        synergeticId: synCommunity.ID,
       });
+      setIsProcessing(false);
+      Toaster.showToast(`File(s) saved to DocMan Successfully.`, TOAST_TYPE_SUCCESS);
+      handleClose();
+      onUpdated(updatedLead);
+    } catch (err) {
+      Toaster.showApiError(err);
+    }
   };
 
   const getProcessedBadge = (eventKey: number, processed: any) => {

@@ -210,6 +210,7 @@ const FunnelLeadsTable = ({
                         lead={data}
                         variant={"success"}
                         size={"sm"}
+                        onUpdated={(lead) => onLeadUpdated && onLeadUpdated(lead)}
                       >
                         <Icons.Download /> {files.length} file(s)
                       </FunnelLeadsFileDownloadPopupBtn>
