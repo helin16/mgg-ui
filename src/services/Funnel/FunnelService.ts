@@ -15,9 +15,14 @@ const download = (params: iConfigParams = {}, config: AxiosRequestConfig = {}): 
   return appService.post(`${endPoint}/download`, params, config).then(({data}) => data);
 };
 
+const update = (id: number | string, params: iConfigParams, config: AxiosRequestConfig = {}): Promise<iFunnelLead> => {
+  return appService.put(`${endPoint}/${id}`, params, config).then(({data}) => data);
+};
+
 const FunnelService = {
   getAll,
   download,
+  update,
 }
 
 export default FunnelService;

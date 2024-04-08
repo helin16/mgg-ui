@@ -5,29 +5,37 @@ import FunnelLeadsFileDownloadPopupBtn, {
   getFunnelLeadFiles
 } from "./FunnelLeadsFileDownloadPopupBtn";
 import * as Icons from "react-bootstrap-icons";
-import styled from 'styled-components';
+import styled from "styled-components";
+import DeleteConfirmPopupBtn from "../../../../components/common/DeleteConfirm/DeleteConfirmPopupBtn";
+import {useSelector} from 'react-redux';
+import {RootState} from '../../../../redux/makeReduxStore';
 
 const Wrapper = styled.div`
-    td.status {
-        &.IGNORED {
-            background-color: red;
-            color: white;
-        }
+  td.status {
+    &.IGNORED {
+      background-color: red;
+      color: white;
     }
-`
+  }
+`;
 
 type iFunnelLeadsTable = {
   funnelLeads: iPaginatedResult<IFunnelLead> | null;
   setCurrentPage?: (currentPage: number) => void;
   setPerPage?: (perPage: number) => void;
   isLoading?: boolean;
+  onLeadUpdated?: (lead: IFunnelLead) => void;
+  leadUpdatingFn?: (lead: IFunnelLead) => Promise<IFunnelLead>;
 };
 const FunnelLeadsTable = ({
   funnelLeads,
   setCurrentPage,
   setPerPage,
+  onLeadUpdated,
+  leadUpdatingFn,
   isLoading = false
 }: iFunnelLeadsTable) => {
+  const { user } = useSelector((state: RootState) => state.auth);
   const getParentTd = (data: IFunnelLead, key: string) => {
     // @ts-ignore
     const parentEmail = `${data[`${key}_email`] || ""}`.trim();
@@ -92,8 +100,8 @@ const FunnelLeadsTable = ({
               return (
                 <td key={col.key}>
                   <div>
-                    {`${data.student_first_name || ""} ${data.student_last_name ||
-                    ""}`.trim()}
+                    {`${data.student_first_name ||
+                      ""} ${data.student_last_name || ""}`.trim()}
                   </div>
                   <div>
                     <small>
@@ -125,7 +133,7 @@ const FunnelLeadsTable = ({
               return (
                 <td key={col.key}>
                   {`${data.student_starting_year_level_code ||
-                  ""} - ${data.student_starting_year_level || ""}`.trim()}
+                    ""} - ${data.student_starting_year_level || ""}`.trim()}
                 </td>
               );
             }
@@ -148,8 +156,16 @@ const FunnelLeadsTable = ({
             key: "ET",
             header: "Enquiry Tracker",
             cell: (col: iTableColumn, data: IFunnelLead) => {
-              const etId = `${data.enquiryTrackerId || ''}`.trim();
-              const content = (etId === '' ? null : <a href={`https://app.enquirytracker.net/enquiries/edit-student;studentId=${etId}`} target={'__BLANK'}>{etId}</a>);
+              const etId = `${data.enquiryTrackerId || ""}`.trim();
+              const content =
+                etId === "" ? null : (
+                  <a
+                    href={`https://app.enquirytracker.net/enquiries/edit-student;studentId=${etId}`}
+                    target={"__BLANK"}
+                  >
+                    {etId}
+                  </a>
+                );
               return <td key={col.key}>{content}</td>;
             }
           },
@@ -157,12 +173,16 @@ const FunnelLeadsTable = ({
             key: "status",
             header: "Status",
             cell: (col: iTableColumn, data: IFunnelLead) => {
-              const status = `${data.status || ''}`.trim();
-              const statusMeaning = `${data.statusMeaning || ''}`.trim();
-              return <td key={col.key} className={`status ${status.toUpperCase()}`}>
-                <div>{status.toUpperCase()}</div>
-                <div className={'ellipsis'}><small>{statusMeaning}</small></div>
-              </td>;
+              const status = `${data.status || ""}`.trim();
+              const statusMeaning = `${data.statusMeaning || ""}`.trim();
+              return (
+                <td key={col.key} className={`status ${status.toUpperCase()}`}>
+                  <div>{status.toUpperCase()}</div>
+                  <div className={"ellipsis"}>
+                    <small>{statusMeaning}</small>
+                  </div>
+                </td>
+              );
             }
           },
           {
@@ -175,13 +195,37 @@ const FunnelLeadsTable = ({
               return (
                 <td key={col.key} className={"text-right"}>
                   {files.length > 0 ? (
-                    <FunnelLeadsFileDownloadPopupBtn
-                      lead={data}
-                      variant={"success"}
-                    >
-                      <Icons.Download /> {files.length} file(s)
-                    </FunnelLeadsFileDownloadPopupBtn>
+                    <>
+                      <FunnelLeadsFileDownloadPopupBtn
+                        lead={data}
+                        variant={"success"}
+                        size={"sm"}
+                      >
+                        <Icons.Download /> {files.length} file(s)
+                      </FunnelLeadsFileDownloadPopupBtn>
+                      {' '}
+                    </>
                   ) : null}
+
+                  <DeleteConfirmPopupBtn
+                    variant={"danger"}
+                    deletingFn={async () => leadUpdatingFn && leadUpdatingFn(data)}
+                    deletedCallbackFn={() => onLeadUpdated && onLeadUpdated(data)}
+                    size={"sm"}
+                    confirmBtnString={'Ignore'}
+                    description={
+                      <>
+                        You are about to ignore any updates from Funnel for this student{" "}
+                        <b>
+                          {data.student_first_name}{" "}
+                          {data.student_last_name}
+                        </b>
+                      </>
+                    }
+                    confirmString={`${user?.synergyId || 'na'}`}
+                  >
+                    <Icons.Trash /> Ignore
+                  </DeleteConfirmPopupBtn>
                 </td>
               );
             }

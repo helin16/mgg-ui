@@ -13,6 +13,15 @@ export const FUNNEL_LEAD_STATUS_UPDATED = 'UPDATED';
 export const FUNNEL_LEAD_STATUS_IGNORED = 'IGNORED';
 export const FUNNEL_LEAD_STATUS_SYNCD_WITH_SYNERGETIC = 'SYNCD_WITH_SYNERGETIC';
 
+export const FunnelLeadsStatuses = [
+  FUNNEL_LEAD_STATUS_NEW,
+  FUNNEL_LEAD_STATUS_UPDATED,
+  FUNNEL_LEAD_STATUS_IGNORED,
+  FUNNEL_LEAD_STATUS_SYNCD_WITH_SYNERGETIC
+];
+
+export const defaultSearchFunnelLeadsStatuses = FunnelLeadsStatuses.filter(status => [FUNNEL_LEAD_STATUS_IGNORED, FUNNEL_LEAD_STATUS_SYNCD_WITH_SYNERGETIC].indexOf(status) < 0)
+
 type iFunnelLead = {
   id: number;
   externalId: string;

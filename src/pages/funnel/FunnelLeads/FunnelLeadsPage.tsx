@@ -7,7 +7,10 @@ import FunnelLeadsSearchPanel, {
 } from "./Components/FunnelLeadsSearchPanel";
 import { useEffect, useState } from "react";
 import iPaginatedResult from "../../../types/iPaginatedResult";
-import IFunnelLead from "../../../types/Funnel/iFunnelLead";
+import IFunnelLead, {
+  defaultSearchFunnelLeadsStatuses,
+  FUNNEL_LEAD_STATUS_IGNORED
+} from "../../../types/Funnel/iFunnelLead";
 import MathHelper from "../../../helper/MathHelper";
 import FunnelService from "../../../services/Funnel/FunnelService";
 import { Button } from "react-bootstrap";
@@ -34,10 +37,12 @@ const FunnelLeadsPage = () => {
     const searchStudentName = `${searchCriteria.studentName || ''}`.trim();
     const searchParent1 = `${searchCriteria.parent1 || ''}`.trim();
     const searchParent2 = `${searchCriteria.parent2 || ''}`.trim();
+    const searchStatuses = searchCriteria.statuses || defaultSearchFunnelLeadsStatuses;
     const searchObj = [
       ...(searchStudentName === '' ? [] : [{[OP_OR]: [{student_first_name: searchStudentName}, {student_last_name: searchStudentName}]}]),
       ...(searchParent1 === '' ? [] : [{[OP_OR]: [{parent_first_name: searchParent1}, {parent_last_name: searchParent1}, {parent_email: searchParent1}, {parent_phone_number: searchParent1}]}]),
       ...(searchParent2 === '' ? [] : [{[OP_OR]: [{parent1_first_name: searchParent2}, {parent1_last_name: searchParent2}, {parent1_email: searchParent2}, {parent1_phone_number: searchParent2}]}]),
+      ...(searchStatuses.length <= 0 ? [] : [{status: searchStatuses}]),
     ]
 
     FunnelService.getAll({
@@ -114,6 +119,8 @@ const FunnelLeadsPage = () => {
           setCurrentPage={setCurrentPage}
           setPerPage={setPerPage}
           isLoading={isLoading}
+          onLeadUpdated={() => onRefresh()}
+          leadUpdatingFn={(lead) => FunnelService.update(lead.id, {status: FUNNEL_LEAD_STATUS_IGNORED})}
         />
       </>
     );
