@@ -45,8 +45,8 @@ const FunnelLeadsSearchPanel = ({
 
   return (
     <Wrapper className={className}>
-      <Row className={"align-items-end"}>
-        <Col lg={3}>
+      <Row className={"align-items-start"}>
+        <Col lg={3} md={6}>
           <FormLabel label={"Student Name"} />
           <FormControl
             placeholder={"Student name..."}
@@ -56,7 +56,7 @@ const FunnelLeadsSearchPanel = ({
             }
           />
         </Col>
-        <Col lg={2}>
+        <Col lg={2} md={6}>
           <FormLabel label={"Parent 1"} />
           <FormControl
             placeholder={"Name of Parent 1, or email, or phone ..."}
@@ -66,7 +66,7 @@ const FunnelLeadsSearchPanel = ({
             }
           />
         </Col>
-        <Col lg={2}>
+        <Col lg={2} md={6}>
           <FormLabel label={"Parent 2"} />
           <FormControl
             placeholder={"Name of Parent 2, or email, or phone ..."}
@@ -76,7 +76,7 @@ const FunnelLeadsSearchPanel = ({
             }
           />
         </Col>
-        <Col lg={3}>
+        <Col lg={3} md={6}>
           <FormLabel label={"Status"} />
           <SelectBox
             options={FunnelLeadsStatuses.map(status => ({
@@ -91,7 +91,7 @@ const FunnelLeadsSearchPanel = ({
             }))}
           />
         </Col>
-        <Col lg={2}>
+        <Col lg={2} style={{paddingTop: '20px'}} className={'text-right'}>
           {onReset ? (
             <LoadingBtn
               variant={"link"}
