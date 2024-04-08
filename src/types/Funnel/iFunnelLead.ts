@@ -59,6 +59,7 @@ type iFunnelLead = {
   status: string;
   statusMeaning: string;
   updatedById: number | null;
+  synergeticId: number | null;
 }
 
 export default iFunnelLead;

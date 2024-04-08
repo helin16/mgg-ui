@@ -1,3 +1,5 @@
+export const DOCUMENT_CLASSIFICATION_CODE_ADMISSION_CONFIDENTIAL = 'ADMISSIONCONF';
+
 type iSynVDocument = {
   ID: number;
   tDocumentsSeq: number;

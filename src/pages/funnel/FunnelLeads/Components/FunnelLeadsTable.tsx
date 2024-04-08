@@ -184,6 +184,16 @@ const FunnelLeadsTable = ({
                 </td>
               );
             }
+          },{
+            key: "synergeticId",
+            header: "Syn ID",
+            cell: (col: iTableColumn, data: IFunnelLead) => {
+              return (
+                <td key={col.key}>
+                  {data.synergeticId || ''}
+                </td>
+              );
+            }
           },
           {
             key: "Operations",

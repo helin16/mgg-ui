@@ -116,7 +116,6 @@ const MedicalReportPage = () => {
           ...(criteria.yearLevels.length > 0 ? {StudentYearLevel: criteria.yearLevels} : {}),
           FileYear: (user?.SynCurrentFileSemester?.FileYear || moment().year()),
           FileSemester: (user?.SynCurrentFileSemester?.FileSemester || 1),
-          CurrentSemesterOnlyFlag: true,
         }),
         sort: `StudentNameInternal:ASC`,
       }, {
