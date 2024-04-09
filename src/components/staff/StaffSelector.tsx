@@ -16,7 +16,8 @@ type iStaffSelector = {
 };
 
 const getLabel = (staff: iVStaff) => {
-  return `[${staff.StaffID}] ${staff.StaffLegalFullName}`;
+  const givenName = staff.StaffPreferred === staff.StaffGiven1 ? staff.StaffGiven1 : `${staff.StaffGiven1}(${staff.StaffPreferred})`;
+  return `[${staff.StaffID}] ${givenName} ${staff.StaffSurname}`;
 }
 export const translateVStaffToOption = (staff: iVStaff) => {
   return {value: staff.StaffID, data: staff, label: getLabel(staff)}

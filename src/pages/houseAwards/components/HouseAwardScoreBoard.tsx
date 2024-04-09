@@ -243,7 +243,7 @@ const HouseAwardScoreBoard = ({
             Board for <i>{type.name}</i> in House: <u>{house.Description}</u>
           </div>
         </Col>
-        <Col md={3}>
+        <Col md={4}>
           <FlexContainer className={"justify-content-end with-gap lg-gap"}>
             <FileYearSelector
               className={"selector year-selector"}
