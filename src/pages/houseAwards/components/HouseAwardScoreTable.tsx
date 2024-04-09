@@ -33,7 +33,11 @@ type iHouseAwardScoreTable = {
   isAwardable?: boolean;
   isLoadingStudents?: boolean;
 };
-const Wrapper = styled.div``;
+const Wrapper = styled.div`
+    .table {
+        background-color: white !important;
+    }
+`;
 
 type iScoreArrMap = { [key: number]: iHouseAwardScore[] };
 type iStudentEventScoreMap = {
