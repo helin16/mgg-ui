@@ -3,13 +3,10 @@ import iHouseAwardEventType from "../../../types/HouseAwards/iHouseAwardEventTyp
 import styled from "styled-components";
 import { useEffect, useState } from "react";
 import { Spinner } from "react-bootstrap";
-import Toaster from "../../../services/Toaster";
 import ReactTableWithFixedColumns from "../../../components/common/ReactTableWithFixedColumns";
 import ISynLuYearLevel from "../../../types/Synergetic/Lookup/iSynLuYearLevel";
 import iHouseAwardEvent from "../../../types/HouseAwards/iHouseAwardEvent";
 import iVStudent from "../../../types/Synergetic/Student/iVStudent";
-import HouseAwardStudentYearService from "../../../services/HouseAwards/HouseAwardStudentYearService";
-import iHouseAwardStudentYear from "../../../types/HouseAwards/iHouseAwardStudentYear";
 import iHouseAwardScore from "../../../types/HouseAwards/iHouseAwardScore";
 import HouseAwardScoreService from "../../../services/HouseAwards/HouseAwardScoreService";
 import MathHelper from "../../../helper/MathHelper";
@@ -20,7 +17,6 @@ import SynVStudentService from "../../../services/Synergetic/Student/SynVStudent
 import CSVExportBtn from "../../../components/form/CSVExportBtn";
 import { FlexContainer } from "../../../styles";
 import HouseAwardExportHelper from "./HouseAwardExportHelper";
-import moment from "moment-timezone";
 
 type iHouseAwardScoreTable = {
   house: iSynLuHouse;
@@ -34,9 +30,15 @@ type iHouseAwardScoreTable = {
   isLoadingStudents?: boolean;
 };
 const Wrapper = styled.div`
-    .table {
-        background-color: white !important;
+  .table {
+    background-color: white !important;
+      
+    tbody {
+        tr:hover td {
+            background-color: #efefef !important;
+        }
     }
+  }
 `;
 
 type iScoreArrMap = { [key: number]: iHouseAwardScore[] };
@@ -336,14 +338,14 @@ const HouseAwardScoreTable = ({
                     if (score.FileYear >= fileYear) {
                       return false;
                     }
-                    if (score.awarded_at === null) {
-                      return true;
+                    if (score.awarded_at !== null) {
+                      return false;
                     }
 
                     // if (moment(score.awarded_at).year() < fileYear) {
                     //   return false;
                     // }
-                    // return true;
+                    return true;
                   })
                 )
               : 0
