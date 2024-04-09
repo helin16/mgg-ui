@@ -373,7 +373,8 @@ const HouseAwardScoreTable = ({
                 yearLevel,
                 fileYear,
                 events,
-                studentEventScoreMap
+                studentEventScoreMap,
+                studentNotAwardedMap
               )
             }
             size={"sm"}
