@@ -217,6 +217,7 @@ const HouseAwardScoreTable = ({
         return <div style={{ textAlign: "right" }}>Total {fileYear}</div>;
       },
       accessor: "total",
+      width: 60,
       sticky: "right",
       Cell: (cell: any) => {
         const scoreMap =
@@ -241,6 +242,7 @@ const HouseAwardScoreTable = ({
               );
             },
             accessor: "currentYearTotal",
+            width: 60,
             sticky: "right",
             Cell: (cell: any) => {
               const { total, scores } = getNotWardedScores(cell);
@@ -275,6 +277,7 @@ const HouseAwardScoreTable = ({
                     return <div className={"text-right"}>Actions</div>;
                   },
                   accessor: "actions",
+                  width: 70,
                   sticky: "right",
                   Cell: (cell: any) => {
                     const { total, scores } = getNotWardedScores(cell);
