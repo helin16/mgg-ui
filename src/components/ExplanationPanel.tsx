@@ -6,12 +6,13 @@ type iExplanationPanel = {
   text: any;
   icon?: any;
   variant?: string;
+  className?: string;
   dismissible?: boolean;
 }
 
-const ExplanationPanel = ({text, icon, variant, dismissible}: iExplanationPanel) => {
+const ExplanationPanel = ({text, icon, variant, dismissible, className}: iExplanationPanel) => {
   return (
-    <Alert variant={variant || 'secondary'} dismissible={dismissible}>
+    <Alert variant={variant || 'secondary'} dismissible={dismissible} className={className}>
       {icon || <Icons.ExclamationOctagonFill />} {text}
     </Alert>
   )

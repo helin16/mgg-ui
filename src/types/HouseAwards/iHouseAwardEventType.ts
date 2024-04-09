@@ -7,6 +7,7 @@ type iHouseAwardEventType = {
   name: string;
   points_to_be_awarded: number;
   comments: string;
+  icon?: string | null;
 
   created_at: Date | string | null;
   created_by_id: number | null;

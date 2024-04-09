@@ -107,7 +107,7 @@ const SchoolBoxRouter = ({
         </ModuleAccessWrapper>
       );
     }
-    case "/houseAwards": {
+    case "/score_board/home": {
       removeSchoolBoxIframe();
       return (
         <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_HOUSE_AWARDS}>

@@ -1,19 +1,20 @@
-import React, {useCallback} from 'react';
-import styled from 'styled-components';
-import {Button, Spinner, Table} from 'react-bootstrap';
-import HouseAwardEventTypeService from '../../../services/HouseAwards/HouseAwardEventTypeService';
-import iHouseAwardEventType from '../../../types/HouseAwards/iHouseAwardEventType';
-import moment from 'moment-timezone';
-import useListCrudHook from '../../../components/hooks/useListCrudHook/useListCrudHook';
-import HouseAwardEventTypeAddOrEditPopup from './HouseAwardEventTypeAddOrEditPopup';
-import {FlexContainer} from '../../../styles';
-import * as Icons from 'react-bootstrap-icons'
-import DeleteConfirmPopup from '../../../components/common/DeleteConfirm/DeleteConfirmPopup';
-import {iConfigParams} from '../../../services/AppService';
+import React, { useCallback } from "react";
+import styled from "styled-components";
+import { Button, Spinner } from "react-bootstrap";
+import HouseAwardEventTypeService from "../../../services/HouseAwards/HouseAwardEventTypeService";
+import iHouseAwardEventType from "../../../types/HouseAwards/iHouseAwardEventType";
+import moment from "moment-timezone";
+import useListCrudHook from "../../../components/hooks/useListCrudHook/useListCrudHook";
+import HouseAwardEventTypeAddOrEditPopup from "./HouseAwardEventTypeAddOrEditPopup";
+import { FlexContainer } from "../../../styles";
+import * as Icons from "react-bootstrap-icons";
+import DeleteConfirmPopup from "../../../components/common/DeleteConfirm/DeleteConfirmPopup";
+import { iConfigParams } from "../../../services/AppService";
+import Table, { iTableColumn } from "../../../components/common/Table";
+import IconDisplay from '../../../components/IconDisplay';
 
 const Wrapper = styled.div``;
-type iHouseAwardEventTypeTable = {
-}
+type iHouseAwardEventTypeTable = {};
 const HouseAwardEventTypeTable = (props: iHouseAwardEventTypeTable) => {
   const {
     state,
@@ -21,21 +22,19 @@ const HouseAwardEventTypeTable = (props: iHouseAwardEventTypeTable) => {
     onOpenAddModal,
     onOpenEditModal,
     onCloseModal,
-    onOpenDeleteModal,
     onSubmit,
-    onDelete,
+    onDelete
   } = useListCrudHook<iHouseAwardEventType>({
     getFn: useCallback((config?: iConfigParams) => {
-      const where = config ? JSON.parse(config?.where || '{}') : {};
+      const where = config ? JSON.parse(config?.where || "{}") : {};
       return HouseAwardEventTypeService.getEventTypes({
-        where: JSON.stringify({...where, active: true})
-      })
+        where: JSON.stringify({ ...where, active: true })
+      });
     }, []),
     createFn: HouseAwardEventTypeService.createEventType,
     updateFn: HouseAwardEventTypeService.updateEventType,
-    deleteFn: HouseAwardEventTypeService.deleteEventType,
+    deleteFn: HouseAwardEventTypeService.deleteEventType
   });
-
 
   const getPopup = () => {
     if (edit.target) {
@@ -48,7 +47,7 @@ const HouseAwardEventTypeTable = (props: iHouseAwardEventTypeTable) => {
             onSubmit={onSubmit}
             isSubmitting={state.isConfirming}
           />
-        )
+        );
       }
 
       return (
@@ -58,7 +57,7 @@ const HouseAwardEventTypeTable = (props: iHouseAwardEventTypeTable) => {
           onClose={onCloseModal}
           onConfirm={() => onDelete(edit.delTargetId || 0)}
         />
-      )
+      );
     }
     return (
       <HouseAwardEventTypeAddOrEditPopup
@@ -68,52 +67,94 @@ const HouseAwardEventTypeTable = (props: iHouseAwardEventTypeTable) => {
         isSubmitting={state.isConfirming}
       />
     );
-  }
-
+  };
 
   if (state.isLoading) {
-    return <Spinner animation={'border'} />
+    return <Spinner animation={"border"} />;
   }
 
   return (
     <Wrapper>
-      <FlexContainer className={'withGap'}>
+      <FlexContainer
+        className={"justify-content-start gap-2 align-items-center"}
+      >
         <h5>Event Types</h5>
-        <Button variant={'info'} size={'sm'}onClick={() => onOpenAddModal()}><Icons.Plus /></Button>
+        <Button
+          variant={"success"}
+          size={"sm"}
+          onClick={() => onOpenAddModal()}
+        >
+          <Icons.Plus />
+        </Button>
       </FlexContainer>
-      <Table striped hover>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Points to be awarded</th>
-            <th>Comments</th>
-            <th>Created</th>
-            <th>Updated</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {state.data.map(eventType => {
-            return (
-              <tr key={eventType.id}>
-                <td><Button variant={'link'} size={'sm'} onClick={() => onOpenEditModal(eventType.id)}>{eventType.name}</Button></td>
-                <td>{eventType.points_to_be_awarded}</td>
-                <td>{eventType.comments}</td>
-                <td>{moment(eventType.created_at).format('lll')}</td>
-                <td>{moment(eventType.updated_at).format('lll')}</td>
-                <td className={'text-right'}>
-                  <Button variant={'danger'} size={'sm'} onClick={() => onOpenDeleteModal(eventType.id)}>
-                    <Icons.Trash />
+
+      <Table
+        columns={[
+          {
+            key: "name",
+            header: "Name",
+            cell: (col: iTableColumn, data: iHouseAwardEventType) => {
+              return (
+                <td key={col.key}>
+                  <Button
+                    size={"sm"}
+                    variant={"link"}
+                    onClick={() => onOpenEditModal(data.id)}
+                  >
+                    {data.name}
                   </Button>
                 </td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </Table>
+              );
+            }
+          },
+          {
+            key: "PointsToBeAwarded",
+            header: "Points to be awarded",
+            cell: (col: iTableColumn, data: iHouseAwardEventType) => {
+              return <td key={col.key}>{data.points_to_be_awarded}</td>;
+            }
+          },
+          {
+            key: "icon",
+            header: "Icon",
+            cell: (col: iTableColumn, data: iHouseAwardEventType) => {
+              return <td key={col.key}><IconDisplay name={data.icon || ''} /></td>;
+            }
+          },
+          {
+            key: "comments",
+            header: "Comments",
+            cell: (col: iTableColumn, data: iHouseAwardEventType) => {
+              return <td key={col.key}>{data.comments}</td>;
+            }
+          },
+          {
+            key: "created",
+            header: "Created",
+            cell: (col: iTableColumn, data: iHouseAwardEventType) => {
+              return (
+                <td key={col.key}>{moment(data.created_at).format("lll")}</td>
+              );
+            }
+          },
+          {
+            key: "updated",
+            header: "Updated",
+            cell: (col: iTableColumn, data: iHouseAwardEventType) => {
+              return (
+                <td key={col.key}>{moment(data.updated_at).format("lll")}</td>
+              );
+            }
+          }
+        ]}
+        rows={state.data || []}
+        striped
+        hover
+        responsive
+      />
       {getPopup()}
     </Wrapper>
-  )
-}
+  );
+};
 
-export default HouseAwardEventTypeTable
+export default HouseAwardEventTypeTable;

@@ -7,11 +7,10 @@ import {
   HOUSE_COLOR_MC,
   HOUSE_COLOR_SM
 } from "../../../components/HouseAwards/styles";
-import * as Icon from "react-bootstrap-icons";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/makeReduxStore";
 import { useEffect, useState } from "react";
-import { Alert, Col, Row, Spinner } from "react-bootstrap";
+import { Col, Row, Spinner } from "react-bootstrap";
 import Toaster from "../../../services/Toaster";
 import { CAMPUS_CODE_SENIOR } from "../../../types/Synergetic/Lookup/iSynLuCampus";
 import ISynLuYearLevel from "../../../types/Synergetic/Lookup/iSynLuYearLevel";
@@ -26,6 +25,8 @@ import { MGGS_MODULE_ID_HOUSE_AWARDS } from "../../../types/modules/iModuleUser"
 import { ROLE_ID_ADMIN } from "../../../types/modules/iRole";
 import YearLevelSelector from "../../../components/student/YearLevelSelector";
 import FileYearSelector from "../../../components/student/FileYearSelector";
+import IconDisplay from "../../../components/IconDisplay";
+import ExplanationPanel from "../../../components/ExplanationPanel";
 
 type iHouseAwardScoreBoard = {
   house: iSynLuHouse;
@@ -174,12 +175,12 @@ const HouseAwardScoreBoard = ({
       return true;
     }
 
-    if (isAdmin) {
-      return false;
-    }
-
     if (selectedFileYear < currentFileYear) {
       return true;
+    }
+
+    if (isAdmin) {
+      return false;
     }
 
     if (Number(user?.synergyId || 0) !== house.HeadOfHouseID) {
@@ -190,19 +191,33 @@ const HouseAwardScoreBoard = ({
   };
 
   const getDisabledMsg = () => {
-    if (!user || isAdmin) {
-      return null;
-    }
-    if (user.synergyId === house.HeadOfHouseID) {
+    if (getIsDisabled() !== true) {
       return null;
     }
     return (
-      <FlexContainer className={"space-below"}>
-        <Alert variant={"danger"} className={"full-width"}>
-          Board can ONLY be updated by Head of House: <b>{house.HeadOfHouse}</b>{" "}
-          ({house.HeadOfHouseID})
-        </Alert>
-      </FlexContainer>
+      <ExplanationPanel
+        variant={"danger"}
+        className={"full-width"}
+        text={
+          <>
+            <b>Boarded in view only.</b>
+            <ul>
+              {((user?.synergyId || 0) !== house.HeadOfHouseID && isAdmin !== true) ? (
+                <li>
+                  Board can ONLY be updated by Head of House:{" "}
+                  <b>{house.HeadOfHouse}</b> ({house.HeadOfHouseID}) or an admin
+                  of this module.
+                </li>
+              ) : null}
+              {selectedFileYear < currentFileYear ? (
+                <li>
+                  Selected year({selectedFileYear}) in the past.
+                </li>
+              ) : null}
+            </ul>
+          </>
+        }
+      />
     );
   };
 
@@ -219,12 +234,14 @@ const HouseAwardScoreBoard = ({
             onClick={() => onCancel()}
             title={"back to house selection"}
           >
-            <Icon.ArrowLeft />
+            <IconDisplay name={"ArrowLeft"} />
           </div>
           <div>
-            <Icon.Speedometer2 />
+            <IconDisplay name={"Speedometer2"} />
           </div>
-          <div>{`Board for ${type.name} in House: ${house.Description}`}</div>
+          <div>
+            Board for <i>{type.name}</i> in House: <u>{house.Description}</u>
+          </div>
         </Col>
         <Col md={3}>
           <FlexContainer className={"justify-content-end with-gap lg-gap"}>
@@ -259,6 +276,7 @@ const HouseAwardScoreBoard = ({
           events={events}
           fileYear={selectedFileYear}
           isDisabled={getIsDisabled()}
+          isAwardable={(type.points_to_be_awarded || 0) > 0}
         />
       )}
     </Wrapper>

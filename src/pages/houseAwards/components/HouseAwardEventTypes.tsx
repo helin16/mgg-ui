@@ -8,8 +8,8 @@ import iSynLuHouse from '../../../types/Synergetic/Lookup/iSynLuHouse';
 import SynLuHouseService from '../../../services/Synergetic/Lookup/SynLuHouseService';
 import {CAMPUS_CODE_SENIOR} from '../../../types/Synergetic/Lookup/iSynLuCampus';
 import {OP_NOT} from '../../../helper/ServiceHelper';
-import * as Icon from 'react-bootstrap-icons';
 import {HOUSE_COLOR_GR, HOUSE_COLOR_KT, HOUSE_COLOR_MC, HOUSE_COLOR_SM} from '../../../components/HouseAwards/styles';
+import IconDisplay from '../../../components/IconDisplay';
 
 type iHouseAwardEventTypes = {
   onSelect: (type: iHouseAwardEventType, luHouse: iSynLuHouse) => void;
@@ -110,13 +110,6 @@ const HouseAwardEventTypes = ({onSelect, header}: iHouseAwardEventTypes) => {
     }
   }, []);
 
-  const getTypeIcon = (index: number) => {
-    if (index === 0) {
-      return <Icon.TrophyFill />
-    }
-    return <Icon.LifePreserver />;
-  }
-
   const getTypes = (house: iSynLuHouse) => {
     if (houseAwardEventTypes.length <= 0) {
       return null;
@@ -128,7 +121,7 @@ const HouseAwardEventTypes = ({onSelect, header}: iHouseAwardEventTypes) => {
             return (
               <div className={`type ${type.name.toLowerCase()}`} key={type.id} onClick={() => onSelect(type, house)}>
                 <div className={'icon'}>
-                  {getTypeIcon(index)}
+                  <IconDisplay name={type.icon || ''} />
                 </div>
                 <div>{type.name}</div>
               </div>
