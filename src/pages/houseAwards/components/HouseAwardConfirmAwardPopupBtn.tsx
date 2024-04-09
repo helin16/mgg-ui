@@ -8,9 +8,10 @@ import iVStudent from "../../../types/Synergetic/Student/iVStudent";
 import { FlexContainer } from "../../../styles";
 import { Alert, Button, ButtonProps } from "react-bootstrap";
 import HouseAwardScoreService from "../../../services/HouseAwards/HouseAwardScoreService";
-import Toaster, {TOAST_TYPE_SUCCESS} from "../../../services/Toaster";
+import Toaster, { TOAST_TYPE_SUCCESS } from "../../../services/Toaster";
 import iHouseAwardEvent from "../../../types/HouseAwards/iHouseAwardEvent";
 import IconDisplay from "../../../components/IconDisplay";
+import Table, { iTableColumn } from "../../../components/common/Table";
 
 type iHouseAwardConfirmAwardPopupBtn = ButtonProps & {
   viewOnly?: boolean;
@@ -66,7 +67,7 @@ const HouseAwardConfirmAwardPopupBtn = ({
       .then(resp => {
         setIsShowing(false);
         setIsUpdating(false);
-        Toaster.showToast('Awarded successfully.', TOAST_TYPE_SUCCESS);
+        Toaster.showToast("Awarded successfully.", TOAST_TYPE_SUCCESS);
         onAwarded(resp.scores, resp.studentYear);
       })
       .catch(err => {
@@ -83,52 +84,83 @@ const HouseAwardConfirmAwardPopupBtn = ({
     return selectedScores.length === eventType.points_to_be_awarded;
   };
 
-  const getSelectedEvents = () => {
-    const selectedScoreIds = selectedScores.map(score => score.id);
+  const getEventTable = (scores: iHouseAwardScore[]) => {
+    if (scores.length <= 0) {
+      return null;
+    }
+
     return (
-      <>
-        <h6>({filteredScores.length}) Event(s) to be awarded:</h6>
-        {scores.map(score => {
-          if (!(score.event_id in eventMap)) {
-            return null;
+      <Table
+        columns={[
+          ...(viewOnly === true
+            ? []
+            : [
+                {
+                  key: "options",
+                  header: "",
+                  cell: (col: iTableColumn, data: iHouseAwardScore) => {
+                    const selectedScoreIds = selectedScores.map(
+                      score => score.id
+                    );
+                    return (
+                      <td
+                        key={col.key}
+                        style={{ width: "23px" }}
+                        className={"cursor-pointer"}
+                        onClick={() => {
+                          if (selectedScoreIds.indexOf(data.id) >= 0) {
+                            setSelectedScores(
+                              selectedScores.filter(
+                                sScore => sScore.id !== data.id
+                              )
+                            );
+                          } else {
+                            setSelectedScores([...selectedScores, data]);
+                          }
+                        }}
+                      >
+                        {selectedScoreIds.indexOf(data.id) >= 0 ? (
+                          <IconDisplay
+                            name={"CheckSquareFill"}
+                            className={"text-success"}
+                          />
+                        ) : (
+                          <IconDisplay
+                            name={"Square"}
+                            className={"text-muted"}
+                          />
+                        )}
+                      </td>
+                    );
+                  }
+                }
+              ]),
+          {
+            key: "eventYear",
+            header: "Year",
+            cell: (col: iTableColumn, data: iHouseAwardScore) => {
+              return <td key={col.key}>{data.FileYear}</td>;
+            }
+          },
+          {
+            key: "eventName",
+            header: "Event",
+            cell: (col: iTableColumn, data: iHouseAwardScore) => {
+              return <td key={col.key}>{eventMap[data.event_id].name}</td>;
+            }
+          },
+          {
+            key: "score",
+            header: "Score",
+            cell: (col: iTableColumn, data: iHouseAwardScore) => {
+              return <td key={col.key}>{data.score}</td>;
+            }
           }
-
-          return (
-            <FlexContainer
-              className={`with-gap lg-gap space-below align-items-center ${
-                viewOnly === true ? "" : "cursor-pointer"
-              }`}
-              key={score.id}
-              onClick={() => {
-                if (viewOnly === true) {
-                  return;
-                }
-
-                if (selectedScoreIds.indexOf(score.id) >= 0) {
-                  setSelectedScores(
-                    selectedScores.filter(sScore => sScore.id !== score.id)
-                  );
-                } else {
-                  setSelectedScores([...selectedScores, score]);
-                }
-              }}
-            >
-              {viewOnly === true ? null : selectedScoreIds.indexOf(score.id) >=
-                0 ? (
-                <IconDisplay
-                  name={"CheckSquareFill"}
-                  className={"text-success"}
-                />
-              ) : (
-                <IconDisplay name={"Square"} className={"text-muted"} />
-              )}
-              <div>
-                {score.FileYear} - {eventMap[score.event_id].name}: {score.score}
-              </div>
-            </FlexContainer>
-          );
-        })}
-      </>
+        ]}
+        rows={scores}
+        responsive
+        hover
+      />
     );
   };
 
@@ -139,10 +171,9 @@ const HouseAwardConfirmAwardPopupBtn = ({
     return (
       <PopupModal
         header={
-          <div>
-            Please selected the points for <b>{student.StudentLegalFullName}</b>{" "}
-            in (<b>{FileYear}</b>)?
-          </div>
+          <h6>
+            ({filteredScores.length}) Event(s) for <b>{student.StudentLegalFullName}</b> to be awarded:
+          </h6>
         }
         handleClose={() => handleClose()}
         show={true}
@@ -181,7 +212,7 @@ const HouseAwardConfirmAwardPopupBtn = ({
         }
       >
         <>
-          {getSelectedEvents()}
+          {getEventTable(scores)}
 
           {getIsAwardable() || viewOnly === true ? null : (
             <Alert variant={"danger"}>
