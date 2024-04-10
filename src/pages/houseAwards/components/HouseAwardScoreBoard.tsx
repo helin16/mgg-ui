@@ -175,12 +175,12 @@ const HouseAwardScoreBoard = ({
       return true;
     }
 
-    if (selectedFileYear < currentFileYear) {
-      return true;
-    }
-
     if (isAdmin) {
       return false;
+    }
+
+    if (selectedFileYear < currentFileYear) {
+      return true;
     }
 
     if (Number(user?.synergyId || 0) !== house.HeadOfHouseID) {
