@@ -26,6 +26,7 @@ import AuthService from "../../../services/AuthService";
 import SchoolManagementTeamService from "../../../services/Synergetic/SchoolManagementTeamService";
 import SectionDiv from "../../../components/common/SectionDiv";
 import StudentAbsenceSyncToSynergeticPanel from "./StudentAbsenceSyncToSynergeticPanel";
+import MggsModuleService from '../../../services/Module/MggsModuleService';
 
 type iStudentAbsenceEditPanel = {
   recordType: iRecordType;
@@ -49,6 +50,7 @@ const StudentAbsenceEditPanel = ({
   isExpectedEvent = false,
   isSaving = false
 }: iStudentAbsenceEditPanel) => {
+  const { user } = useSelector((state: RootState) => state.auth);
   const [isSubmitting, setIsSubmitting] = useState(isSaving);
   const [record, setRecord] = useState<iStudentAbsence | undefined>(undefined);
   const [hasNote, setHasNote] = useState<boolean>(
@@ -69,7 +71,7 @@ const StudentAbsenceEditPanel = ({
   const [isLoading, setIsLoading] = useState(false);
   const [errorMap, setErrorMap] = useState<{ [key: string]: any }>({});
   const [vStudent, setVStudent] = useState<iVStudent | null>(null);
-  const { user } = useSelector((state: RootState) => state.auth);
+  const [extraAbsenceTypeCodes, setExtraAbsenceTypeCodes] = useState<string[]>([]);
 
   useEffect(() => {
     if (record?.Student) {
@@ -97,6 +99,7 @@ const StudentAbsenceEditPanel = ({
           YearLevelCode: vStudent?.StudentYearLevel
         })
       }),
+      MggsModuleService.getModule(MGGS_MODULE_ID_STUDENT_ABSENCES),
       ...(`${studentAbsenceRecord?.id || ''}`.trim() === '' ? [] : [StudentAbsenceService.getAll({where: JSON.stringify({id: studentAbsenceRecord?.id || '', type: recordType}), include: `Student,AbsenceReason,CreatedBy,ApprovedBy,Expected,SyncdBy`,})])
     ])
       .then(resp => {
@@ -112,11 +115,12 @@ const StudentAbsenceEditPanel = ({
             };
           }, {});
         const accessible = Object.keys(canAccessRoles).length > 0 || resp[1].length > 0;
-        const recordFromDB = `${studentAbsenceRecord?.id || ''}`.trim() === '' ? undefined : (resp[2].data || []).length > 0 ? resp[2].data[0] : undefined;
+        const recordFromDB = `${studentAbsenceRecord?.id || ''}`.trim() === '' ? undefined : (resp[3].data || []).length > 0 ? resp[3].data[0] : undefined;
         setCanEdit(accessible && `${recordFromDB?.syncd_AbsenceEventSeq || ""}`.trim() === "")
         setCanAccess(accessible);
         setIsModuleUser(Object.keys(canAccessRoles).length > 0);
         setRecord(recordFromDB);
+        setExtraAbsenceTypeCodes(`${resp[2].settings?.extraAbsenceTypeCodes || ''}`.trim().split(','))
       })
       .catch(err => {
         if (isCanceled) return;
@@ -170,8 +174,6 @@ const StudentAbsenceEditPanel = ({
       Comments: `${recordComments || ''}`.trim(),
       ...(`${record?.id || ""}`.trim() === "" ? { isExpectedEvent } : {})
     };
-    // console.log('data', data);
-    // return;
     if (onIsSubmitting) {
       onIsSubmitting(true);
     } else {
@@ -361,7 +363,7 @@ const StudentAbsenceEditPanel = ({
                 addOtherRegardless
                 absenceTypeCodes={
                   recordType in iRecordTypeMap
-                    ? [iRecordTypeMap[recordType]]
+                    ? [iRecordTypeMap[recordType], ...extraAbsenceTypeCodes]
                     : []
                 }
                 values={absenceReasonCode ? [absenceReasonCode] : undefined}

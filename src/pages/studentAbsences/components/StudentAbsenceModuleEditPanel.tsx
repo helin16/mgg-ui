@@ -1,27 +1,36 @@
-import React, {useState} from 'react';
-import styled from 'styled-components';
-import ModuleEmailTemplateNameEditor from '../../../components/module/ModuleEmailTemplateNameEditor';
-import {MGGS_MODULE_ID_STUDENT_ABSENCES} from '../../../types/modules/iModuleUser';
-import {ROLE_ID_ADMIN} from '../../../types/modules/iRole';
-import ModuleEditPanel from '../../../components/module/ModuleEditPanel';
-import iModule from '../../../types/modules/iModule';
-import SectionDiv from '../../../components/common/SectionDiv';
-import {Form} from 'react-bootstrap';
-import ExplanationPanel from '../../../components/ExplanationPanel';
+import React, { useState } from "react";
+import styled from "styled-components";
+import ModuleEmailTemplateNameEditor from "../../../components/module/ModuleEmailTemplateNameEditor";
+import { MGGS_MODULE_ID_STUDENT_ABSENCES } from "../../../types/modules/iModuleUser";
+import { ROLE_ID_ADMIN } from "../../../types/modules/iRole";
+import ModuleEditPanel from "../../../components/module/ModuleEditPanel";
+import iModule from "../../../types/modules/iModule";
+import SectionDiv from "../../../components/common/SectionDiv";
+import { Form } from "react-bootstrap";
+import ExplanationPanel from "../../../components/ExplanationPanel";
 
-const Wrapper = styled.div`
-  
-`;
+const Wrapper = styled.div``;
 
 type iEditPanel = {
   module: iModule;
   onUpdate: (data: any) => void;
-}
-const EditPanel = ({module, onUpdate}: iEditPanel) => {
-  const [parentEmailTemplateName, setParentEmailTemplateName] = useState(module.settings?.parentSubmissionForm?.templateName || '');
-  const [parentEmailRecipients, setParentEmailRecipients] = useState(`${module.settings?.parentSubmissionForm?.recipients || ''}`.trim());
-  const [earlySignOutTemplateName, setEarlySignOutTemplateName] = useState(`${module.settings?.templateNames?.earlySignOutNotification || ''}`.trim());
-  const [lateSignInTemplateName, setLateSignInTemplateName] = useState(`${module.settings?.templateNames?.lateSignInNotification || ''}`.trim());
+};
+const EditPanel = ({ module, onUpdate }: iEditPanel) => {
+  const [parentEmailTemplateName, setParentEmailTemplateName] = useState(
+    module.settings?.parentSubmissionForm?.templateName || ""
+  );
+  const [parentEmailRecipients, setParentEmailRecipients] = useState(
+    `${module.settings?.parentSubmissionForm?.recipients || ""}`.trim()
+  );
+  const [earlySignOutTemplateName, setEarlySignOutTemplateName] = useState(
+    `${module.settings?.templateNames?.earlySignOutNotification || ""}`.trim()
+  );
+  const [lateSignInTemplateName, setLateSignInTemplateName] = useState(
+    `${module.settings?.templateNames?.lateSignInNotification || ""}`.trim()
+  );
+  const [extraAbsenceTypeCodes, setExtraAbsenceTypeCodes] = useState(
+    `${module.settings?.extraAbsenceTypeCodes || ""}`.trim()
+  );
 
   const handleUpdate = () => {
     onUpdate({
@@ -29,62 +38,108 @@ const EditPanel = ({module, onUpdate}: iEditPanel) => {
       templateNames: {
         ...(module?.settings.templateNames || {}),
         earlySignOutNotification: earlySignOutTemplateName,
-        lateSignInNotification: lateSignInTemplateName,
+        lateSignInNotification: lateSignInTemplateName
       },
       parentSubmissionForm: {
         templateName: parentEmailTemplateName,
-        recipients: parentEmailRecipients.split(',').map(email => `${email}`).filter(email => `${email}`.trim() !== '').join(','),
-      }
-    })
-  }
+        recipients: parentEmailRecipients
+          .split(",")
+          .map(email => `${email || ''}`.trim())
+          .filter(email => `${email}`.trim() !== "")
+          .join(",")
+      },
+      extraAbsenceTypeCodes: extraAbsenceTypeCodes.split(",")
+        .map(code => `${code || ''}`.trim())
+        .filter(code => `${code}`.trim() !== "")
+        .join(",")
+    });
+  };
 
   return (
     <Wrapper>
       <SectionDiv>
         <h5>Email Notifications</h5>
-        <h6>Early Sign Out - <small className={'text-muted'}>Email Notification Template for Early Sign Outs, email will send to Module Users, HOYs, HomeRoom Teachers and Parents(SC1 and SC2 with LiveWithFlag = true)</small> </h6>
+        <h6>
+          Early Sign Out -{" "}
+          <small className={"text-muted"}>
+            Email Notification Template for Early Sign Outs, email will send to
+            Module Users, HOYs, HomeRoom Teachers and Parents(SC1 and SC2 with
+            LiveWithFlag = true)
+          </small>{" "}
+        </h6>
         <ModuleEmailTemplateNameEditor
           value={earlySignOutTemplateName}
-          className={'content-row'}
-          onChange={(event) => setEarlySignOutTemplateName(event.target.value)}
+          className={"content-row"}
+          onChange={event => setEarlySignOutTemplateName(event.target.value)}
           handleUpdate={() => handleUpdate()}
         />
-        <h6>Late Sign In - <small className={'text-muted'}>Email Notification Template for Late Sign In, email will send to Module Users, HOYs and HomeRoom Teachers</small> </h6>
+        <h6>
+          Late Sign In -{" "}
+          <small className={"text-muted"}>
+            Email Notification Template for Late Sign In, email will send to
+            Module Users, HOYs and HomeRoom Teachers
+          </small>{" "}
+        </h6>
         <ModuleEmailTemplateNameEditor
           value={lateSignInTemplateName}
-          className={'content-row'}
-          onChange={(event) => setLateSignInTemplateName(event.target.value)}
+          className={"content-row"}
+          onChange={event => setLateSignInTemplateName(event.target.value)}
           handleUpdate={() => handleUpdate()}
         />
       </SectionDiv>
 
-      <SectionDiv className={'lg'}>
+      <SectionDiv className={"lg"}>
         <h5>Parent Submission</h5>
-        <ExplanationPanel text={'Settings for the Parent Submission Form'} />
+        <ExplanationPanel text={"Settings for the Parent Submission Form"} />
         <ModuleEmailTemplateNameEditor
           value={parentEmailTemplateName}
-          className={'content-row'}
-          onChange={(event) => setParentEmailTemplateName(event.target.value)}
+          className={"content-row"}
+          onChange={event => setParentEmailTemplateName(event.target.value)}
           handleUpdate={() => handleUpdate()}
         />
         <SectionDiv>
           <h6>Parent Submission Email Recipients</h6>
           <Form.Label>
-            Recipients who will receive the notification after a submission by parent (email addresses separated by <b>,</b>):
+            Recipients who will receive the notification after a submission by
+            parent (email addresses separated by <b>,</b>):
           </Form.Label>
           <Form.Control
             placeholder="Email address separated by ,"
-            value={ parentEmailRecipients }
-            onChange={(event) => {
+            value={parentEmailRecipients}
+            onChange={event => {
               setParentEmailRecipients(event.target.value);
             }}
             onBlur={() => handleUpdate()}
           />
         </SectionDiv>
       </SectionDiv>
+
+      <SectionDiv className={"lg"}>
+        <h5>Extra Reasons for Late arrival at School / Early departure from School</h5>
+        <ExplanationPanel
+          text={
+            "Normally, the program will take any reasons from Synergetic(luAbsenceReason) with AbsenceTypeCode 111 (Late arrival at School) and 112 (Early departure from School). Extra AbsenceTypeCodes will be shown on both both 111 (Late arrival at School) and 112 (Early departure from School)"
+          }
+        />
+        <SectionDiv>
+          <h6>Extra AbsenceTypeCodes for both 111 (Late arrival at School) and 112 (Early departure from School)</h6>
+          <Form.Label>
+            AbsenceTypeCodes:
+          </Form.Label>
+          <Form.Control
+            placeholder="AbsenceTypeCodes separated by ,(single quote)"
+            value={extraAbsenceTypeCodes}
+            onChange={event => {
+              setExtraAbsenceTypeCodes(event.target.value);
+            }}
+            onBlur={() => handleUpdate()}
+          />
+          <small>AbsenceTypeCodes separated by ,(single quote)</small>
+        </SectionDiv>
+      </SectionDiv>
     </Wrapper>
-  )
-}
+  );
+};
 const StudentAbsenceModuleEditPanel = () => {
   const [settings, setSettings] = useState({});
 
@@ -95,16 +150,16 @@ const StudentAbsenceModuleEditPanel = () => {
         onUpdate={(newSettings: any) => setSettings(newSettings)}
       />
     );
-  }
+  };
 
   return (
-      <ModuleEditPanel
-        moduleId={MGGS_MODULE_ID_STUDENT_ABSENCES}
-        roleId={ROLE_ID_ADMIN}
-        getChildren={getContent}
-        getSubmitData={() => (settings)}
-      />
-  )
-}
+    <ModuleEditPanel
+      moduleId={MGGS_MODULE_ID_STUDENT_ABSENCES}
+      roleId={ROLE_ID_ADMIN}
+      getChildren={getContent}
+      getSubmitData={() => settings}
+    />
+  );
+};
 
 export default StudentAbsenceModuleEditPanel;

@@ -1,4 +1,3 @@
-import { Table } from "react-bootstrap";
 import moment from "moment-timezone";
 import styled from "styled-components";
 import iVStudent from "../../../../../types/Synergetic/Student/iVStudent";
@@ -20,54 +19,49 @@ type iWellBeingGraphDetailsPanel = {
 const WellBeingGraphDetailsPanel = ({
   student
 }: iWellBeingGraphDetailsPanel) => {
+  const data = [{
+    title: 'ID',
+    content: student.StudentID
+  }, {
+    title: 'Year Level',
+    content: student.StudentForm
+  }, {
+    title: 'D.O.B.',
+    content: `${student.StudentBirthDate || ""}`.trim() === ""
+      ? ""
+      : moment(`${student.StudentBirthDate || ""}`.trim()).format(
+        "DD/MM/YYYY"
+      ),
+  }, {
+    title: 'House',
+    content: student.StudentHouseDescription,
+  }, {
+    title: 'Commenced',
+    content: `${student.StudentEntryDate || ""}`.trim() === ""
+      ? ""
+      : moment(`${student.StudentEntryDate || ""}`.trim()).format(
+        "DD/MM/YYYY"
+      ),
+  }, {
+    title: 'Court Order?',
+    content: `${student.LegalCourtOrderType || ""}`.trim() === "" ? "No" : <div className={'bg-danger text-white'}>Yes</div>,
+  }, {
+    title: 'Parent Separated?',
+    content: `${student.LegalParentsSeparatedFlag || ""}`.trim() === "" ? "No" :
+      <div className={'bg-danger text-white'}>Yes</div>,
+  }]
   return (
     <Wrapper className={"details-table"}>
-      <Table>
-        <tbody>
-          <tr>
-            <td>ID</td>
-            <td>{student.StudentID}</td>
-          </tr>
-          <tr>
-            <td>Year Level</td>
-            <td>{student.StudentForm}</td>
-          </tr>
-          <tr>
-            <td>D.O.B.</td>
-            <td>
-              {`${student.StudentBirthDate || ""}`.trim() === ""
-                ? ""
-                : moment(`${student.StudentBirthDate || ""}`.trim()).format(
-                    "DD/MM/YYYY"
-                  )}
-            </td>
-          </tr>
-          <tr>
-            <td>House</td>
-            <td>{student.StudentHouseDescription}</td>
-          </tr>
-          <tr>
-            <td>Commented</td>
-            <td>
-              {`${student.StudentEntryDate || ""}`.trim() === ""
-                ? ""
-                : moment(`${student.StudentEntryDate || ""}`.trim()).format(
-                    "DD/MM/YYYY"
-                  )}
-            </td>
-          </tr>
-          <tr>
-            <td>Court Order</td>
-            <td>
-              {`${student.LegalCourtOrderType || ""}`.trim() === "" ? "N" : "Y"}
-            </td>
-          </tr>
-          <tr>
-            <td>Parent Separated</td>
-            <td>{student.LegalParentsSeparatedFlag === true ? "Y" : "N"}</td>
-          </tr>
-        </tbody>
-      </Table>
+      {
+        data.map(row => {
+          return (
+            <div key={row.title} className={'clearfix border-bottom'} style={{padding: '6px 0'}}>
+              <div className={'float-start text-left'}><b>{row.title}</b></div>
+              <div className={'float-end'}>{row.content}</div>
+            </div>
+          )
+        })
+      }
     </Wrapper>
   );
 };

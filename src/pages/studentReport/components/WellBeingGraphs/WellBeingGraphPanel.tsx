@@ -280,13 +280,13 @@ const WellBeingGraphPanel = ({ student }: iWellBeingGraphPanel) => {
       <Row>
         <Col lg={2} md={12} sm={12}>
           <Row>
-            <Col>
-              <Image src={student.profileUrl} />
+            <Col md={12}>
+              <Image src={student.profileUrl} style={{width: '100%', height: 'auto'}}/>
             </Col>
-            <Col>
+            <Col md={12}>
               <WellBeingGraphDetailsPanel student={student} />
             </Col>
-            <Col>
+            <Col md={12}>
               <WellBeingGraphNurseVisitsPanel
                 student={student}
                 fileSemesters={selectedFileSemesters}
@@ -294,7 +294,7 @@ const WellBeingGraphPanel = ({ student }: iWellBeingGraphPanel) => {
             </Col>
           </Row>
         </Col>
-        <Col md={5} sm={12}>
+        <Col lg={5} md={6} sm={12}>
           <h4 className={"title"}>Absence By Class:</h4>
           <WellBeingAbsenceByClassChart
             student={student}
@@ -453,7 +453,7 @@ const WellBeingGraphPanel = ({ student }: iWellBeingGraphPanel) => {
             </div>
           </FlexContainer>
         </Col>
-        <Col md={5} sm={12}>
+        <Col lg={5} md={6} sm={12}>
           <h4 className={"title"}>Class Absence Reasons:</h4>
           <WellBeingAbsenceByReasonChart
             student={student}

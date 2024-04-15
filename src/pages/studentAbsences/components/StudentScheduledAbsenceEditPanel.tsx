@@ -26,6 +26,7 @@ import iStudentAbsenceSchedule from '../../../types/StudentAbsence/iStudentAbsen
 import StudentScheduledAbsenceService from '../../../services/StudentAbsences/StudentScheduledAbsenceService';
 import StudentAbsenceService from '../../../services/StudentAbsences/StudentAbsenceService';
 import TimePicker from '../../../components/common/TimePicker';
+import MggsModuleService from '../../../services/Module/MggsModuleService';
 
 type iStudentScheduledAbsenceEditPanel = {
   recordType: iRecordType;
@@ -39,6 +40,7 @@ type iStudentScheduledAbsenceEditPanel = {
 
 const Wrapper = styled.div``;
 const StudentScheduledAbsenceEditPanel = ({scheduledAbsence, recordType, student, onSaved, onIsSubmitting, onCancel, isSaving = false}: iStudentScheduledAbsenceEditPanel) => {
+  const {user} = useSelector((state: RootState) => state.auth);
   const [isSubmitting, setIsSubmitting] = useState(isSaving);
   const [record, setRecord] = useState<iStudentAbsenceSchedule | undefined>(scheduledAbsence);
   const [recordEvent, setRecordEvent] = useState<iStudentAbsence | undefined>(undefined);
@@ -46,7 +48,7 @@ const StudentScheduledAbsenceEditPanel = ({scheduledAbsence, recordType, student
   const [isLoading, setIsLoading] = useState(false);
   const [errorMap, setErrorMap] = useState<{[key: string]: any}>({});
   const [vStudent, setVStudent] = useState<iVStudent | null>(null);
-  const {user} = useSelector((state: RootState) => state.auth);
+  const [extraAbsenceTypeCodes, setExtraAbsenceTypeCodes] = useState<string[]>([]);
 
   useEffect(() => {
     let isCanceled = false;
@@ -97,7 +99,8 @@ const StudentScheduledAbsenceEditPanel = ({scheduledAbsence, recordType, student
           FileSemester: user?.SynCurrentFileSemester?.FileSemester || moment().year(),
           YearLevelCode: vStudent?.StudentYearLevel,
         })
-      })
+      }),
+      MggsModuleService.getModule(MGGS_MODULE_ID_STUDENT_ABSENCES),
     ])
       .then(resp => {
         if (isCanceled) return;
@@ -114,6 +117,7 @@ const StudentScheduledAbsenceEditPanel = ({scheduledAbsence, recordType, student
         } else {
           setCanEdit(Object.keys(canAccessRoles).length > 0 || resp[1].length > 0);
         }
+        setExtraAbsenceTypeCodes(`${resp[2].settings?.extraAbsenceTypeCodes || ''}`.trim().split(','))
       })
       .catch(err => {
         if (isCanceled) return;
@@ -350,7 +354,7 @@ const StudentScheduledAbsenceEditPanel = ({scheduledAbsence, recordType, student
                 isDisabled={canEdit !== true}
                 allowClear
                 addOtherRegardless
-                absenceTypeCodes={recordType in iRecordTypeMap ? [iRecordTypeMap[recordType]] : []}
+                absenceTypeCodes={recordType in iRecordTypeMap ? [iRecordTypeMap[recordType], ...extraAbsenceTypeCodes] : []}
                 values={recordEvent?.AbsenceCode ? [recordEvent?.AbsenceCode || ''] : undefined}
                 onSelect={(options) => {
                   // @ts-ignore
