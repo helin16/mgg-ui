@@ -40,7 +40,7 @@ import PowerBIReportManagerPage from '../../pages/PowerBI/Manager/PowerBIReportM
 import {URL_POWER_BI_DISPLAY, URL_STUDENT_REPORT_SCHOOL_BOX_ID} from '../../Url';
 import AcademicReportsForSchoolBoxId from '../../pages/studentReport/components/AcademicReportsForSchoolBoxId';
 import FunnelLeadsPage from '../../pages/funnel/FunnelLeads/FunnelLeadsPage';
-// import PageNotFound from '../../components/PageNotFound';
+import PageNotFound from '../../components/PageNotFound';
 
 const schoolBoxIframeElementId = "remote";
 const SchoolBoxRouter = ({
@@ -59,15 +59,15 @@ const SchoolBoxRouter = ({
     }
   };
 
-  const showSchoolBoxIframe = () => {
-    const schoolBoxIframeElement = document.querySelector(
-      `iframe#${schoolBoxIframeElementId}`
-    );
-    if (schoolBoxIframeElement) {
-      // @ts-ignore
-      schoolBoxIframeElement.style.display = "block";
-    }
-  };
+  // const showSchoolBoxIframe = () => {
+  //   const schoolBoxIframeElement = document.querySelector(
+  //     `iframe#${schoolBoxIframeElementId}`
+  //   );
+  //   if (schoolBoxIframeElement) {
+  //     // @ts-ignore
+  //     schoolBoxIframeElement.style.display = "block";
+  //   }
+  // };
   // /powerbi/report/:reportId
   if (path.startsWith(URL_POWER_BI_DISPLAY.replace(':reportId', ''))) {
     removeSchoolBoxIframe();
@@ -239,8 +239,8 @@ const SchoolBoxRouter = ({
       );
     }
     default: {
-      showSchoolBoxIframe();
-      return null; //<PageNotFound />
+      // showSchoolBoxIframe();
+      return <PageNotFound />;
     }
   }
 };
