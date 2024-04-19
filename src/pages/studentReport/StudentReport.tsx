@@ -18,6 +18,10 @@ import {
   STUDENT_CONTACT_TYPE_SC2,
   STUDENT_CONTACT_TYPE_SC3
 } from "../../types/Synergetic/Student/iStudentContact";
+import SynCommunityService from '../../services/Synergetic/Community/SynCommunityService';
+import {OP_OR} from '../../helper/ServiceHelper';
+import * as _ from 'lodash';
+import StudentContactService from '../../services/Synergetic/Student/StudentContactService';
 
 const StudentReport = () => {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -28,20 +32,59 @@ const StudentReport = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const requestedSynId = urlParams.get('synId');
     let isCancelled = false;
-    if (!user || user?.isStudent !== true) {
+    if (!user || (user?.isStudent !== true && requestedSynId ==='')) {
       return;
     }
+
+    const isRequestStudentUnderCurrentUser = async (): Promise<boolean> => {
+      if (user?.isParent !== true || `${requestedSynId || ''}`.trim() === '') {
+        return false;
+      }
+      const parentsProfiles = await SynCommunityService.getCommunityProfiles({
+        where: JSON.stringify({[OP_OR]: [{SpouseID: user?.synergyId}, {ID: user?.synergyId}]})
+      });
+      const parentIds: number[] = [];
+      parentsProfiles.data.map(community => { // @ts-ignore
+        parentIds.push(Number(community.ID));
+        parentIds.push(Number(community.SpouseID));
+        return null;
+      });
+
+      const results = await StudentContactService.getStudentContacts({
+        where: JSON.stringify({
+          LinkedID: _.uniq(parentIds),
+          ID: requestedSynId,
+          ContactType: [
+            STUDENT_CONTACT_TYPE_SC1,
+            STUDENT_CONTACT_TYPE_SC2,
+            STUDENT_CONTACT_TYPE_SC3
+          ],
+        }),
+      })
+      return (results.data || []).length > 0;
+    }
+
     setIsLoading(true);
-    SynVStudentService.getVPastAndCurrentStudentAll({
-      where: JSON.stringify({StudentID: user?.synergyId || ''}),
-      perPage: 1,
-    })
+    Promise.all([
+      SynVStudentService.getVPastAndCurrentStudentAll({
+        where: JSON.stringify({StudentID: user?.isStudent === true ? user?.synergyId : (requestedSynId || '')}),
+        perPage: 1,
+      }),
+      // get the current requested student's parent
+      ...((user?.isParent !== true || `${requestedSynId || ''}`.trim() === '') ? [] : [isRequestStudentUnderCurrentUser()])
+    ])
       .then(resp => {
         if (isCancelled) {
           return;
         }
-        const students = resp.data || [];
+        const students = resp[0].data || [];
+        console.log('resp[1]', resp[1]);
+        if (user?.isParent === true && resp.length > 1 && resp[1] !== true) {
+          return;
+        }
         setSelectedStudent(students.length > 0 ? students[0] : null);
       })
       .finally(() => {

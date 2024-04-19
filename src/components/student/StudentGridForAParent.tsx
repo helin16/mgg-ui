@@ -74,6 +74,7 @@ const StudentGridForAParent = ({
   }, [parentSynId]);
 
   useEffect(() => {
+
     let isCancelled = false;
     if (parentIds.length <= 0) { return }
 
