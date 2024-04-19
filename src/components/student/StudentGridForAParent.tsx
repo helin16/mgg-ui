@@ -103,8 +103,9 @@ const StudentGridForAParent = ({
     setIsLoadingStudents(true);
     Promise.all(studentIds.map(studentId => {
         return SynVStudentService.getVPastAndCurrentStudentAll({
-          where: JSON.stringify({StudentId: studentIds}),
+          where: JSON.stringify({StudentId: studentId}),
           perPage: 1,
+          sort: 'FileYear:DESC,FileSemester:DESC'
         })
       }))
       .then(resp => {
