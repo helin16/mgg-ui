@@ -81,7 +81,6 @@ const StudentReport = () => {
           return;
         }
         const students = resp[0].data || [];
-        console.log('resp[1]', resp[1]);
         if (user?.isParent === true && resp.length > 1 && resp[1] !== true) {
           return;
         }
