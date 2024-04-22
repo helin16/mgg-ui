@@ -7,7 +7,7 @@ import {
 import { useEffect, useState } from "react";
 import iPaginatedResult from "../../../types/iPaginatedResult";
 import StudentAbsenceService from "../../../services/StudentAbsences/StudentAbsenceService";
-import Toaster from "../../../services/Toaster";
+import Toaster, {TOAST_TYPE_SUCCESS} from "../../../services/Toaster";
 import PageLoadingSpinner from "../../../components/common/PageLoadingSpinner";
 import { Dropdown, DropdownButton, Table } from "react-bootstrap";
 import moment from "moment-timezone";
@@ -237,9 +237,15 @@ const UnSyncdStudentAbsenceListPanel = ({ type }: iStudentAbsenceListPanel) => {
               deletingFn={() =>
                 Promise.all(
                   notSyncdAbsences.map(record =>
-                    StudentAbsenceService.remove(record.id, { type })
+                    StudentAbsenceService.syncToSynergetic(record.id, { type })
                   )
-                )
+                ).then(() => {
+                  Toaster.showToast(
+                    `Sync request successfully.`,
+                    TOAST_TYPE_SUCCESS
+                  )
+                  setQueuedIds([...queuedIds, ...notSyncdAbsences.map(record => record.id)]);
+                })
               }
               confirmString={`${user?.synergyId || "delete"}`}
               variant={"warning"}
