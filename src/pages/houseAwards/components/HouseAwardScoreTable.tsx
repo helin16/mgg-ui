@@ -17,6 +17,7 @@ import SynVStudentService from "../../../services/Synergetic/Student/SynVStudent
 import CSVExportBtn from "../../../components/form/CSVExportBtn";
 import { FlexContainer } from "../../../styles";
 import HouseAwardExportHelper from "./HouseAwardExportHelper";
+import HouseAwardScoreBulkCheckBox from "./HouseAwardScoreBulkCheckBox";
 
 type iHouseAwardScoreTable = {
   house: iSynLuHouse;
@@ -32,11 +33,11 @@ type iHouseAwardScoreTable = {
 const Wrapper = styled.div`
   .table {
     background-color: white !important;
-      
+
     tbody {
-        tr:hover td {
-            background-color: #efefef !important;
-        }
+      tr:hover td {
+        background-color: #efefef !important;
+      }
     }
   }
 `;
@@ -181,7 +182,23 @@ const HouseAwardScoreTable = ({
 
   const columnEvents = events.map(event => ({
     Header: () => {
-      return <div style={{ textAlign: "center" }}>{event.name}</div>;
+      return (
+        <div style={{ textAlign: "center" }}>
+          <div>{event.name}</div>
+          {isAwardable === true ? null : (
+            <HouseAwardScoreBulkCheckBox
+              fileYear={fileYear}
+              eventType={type}
+              event={event}
+              studentEventScoreMap={studentEventScoreMap}
+              studentIds={Object.keys(studentMap).map(id => Number(id))}
+              onAddedScores={() => setCount(MathHelper.add(count, 1))}
+              onDeletedScores={() => setCount(MathHelper.add(count, 1))}
+              forceReload={count}
+            />
+          )}
+        </div>
+      );
     },
     accessor: `${event.id}`,
     width: 70,
