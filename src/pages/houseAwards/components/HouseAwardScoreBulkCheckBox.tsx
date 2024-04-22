@@ -28,12 +28,17 @@ const Wrapper = styled.div`
   padding: 4px 0px;
   .check-icon {
     cursor: pointer;
+      
+      &.disabled {
+          cursor: not-allowed;
+      }
   }
 `;
 
 const HouseAwardScoreBulkCheckBox = ({
   studentIds,
   event,
+  isDisabled = false,
   eventType,
   fileYear,
   forceReload = 0,
@@ -95,6 +100,9 @@ const HouseAwardScoreBulkCheckBox = ({
   }, [studentIds, event, eventType, forceReload, studentEventScoreMap]);
 
   const handleOnChange = (checked: boolean) => {
+    if (isDisabled === true) {
+      return;
+    }
     setIsChanging(true);
     if (checked === true) {
       const newStudentIds = notCheckedStudentIds.filter(
@@ -145,7 +153,7 @@ const HouseAwardScoreBulkCheckBox = ({
     if (notCheckedStudentIds.length <= 0) {
       return (
         <Icons.CheckSquareFill
-          className={"check-icon text-primary"}
+          className={`check-icon ${isDisabled === true ? 'text-muted disabled' : 'text-primary'}`}
           onClick={() => handleOnChange(false)}
         />
       );
@@ -153,7 +161,7 @@ const HouseAwardScoreBulkCheckBox = ({
 
     return (
       <Icons.Square
-        className={"check-icon"}
+        className={`check-icon text-muted ${isDisabled === true ? 'disabled' : ''}`}
         onClick={() => handleOnChange(true)}
       />
     );

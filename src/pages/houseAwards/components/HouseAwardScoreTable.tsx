@@ -187,6 +187,7 @@ const HouseAwardScoreTable = ({
           <div>{event.name}</div>
           {isAwardable === true ? null : (
             <HouseAwardScoreBulkCheckBox
+              isDisabled={isDisabled}
               fileYear={fileYear}
               eventType={type}
               event={event}
