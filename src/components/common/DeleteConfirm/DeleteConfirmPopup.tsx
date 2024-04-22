@@ -10,6 +10,7 @@ type iParam = {
   onConfirm?: () => void;
   confirmBtnString?: string;
   confirmString: string;
+  confirmBtnVariant?: string;
   isDeleting?: boolean;
   description?: string | ReactElement;
   title?: string;
@@ -38,6 +39,7 @@ const DeleteByRetype = ({
   confirmString,
   isDeleting,
   description,
+  confirmBtnVariant,
   confirmBtnString
 }: iParam) => {
   const [isConfirmed, setIsConfirmed] = useState(false);
@@ -65,7 +67,7 @@ const DeleteByRetype = ({
           <LoadingBtn
             isLoading={isDeleting}
             disabled={!isConfirmed}
-            variant={"danger"}
+            variant={confirmBtnVariant || "danger"}
             onClick={onConfirm}
           >
             {confirmBtnString || "Delete"}

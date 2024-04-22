@@ -13,6 +13,7 @@ type iDeleteConfirmPopupBtnProps = ButtonProps & {
   deletedCallbackFn?: (resp: any) => void;
   confirmString?: string;
   confirmBtnString?: string;
+  confirmBtnVariant?: string;
   title?: any;
   description?: any;
   isShowing?: boolean;
@@ -28,6 +29,7 @@ const DeleteConfirmPopupBtn = ({
   deletingFn,
   deletedCallbackFn,
   confirmBtnString = 'Delete',
+  confirmBtnVariant = 'danger',
   onOpenDelete,
   isShowing = false,
   isDeleting = false,
@@ -62,6 +64,7 @@ const DeleteConfirmPopupBtn = ({
         isOpen={isShowingPopup}
         confirmString={confirmString || `${currentUser?.synergyId || 'na'}`.trim()}
         confirmBtnString={confirmBtnString}
+        confirmBtnVariant={confirmBtnVariant}
         onClose={() => closePopup ? closePopup() : setIsShowingPopup(false)}
       />
     </>

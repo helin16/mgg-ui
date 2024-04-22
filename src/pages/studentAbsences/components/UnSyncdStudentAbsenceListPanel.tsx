@@ -9,21 +9,33 @@ import iPaginatedResult from "../../../types/iPaginatedResult";
 import StudentAbsenceService from "../../../services/StudentAbsences/StudentAbsenceService";
 import Toaster from "../../../services/Toaster";
 import PageLoadingSpinner from "../../../components/common/PageLoadingSpinner";
-import { Table } from "react-bootstrap";
+import { Dropdown, DropdownButton, Table } from "react-bootstrap";
 import moment from "moment-timezone";
 import * as Icons from "react-bootstrap-icons";
 import DeleteConfirmPopupBtn from "../../../components/common/DeleteConfirm/DeleteConfirmPopupBtn";
 import MathHelper from "../../../helper/MathHelper";
 import StudentAbsenceEditPopupBtn from "./StudentAbsenceEditPopupBtn";
 import { FlexContainer } from "../../../styles";
-import {OP_NOT} from '../../../helper/ServiceHelper';
+import { OP_NOT } from "../../../helper/ServiceHelper";
+import * as _ from "lodash";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../redux/makeReduxStore";
 
 const Wrapper = styled.div`
+  .table-responsive {
+    min-height: 300px;
+  }
   .student-img {
     width: 60px;
     img {
       width: 100%;
       height: auto;
+    }
+  }
+
+  .dropdown {
+    > button {
+      padding: 0px;
     }
   }
 
@@ -73,6 +85,13 @@ const Wrapper = styled.div`
       width: 160px;
       font-size: 12px;
     }
+
+    .check-box {
+      width: 23px;
+      svg {
+        cursor: pointer;
+      }
+    }
   }
 `;
 
@@ -80,15 +99,19 @@ type iStudentAbsenceListPanel = {
   type: iRecordType;
 };
 const UnSyncdStudentAbsenceListPanel = ({ type }: iStudentAbsenceListPanel) => {
+  const { user } = useSelector((state: RootState) => state.auth);
+  const [selectedAbsences, setSelectedAbsences] = useState<iStudentAbsence[]>(
+    []
+  );
   const [records, setRecords] = useState<iPaginatedResult<iStudentAbsence>>();
   const [isLoading, setIsLoading] = useState(false);
   const [queuedIds, setQueuedIds] = useState<number[]>([]);
   const [count, setCount] = useState(0);
 
-
   useEffect(() => {
     let isCanceled = false;
     setIsLoading(true);
+    setSelectedAbsences([]);
     StudentAbsenceService.getAll({
       where: JSON.stringify({
         type: type,
@@ -96,7 +119,7 @@ const UnSyncdStudentAbsenceListPanel = ({ type }: iStudentAbsenceListPanel) => {
         syncd_at: null,
         syncd_by_id: null,
         syncd_AbsenceEventSeq: null,
-        ...(queuedIds.length > 0 ? {id : {[OP_NOT]: queuedIds}} : {})
+        ...(queuedIds.length > 0 ? { id: { [OP_NOT]: queuedIds } } : {})
       }),
       include: `Student,AbsenceReason,CreatedBy,ApprovedBy,Expected,SyncdBy`,
       sort: "id:DESC"
@@ -146,15 +169,150 @@ const UnSyncdStudentAbsenceListPanel = ({ type }: iStudentAbsenceListPanel) => {
     );
   };
 
+  const handleSelectingRecordIds = (
+    absences: iStudentAbsence[],
+    checked: boolean
+  ) => {
+    const selectedIds = absences.map(record => record.id);
+    if (checked === true) {
+      return setSelectedAbsences(
+        _.uniqBy([...selectedAbsences, ...absences], record => record.id)
+      );
+    }
+    return setSelectedAbsences(
+      _.uniqBy(
+        selectedAbsences.filter(record => selectedIds.indexOf(record.id) < 0),
+        record => record.id
+      )
+    );
+  };
+
+  const getBulkOptions = () => {
+    if (selectedAbsences.length <= 0) {
+      return null;
+    }
+    console.log('selectedAbsences', selectedAbsences);
+    const notApprovedAbsences = selectedAbsences.filter(
+      record => `${record?.approved_at || ""}`.trim() === ""
+    );
+    const notSyncdAbsences = selectedAbsences.filter(
+      record => `${record?.syncd_at || ""}`.trim() === ""
+    );
+    return (
+      <DropdownButton title={`Actions`} size={"sm"} variant={"link"}>
+        {notApprovedAbsences.length > 0 && (
+          <Dropdown.Item>
+            <DeleteConfirmPopupBtn
+              deletingFn={() =>
+                Promise.all(
+                  notApprovedAbsences.map(record =>
+                    StudentAbsenceService.update(record?.id || "", {
+                      type: type,
+                      approved_at: moment().toISOString(),
+                      approved_by_id: user?.synergyId
+                    })
+                  )
+                )
+              }
+              confirmString={`${user?.synergyId || "delete"}`}
+              variant={"success"}
+              confirmBtnString={`Approve ${notApprovedAbsences.length} record(s)`}
+              confirmBtnVariant={'success'}
+              size={"sm"}
+              description={
+                <h5 className={"text-success"}>
+                  You are about to approve {notApprovedAbsences.length} selected
+                  records. Are you sure to continue?
+                </h5>
+              }
+              deletedCallbackFn={() => setCount(MathHelper.add(count, 1))}
+            >
+              <Icons.CheckLg /> Approve {notApprovedAbsences.length} record(s)
+            </DeleteConfirmPopupBtn>
+          </Dropdown.Item>
+        )}
+        {notSyncdAbsences.length > 0 && (
+          <Dropdown.Item>
+            <DeleteConfirmPopupBtn
+              deletingFn={() =>
+                Promise.all(
+                  notSyncdAbsences.map(record =>
+                    StudentAbsenceService.remove(record.id, { type })
+                  )
+                )
+              }
+              confirmString={`${user?.synergyId || "delete"}`}
+              variant={"warning"}
+              size={"sm"}
+              confirmBtnString={`Sync ${notSyncdAbsences.length} record(s)`}
+              confirmBtnVariant={'warning'}
+              description={
+                <h5 className={"text-warning"}>
+                  You are about to synchronise {notSyncdAbsences.length} selected
+                  records to Synergetic. Are you sure to continue?
+                </h5>
+              }
+              deletedCallbackFn={() => setCount(MathHelper.add(count, 1))}
+            >
+              <Icons.CheckLg /> Sync {notSyncdAbsences.length} record(s)
+            </DeleteConfirmPopupBtn>
+          </Dropdown.Item>
+        )}
+        <Dropdown.Divider />
+        <Dropdown.Item>
+          <DeleteConfirmPopupBtn
+            deletingFn={() =>
+              Promise.all(
+                selectedAbsences.map(record =>
+                  StudentAbsenceService.remove(record.id, { type })
+                )
+              )
+            }
+            confirmString={`${user?.synergyId || "delete"}`}
+            variant={"danger"}
+            size={"sm"}
+            description={
+              <p className={"text-danger"}>
+                You are about to delete {selectedAbsences.length} selected
+                records. Are you sure to continue?
+              </p>
+            }
+            deletedCallbackFn={() => setCount(MathHelper.add(count, 1))}
+          >
+            <Icons.Trash /> Delete {selectedAbsences.length} record(s)
+          </DeleteConfirmPopupBtn>
+        </Dropdown.Item>
+      </DropdownButton>
+    );
+  };
+
   if (isLoading) {
     return <PageLoadingSpinner />;
   }
 
+  const recordIds = (records?.data || []).map(record => record.id);
   return (
     <Wrapper>
       <Table className={"record-table"} responsive>
         <thead>
           <tr>
+            <th className={"check-box"}>
+              {recordIds.length <= 0 ? null : selectedAbsences.length !==
+                  recordIds.length || recordIds.length <= 0 ? (
+                <Icons.Square
+                  onClick={() =>
+                    handleSelectingRecordIds(records?.data || [], true)
+                  }
+                />
+              ) : (
+                <Icons.CheckSquareFill
+                  className={"text-primary"}
+                  onClick={() =>
+                    handleSelectingRecordIds(records?.data || [], false)
+                  }
+                />
+              )}
+            </th>
             <th colSpan={2}>{records?.total || 0} Student(s)</th>
             <th>Form</th>
             <th>Parent Slip?</th>
@@ -162,7 +320,7 @@ const UnSyncdStudentAbsenceListPanel = ({ type }: iStudentAbsenceListPanel) => {
             <th>Reason</th>
             <th>Created</th>
             <th>Approved</th>
-            <th></th>
+            <th className={"text-right"}>{getBulkOptions()}</th>
           </tr>
         </thead>
         <tbody>
@@ -172,6 +330,25 @@ const UnSyncdStudentAbsenceListPanel = ({ type }: iStudentAbsenceListPanel) => {
               return (
                 <React.Fragment key={record.id}>
                   <tr>
+                    <td className={"check-box"} rowSpan={3}>
+                      {_.findIndex(
+                        selectedAbsences,
+                        absence => record.id === absence.id
+                      ) < 0 ? (
+                        <Icons.Square
+                          onClick={() =>
+                            handleSelectingRecordIds([record], true)
+                          }
+                        />
+                      ) : (
+                        <Icons.CheckSquareFill
+                          className={"text-primary"}
+                          onClick={() =>
+                            handleSelectingRecordIds([record], false)
+                          }
+                        />
+                      )}
+                    </td>
                     <td className={"student-img"} rowSpan={3}>
                       {`${record.Student?.profileUrl || ""}`.trim() !== "" ? (
                         <img
@@ -188,7 +365,7 @@ const UnSyncdStudentAbsenceListPanel = ({ type }: iStudentAbsenceListPanel) => {
                         size={"sm"}
                         onSaved={(savedRecord, jobQueued) => {
                           if (jobQueued === true && savedRecord) {
-                            setQueuedIds([...queuedIds, savedRecord?.id])
+                            setQueuedIds([...queuedIds, savedRecord?.id]);
                             // return;
                           }
                           setCount(MathHelper.add(count, 1));
