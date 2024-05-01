@@ -2719,7 +2719,7 @@ const translateQualificationLevel = (qLevel: string) => {
     return '5';
   }
 
-  if (['POSTGRAD', 'MA', 'DOC'].indexOf(qLevelStr) >= 0 ) {
+  if (['POSTGRAD', 'MA', 'DOC', 'UNDGRAD'].indexOf(qLevelStr) >= 0 ) {
     return '7';
   }
   return qLevelStr;
