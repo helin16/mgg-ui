@@ -7,7 +7,7 @@ import React, { useEffect, useState } from "react";
 import Toaster, { TOAST_TYPE_ERROR } from "../../../../services/Toaster";
 import SynFileSemesterService from "../../../../services/Synergetic/SynFileSemesterService";
 import * as _ from "lodash";
-import {OP_GTE, OP_LTE, OP_OR} from "../../../../helper/ServiceHelper";
+import { OP_OR } from "../../../../helper/ServiceHelper";
 import iAcaraData from "./iAcaraData";
 import AcaraDataList from "./AcaraDataList";
 import AcaraDataHelper from "./AcaraDataHelper";
@@ -29,7 +29,6 @@ import AcaraDataExportHelper from "./AcaraDataExportHelper";
 import {Dropdown} from 'react-bootstrap';
 import * as Icons from 'react-bootstrap-icons'
 import styled from 'styled-components';
-import moment from 'moment-timezone';
 
 const ACARA_SCHOOL_ID = "46195";
 const ACARA_SCHOOL_NAME = `Mentone Girls' Grammar School`;
@@ -86,12 +85,7 @@ const AcaraDataPanel = () => {
         SynVStudentService.getVPastAndCurrentStudentAll(
           {
             where: JSON.stringify({
-              StudentEntryDate: {[OP_LTE]: startEndDataString.endDateStr.replace('T00:00:00Z', '') },
-              [OP_OR]: [{
-                StudentLeavingDate: null
-              }, {
-                StudentLeavingDate: {[OP_GTE]: startEndDataString.startDateStr.replace('T00:00:00Z', '')},
-              }],
+              StudentCampus: searchCriteria?.campusCodes,
               ...(fileSemesters.length === 1
                 ? {
                     FileYear: fileSemesters[0].FileYear,
@@ -143,7 +137,23 @@ const AcaraDataPanel = () => {
         })
       ]);
 
-      const studentIds = (students || []).map(record => record.StudentID);
+      const filteredStudents = students.filter((student) => {
+
+        if (`${student.StudentEntryDate}`.replace('T00:00:00Z', '') > startEndDataString.endDateStr.replace('T00:00:00Z', '')) {
+          return false;
+        }
+
+        if (`${student.StudentLeavingDate || ''}`.trim() === '') {
+          return true;
+        }
+
+        if (`${student.StudentLeavingDate}`.replace('T00:00:00Z', '') < startEndDataString.startDateStr.replace('T00:00:00Z', '')) {
+          return false;
+        }
+
+        return true;
+      })
+      const studentIds = (filteredStudents || []).map(record => record.StudentID);
       if (studentIds.length <= 0) {
         setRecords([]);
         return;
@@ -308,7 +318,7 @@ const AcaraDataPanel = () => {
       setRecords(
         // @ts-ignore
         _.uniqBy(
-          (students || []).map(row => {
+          (filteredStudents || []).map(row => {
             const parent1Info = getParentInfo(row, 1);
             const parent2Info = getParentInfo(row, 2);
             const studentMainSLG = AcaraDataHelper.translateLanguageCode(
