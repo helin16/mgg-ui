@@ -7,7 +7,7 @@ import React, { useEffect, useState } from "react";
 import Toaster, { TOAST_TYPE_ERROR } from "../../../../services/Toaster";
 import SynFileSemesterService from "../../../../services/Synergetic/SynFileSemesterService";
 import * as _ from "lodash";
-import { OP_OR } from "../../../../helper/ServiceHelper";
+import {OP_GTE, OP_LTE, OP_OR} from "../../../../helper/ServiceHelper";
 import iAcaraData from "./iAcaraData";
 import AcaraDataList from "./AcaraDataList";
 import AcaraDataHelper from "./AcaraDataHelper";
@@ -29,6 +29,7 @@ import AcaraDataExportHelper from "./AcaraDataExportHelper";
 import {Dropdown} from 'react-bootstrap';
 import * as Icons from 'react-bootstrap-icons'
 import styled from 'styled-components';
+import moment from 'moment-timezone';
 
 const ACARA_SCHOOL_ID = "46195";
 const ACARA_SCHOOL_NAME = `Mentone Girls' Grammar School`;
@@ -85,7 +86,12 @@ const AcaraDataPanel = () => {
         SynVStudentService.getVPastAndCurrentStudentAll(
           {
             where: JSON.stringify({
-              StudentCampus: searchCriteria?.campusCodes,
+              StudentEntryDate: {[OP_LTE]: startEndDataString.endDateStr.replace('T00:00:00Z', '') },
+              [OP_OR]: [{
+                StudentLeavingDate: null
+              }, {
+                StudentLeavingDate: {[OP_GTE]: startEndDataString.startDateStr.replace('T00:00:00Z', '')},
+              }],
               ...(fileSemesters.length === 1
                 ? {
                     FileYear: fileSemesters[0].FileYear,

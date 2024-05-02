@@ -161,6 +161,16 @@ const AcaraDataList = ({ records, isLoading = false }: iAcaraDataList) => {
             </td>
           );
         }
+      },{
+        key: "entryDate",
+        header: "Entry Date",
+        cell: (column: iTableColumn, row: iAcaraData) => {
+          return (
+            <td key={column.key}>
+              {moment(row.entryDate).format("DD MMM YYYY")}
+            </td>
+          );
+        }
       },
       {
         key: "homeLanguage",
