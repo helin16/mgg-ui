@@ -228,7 +228,7 @@ const HouseAwardScoreBoard = ({
   return (
     <Wrapper>
       <Row className={`title-row ${house.Code.toLowerCase()}`}>
-        <Col className={"menu-div"} md={8}>
+        <Col className={"menu-div"} md={7}>
           <div
             className={"icon-btn"}
             onClick={() => onCancel()}
@@ -243,7 +243,8 @@ const HouseAwardScoreBoard = ({
             Board for <i>{type.name}</i> in House: <u>{house.Description}</u>
           </div>
         </Col>
-        <Col md={4}>
+        <Col md={2} className={'text-center'}><small style={{fontSize: '12px'}}>{house.HeadOfHouse}</small></Col>
+        <Col md={3}>
           <FlexContainer className={"justify-content-end with-gap lg-gap"}>
             <FileYearSelector
               className={"selector year-selector"}

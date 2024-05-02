@@ -143,7 +143,8 @@ const HouseAwardEventTypes = ({onSelect, header}: iHouseAwardEventTypes) => {
           {luHouses.map(house => {
             return (
               <Col md={6} className={`house-cell ${house.Code.toLowerCase()}`} key={house.Code.toLowerCase()}>
-                <h6 className={'title'}>{house.Description}</h6>
+                <h4 className={'title'} style={{marginBottom: '0px'}}>{house.Description}</h4>
+                <small>{house.HeadOfHouse}</small>
                 {getTypes(house)}
               </Col>
             )

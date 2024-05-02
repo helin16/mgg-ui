@@ -185,19 +185,17 @@ const HouseAwardScoreTable = ({
       return (
         <div style={{ textAlign: "center" }}>
           <div>{event.name}</div>
-          {isAwardable === true ? null : (
-            <HouseAwardScoreBulkCheckBox
-              isDisabled={isDisabled}
-              fileYear={fileYear}
-              eventType={type}
-              event={event}
-              studentEventScoreMap={studentEventScoreMap}
-              studentIds={Object.keys(studentMap).map(id => Number(id))}
-              onAddedScores={() => setCount(MathHelper.add(count, 1))}
-              onDeletedScores={() => setCount(MathHelper.add(count, 1))}
-              forceReload={count}
-            />
-          )}
+          <HouseAwardScoreBulkCheckBox
+            isDisabled={isDisabled}
+            fileYear={fileYear}
+            eventType={type}
+            event={event}
+            studentEventScoreMap={studentEventScoreMap}
+            studentIds={Object.keys(studentMap).map(id => Number(id))}
+            onAddedScores={() => setCount(MathHelper.add(count, 1))}
+            onDeletedScores={() => setCount(MathHelper.add(count, 1))}
+            forceReload={count}
+          />
         </div>
       );
     },

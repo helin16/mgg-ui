@@ -5,6 +5,7 @@ import HouseAwardEventTypeTable from "./components/HouseAwardEventTypeTable";
 import AdminPage from "../../layouts/AdminPage";
 import AdminPageTabs from "../../layouts/AdminPageTabs";
 import SectionDiv from "../../components/common/SectionDiv";
+import SynLuHouseTable from '../../components/HouseAwards/SynLuHouseTable';
 
 type iHouseAwardAdminPage = {
   onNavBack: () => void;
@@ -20,6 +21,15 @@ const HouseAwardAdminPage = ({ onNavBack }: iHouseAwardAdminPage) => {
       <AdminPageTabs
         moduleId={MGGS_MODULE_ID_HOUSE_AWARDS}
         extraTabs={[
+          {
+            key: "houses",
+            title: "Houses",
+            component: (
+              <SectionDiv>
+                <SynLuHouseTable />
+              </SectionDiv>
+            )
+          },
           {
             key: "eventTypes",
             title: "Event Types",
