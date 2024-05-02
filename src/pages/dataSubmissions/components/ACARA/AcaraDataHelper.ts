@@ -2715,7 +2715,7 @@ const translateQualificationLevel = (qLevel: string) => {
     return '0';
   }
 
-  if (['CERTCOM'].indexOf(qLevelStr) >= 0) {
+  if (['CERTCOM', 'LICE'].indexOf(qLevelStr) >= 0) {
     return '5';
   }
 
