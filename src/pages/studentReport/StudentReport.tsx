@@ -72,6 +72,7 @@ const StudentReport = () => {
       SynVStudentService.getVPastAndCurrentStudentAll({
         where: JSON.stringify({StudentID: user?.isStudent === true ? user?.synergyId : (requestedSynId || '')}),
         perPage: 1,
+        sort: 'FileYear:DESC,FileSemester:DESC'
       }),
       // get the current requested student's parent
       ...((user?.isParent !== true || `${requestedSynId || ''}`.trim() === '') ? [] : [isRequestStudentUnderCurrentUser()])
