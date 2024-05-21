@@ -223,7 +223,7 @@ const SchoolBoxRouter = ({
         </ModuleAccessWrapper>
       );
     }
-    case "/admissions/attendances": {
+    case "/admissions": {
       removeSchoolBoxIframe();
       return (
         <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_ADMISSIONS}>
