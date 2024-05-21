@@ -226,9 +226,9 @@ const SchoolBoxRouter = ({
     case "/admissions/attendances": {
       removeSchoolBoxIframe();
       return (
-        // <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_ADMISSIONS}>
+        <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_ADMISSIONS}>
           <AttendanceBulkChangePage />
-        // </ModuleAccessWrapper>
+        </ModuleAccessWrapper>
       );
     }
     default: {

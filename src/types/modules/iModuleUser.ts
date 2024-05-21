@@ -23,7 +23,8 @@ export const MGGS_MODULE_ID_SYN_EMAIL_TEMPLATE = 17;
 export const MGGS_MODULE_ID_CAMPUS_DISPLAY = 18;
 export const MGGS_MODULE_ID_POWER_BI_REPORT = 19;
 export const MGGS_MODULE_ID_MY_CLASS_LIST = 20;
-export const MGGS_MODULE_ID_ADMISSIONS = 21;
+export const MGGS_MODULE_ID_CLIPBOARD = 21;
+export const MGGS_MODULE_ID_ADMISSIONS = 22;
 
 
 type iModuleUser = {
