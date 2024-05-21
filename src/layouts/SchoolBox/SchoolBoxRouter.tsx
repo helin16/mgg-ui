@@ -41,7 +41,7 @@ import PowerBIReportManagerPage from '../../pages/PowerBI/Manager/PowerBIReportM
 import {URL_POWER_BI_DISPLAY} from '../../Url';
 import FunnelLeadsPage from '../../pages/funnel/FunnelLeads/FunnelLeadsPage';
 import PageNotFound from '../../components/PageNotFound';
-import AttendanceBulkChangePage from '../../pages/AttendanceBulk/AttendanceBulkChangePage';
+import AdmissionsPage from '../../pages/AttendanceBulk/AdmissionsPage';
 
 const schoolBoxIframeElementId = "remote";
 const SchoolBoxRouter = ({
@@ -227,7 +227,7 @@ const SchoolBoxRouter = ({
       removeSchoolBoxIframe();
       return (
         <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_ADMISSIONS}>
-          <AttendanceBulkChangePage />
+          <AdmissionsPage />
         </ModuleAccessWrapper>
       );
     }

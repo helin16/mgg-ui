@@ -3,7 +3,7 @@ import AdminPage, {AdminPageProps} from '../../layouts/AdminPage';
 import AdminPageTabs from '../../layouts/AdminPageTabs';
 
 
-const AttendanceBulkChangeAdminPage = ({onNavBack}: AdminPageProps) => {
+const AdmissionsAdminPage = ({onNavBack}: AdminPageProps) => {
   return (
     <AdminPage title={<h3>Admissions Admin</h3>} moduleId={MGGS_MODULE_ID_ADMISSIONS} onNavBack={onNavBack}>
       <AdminPageTabs
@@ -13,4 +13,4 @@ const AttendanceBulkChangeAdminPage = ({onNavBack}: AdminPageProps) => {
   )
 }
 
-export default AttendanceBulkChangeAdminPage;
+export default AdmissionsAdminPage;
