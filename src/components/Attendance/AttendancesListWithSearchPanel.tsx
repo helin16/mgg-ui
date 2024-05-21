@@ -11,7 +11,10 @@ import * as Icons from "react-bootstrap-icons";
 import iPaginatedResult from "../../types/iPaginatedResult";
 import iSynVAttendance from "../../types/Synergetic/Attendance/iSynVAttendance";
 import SynVAttendanceService from "../../services/Synergetic/Attendance/SynVAttendanceService";
-import Toaster, {TOAST_TYPE_ERROR, TOAST_TYPE_SUCCESS} from "../../services/Toaster";
+import Toaster, {
+  TOAST_TYPE_ERROR,
+  TOAST_TYPE_SUCCESS
+} from "../../services/Toaster";
 import PageLoadingSpinner from "../common/PageLoadingSpinner";
 import { OP_BETWEEN } from "../../helper/ServiceHelper";
 import Table, { iTableColumn } from "../common/Table";
@@ -39,7 +42,11 @@ const Wrapper = styled.div`
     }
   }
   .students-autocomplete {
-    min-width: 400px;
+    min-width: 520px;
+    input {
+      height: 24px;
+      min-height: 19px;
+    }
   }
 `;
 
@@ -175,10 +182,15 @@ const ResultTable = ({
             .filter(record => record.AttendedFlag === false)
             .map(record => record.AttendanceSeq)
         );
-        const allChecked = _.isEqual(
+        const allChecked = attendanceRecordSeqs.length > 0 && _.isEqual(
           _.countBy(selectedSeqs),
           _.countBy(attendanceRecordSeqs)
         );
+
+        if (attendanceRecordSeqs.length <= 0) {
+          return <th key={col.key}></th>
+        }
+
         return (
           <th key={col.key}>
             <CheckBox
@@ -350,7 +362,6 @@ const ResultTable = ({
   return <Table striped hover columns={columns} rows={data?.data || []} />;
 };
 
-
 type iPopupPanel = ButtonProps & {
   selectedSeqs: number[];
   onSaved: (records: iSynAttendance[]) => void;
@@ -365,11 +376,11 @@ const PopupBtnPanel = ({ selectedSeqs, onSaved, ...props }: iPopupPanel) => {
 
   const handleClose = () => {
     setPossibleAbsenceCode(null);
-    setPossibleDescription('');
+    setPossibleDescription("");
     setPossibleReasonCode(null);
     setShowingBulkEditPopup(false);
     setIsSaving(false);
-  }
+  };
 
   const update = async () => {
     const data = {
@@ -385,22 +396,28 @@ const PopupBtnPanel = ({ selectedSeqs, onSaved, ...props }: iPopupPanel) => {
     };
 
     if (Object.keys(data).length <= 0) {
-      Toaster.showToast('Need to change the fields that you want to change.', TOAST_TYPE_ERROR);
+      Toaster.showToast(
+        "Need to change the fields that you want to change.",
+        TOAST_TYPE_ERROR
+      );
       return;
     }
 
     setIsSaving(true);
     const saved: iSynAttendance[] = [];
-    for(const seq of selectedSeqs) {
+    for (const seq of selectedSeqs) {
       try {
-        saved.push(await SynAttendanceService.update(seq, data))
+        saved.push(await SynAttendanceService.update(seq, data));
       } catch (err) {
         Toaster.showApiError(err);
       }
     }
     handleClose();
     if (saved.length >= selectedSeqs.length) {
-      Toaster.showToast(`${saved.length} record(s) updated successfully.`, TOAST_TYPE_SUCCESS)
+      Toaster.showToast(
+        `${saved.length} record(s) updated successfully.`,
+        TOAST_TYPE_SUCCESS
+      );
     }
     onSaved(saved);
   };
@@ -423,16 +440,10 @@ const PopupBtnPanel = ({ selectedSeqs, onSaved, ...props }: iPopupPanel) => {
         title={`Editing ${selectedSeqs.length} record(s)`}
         footer={
           <FlexContainer className={"justify-content-end gap-3"}>
-            <Button
-              variant={"link"}
-              onClick={() => handleClose()}
-            >
+            <Button variant={"link"} onClick={() => handleClose()}>
               <Icons.XLg /> Cancel
             </Button>
-            <LoadingBtn
-              isLoading={isSaving === true}
-              onClick={() => update()}
-            >
+            <LoadingBtn isLoading={isSaving === true} onClick={() => update()}>
               <Icons.Send /> update {selectedSeqs.length} record(s)
             </LoadingBtn>
           </FlexContainer>
@@ -583,7 +594,7 @@ const AttendancesListWithSearchPanel = () => {
     searchCriteria?.dateRange?.end,
     searchCriteria?.periods,
     searchCriteria?.studentIds,
-    searchCriteria?.attendedFlag,
+    searchCriteria?.attendedFlag
   ]);
 
   const getResultTable = () => {
@@ -613,11 +624,14 @@ const AttendancesListWithSearchPanel = () => {
   const getBulkActionBtnPanel = () => {
     return (
       <div>
-        <PopupBtnPanel selectedSeqs={selectedSeqs} onSaved={() => {
-          setCount(MathHelper.add(count, 1));
-          setCurrentPage(1);
-          setSelectedSeqs([]);
-        }}>
+        <PopupBtnPanel
+          selectedSeqs={selectedSeqs}
+          onSaved={() => {
+            setCount(MathHelper.add(count, 1));
+            setCurrentPage(1);
+            setSelectedSeqs([]);
+          }}
+        >
           <Icons.Pencil /> edit {selectedSeqs.length} record(s)
         </PopupBtnPanel>
       </div>
