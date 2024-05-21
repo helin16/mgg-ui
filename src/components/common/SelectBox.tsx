@@ -1,11 +1,13 @@
 import Select from "react-select";
 import styled from "styled-components";
 
+
+export type iSelectOptionProps = {value: string, label: any, data?: any}
 export type iSelectBox = {
   placeholder?: string;
   isMulti?: boolean;
   className?: string;
-  options: any;
+  options?: any;
   onChange?: (options: any) => void;
   value?: any | any[];
   isClearable?: boolean;

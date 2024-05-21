@@ -85,7 +85,6 @@ const SynLuAbsenceReasonSelector = ({
           ? whereOrObjArr[0]
           : { [OP_OR]: whereOrObjArr })
       }),
-      sort: "Description:ASC"
     })
       .then(resp => {
         if (isCancelled === true) {
@@ -145,7 +144,7 @@ const SynLuAbsenceReasonSelector = ({
       if (!opt1.data || !opt2.data) {
         return 1;
       }
-      return opt1.data.Code > opt2.data.SynLuAbsenceReasonSort ? 1 : -1;
+      return opt1.data.Code > opt2.data.Code ? 1 : -1;
     });
   };
 

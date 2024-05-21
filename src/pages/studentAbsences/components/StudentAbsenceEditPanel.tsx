@@ -12,7 +12,7 @@ import iVStudent from "../../../types/Synergetic/Student/iVStudent";
 import { FlexContainer } from "../../../styles";
 import FormLabel from "../../../components/form/FormLabel";
 import DateTimePicker from "../../../components/common/DateTimePicker";
-import SynLuAbsenceReasonSelector from "../../../components/student/SynLuAbsenceReasonSelector";
+import SynLuAbsenceReasonSelector from "../../../components/Absence/SynLuAbsenceReasonSelector";
 import LoadingBtn from "../../../components/common/LoadingBtn";
 import * as Icons from "react-bootstrap-icons";
 import Toaster, { TOAST_TYPE_SUCCESS } from "../../../services/Toaster";

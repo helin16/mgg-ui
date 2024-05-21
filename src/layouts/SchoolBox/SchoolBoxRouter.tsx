@@ -3,6 +3,7 @@ import StudentReport from "../../pages/studentReport/StudentReport";
 import OperooSafetyAlertsPage from "../../pages/operoo/OperooSafetyAlertsPage";
 import ModuleAccessWrapper from "../../components/module/ModuleAccessWrapper";
 import {
+  MGGS_MODULE_ID_ADMISSIONS,
   MGGS_MODULE_ID_ALUMNI_REQUEST, MGGS_MODULE_ID_CAMPUS_DISPLAY,
   MGGS_MODULE_ID_ENROLLMENTS,
   MGGS_MODULE_ID_FINANCE,
@@ -40,6 +41,7 @@ import PowerBIReportManagerPage from '../../pages/PowerBI/Manager/PowerBIReportM
 import {URL_POWER_BI_DISPLAY} from '../../Url';
 import FunnelLeadsPage from '../../pages/funnel/FunnelLeads/FunnelLeadsPage';
 import PageNotFound from '../../components/PageNotFound';
+import AttendanceBulkChangePage from '../../pages/AttendanceBulk/AttendanceBulkChangePage';
 
 const schoolBoxIframeElementId = "remote";
 const SchoolBoxRouter = ({
@@ -58,15 +60,6 @@ const SchoolBoxRouter = ({
     }
   };
 
-  // const showSchoolBoxIframe = () => {
-  //   const schoolBoxIframeElement = document.querySelector(
-  //     `iframe#${schoolBoxIframeElementId}`
-  //   );
-  //   if (schoolBoxIframeElement) {
-  //     // @ts-ignore
-  //     schoolBoxIframeElement.style.display = "block";
-  //   }
-  // };
   // /powerbi/report/:reportId
   if (path.startsWith(URL_POWER_BI_DISPLAY.replace(':reportId', ''))) {
     removeSchoolBoxIframe();
@@ -230,8 +223,16 @@ const SchoolBoxRouter = ({
         </ModuleAccessWrapper>
       );
     }
+    case "/admissions/attendances": {
+      removeSchoolBoxIframe();
+      return (
+        // <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_ADMISSIONS}>
+          <AttendanceBulkChangePage />
+        // </ModuleAccessWrapper>
+      );
+    }
     default: {
-      // showSchoolBoxIframe();
+      removeSchoolBoxIframe();
       return <PageNotFound />;
     }
   }
