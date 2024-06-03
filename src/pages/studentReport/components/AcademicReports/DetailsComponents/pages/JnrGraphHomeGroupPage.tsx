@@ -14,6 +14,7 @@ import iStudentReportYear from '../../../../../../types/Synergetic/Student/iStud
 import iStudentReportResult from '../../../../../../types/Synergetic/Student/iStudentReportResult';
 import LearningAreaGraph from '../sections/LearningAreaGraph';
 import LearningAgencyDiv from '../sections/LearningAgencyDiv';
+import PersonalAndSocialDevelopmentDiv from '../sections/PersonalAndSocialDevelopmentDiv';
 
 type iJnrGraphHomeGroupPage = {
   student: iVStudent;
@@ -54,6 +55,7 @@ const JnrGraphHomeGroupPage = ({
 
       <AttitudeAndManagementDiv results={resultList} />
       <LearningAgencyDiv results={resultList} />
+      <PersonalAndSocialDevelopmentDiv results={resultList} />
       <ApproachesToLearningDiv results={resultList} />
       <ReflectionDiv results={resultList} />
 

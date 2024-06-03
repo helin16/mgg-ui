@@ -135,9 +135,11 @@ const StudentAbsenceParentSubmissionForm = () => {
   }, [user?.isParent, user?.synergyId]);
 
   const getStudentDropDownList = () => {
+
     if (isLoadingStudents === true) {
       return <Spinner animation={"border"} />;
     }
+
     return (
       <>
         <SelectBox

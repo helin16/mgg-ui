@@ -14,6 +14,8 @@ type iSynStudentSelector = iSelectBox & {
 };
 
 const SynStudentProfileSelector = ({onChange, ...props}: iSynStudentSelector) => {
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const searchStudent = useCallback(
     debounce((inputValue: string, callback: (options: any[]) => void) => {
       // fetchOptions(inputValue).then(callback);
