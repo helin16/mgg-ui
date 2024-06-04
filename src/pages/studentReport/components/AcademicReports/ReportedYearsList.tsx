@@ -80,7 +80,9 @@ const ReportedYearsList = ({student, onSelect}: {student: iVStudent, onSelect: (
       <Image
         src={student.profileUrl}
         rounded
-        className={'pull-right'} />
+        className={'pull-right'}
+        style={{padding: '1.3rem', width: '18rem'}}
+      />
       <div>
         <p>Select the academic report you want to view from the list below.</p>
         <div className={'reported-years-list'}>
