@@ -43,7 +43,9 @@ const CoverLetterPage = ({student, studentReportYear, studentReportResult}: Stud
         <Image
           src={student.profileUrl}
           rounded
-          className={'pull-right'} />
+          className={'pull-right'}
+          style={{padding: '1.4rem', width: '15rem', height: 'auto'}}
+        />
         <div dangerouslySetInnerHTML={{__html: studentReportYear.LetterOfExplanation || ''}} />
       </SectionDiv>
     </Wrapper>
