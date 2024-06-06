@@ -8904,6 +8904,13 @@ react-dom@^17.0.2:
     object-assign "^4.1.1"
     scheduler "^0.20.2"
 
+react-email-editor@^1.7.10:
+  version "1.7.10"
+  resolved "https://registry.yarnpkg.com/react-email-editor/-/react-email-editor-1.7.10.tgz#e20eb51c3bddf1ade613fc45ab551d71ff3b9148"
+  integrity sha512-nIBohccq/oIG50/Xdgf3Q9Cml1/URywtQpl9i4HYofEPKYoDqC3gabbYwOeUSC78VkIAGBMzKkyPdyDHUvgsRg==
+  dependencies:
+    unlayer-types latest
+
 react-error-overlay@^6.0.11:
   version "6.0.11"
   resolved "https://registry.yarnpkg.com/react-error-overlay/-/react-error-overlay-6.0.11.tgz#92835de5841c5cf08ba00ddd2d677b6d17ff9adb"
@@ -10496,6 +10503,11 @@ universalify@^2.0.0:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/universalify/-/universalify-2.0.1.tgz#168efc2180964e6386d061e094df61afe239b18d"
   integrity sha512-gptHNQghINnc/vTGIk0SOFGFNXw7JVrlRUtConJRlvaw6DuX0wO5Jeko9sWrMBhh+PsYAZ7oXAiOnf/UKogyiw==
+
+unlayer-types@latest:
+  version "1.33.0"
+  resolved "https://registry.yarnpkg.com/unlayer-types/-/unlayer-types-1.33.0.tgz#e199a9b4743932964f1027c4fad5b2753819a4ff"
+  integrity sha512-Px6uMWKSPsmVgW3Bc6g1UDiIN1/7xKsEUlm+BjiVIwGD7osUEJUQfh5GYLOseStQT6bISfuGMsKg1OkjJ2ABtQ==
 
 unpipe@1.0.0, unpipe@~1.0.0:
   version "1.0.0"
