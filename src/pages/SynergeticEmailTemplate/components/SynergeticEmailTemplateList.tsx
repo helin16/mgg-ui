@@ -21,12 +21,14 @@ import UtilsService from "../../../services/UtilsService";
 import DeleteConfirmPopupBtn from "../../../components/common/DeleteConfirm/DeleteConfirmPopupBtn";
 import { Button } from "react-bootstrap";
 import SynergeticEmailTemplateEditPanel from "./SynergeticEmailTemplateEditPanel";
+import iEmailTemplate from "../../../types/Email/iEmailTemplate";
+import EmailTemplateService from "../../../services/Email/EmailTemplateService";
 
 const Wrapper = styled.div`
   .templates-table {
     .btn.btn-link {
       padding: 0px;
-      
+
       &.ellipsis {
         width: 100%;
         text-align: left;
@@ -45,11 +47,13 @@ const Wrapper = styled.div`
   }
 `;
 
+type iResult = iSynCommunicationTemplate & { emailTemplate?: iEmailTemplate };
+
 const SynergeticEmailTemplateList = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [count, setCount] = useState(0);
   const [templateList, setTemplateList] = useState<iPaginatedResult<
-    iSynCommunicationTemplate
+    iResult
   > | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [editingTemplate, setEditingTemplate] = useState<
@@ -59,31 +63,62 @@ const SynergeticEmailTemplateList = () => {
 
   useEffect(() => {
     let isCanceled = false;
-    setIsLoading(true);
-
-    SynCommunicationTemplateService.getAll({
-      where: JSON.stringify({
-        MessageType: SYN_COMMUNICATION_TEMPLATE_TYPE_HTML,
-        [OP_OR]: [
-          {
-            PrivateFlag: false
-          },
-          {
-            PrivateFlag: true,
-            Owner: `MGG\\${user?.SynCommunity?.NetworkLogin || ""}`
-          }
-        ]
-      }),
-      sort: "CommunicationTemplatesSeq:DESC",
-      currentPage
-    })
-      .then(resp => {
-        if (isCanceled) {
-          return;
-        }
+    const getData = async () => {
+      const resp = await SynCommunicationTemplateService.getAll({
+        where: JSON.stringify({
+          MessageType: SYN_COMMUNICATION_TEMPLATE_TYPE_HTML,
+          [OP_OR]: [
+            {
+              PrivateFlag: false
+            },
+            {
+              PrivateFlag: true,
+              Owner: `MGG\\${user?.SynCommunity?.NetworkLogin || ""}`
+            }
+          ]
+        }),
+        sort: "ModifiedDate:DESC",
+        currentPage
+      });
+      const sequences = (resp.data || []).map(
+        template => template.CommunicationTemplatesSeq
+      );
+      if (sequences.length <= 0) {
         setTemplateList(resp);
         setEditingTemplate(null);
-      })
+        return;
+      }
+
+      const templates = await EmailTemplateService.getAll({
+        where: JSON.stringify({
+          CommunicationTemplatesSeq: sequences,
+          isActive: true
+        })
+      });
+      const tMap: { [key: number]: iEmailTemplate } = (
+        templates.data || []
+      ).reduce((map, template) => {
+        return {
+          ...map,
+          [template.CommunicationTemplatesSeq]: template
+        };
+      }, {});
+      setTemplateList({
+        ...resp,
+        data: resp.data.map(row => {
+          return {
+            ...row,
+            ...(row.CommunicationTemplatesSeq in tMap
+              ? { emailTemplate: tMap[row.CommunicationTemplatesSeq] }
+              : {})
+          };
+        })
+      });
+      setEditingTemplate(null);
+    };
+
+    setIsLoading(true);
+    getData()
       .catch(err => {
         if (isCanceled) {
           return;
@@ -106,7 +141,7 @@ const SynergeticEmailTemplateList = () => {
     {
       key: "name",
       header: "Name",
-      cell: (col: iTableColumn, data: iSynCommunicationTemplate) => {
+      cell: (col: iTableColumn, data: iResult) => {
         return (
           <td key={col.key}>
             <Button
@@ -129,7 +164,7 @@ const SynergeticEmailTemplateList = () => {
     {
       key: "message",
       header: "Message",
-      cell: (col: iTableColumn, data: iSynCommunicationTemplate) => {
+      cell: (col: iTableColumn, data: iResult) => {
         return (
           <td key={col.key} className={"message"}>
             <Button
@@ -154,19 +189,41 @@ const SynergeticEmailTemplateList = () => {
     {
       key: "isPrivate",
       header: "is Private",
-      cell: (col: iTableColumn, data: iSynCommunicationTemplate) =>
-        `${data.PrivateFlag === true ? "Y" : ""}`
+      cell: (col: iTableColumn, data: iResult) => {
+        return (
+          <td key={col.key}>
+            {data.PrivateFlag === true ? (
+              <Icons.CheckCircleFill className={"text-success"} />
+            ) : null}
+          </td>
+        );
+      }
+    },
+    {
+      key: "useNewStyle",
+      header: "New Style?",
+      cell: (col: iTableColumn, data: iResult) => {
+        return (
+          <td key={col.key}>
+            {`${data.emailTemplate?.CommunicationTemplatesSeq || ""}`.trim() !==
+            "" ? (
+              <Icons.CheckCircleFill className={"text-success"} />
+            ) : null}
+          </td>
+        );
+      }
     },
     {
       key: "owner",
       header: "Owner",
-      cell: (col: iTableColumn, data: iSynCommunicationTemplate) =>
-        `${data.Owner}`
+      cell: (col: iTableColumn, data: iResult) => {
+        return <td key={col.key}>{data.Owner}</td>;
+      }
     },
     {
       key: "created",
       header: "Created",
-      cell: (col: iTableColumn, data: iSynCommunicationTemplate) => {
+      cell: (col: iTableColumn, data: iResult) => {
         return (
           <td key={col.key}>
             <small>
@@ -189,7 +246,7 @@ const SynergeticEmailTemplateList = () => {
     {
       key: "updated",
       header: "Updated",
-      cell: (col: iTableColumn, data: iSynCommunicationTemplate) => {
+      cell: (col: iTableColumn, data: iResult) => {
         return (
           <td key={col.key}>
             <small>
@@ -224,7 +281,7 @@ const SynergeticEmailTemplateList = () => {
           </th>
         );
       },
-      cell: (col: iTableColumn, data: iSynCommunicationTemplate) => {
+      cell: (col: iTableColumn, data: iResult) => {
         return (
           <td key={col.key} className={"text-right"}>
             <Button
