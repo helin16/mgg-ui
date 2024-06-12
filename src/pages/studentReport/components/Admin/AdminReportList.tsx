@@ -16,6 +16,8 @@ import ISynLuCampus, {CAMPUS_CODE_ELC, CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR} f
 import ISynLuYearLevel from '../../../../types/Synergetic/Lookup/iSynLuYearLevel';
 import ReportStyleSelector, {translateReportStyleToOption} from './ReportStyleSelector';
 import iStudentReportStyle from '../../../../types/Synergetic/Student/iStudentReportStyle';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../../../redux/makeReduxStore';
 
 const Wrapper = styled.div`
   .result-wrapper {
@@ -37,6 +39,7 @@ const AdminReportList = ({ onSelected }: iAdminReportList) => {
   const [isLoading, setIsLoading] = useState(false);
   const [reportList, setReportList] = useState<iStudentReportYear[]>([]);
   const [query, setQuery] = useState<iQuery>({});
+  const { user } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
     setIsLoading(true);
@@ -166,7 +169,7 @@ const AdminReportList = ({ onSelected }: iAdminReportList) => {
                    title={'clone'}
                    size={'sm'}
                    className={'flexbox-inline flexbox-align-items-center'}
-                   onClick={() => onSelected(getDataForClone(report))}
+                   onClick={() => onSelected(getDataForClone(report, user?.SynCurrentFileSemester))}
                    >
                    <Icons.Files />
                    <span className={'d-none d-lg-block'}> Clone</span>

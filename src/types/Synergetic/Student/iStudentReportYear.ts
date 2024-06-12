@@ -1,3 +1,6 @@
+import moment from "moment-timezone";
+import iSynFileSemester from "../iSynFileSemester";
+
 type iStudentReportYear = {
   ID?: number;
   FileYear: number;
@@ -24,13 +27,20 @@ type iStudentReportYear = {
   HideResults: boolean;
 };
 
-export const getDataForClone = (oldReportYear: iStudentReportYear) => {
-  const newRepYear = {...oldReportYear};
+export const getDataForClone = (
+  oldReportYear: iStudentReportYear,
+  currentFileSemester?: iSynFileSemester
+) => {
+  const newRepYear = {
+    ...oldReportYear,
+    ReleaseToStaffDate: moment().format('YYYY-MM-DD HH:00:00'),
+    ReleaseToAllDate: null,
+    FileYear: currentFileSemester
+      ? currentFileSemester.FileYear
+      : moment().year(),
+    FileSemester: currentFileSemester ? currentFileSemester.FileSemester : 1
+  };
   delete newRepYear.ID;
-  // @ts-ignore
-  delete newRepYear.FileYear;
-  // @ts-ignore
-  delete newRepYear.FileSemester;
   // @ts-ignore
   delete newRepYear.Active;
   // @ts-ignore
@@ -50,6 +60,6 @@ export const getDataForClone = (oldReportYear: iStudentReportYear) => {
   // @ts-ignore
   delete newRepYear.updatedById;
   return newRepYear;
-}
+};
 
 export default iStudentReportYear;
