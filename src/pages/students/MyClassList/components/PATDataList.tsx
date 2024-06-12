@@ -12,15 +12,19 @@ import { FlexContainer } from "../../../../styles";
 import PageLoadingSpinner from "../../../../components/common/PageLoadingSpinner";
 import SectionDiv from "../../../../components/common/SectionDiv";
 import LoadingBtn from "../../../../components/common/LoadingBtn";
-import Table from "../../../../components/common/Table";
+import Table, {iTableColumn} from "../../../../components/common/Table";
 import Toaster, { TOAST_TYPE_ERROR } from "../../../../services/Toaster";
 import SynSubjectClassService from "../../../../services/Synergetic/SynSubjectClassService";
-import { OP_BETWEEN, OP_LIKE, OP_OR } from "../../../../helper/ServiceHelper";
 import SynVStudentClassService from "../../../../services/Synergetic/Student/SynVStudentClassService";
 import { HEADER_NAME_SELECTING_FIELDS } from "../../../../services/AppService";
 import SynVStudentService from "../../../../services/Synergetic/Student/SynVStudentService";
 import MathHelper from "../../../../helper/MathHelper";
-import CSVExportFromHtmlTableBtn from "../../../../components/form/CSVExportFromHtmlTableBtn";
+import {
+  CAMPUS_CODE_JUNIOR,
+  CAMPUS_CODE_SENIOR
+} from "../../../../types/Synergetic/Lookup/iSynLuCampus";
+import CSVExportBtn from '../../../../components/form/CSVExportBtn';
+import * as XLSX from 'sheetjs-style';
 
 type iSearchCriteria = {
   classCodes: string[];
@@ -39,6 +43,7 @@ type iResult = {
   schoolYear: string;
 };
 const Wrapper = styled.div``;
+const SearchingYearLevels = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 const PATDataList = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [searchCriteria, setSearchCriteria] = useState<iSearchCriteria | null>(
@@ -54,14 +59,12 @@ const PATDataList = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [currentYear, setCurrentYear] = useState(moment().year());
   const [currentSemester, setCurrentSemester] = useState(1);
-  const [tableHtmlId, setTableHtmlId] = useState(`PAT_RES_TABLE`);
 
   useEffect(() => {
     const year = user?.SynCurrentFileSemester?.FileYear || moment().year();
     const semester = user?.SynCurrentFileSemester?.FileSemester || 1;
     setCurrentYear(year);
     setCurrentSemester(semester);
-    setTableHtmlId(`PAT_RES_TABLE_${moment().unix()}`);
 
     let isCanceled = false;
     setIsLoading(true);
@@ -70,21 +73,7 @@ const PATDataList = () => {
         FileType: "A",
         FileYear: year,
         FileSemester: semester,
-        NormalYearLevel: { [OP_BETWEEN]: [0, 10] },
-        [OP_OR]: [
-          // {NormalYearLevel: {[OP_BETWEEN]: [0, 10]}, [OP_OR]: [{ClassCode: {[OP_LIKE]: '%AAH%'}, Description: {[OP_LIKE]: '%tutor%group%'}}]},
-          {
-            NormalYearLevel: { [OP_BETWEEN]: [0, 10] },
-            [OP_OR]: [
-              { Description: { [OP_LIKE]: "%tutor%group%" } },
-              { Description: { [OP_LIKE]: "%home%group%" } }
-            ]
-          },
-          {
-            NormalYearLevel: { [OP_BETWEEN]: [9, 10] },
-            [OP_OR]: [{ Description: { [OP_LIKE]: "%math%" } }]
-          }
-        ]
+        ClassCampus: [CAMPUS_CODE_SENIOR, CAMPUS_CODE_JUNIOR]
       }),
       perPage: 9999999
     })
@@ -93,9 +82,40 @@ const PATDataList = () => {
           return;
         }
         setSearchCriteria({
-          classCodes: (resp.data || []).map(
-            subjectClass => subjectClass.ClassCode
-          )
+          classCodes: (resp.data || [])
+            .filter(subjectClass => {
+              const yearLevel = subjectClass.NormalYearLevel || 0;
+              if (yearLevel > 10) {
+                return false;
+              }
+              const description = `${subjectClass.Description || ""}`
+                .toLowerCase()
+                .trim();
+              if (
+                yearLevel >= 9 &&
+                yearLevel <= 10 &&
+                description.includes("math")
+              ) {
+                return true;
+              }
+
+              if (
+                description.includes("tutor") &&
+                description.includes("group")
+              ) {
+                return true;
+              }
+
+              if (
+                description.includes("home") &&
+                description.includes("group")
+              ) {
+                return true;
+              }
+
+              return false;
+            })
+            .map(subjectClass => subjectClass.ClassCode)
         });
       })
       .catch(err => {
@@ -222,7 +242,7 @@ const PATDataList = () => {
             ClassCode: classCodes,
             FileYear: currentYear,
             FileSemester: currentSemester,
-            StudentYearLevel: { [OP_BETWEEN]: [0, 10] }
+            StudentYearLevel: SearchingYearLevels
           }),
           perPage: 999999
         },
@@ -239,9 +259,10 @@ const PATDataList = () => {
         where: JSON.stringify({
           FileYear: currentYear,
           FileSemester: currentSemester,
-          StudentYearLevel: { [OP_BETWEEN]: [0, 10] }
+          StudentYearLevel: SearchingYearLevels
         }),
-        perPage: 999999
+        perPage: 999999,
+        sort: "StudentYearLevelSort:ASC"
       })
     ])
       .then(resp => {
@@ -261,6 +282,7 @@ const PATDataList = () => {
         setResults(
           (resp[1] || [])
             .filter(data => (data.StudentID in studentClassMap ? true : false))
+            .sort((a, b) => (a.StudentYearLevel > b.StudentYearLevel ? 1 : -1))
             .map(data => {
               return {
                 familyName: data.StudentSurname,
@@ -277,7 +299,10 @@ const PATDataList = () => {
                     ? studentClassMap[data.StudentID]
                     : [],
                 uniqueId: `${data.StudentID}`,
-                yearLevel: data.StudentYearLevelDescription,
+                yearLevel:
+                  data.StudentYearLevel === 0
+                    ? "Foundation"
+                    : `Year ${data.StudentYearLevel}`,
                 schoolYear: `${currentYear}-${MathHelper.add(currentYear, 1)}`
               };
             })
@@ -290,6 +315,66 @@ const PATDataList = () => {
         setIsLoading(false);
       });
   };
+
+  const getColumns = () => {
+    return [
+      {
+        key: "familyName",
+        header: "Family name",
+        cell: (col: iTableColumn, data: iResult) => (data.familyName || "")
+      },
+      {
+        key: "givenName",
+        header: "Given name",
+        cell: (col: iTableColumn, data: iResult) => (data.givenName || "")
+      },
+      {
+        key: "middleName",
+        header: "Middle Names",
+        cell: (col: iTableColumn, data: iResult) => (data.middleName || "")
+      },
+      {
+        key: "username",
+        header: "Username",
+        cell: (col: iTableColumn, data: iResult) => (data.username || "")
+      },
+      {
+        key: "password",
+        header: "Password",
+        cell: (col: iTableColumn, data: iResult) => (values.initPassword || "")
+      },
+      {
+        key: "dateOfBirth",
+        header: "Date Of Birth (DD-MM-YYYY)",
+        cell: (col: iTableColumn, data: iResult) => (data.dateOfBirth || "")
+      },
+      {
+        key: "gender",
+        header: "Gender",
+        cell: (col: iTableColumn, data: iResult) => (data.gender || "")
+      },
+      {
+        key: "tags",
+        header: "Tags",
+        cell: (col: iTableColumn, data: iResult) => (data.tags || []).join(",")
+      },
+      {
+        key: "uniqueId",
+        header: "Unique ID",
+        cell: (col: iTableColumn, data: iResult) => (data.uniqueId || "")
+      },
+      {
+        key: "yearLevel",
+        header: "Year Level",
+        cell: (col: iTableColumn, data: iResult) => (data.yearLevel || "")
+      },
+      {
+        key: "schoolYear",
+        header: "School Year",
+        cell: (col: iTableColumn, data: iResult) => (data.schoolYear || "")
+      }
+    ]
+  }
 
   const getTableDiv = () => {
     if (isLoading === true) {
@@ -304,87 +389,8 @@ const PATDataList = () => {
       <Table
         striped
         responsive
-        id={tableHtmlId}
         rows={results || []}
-        columns={[
-          {
-            key: "familyName",
-            header: "Family name",
-            cell: (col, data: iResult) => {
-              return <td key={col.key}>{data.familyName || ""}</td>;
-            }
-          },
-          {
-            key: "givenName",
-            header: "Given name",
-            cell: (col, data: iResult) => {
-              return <td key={col.key}>{data.givenName || ""}</td>;
-            }
-          },
-          {
-            key: "middleName",
-            header: "Middle Names",
-            cell: (col, data: iResult) => {
-              return <td key={col.key}>{data.middleName || ""}</td>;
-            }
-          },
-          {
-            key: "username",
-            header: "Username",
-            cell: (col, data: iResult) => {
-              return <td key={col.key}>{data.username || ""}</td>;
-            }
-          },
-          {
-            key: "password",
-            header: "Password",
-            cell: (col, data: iResult) => {
-              return <td key={col.key}>{values.initPassword || ""}</td>;
-            }
-          },
-          {
-            key: "dateOfBirth",
-            header: "Date Of Birth (DD-MM-YYYY)",
-            cell: (col, data: iResult) => {
-              return <td key={col.key}>{data.dateOfBirth || ""}</td>;
-            }
-          },
-          {
-            key: "gender",
-            header: "Gender",
-            cell: (col, data: iResult) => {
-              return <td key={col.key}>{data.gender || ""}</td>;
-            }
-          },
-          {
-            key: "tags",
-            header: "Tags",
-            cell: (col, data: iResult) => {
-              return <td key={col.key}>{(data.tags || []).join(",")}</td>;
-            }
-          },
-          {
-            key: "uniqueId",
-            header: "Unique ID",
-            cell: (col, data: iResult) => {
-              return <td key={col.key}>{data.uniqueId || ""}</td>;
-            }
-          },
-          {
-            key: "yearLevel",
-            header: "Year Level",
-            cell: (col, data: iResult) => {
-              return <td key={col.key}>{data.yearLevel || ""}</td>;
-            }
-          },
-          {
-            key: "schoolYear",
-            header: "School Year",
-            cell: (col, data: iResult) => {
-              return <td key={col.key}>{data.schoolYear || ""}</td>;
-            }
-          }
-        ]}
+        columns={getColumns()}
       />
     );
   };
@@ -395,17 +401,31 @@ const PATDataList = () => {
       return null;
     }
 
+    const name = `PAT_${user?.synergyId}_${moment().format("DD_MMM_YYYY_HH_mm_ss")}`;
     return (
-      <CSVExportFromHtmlTableBtn
-        tableHtmlId={tableHtmlId}
-        className={`col-lg-auto col-5`}
-        fileName={`PAT_${user?.synergyId}_${moment().format(
-          "YYYY_MMM_DD_HH_mm"
-        )}.xlsx`}
+      <CSVExportBtn
+        fetchingFnc={async () => data}
+        downloadFnc={() => {
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(
+            wb,
+            XLSX.utils.aoa_to_sheet([
+              getColumns().map(col => `${col.header}`),
+              ...(data.map(row => {
+                return getColumns().map(col => col.cell(col, row));
+              }))
+            ]),
+            'Sheet1'
+          );
+          XLSX.writeFile(
+            wb,
+            `${name}.xlsx`
+          );
+        }}
         variant={"secondary"}
       >
         <Icons.Download /> Export
-      </CSVExportFromHtmlTableBtn>
+      </CSVExportBtn>
     );
   };
 
@@ -426,7 +446,10 @@ const PATDataList = () => {
                 </small>
                 )
               </li>
-              <li>Math classes in Year Level 9 and Year Level 10</li>
+              <li>
+                Math classes in Year Level 9 and Year Level 10
+                <small>Class Description contains: 'math'</small>
+              </li>
             </ul>
             <Button
               variant={"link"}
@@ -489,7 +512,9 @@ const PATDataList = () => {
         </div>
         <LoadingBtn
           isLoading={isLoading}
-          className={`col-lg-auto ${(results || []).length <= 0 ? 'col-12' : 'col-6'}`}
+          className={`col-lg-auto ${
+            (results || []).length <= 0 ? "col-12" : "col-6"
+          }`}
           onClick={() => searchResult()}
         >
           <Icons.Search /> Search
