@@ -100,6 +100,12 @@ const PATDataList = () => {
               }
 
               if (
+                `${subjectClass.LearningAreaCode || ''}`.trim().toUpperCase() === 'HGR'
+              ) {
+                return true;
+              }
+
+              if (
                 description.includes("tutor") &&
                 description.includes("group")
               ) {
