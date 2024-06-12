@@ -9,9 +9,14 @@ import MyClassListAdminPage from "./MyClassLisAdminPage";
 import MyClassList from "./components/MyClassList";
 import ExplanationPanel from "../../../components/ExplanationPanel";
 import ModuleAccessWrapper from "../../../components/module/ModuleAccessWrapper";
+import {Tab, Tabs} from "react-bootstrap";
+import PATDataList from './components/PATDataList';
 
+const TAB_CLASS_LIST = "My Class List";
+const TAB_PAT_Data = "PAT Data";
 const MyClassListPage = () => {
   const { user } = useSelector((state: RootState) => state.auth);
+  const [selectedTab, setSelectedTab] = React.useState<string>(TAB_CLASS_LIST);
   const errorMsg = (
     <>
       Only <b>Teachers</b> and selected <b>Users of this Module</b> will have
@@ -26,9 +31,15 @@ const MyClassListPage = () => {
         title={<h3>My Class List</h3>}
         AdminPage={MyClassListAdminPage}
         moduleId={moduleId}
-        extraBtns={[<TimeTableImportPopupBtn btnPros={{ size: "sm" }} key={'tt-import-btn'}/>]}
+        extraBtns={[
+          <TimeTableImportPopupBtn
+            btnPros={{ size: "sm" }}
+            key={"tt-import-btn"}
+          />
+        ]}
       >
         <ExplanationPanel
+          dismissible
           text={
             <>
               This page is designed for teachers export student list, in order
@@ -39,7 +50,20 @@ const MyClassListPage = () => {
           }
         />
 
-        <MyClassList />
+        <Tabs
+          activeKey={selectedTab}
+          className="mt-3"
+          unmountOnExit
+          onSelect={tab => setSelectedTab(tab || TAB_CLASS_LIST)}
+        >
+          <Tab title={TAB_CLASS_LIST} eventKey={TAB_CLASS_LIST} className={'mt-3'}>
+            <MyClassList />
+          </Tab>
+
+          <Tab title={TAB_PAT_Data} eventKey={TAB_PAT_Data} className={'mt-3'}>
+            <PATDataList />
+          </Tab>
+        </Tabs>
       </Page>
     );
   };
