@@ -505,6 +505,7 @@ const PATDataList = () => {
         <div className={"col-lg-2 col-12"}>
           <FormLabel label={"Init Passwords"} isRequired />
           <FormControl
+            className={"m-0"}
             value={values.initPassword || ""}
             placeholder="Value in Column: Password"
             onChange={event =>
