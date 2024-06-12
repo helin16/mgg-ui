@@ -293,7 +293,7 @@ const PATDataList = () => {
                   `${data.StudentBirthDate || ""}`.trim() === ""
                     ? ""
                     : moment.utc(data.StudentBirthDate).format("DD-MM-YYYY"),
-                gender: data.StudentGender,
+                gender: data.StudentGender.trim().toUpperCase() === 'F' ? 'Female' : data.StudentGender,
                 tags:
                   data.StudentID in studentClassMap
                     ? studentClassMap[data.StudentID]
@@ -423,9 +423,8 @@ const PATDataList = () => {
           );
         }}
         variant={"secondary"}
-      >
-        <Icons.Download /> Export
-      </CSVExportBtn>
+        btnTxt={`Export ${data?.length} record(s)`}
+      />
     );
   };
 
@@ -475,7 +474,7 @@ const PATDataList = () => {
       <FlexContainer
         className={"flex flex-row flex-wrap gap-2 align-items-end"}
       >
-        <div className={"col-lg-8 col-12"}>
+        <div className={"col-12"}>
           <FormLabel label={"Class Codes"} isRequired />
           <SynSubjectClassSelector
             pageSize={9999}
