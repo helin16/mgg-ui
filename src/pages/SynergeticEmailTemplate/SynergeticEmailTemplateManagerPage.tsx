@@ -26,11 +26,11 @@ const SynergeticEmailTemplateManagerPage = () => {
         defaultActiveKey={TAB_TEMPLATES}
         onSelect={key => setSelectedTab(key || TAB_TEMPLATES)}
       >
-        <Tab eventKey={TAB_TEMPLATES} title={`Email Templates`}>
+        <Tab eventKey={TAB_TEMPLATES} title={`Email Templates`} className={'pt-5'}>
           <SynergeticEmailTemplateList />
         </Tab>
 
-        <Tab eventKey={TAB_LOGS} title={`Logs`}>
+        <Tab eventKey={TAB_LOGS} title={`Logs`} className={'pt-5'}>
           <MessageListPanel type={[MESSAGE_TYPE_MAIL_GUN_EMAIL, MESSAGE_TYPE_SMTP_EMAIL]} />
         </Tab>
       </Tabs>
