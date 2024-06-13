@@ -1,4 +1,3 @@
-import ExplanationPanel from "../../../components/ExplanationPanel";
 import React, { useEffect, useState } from "react";
 import iPaginatedResult from "../../../types/iPaginatedResult";
 import iSynCommunicationTemplate, {
@@ -23,6 +22,7 @@ import { Button } from "react-bootstrap";
 import SynergeticEmailTemplateEditPanel from "./SynergeticEmailTemplateEditPanel";
 import iEmailTemplate from "../../../types/Email/iEmailTemplate";
 import EmailTemplateService from "../../../services/Email/EmailTemplateService";
+import SynEmailSendPopupBtn from './SynEmailSendPopupBtn';
 
 const Wrapper = styled.div`
   .templates-table {
@@ -284,14 +284,15 @@ const SynergeticEmailTemplateList = () => {
       cell: (col: iTableColumn, data: iResult) => {
         return (
           <td key={col.key} className={"text-right"}>
-            <Button
-              variant={"outline-secondary"}
+            <SynEmailSendPopupBtn
+              template={data}
+              variant={"outline-success"}
               size={"sm"}
               className={"ellipsis"}
               onClick={() => setEditingTemplate(data)}
             >
-              <Icons.Pencil /> Edit
-            </Button>{" "}
+              <Icons.Send /> Send
+            </SynEmailSendPopupBtn>{" "}
             <DeleteConfirmPopupBtn
               variant={"danger"}
               size={"sm"}
@@ -343,16 +344,8 @@ const SynergeticEmailTemplateList = () => {
 
   return (
     <Wrapper>
-      <ExplanationPanel
-        text={
-          <>
-            This is just a tool to edit Synergetic EMail Templates,{" "}
-            <b>THIS IS NOT AN EMAIL SENDING TOOL.</b>
-          </>
-        }
-      />
-      <FlexContainer className={"with-gap lg-gap"}>
-        <h5>{templateList?.total || 0} Template(s)</h5>
+      <FlexContainer className={"gap-2 align-items-center"}>
+        <b>{templateList?.total || 0} Template(s)</b>
         <div>
           <LoadingBtn
             variant={"link"}

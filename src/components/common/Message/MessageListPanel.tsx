@@ -18,7 +18,7 @@ import { iLoadingBtn } from "../LoadingBtn";
 import MessageCreatePopupBtn from "./MessageCreatePopupBtn";
 
 type iMessageListPanel = {
-  type: string;
+  type: string | string[];
   reloadCount?: number;
   title?: any;
   createMsgFn?: () => Promise<iMessage>;
@@ -31,6 +31,7 @@ const Wrapper = styled.div`
     overflow-x: auto;
     max-width: 100%;
     .message-table {
+      .type,
       .date {
         width: 10rem;
       }
@@ -224,12 +225,12 @@ const MessageListPanel = ({
   };
 
   const getCreateMsgBtn = () => {
-    if (!createMsgFn) {
+    if (!createMsgFn || (Array.isArray(type) && type.length > 1)) {
       return null;
     }
     return (
       <MessageCreatePopupBtn
-        msgType={type}
+        msgType={Array.isArray(type) ? type[0] : type}
         createMsgFn={createMsgFn}
         onMsgRefreshed={() => setCount(MathHelper.add(count, 1))}
         {...createMsgBtnProps}
@@ -257,6 +258,7 @@ const MessageListPanel = ({
           <thead>
             <tr>
               <th>Date</th>
+              <th>Type</th>
               <th>Status</th>
               <th>Request</th>
               <th>Response</th>
@@ -269,6 +271,9 @@ const MessageListPanel = ({
                 <tr key={message.id}>
                   <td className={"date"}>
                     {moment(message.createdAt).format("lll")}
+                  </td>
+                  <td className={"type"}>
+                    {message.type}
                   </td>
                   <td className={`status ${message.status?.toUpperCase()}`}>
                     {message.status}
@@ -328,7 +333,7 @@ const MessageListPanel = ({
 
   return (
     <Wrapper>
-      <div>{title || <p>List of logs for {type}</p>} </div>
+      <div>{title || <p>List of logs for {Array.isArray(type) ? type.join(", ") : type}</p>} </div>
       {getContent()}
     </Wrapper>
   );

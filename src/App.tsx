@@ -16,7 +16,7 @@ import AlumniRegistrationPage from './pages/alumni/AlumniRegistrationPage';
 import {
   URL_ALUMNI_REGISTRATION,
   URL_ASSET_PICK_UP,
-  URL_CAMPUS_DISPLAY_PAGE, URL_CAMPUS_DISPLAY_SLIDE_SHOW_BY_LOCATION_PAGE,
+  URL_CAMPUS_DISPLAY_PAGE, URL_CAMPUS_DISPLAY_SLIDE_SHOW_BY_LOCATION_PAGE, URL_ENEWS_VIEW_PAGE,
   URL_FUNNEL_THANK_YOU_PAGE,
   URL_ONLINE_DONATION
 } from './Url';
@@ -25,6 +25,7 @@ import FunnelThankYouPage from './pages/funnel/FunnelThankYouPage';
 import PageNotFoundWithTechSupport from './components/PageNotFoundWithTechSupport';
 import CampusDisplayPage from './pages/CampusDisplay/CampusDisplayPage';
 import CampusDisplayByLocationIdPage from './pages/CampusDisplay/CampusDisplayByLocationIdPage';
+import ENewsViewingPage from './pages/ENews/ENewsViewingPage';
 
 const Router = () => {
   const {isProd} = useSelector((state: RootState) => state.app);
@@ -51,7 +52,11 @@ const Router = () => {
 
           <Route path={URL_ALUMNI_REGISTRATION} element={<AlumniRegistrationPage />} />
           <Route path={URL_ONLINE_DONATION} element={<OnlineDonationPage />} />
+
           <Route path={URL_FUNNEL_THANK_YOU_PAGE} element={<FunnelThankYouPage />} />
+
+          <Route path={URL_ENEWS_VIEW_PAGE} element={<ENewsViewingPage />} />
+
 
           <Route path="/modules/remote/:code" element={<SchoolBoxLayout />} />
           <Route path="*" element={<PageNotFound />} />

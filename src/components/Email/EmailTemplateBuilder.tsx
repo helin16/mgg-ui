@@ -10,7 +10,7 @@ type iEmailTemplateBuilder = {
 const Wrapper = styled.div``;
 const EmailTemplateBuilder = ({
   designData,
-  editorRef
+  editorRef,
 }: iEmailTemplateBuilder) => {
   const emailEditorRef = useRef<EditorRef | null>(null);
 
@@ -36,10 +36,10 @@ const EmailTemplateBuilder = ({
       <EmailEditor
         ref={emailEditorRef}
         onReady={onReady}
-        minHeight={'1200px'}
+        minHeight={"1200px"}
         options={{
           safeHtml: true,
-          displayMode: 'email',
+          displayMode: "email"
         }}
       />
     </Wrapper>
