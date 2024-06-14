@@ -240,6 +240,11 @@ const StudentAcademicReportMenu = ({
 
     if (
       studentReportYear.HideResults === true ||
+      `${studentReportYear.HideResultsToIds || ""}`
+        .trim()
+        .split(",")
+        .map(id => Number(`${id || ""}`.trim()))
+        .indexOf(student.StudentID) >= 0 ||
       `${studentReportYear?.styleCode || ""}` ===
         STUDENT_REPORT_YEAR_STYLE_DOCMAN_DOWNLOAD
     ) {

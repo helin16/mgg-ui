@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import iStudentReportYear, {
   getDataForClone
 } from "../../../../types/Synergetic/Student/iStudentReportYear";
-import { Alert, Button, Col, Form, Row } from "react-bootstrap";
+import { Alert, Button, Col, Form, FormControl, Row } from "react-bootstrap";
 import FileYearSelector from "../../../../components/student/FileYearSelector";
 import SynCampusSelector from "../../../../components/student/SynCampusSelector";
 import YearLevelSelector from "../../../../components/student/YearLevelSelector";
@@ -318,6 +318,38 @@ const AdminEditReportYear = ({
             />
           </div>
         </Form.Group>
+
+        <Form.Group as={Col} md={2} className={"form-field"}>
+          <Form.Label>
+            <span>Hide Academic Results:</span>
+          </Form.Label>
+          <div>
+            <ToggleBtn
+              on={"Yes"}
+              off={"No"}
+              size={"sm"}
+              checked={editingReportYear?.HideResults === true}
+              onChange={checked => changeField("HideResults", checked)}
+            />
+          </div>
+        </Form.Group>
+
+        {editingReportYear?.HideResults === true ? null : (
+          <Form.Group as={Col} md={10} className={"form-field"}>
+            <Form.Label>
+              <span>Hide Academic Results To Ids (separate by comma):</span>
+            </Form.Label>
+            <div>
+              <FormControl
+                placeholder={"Student ids (separate by comma)"}
+                value={editingReportYear?.HideResultsToIds || ""}
+                onChange={event =>
+                  changeField("HideResultsToIds", event.target.value || "")
+                }
+              />
+            </div>
+          </Form.Group>
+        )}
       </>
     );
   };

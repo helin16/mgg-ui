@@ -8,9 +8,9 @@ import { MGGS_MODULE_ID_STUDENT_REPORT } from "../../types/modules/iModuleUser";
 import SchoolManagementPanel from "../../components/SchoolManagement/SchoolManagementPanel";
 import AdminPage from "../../layouts/AdminPage";
 import AdminPageTabs from "../../layouts/AdminPageTabs";
-import GenComparativePopupBtn from './components/Admin/GenComparativePopupBtn';
-import ExplanationPanel from '../../components/ExplanationPanel';
-import {FlexContainer} from '../../styles';
+import GenComparativePopupBtn from "./components/Admin/GenComparativePopupBtn";
+import ExplanationPanel from "../../components/ExplanationPanel";
+import { FlexContainer } from "../../styles";
 
 const StudentReportAdminPage = ({
   backToReportFn
@@ -31,10 +31,10 @@ const StudentReportAdminPage = ({
       );
     }
 
-    return <AdminReportList
-      onSelected={report => setEditingReportYear(report)}
-    />
-  }
+    return (
+      <AdminReportList onSelected={report => setEditingReportYear(report)} />
+    );
+  };
 
   return (
     <AdminPage
@@ -55,7 +55,18 @@ const StudentReportAdminPage = ({
           {
             key: "genComp",
             title: "Gen Comparative",
-            component: <FlexContainer className={'justify-content-center'}><div className={'text-center'}><ExplanationPanel text={'You are about to generate comparative result for all students'} /><GenComparativePopupBtn /></div></FlexContainer>
+            component: (
+              <FlexContainer className={"justify-content-center"}>
+                <div className={"text-center"}>
+                  <ExplanationPanel
+                    text={
+                      "You are about to generate comparative result for all students"
+                    }
+                  />
+                  <GenComparativePopupBtn />
+                </div>
+              </FlexContainer>
+            )
           },
           {
             key: "SMT",

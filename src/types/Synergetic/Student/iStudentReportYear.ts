@@ -25,6 +25,7 @@ type iStudentReportYear = {
   isReleasedToAll: boolean;
   isReleasedToStaff: boolean;
   HideResults: boolean;
+  HideResultsToIds: string | null;
 };
 
 export const getDataForClone = (

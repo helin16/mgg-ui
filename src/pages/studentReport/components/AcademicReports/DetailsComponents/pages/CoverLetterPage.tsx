@@ -1,4 +1,4 @@
-import {Image} from 'react-bootstrap';
+import {Alert, Image} from 'react-bootstrap';
 import {StudentAcademicReportDetailsProps} from '../../StudentAcademicReportDetails';
 import React from 'react';
 import SectionDiv from '../../../../../../components/common/SectionDiv';
@@ -25,6 +25,18 @@ const Wrapper = styled.div`
 `
 
 const CoverLetterPage = ({student, studentReportYear, studentReportResult}: StudentAcademicReportDetailsProps & {studentReportResult: iStudentReportResult | null}) => {
+
+  const getCoverLetterContent = () => {
+    if (`${studentReportYear.HideResultsToIds || ""}`
+      .trim()
+      .split(",")
+      .map(id => Number(`${id || ""}`.trim()))
+      .indexOf(student.StudentID) >= 0) {
+      return <div className={'p-3'}><Alert variant={'warning'}>Academic result has been marked as hidden. Further enquiries please contact school.</Alert></div>
+    }
+    return <div dangerouslySetInnerHTML={{__html: studentReportYear.LetterOfExplanation || ''}}/>
+  }
+
   return (
     <Wrapper className={'cover-letter-wrapper'}>
       <div className={'d-table'}>
@@ -46,7 +58,7 @@ const CoverLetterPage = ({student, studentReportYear, studentReportResult}: Stud
           className={'pull-right'}
           style={{padding: '1.4rem', width: '15rem', height: 'auto'}}
         />
-        <div dangerouslySetInnerHTML={{__html: studentReportYear.LetterOfExplanation || ''}} />
+        {getCoverLetterContent()}
       </SectionDiv>
     </Wrapper>
   )
