@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { Col, Row, Spinner } from "react-bootstrap";
+import { Button, Col, Row, Spinner } from "react-bootstrap";
 import FormLabel from "../../../../components/form/FormLabel";
 import Form from "react-bootstrap/Form";
 import { useEffect, useState } from "react";
@@ -17,11 +17,14 @@ import { HEADER_NAME_SELECTING_FIELDS } from "../../../../services/AppService";
 import AuthService from "../../../../services/AuthService";
 import { MGGS_MODULE_ID_MY_CLASS_LIST } from "../../../../types/modules/iModuleUser";
 import LuFormSelector from "../../../../components/student/SynFormSelector";
-import SynLuFormService from '../../../../services/Synergetic/Lookup/SynLuFormService';
+import SynLuFormService from "../../../../services/Synergetic/Lookup/SynLuFormService";
+import { FlexContainer } from "../../../../styles";
+import YearLevelSelector from "../../../../components/student/YearLevelSelector";
 
 export type iSearchCriteria = {
   searchText: string;
   classCodes: string[];
+  yearLevelCodes?: string[];
   form?: string;
 };
 
@@ -60,6 +63,7 @@ const StudentListSearchPanel = ({
   const { user } = useSelector((state: RootState) => state.auth);
   const [isSearching, setIsSearching] = useState(false);
   const [isModuleUser, setIsModuleUser] = useState(false);
+  const [showAdvPanel, setShowAdvPanel] = useState(false);
 
   useEffect(() => {
     let isCanceled = false;
@@ -84,7 +88,7 @@ const StudentListSearchPanel = ({
       AuthService.canAccessModule(MGGS_MODULE_ID_MY_CLASS_LIST),
       SynLuFormService.getAll({
         where: JSON.stringify({
-          ID: user?.synergyId,
+          ID: user?.synergyId
         })
       })
     ])
@@ -92,9 +96,9 @@ const StudentListSearchPanel = ({
         if (isCanceled) {
           return;
         }
-        const canAccessRoles = Object.keys(resp)
+        const canAccessRoles = Object.keys(resp[1])
           // @ts-ignore
-          .filter((roleId: number) => resp[roleId].canAccess === true)
+          .filter((roleId: number) => resp[1][roleId].canAccess === true)
           .reduce((map, roleId) => {
             return {
               ...map,
@@ -115,7 +119,7 @@ const StudentListSearchPanel = ({
         if (isModUser !== true) {
           setSearchLimits({
             classCodes: userClassCodes,
-            forms: (resp[2] || []).map((luForm => luForm.Code)),
+            forms: (resp[2] || []).map(luForm => luForm.Code)
           });
         }
       })
@@ -140,6 +144,54 @@ const StudentListSearchPanel = ({
     user?.SynCurrentFileSemester?.FileYear,
     user?.SynCurrentFileSemester?.FileSemester
   ]);
+
+  const getAdvSearchBtn = () => {
+    if (!isModuleUser) {
+      return <div>1232</div>;
+    }
+
+    return (
+      <Button
+        variant={"link"}
+        size={"sm"}
+        onClick={() => {
+          setShowAdvPanel(!showAdvPanel);
+        }}
+      >
+        Adv. {showAdvPanel ? <Icons.ChevronDown /> : <Icons.ChevronUp />}
+      </Button>
+    );
+  };
+
+  const getAdvancedPanel = () => {
+    if (!showAdvPanel) {
+      return null;
+    }
+
+    return (
+      <Row>
+        <Col>
+          <FormLabel label={"Year Level"} />
+          <YearLevelSelector
+            allowClear
+            isMulti
+            values={searchCriteria.yearLevelCodes || []}
+            onSelect={values => {
+              setSearchCriteria({
+                ...searchCriteria,
+                yearLevelCodes: (values === null
+                    ? []
+                    : Array.isArray(values)
+                      ? values
+                      : [values]
+                ).map(value => `${value.value}`)
+              })
+            }}
+          />
+        </Col>
+      </Row>
+    );
+  };
 
   if (isSearching === true) {
     return (
@@ -180,11 +232,11 @@ const StudentListSearchPanel = ({
                 : [`${searchCriteria.form || ""}`.trim()]
             }
             limitCodes={searchLimits.forms || []}
-            onSelect={(options) => {
+            onSelect={options => {
               setSearchCriteria({
                 ...searchCriteria,
                 // @ts-ignore
-                form: options?.value,
+                form: options?.value
               });
             }}
           />
@@ -214,7 +266,10 @@ const StudentListSearchPanel = ({
         </Col>
         <Col md={1} sm={12} className={"btns"}>
           <FormLabel label={" "} />
-          <div className={"justify-content-between align-content-end"}>
+          <FlexContainer
+            className={"justify-content-between align-content-end"}
+          >
+            {getAdvSearchBtn()}
             <LoadingBtn
               isLoading={isLoading || isSearching}
               variant={"primary"}
@@ -229,12 +284,11 @@ const StudentListSearchPanel = ({
                       : searchCriteria.classCodes
                 })
               }
-            >
-              Search
-            </LoadingBtn>
-          </div>
+            />
+          </FlexContainer>
         </Col>
       </Row>
+      {getAdvancedPanel()}
     </Wrapper>
   );
 };

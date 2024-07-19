@@ -313,6 +313,77 @@ const StudentListResultPanel = ({
           );
         }
       },
+
+      // postal address
+      {
+        key: "postal-address-full",
+        header: "Postal Address Full",
+        group: "Address",
+        cell: (col: iTableColumn, data: iVStudent) => {
+          return (
+            <td key={col.key} className={col.key}>
+              {data.AddressID && data.AddressID in addressMap
+                ? addressMap[data.AddressID].AddressFull
+                : ""}
+            </td>
+          );
+        }
+      },
+      {
+        key: "postal-address-street",
+        header: "Postal Street",
+        group: "Address",
+        cell: (col: iTableColumn, data: iVStudent) => {
+          return (
+            <td key={col.key} className={col.key}>
+              {data.AddressID && data.AddressID in addressMap
+                ? addressMap[data.AddressID].Address1
+                : ""}
+            </td>
+          );
+        }
+      },{
+        key: "postal-address-suburb",
+        header: "Postal Suburb",
+        group: "Address",
+        cell: (col: iTableColumn, data: iVStudent) => {
+          return (
+            <td key={col.key} className={col.key}>
+              {data.AddressID && data.AddressID in addressMap
+                ? addressMap[data.AddressID].Suburb
+                : ""}
+            </td>
+          );
+        }
+      },{
+        key: "postal-address-state",
+        header: "Postal State",
+        group: "Address",
+        cell: (col: iTableColumn, data: iVStudent) => {
+          return (
+            <td key={col.key} className={col.key}>
+              {data.AddressID && data.AddressID in addressMap
+                ? addressMap[data.AddressID].State
+                : ""}
+            </td>
+          );
+        }
+      },{
+        key: "postal-address-postcode",
+        header: "Postal PostCode",
+        group: "Address",
+        cell: (col: iTableColumn, data: iVStudent) => {
+          return (
+            <td key={col.key} className={col.key}>
+              {data.AddressID && data.AddressID in addressMap
+                ? addressMap[data.AddressID].PostCode
+                : ""}
+            </td>
+          );
+        }
+      },
+
+
       {
         key: "form",
         header: "Form",

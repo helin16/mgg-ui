@@ -1,26 +1,26 @@
-import StudentListSearchPanel, {iSearchCriteria} from './StudentListSearchPanel';
-import StudentListResultPanel from './StudentListResultPanel';
-import React, {useState} from 'react';
-import styled from 'styled-components';
-import {useSelector} from 'react-redux';
-import {RootState} from '../../../../redux/makeReduxStore';
-import iVStudent from '../../../../types/Synergetic/Student/iVStudent';
-import iSynVStudentClass from '../../../../types/Synergetic/Student/iSynVStudentClass';
-import iSynVStudentContactAllAddress from '../../../../types/Synergetic/Student/iSynVStudentContactAllAddress';
-import SynVStudentService from '../../../../services/Synergetic/Student/SynVStudentService';
-import moment from 'moment-timezone';
-import {OP_LIKE, OP_OR} from '../../../../helper/ServiceHelper';
-import UtilsService from '../../../../services/UtilsService';
-import SynVStudentClassService from '../../../../services/Synergetic/Student/SynVStudentClassService';
-import {HEADER_NAME_SELECTING_FIELDS} from '../../../../services/AppService';
-import SynVStudentContactAllAddressService
-  from '../../../../services/Synergetic/Student/SynVStudentContactAllAddressService';
-import {STUDENT_CONTACT_TYPE_SC1} from '../../../../types/Synergetic/Student/iStudentContact';
-import Toaster from '../../../../services/Toaster';
+import StudentListSearchPanel, {
+  iSearchCriteria
+} from "./StudentListSearchPanel";
+import StudentListResultPanel from "./StudentListResultPanel";
+import React, { useState } from "react";
+import styled from "styled-components";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../../redux/makeReduxStore";
+import iVStudent from "../../../../types/Synergetic/Student/iVStudent";
+import iSynVStudentClass from "../../../../types/Synergetic/Student/iSynVStudentClass";
+import iSynVStudentContactAllAddress from "../../../../types/Synergetic/Student/iSynVStudentContactAllAddress";
+import SynVStudentService from "../../../../services/Synergetic/Student/SynVStudentService";
+import moment from "moment-timezone";
+import { OP_LIKE, OP_OR } from "../../../../helper/ServiceHelper";
+import UtilsService from "../../../../services/UtilsService";
+import SynVStudentClassService from "../../../../services/Synergetic/Student/SynVStudentClassService";
+import { HEADER_NAME_SELECTING_FIELDS } from "../../../../services/AppService";
+import SynVStudentContactAllAddressService from "../../../../services/Synergetic/Student/SynVStudentContactAllAddressService";
+import { STUDENT_CONTACT_TYPE_SC1 } from "../../../../types/Synergetic/Student/iStudentContact";
+import Toaster from "../../../../services/Toaster";
 
 const Wrapper = styled.div``;
 const MyClassList = () => {
-
   const { user } = useSelector((state: RootState) => state.auth);
   const [isLoading, setIsLoading] = useState(false);
   const [students, setStudents] = useState<iVStudent[]>([]);
@@ -38,31 +38,36 @@ const MyClassList = () => {
           where: JSON.stringify({
             FileYear: user?.SynCurrentFileSemester?.FileYear || moment().year(),
             FileSemester: user?.SynCurrentFileSemester?.FileSemester || 1,
-            ...(`${criteria.form || ''}`.trim() === '' ? {} : {StudentForm: `${criteria.form || ''}`.trim()}),
+            ...(`${criteria.form || ""}`.trim() === ""
+              ? {}
+              : { StudentForm: `${criteria.form || ""}`.trim() }),
+            ...((criteria.yearLevelCodes || []).length <= 0
+              ? {}
+              : { StudentYearLevel: criteria.yearLevelCodes || [] }),
             ...(`${criteria.searchText || ""}`.trim() !== ""
               ? {
-                [OP_OR]: [
-                  {
-                    StudentNameInternal: {
-                      [OP_LIKE]: `%${`${criteria.searchText || ""}`.trim()}%`
-                    }
-                  },
-                  {
-                    StudentNameExternal: {
-                      [OP_LIKE]: `%${`${criteria.searchText || ""}`.trim()}%`
-                    }
-                  },
-                  {
-                    StudentOccupEmail: {
-                      [OP_LIKE]: `%${`${criteria.searchText || ""}`.trim()}%`
-                    }
-                  },
-                  ...(UtilsService.isNumeric(criteria.searchText || "") ===
-                  true
-                    ? [{ StudentID: `${criteria.searchText || ""}`.trim() }]
-                    : [])
-                ]
-              }
+                  [OP_OR]: [
+                    {
+                      StudentNameInternal: {
+                        [OP_LIKE]: `%${`${criteria.searchText || ""}`.trim()}%`
+                      }
+                    },
+                    {
+                      StudentNameExternal: {
+                        [OP_LIKE]: `%${`${criteria.searchText || ""}`.trim()}%`
+                      }
+                    },
+                    {
+                      StudentOccupEmail: {
+                        [OP_LIKE]: `%${`${criteria.searchText || ""}`.trim()}%`
+                      }
+                    },
+                    ...(UtilsService.isNumeric(criteria.searchText || "") ===
+                    true
+                      ? [{ StudentID: `${criteria.searchText || ""}`.trim() }]
+                      : [])
+                  ]
+                }
               : {})
           }),
           sort: "StudentForm:ASC,StudentNameInternal:ASC",
@@ -180,7 +185,7 @@ const MyClassList = () => {
         parentMap={parentMap}
       />
     </Wrapper>
-  )
-}
+  );
+};
 
-export default MyClassList
+export default MyClassList;
