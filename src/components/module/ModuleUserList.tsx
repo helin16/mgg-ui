@@ -20,7 +20,7 @@ type iModuleUserList = {
   roleId: number;
   showCreatingPanel?: boolean;
   showDeletingBtn?: boolean;
-  extraColumns?: iTableColumn[];
+  extraColumns?: iTableColumn<iModuleUser>[];
   forceReload?: number;
 };
 
@@ -104,7 +104,7 @@ const ModuleUserList = ({
       });
   };
 
-  const getColumns = (): iTableColumn[] => [
+  const getColumns = <T extends {}>(): iTableColumn<T>[] => [
     {
       key: "SynergeticID",
       header: "ID",
@@ -144,7 +144,7 @@ const ModuleUserList = ({
     ...extraColumns,
     {
       key: "DeleteBtn",
-      header: (column: iTableColumn) => {
+      header: (column: iTableColumn<T>) => {
         return (
           <th key={column.key} className={"text-right"}>
             {showCreatingPanel !== true ? null : (
@@ -239,7 +239,7 @@ const ModuleUserList = ({
         striped
         hover
         className={"list-table"}
-        columns={getColumns()}
+        columns={getColumns<iModuleUser>()}
         rows={getRows()}
       />
       {getCreatingPanel()}

@@ -98,7 +98,7 @@ const HouseAwardConfirmAwardPopupBtn = ({
                 {
                   key: "options",
                   header: "",
-                  cell: (col: iTableColumn, data: iHouseAwardScore) => {
+                  cell: (col: iTableColumn<iHouseAwardScore>, data: iHouseAwardScore) => {
                     const selectedScoreIds = selectedScores.map(
                       score => score.id
                     );
@@ -138,21 +138,21 @@ const HouseAwardConfirmAwardPopupBtn = ({
           {
             key: "eventYear",
             header: "Year",
-            cell: (col: iTableColumn, data: iHouseAwardScore) => {
+            cell: (col: iTableColumn<iHouseAwardScore>, data: iHouseAwardScore) => {
               return <td key={col.key}>{data.FileYear}</td>;
             }
           },
           {
             key: "eventName",
             header: "Event",
-            cell: (col: iTableColumn, data: iHouseAwardScore) => {
+            cell: (col: iTableColumn<iHouseAwardScore>, data: iHouseAwardScore) => {
               return <td key={col.key}>{eventMap[data.event_id].name}</td>;
             }
           },
           {
             key: "score",
             header: "Score",
-            cell: (col: iTableColumn, data: iHouseAwardScore) => {
+            cell: (col: iTableColumn<iHouseAwardScore>, data: iHouseAwardScore) => {
               return <td key={col.key}>{data.score}</td>;
             }
           }

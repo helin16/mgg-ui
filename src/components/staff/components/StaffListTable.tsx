@@ -31,7 +31,7 @@ const Wrapper = styled.div`
 type iStaffListTable = iGetListColumns & {
   tableHtmlId?: string;
   className?: string;
-  selectedColumns: iTableColumn[];
+  selectedColumns: iTableColumn<iVStaff>[];
   staffList: iVStaff[];
 };
 const StaffListTable = ({
@@ -47,12 +47,12 @@ const StaffListTable = ({
   const [columns, setColumns] = useState<any[]>([]);
   const [hasJPColumns, setHasJPColumns] = useState(false);
 
-  const getDefaultColumn = (column: iTableColumn) => ({
+  const getDefaultColumn = (column: iTableColumn<iVStaff>) => ({
     Header: column.header,
     accessor: column.key,
   });
 
-  const getFormatCell = (column: iTableColumn, value: any, data?: any) => {
+  const getFormatCell = (column: iTableColumn<iVStaff>, value: any, data?: any) => {
     switch (column.format) {
       case TABLE_COLUMN_FORMAT_BOOLEAN: {
         return `${(value === true || value.trim().toLowerCase() === 'true') ? "Y" : "N"}`;
@@ -70,7 +70,7 @@ const StaffListTable = ({
     }
   };
 
-  const getStaffColumns = (column: iTableColumn) => {
+  const getStaffColumns = (column: iTableColumn<iVStaff>) => {
     const defaultCol = getDefaultColumn(column);
     if (`${column.group || ""}`.trim() !== "") {
       return null;
@@ -100,7 +100,7 @@ const StaffListTable = ({
   };
 
 
-  const getJPCell = (column: iTableColumn, jobPositions: iSynStaffJobPosition[], getValueFn: (jp: iSynStaffJobPosition) => any) => {
+  const getJPCell = (column: iTableColumn<iVStaff>, jobPositions: iSynStaffJobPosition[], getValueFn: (jp: iSynStaffJobPosition) => any) => {
     return <div className={`jp-col`}>
       {jobPositions.map((jp, index) => {
         // @ts-ignore
@@ -118,7 +118,7 @@ const StaffListTable = ({
     </div>
   }
 
-  const getJobPositionColumns = (column: iTableColumn) => {
+  const getJobPositionColumns = (column: iTableColumn<iVStaff>) => {
     const defaultCol = getDefaultColumn(column);
     if (`${column.group || ""}`.trim() !== COLUMN_GROUP_JOB_POSITION) {
       return null;
@@ -178,7 +178,7 @@ const StaffListTable = ({
     };
   };
 
-  const getSkillExpiryDateColumns = (column: iTableColumn) => {
+  const getSkillExpiryDateColumns = (column: iTableColumn<iVStaff>) => {
     const defaultCol = getDefaultColumn(column);
     if (`${column.group || ""}`.trim() !== COLUMN_GROUP_SKILL_EXPIRY_DATE) {
       return null;

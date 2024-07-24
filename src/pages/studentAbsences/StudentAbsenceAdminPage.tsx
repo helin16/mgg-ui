@@ -85,7 +85,7 @@ const StudentAbsenceAdminPage = ({ onNavBack }: iStudentAbsenceAdminPage) => {
                 {
                   key: "EmailNotification",
                   header: "Noti?",
-                  cell: (column: iTableColumn, data: iModuleUser) => {
+                  cell: (column: iTableColumn<iModuleUser>, data: iModuleUser) => {
                     return (
                       <td key={column.key}>
                         <ToggleBtn

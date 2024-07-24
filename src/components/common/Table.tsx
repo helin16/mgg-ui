@@ -10,30 +10,25 @@ import MathHelper from "../../helper/MathHelper";
 import * as _ from "lodash";
 import { FlexContainer } from "../../styles";
 import SelectBox from "./SelectBox";
+import iPaginatedResult from '../../types/iPaginatedResult';
 
 export const TABLE_COLUMN_FORMAT_DATE = "Date";
 export const TABLE_COLUMN_FORMAT_BOOLEAN = "Boolean";
 export const TABLE_COLUMN_FORMAT_CALCULATED = "Calculated";
 
-export type iTableColumn = {
+export type iTableColumn<T> = {
   key: string;
   isDefault?: boolean;
   format?: string;
   group?: string;
   name?: string;
   isSelectable?: boolean;
-  header: ((column: iTableColumn) => any) | any;
-  footer?: ((column: iTableColumn) => any) | any;
-  cell?: ((column: iTableColumn, data?: any, index?: number) => any) | string;
+  header: ((column: iTableColumn<T>) => any) | any;
+  footer?: ((column: iTableColumn<T>) => any) | any;
+  cell?:
+    | ((column: iTableColumn<T>, data?: any, index?: number) => any)
+    | string;
   sort?: number;
-};
-
-export type iTable = TableProps & {
-  isLoading?: boolean;
-  showPaginator?: boolean;
-  columns: iTableColumn[];
-  rows?: any[];
-  pagination?: iTablePagination;
 };
 
 type iTablePaginationPageSize = {
@@ -42,13 +37,21 @@ type iTablePaginationPageSize = {
   steps?: number;
 };
 
-type iTablePagination = {
+export type iTablePagination = {
   totalPages: number;
   currentPage: number;
   onSetCurrentPage: (currentPage: number) => void;
   perPage?: number;
   onPageSizeChanged?: (pageSize: number) => void;
   pageSizeProps?: iTablePaginationPageSize;
+};
+
+export type iTable<T> = TableProps & {
+  isLoading?: boolean;
+  showPaginator?: boolean;
+  columns: iTableColumn<T>[];
+  rows?: T[] | iPaginatedResult<T>;
+  pagination?: iTablePagination;
 };
 
 const Wrapper = styled.div`
@@ -78,11 +81,11 @@ const Wrapper = styled.div`
     .page-item {
       background-color: white;
       .page-link {
-        padding: .375rem 0.75rem;
+        padding: 0.375rem 0.75rem;
       }
     }
   }
-  
+
   .page-size-selector-wrapper {
     .page-size-selector {
       [class$="-control"] {
@@ -96,14 +99,14 @@ const Wrapper = styled.div`
     }
   }
 `;
-const Table = ({
+const Table = <T extends {}>({
   isLoading = false,
   columns,
   pagination,
   rows = [],
   ...props
-}: iTable) => {
-  const [cols, setCols] = useState<iTableColumn[]>([]);
+}: iTable<T>) => {
+  const [cols, setCols] = useState<iTableColumn<T>[]>([]);
   const [hasFooter, setHasFooter] = useState(false);
 
   useEffect(() => {
@@ -200,9 +203,7 @@ const Table = ({
       <Pagination className={"pagination-wrapper"}>
         {pagination.currentPage <= 1 ? null : (
           <>
-            <Pagination.First
-              onClick={() => pagination?.onSetCurrentPage(1)}
-            />
+            <Pagination.First onClick={() => pagination?.onSetCurrentPage(1)} />
             <Pagination.Prev
               onClick={() =>
                 pagination?.onSetCurrentPage(
@@ -243,8 +244,8 @@ const Table = ({
           </>
         )}
       </Pagination>
-    )
-  }
+    );
+  };
 
   const getPaginator = () => {
     if (!pagination) {
@@ -259,7 +260,7 @@ const Table = ({
     );
   };
 
-  const getCell = (column: iTableColumn, data: any, index?: number) => {
+  const getCell = (column: iTableColumn<T>, data: any, index?: number) => {
     if (typeof column.cell !== "function") {
       return <td key={column.key}>{column.cell}</td>;
     }
@@ -285,6 +286,7 @@ const Table = ({
     );
   };
 
+  const dataRow = Array.isArray(rows) ? rows : ('data' in rows ? rows.data : []);
   return (
     <Wrapper>
       <div className={"table-wrapper"}>
@@ -302,9 +304,11 @@ const Table = ({
             </tr>
           </thead>
           <tbody>
-            {rows.map((row, index) => {
+            {dataRow.map((row, index) => {
               return (
-                <tr key={index}>{cols.map(column => getCell(column, row, index))}</tr>
+                <tr key={index}>
+                  {cols.map(column => getCell(column, row, index))}
+                </tr>
               );
             })}
           </tbody>

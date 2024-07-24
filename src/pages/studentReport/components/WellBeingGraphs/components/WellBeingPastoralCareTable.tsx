@@ -24,7 +24,7 @@ const WellBeingPastoralCareTable = ({
 }: iWellBeingStudentAlertsPanel) => {
   const [showDetails, setShowDetails] = useState<string | null>(null);
 
-  const getColumns = (): iTableColumn[] => [
+  const getColumns = <T extends {}>(): iTableColumn<T>[] => [
     {
       key: "category",
       header: "Category",
@@ -82,7 +82,7 @@ const WellBeingPastoralCareTable = ({
 
   return (
     <Wrapper className={"pastoral-care-table"}>
-      <Table columns={getColumns()} rows={pastoralCares} responsive/>
+      <Table columns={getColumns<iSynTPastoralCare>()} rows={pastoralCares} responsive/>
       {getPopup()}
     </Wrapper>
   );

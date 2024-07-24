@@ -42,8 +42,8 @@ const StudentListResultPanel = ({
   studentClassCodeMap,
   parentMap
 }: iStudentListResultPanel) => {
-  const [columns, setColumns] = useState<iTableColumn[]>([]);
-  const [selectedColumns, setSelectedColumns] = useState<iTableColumn[]>([]);
+  const [columns, setColumns] = useState<iTableColumn<any>[]>([]);
+  const [selectedColumns, setSelectedColumns] = useState<iTableColumn<any>[]>([]);
   const [resultTableHtmlId] = useState(
     `mcl-${moment().unix()}-${Math.random()}`
   );
@@ -95,13 +95,13 @@ const StudentListResultPanel = ({
   }, [students]);
 
   useEffect(() => {
-    const cols: iTableColumn[] = [
+    const cols: iTableColumn<iVStudent>[] = [
       {
         key: "photo",
         header: "Photo",
         isDefault: true,
         group: "Student",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           return (
             <td key={col.key} className={col.key}>
               <Image src={data.profileUrl} />
@@ -115,7 +115,7 @@ const StudentListResultPanel = ({
         isSelectable: false,
         isDefault: true,
         group: "Student",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           return (
             <td key={col.key} className={col.key}>
               {data.StudentID}
@@ -127,7 +127,7 @@ const StudentListResultPanel = ({
         key: "student-given1",
         header: "Student Given",
         group: "Student",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           return (
             <td key={col.key} className={col.key}>
               {data.StudentGiven1 || ""}
@@ -139,7 +139,7 @@ const StudentListResultPanel = ({
         key: "student-preferred",
         header: "Student Preferred Name",
         group: "Student",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           return (
             <td key={col.key} className={col.key}>
               {data.StudentPreferred || ""}
@@ -151,7 +151,7 @@ const StudentListResultPanel = ({
         key: "student-surname",
         header: "Student Surname",
         group: "Student",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           return (
             <td key={col.key} className={col.key}>
               {data.StudentSurname || ""}
@@ -164,7 +164,7 @@ const StudentListResultPanel = ({
         header: "Student Internal Name",
         isDefault: true,
         group: "Student",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           return (
             <td key={col.key} className={col.key}>
               {data.StudentNameInternal || ""}
@@ -177,7 +177,7 @@ const StudentListResultPanel = ({
         header: "Student D.O.B.",
         isDefault: true,
         group: "Student",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           return (
             <td key={col.key} className={col.key}>
               {`${data.StudentBirthDate || ""}`
@@ -192,7 +192,7 @@ const StudentListResultPanel = ({
         header: "Student Age",
         isDefault: true,
         group: "Student",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           const dob = `${data.StudentBirthDate || ""}`
             .trim()
             .replace("T00:00:00.000Z", "");
@@ -208,7 +208,7 @@ const StudentListResultPanel = ({
         header: "Student Email",
         isDefault: true,
         group: "Student",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           return (
             <td key={col.key} className={col.key}>
               {`${data.StudentOccupEmail || ""}`.trim() === "" ? null : (
@@ -224,7 +224,7 @@ const StudentListResultPanel = ({
         key: "student-entry-date",
         header: "Student Entry Date",
         group: "Student",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           return (
             <td key={col.key} className={col.key}>
               {`${data.StudentEntryDate || ""}`
@@ -238,7 +238,7 @@ const StudentListResultPanel = ({
         key: "student-full-fee",
         header: "Student Full Fee",
         group: "Student",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           return (
             <td key={col.key} className={col.key}>
               {data.FullFeeFlag === true ? "Y" : ""}
@@ -250,7 +250,7 @@ const StudentListResultPanel = ({
         key: "address-full",
         header: "Home Address Full",
         group: "Address",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           return (
             <td key={col.key} className={col.key}>
               {data.AddressID && data.AddressID in addressMap
@@ -264,7 +264,7 @@ const StudentListResultPanel = ({
         key: "address-street",
         header: "Home Street",
         group: "Address",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           return (
             <td key={col.key} className={col.key}>
               {data.AddressID && data.AddressID in addressMap
@@ -277,7 +277,7 @@ const StudentListResultPanel = ({
         key: "address-suburb",
         header: "Home Suburb",
         group: "Address",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           return (
             <td key={col.key} className={col.key}>
               {data.AddressID && data.AddressID in addressMap
@@ -290,7 +290,7 @@ const StudentListResultPanel = ({
         key: "address-state",
         header: "Home State",
         group: "Address",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           return (
             <td key={col.key} className={col.key}>
               {data.AddressID && data.AddressID in addressMap
@@ -303,7 +303,7 @@ const StudentListResultPanel = ({
         key: "address-postcode",
         header: "Home PostCode",
         group: "Address",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           return (
             <td key={col.key} className={col.key}>
               {data.AddressID && data.AddressID in addressMap
@@ -319,7 +319,7 @@ const StudentListResultPanel = ({
         key: "postal-address-full",
         header: "Postal Address Full",
         group: "Address",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           return (
             <td key={col.key} className={col.key}>
               {data.AddressID && data.AddressID in addressMap
@@ -333,7 +333,7 @@ const StudentListResultPanel = ({
         key: "postal-address-street",
         header: "Postal Street",
         group: "Address",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           return (
             <td key={col.key} className={col.key}>
               {data.AddressID && data.AddressID in addressMap
@@ -346,7 +346,7 @@ const StudentListResultPanel = ({
         key: "postal-address-suburb",
         header: "Postal Suburb",
         group: "Address",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           return (
             <td key={col.key} className={col.key}>
               {data.AddressID && data.AddressID in addressMap
@@ -359,7 +359,7 @@ const StudentListResultPanel = ({
         key: "postal-address-state",
         header: "Postal State",
         group: "Address",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           return (
             <td key={col.key} className={col.key}>
               {data.AddressID && data.AddressID in addressMap
@@ -372,7 +372,7 @@ const StudentListResultPanel = ({
         key: "postal-address-postcode",
         header: "Postal PostCode",
         group: "Address",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           return (
             <td key={col.key} className={col.key}>
               {data.AddressID && data.AddressID in addressMap
@@ -389,7 +389,7 @@ const StudentListResultPanel = ({
         header: "Form",
         isDefault: true,
         group: "School",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           return (
             <td key={col.key} className={col.key}>
               {data.StudentForm}
@@ -402,7 +402,7 @@ const StudentListResultPanel = ({
         header: "Year Level",
         isDefault: true,
         group: "School",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           return (
             <td key={col.key} className={col.key}>
               {data.StudentYearLevel}
@@ -414,7 +414,7 @@ const StudentListResultPanel = ({
         key: "houseCode",
         header: "House Code",
         group: "School",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           return (
             <td key={col.key} className={col.key}>
               {data.StudentHouse}
@@ -427,7 +427,7 @@ const StudentListResultPanel = ({
         header: "House",
         isDefault: true,
         group: "School",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           return (
             <td key={col.key} className={col.key}>
               {data.StudentHouseDescription}
@@ -439,7 +439,7 @@ const StudentListResultPanel = ({
         key: "previousSchoolCode",
         header: "Previous School Code",
         group: "School",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           return (
             <td key={col.key} className={col.key}>
               {data.StudentPreviousSchoolCode}
@@ -451,7 +451,7 @@ const StudentListResultPanel = ({
         key: "previousSchool",
         header: "Previous School",
         group: "School",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           return (
             <td key={col.key} className={col.key}>
               {data.StudentPreviousSchoolDescription}
@@ -463,7 +463,7 @@ const StudentListResultPanel = ({
         key: "parent1-id",
         header: "Parent ID",
         group: "Parent",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           const parent =
             data.StudentID in parentMap ? parentMap[data.StudentID] : null;
           return (
@@ -478,7 +478,7 @@ const StudentListResultPanel = ({
         header: "Parent Name",
         isDefault: true,
         group: "Parent",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           const parent =
             data.StudentID in parentMap ? parentMap[data.StudentID] : null;
           return (
@@ -494,7 +494,7 @@ const StudentListResultPanel = ({
         header: "Parent Email",
         isDefault: true,
         group: "Parent",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           const parent =
             data.StudentID in parentMap ? parentMap[data.StudentID] : null;
           const parentEmail = `${parent?.StudentContactDefaultEmail ||
@@ -513,7 +513,7 @@ const StudentListResultPanel = ({
         header: "Parent Mobile",
         isDefault: true,
         group: "Parent",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           const parent =
             data.StudentID in parentMap ? parentMap[data.StudentID] : null;
           return (
@@ -527,7 +527,7 @@ const StudentListResultPanel = ({
         key: "parent2-id",
         header: "Parent2 ID",
         group: "Parent",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           const parent =
             data.StudentID in parentMap ? parentMap[data.StudentID] : null;
           return (
@@ -542,7 +542,7 @@ const StudentListResultPanel = ({
         header: "Parent2 Name",
         isDefault: true,
         group: "Parent",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           const parent =
             data.StudentID in parentMap ? parentMap[data.StudentID] : null;
           return (
@@ -558,7 +558,7 @@ const StudentListResultPanel = ({
         header: "Parent2 Email",
         isDefault: true,
         group: "Parent",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           const parent =
             data.StudentID in parentMap ? parentMap[data.StudentID] : null;
           const parentEmail = `${parent?.StudentContactSpouseDefaultEmail ||
@@ -577,7 +577,7 @@ const StudentListResultPanel = ({
         header: "Parent2 Mobile",
         isDefault: true,
         group: "Parent",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           const parent =
             data.StudentID in parentMap ? parentMap[data.StudentID] : null;
           return (
@@ -592,7 +592,7 @@ const StudentListResultPanel = ({
         header: "Is Separated",
         isDefault: true,
         group: "Parent",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           const parent =
             data.StudentID in parentMap ? parentMap[data.StudentID] : null;
           return (
@@ -614,7 +614,7 @@ const StudentListResultPanel = ({
         header: "Classes",
         isDefault: true,
         group: "Classes",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           const classes =
             data.StudentID in studentClassCodeMap
               ? studentClassCodeMap[data.StudentID]
@@ -637,7 +637,7 @@ const StudentListResultPanel = ({
         key: "StudentDoctorName",
         header: "Student Doctor Name",
         group: "Emergency",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           return (
             <td key={col.key} className={col.key}>
               {data.StudentDoctorName || ""}
@@ -649,7 +649,7 @@ const StudentListResultPanel = ({
         key: "StudentDoctorPhone",
         header: "Student Doctor Phone",
         group: "Emergency",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           return (
             <td key={col.key} className={col.key}>
               {data.StudentDoctorPhone || ""}
@@ -661,7 +661,7 @@ const StudentListResultPanel = ({
         key: "StudentEmergencyName",
         header: "Student Emergency Name",
         group: "Emergency",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           return (
             <td key={col.key} className={col.key}>
               {data.StudentEmergencyName || ""}
@@ -673,7 +673,7 @@ const StudentListResultPanel = ({
         key: "StudentEmergencyPhone",
         header: "Student Emergency Phone",
         group: "Emergency",
-        cell: (col: iTableColumn, data: iVStudent) => {
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
           return (
             <td key={col.key} className={col.key}>
               {data.StudentEmergencyPhone || ""}

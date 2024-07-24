@@ -175,7 +175,7 @@ const AdminReportList = ({ onSelected }: iAdminReportList) => {
           {
             key: "name",
             header: "Name",
-            cell: (col: iTableColumn, data: iStudentReportYear) => {
+            cell: (col: iTableColumn<iStudentReportYear>, data: iStudentReportYear) => {
               return (
                 <td key={col.key}>
                   <Button
@@ -192,7 +192,7 @@ const AdminReportList = ({ onSelected }: iAdminReportList) => {
           {
             key: "Semester",
             header: "Semester",
-            cell: (col: iTableColumn, data: iStudentReportYear) => {
+            cell: (col: iTableColumn<iStudentReportYear>, data: iStudentReportYear) => {
               return (
                 <td key={col.key}>
                   <Button
@@ -209,28 +209,28 @@ const AdminReportList = ({ onSelected }: iAdminReportList) => {
           {
             key: "Style",
             header: "Style",
-            cell: (col: iTableColumn, data: iStudentReportYear) => {
+            cell: (col: iTableColumn<iStudentReportYear>, data: iStudentReportYear) => {
               return <td key={col.key}>{data.styleCode}</td>;
             }
           },
           {
             key: "Campus",
             header: "Campus",
-            cell: (col: iTableColumn, data: iStudentReportYear) => {
+            cell: (col: iTableColumn<iStudentReportYear>, data: iStudentReportYear) => {
               return <td key={col.key}>{data.CampusCode}</td>;
             }
           },
           {
             key: "YearLevel",
             header: "Year Lvl",
-            cell: (col: iTableColumn, data: iStudentReportYear) => {
+            cell: (col: iTableColumn<iStudentReportYear>, data: iStudentReportYear) => {
               return <td key={col.key}>{data.YearLevelCode}</td>;
             }
           },
           {
             key: "ReleaseToStaff",
             header: "Release To Staff",
-            cell: (col: iTableColumn, data: iStudentReportYear) => {
+            cell: (col: iTableColumn<iStudentReportYear>, data: iStudentReportYear) => {
               return (
                 <td key={col.key}>
                   {moment(data.ReleaseToStaffDate).format("lll")}
@@ -241,7 +241,7 @@ const AdminReportList = ({ onSelected }: iAdminReportList) => {
           {
             key: "ReleaseToAll",
             header: "Release To All",
-            cell: (col: iTableColumn, data: iStudentReportYear) => {
+            cell: (col: iTableColumn<iStudentReportYear>, data: iStudentReportYear) => {
               return (
                 <td key={col.key}>
                   {data.ReleaseToAllDate &&
@@ -253,7 +253,7 @@ const AdminReportList = ({ onSelected }: iAdminReportList) => {
           {
             key: "HideResult",
             header: "Hide Result",
-            cell: (col: iTableColumn, data: iStudentReportYear) => {
+            cell: (col: iTableColumn<iStudentReportYear>, data: iStudentReportYear) => {
               return (
                 <td key={col.key}>
                   {data.HideResults === true ? (
@@ -278,7 +278,7 @@ const AdminReportList = ({ onSelected }: iAdminReportList) => {
           },
           {
             key: "btns",
-            header: (col: iTableColumn) => {
+            header: (col: iTableColumn<iStudentReportYear>) => {
               return (
                 <th key={col.key} className={"text-right"}>
                   <Button
@@ -293,7 +293,7 @@ const AdminReportList = ({ onSelected }: iAdminReportList) => {
                 </th>
               );
             },
-            cell: (col: iTableColumn, data: iStudentReportYear) => {
+            cell: (col: iTableColumn<iStudentReportYear>, data: iStudentReportYear) => {
               return (
                 <td key={col.key} className={"text-right"}>
                   <Button

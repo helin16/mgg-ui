@@ -322,62 +322,62 @@ const PATDataList = () => {
       });
   };
 
-  const getColumns = () => {
+  const getColumns = <T extends {}>() => {
     return [
       {
         key: "familyName",
         header: "Family name",
-        cell: (col: iTableColumn, data: iResult) => (data.familyName || "")
+        cell: (col: iTableColumn<T>, data: iResult) => (data.familyName || "")
       },
       {
         key: "givenName",
         header: "Given name",
-        cell: (col: iTableColumn, data: iResult) => (data.givenName || "")
+        cell: (col: iTableColumn<T>, data: iResult) => (data.givenName || "")
       },
       {
         key: "middleName",
         header: "Middle Names",
-        cell: (col: iTableColumn, data: iResult) => (data.middleName || "")
+        cell: (col: iTableColumn<T>, data: iResult) => (data.middleName || "")
       },
       {
         key: "username",
         header: "Username",
-        cell: (col: iTableColumn, data: iResult) => (data.username || "")
+        cell: (col: iTableColumn<T>, data: iResult) => (data.username || "")
       },
       {
         key: "password",
         header: "Password",
-        cell: (col: iTableColumn, data: iResult) => (values.initPassword || "")
+        cell: (col: iTableColumn<T>, data: iResult) => (values.initPassword || "")
       },
       {
         key: "dateOfBirth",
         header: "Date Of Birth (DD-MM-YYYY)",
-        cell: (col: iTableColumn, data: iResult) => (data.dateOfBirth || "")
+        cell: (col: iTableColumn<T>, data: iResult) => (data.dateOfBirth || "")
       },
       {
         key: "gender",
         header: "Gender",
-        cell: (col: iTableColumn, data: iResult) => (data.gender || "")
+        cell: (col: iTableColumn<T>, data: iResult) => (data.gender || "")
       },
       {
         key: "tags",
         header: "Tags",
-        cell: (col: iTableColumn, data: iResult) => (data.tags || []).join(",")
+        cell: (col: iTableColumn<T>, data: iResult) => (data.tags || []).join(",")
       },
       {
         key: "uniqueId",
         header: "Unique ID",
-        cell: (col: iTableColumn, data: iResult) => (data.uniqueId || "")
+        cell: (col: iTableColumn<T>, data: iResult) => (data.uniqueId || "")
       },
       {
         key: "yearLevel",
         header: "Year Level",
-        cell: (col: iTableColumn, data: iResult) => (data.yearLevel || "")
+        cell: (col: iTableColumn<T>, data: iResult) => (data.yearLevel || "")
       },
       {
         key: "schoolYear",
         header: "School Year",
-        cell: (col: iTableColumn, data: iResult) => (data.schoolYear || "")
+        cell: (col: iTableColumn<T>, data: iResult) => (data.schoolYear || "")
       }
     ]
   }
@@ -396,7 +396,7 @@ const PATDataList = () => {
         striped
         responsive
         rows={results || []}
-        columns={getColumns()}
+        columns={getColumns<iResult>()}
       />
     );
   };

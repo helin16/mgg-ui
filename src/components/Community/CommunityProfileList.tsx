@@ -1,15 +1,16 @@
-import { useEffect, useState } from "react";
 import iSynCommunity from "../../types/Synergetic/iSynCommunity";
 import styled from "styled-components";
 import SynCommunityService from "../../services/Synergetic/Community/SynCommunityService";
-import Toaster from "../../services/Toaster";
-import { Button, Spinner } from "react-bootstrap";
-import Table, { iTableColumn } from "../common/Table";
+import { Button } from "react-bootstrap";
+import { iTableColumn } from "../common/Table";
 import { FlexContainer } from "../../styles";
 import CommunityAutoComplete from "./CommunityAutoComplete";
 import * as Icons from "react-bootstrap-icons";
+import useListCrudHook from "../hooks/useListCrudHook/useListCrudHook";
+import PageLoadingSpinner from "../common/PageLoadingSpinner";
+import {useCallback} from 'react';
 
-type iPowerBIListItemUserList = {
+type iCommunityProfileList = {
   userIds: (string | number)[];
   onCreate?: (newId: string | number) => void;
   onDelete?: (userId: string | number) => void;
@@ -26,50 +27,19 @@ const CommunityProfileList = ({
   showDeletingBtn,
   onDelete,
   className
-}: iPowerBIListItemUserList) => {
-  const [communityProfiles, setCommunityProfiles] = useState<iSynCommunity[]>(
-    []
-  );
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    if (userIds.length <= 0) {
-      setCommunityProfiles([]);
-      return;
-    }
-
-    let isCanceled = false;
-    setIsLoading(true);
-
-    SynCommunityService.getCommunityProfiles({
-      where: JSON.stringify({
-        ID: userIds
-      }),
-      perPage: 999999
-    })
-      .then(resp => {
-        if (isCanceled) {
-          return;
-        }
-        setCommunityProfiles(resp.data || []);
-      })
-      .catch(err => {
-        if (isCanceled) {
-          return;
-        }
-        Toaster.showApiError(err);
-      })
-      .finally(() => {
-        if (isCanceled) {
-          return;
-        }
-        setIsLoading(false);
+}: iCommunityProfileList) => {
+  const { state, renderDataTable } = useListCrudHook<iSynCommunity>({
+    getFn: useCallback(config => {
+      const { filter, ...props } = config || {};
+      return SynCommunityService.getCommunityProfiles({
+        where: JSON.stringify({
+          ...filter,
+          ID: userIds,
+        }),
+        ...props
       });
-
-    return () => {
-      isCanceled = true;
-    };
-  }, [userIds]);
+    }, [userIds]),
+  });
 
   const getCreatingPanel = () => {
     if (showCreatingPanel !== true) {
@@ -80,94 +50,100 @@ const CommunityProfileList = ({
       <FlexContainer className={"with-gap lg-gap align-items-center"}>
         <b>Adding</b>
         <div style={{ width: "70%" }}>
-          <CommunityAutoComplete onSelect={option => {
-            let value: string | number | null | undefined = '';
-            if (Array.isArray(option) && option.length > 0) {
-              value = option[0].value;
-            } else if (option) {
-              // @ts-ignore
-              value = option?.value;
-            }
-            onCreate && onCreate(`${value || ''}`.trim() === '' ? Number(value) : "")
-          }} />
+          <CommunityAutoComplete
+            onSelect={option => {
+              let value: string | number | null | undefined = "";
+              if (Array.isArray(option) && option.length > 0) {
+                value = option[0].value;
+              } else if (option) {
+                // @ts-ignore
+                value = option?.value;
+              }
+              onCreate &&
+                onCreate(`${value || ""}`.trim() === "" ? Number(value) : "");
+            }}
+          />
         </div>
       </FlexContainer>
     );
   };
 
-  if (isLoading === true) {
-    return <Spinner animation={"border"} />;
+  const getColumns = <T extends {}>() => {
+    return [
+      {
+        key: "SynergeticID",
+        header: "ID",
+        cell: (column: iTableColumn<T>, data: iSynCommunity) => {
+          return <td key={column.key}>{data.ID}</td>;
+        }
+      },
+      {
+        key: "Name",
+        header: "Name",
+        cell: (column: iTableColumn<T>, user: iSynCommunity) => {
+          return (
+            <td key={column.key}>
+              {user.Given1} {user.Surname}
+              {`${user.Preferred || ""}`.trim() === ""
+                ? ""
+                : ` (${user.Preferred})`}
+            </td>
+          );
+        }
+      },
+      {
+        key: "Email",
+        header: "Email",
+        cell: (column: iTableColumn<T>, user: iSynCommunity) => {
+          const emailAddress = `${user.OccupEmail || ""}`.trim();
+          if (emailAddress === "") {
+            return <td key={column.key}></td>;
+          }
+
+          return (
+            <td key={column.key}>
+              <a href={`mailto:${user.OccupEmail || ""}`}>
+                {user.OccupEmail || ""}
+              </a>
+            </td>
+          );
+        }
+      },
+      ...(showDeletingBtn === true
+        ? [
+            {
+              key: "Operations",
+              header: "",
+              cell: (column: iTableColumn<T>, user: iSynCommunity) => {
+                return (
+                  <td key={column.key} className={"text-right"}>
+                    <Button
+                      variant={"danger"}
+                      size={"sm"}
+                      onClick={() => onDelete && onDelete(user.ID)}
+                    >
+                      <Icons.Trash />
+                    </Button>
+                  </td>
+                );
+              }
+            }
+          ]
+        : [])
+    ];
+  };
+
+  if (state.isLoading === true) {
+    return <PageLoadingSpinner />;
   }
 
   return (
     <Wrapper className={className}>
-      <Table
-        responsive
-        hover
-        columns={[
-          {
-            key: "SynergeticID",
-            header: "ID",
-            cell: (column, data) => {
-              return <td key={column.key}>{data.ID}</td>;
-            }
-          },
-          {
-            key: "Name",
-            header: "Name",
-            cell: (column, user) => {
-              return (
-                <td key={column.key}>
-                  {user.Given1} {user.Surname}
-                  {`${user.Preferred || ""}`.trim() === ""
-                    ? ""
-                    : ` (${user.Preferred})`}
-                </td>
-              );
-            }
-          },
-          {
-            key: "Email",
-            header: "Email",
-            cell: (column, user) => {
-              const emailAddress = `${user.OccupEmail || ""}`.trim();
-              if (emailAddress === "") {
-                return <td key={column.key}></td>;
-              }
-
-              return (
-                <td key={column.key}>
-                  <a href={`mailto:${user.OccupEmail || ""}`}>
-                    {user.OccupEmail || ""}
-                  </a>
-                </td>
-              );
-            }
-          },
-          ...(showDeletingBtn === true
-            ? [
-                {
-                  key: "Operations",
-                  header: "",
-                  cell: (column: iTableColumn, user: iSynCommunity) => {
-                    return (
-                      <td key={column.key} className={"text-right"}>
-                        <Button
-                          variant={"danger"}
-                          size={"sm"}
-                          onClick={() => onDelete && onDelete(user.ID)}
-                        >
-                          <Icons.Trash />
-                        </Button>
-                      </td>
-                    );
-                  }
-                }
-              ]
-            : [])
-        ]}
-        rows={communityProfiles}
-      />
+      {renderDataTable({
+        responsive: true,
+        hover: true,
+        columns: getColumns<iSynCommunity>(),
+      })}
       {getCreatingPanel()}
     </Wrapper>
   );

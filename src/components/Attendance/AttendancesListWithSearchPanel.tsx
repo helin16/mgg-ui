@@ -173,10 +173,10 @@ const ResultTable = ({
   onLoadNextPage
 }: iResultTable) => {
   const selectedSeqs = selectedSequences || [];
-  const columns = [
+  const getColumns = <T extends {}>() => [
     {
       key: "select-box",
-      header: (col: iTableColumn) => {
+      header: (col: iTableColumn<T>) => {
         const attendanceRecordSeqs = _.uniq(
           (data?.data || [])
             .filter(record => record.AttendedFlag === false)
@@ -197,15 +197,15 @@ const ResultTable = ({
               checked={allChecked}
               onChange={() => {
                 onRecordsSelected &&
-                  onRecordsSelected(
-                    allChecked === true ? [] : attendanceRecordSeqs
-                  );
+                onRecordsSelected(
+                  allChecked === true ? [] : attendanceRecordSeqs
+                );
               }}
             />
           </th>
         );
       },
-      cell: (col: iTableColumn, data: iSynVAttendance) => {
+      cell: (col: iTableColumn<T>, data: iSynVAttendance) => {
         if (data.AttendedFlag !== false) {
           return <td key={col.key}></td>;
         }
@@ -215,19 +215,19 @@ const ResultTable = ({
               checked={selectedSeqs.indexOf(data.AttendanceSeq) >= 0}
               onChange={() => {
                 onRecordsSelected &&
-                  onRecordsSelected(
-                    _.uniq(
-                      selectedSeqs.indexOf(data.AttendanceSeq) >= 0
-                        ? selectedSeqs.filter(seq => data.AttendanceSeq !== seq)
-                        : [...selectedSeqs, data.AttendanceSeq]
-                    )
-                  );
+                onRecordsSelected(
+                  _.uniq(
+                    selectedSeqs.indexOf(data.AttendanceSeq) >= 0
+                      ? selectedSeqs.filter(seq => data.AttendanceSeq !== seq)
+                      : [...selectedSeqs, data.AttendanceSeq]
+                  )
+                );
               }}
             />
           </td>
         );
       },
-      footer: (col: iTableColumn) => {
+      footer: (col: iTableColumn<T>) => {
         if (
           (data?.data || []).length <= 0 ||
           (data?.currentPage || 0) >= (data?.pages || 0)
@@ -254,14 +254,14 @@ const ResultTable = ({
     {
       key: "Attendance Date",
       header: "Date",
-      cell: (col: iTableColumn, data: iSynVAttendance) => {
+      cell: (col: iTableColumn<T>, data: iSynVAttendance) => {
         return (
           <td key={col.key}>
             {`${data.AttendanceDate || ""}`.trim() === ""
               ? ""
               : moment(`${data.AttendanceDate || ""}`.trim()).format(
-                  "DD MMM YYYY"
-                )}
+                "DD MMM YYYY"
+              )}
           </td>
         );
       },
@@ -270,7 +270,7 @@ const ResultTable = ({
     {
       key: "Period",
       header: "Period",
-      cell: (col: iTableColumn, data: iSynVAttendance) => {
+      cell: (col: iTableColumn<T>, data: iSynVAttendance) => {
         return <td key={col.key}>{data.AttendancePeriod}</td>;
       },
       footer: () => null
@@ -278,7 +278,7 @@ const ResultTable = ({
     {
       key: "Class",
       header: "Class",
-      cell: (col: iTableColumn, data: iSynVAttendance) => {
+      cell: (col: iTableColumn<T>, data: iSynVAttendance) => {
         return <td key={col.key}>{data.ClassCode}</td>;
       },
       footer: () => null
@@ -286,7 +286,7 @@ const ResultTable = ({
     {
       key: "Student",
       header: "Student",
-      cell: (col: iTableColumn, data: iSynVAttendance) => {
+      cell: (col: iTableColumn<T>, data: iSynVAttendance) => {
         return (
           <td key={col.key}>
             [{data.ID}] {data.SynCommunity?.Given1} {data.SynCommunity?.Surname}
@@ -298,7 +298,7 @@ const ResultTable = ({
     {
       key: "Attended",
       header: "Attended?",
-      cell: (col: iTableColumn, data: iSynVAttendance) => {
+      cell: (col: iTableColumn<T>, data: iSynVAttendance) => {
         return (
           <td
             key={col.key}
@@ -313,7 +313,7 @@ const ResultTable = ({
     {
       key: "ClassCanceled",
       header: "Class Canceled?",
-      cell: (col: iTableColumn, data: iSynVAttendance) => {
+      cell: (col: iTableColumn<T>, data: iSynVAttendance) => {
         return (
           <td
             key={col.key}
@@ -328,7 +328,7 @@ const ResultTable = ({
     {
       key: "PossibleAbsenceType",
       header: "Possible Absence Type",
-      cell: (col: iTableColumn, data: iSynVAttendance) => {
+      cell: (col: iTableColumn<T>, data: iSynVAttendance) => {
         return <td key={col.key}>{data.PossibleAbsenceType}</td>;
       },
       footer: () => null
@@ -336,7 +336,7 @@ const ResultTable = ({
     {
       key: "PossibleAbsenceCode",
       header: "Possible Absence Code",
-      cell: (col: iTableColumn, data: iSynVAttendance) => {
+      cell: (col: iTableColumn<T>, data: iSynVAttendance) => {
         return <td key={col.key}>{data.PossibleAbsenceCode}</td>;
       },
       footer: () => null
@@ -344,7 +344,7 @@ const ResultTable = ({
     {
       key: "PossibleReasonCode",
       header: "Possible Reason Code",
-      cell: (col: iTableColumn, data: iSynVAttendance) => {
+      cell: (col: iTableColumn<T>, data: iSynVAttendance) => {
         return <td key={col.key}>{data.PossibleReasonCode}</td>;
       },
       footer: () => null
@@ -352,14 +352,14 @@ const ResultTable = ({
     {
       key: "PossibleDescription",
       header: "Possible Description",
-      cell: (col: iTableColumn, data: iSynVAttendance) => {
+      cell: (col: iTableColumn<T>, data: iSynVAttendance) => {
         return <td key={col.key}>{data.PossibleDescription}</td>;
       },
       footer: () => null
     }
   ];
 
-  return <Table striped hover columns={columns} rows={data?.data || []} />;
+  return <Table striped hover columns={getColumns<iSynVAttendance>()} rows={data?.data || []} />;
 };
 
 type iPopupPanel = ButtonProps & {

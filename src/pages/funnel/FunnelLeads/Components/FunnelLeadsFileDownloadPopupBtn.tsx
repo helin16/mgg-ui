@@ -303,7 +303,7 @@ const FunnelLeadsFileDownloadPopupBtn = ({
                 columns={[
                   {
                     key: "selected",
-                    header: (col: iTableColumn) => {
+                    header: (col: iTableColumn<iFileInfo>) => {
                       return (
                         <th key={col.key}>
                           <span
@@ -321,7 +321,7 @@ const FunnelLeadsFileDownloadPopupBtn = ({
                         </th>
                       );
                     },
-                    cell: (col: iTableColumn, data: iFileInfo) => {
+                    cell: (col: iTableColumn<iFileInfo>, data: iFileInfo) => {
                       return (
                         <td key={col.key}>
                           <span
@@ -343,7 +343,7 @@ const FunnelLeadsFileDownloadPopupBtn = ({
                   {
                     key: "name",
                     header: "File Name",
-                    cell: (col: iTableColumn, data: iFileInfo) => {
+                    cell: (col: iTableColumn<iFileInfo>, data: iFileInfo) => {
                       return (
                         <td key={col.key} className={"ellipsis"}>
                           <a
@@ -359,7 +359,7 @@ const FunnelLeadsFileDownloadPopupBtn = ({
                   {
                     key: "type",
                     header: "File Type",
-                    cell: (col: iTableColumn, data: iFileInfo) => {
+                    cell: (col: iTableColumn<iFileInfo>, data: iFileInfo) => {
                       return (
                         <td key={col.key} className={"ellipsis"}>
                           {data.type}
@@ -370,7 +370,7 @@ const FunnelLeadsFileDownloadPopupBtn = ({
                   {
                     key: "size",
                     header: "File Size",
-                    cell: (col: iTableColumn, data: iFileInfo) => {
+                    cell: (col: iTableColumn<iFileInfo>, data: iFileInfo) => {
                       return (
                         <td key={col.key} className={"ellipsis"}>
                           {UtilsService.formatBytesToHuman(data.size || 0)}

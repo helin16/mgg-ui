@@ -58,7 +58,7 @@ const LeadershipAndAwardByTypChartWithTable = ({
           {
             key: "Award",
             header: "Award/Position",
-            cell: (col: iTableColumn, data: iStudentReportAward[]) => {
+            cell: (col: iTableColumn<iStudentReportAward[]>, data: iStudentReportAward[]) => {
               return (
                 <td key={col.key}>
                   <div className={"ellipsis"}>
@@ -67,7 +67,7 @@ const LeadershipAndAwardByTypChartWithTable = ({
                 </td>
               );
             },
-            footer: (col: iTableColumn) => {
+            footer: (col: iTableColumn<iStudentReportAward[]>) => {
               return (
                 <td key={col.key}><b>Total</b></td>
               );
@@ -76,14 +76,14 @@ const LeadershipAndAwardByTypChartWithTable = ({
           {
             key: "Attained",
             header: "Attained",
-            cell: (col: iTableColumn, data: iStudentReportAward[]) => {
+            cell: (col: iTableColumn<iStudentReportAward[]>, data: iStudentReportAward[]) => {
               return (
                 <td key={col.key}>
                   <div className={"ellipsis"}>{data.length}</div>
                 </td>
               );
             },
-            footer: (col: iTableColumn) => {
+            footer: (col: iTableColumn<iStudentReportAward[]>) => {
               return (
                 <td key={col.key}><b>{awards.length}</b></td>
               );

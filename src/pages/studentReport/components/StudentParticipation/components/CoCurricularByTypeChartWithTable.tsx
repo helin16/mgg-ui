@@ -60,14 +60,14 @@ const CoCurricularByTypeChartWithTable = ({
           {
             key: "FileYear",
             header: "Year",
-            cell: (col: iTableColumn, data: iStudentReportCoCurricular[]) => {
+            cell: (col: iTableColumn<iStudentReportCoCurricular[]>, data: iStudentReportCoCurricular[]) => {
               return (
                 <td key={col.key}>
                   {data.length <= 0 ? "" : data[0].FileYear}
                 </td>
               );
             },
-            footer: (col: iTableColumn) => {
+            footer: (col: iTableColumn<iStudentReportCoCurricular[]>) => {
               return (
                 <td key={col.key}><b>Total</b></td>
               );
@@ -76,7 +76,7 @@ const CoCurricularByTypeChartWithTable = ({
           {
             key: "CoCurricular",
             header: "Co Curricular",
-            cell: (col: iTableColumn, data: iStudentReportCoCurricular[]) => {
+            cell: (col: iTableColumn<iStudentReportCoCurricular[]>, data: iStudentReportCoCurricular[]) => {
               return (
                 <td key={col.key}>
                   <div className={"ellipsis"}>
@@ -89,14 +89,14 @@ const CoCurricularByTypeChartWithTable = ({
           {
             key: "Involved",
             header: "Involved",
-            cell: (col: iTableColumn, data: iStudentReportCoCurricular[]) => {
+            cell: (col: iTableColumn<iStudentReportCoCurricular[]>, data: iStudentReportCoCurricular[]) => {
               return (
                 <td key={col.key}>
                   <div className={"ellipsis"}>{data.length}</div>
                 </td>
               );
             },
-            footer: (col: iTableColumn) => {
+            footer: (col: iTableColumn<iStudentReportCoCurricular[]>) => {
               return (
                 <td key={col.key}><b>{coCurriculars.length}</b></td>
               );

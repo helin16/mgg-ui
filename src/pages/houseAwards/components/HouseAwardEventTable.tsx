@@ -1,114 +1,190 @@
-import React, {useCallback} from 'react';
-import iHouseAwardEvent from '../../../types/HouseAwards/iHouseAwardEvent';
-import HouseAwardEventService from '../../../services/HouseAwards/HouseAwardEventService';
-import styled from 'styled-components';
-import {Button, Spinner, Table} from 'react-bootstrap';
-import * as Icons from 'react-bootstrap-icons';
-import moment from 'moment-timezone';
-import {FlexContainer} from '../../../styles';
-import useListCrudHook from '../../../components/hooks/useListCrudHook/useListCrudHook';
-import {iConfigParams} from '../../../services/AppService';
-import DeleteConfirmPopup from '../../../components/common/DeleteConfirm/DeleteConfirmPopup';
-import HouseAwardEventAddOrEditPopup from './HouseAwardEventAddOrEditPopup';
+import React, {useCallback} from "react";
+import iHouseAwardEvent from "../../../types/HouseAwards/iHouseAwardEvent";
+import HouseAwardEventService from "../../../services/HouseAwards/HouseAwardEventService";
+import styled from "styled-components";
+import { Button, Spinner } from "react-bootstrap";
+import * as Icons from "react-bootstrap-icons";
+import moment from "moment-timezone";
+import { FlexContainer } from "../../../styles";
+import useListCrudHook from "../../../components/hooks/useListCrudHook/useListCrudHook";
+import AppService from "../../../services/AppService";
+import DeleteConfirmPopup from "../../../components/common/DeleteConfirm/DeleteConfirmPopup";
+import HouseAwardEventAddOrEditPopup from "./HouseAwardEventAddOrEditPopup";
+import { iTableColumn } from "../../../components/common/Table";
 
 const Wrapper = styled.div``;
 const HouseAwardEventTable = () => {
-
   const {
     state,
-    edit,
+    viewingState,
     onOpenAddModal,
     onOpenEditModal,
     onCloseModal,
     onOpenDeleteModal,
     onSubmit,
     onDelete,
+    renderDataTable,
+    onRefreshWhenCreated,
+    onRefreshOnCurrentPage,
+    onRefresh,
   } = useListCrudHook<iHouseAwardEvent>({
-    getFn: useCallback((config?: iConfigParams) => {
-      const where = config ? JSON.parse(config?.where || '{}') : {};
+    perPage: 99999,
+    getFn: useCallback(async (config) => {
+      const { filter, ...props } = config || {};
       return HouseAwardEventService.getEvents({
-        where: JSON.stringify({...where, active: true})
-      })
+        where: JSON.stringify({ ...filter, active: true }),
+        ...props
+      }).then(res => AppService.convertArrToPaginatedArr(res));
     }, []),
-    createFn: HouseAwardEventService.createEvent,
-    updateFn: HouseAwardEventService.updateEvent,
-    deleteFn: HouseAwardEventService.deleteEvent,
+    createFn: data => HouseAwardEventService.createEvent(data),
+    updateFn: (model, data) =>
+      HouseAwardEventService.updateEvent(model.id, data || {}),
+    deleteFn: model => HouseAwardEventService.deleteEvent(model.id)
   });
 
   const getPopup = () => {
-    if (edit.target) {
-      if (!edit.delTargetId) {
-        return (
-          <HouseAwardEventAddOrEditPopup
-            event={edit.target}
-            isShowing={edit.isModalOpen}
-            handleClose={onCloseModal}
-            onSubmit={onSubmit}
-            isSubmitting={state.isConfirming}
-          />
-        )
-      }
+    if (viewingState.isModalOpen !== true) {
+      return null;
+    }
 
+    if (!viewingState.editingModel) {
+      return (
+        <HouseAwardEventAddOrEditPopup
+          isShowing={viewingState.isModalOpen}
+          handleClose={() => onCloseModal()}
+          onSubmit={(data) => onSubmit(data)?.then(res => {
+            onRefreshOnCurrentPage();
+            return res;
+          })}
+          isSubmitting={viewingState.isSaving}
+        />
+      );
+    }
+
+    if (viewingState.isShowingDeleting === true) {
       return (
         <DeleteConfirmPopup
-          confirmString={`${edit.target.name}`}
-          isOpen={edit.isModalOpen}
-          onClose={onCloseModal}
-          onConfirm={() => onDelete(edit.delTargetId || 0)}
+          confirmString={`${viewingState.editingModel.name}`}
+          isOpen={viewingState.isShowingDeleting}
+          onClose={() => onCloseModal()}
+          // @ts-ignore
+          onConfirm={() => onDelete(viewingState.editingModel).then(res => {
+            onRefresh();
+            return res;
+          })}
         />
-      )
+      );
     }
+
     return (
       <HouseAwardEventAddOrEditPopup
-        isShowing={edit.isModalOpen}
-        handleClose={onCloseModal}
-        onSubmit={onSubmit}
-        isSubmitting={state.isConfirming}
+        event={viewingState.editingModel}
+        isShowing={viewingState.isModalOpen}
+        handleClose={() => onCloseModal()}
+        onSubmit={(data) => onSubmit(data)?.then(res => {
+          onRefreshWhenCreated();
+          return res;
+        })}
+        isSubmitting={viewingState.isSaving}
       />
     );
-  }
+  };
 
   if (state.isLoading) {
-    return <Spinner animation={'border'} />
+    return <Spinner animation={"border"} />;
   }
 
   return (
     <Wrapper>
-      <FlexContainer className={'withGap'}>
+      <FlexContainer className={"withGap"}>
         <h5>Events</h5>
-        <Button variant={'info'} size={'sm'}onClick={() => onOpenAddModal()}><Icons.Plus /></Button>
+        <Button variant={"info"} size={"sm"} onClick={() => onOpenAddModal()}>
+          <Icons.Plus />
+        </Button>
       </FlexContainer>
-      <Table striped hover>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Created</th>
-            <th>Update</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {state.data.map(event => {
-            return (
-              <tr key={event.id}>
-                <td><Button variant={'link'} size={'sm'} onClick={() => onOpenEditModal(event.id)}>{event.name}</Button></td>
-                <td>{event.description}</td>
-                <td>{moment(event.created_at).format('lll')}</td>
-                <td>{moment(event.updated_at).format('lll')}</td>
-                <td className={'text-right'}>
-                  <Button variant={'danger'} size={'sm'} onClick={() => onOpenDeleteModal(event.id)}>
+      {renderDataTable({
+        striped: true,
+        hover: true,
+        columns: [
+          {
+            key: "name",
+            header: "Name",
+            cell: (
+              col: iTableColumn<iHouseAwardEvent>,
+              event: iHouseAwardEvent
+            ) => {
+              return (
+                <td key={col.key}>
+                  <Button
+                    variant={"link"}
+                    size={"sm"}
+                    onClick={() => onOpenEditModal(event)}
+                  >
+                    {event.name}
+                  </Button>
+                </td>
+              );
+            }
+          },
+          {
+            key: "description",
+            header: "Description",
+            cell: (
+              col: iTableColumn<iHouseAwardEvent>,
+              event: iHouseAwardEvent
+            ) => {
+              return <td key={col.key}>{event.description}</td>;
+            }
+          },
+          {
+            key: "created",
+            header: "Created",
+            cell: (
+              col: iTableColumn<iHouseAwardEvent>,
+              event: iHouseAwardEvent
+            ) => {
+              return (
+                <td key={col.key}>{moment(event.created_at).format("lll")}</td>
+              );
+            }
+          },
+          {
+            key: "update",
+            header: "Update",
+            cell: (
+              col: iTableColumn<iHouseAwardEvent>,
+              event: iHouseAwardEvent
+            ) => {
+              return (
+                <td key={col.key}>{moment(event.updated_at).format("lll")}</td>
+              );
+            }
+          },
+          {
+            key: "btns",
+            header: "",
+            cell: (
+              col: iTableColumn<iHouseAwardEvent>,
+              event: iHouseAwardEvent
+            ) => {
+              return (
+                <td key={col.key} className={"text-right"}>
+                  <Button
+                    variant={"danger"}
+                    size={"sm"}
+                    onClick={() => onOpenDeleteModal(event)}
+                  >
                     <Icons.Trash />
                   </Button>
                 </td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </Table>
+              );
+            }
+          }
+        ]
+      })}
       {getPopup()}
     </Wrapper>
-  )
-}
+  );
+};
 
-export default HouseAwardEventTable
+export default HouseAwardEventTable;

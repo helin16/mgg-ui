@@ -8,11 +8,11 @@ import { FlexContainer } from "../../styles";
 import LocalStorageService from '../../services/LocalStorageService';
 
 type iColumnPopupSelector = ButtonProps & {
-  columns: iTableColumn[];
+  columns: iTableColumn<any>[];
   localStorageKey?: string;
-  selectedColumns?: iTableColumn[];
+  selectedColumns?: iTableColumn<any>[];
   popupModalProp?: iPopupModal;
-  onColumnSelected: (selectedColumns: iTableColumn[]) => void;
+  onColumnSelected: (selectedColumns: iTableColumn<any>[]) => void;
 };
 
 const Wrapper = styled.div``;
@@ -41,9 +41,9 @@ const PopupWrapper = styled.div`
     }
   }
 `;
-type iGroupedColumns = { [key: string]: iTableColumn[] };
+type iGroupedColumns = { [key: string]: iTableColumn<any>[] };
 
-export const getSelectedColumnsFromLocalStorage = (localStorageKey: string, columns: iTableColumn[]) => {
+export const getSelectedColumnsFromLocalStorage = (localStorageKey: string, columns: iTableColumn<any>[]) => {
   const selectedKeys = LocalStorageService.getItem(localStorageKey);
   if (!Array.isArray(selectedKeys) || selectedKeys.length <= 0) {
     return [];
@@ -88,7 +88,7 @@ const ColumnPopupSelector = ({
     setShowingPopup(false);
   }
 
-  const handleSelected = (selected: boolean, column: iTableColumn) => {
+  const handleSelected = (selected: boolean, column: iTableColumn<any>) => {
     const newSelectedKeys = selected === true ? [
       ...selectedColumnKeys,
       column.key

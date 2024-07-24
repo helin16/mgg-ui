@@ -44,11 +44,11 @@ const ExpiringCreditCardsTable = ({data}: iExpiringCreditCardsTable) => {
     }
   }, [data])
 
-  const getColumns = (): iTableColumn[] => [
+  const getColumns = <T extends {}>(): iTableColumn<T>[] => [
     {
       key: 'Debtor',
       header: 'Debtor',
-      cell: (column: iTableColumn, data: iSynDebtorPaymentMethod) => {
+      cell: (column: iTableColumn<T>, data: iSynDebtorPaymentMethod) => {
         return <td key={column.key}>
           {`${data.DebtorID}` in debtorMap ?
             <Button size={'sm'} variant={'link'} onClick={() => setShowingDebtor(debtorMap[`${data.DebtorID}`])}>
@@ -60,21 +60,21 @@ const ExpiringCreditCardsTable = ({data}: iExpiringCreditCardsTable) => {
     {
       key: 'ccType',
       header: 'CC Type',
-      cell: (column: iTableColumn, data: iSynDebtorPaymentMethod) => {
+      cell: (column: iTableColumn<T>, data: iSynDebtorPaymentMethod) => {
         return <td key={column.key}>{data.CreditCardType}</td>
       }
     },
     {
       key: 'ccNumber',
       header: 'CC No.',
-      cell: (column: iTableColumn, data: iSynDebtorPaymentMethod) => {
+      cell: (column: iTableColumn<T>, data: iSynDebtorPaymentMethod) => {
         return <td key={column.key}>*******{data.CreditCardNumber}</td>
       }
     },
     {
       key: 'ccExpiry',
       header: 'CC Expiry',
-      cell: (column: iTableColumn, data: iSynDebtorPaymentMethod) => {
+      cell: (column: iTableColumn<T>, data: iSynDebtorPaymentMethod) => {
         return <td key={column.key}>{data.CreditCardExpiryYear} - {data.CreditCardExpiryMonth}</td>
       }
     }
@@ -123,7 +123,7 @@ const ExpiringCreditCardsTable = ({data}: iExpiringCreditCardsTable) => {
 
   return (
     <>
-      <Table columns={getColumns()} rows={data} hover striped />
+      <Table columns={getColumns<iSynDebtorPaymentMethod>()} rows={data} hover striped />
       {getPopup()}
     </>
   )

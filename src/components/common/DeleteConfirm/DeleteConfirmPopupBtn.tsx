@@ -1,4 +1,4 @@
-import { useState} from 'react';
+import {useEffect, useState} from 'react';
 import {Button, ButtonProps} from 'react-bootstrap';
 import DeleteConfirmPopup from './DeleteConfirmPopup';
 import Toaster from '../../../services/Toaster';
@@ -9,7 +9,7 @@ import {RootState} from '../../../redux/makeReduxStore';
 type iDeleteConfirmPopupBtnProps = ButtonProps & {
   closePopup?: () => void;
   onOpenDelete?: () => void;
-  deletingFn: () => Promise<any>;
+  deletingFn?: () => Promise<any>;
   deletedCallbackFn?: (resp: any) => void;
   confirmString?: string;
   confirmBtnString?: string;
@@ -38,8 +38,18 @@ const DeleteConfirmPopupBtn = ({
   const {user: currentUser} = useSelector((state: RootState) => state.auth);
   const [isShowingPopup, setIsShowingPopup] = useState(isShowing);
   const [isSubmitting, setIsSubmitting] = useState(isDeleting);
+  const [confirmStr, setConfirmStr] = useState('na');
+
+  useEffect(() => {
+    const confirmStrTrimmed = `${confirmString || ''}`.trim();
+    setConfirmStr(confirmStrTrimmed === '' ? `${(currentUser?.synergyId || Math.ceil(Math.random() * 100000))}` : confirmStrTrimmed);
+  }, [confirmString, currentUser]);
 
   const submitDeletion = () => {
+    if (!deletingFn) {
+      return;
+    }
+
     setIsSubmitting(true);
     return deletingFn()
       .then(resp => {
@@ -54,6 +64,10 @@ const DeleteConfirmPopupBtn = ({
       })
   }
 
+  if (!deletingFn) {
+    return null;
+  }
+
   return (
     <>
       <Button {...props} title={title} onClick={() => onOpenDelete ? onOpenDelete() : setIsShowingPopup(true)}>{children}</Button>
@@ -62,7 +76,7 @@ const DeleteConfirmPopupBtn = ({
         onConfirm={submitDeletion}
         isDeleting={isSubmitting}
         isOpen={isShowingPopup}
-        confirmString={confirmString || `${currentUser?.synergyId || 'na'}`.trim()}
+        confirmString={confirmStr}
         confirmBtnString={confirmBtnString}
         confirmBtnVariant={confirmBtnVariant}
         onClose={() => closePopup ? closePopup() : setIsShowingPopup(false)}

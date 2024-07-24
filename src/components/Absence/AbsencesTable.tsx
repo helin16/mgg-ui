@@ -6,11 +6,11 @@ type iAbsencesTable = {
 }
 
 const AbsencesTable = ({absences, ...props}: iAbsencesTable) => {
-  const getColumns = () => [
+  const getColumns = <T extends {}>() => [
     {
       key: "date",
       header: "Date",
-      cell: (col: iTableColumn, data: iSynVAbsence) => {
+      cell: (col: iTableColumn<T>, data: iSynVAbsence) => {
         return (
           <td key={col.key}>
             {`${data.AbsenceDate || ""}`.replace("T00:00:00.000Z", "")}
@@ -21,14 +21,14 @@ const AbsencesTable = ({absences, ...props}: iAbsencesTable) => {
     {
       key: "period",
       header: "Period",
-      cell: (col: iTableColumn, data: iSynVAbsence) => {
+      cell: (col: iTableColumn<T>, data: iSynVAbsence) => {
         return <td key={col.key}>{data.AbsencePeriod}</td>;
       }
     },
     {
       key: "type",
       header: "Type",
-      cell: (col: iTableColumn, data: iSynVAbsence) => {
+      cell: (col: iTableColumn<T>, data: iSynVAbsence) => {
         return (
           <td key={col.key}>
             {data.SynLuAbsenceType?.Code} - {data.SynLuAbsenceType?.Description}
@@ -39,7 +39,7 @@ const AbsencesTable = ({absences, ...props}: iAbsencesTable) => {
     {
       key: "reason",
       header: "Reason",
-      cell: (col: iTableColumn, data: iSynVAbsence) => {
+      cell: (col: iTableColumn<T>, data: iSynVAbsence) => {
         return (
           <td key={col.key}>
             {data.SynLuAbsenceReason?.Code} -{" "}
@@ -51,7 +51,7 @@ const AbsencesTable = ({absences, ...props}: iAbsencesTable) => {
     {
       key: "comments",
       header: "Comments",
-      cell: (col: iTableColumn, data: iSynVAbsence) => {
+      cell: (col: iTableColumn<T>, data: iSynVAbsence) => {
         return (
           <td key={col.key}>
             {data.Description}
@@ -69,7 +69,7 @@ const AbsencesTable = ({absences, ...props}: iAbsencesTable) => {
           ? 1
           : -1;
       })}
-      columns={getColumns()}
+      columns={getColumns<iSynVAbsence>()}
       responsive
       hover
       striped

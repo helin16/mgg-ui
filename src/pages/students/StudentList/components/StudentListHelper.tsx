@@ -4,7 +4,7 @@ import moment from 'moment-timezone';
 import * as XLSX from 'sheetjs-style';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const getCell = (columnName: string, forExport = false, _schoolBoxUrl: string | null = null) =>  (col: iTableColumn, data: iVPastAndCurrentStudent) => {
+const getCell = (columnName: string, forExport = false, _schoolBoxUrl: string | null = null) =>  (col: iTableColumn<any>, data: iVPastAndCurrentStudent) => {
   // @ts-ignore
   const value = `${data[columnName] || ""}`.trim();
   if (value.toLowerCase() === "true") {
@@ -20,7 +20,7 @@ const getCell = (columnName: string, forExport = false, _schoolBoxUrl: string | 
   return value;
 }
 
-const genStudentListExcel = (columns: iTableColumn[], students: iVPastAndCurrentStudent[]) => {
+const genStudentListExcel = (columns: iTableColumn<iVPastAndCurrentStudent[]>[], students: iVPastAndCurrentStudent[]) => {
   const data = students.map(student => {
     return columns.reduce((map, column) => {
       return {

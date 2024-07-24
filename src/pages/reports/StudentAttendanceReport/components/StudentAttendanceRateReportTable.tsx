@@ -113,18 +113,18 @@ const StudentAttendanceRateReportTable = ({
 
   }
 
-  const getColumns = () => [
+  const getColumns = <T extends {}>() => [
     {
       key: "yearLevel",
       header: "Yr Lvl.",
-      cell: (column: iTableColumn, data: ISynLuYearLevel) => {
+      cell: (column: iTableColumn<T>, data: ISynLuYearLevel) => {
         return (
           <td key={column.key}>
             <b>{data.Description}</b>
           </td>
         );
       },
-      footer: (column: iTableColumn) => {
+      footer: (column: iTableColumn<T>) => {
         return (
           <td key={column.key}>
             <b>Total</b>
@@ -135,7 +135,7 @@ const StudentAttendanceRateReportTable = ({
     {
       key: "rate-greater",
       header: `>=${watchingRate}%`,
-      footer: (column: iTableColumn) => {
+      footer: (column: iTableColumn<T>) => {
         // @ts-ignore
         const studentIds = getRatedStudentIds({
           minRate: watchingRate,
@@ -144,7 +144,7 @@ const StudentAttendanceRateReportTable = ({
 
         return <td key={column.key}>{getPopupDiv(studentIds)}</td>;
       },
-      cell: (column: iTableColumn, data: ISynLuYearLevel) => {
+      cell: (column: iTableColumn<T>, data: ISynLuYearLevel) => {
         const studentIds = getRatedStudentIds({
           // @ts-ignore
           studentIds: stYearLevelMap[data.Code] || [],
@@ -158,7 +158,7 @@ const StudentAttendanceRateReportTable = ({
     {
       key: "rate-less",
       header: `<${watchingRate}%`,
-      footer: (column: iTableColumn) => {
+      footer: (column: iTableColumn<T>) => {
         // @ts-ignore
         const studentIds = getRatedStudentIds({
           minRate: 0,
@@ -166,7 +166,7 @@ const StudentAttendanceRateReportTable = ({
         });
         return <td key={column.key}>{getPopupDiv(studentIds)}</td>;
       },
-      cell: (column: iTableColumn, data: ISynLuYearLevel) => {
+      cell: (column: iTableColumn<T>, data: ISynLuYearLevel) => {
         const studentIds = getRatedStudentIds({
           // @ts-ignore
           studentIds: stYearLevelMap[data.Code] || [],
@@ -180,13 +180,13 @@ const StudentAttendanceRateReportTable = ({
     {
       key: "yrlvl-total",
       header: "Total",
-      footer: (column: iTableColumn) => {
+      footer: (column: iTableColumn<T>) => {
         // @ts-ignore
         const studentIds = Object.keys(studentMap);
 
         return <td key={column.key}>{getPopupDiv(studentIds)}</td>;
       },
-      cell: (column: iTableColumn, data: ISynLuYearLevel) => {
+      cell: (column: iTableColumn<T>, data: ISynLuYearLevel) => {
         // @ts-ignore
         const studentIds = stYearLevelMap[data.Code] || [];
         return <td key={column.key}>{getPopupDiv(studentIds)}</td>;
@@ -195,7 +195,7 @@ const StudentAttendanceRateReportTable = ({
     {
       key: "yrlvl-overall",
       header: "Overall %",
-      footer: (column: iTableColumn) => {
+      footer: (column: iTableColumn<T>) => {
         const studentIds = Object.keys(studentMap).map(studentId => Number(studentId));
 
         const {attended, attendances} = getOverallAttendanceRate(studentIds);
@@ -204,7 +204,7 @@ const StudentAttendanceRateReportTable = ({
         }
         return <td key={column.key}>{getPopupDiv(studentIds, MathHelper.mul(MathHelper.div(attended.length, attendances.length), 100).toFixed(2))}</td>;;
       },
-      cell: (column: iTableColumn, data: ISynLuYearLevel) => {
+      cell: (column: iTableColumn<T>, data: ISynLuYearLevel) => {
         // @ts-ignore
         const studentIds = stYearLevelMap[data.Code] || [];
         const {attended, attendances} = getOverallAttendanceRate(studentIds);
@@ -221,7 +221,7 @@ const StudentAttendanceRateReportTable = ({
   }
   return (
     <Wrapper>
-      <Table columns={getColumns()} rows={yearLevels} hover />
+      <Table columns={getColumns<ISynLuYearLevel>()} rows={yearLevels} hover />
     </Wrapper>
   );
 };

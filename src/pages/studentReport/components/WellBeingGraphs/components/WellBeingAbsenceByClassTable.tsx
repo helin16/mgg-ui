@@ -51,7 +51,7 @@ const WellBeingAbsenceByClassChart = ({
     );
   }, [student, attendances, absences]);
 
-  const getColumns = (): iTableColumn[] => [
+  const getColumns = <T extends {}>(): iTableColumn<T>[] => [
     {
       key: "classCode",
       header: "Class",
@@ -82,7 +82,7 @@ const WellBeingAbsenceByClassChart = ({
           </td>
         );
       },
-      footer: (column: iTableColumn) => {
+      footer: (column: iTableColumn<T>) => {
         const atts = attendances;
         return (
           <td key={column.key}>
@@ -124,7 +124,7 @@ const WellBeingAbsenceByClassChart = ({
           </td>
         );
       },
-      footer: (column: iTableColumn) => {
+      footer: (column: iTableColumn<T>) => {
         const atts = attendances.filter(
           attendance =>
             attendance.AttendedFlag === true
@@ -169,7 +169,7 @@ const WellBeingAbsenceByClassChart = ({
           </td>
         );
       },
-      footer: (column: iTableColumn) => {
+      footer: (column: iTableColumn<T>) => {
         const atts = attendances.filter(
           attendance =>
             attendance.AttendedFlag !== true
@@ -216,7 +216,7 @@ const WellBeingAbsenceByClassChart = ({
           </td>
         );
       },
-      footer: (column: iTableColumn) => {
+      footer: (column: iTableColumn<T>) => {
         const atts = attendances.filter(
           attendance =>
             // @ts-ignore
@@ -266,7 +266,7 @@ const WellBeingAbsenceByClassChart = ({
           </td>
         );
       },
-      footer: (column: iTableColumn) => {
+      footer: (column: iTableColumn<T>) => {
         const atts = attendances.filter(
           attendance =>
             AttendanceHelper.isReportableAbsence(attendance)
@@ -292,7 +292,7 @@ const WellBeingAbsenceByClassChart = ({
   return (
     <Wrapper>
       <Table
-        columns={getColumns()}
+        columns={getColumns<string>()}
         rows={Object.keys(absencesByClassMap).sort((classCode1, classCode2) => classCode1 > classCode2 ? 1 : -1)}
         hover
         striped

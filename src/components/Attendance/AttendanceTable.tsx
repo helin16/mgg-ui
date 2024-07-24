@@ -11,13 +11,13 @@ const AttendanceTable = ({
   attendances,
   showStudentID = true
 }: iAttendanceTable) => {
-  const getColumns = () => [
+  const getColumns = <T extends {}>() => [
     ...(showStudentID === true
       ? [
           {
             key: "id",
             header: "ID",
-            cell: (col: iTableColumn, data: iSynVAttendance) => {
+            cell: (col: iTableColumn<T>, data: iSynVAttendance) => {
               return <td key={col.key}>{data.ID}</td>;
             }
           }
@@ -26,7 +26,7 @@ const AttendanceTable = ({
     {
       key: "date",
       header: "Date",
-      cell: (col: iTableColumn, data: iSynVAttendance) => {
+      cell: (col: iTableColumn<T>, data: iSynVAttendance) => {
         return (
           <td key={col.key}>
             {`${data.AttendanceDate || ""}`.replace("T00:00:00.000Z", "")}
@@ -37,28 +37,28 @@ const AttendanceTable = ({
     {
       key: "period",
       header: "Period",
-      cell: (col: iTableColumn, data: iSynVAttendance) => {
+      cell: (col: iTableColumn<T>, data: iSynVAttendance) => {
         return <td key={col.key}>{data.AttendancePeriod}</td>;
       }
     },
     {
       key: "class",
       header: "Class",
-      cell: (col: iTableColumn, data: iSynVAttendance) => {
+      cell: (col: iTableColumn<T>, data: iSynVAttendance) => {
         return <td key={col.key}>{data.ClassCode}</td>;
       }
     },
     {
       key: "attended",
       header: "Attended",
-      cell: (col: iTableColumn, data: iSynVAttendance) => {
+      cell: (col: iTableColumn<T>, data: iSynVAttendance) => {
         return <td key={col.key}>{data.AttendedFlag === true ? 'Y' : ''}</td>;
       }
     },
     {
       key: "reason",
       header: "Absence Reason",
-      cell: (col: iTableColumn, data: iSynVAttendance) => {
+      cell: (col: iTableColumn<T>, data: iSynVAttendance) => {
         return (
           <td key={col.key}>
             {`${data.PossibleAbsenceType?.Code || ''}${data.PossibleDescription}`.trim() ===
@@ -74,21 +74,21 @@ const AttendanceTable = ({
     {
       key: "class-canceled",
       header: "Class Canceled?",
-      cell: (col: iTableColumn, data: iSynVAttendance) => {
+      cell: (col: iTableColumn<T>, data: iSynVAttendance) => {
         return <td key={col.key}>{data.ClassCancelledFlag}</td>;
       }
     },
     {
       key: "approved",
       header: "Approved?",
-      cell: (col: iTableColumn, data: iSynVAttendance) => {
+      cell: (col: iTableColumn<T>, data: iSynVAttendance) => {
         return <td key={col.key}>{data.AttendedFlag === true ? "Y" : ""}</td>;
       }
     },
     {
       key: "countAsAbsence",
       header: "Count As Absence?",
-      cell: (col: iTableColumn, data: iSynVAttendance) => {
+      cell: (col: iTableColumn<T>, data: iSynVAttendance) => {
         return <td key={col.key}>{AttendanceHelper.isReportableAbsence(data) === true ? "Y" : ""}</td>;
       }
     }
@@ -102,7 +102,7 @@ const AttendanceTable = ({
           ? 1
           : -1;
       })}
-      columns={getColumns()}
+      columns={getColumns<iSynVAttendance>()}
       responsive
       hover
       striped

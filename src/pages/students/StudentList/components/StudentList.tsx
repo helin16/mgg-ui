@@ -23,8 +23,6 @@ import {OP_LIKE, OP_OR} from '../../../../helper/ServiceHelper';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../../redux/makeReduxStore';
 
-
-
 type iStudentList = {
   className?: string;
   searchCriteria: iStudentListSearchCriteria;
@@ -44,8 +42,8 @@ const StudentList = ({ className, searchCriteria, isSearching, onSearching }: iS
   > | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
-  const [columns, setColumns] = useState<iTableColumn[]>([]);
-  const [selectedColumns, setSelectedColumns] = useState<iTableColumn[]>([]);
+  const [columns, setColumns] = useState<iTableColumn<any>[]>([]);
+  const [selectedColumns, setSelectedColumns] = useState<iTableColumn<any>[]>([]);
   const [count, setCount] = useState(0);
 
   const doSearch = (pageNo: Number) => {

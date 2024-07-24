@@ -1,59 +1,33 @@
-import { useEffect, useState } from "react";
-import iPaginatedResult from "../../../types/iPaginatedResult";
+import {useCallback, useState} from "react";
 import iSynOnlineDonation from "../../../types/Synergetic/Finance/iSynOnlineDonation";
-import PageLoadingSpinner from "../../../components/common/PageLoadingSpinner";
-import Table, { iTableColumn } from "../../../components/common/Table";
+import { iTableColumn } from "../../../components/common/Table";
 import SynOnlineDonationService from "../../../services/Payments/SynOnlineDonationService";
-import Toaster from "../../../services/Toaster";
 import moment from "moment-timezone";
 import UtilsService from "../../../services/UtilsService";
 import PopupModal from "../../../components/common/PopupModal";
 import SectionDiv from "../../../components/common/SectionDiv";
+import useListCrudHook from "../../../components/hooks/useListCrudHook/useListCrudHook";
+import iSynVDonorReceipt from "../../../types/Synergetic/Finance/iSynVDonorReceipt";
 
 const OnlineDonationListPanel = () => {
-  const [onlineDonations, setOnlineDonations] = useState<iPaginatedResult<
-    iSynOnlineDonation
-  > | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
   const [showingRecord, setShowingRecord] = useState<iSynOnlineDonation | null>(
     null
   );
 
-  useEffect(() => {
-    let isCanceled = false;
-    setIsLoading(true);
-    SynOnlineDonationService.getAll({
-      where: JSON.stringify({
-        Active: true
-      }),
-      perPage: 20,
-      sort: "CreatedAt:DESC",
-      currentPage
-    })
-      .then(resp => {
-        if (isCanceled) {
-          return;
-        }
-        setOnlineDonations(resp);
-      })
-      .catch(err => {
-        if (isCanceled) {
-          return;
-        }
-        Toaster.showApiError(err);
-      })
-      .finally(() => {
-        if (isCanceled) {
-          return;
-        }
-        setIsLoading(false);
+  const { renderDataTable } = useListCrudHook({
+    perPage: 20,
+    getFn: useCallback(config => {
+      const { filter, sort, ...props } = config || {};
+      return SynOnlineDonationService.getAll({
+        where: JSON.stringify({
+          ...filter,
+          Active: true
+        }),
+        sort: sort || "CreatedAt:DESC",
+        ...props
       });
-
-    return () => {
-      isCanceled = true;
-    };
-  }, [currentPage]);
+    }, []),
+  });
 
   const getErrorDetailsPopup = () => {
     if (showingRecord === null) {
@@ -67,7 +41,13 @@ const OnlineDonationListPanel = () => {
         size={"lg"}
       >
         <SectionDiv className={"margin-bottom"}>
-          <pre>{JSON.stringify(JSON.parse(showingRecord.GatewaytError || '{}'), null, 2)}</pre>
+          <pre>
+            {JSON.stringify(
+              JSON.parse(showingRecord.GatewaytError || "{}"),
+              null,
+              2
+            )}
+          </pre>
         </SectionDiv>
       </PopupModal>
     );
@@ -76,7 +56,11 @@ const OnlineDonationListPanel = () => {
   const getStatusTd = (key: string, data: iSynOnlineDonation) => {
     if (`${data.GatewaytError || ""}`.trim() !== "") {
       return (
-        <td key={key} className={"bg-danger text-white cursor-pointer"} onClick={() => setShowingRecord(data)}>
+        <td
+          key={key}
+          className={"bg-danger text-white cursor-pointer"}
+          onClick={() => setShowingRecord(data)}
+        >
           ERROR
         </td>
       );
@@ -92,11 +76,11 @@ const OnlineDonationListPanel = () => {
     return <td key={key}></td>;
   };
 
-  const getColumns = () => [
+  const getColumns = <T extends {}>() => [
     {
       key: "date",
       header: "Date",
-      cell: (col: iTableColumn, data: iSynOnlineDonation) => {
+      cell: (col: iTableColumn<T>, data: iSynOnlineDonation) => {
         return (
           <td key={col.key}>
             {moment(data.DonationDate).format("DD MMM YYYY")}
@@ -107,14 +91,14 @@ const OnlineDonationListPanel = () => {
     {
       key: "ref",
       header: "Reference",
-      cell: (col: iTableColumn, data: iSynOnlineDonation) => {
+      cell: (col: iTableColumn<T>, data: iSynOnlineDonation) => {
         return <td key={col.key}>{data.CustomerReferenceNumber}</td>;
       }
     },
     {
       key: "name",
       header: "Name",
-      cell: (col: iTableColumn, data: iSynOnlineDonation) => {
+      cell: (col: iTableColumn<T>, data: iSynOnlineDonation) => {
         return (
           <td key={col.key}>
             {data.Preferred} {data.Surname}
@@ -125,7 +109,7 @@ const OnlineDonationListPanel = () => {
     {
       key: "email",
       header: "Email",
-      cell: (col: iTableColumn, data: iSynOnlineDonation) => {
+      cell: (col: iTableColumn<T>, data: iSynOnlineDonation) => {
         return (
           <td key={col.key}>
             <a href={`mailto:${data.Email}`}>{data.Email}</a>
@@ -136,14 +120,14 @@ const OnlineDonationListPanel = () => {
     {
       key: "phone",
       header: "Phone",
-      cell: (col: iTableColumn, data: iSynOnlineDonation) => {
+      cell: (col: iTableColumn<T>, data: iSynOnlineDonation) => {
         return <td key={col.key}>{data.MobilePhone}</td>;
       }
     },
     {
       key: "amount",
       header: "Amount",
-      cell: (col: iTableColumn, data: iSynOnlineDonation) => {
+      cell: (col: iTableColumn<T>, data: iSynOnlineDonation) => {
         return (
           <td key={col.key}>
             {UtilsService.formatIntoCurrency(data.DonationAmount)}
@@ -154,14 +138,14 @@ const OnlineDonationListPanel = () => {
     {
       key: "fundDirection",
       header: "Donation Direction",
-      cell: (col: iTableColumn, data: iSynOnlineDonation) => {
+      cell: (col: iTableColumn<T>, data: iSynOnlineDonation) => {
         return <td key={col.key}>{data.DonationFund}</td>;
       }
     },
     {
       key: "remainAnonymous",
       header: "Prefer Anonymous?",
-      cell: (col: iTableColumn, data: iSynOnlineDonation) => {
+      cell: (col: iTableColumn<T>, data: iSynOnlineDonation) => {
         return (
           <td key={col.key}>
             {data.AnonymousDonationFlag === true ? "Y" : ""}
@@ -172,34 +156,24 @@ const OnlineDonationListPanel = () => {
     {
       key: "address",
       header: "Address",
-      cell: (col: iTableColumn, data: iSynOnlineDonation) => {
+      cell: (col: iTableColumn<T>, data: iSynOnlineDonation) => {
         return <td key={col.key}>{data.FullAddress}</td>;
       }
     },
     {
       key: "status",
       header: "Status",
-      cell: (col: iTableColumn, data: iSynOnlineDonation) => {
+      cell: (col: iTableColumn<T>, data: iSynOnlineDonation) => {
         return getStatusTd(col.key, data);
       }
     }
   ];
 
-  if (isLoading === true) {
-    return <PageLoadingSpinner />;
-  }
-
   return (
     <>
-      <Table
-        columns={getColumns()}
-        rows={onlineDonations?.data || []}
-        pagination={{
-          currentPage,
-          totalPages: onlineDonations?.pages || 0,
-          onSetCurrentPage: newPage => setCurrentPage(newPage)
-        }}
-      />
+      {renderDataTable({
+        columns: getColumns<iSynVDonorReceipt>()
+      })}
       {getErrorDetailsPopup()}
     </>
   );

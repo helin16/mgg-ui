@@ -1,9 +1,7 @@
 import useListCrudHook from '../../../components/hooks/useListCrudHook/useListCrudHook';
-import {useCallback} from 'react';
-import {iConfigParams} from '../../../services/AppService';
 import MggAppDeviceService from '../../../services/Settings/MggAppDeviceService';
 import PageLoadingSpinner from '../../../components/common/PageLoadingSpinner';
-import Table, {iTableColumn} from '../../../components/common/Table';
+import {iTableColumn} from '../../../components/common/Table';
 import iMggAppDevice from '../../../types/Settings/iMggAppDevice';
 import {Button} from 'react-bootstrap';
 import * as Icons from 'react-bootstrap-icons';
@@ -12,45 +10,40 @@ import MggDeviceAddOrEditPanel from './MggDeviceAddOrEditPanel';
 import DeleteConfirmPopupBtn from '../../../components/common/DeleteConfirm/DeleteConfirmPopupBtn';
 import {FlexContainer} from '../../../styles';
 import moment from 'moment-timezone';
+import {useCallback} from 'react';
 
 const MggDeviceList = () => {
   const {
     state,
-    edit,
-    onOpenAddModal,
     onOpenEditModal,
-    onCloseModal,
-    onSubmit,
+    onOpenAddModal,
+    onRefresh,
     onDelete,
-    onRefreshList,
-    onSetCurrentPage,
+    viewingState,
+    onCloseModal,
+    renderDataTable,
+    onRefreshWhenCreated,
+    onRefreshOnCurrentPage,
+    onSubmit,
   } = useListCrudHook<iMggAppDevice>({
-    paginationApplied: true,
-    forceRefreshAfterSave: true,
-    getFn: useCallback((config?: iConfigParams) => {
-      const where = config ? JSON.parse(config?.where || '{}') : {};
-      const includes = [
-        ...`${config?.include || ''}`.trim().split(','),
-        ...['CreatedBy', 'UpdatedBy', 'MggApp'],
-      ].filter(inc => `${inc}`.trim() !== '')
+    getFn: useCallback((config) => {
+      const {filter, ...props} = (config || {});
 
-      delete config?.where;
-      delete config?.include;
       return MggAppDeviceService.getAll({
-        where: JSON.stringify({...where, isActive: true}),
-        include: includes.join(','),
-        ...(config || {}),
+        where: JSON.stringify({...filter, isActive: true}),
+        include: ['CreatedBy', 'UpdatedBy', 'MggApp'].join(','),
+        ...props,
       })
     }, []),
-    createFn: MggAppDeviceService.create,
-    updateFn: MggAppDeviceService.update,
-    deleteFn: MggAppDeviceService.deactivate,
+    deleteFn: (model) => MggAppDeviceService.deactivate(model.id),
+    createFn: (params) => MggAppDeviceService.create(params),
+    updateFn: (model, params) => MggAppDeviceService.update(model.id, params || {}),
   });
 
-  const getColumns = (): iTableColumn[] => [
+  const getColumns = <T extends {}>(): iTableColumn<T>[] => [
     {
       key: 'device',
-      header: (column: iTableColumn) => {
+      header: (column: iTableColumn<T>) => {
         return <th key={column.key}>
           <FlexContainer className={'justify-content space-between'}>
             <div>Device</div>
@@ -58,10 +51,10 @@ const MggDeviceList = () => {
           </FlexContainer>
         </th>
       },
-      cell: (column: iTableColumn, row: iMggAppDevice) => {
+      cell: (column: iTableColumn<T>, row: iMggAppDevice) => {
         return <td key={column.key}>
           <FlexContainer className={'justify-content space-between'}>
-            <Button variant={'link'} size={'sm'} onClick={() => onOpenEditModal(row.id)}>{row.name}</Button>
+            <Button variant={'link'} size={'sm'} onClick={() => onOpenEditModal(row)}>{row.name}</Button>
             <div>{row.deviceId}</div>
           </FlexContainer>
           <small>{row.description}</small>
@@ -71,34 +64,34 @@ const MggDeviceList = () => {
     {
       key: 'code',
       header: 'App Code',
-      cell: (column: iTableColumn, row: iMggAppDevice) => {
+      cell: (column: iTableColumn<T>, row: iMggAppDevice) => {
         return <td key={column.key}>{row.code}</td>
       }
     },
     {
       key: 'make',
       header: 'Make',
-      cell: (column: iTableColumn, row: iMggAppDevice) => {
+      cell: (column: iTableColumn<T>, row: iMggAppDevice) => {
         return <td key={column.key}>{row.make}</td>
       }
     },{
       key: 'model',
       header: 'Model',
-      cell: (column: iTableColumn, row: iMggAppDevice) => {
+      cell: (column: iTableColumn<T>, row: iMggAppDevice) => {
         return <td key={column.key}>{row.model}</td>
       }
     },
     {
       key: 'location',
       header: 'Location',
-      cell: (column: iTableColumn, row: iMggAppDevice) => {
+      cell: (column: iTableColumn<T>, row: iMggAppDevice) => {
         return <td key={column.key}>{row.location}</td>
       }
     },
     {
       key: 'created',
       header: 'Created',
-      cell: (column: iTableColumn, row: iMggAppDevice) => {
+      cell: (column: iTableColumn<T>, row: iMggAppDevice) => {
         return <td key={column.key}>
           <div><b>By:</b> {row.CreatedBy?.firstName} {row.CreatedBy?.lastName}</div>
           <div><b>@:</b> {moment(row.createdAt).format('lll')}</div>
@@ -108,7 +101,7 @@ const MggDeviceList = () => {
     {
       key: 'updated',
       header: 'Updated',
-      cell: (column: iTableColumn, row: iMggAppDevice) => {
+      cell: (column: iTableColumn<T>, row: iMggAppDevice) => {
         return <td key={column.key}>
           <div><b>By:</b> {row.UpdatedBy?.firstName} {row.UpdatedBy?.lastName}</div>
           <div><b>@:</b> {moment(row.updatedAt).format('lll')}</div>
@@ -117,13 +110,13 @@ const MggDeviceList = () => {
     },
     {
       key: 'operations',
-      header: (column: iTableColumn) => <th className={'text-right'} key={column.key}><Button variant={'success'} size={'sm'} onClick={() => onOpenAddModal()}><Icons.Plus /> New</Button></th>,
-      cell: (column: iTableColumn, row: iMggAppDevice) => {
+      header: (column: iTableColumn<T>) => <th className={'text-right'} key={column.key}><Button variant={'success'} size={'sm'} onClick={() => onOpenAddModal()}><Icons.Plus /> New</Button></th>,
+      cell: (column: iTableColumn<T>, row: iMggAppDevice) => {
         return <td className={'text-right'} key={column.key}>
           <DeleteConfirmPopupBtn
             variant={'danger'}
-            deletingFn={() => onDelete(row.id)}
-            deletedCallbackFn={() => onRefreshList()}
+            deletingFn={() => onDelete(row)}
+            deletedCallbackFn={() => onRefresh()}
             size={'sm'}
             description={<>You are about to deregister this device: <b>{row.name} {row.deviceId}</b></>}
             confirmString={`${row.code}`}
@@ -139,15 +132,22 @@ const MggDeviceList = () => {
     return (
       <PopupModal
         dialogClassName={'modal-80w'}
-        show={edit.isModalOpen}
+        show={viewingState.isModalOpen}
         handleClose={() => onCloseModal()}
-        title={edit.target?.id ? `Updating a device: ${edit.target.name}`: `Registering a device`}
+        title={`${viewingState.editingModel?.id || ''}`.trim() !== '' ? `Updating a device: ${viewingState.editingModel?.name}`: `Registering a device`}
       >
         <MggDeviceAddOrEditPanel
-          isSubmitting={state.isConfirming}
-          mggAppDevice={edit.target}
+          isSubmitting={viewingState.isSaving}
+          mggAppDevice={viewingState.editingModel || undefined}
           onCancel={() => onCloseModal()}
-          onSave={(data) => onSubmit(data)}
+          onSave={(data) => onSubmit(data)?.then(res => {
+            if (viewingState.editingModel) {
+              onRefreshOnCurrentPage();
+            } else {
+              onRefreshWhenCreated();
+            }
+            return res;
+          })}
         />
       </PopupModal>
     )
@@ -158,17 +158,11 @@ const MggDeviceList = () => {
   }
   return (
     <div>
-      <Table
-        hover
-        responsive
-        columns={getColumns()}
-        rows={state.data}
-        pagination={{
-          totalPages: state.pages || 0,
-          currentPage: state.currentPage || 1,
-          onSetCurrentPage: (currentPage) => onSetCurrentPage(currentPage),
-        }}
-      />
+      {renderDataTable({
+        columns: getColumns<iMggAppDevice>(),
+        hover: true,
+        responsive: true,
+      })}
       {getAddOrEditPopup()}
     </div>
   )

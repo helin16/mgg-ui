@@ -295,11 +295,11 @@ const StudentNumberDetailsPopupBtn = ({
     );
   };
 
-  const getColumns = () => [
+  const getColumns = <T extends {}>() => [
     {
       key: "studentID",
       header: "ID",
-      cell: (col: iTableColumn, record: iVStudent | iFunnelLead) => {
+      cell: (col: iTableColumn<T>, record: iVStudent | iFunnelLead) => {
         return (
           <td key={col.key}>{"StudentID" in record ? record.StudentID : ""}</td>
         );
@@ -308,7 +308,7 @@ const StudentNumberDetailsPopupBtn = ({
     {
       key: "studentGiven1",
       header: "First Name",
-      cell: (col: iTableColumn, record: iVStudent | iFunnelLead) => {
+      cell: (col: iTableColumn<T>, record: iVStudent | iFunnelLead) => {
         return (
           <td key={col.key}>
             {"StudentGiven1" in record
@@ -321,7 +321,7 @@ const StudentNumberDetailsPopupBtn = ({
     {
       key: "studentSurname",
       header: "Last Name",
-      cell: (col: iTableColumn, record: iVStudent | iFunnelLead) => {
+      cell: (col: iTableColumn<T>, record: iVStudent | iFunnelLead) => {
         return (
           <td key={col.key}>
             {"StudentSurname" in record
@@ -334,7 +334,7 @@ const StudentNumberDetailsPopupBtn = ({
     {
       key: "studentStatus",
       header: "Status",
-      cell: (col: iTableColumn, record: iVStudent | iFunnelLead) => {
+      cell: (col: iTableColumn<T>, record: iVStudent | iFunnelLead) => {
         return (
           <td key={col.key}>
             {"StudentStatusDescription" in record
@@ -347,7 +347,7 @@ const StudentNumberDetailsPopupBtn = ({
     {
       key: "StudentLeavingDate",
       header: "Leaving Date",
-      cell: (col: iTableColumn, record: iVStudent | iFunnelLead) => {
+      cell: (col: iTableColumn<T>, record: iVStudent | iFunnelLead) => {
         return (
           <td key={col.key}>
             {"StudentLeavingDate" in record
@@ -362,7 +362,7 @@ const StudentNumberDetailsPopupBtn = ({
     {
       key: "currentYearLevel",
       header: "Current Year Level",
-      cell: (col: iTableColumn, record: iVStudent | iFunnelLead) => {
+      cell: (col: iTableColumn<T>, record: iVStudent | iFunnelLead) => {
         if (
           // @ts-ignore
           `${record.StudentStatus || ""}`.trim() ===
@@ -382,7 +382,7 @@ const StudentNumberDetailsPopupBtn = ({
     {
       key: "currentForm",
       header: "Form",
-      cell: (col: iTableColumn, record: iVStudent | iFunnelLead) => {
+      cell: (col: iTableColumn<T>, record: iVStudent | iFunnelLead) => {
         return (
           <td key={col.key}>
             {"StudentForm" in record ? record.StudentForm : ""}
@@ -393,7 +393,7 @@ const StudentNumberDetailsPopupBtn = ({
     {
       key: "fullFee",
       header: "FullFee?",
-      cell: (col: iTableColumn, record: iVStudent | iFunnelLead) => {
+      cell: (col: iTableColumn<T>, record: iVStudent | iFunnelLead) => {
         return (
           <td key={col.key}>
             {"FullFeeFlag" in record && record.FullFeeFlag === true ? "Y" : ""}
@@ -404,7 +404,7 @@ const StudentNumberDetailsPopupBtn = ({
     {
       key: "ProposingEntryYear",
       header: "Proposing Entry Year",
-      cell: (col: iTableColumn, record: iVStudent | iFunnelLead) => {
+      cell: (col: iTableColumn<T>, record: iVStudent | iFunnelLead) => {
         if (
           // @ts-ignore
           `${record.StudentStatus || ""}`.trim() ===
@@ -432,7 +432,7 @@ const StudentNumberDetailsPopupBtn = ({
     {
       key: "proposingEntryYearLevel",
       header: "Proposing Entry Year Level",
-      cell: (col: iTableColumn, record: iVStudent | iFunnelLead) => {
+      cell: (col: iTableColumn<T>, record: iVStudent | iFunnelLead) => {
         if (
           // @ts-ignore
           `${record.StudentStatus || ""}`.trim() ===
@@ -459,7 +459,7 @@ const StudentNumberDetailsPopupBtn = ({
     {
       key: "leadStage",
       header: "Lead Stage",
-      cell: (col: iTableColumn, record: iVStudent | iFunnelLead) => {
+      cell: (col: iTableColumn<T>, record: iVStudent | iFunnelLead) => {
         return (
           <td key={col.key}>
             {"pipeline_stage_name" in record ? record.pipeline_stage_name : ""}
@@ -473,7 +473,7 @@ const StudentNumberDetailsPopupBtn = ({
           {
             key: "FeeTotal",
             header: "Fee Total",
-            cell: (col: iTableColumn, record: iVStudent | iFunnelLead) => {
+            cell: (col: iTableColumn<T>, record: iVStudent | iFunnelLead) => {
               return (
                 <td key={col.key} className={"finance-col"}>
                   <b>
@@ -500,7 +500,7 @@ const StudentNumberDetailsPopupBtn = ({
           {
             key: "YearLevelTuitionFee",
             header: "Tuit. Fee",
-            cell: (col: iTableColumn, record: iVStudent | iFunnelLead) => {
+            cell: (col: iTableColumn<T>, record: iVStudent | iFunnelLead) => {
               return (
                 <td key={col.key} className={"finance-col"}>
                   {"tuitionFees" in record
@@ -519,7 +519,7 @@ const StudentNumberDetailsPopupBtn = ({
           {
             key: "YearLevelConsolidateCharges",
             header: "Con. Charges",
-            cell: (col: iTableColumn, record: iVStudent | iFunnelLead) => {
+            cell: (col: iTableColumn<T>, record: iVStudent | iFunnelLead) => {
               return (
                 <td key={col.key} className={"finance-col"}>
                   {"consolidateFees" in record
@@ -538,7 +538,7 @@ const StudentNumberDetailsPopupBtn = ({
           {
             key: "concessions",
             header: "Conessions",
-            cell: (col: iTableColumn, record: iVStudent | iFunnelLead) => {
+            cell: (col: iTableColumn<T>, record: iVStudent | iFunnelLead) => {
               return (
                 <td key={col.key} className={"finance-col concession"}>
                   {getConcessionDiv(record)}
@@ -549,7 +549,7 @@ const StudentNumberDetailsPopupBtn = ({
           {
             key: "siblingDiscounts",
             header: "Sibling Dis.",
-            cell: (col: iTableColumn, record: iVStudent | iFunnelLead) => {
+            cell: (col: iTableColumn<T>, record: iVStudent | iFunnelLead) => {
               return (
                 <td key={col.key} className={"finance-col sibling-disc"}>
                   {getSiblingDiscountDiv(record)}
@@ -635,7 +635,7 @@ const StudentNumberDetailsPopupBtn = ({
           <Table
             hover
             responsive
-            columns={getColumns()}
+            columns={getColumns<iVStudent | iFunnelLead>()}
             rows={[
               ...records
                 .filter(

@@ -137,11 +137,11 @@ const SynergeticEmailTemplateList = () => {
     };
   }, [currentPage, count, user?.SynCommunity]);
 
-  const getColumns = () => [
+  const getColumns = <T extends {}>() => [
     {
       key: "name",
       header: "Name",
-      cell: (col: iTableColumn, data: iResult) => {
+      cell: (col: iTableColumn<T>, data: iResult) => {
         return (
           <td key={col.key}>
             <Button
@@ -164,7 +164,7 @@ const SynergeticEmailTemplateList = () => {
     {
       key: "message",
       header: "Message",
-      cell: (col: iTableColumn, data: iResult) => {
+      cell: (col: iTableColumn<T>, data: iResult) => {
         return (
           <td key={col.key} className={"message"}>
             <Button
@@ -189,7 +189,7 @@ const SynergeticEmailTemplateList = () => {
     {
       key: "isPrivate",
       header: "is Private",
-      cell: (col: iTableColumn, data: iResult) => {
+      cell: (col: iTableColumn<T>, data: iResult) => {
         return (
           <td key={col.key}>
             {data.PrivateFlag === true ? (
@@ -202,7 +202,7 @@ const SynergeticEmailTemplateList = () => {
     {
       key: "useNewStyle",
       header: "New Style?",
-      cell: (col: iTableColumn, data: iResult) => {
+      cell: (col: iTableColumn<T>, data: iResult) => {
         return (
           <td key={col.key}>
             {`${data.emailTemplate?.CommunicationTemplatesSeq || ""}`.trim() !==
@@ -216,14 +216,14 @@ const SynergeticEmailTemplateList = () => {
     {
       key: "owner",
       header: "Owner",
-      cell: (col: iTableColumn, data: iResult) => {
+      cell: (col: iTableColumn<T>, data: iResult) => {
         return <td key={col.key}>{data.Owner}</td>;
       }
     },
     {
       key: "created",
       header: "Created",
-      cell: (col: iTableColumn, data: iResult) => {
+      cell: (col: iTableColumn<T>, data: iResult) => {
         return (
           <td key={col.key}>
             <small>
@@ -246,7 +246,7 @@ const SynergeticEmailTemplateList = () => {
     {
       key: "updated",
       header: "Updated",
-      cell: (col: iTableColumn, data: iResult) => {
+      cell: (col: iTableColumn<T>, data: iResult) => {
         return (
           <td key={col.key}>
             <small>
@@ -268,7 +268,7 @@ const SynergeticEmailTemplateList = () => {
     },
     {
       key: "operations",
-      header: (col: iTableColumn) => {
+      header: (col: iTableColumn<T>) => {
         return (
           <th key={col.key} className={"text-right"}>
             <Button
@@ -281,7 +281,7 @@ const SynergeticEmailTemplateList = () => {
           </th>
         );
       },
-      cell: (col: iTableColumn, data: iResult) => {
+      cell: (col: iTableColumn<T>, data: iResult) => {
         return (
           <td key={col.key} className={"text-right"}>
             <SynEmailSendPopupBtn
@@ -365,7 +365,7 @@ const SynergeticEmailTemplateList = () => {
         hover
         striped
         className={"templates-table"}
-        columns={getColumns()}
+        columns={getColumns<iResult>()}
         rows={templateList?.data || []}
         isLoading={isLoading === true && currentPage > 1}
         pagination={{

@@ -1,5 +1,4 @@
 import ExplanationPanel from '../../../../components/ExplanationPanel';
-import {useCallback} from 'react';
 import iSynDebtorPaymentMethod from '../../../../types/Synergetic/Finance/iSynDebtorPaymentMethod';
 import SynDebtorPaymentMethodService from '../../../../services/Synergetic/Finance/SynDebtorPaymentMethodService';
 import {OP_AND, OP_LT, OP_LTE, OP_NOT, OP_OR} from '../../../../helper/ServiceHelper';
@@ -8,6 +7,7 @@ import PageLoadingSpinner from '../../../../components/common/PageLoadingSpinner
 import useListCrudHook from '../../../../components/hooks/useListCrudHook/useListCrudHook';
 import {iConfigParams} from '../../../../services/AppService';
 import ExpiringCreditCardsTable from './ExpiringCreditCardsTable';
+import {useCallback} from 'react';
 
 
 const ExpiringCreditCardsPanel = () => {
@@ -19,16 +19,13 @@ const ExpiringCreditCardsPanel = () => {
     state,
   // @ts-ignore
   } = useListCrudHook<iSynDebtorPaymentMethod>({
-    paginationApplied: true,
+    perPage: 99999,
     getFn: useCallback((config?: iConfigParams) => {
       const nextMonth = getNextMonth();
-      const where = config ? JSON.parse(config?.where || '{}') : {};
+      const {filter, sort, ...props} = (config || {});
       return SynDebtorPaymentMethodService.getAllCurrent({
-        ...config,
-        perPage: 99999,
-        sort: 'CreditCardExpiryYear:DESC,CreditCardExpiryMonth:DESC',
+        sort: sort || 'CreditCardExpiryYear:DESC,CreditCardExpiryMonth:DESC',
         where: JSON.stringify({
-          ...where,
           CreditCardNumber: {[OP_NOT]: ''},
           [OP_AND]: [
             {[OP_OR]: [
@@ -39,25 +36,30 @@ const ExpiringCreditCardsPanel = () => {
                 }
             ]}
           ],
+          ...filter,
         }),
+        ...props,
       })
     }, []),
   });
 
+  const getData = () => {
+    return state.data.data || [];
+  }
 
   const getContent = () => {
     if (state.isLoading) {
       return <PageLoadingSpinner />
     }
-    if (state.data.length <= 0) {
+    if (getData().length <= 0) {
       return null;
     }
-    return <ExpiringCreditCardsTable data={state.data} />;
+    return <ExpiringCreditCardsTable data={getData()} />;
   }
 
   return (
     <>
-      <h6>{(state.data || []).length} Expiring Credit Card (s)</h6>
+      <h6>{getData().length} Expiring Credit Card (s)</h6>
       <ExplanationPanel
         text={
           <>List of all <b>CURRENT</b> debtors with credit cards that <u>have expired</u> or <u>about to expire</u> in <b>{getNextMonth().format('MMMM YYYY')}</b>.</>

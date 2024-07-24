@@ -314,11 +314,11 @@ const StudentNumberForecastTable = ({
     );
   };
 
-  const getColumns = () => [
+  const getColumns = <T extends {}>() => [
     {
       key: "ylevelCode",
       header: "Year Level",
-      cell: (col: iTableColumn, data: ISynLuYearLevel) => {
+      cell: (col: iTableColumn<T>, data: ISynLuYearLevel) => {
         if (data.Code === "subTotal") {
           return (
             <td key={col.key} className={"text-right sub-total"}>
@@ -334,7 +334,7 @@ const StudentNumberForecastTable = ({
           </td>
         );
       },
-      footer: (col: iTableColumn) => {
+      footer: (col: iTableColumn<T>) => {
         return (
           <td key={col.key}>
             <b>Total</b>
@@ -345,10 +345,10 @@ const StudentNumberForecastTable = ({
     {
       key: "currentStudent",
       header: "Current Student",
-      cell: (col: iTableColumn, data: ISynLuYearLevel) => {
+      cell: (col: iTableColumn<T>, data: ISynLuYearLevel) => {
         return getCell(col.key, data, currentStudentMap);
       },
-      footer: (col: iTableColumn) => {
+      footer: (col: iTableColumn<T>) => {
         const students =
           "total" in currentStudentMap ? currentStudentMap.total : [];
         return <td key={col.key}>{StudentPopupDiv(students)}</td>;
@@ -359,10 +359,10 @@ const StudentNumberForecastTable = ({
           {
             key: "currentConcessions",
             header: "Current Concessions",
-            cell: (col: iTableColumn, data: ISynLuYearLevel) => {
+            cell: (col: iTableColumn<T>, data: ISynLuYearLevel) => {
               return getConcessionCell(col.key, currentStudentMap, data, false);
             },
-            footer: (col: iTableColumn) => {
+            footer: (col: iTableColumn<T>) => {
               return getConcessionCell(
                 col.key,
                 currentStudentMap,
@@ -374,10 +374,10 @@ const StudentNumberForecastTable = ({
           {
             key: "currentSiblingDiscounts",
             header: "Current Sibling Disc.",
-            cell: (col: iTableColumn, data: ISynLuYearLevel) => {
+            cell: (col: iTableColumn<T>, data: ISynLuYearLevel) => {
               return getSiblingDiscountCell(col.key, currentStudentMap, data, false);
             },
-            footer: (col: iTableColumn) => {
+            footer: (col: iTableColumn<T>) => {
               return getSiblingDiscountCell(
                 col.key,
                 currentStudentMap,
@@ -391,10 +391,10 @@ const StudentNumberForecastTable = ({
     {
       key: "currentLeavers",
       header: "Current Leavers",
-      cell: (col: iTableColumn, data: ISynLuYearLevel) => {
+      cell: (col: iTableColumn<T>, data: ISynLuYearLevel) => {
         return getCell(col.key, data, currentStudentLeaverMap);
       },
-      footer: (col: iTableColumn) => {
+      footer: (col: iTableColumn<T>) => {
         const students =
           "total" in currentStudentLeaverMap
             ? currentStudentLeaverMap.total
@@ -405,10 +405,10 @@ const StudentNumberForecastTable = ({
     {
       key: "confirmed",
       header: "Confirmed",
-      cell: (col: iTableColumn, data: ISynLuYearLevel) => {
+      cell: (col: iTableColumn<T>, data: ISynLuYearLevel) => {
         return getCell(col.key, data, confirmedFutureStudentMap, true);
       },
-      footer: (col: iTableColumn) => {
+      footer: (col: iTableColumn<T>) => {
         const students =
           "total" in confirmedFutureStudentMap
             ? confirmedFutureStudentMap.total
@@ -421,20 +421,20 @@ const StudentNumberForecastTable = ({
         {
           key: "confirmedConcessions",
           header: "Confirmed Concessions",
-          cell: (col: iTableColumn, data: ISynLuYearLevel) => {
+          cell: (col: iTableColumn<T>, data: ISynLuYearLevel) => {
             return getConcessionCell(col.key, confirmedFutureStudentMap, data, true);;
           },
-          footer: (col: iTableColumn) => {
+          footer: (col: iTableColumn<T>) => {
             return getConcessionCell(col.key, confirmedFutureStudentMap, undefined, true);
           }
         },
         {
           key: "confirmedSibDisc",
           header: "Confirmed Sibling Disc.",
-          cell: (col: iTableColumn, data: ISynLuYearLevel) => {
+          cell: (col: iTableColumn<T>, data: ISynLuYearLevel) => {
             return getSiblingDiscountCell(col.key, confirmedFutureStudentMap, data, true);;
           },
-          footer: (col: iTableColumn) => {
+          footer: (col: iTableColumn<T>) => {
             return getSiblingDiscountCell(col.key, confirmedFutureStudentMap, undefined, true);
           }
         },
@@ -443,7 +443,7 @@ const StudentNumberForecastTable = ({
           {
             key: "inProgress",
             header: "In Progress",
-            cell: (col: iTableColumn, data: ISynLuYearLevel) => {
+            cell: (col: iTableColumn<T>, data: ISynLuYearLevel) => {
               return getCell(
                 col.key,
                 data,
@@ -451,7 +451,7 @@ const StudentNumberForecastTable = ({
                 true
               );
             },
-            footer: (col: iTableColumn) => {
+            footer: (col: iTableColumn<T>) => {
               const students =
                 "total" in nextYearFunnelLeadMap.inProgress
                   ? nextYearFunnelLeadMap.inProgress.total
@@ -463,10 +463,10 @@ const StudentNumberForecastTable = ({
     {
       key: "nextYear",
       header: `Future ${nextFileYear}`,
-      cell: (col: iTableColumn, data: ISynLuYearLevel) => {
+      cell: (col: iTableColumn<T>, data: ISynLuYearLevel) => {
         return getCell(col.key, data, futureNextYearMap, true);
       },
-      footer: (col: iTableColumn) => {
+      footer: (col: iTableColumn<T>) => {
         const students =
           "total" in futureNextYearMap ? futureNextYearMap.total : [];
         return <td key={col.key}>{StudentPopupDiv(students, true)}</td>;
@@ -477,10 +477,10 @@ const StudentNumberForecastTable = ({
           {
             key: "futureConcessions",
             header: `${nextFileYear} Concessions`,
-            cell: (col: iTableColumn, data: ISynLuYearLevel) => {
+            cell: (col: iTableColumn<T>, data: ISynLuYearLevel) => {
               return getConcessionCell(col.key, futureNextYearMap, data, true);
             },
-            footer: (col: iTableColumn) => {
+            footer: (col: iTableColumn<T>) => {
               return getConcessionCell(
                 col.key,
                 futureNextYearMap,
@@ -492,10 +492,10 @@ const StudentNumberForecastTable = ({
           {
             key: "futureSibDisc",
             header: `${nextFileYear} Sibling Disc.`,
-            cell: (col: iTableColumn, data: ISynLuYearLevel) => {
+            cell: (col: iTableColumn<T>, data: ISynLuYearLevel) => {
               return getSiblingDiscountCell(col.key, futureNextYearMap, data, true);
             },
-            footer: (col: iTableColumn) => {
+            footer: (col: iTableColumn<T>) => {
               return getSiblingDiscountCell(col.key, futureNextYearMap, undefined, true);
             }
           },
@@ -507,7 +507,7 @@ const StudentNumberForecastTable = ({
           {
             key: "leadsAndTours",
             header: `Leads & Tours`,
-            cell: (col: iTableColumn, data: ISynLuYearLevel) => {
+            cell: (col: iTableColumn<T>, data: ISynLuYearLevel) => {
               return getCell(
                 col.key,
                 data,
@@ -515,7 +515,7 @@ const StudentNumberForecastTable = ({
                 true
               );
             },
-            footer: (col: iTableColumn) => {
+            footer: (col: iTableColumn<T>) => {
               const students =
                 "total" in nextYearFunnelLeadMap.leadsAndTours
                   ? nextYearFunnelLeadMap.leadsAndTours.total
@@ -532,7 +532,7 @@ const StudentNumberForecastTable = ({
         hover
         responsive
         className={"lead-table"}
-        columns={getColumns()}
+        columns={getColumns<ISynLuYearLevel>()}
         rows={yLevelArr}
       />
     </Wrapper>

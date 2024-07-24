@@ -1,13 +1,29 @@
-export interface iState<T> {
-  data: Array<T>;
+import { iConfigParams } from '../../../services/AppService';
+import iPaginatedResult from '../../../types/iPaginatedResult';
+
+export interface iDataState<T> {
+  data: iPaginatedResult<T>;
   isLoading: boolean;
-  isConfirming: boolean;
-  from?: number;
-  to?: number;
-  currentPage?: number;
+  // isConfirming: boolean;
+}
+
+export const getInitDataState = (currentPage: number, perPage: number)=> {
+  return {
+    data: { data: [], perPage, currentPage, from: 0, to: 0, pages: 0, total: 0 },
+    isLoading: false,
+  };
+};
+
+export interface iViewingState<T extends {}> {
+  editingModel?: T | null;
   perPage?: number;
-  total?: number;
-  pages?: number;
+  sort?: string;
+  filter?: iConfigParams;
+  currentPage?: number;
+  isModalOpen?: boolean;
+  isSaving?: boolean;
+  isShowingDeleting?: boolean;
+  version: number;
 }
 
 export enum ActionKind {
@@ -26,93 +42,29 @@ export enum ActionKind {
 export type Action<T> = {
   type: ActionKind;
   payload: {
-    data?: Array<T>;
-    from?: number;
-    to?: number;
+    data?: iPaginatedResult<T>;
     currentPage?: number;
-    perPage?: number;
-    pages?: number;
-    total?: number;
-    targetId?: string | number;
+    sort?: string;
+    filter?: iConfigParams;
+
+    targetId?: string;
     keyword?: string;
     item?: T;
   };
 };
 
-export const reducer = <T extends { id: string | number }>(
-  state: iState<T>,
+export const reducer = <T extends {}>(
+  state: iDataState<T>,
   action: Action<T>,
-): iState<T> => {
+): iDataState<T> => {
   switch (action.type) {
     case ActionKind.Loading:
       return { ...state, isLoading: true };
-    case ActionKind.Confirming:
-      return { ...state, isConfirming: true };
-    case ActionKind.Confirmed:
-      return { ...state, isConfirming: false };
     case ActionKind.Loaded:
       return {
         ...state,
         isLoading: false,
         data: action.payload.data ? action.payload.data : state.data,
-        from: action.payload.from,
-        to: action.payload.to,
-        currentPage: action.payload.currentPage,
-        perPage: action.payload.perPage,
-        total: action.payload.total,
-        pages: action.payload.pages,
-      };
-    case ActionKind.LoadMore:
-      return {
-        ...state,
-        isLoading: false,
-        data: action.payload.data
-          ? [...state.data, ...action.payload.data]
-          : state.data,
-        from: action.payload.from,
-        to: action.payload.to,
-        currentPage: action.payload.currentPage,
-        perPage: action.payload.perPage,
-        total: action.payload.total,
-        pages: action.payload.pages,
-      };
-    case ActionKind.Delete:
-      return {
-        ...state,
-        isLoading: false,
-        isConfirming: false,
-        data: action.payload.targetId
-          ? state.data.filter((d: T) => d.id !== action.payload.targetId)
-          : state.data,
-      };
-    case ActionKind.Reset:
-      return {
-        ...state,
-        data: action.payload.data ? action.payload.data : state.data,
-        isLoading: false,
-        isConfirming: false,
-      };
-    //  new added put first
-    case ActionKind.Add:
-      return {
-        ...state,
-        data: action.payload.item
-          ? [action.payload.item, ...state.data]
-          : state.data,
-        isLoading: false,
-        isConfirming: false,
-      };
-    // updated keeps sequence
-    case ActionKind.Update:
-      return {
-        ...state,
-        data: action.payload.item
-          ? state.data.map((item: T) =>
-              item.id === action.payload.item?.id ? action.payload.item : item,
-            )
-          : state.data,
-        isLoading: false,
-        isConfirming: false,
       };
     default:
       return state;

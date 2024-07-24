@@ -1,134 +1,153 @@
 import styled from "styled-components";
-import { useEffect, useState } from "react";
 import SynVStudentService from "../../services/Synergetic/Student/SynVStudentService";
-import Toaster from "../../services/Toaster";
-import PageLoadingSpinner from '../common/PageLoadingSpinner';
-import iVStudent from '../../types/Synergetic/Student/iVStudent';
-import moment from 'moment-timezone';
-import Table, {iTableColumn} from '../common/Table';
-import ExplanationPanel from '../ExplanationPanel';
+import PageLoadingSpinner from "../common/PageLoadingSpinner";
+import iVStudent from "../../types/Synergetic/Student/iVStudent";
+import moment from "moment-timezone";
+import { iTableColumn } from "../common/Table";
+import ExplanationPanel from "../ExplanationPanel";
+import useListCrudHook from "../hooks/useListCrudHook/useListCrudHook";
+import {useCallback} from 'react';
 
 const Wrapper = styled.div``;
 
 const ExpiringPassportsAndVisas = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [students, setStudents] = useState<iVStudent[]>([]);
-  const nextMonthEnd = moment().add(1, 'month').endOf('month');
-
-  useEffect(() => {
-    let isCanceled = false;
-    setIsLoading(true);
-
-    SynVStudentService.getVStudentAll({
-      where: JSON.stringify({
-        CurrentSemesterOnlyFlag: true,
-        StudentActiveFlag: true,
-      }),
-      perPage: 999999
-    })
-      .then(resp => {
-        if (isCanceled) {
-          return;
-        }
-        setStudents((resp.data || []).filter(student => {
-          if (`${student.StudentPassportExpiryDate}`.trim() !== '' && moment(`${student.StudentPassportExpiryDate}`.trim()).isSameOrBefore(nextMonthEnd)) {
-            return true;
-          }
-
-          if (`${student.StudentsVisaExpiryDate}`.trim() !== '' && moment(`${student.StudentsVisaExpiryDate}`.trim()).isSameOrBefore(nextMonthEnd)) {
-            return true;
-          }
-
-          return false;
-        }))
-      })
-      .catch(err => {
-        if (isCanceled) {
-          return;
-        }
-        Toaster.showApiError(err);
-      })
-      .finally(() => {
-        if (isCanceled) {
-          return;
-        }
-        setIsLoading(false);
+  const nextMonthEnd = moment()
+    .add(1, "month")
+    .endOf("month");
+  const { state, renderDataTable } = useListCrudHook<iVStudent>({
+    perPage: 999999,
+    getFn: useCallback(config => {
+      const { filter, ...props } = config || {};
+      return SynVStudentService.getVStudentAll({
+        where: JSON.stringify({
+          CurrentSemesterOnlyFlag: true,
+          StudentActiveFlag: true,
+          ...filter
+        }),
+        ...props
       });
+    }, []),
+  });
 
-    return () => {
-      isCanceled = true;
-    };
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const getColumns = () => [{
-    key: 'StudentID',
-    header: 'ID',
-    cell: (col: iTableColumn, data: iVStudent) => {
-      return <td key={col.key}>{data.StudentID}</td>
-    }
-  }, {
-    key: 'StudentName',
-    header: 'Name',
-    cell: (col: iTableColumn, data: iVStudent) => {
-      return <td key={col.key}>{data.StudentNameInternal}</td>
-    }
-  }, {
-    key: 'Form',
-    header: 'Form',
-    cell: (col: iTableColumn, data: iVStudent) => {
-      return <td key={col.key}>{data.StudentForm}</td>
-    }
-  }, {
-    key: 'PassportNo',
-    header: 'Passport No.',
-    cell: (col: iTableColumn, data: iVStudent) => {
-      return <td key={col.key}>{data.StudentsPassportNo}</td>
-    }
-  }, {
-    key: 'PassportExpiryDate',
-    header: 'Passport Expiry Date',
-    cell: (col: iTableColumn, data: iVStudent) => {
-      if (`${data.StudentPassportExpiryDate || ''}`.trim() === '') {
-        return <td key={col.key}></td>;
+  const getColumns = <T extends {}>() => [
+    {
+      key: "StudentID",
+      header: "ID",
+      cell: (col: iTableColumn<T>, data: iVStudent) => {
+        return <td key={col.key}>{data.StudentID}</td>;
       }
-      const expired = moment(data.StudentPassportExpiryDate).isBefore(moment());
-      return <td key={col.key} className={expired ? 'text-white bg-danger' : ''}>{moment(data.StudentPassportExpiryDate).format('DD MMM YYYY')}</td>
-    }
-  }, {
-    key: 'VisaNo',
-    header: 'Visa No.',
-    cell: (col: iTableColumn, data: iVStudent) => {
-      return <td key={col.key}>{data.StudentVisaNumber}</td>
-    }
-  }, {
-    key: 'VisaExpiryDate',
-    header: 'Visa Expiry Date',
-    cell: (col: iTableColumn, data: iVStudent) => {
-      if (`${data.StudentsVisaExpiryDate || ''}`.trim() === '') {
-        return <td key={col.key}></td>;
+    },
+    {
+      key: "StudentName",
+      header: "Name",
+      cell: (col: iTableColumn<T>, data: iVStudent) => {
+        return <td key={col.key}>{data.StudentNameInternal}</td>;
       }
-      const expired = moment(data.StudentsVisaExpiryDate).isBefore(moment());
-      return <td key={col.key} className={expired ? 'text-white bg-danger' : ''}>{moment(data.StudentsVisaExpiryDate).format('DD MMM YYYY')}</td>
+    },
+    {
+      key: "Form",
+      header: "Form",
+      cell: (col: iTableColumn<T>, data: iVStudent) => {
+        return <td key={col.key}>{data.StudentForm}</td>;
+      }
+    },
+    {
+      key: "PassportNo",
+      header: "Passport No.",
+      cell: (col: iTableColumn<T>, data: iVStudent) => {
+        return <td key={col.key}>{data.StudentsPassportNo}</td>;
+      }
+    },
+    {
+      key: "PassportExpiryDate",
+      header: "Passport Expiry Date",
+      cell: (col: iTableColumn<T>, data: iVStudent) => {
+        if (`${data.StudentPassportExpiryDate || ""}`.trim() === "") {
+          return <td key={col.key}></td>;
+        }
+        const expired = moment(data.StudentPassportExpiryDate).isBefore(
+          moment()
+        );
+        return (
+          <td key={col.key} className={expired ? "text-white bg-danger" : ""}>
+            {moment(data.StudentPassportExpiryDate).format("DD MMM YYYY")}
+          </td>
+        );
+      }
+    },
+    {
+      key: "VisaNo",
+      header: "Visa No.",
+      cell: (col: iTableColumn<T>, data: iVStudent) => {
+        return <td key={col.key}>{data.StudentVisaNumber}</td>;
+      }
+    },
+    {
+      key: "VisaExpiryDate",
+      header: "Visa Expiry Date",
+      cell: (col: iTableColumn<T>, data: iVStudent) => {
+        if (`${data.StudentsVisaExpiryDate || ""}`.trim() === "") {
+          return <td key={col.key}></td>;
+        }
+        const expired = moment(data.StudentsVisaExpiryDate).isBefore(moment());
+        return (
+          <td key={col.key} className={expired ? "text-white bg-danger" : ""}>
+            {moment(data.StudentsVisaExpiryDate).format("DD MMM YYYY")}
+          </td>
+        );
+      }
     }
-  }]
+  ];
+
+  const getData = () => {
+    return (state.data.data || []).filter(student => {
+      if (
+        `${student.StudentPassportExpiryDate}`.trim() !== "" &&
+        moment(`${student.StudentPassportExpiryDate}`.trim()).isSameOrBefore(
+          nextMonthEnd
+        )
+      ) {
+        return true;
+      }
+
+      if (
+        `${student.StudentsVisaExpiryDate}`.trim() !== "" &&
+        moment(`${student.StudentsVisaExpiryDate}`.trim()).isSameOrBefore(
+          nextMonthEnd
+        )
+      ) {
+        return true;
+      }
+
+      return false;
+    });
+  };
 
   const getContent = () => {
-    if (isLoading === true) {
-      return <PageLoadingSpinner />
+    if (state.isLoading === true) {
+      return <PageLoadingSpinner />;
     }
     return (
       <>
-        <ExplanationPanel text={
-          <>
-            This is list of students with passport(s) or visa(s) that has expired or will expire by <b>{nextMonthEnd.format('DD MMM YYYY')}</b>
-          </>
-        } />
-        <Table columns={getColumns()} rows={students} responsive striped hover />
+        <ExplanationPanel
+          text={
+            <>
+              This is list of students with passport(s) or visa(s) that has
+              expired or will expire by{" "}
+              <b>{nextMonthEnd.format("DD MMM YYYY")}</b>
+            </>
+          }
+        />
+        {renderDataTable({
+          columns: getColumns<iVStudent>(),
+          rows: getData(),
+          responsive: true,
+          striped: true,
+          hover: true
+        })}
       </>
-    )
-  }
+    );
+  };
 
   return <Wrapper>{getContent()}</Wrapper>;
 };

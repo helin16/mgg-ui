@@ -182,7 +182,7 @@ const CampusDisplayManagementPage = () => {
             columns={[
               {
                 key: "playlist",
-                header: (col: iTableColumn) => {
+                header: (col: iTableColumn<iCampusDisplay>) => {
                   return (
                     <th key={col.key}>
                       Default{" "}

@@ -76,86 +76,86 @@ export const COLUMN_GROUP_SKILL_EXPIRY_DATE = 'Skill Expiry Date';
 
 const getListColumns = ({
   luSkills,
-}: iGetListColumns): iTableColumn[] => [
+}: iGetListColumns): iTableColumn<iVStaff>[] => [
   {
     isDefault: true,
     key: "StaffID",
     header: "Staff ID",
     isSelectable: false,
-    cell: (column: iTableColumn, data: iVStaff) => `${data.StaffID}`
+    cell: (column: iTableColumn<iVStaff>, data: iVStaff) => `${data.StaffID}`
   },
   {
     isDefault: true,
     key: "StaffNameInternal",
     header: "Staff Name",
-    cell: (column: iTableColumn, data: iVStaff) => `${data.StaffNameInternal}`
+    cell: (column: iTableColumn<iVStaff>, data: iVStaff) => `${data.StaffNameInternal}`
   },
   {
     isDefault: true,
     key: "SchoolStaffCode",
     header: "Staff Code",
-    cell: (column: iTableColumn, data: iVStaff) => `${data.SchoolStaffCode}`
+    cell: (column: iTableColumn<iVStaff>, data: iVStaff) => `${data.SchoolStaffCode}`
   },
   {
     key: "StaffGiven1",
     header: "Given Name",
-    cell: (column: iTableColumn, data: iVStaff) => `${data.StaffGiven1}`
+    cell: (column: iTableColumn<iVStaff>, data: iVStaff) => `${data.StaffGiven1}`
   },
   {
     key: "StaffGiven2",
     header: "Given Name 2",
-    cell: (column: iTableColumn, data: iVStaff) => `${data.StaffGiven2}`
+    cell: (column: iTableColumn<iVStaff>, data: iVStaff) => `${data.StaffGiven2}`
   },
   {
     key: "StaffSurname",
     header: "Surname",
-    cell: (column: iTableColumn, data: iVStaff) => `${data.StaffSurname}`
+    cell: (column: iTableColumn<iVStaff>, data: iVStaff) => `${data.StaffSurname}`
   },
   {
     key: "StaffCategory",
     header: "Category Code",
-    cell: (column: iTableColumn, data: iVStaff) => `${data.StaffCategory}`
+    cell: (column: iTableColumn<iVStaff>, data: iVStaff) => `${data.StaffCategory}`
   },
   {
     isDefault: true,
     key: "StaffDepartment",
     header: "Department",
-    cell: (column: iTableColumn, data: iVStaff) => `${data.StaffDepartment}`
+    cell: (column: iTableColumn<iVStaff>, data: iVStaff) => `${data.StaffDepartment}`
   },
   {
     isDefault: true,
     key: "StaffCategoryDescription",
     header: "Category Description",
-    cell: (column: iTableColumn, data: iVStaff) =>
+    cell: (column: iTableColumn<iVStaff>, data: iVStaff) =>
       `${data.StaffCategoryDescription}`
   },
   {
     key: "StaffCategoryType",
     header: "Category Type",
-    cell: (column: iTableColumn, data: iVStaff) => `${data.StaffCategoryType}`
+    cell: (column: iTableColumn<iVStaff>, data: iVStaff) => `${data.StaffCategoryType}`
   },
   {
     isDefault: true,
     key: "StaffOccupEmail",
     header: "Occup. Email",
-    cell: (column: iTableColumn, data: iVStaff) => `${data.StaffOccupEmail}`
+    cell: (column: iTableColumn<iVStaff>, data: iVStaff) => `${data.StaffOccupEmail}`
   },
   {
     key: "StaffCampus",
     header: "Campus Code",
-    cell: (column: iTableColumn, data: iVStaff) => `${data.StaffCampus}`
+    cell: (column: iTableColumn<iVStaff>, data: iVStaff) => `${data.StaffCampus}`
   },
   {
     key: "StaffCampusDescription",
     header: "Campus",
-    cell: (column: iTableColumn, data: iVStaff) =>
+    cell: (column: iTableColumn<iVStaff>, data: iVStaff) =>
       `${data.StaffCampusDescription}`
   },
   {
     key: "ActiveFlag",
     header: "Active Flag",
     format: TABLE_COLUMN_FORMAT_BOOLEAN,
-    cell: (column: iTableColumn, data: iVStaff) => {
+    cell: (column: iTableColumn<iVStaff>, data: iVStaff) => {
       console.log('data.ActiveFlag', data.ActiveFlag);
       return `${data.ActiveFlag === true ? "Y" : "N"}`
     }
@@ -165,7 +165,7 @@ const getListColumns = ({
     key: "StartDate",
     header: "Start Date",
     format: TABLE_COLUMN_FORMAT_DATE,
-    cell: (column: iTableColumn, data: iVStaff) =>
+    cell: (column: iTableColumn<iVStaff>, data: iVStaff) =>
       `${
         `${data.StartDate || ""}`.trim() === ""
           ? ""
@@ -176,7 +176,7 @@ const getListColumns = ({
     key: "LeavingDate",
     header: "Leaving Date",
     format: TABLE_COLUMN_FORMAT_DATE,
-    cell: (column: iTableColumn, data: iVStaff) =>
+    cell: (column: iTableColumn<iVStaff>, data: iVStaff) =>
       `${
         `${data.LeavingDate || ""}`.trim() === ""
           ? ""
@@ -187,7 +187,7 @@ const getListColumns = ({
     key: "ServicedYears",
     header: "Serviced Years",
     format: TABLE_COLUMN_FORMAT_CALCULATED,
-    cell: (column: iTableColumn, data: iVStaff) => {
+    cell: (column: iTableColumn<iVStaff>, data: iVStaff) => {
       if (`${data.StartDate || ""}`.trim() === "") {
         return '';
       }
@@ -202,7 +202,7 @@ const getListColumns = ({
     key: "ServicedMilestone",
     header: "Service Milestone",
     format: TABLE_COLUMN_FORMAT_CALCULATED,
-    cell: (column: iTableColumn, data: iVStaff) => {
+    cell: (column: iTableColumn<iVStaff>, data: iVStaff) => {
       if (`${data.StartDate || ""}`.trim() === "") {
         return '';
       }
@@ -216,7 +216,7 @@ const getListColumns = ({
   {
     key: "StaffExtension",
     header: "Staff Extension",
-    cell: (column: iTableColumn, data: iVStaff) => `${data.StaffExtension || ''}`.trim()
+    cell: (column: iTableColumn<iVStaff>, data: iVStaff) => `${data.StaffExtension || ''}`.trim()
   },
   {
     key: `${COLUMN_KEY_PREFIX_JP_POS}JobPositionCode`,

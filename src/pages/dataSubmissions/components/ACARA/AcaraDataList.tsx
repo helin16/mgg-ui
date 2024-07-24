@@ -117,12 +117,13 @@ const AcaraDataList = ({ records, isLoading = false }: iAcaraDataList) => {
       </table>
     );
   };
-  const getColumns = () => {
+
+  const getColumns = <T extends {}>() => {
     return [
       {
         key: "Student",
         header: "Student",
-        cell: (column: iTableColumn, row: iAcaraData) => {
+        cell: (column: iTableColumn<T>, row: iAcaraData) => {
           return (
             <td key={column.key}>
               <div>[{row.ID}]</div>
@@ -136,7 +137,7 @@ const AcaraDataList = ({ records, isLoading = false }: iAcaraDataList) => {
       {
         key: "Semester",
         header: "Semester",
-        cell: (column: iTableColumn, row: iAcaraData) => {
+        cell: (column: iTableColumn<T>, row: iAcaraData) => {
           return (
             <td key={column.key}>
               {row.fileYear} - {row.fileSemester}
@@ -147,14 +148,14 @@ const AcaraDataList = ({ records, isLoading = false }: iAcaraDataList) => {
       {
         key: "yearLevel",
         header: "Yr Lvl.",
-        cell: (column: iTableColumn, row: iAcaraData) => {
+        cell: (column: iTableColumn<T>, row: iAcaraData) => {
           return <td key={column.key}>{row.yearLevelCode}</td>;
         }
       },
       {
         key: "dateOfBirth",
         header: "D.O.B.",
-        cell: (column: iTableColumn, row: iAcaraData) => {
+        cell: (column: iTableColumn<T>, row: iAcaraData) => {
           return (
             <td key={column.key}>
               {moment(row.dateOfBirth).format("DD MMM YYYY")}
@@ -164,7 +165,7 @@ const AcaraDataList = ({ records, isLoading = false }: iAcaraDataList) => {
       },{
         key: "entryDate",
         header: "Entry Date",
-        cell: (column: iTableColumn, row: iAcaraData) => {
+        cell: (column: iTableColumn<T>, row: iAcaraData) => {
           return (
             <td key={column.key}>
               {moment(row.entryDate).format("DD MMM YYYY")}
@@ -175,7 +176,7 @@ const AcaraDataList = ({ records, isLoading = false }: iAcaraDataList) => {
       {
         key: "homeLanguage",
         header: "Home Language",
-        cell: (column: iTableColumn, row: iAcaraData) => {
+        cell: (column: iTableColumn<T>, row: iAcaraData) => {
           return (
             <td key={column.key}>
               <div>
@@ -195,7 +196,7 @@ const AcaraDataList = ({ records, isLoading = false }: iAcaraDataList) => {
       {
         key: "isInternational",
         header: "internal?",
-        cell: (column: iTableColumn, row: iAcaraData) => {
+        cell: (column: iTableColumn<T>, row: iAcaraData) => {
           return (
             <td key={column.key}>
               {row.isInternationalStudent === true ? "Y" : ""}
@@ -206,7 +207,7 @@ const AcaraDataList = ({ records, isLoading = false }: iAcaraDataList) => {
       {
         key: "isPastStudent",
         header: "past?",
-        cell: (column: iTableColumn, row: iAcaraData) => {
+        cell: (column: iTableColumn<T>, row: iAcaraData) => {
           return (
             <td key={column.key}>
               <div>{row.isPastStudent === true ? "Y" : ""}</div>
@@ -224,7 +225,7 @@ const AcaraDataList = ({ records, isLoading = false }: iAcaraDataList) => {
       {
         key: "ATSI",
         header: "ATSI",
-        cell: (column: iTableColumn, row: iAcaraData) => {
+        cell: (column: iTableColumn<T>, row: iAcaraData) => {
           return (
             <td key={column.key}>
               <div>Ind.?: {row.isAboriginal === true ? "Y" : ""}</div>
@@ -239,7 +240,7 @@ const AcaraDataList = ({ records, isLoading = false }: iAcaraDataList) => {
       {
         key: "Parent1",
         header: "Parent 1",
-        cell: (column: iTableColumn, row: iAcaraData) => {
+        cell: (column: iTableColumn<T>, row: iAcaraData) => {
           return (
             <td key={column.key} className={"parent-col"}>
               {getParentTd(row, 1)}
@@ -250,7 +251,7 @@ const AcaraDataList = ({ records, isLoading = false }: iAcaraDataList) => {
       {
         key: "Parent2",
         header: "Parent 2",
-        cell: (column: iTableColumn, row: iAcaraData) => {
+        cell: (column: iTableColumn<T>, row: iAcaraData) => {
           return (
             <td key={column.key} className={"parent-col"}>
               {getParentTd(row, 2)}
@@ -267,7 +268,7 @@ const AcaraDataList = ({ records, isLoading = false }: iAcaraDataList) => {
 
   return (
     <Wrapper>
-      <Table hover striped responsive columns={getColumns()} rows={records} />
+      <Table hover striped responsive columns={getColumns<iAcaraData>()} rows={records} />
     </Wrapper>
   );
 };

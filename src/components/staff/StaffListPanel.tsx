@@ -56,8 +56,8 @@ const CHUNK_SIZE = 100;
 const StaffListPanel = ({ showSearchPanel = true }: iStaffListPanel) => {
   const [staffList, setStaffList] = useState<iVStaff[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [columns, setColumns] = useState<iTableColumn[]>([]);
-  const [selectedColumns, setSelectedColumns] = useState<iTableColumn[]>([]);
+  const [columns, setColumns] = useState<iTableColumn<iVStaff>[]>([]);
+  const [selectedColumns, setSelectedColumns] = useState<iTableColumn<iVStaff>[]>([]);
   const [skills, setSkills] = useState<iSynLuSkill[]>([]);
   const [staffJobPosMap, setStaffJobPosMap] = useState<iStaffJobPositionMap>(
     {}

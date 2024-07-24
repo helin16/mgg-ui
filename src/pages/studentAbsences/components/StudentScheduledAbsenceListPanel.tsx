@@ -79,17 +79,17 @@ const StudentScheduledAbsenceListPanel = ({
     };
   }, [type, count]);
 
-  const getColumns = () => [
+  const getColumns = <T extends {}>() => [
     {
       key: "photo",
-      header: (col: iTableColumn) => {
+      header: (col: iTableColumn<T>) => {
         return (
           <th key={col.key}>
             {isLoading === true ? null : <>Total: {records?.total || 0}</>}
           </th>
         );
       },
-      cell: (col: iTableColumn, data: iStudentAbsenceSchedule) => {
+      cell: (col: iTableColumn<T>, data: iStudentAbsenceSchedule) => {
         return (
           <td key={col.key} className={col.key}>
             <Image src={data.Event?.Student?.profileUrl} />
@@ -100,7 +100,7 @@ const StudentScheduledAbsenceListPanel = ({
     {
       key: "student",
       header: "Student",
-      cell: (col: iTableColumn, data: iStudentAbsenceSchedule) => {
+      cell: (col: iTableColumn<T>, data: iStudentAbsenceSchedule) => {
         return (
           <td key={col.key} className={col.key}>
             <div>
@@ -123,7 +123,7 @@ const StudentScheduledAbsenceListPanel = ({
     {
       key: "reason",
       header: "Reason",
-      cell: (col: iTableColumn, data: iStudentAbsenceSchedule) => {
+      cell: (col: iTableColumn<T>, data: iStudentAbsenceSchedule) => {
         return (
           <td key={col.key} className={col.key}>
             {data.Event?.AbsenceCode || ""} -{" "}
@@ -135,7 +135,7 @@ const StudentScheduledAbsenceListPanel = ({
     {
       key: "parentSlip",
       header: "ParentSlip?",
-      cell: (col: iTableColumn, data: iStudentAbsenceSchedule) => {
+      cell: (col: iTableColumn<T>, data: iStudentAbsenceSchedule) => {
         return (
           <td key={col.key} className={col.key}>
             <div>
@@ -152,7 +152,7 @@ const StudentScheduledAbsenceListPanel = ({
     {
       key: "Scheduled",
       header: "Scheduled",
-      cell: (col: iTableColumn, data: iStudentAbsenceSchedule) => {
+      cell: (col: iTableColumn<T>, data: iStudentAbsenceSchedule) => {
         return (
           <td key={col.key} className={col.key}>
             <FlexContainer className={"with-gap"}>
@@ -190,7 +190,7 @@ const StudentScheduledAbsenceListPanel = ({
     {
       key: "created",
       header: "Created",
-      cell: (col: iTableColumn, data: iStudentAbsenceSchedule) => {
+      cell: (col: iTableColumn<T>, data: iStudentAbsenceSchedule) => {
         return (
           <td key={col.key} className={col.key}>
             <div>
@@ -212,7 +212,7 @@ const StudentScheduledAbsenceListPanel = ({
     {
       key: "operations",
       header: "",
-      cell: (col: iTableColumn, data: iStudentAbsenceSchedule) => {
+      cell: (col: iTableColumn<T>, data: iStudentAbsenceSchedule) => {
         return (
           <td key={col.key} className={col.key}>
             <DeleteConfirmPopupBtn
@@ -244,7 +244,7 @@ const StudentScheduledAbsenceListPanel = ({
     <Wrapper>
       <Table
         responsive
-        columns={getColumns()}
+        columns={getColumns<iStudentAbsenceSchedule>()}
         rows={(records?.data || []).sort((rec1, rec2) =>
           `${rec1.Event?.Student?.StudentNameInternal || ""}` <
           `${rec2.Event?.Student?.StudentNameInternal || ""}`
