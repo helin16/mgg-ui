@@ -45,6 +45,7 @@ type iUseListCrudHook<T> = {
   sort?: string;
   showingPageSizer?: boolean;
   filter?: iConfigParams;
+  loadOnInit?: boolean;
 };
 
 const useListCrudHook = <T extends {}>({
@@ -55,7 +56,8 @@ const useListCrudHook = <T extends {}>({
   filter,
   createFn,
   updateFn,
-  showingPageSizer = false
+  showingPageSizer = false,
+  loadOnInit = true
 }: iUseListCrudHook<T>) => {
   const [state, dispatch] = useReducer<React.Reducer<iDataState<T>, Action<T>>>(
     reducer,
@@ -70,10 +72,15 @@ const useListCrudHook = <T extends {}>({
     currentPage: 1,
     sort,
     filter,
-    version: 1
+    version: 1,
+    loadOnInit,
   });
 
   useEffect(() => {
+    if (!viewingState.loadOnInit) {
+      return;
+    }
+
     let isCanceled = false;
     dispatch({ type: ActionKind.Loading, payload: {} });
 
@@ -92,7 +99,7 @@ const useListCrudHook = <T extends {}>({
           editingModel: null,
           isModalOpen: false,
           isShowingDeleting: false,
-          isSaving: false,
+          isSaving: false
         }));
         dispatch({ type: ActionKind.Loaded, payload: { data: res } });
       })
@@ -106,6 +113,7 @@ const useListCrudHook = <T extends {}>({
     };
   }, [
     getFn,
+    viewingState.loadOnInit,
     viewingState.sort,
     viewingState.filter,
     viewingState.currentPage,
@@ -273,6 +281,18 @@ const useListCrudHook = <T extends {}>({
     });
   };
 
+  const onSearch = (moreFilter: iConfigParams = {}) => {
+    setViewingState(prevState => ({
+      ...prevState,
+      filter: {
+        ...filter,
+        ...moreFilter,
+      },
+      loadOnInit: true,
+      version: MathHelper.add(prevState.version, 1)
+    }));
+  };
+
   return {
     state,
     viewingState,
@@ -289,7 +309,8 @@ const useListCrudHook = <T extends {}>({
     onDelete,
     onCloseModal,
     onSubmit,
-    onOpenDeleteModal
+    onOpenDeleteModal,
+    onSearch,
   };
 };
 export default useListCrudHook;

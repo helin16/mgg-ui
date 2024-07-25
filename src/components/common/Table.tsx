@@ -10,7 +10,7 @@ import MathHelper from "../../helper/MathHelper";
 import * as _ from "lodash";
 import { FlexContainer } from "../../styles";
 import SelectBox from "./SelectBox";
-import iPaginatedResult from '../../types/iPaginatedResult';
+import iPaginatedResult from "../../types/iPaginatedResult";
 
 export const TABLE_COLUMN_FORMAT_DATE = "Date";
 export const TABLE_COLUMN_FORMAT_BOOLEAN = "Boolean";
@@ -49,6 +49,7 @@ export type iTablePagination = {
 export type iTable<T> = TableProps & {
   isLoading?: boolean;
   showPaginator?: boolean;
+  showHeader?: boolean;
   columns: iTableColumn<T>[];
   rows?: T[] | iPaginatedResult<T>;
   pagination?: iTablePagination;
@@ -101,6 +102,7 @@ const Wrapper = styled.div`
 `;
 const Table = <T extends {}>({
   isLoading = false,
+  showHeader = true,
   columns,
   pagination,
   rows = [],
@@ -286,23 +288,25 @@ const Table = <T extends {}>({
     );
   };
 
-  const dataRow = Array.isArray(rows) ? rows : ('data' in rows ? rows.data : []);
+  const dataRow = Array.isArray(rows) ? rows : "data" in rows ? rows.data : [];
   return (
     <Wrapper>
       <div className={"table-wrapper"}>
         {getLoadingMask()}
         <Original {...props}>
-          <thead>
-            <tr>
-              {cols.map(column => {
-                return typeof column.header === "function" ? (
-                  column.header(column)
-                ) : (
-                  <th key={column.key}>{column.header}</th>
-                );
-              })}
-            </tr>
-          </thead>
+          {showHeader && (
+            <thead>
+              <tr>
+                {cols.map(column => {
+                  return typeof column.header === "function" ? (
+                    column.header(column)
+                  ) : (
+                    <th key={column.key}>{column.header}</th>
+                  );
+                })}
+              </tr>
+            </thead>
+          )}
           <tbody>
             {dataRow.map((row, index) => {
               return (

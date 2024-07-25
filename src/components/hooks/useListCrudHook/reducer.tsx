@@ -23,6 +23,7 @@ export interface iViewingState<T extends {}> {
   isModalOpen?: boolean;
   isSaving?: boolean;
   isShowingDeleting?: boolean;
+  loadOnInit?: boolean;
   version: number;
 }
 
