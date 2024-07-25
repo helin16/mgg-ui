@@ -11,7 +11,7 @@ const OnlineDonationAdminPage = ({ onNavBack }: iOnlineDonationAdminPage) => {
   return (
     <AdminPage
       onNavBack={onNavBack}
-      title={<h3>Online Donation Manager - Admin</h3>}
+      title={<h3>Donation Manager - Admin</h3>}
       moduleId={MGGS_MODULE_ID_ONLINE_DONATION}
     >
       <AdminPageTabs
