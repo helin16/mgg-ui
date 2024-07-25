@@ -28,6 +28,9 @@ import SynLuFundSelector from "../../../components/lookup/SynLuFundSelector";
 import SynLuAppealSelector from "../../../components/lookup/SynLuAppealSelector";
 
 const Wrapper = styled.div`
+  .form-control {
+      margin-bottom: 0px;
+  }
   .donor {
     width: 230px;
   }
