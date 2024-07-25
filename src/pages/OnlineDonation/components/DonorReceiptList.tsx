@@ -29,7 +29,7 @@ import SynLuAppealSelector from "../../../components/lookup/SynLuAppealSelector"
 
 const Wrapper = styled.div`
   .donor {
-    min-width: 230px;
+    width: 230px;
   }
   .fund-name {
     width: 275px;
@@ -40,6 +40,7 @@ const Wrapper = styled.div`
       font-size: 17px;
     }
   }
+  .receipt-number,
   .receipt-paymentMethod,
   .receipt-date {
     width: 110px;
@@ -48,13 +49,13 @@ const Wrapper = styled.div`
     width: 135px;
   }
   .receipt-appeal {
-    width: 25%;
+    width: 250px;
   }
   .fund-table {
     width: 100%;
     th.fund-name,
     td.fund-name {
-      width: 20%;
+      width: 250px;
     }
   }
 
@@ -303,7 +304,20 @@ const DonorReceiptList = () => {
                 <thead>
                   <tr>
                     <th className={"fund-name"}>Fund</th>
-                    <th className={"receipts"}>Receipts</th>
+                    <th className={"receipts"}>
+                      <table className={"receipts-table"}>
+                        <thead>
+                          <tr>
+                            <th className={"receipt-number"}>Receipt No.</th>
+                            <th className={"receipt-date"}>Date</th>
+                            <th className={"receipt-amt"}>Amt</th>
+                            <th className={"receipt-paymentMethod"}>Method</th>
+                            <th className={"receipt-appeal"}>Appeal</th>
+                            <th className={"receipt-comments"}>Comments</th>
+                          </tr>
+                        </thead>
+                      </table>
+                    </th>
                   </tr>
                 </thead>
               </table>
@@ -352,6 +366,23 @@ const DonorReceiptList = () => {
                             className={"receipts-table no-margin no-padding "}
                             columns={[
                               {
+                                key: "receiptNumber",
+                                header: "Receipt No.",
+                                cell: (
+                                  col: iTableColumn<iSynVDonorReceipt>,
+                                  data: iSynVDonorReceipt
+                                ) => {
+                                  return (
+                                    <td
+                                      key={col.key}
+                                      className={"receipt-number"}
+                                    >
+                                      {data.ReceiptNo || ""}
+                                    </td>
+                                  );
+                                }
+                              },
+                              {
                                 key: "date",
                                 header: "Date",
                                 cell: (
@@ -379,7 +410,14 @@ const DonorReceiptList = () => {
                                   data: iSynVDonorReceipt
                                 ) => {
                                   return (
-                                    <td key={col.key} className={"receipt-amt"}>
+                                    <td
+                                      key={col.key}
+                                      className={`receipt-amt ${
+                                        data.ReceiptAmount <= 0
+                                          ? "text-white bg-danger"
+                                          : ""
+                                      }`}
+                                    >
                                       {UtilsService.formatIntoCurrency(
                                         data.ReceiptAmount
                                       )}
@@ -598,7 +636,6 @@ const DonorReceiptList = () => {
             ]
           })
     };
-    console.log("newFilter", newFilter);
     onSearch(newFilter);
   };
 
