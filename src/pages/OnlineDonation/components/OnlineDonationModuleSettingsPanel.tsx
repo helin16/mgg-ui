@@ -63,7 +63,7 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
     module.settings?.donationReceipts?.emailBody || {}
   );
   const [donationEmailSubject, setDonationEmailSubject] = useState(
-    module.settings?.donationReceipts?.emailSubject || ''
+    module.settings?.donationReceipts?.emailSubject || ""
   );
 
   const getEditorContent = (editor: any, defaultValue: string) => {
@@ -201,7 +201,7 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
                     />
                     <FormControl
                       placeholder="Email address separated by ,"
-                      className={'no-margin'}
+                      className={"no-margin"}
                       value={donationReceiptsBCCs}
                       onChange={event => {
                         setDonationReceiptsBCCs(event.target.value);
@@ -212,11 +212,9 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
                   </div>
 
                   <SectionDiv>
-                    <FormLabel
-                      label={'Email Subject'}
-                    />
+                    <FormLabel label={"Email Subject"} />
                     <FormControl
-                      className={'no-margin'}
+                      className={"no-margin"}
                       placeholder="The subject of the receipt email"
                       value={donationEmailSubject}
                       onChange={event => {
@@ -227,15 +225,40 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
                   </SectionDiv>
 
                   <SectionDiv>
-                    <FormLabel label={"Email Body"}/>
+                    <FormLabel label={"Email Body"} />
+                    <ExplanationPanel
+                      text={
+                        <>
+                          Dynamic variables:
+                          <ul style={{marginBottom: '0px'}}>
+                            <li>
+                              {" "}
+                              -{" "}
+                              <Badge bg={"secondary"}>
+                                {"{{DONOR_MAIL_NAME}}"}
+                              </Badge>
+                              : the donor's mail name
+                            </li>
+                            <li>
+                              {" "}
+                              -{" "}
+                              <Badge bg={"secondary"}>
+                                {"{{DONATION_RECEIPT_FUND_NAME}}"}
+                              </Badge>
+                              : fund name
+                            </li>
+                          </ul>
+                        </>
+                      }
+                    />
                     <EmailTemplateBuilder
                       designData={donationEmailBody?.design || {}}
                       editorRef={() => null}
                       onUpdated={editor => {
                         editor.exportHtml(data => {
-                          const {design, html} = data;
-                          const newEmailBody = {design, html};
-                          setDonationEmailBody(newEmailBody)
+                          const { design, html } = data;
+                          const newEmailBody = { design, html };
+                          setDonationEmailBody(newEmailBody);
                           handleUpdate(newEmailBody);
                         });
                       }}
@@ -246,7 +269,7 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
 
               <Accordion.Item eventKey="pdfTemplates">
                 <Accordion.Header>
-                  PDF Templates {" "}
+                  PDF Templates{" "}
                   <small className={"text-muted"}>
                     - how the pdf will be generated
                   </small>
@@ -264,7 +287,7 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
                     }
                   />
                   <FlexContainer className={"justify-content-between gap-3"}>
-                    <div style={{width: "40%"}}>
+                    <div style={{ width: "40%" }}>
                       <FormLabel label={"PDF Header"} />
                       <RichTextEditor
                         settings={{

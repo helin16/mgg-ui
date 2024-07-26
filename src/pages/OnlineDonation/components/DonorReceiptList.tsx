@@ -20,16 +20,15 @@ import {
 import Table, { iTableColumn } from "../../../components/common/Table";
 import * as _ from "lodash";
 import UtilsService from "../../../services/UtilsService";
-import PopupModal from "../../../components/common/PopupModal";
-import { Button, FormControl } from "react-bootstrap";
-import MathHelper from "../../../helper/MathHelper";
+import { FormControl } from "react-bootstrap";
 import FlagSelector from "../../../components/form/FlagSelector";
 import SynLuFundSelector from "../../../components/lookup/SynLuFundSelector";
 import SynLuAppealSelector from "../../../components/lookup/SynLuAppealSelector";
+import DonorReceiptsSendingPopup from "./DonorReceiptsSendingPopup";
 
 const Wrapper = styled.div`
   .form-control {
-      margin-bottom: 0px;
+    margin-bottom: 0px;
   }
   .donor {
     width: 230px;
@@ -79,22 +78,6 @@ const Wrapper = styled.div`
 
       > tr:last-child > td {
         padding-bottom: 0px;
-      }
-    }
-  }
-`;
-const ModalWrapper = styled.div`
-  overflow-y: auto;
-  max-height: calc(100vh - 18rem);
-
-  tbody {
-    tr {
-      &:hover {
-        background-color: #eee !important;
-      }
-
-      td {
-        padding: 0.2rem;
       }
     }
   }
@@ -500,62 +483,6 @@ const DonorReceiptList = () => {
     setShowingConfirmModal(false);
   };
 
-  const getPopupModal = () => {
-    if (!showingConfirmModal) {
-      return null;
-    }
-
-    return (
-      <PopupModal
-        show={showingConfirmModal}
-        // dialogClassName={popupModalProp?.dialogClassName || "modal-80w"}
-        handleClose={() => handleClose()}
-        header={<b>Sending Receipts to {selectedDonorIds.length} Donor(s)</b>}
-        footer={
-          <FlexContainer className={"justify-content-between"}>
-            <div />
-            <div>
-              <Button
-                size={"sm"}
-                variant={"primary"}
-                onClick={() => handleClose()}
-              >
-                <Icons.CheckLg /> OK
-              </Button>
-            </div>
-          </FlexContainer>
-        }
-      >
-        <ModalWrapper>
-          <table>
-            <thead>
-              <tr>
-                <th>Donor</th>
-                <th>No of Receipts</th>
-              </tr>
-            </thead>
-            <tbody>
-              {selectedDonorIds.map(donorId => {
-                const fundMap = donorId in resultMap ? resultMap[donorId] : {};
-                const keys = Object.keys(fundMap);
-                return (
-                  <tr key={donorId}>
-                    <td>{fundMap[keys[0]][0].DonorMailName}</td>
-                    <td>
-                      {Object.values(fundMap).reduce((sum, arr) => {
-                        return MathHelper.add(sum, arr.length);
-                      }, 0)}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </ModalWrapper>
-      </PopupModal>
-    );
-  };
-
   const doSearch = () => {
     const searchNameStr = `${searchCriteria?.searchNameOrEmail || ""}`.trim();
     const newFilter = {
@@ -794,7 +721,14 @@ const DonorReceiptList = () => {
             })
           : null}
       </div>
-      {getPopupModal()}
+      <DonorReceiptsSendingPopup
+        handleClose={handleClose}
+        show={showingConfirmModal}
+        receiptMap={_.pickBy(
+          resultMap,
+          (value, key) => selectedDonorIds.indexOf(Number(key)) >= 0
+        )}
+      />
     </Wrapper>
   );
 };
