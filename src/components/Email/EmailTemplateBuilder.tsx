@@ -1,16 +1,18 @@
-import EmailEditor, { EditorRef, EmailEditorProps } from "react-email-editor";
+import EmailEditor, { EditorRef, EmailEditorProps, Editor } from "react-email-editor";
 import { useRef } from "react";
 import styled from "styled-components";
 
 type iEmailTemplateBuilder = {
   designData: any;
   editorRef: (editor: EditorRef | null) => void;
+  onUpdated?: (editor: Editor, data: any) => void;
 };
 
 const Wrapper = styled.div``;
 const EmailTemplateBuilder = ({
   designData,
   editorRef,
+  onUpdated
 }: iEmailTemplateBuilder) => {
   const emailEditorRef = useRef<EditorRef | null>(null);
 
@@ -28,7 +30,12 @@ const EmailTemplateBuilder = ({
     editorRef(emailEditorRef?.current);
     if (Object.keys(designData).length > 0) {
       unlayer.loadDesign(designData);
+
     }
+    unlayer.addEventListener(
+      "design:updated",
+      (data: any) => onUpdated && onUpdated(unlayer, data)
+    );
   };
 
   return (
