@@ -23,6 +23,9 @@ const TAB_ONLINE_DONATIONS = "ONLINE_DONATIONS";
 const TAB_DONATION_RECEIPTS = "DONATION_RECEIPTS";
 const EditPanel = ({ module, onUpdate }: iEditPanel) => {
   const [selectedTab, setSelectedTab] = useState(TAB_ONLINE_DONATIONS);
+  const [successMsgEditor, setSuccessMsgEditor] = useState<any | null>(null);
+  const [donationReceiptsHeaderEditor, setDonationReceiptsHeaderEditor] = useState<any | null>(null);
+  const [donationReceiptsFooterEditor, setDonationReceiptsFooterEditor] = useState<any | null>(null);
   const [
     notificationEmailTemplateName,
     setNotificationEmailTemplateName
@@ -30,19 +33,25 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
   const [notificationRecipients, setNotificationRecipients] = useState(
     module.settings?.notification?.recipients || ""
   );
-  const [successMsg, setSuccessMsg] = useState(
+  const [successMsg, ] = useState(
     module.settings?.successMsg || ""
   );
 
   const [donationReceiptsBCCs, setDonationReceiptsBCCs] = useState(
     module.settings?.donationReceipts?.bccs || ""
   );
-  const [donationReceiptsHeader, setDonationReceiptsHeader] = useState(
+  const [donationReceiptsHeader] = useState(
     module.settings?.donationReceipts?.receiptHeader || ""
   );
-  const [donationReceiptsFooter, setDonationReceiptsFooter] = useState(
+  const [donationReceiptsFooter] = useState(
     module.settings?.donationReceipts?.receiptFooter || ""
   );
+
+  const getEditorContent = (editor: any, defaultValue: string) => {
+    return `${editor?.getContent() || ""}`.trim() === ""
+      ? defaultValue
+      : `${editor?.getContent() || ""}`.trim();
+  }
 
   const handleUpdate = () => {
     onUpdate({
@@ -52,12 +61,12 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
         templateName: notificationEmailTemplateName,
         recipients: notificationRecipients
       },
-      successMsg,
+      successMsg: getEditorContent(successMsgEditor, successMsg),
       donationReceipts: {
         ...(module?.settings?.donationReceipts || {}),
         bccs: donationReceiptsBCCs,
-        receiptHeader: donationReceiptsHeader,
-        receiptFooter: donationReceiptsFooter
+        receiptHeader: getEditorContent(donationReceiptsHeaderEditor, donationReceiptsHeader),
+        receiptFooter: getEditorContent(donationReceiptsFooterEditor, donationReceiptsFooter),
       }
     });
   };
@@ -124,7 +133,12 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
             </h5>
             <RichTextEditor
               value={successMsg}
-              onChange={newText => setSuccessMsg(newText)}
+              onEditorChange={(content, editor) => {
+                setSuccessMsgEditor(editor);
+              }}
+              onChange={() => {
+                handleUpdate()
+              }}
             />
           </SectionDiv>
         </Tab>
@@ -135,7 +149,7 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
         >
           <SectionDiv>
             <h5>
-              Email Receipt BCC's{" "}
+              Email Receipt BCC's {" "}
               <small className={"text-muted"}>
                 - when a donation receipt gets sent out, the following email
                 addresses will be Bcc'd
@@ -165,17 +179,33 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
                 <div>
                   <FormLabel label={"Header"} />
                   <RichTextEditor
+                    settings={{
+                      menubar: false
+                    }}
                     height={220}
                     value={donationReceiptsHeader}
-                    onChange={newText => setDonationReceiptsHeader(newText)}
+                    onEditorChange={(content, editor) => {
+                      setDonationReceiptsHeaderEditor(editor);
+                    }}
+                    onChange={() => {
+                      handleUpdate()
+                    }}
                   />
                 </div>
                 <div>
                   <FormLabel label={"Footer:"} />
                   <RichTextEditor
+                    settings={{
+                      menubar: false
+                    }}
                     height={220}
                     value={donationReceiptsFooter}
-                    onChange={newText => setDonationReceiptsFooter(newText)}
+                    onEditorChange={(content, editor) => {
+                      setDonationReceiptsFooterEditor(editor);
+                    }}
+                    onChange={() => {
+                      handleUpdate()
+                    }}
                   />
                 </div>
               </div>

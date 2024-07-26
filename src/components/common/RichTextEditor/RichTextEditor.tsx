@@ -15,6 +15,7 @@ type iRichTextEditor = {
   onChange?: (text: string) => void;
   onEditorChange?: (content: any, editor: any) => void;
   imagesUploadFn?: (blobInfo: any) => Promise<iAsset>;
+  onBlur?: (event: any) => void;
 }
 
 const defaultPlugins = [
@@ -73,7 +74,7 @@ const Wrapper = styled.div`
   }
 `;
 
-const RichTextEditor = ({value, plugins, toolBar, settings, onChange, className, onEditorChange, imagesUploadFn, height = 450}: iRichTextEditor) => {
+const RichTextEditor = ({value, plugins, toolBar, settings, onChange, className, onEditorChange, imagesUploadFn, height = 450, onBlur}: iRichTextEditor) => {
   // const editorRef = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -135,6 +136,10 @@ const RichTextEditor = ({value, plugins, toolBar, settings, onChange, className,
             editor.on('init', () => {
               // Set isLoading to false when TinyMCE is initialized
               setIsLoading(false);
+            });
+
+            editor.on('blur', (event) => {
+              onBlur && onBlur(event);
             });
           },
           ...getImageUploadSettings(),
