@@ -62,6 +62,9 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
   const [donationEmailBody, setDonationEmailBody] = useState(
     module.settings?.donationReceipts?.emailBody || {}
   );
+  const [donationEmailSubject, setDonationEmailSubject] = useState(
+    module.settings?.donationReceipts?.emailSubject || ''
+  );
 
   const getEditorContent = (editor: any, defaultValue: string) => {
     return `${editor?.getContent() || ""}`.trim() === ""
@@ -70,12 +73,6 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
   };
 
   const handleUpdate = (extraEmailBody = {}) => {
-    console.log('emailBody', extraEmailBody);
-    console.log('donationEmailBody', donationEmailBody);
-    console.log('emailBody', {
-      ...donationEmailBody,
-      ...extraEmailBody
-    });
     onUpdate({
       ...(module?.settings || {}),
       notification: {
@@ -95,6 +92,7 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
           donationReceiptsFooterEditor,
           donationReceiptsFooter
         ),
+        emailSubject: donationEmailSubject,
         emailBody: {
           ...donationEmailBody,
           ...extraEmailBody
@@ -203,6 +201,7 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
                     />
                     <FormControl
                       placeholder="Email address separated by ,"
+                      className={'no-margin'}
                       value={donationReceiptsBCCs}
                       onChange={event => {
                         setDonationReceiptsBCCs(event.target.value);
@@ -213,14 +212,29 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
                   </div>
 
                   <SectionDiv>
-                    <FormLabel label={"Email Body"} />
+                    <FormLabel
+                      label={'Email Subject'}
+                    />
+                    <FormControl
+                      className={'no-margin'}
+                      placeholder="The subject of the receipt email"
+                      value={donationEmailSubject}
+                      onChange={event => {
+                        setDonationEmailSubject(event.target.value);
+                      }}
+                      onBlur={() => handleUpdate()}
+                    />
+                  </SectionDiv>
+
+                  <SectionDiv>
+                    <FormLabel label={"Email Body"}/>
                     <EmailTemplateBuilder
                       designData={donationEmailBody?.design || {}}
                       editorRef={() => null}
                       onUpdated={editor => {
                         editor.exportHtml(data => {
-                          const { design, html } = data;
-                          const newEmailBody = { design, html };
+                          const {design, html} = data;
+                          const newEmailBody = {design, html};
                           setDonationEmailBody(newEmailBody)
                           handleUpdate(newEmailBody);
                         });
@@ -232,7 +246,7 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
 
               <Accordion.Item eventKey="pdfTemplates">
                 <Accordion.Header>
-                  PDF Templates{" "}
+                  PDF Templates {" "}
                   <small className={"text-muted"}>
                     - how the pdf will be generated
                   </small>
@@ -250,7 +264,7 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
                     }
                   />
                   <FlexContainer className={"justify-content-between gap-3"}>
-                    <div style={{ width: "40%" }}>
+                    <div style={{width: "40%"}}>
                       <FormLabel label={"PDF Header"} />
                       <RichTextEditor
                         settings={{
