@@ -86,7 +86,10 @@ const DonorReceiptsSendingPopup = ({
           return null;
         }
 
-        const receipt = receipts[0];
+        const receipt = {
+          ...receipts[0],
+          ...(fundCodes.length > 0 ? { ReceiptFundDescription: `Multiple funds` }: {}),
+        };
         return receipt;
       })
       .filter(item => item !== null);
