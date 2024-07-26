@@ -64,6 +64,7 @@ const Wrapper = styled.div`
 
   .receipts-table,
   .fund-table {
+    th,
     td {
       text-align: left;
       padding: 0px;

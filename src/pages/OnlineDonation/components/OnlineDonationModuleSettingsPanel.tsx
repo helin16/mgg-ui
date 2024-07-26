@@ -59,7 +59,7 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
   const [donationReceiptsFooter, setDonationReceiptsFooter] = useState(
     module.settings?.donationReceipts?.receiptFooter || ""
   );
-  const [donationEmailBody] = useState(
+  const [donationEmailBody, setDonationEmailBody] = useState(
     module.settings?.donationReceipts?.emailBody || {}
   );
 
@@ -70,6 +70,12 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
   };
 
   const handleUpdate = (extraEmailBody = {}) => {
+    console.log('emailBody', extraEmailBody);
+    console.log('donationEmailBody', donationEmailBody);
+    console.log('emailBody', {
+      ...donationEmailBody,
+      ...extraEmailBody
+    });
     onUpdate({
       ...(module?.settings || {}),
       notification: {
@@ -214,7 +220,9 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
                       onUpdated={editor => {
                         editor.exportHtml(data => {
                           const { design, html } = data;
-                          handleUpdate({ design, html });
+                          const newEmailBody = { design, html };
+                          setDonationEmailBody(newEmailBody)
+                          handleUpdate(newEmailBody);
                         });
                       }}
                     />

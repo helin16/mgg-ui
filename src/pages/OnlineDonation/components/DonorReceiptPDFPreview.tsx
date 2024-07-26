@@ -61,7 +61,7 @@ const DonorReceiptPDFPreview = ({
     className?: string
   ) => {
     return (
-      <FlexContainer className={`preview-row ${className || ""}`}>
+      <FlexContainer className={`preview-row ${className || ""}`} key={item.receiptNo}>
         <div className={'date'}>{item.date}</div>
         <div className={'receiptNo'}>{item.receiptNo}</div>
         <div className={'appeal'}>{item.appeal}</div>
