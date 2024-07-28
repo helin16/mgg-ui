@@ -129,7 +129,7 @@ const SchoolCensusDataPanel = () => {
           if (`${nccd.StartDate || ''}`.trim() !== '' && moment(nccd.StartDate).isSameOrAfter(moment(startEndDataString.endDateStr))) {
             return false;
           }
-          if (`${nccd.EndDate || ''}`.trim() !== '' && moment(nccd.EndDate).isBefore(moment(startEndDataString.endDateStr))) {
+          if (`${nccd.EndDate || ''}`.trim() !== '' && moment(nccd.EndDate).isBefore(moment(startEndDataString.startDateStr))) {
             return false;
           }
           // console.log('nccd', nccd)
