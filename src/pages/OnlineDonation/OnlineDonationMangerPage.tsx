@@ -5,9 +5,12 @@ import OnlineDonationAdminPage from './OnlineDonationAdminPage';
 import Page from '../../layouts/Page';
 import {Tab, Tabs} from 'react-bootstrap';
 import DonorReceiptList from './components/DonorReceiptList';
+import MessageListPanel from '../../components/common/Message/MessageListPanel';
+import {MESSAGE_TYPE_DONATION_RECEIPT_EMAIL} from '../../types/Message/iMessage';
 
 const TAB_ONLINE_DONATIONS = "ONLINE_DONATIONS";
 const TAB_DONATION_RECEIPTS = "DONATION_RECEIPTS";
+const TAB_DONATION_RECEIPTS_EMAIL_LOGS = "DONATION_RECEIPTS_EMAIL_LOGS";
 const OnlineDonationMangerPage = () => {
   const [selectedTab, setSelectedTab] = useState(TAB_ONLINE_DONATIONS);
   return (
@@ -24,6 +27,10 @@ const OnlineDonationMangerPage = () => {
 
         <Tab eventKey={TAB_DONATION_RECEIPTS} title={`Donation Receipts`}>
           <DonorReceiptList />
+        </Tab>
+
+        <Tab eventKey={TAB_DONATION_RECEIPTS_EMAIL_LOGS} title={`Donation Receipts Email Logs`}>
+          <MessageListPanel type={MESSAGE_TYPE_DONATION_RECEIPT_EMAIL} />
         </Tab>
 
       </Tabs>

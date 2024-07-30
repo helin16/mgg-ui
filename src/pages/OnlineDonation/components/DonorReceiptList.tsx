@@ -25,6 +25,7 @@ import FlagSelector from "../../../components/form/FlagSelector";
 import SynLuFundSelector from "../../../components/lookup/SynLuFundSelector";
 import SynLuAppealSelector from "../../../components/lookup/SynLuAppealSelector";
 import DonorReceiptsSendingPopup from "./DonorReceiptsSendingPopup";
+import Toaster, {TOAST_TYPE_ERROR} from '../../../services/Toaster';
 
 const Wrapper = styled.div`
   .form-control {
@@ -201,7 +202,22 @@ const DonorReceiptList = () => {
       {
         key: "selectbox",
         header: (col: iTableColumn<T>) => {
-          const allDonorIds = Object.keys(resultMap).map(id => Number(id));
+          const allDonorIds = Object.keys(resultMap).filter(id => {
+            const donorId = Number(id);
+            const fundMap = donorId in resultMap ? resultMap[donorId] : {};
+            const keys = Object.keys(fundMap);
+            const record =
+              keys.length <= 0
+                ? null
+                : keys[0] in fundMap
+                  ? // @ts-ignore
+                  fundMap[keys[0]].length <= 0
+                    ? null
+                    : // @ts-ignore
+                    fundMap[keys[0]][0]
+                  : null;
+            return `${record?.DonorDefaultEmail || ''}`.trim() !== '';
+          }).map(id => Number(id));
           const leftIds = allDonorIds.filter(
             id => selectedDonorIds.indexOf(id) < 0
           );
@@ -211,7 +227,15 @@ const DonorReceiptList = () => {
               <span
                 className={"cursor-pointer check-box"}
                 onClick={() => {
-                  setSelectedDonorIds(allSelected === true ? [] : allDonorIds);
+                  if (allSelected === true) {
+                    setSelectedDonorIds([]);
+                    return;
+                  }
+
+                  if (Object.keys(resultMap).length > allDonorIds.length) {
+                    Toaster.showToast('There are donor(s) without email address, please check below.', TOAST_TYPE_ERROR);
+                  }
+                  setSelectedDonorIds(allDonorIds);
                 }}
               >
                 {allSelected === true ? (
@@ -227,27 +251,41 @@ const DonorReceiptList = () => {
         },
         cell: (col: iTableColumn<T>, dId: T) => {
           const donorId = Number(dId);
+          const fundMap = donorId in resultMap ? resultMap[donorId] : {};
+          const keys = Object.keys(fundMap);
+          const record =
+            keys.length <= 0
+              ? null
+              : keys[0] in fundMap
+              ? // @ts-ignore
+                fundMap[keys[0]].length <= 0
+                ? null
+                : // @ts-ignore
+                  fundMap[keys[0]][0]
+              : null;
           return (
             <td key={col.key} className={"select-box"}>
-              <span
-                className={"cursor-pointer check-box"}
-                onClick={() => {
-                  if (selectedDonorIds.indexOf(donorId) >= 0) {
-                    setSelectedDonorIds(
-                      selectedDonorIds.filter(id => id !== donorId)
-                    );
-                    return;
-                  }
+              {`${record?.DonorDefaultEmail || ""}`.trim() === "" ? null : (
+                <span
+                  className={"cursor-pointer check-box"}
+                  onClick={() => {
+                    if (selectedDonorIds.indexOf(donorId) >= 0) {
+                      setSelectedDonorIds(
+                        selectedDonorIds.filter(id => id !== donorId)
+                      );
+                      return;
+                    }
 
-                  setSelectedDonorIds(_.uniq([...selectedDonorIds, donorId]));
-                }}
-              >
-                {selectedDonorIds.indexOf(donorId) >= 0 ? (
-                  <Icons.CheckSquareFill />
-                ) : (
-                  <Icons.Square />
-                )}
-              </span>
+                    setSelectedDonorIds(_.uniq([...selectedDonorIds, donorId]));
+                  }}
+                >
+                  {selectedDonorIds.indexOf(donorId) >= 0 ? (
+                    <Icons.CheckSquareFill />
+                  ) : (
+                    <Icons.Square />
+                  )}
+                </span>
+              )}
             </td>
           );
         }
@@ -269,13 +307,19 @@ const DonorReceiptList = () => {
                   fundMap[keys[0]][0]
               : null;
           return (
-            <td key={col.key} className={"donor"}>
+            <td key={col.key}
+                className={`donor ${`${record?.DonorDefaultEmail || ''}`.trim() === "" ? 'bg-warning' : ''}`}>
               <div>
-                <b>{record?.DonorMailName}</b>
+                <b>{record?.DonorMailName || ''}</b>
               </div>
               <div>
                 <small className={"text-muted"}>
-                  <i>{record?.DonorDefaultEmail}</i>
+                  <i>{record?.DonorDefaultEmail || ''}</i>
+                </small>
+              </div>
+              <div>
+                <small className={"text-muted"}>
+                  <i>DonorID: {record?.DonorID || ''}</i>
                 </small>
               </div>
             </td>
@@ -724,6 +768,8 @@ const DonorReceiptList = () => {
       <DonorReceiptsSendingPopup
         handleClose={handleClose}
         show={showingConfirmModal}
+        fromDate={searchCriteria?.dates.startDate || ""}
+        toDate={searchCriteria?.dates.endDate || ""}
         receiptMap={_.pickBy(
           resultMap,
           (value, key) => selectedDonorIds.indexOf(Number(key)) >= 0

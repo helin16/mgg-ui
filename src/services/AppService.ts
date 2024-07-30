@@ -9,9 +9,7 @@ export const HEADER_NAME_SELECTING_FIELDS = "X-MGGS-SELECT-FIELDS";
 export type iConfigParams = {
   [key: string]: any;
 };
-export type iParams = {
-  [key: string]: string | boolean | number | null | undefined | string[];
-};
+export type iParams = iConfigParams;
 
 const cancelToken = axios.CancelToken;
 

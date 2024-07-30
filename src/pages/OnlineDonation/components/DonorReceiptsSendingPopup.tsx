@@ -7,17 +7,26 @@ import iSynVDonorReceipt from "../../../types/Synergetic/Finance/iSynVDonorRecei
 import { useEffect, useState } from "react";
 import MggsModuleService from "../../../services/Module/MggsModuleService";
 import { MGGS_MODULE_ID_ONLINE_DONATION } from "../../../types/modules/iModuleUser";
-import Toaster from "../../../services/Toaster";
+import Toaster, {TOAST_TYPE_ERROR, TOAST_TYPE_SUCCESS} from "../../../services/Toaster";
 import PageLoadingSpinner from "../../../components/common/PageLoadingSpinner";
 import FormLabel from "../../../components/form/FormLabel";
 import SelectBox from "../../../components/common/SelectBox";
 import SectionDiv from "../../../components/common/SectionDiv";
+import { Alert, FormControl } from "react-bootstrap";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../redux/makeReduxStore";
+import UtilsService from "../../../services/UtilsService";
+import SynDonorReceiptService from "../../../services/Synergetic/Finance/SynDonorReceiptService";
+import moment from "moment-timezone";
+import * as _ from "lodash";
 
 type iMap = { [key: number]: { [key: string]: iSynVDonorReceipt[] } };
 type iDonorReceiptsSendingPopup = {
   handleClose?: () => void;
   show?: boolean;
   receiptMap: iMap;
+  fromDate: string;
+  toDate: string;
 };
 
 const Wrapper = styled.div`
@@ -34,13 +43,19 @@ const Wrapper = styled.div`
 
 const DonorReceiptsSendingPopup = ({
   handleClose,
+  fromDate,
+  toDate,
   show = false,
   receiptMap
 }: iDonorReceiptsSendingPopup) => {
+  const { user } = useSelector((state: RootState) => state.auth);
   const [moduleSettings, setModuleSettings] = useState<any | null>(null);
+  const [isTesting, setIsTesting] = useState(false);
+  const [testingEmail, setTestingEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [donorMap, setDonorMap] = useState<{
-    [key: number]: iSynVDonorReceipt;
+    [key: number]: iSynVDonorReceipt[];
   }>({});
   const [selectedDonor, setSelectedDonor] = useState<iSynVDonorReceipt | null>(
     null
@@ -88,7 +103,9 @@ const DonorReceiptsSendingPopup = ({
 
         const receipt = {
           ...receipts[0],
-          ...(fundCodes.length > 0 ? { ReceiptFundDescription: `Multiple funds` }: {}),
+          ...(fundCodes.length > 1
+            ? { ReceiptFundDescription: `Multiple funds` }
+            : {})
         };
         return receipt;
       })
@@ -96,15 +113,66 @@ const DonorReceiptsSendingPopup = ({
     setSelectedDonor(donorArr.length > 0 ? donorArr[0] : null);
     setDonorMap(
       donorArr.reduce((map, item) => {
+        const key = item?.DonorID;
         return {
           ...map,
-          [item?.DonorID]: item
+          [key]: _.uniqBy(
+            [...(key in map ? map[key] : []), item],
+            i => i.ReceiptSeq
+          )
         };
       }, {})
     );
   }, [receiptMap]);
 
-  const doSave = () => {};
+  const doClosePopup = () => {
+    if (isSubmitting === true) {
+      return;
+    }
+    setIsTesting(false);
+    setTestingEmail("");
+    handleClose && handleClose();
+  };
+
+  const doSave = () => {
+    if (isTesting === true) {
+      const emailString = `${testingEmail || ""}`.trim();
+      if (emailString === "") {
+        Toaster.showToast("Testing email needed.", TOAST_TYPE_ERROR);
+        return;
+      }
+      if (!UtilsService.validateEmail(emailString)) {
+        Toaster.showToast("Invalid testing email address.", TOAST_TYPE_ERROR);
+        return;
+      }
+    }
+    setIsSubmitting(true);
+    Promise.all(
+      Object.keys(donorMap).map(donorId => {
+        const receipts: iSynVDonorReceipt[] =
+          // @ts-ignore
+          donorId in donorMap ? donorMap[donorId] : [];
+        return SynDonorReceiptService.sendEmail({
+          to:
+            `${testingEmail || ""}`.trim() !== ""
+              ? `${testingEmail || ""}`.trim()
+              : receipts[0].DonorDefaultEmail || '',
+          donorId,
+          fromDate: moment(fromDate).format("YYYY-MM-DD"),
+          toDate: moment(toDate).format("YYYY-MM-DD"),
+          receiptNumbers: receipts.map(receipt => receipt.ReceiptNo)
+        })
+      })
+    ).then(() => {
+      Toaster.showToast(`${Object.keys(donorMap).length} Email(s) has been queued.`, TOAST_TYPE_SUCCESS);
+      setIsSubmitting(false);
+      doClosePopup();
+    })
+      .catch(err => {
+        setIsSubmitting(false);
+        Toaster.showApiError(err);
+      });
+  };
 
   const getEmailPreview = () => {
     const donorMailNameHolder = "{{DONOR_MAIL_NAME}}";
@@ -128,10 +196,12 @@ const DonorReceiptsSendingPopup = ({
         <div>
           <FormLabel label={"Select a donor"} />
           <SelectBox
-            options={Object.values(donorMap).map(donor => ({
-              label: donor.DonorMailName,
-              value: donor.DonorID
-            }))}
+            options={Object.values(donorMap).map(receipts => {
+              return {
+                label: receipts.length > 0 ? receipts[0].DonorMailName : "",
+                value: receipts.length > 0 ? receipts[0].DonorID : ""
+              };
+            })}
             value={
               selectedDonor === null
                 ? null
@@ -142,7 +212,11 @@ const DonorReceiptsSendingPopup = ({
             }
             onChange={event => {
               setSelectedDonor(
-                event.value in donorMap ? donorMap[event.value] : null
+                event.value in donorMap &&
+                  donorMap[event.value] &&
+                  donorMap[event.value].length > 0
+                  ? donorMap[event.value][0]
+                  : null
               );
             }}
           />
@@ -170,6 +244,15 @@ const DonorReceiptsSendingPopup = ({
       return <PageLoadingSpinner />;
     }
 
+    if (isSubmitting === true) {
+      return (
+        <Alert variant={"danger"}>
+          <h5>DO NOT CLOSE THIS WINDOW.</h5>
+          <div>Please don't close this window, until this is done.</div>
+        </Alert>
+      );
+    }
+
     return (
       <>
         <div className={"content-wrapper"}>{getEmailPreview()}</div>
@@ -179,12 +262,17 @@ const DonorReceiptsSendingPopup = ({
           {handleClose && (
             <LoadingBtn
               variant={"link"}
-              onClick={() => handleClose()}
+              onClick={doClosePopup}
+              isLoading={isSubmitting}
             >
               <Icons.XLg /> Cancel
             </LoadingBtn>
           )}
-          <LoadingBtn variant={"primary"} onClick={() => doSave()}>
+          <LoadingBtn
+            variant={"primary"}
+            onClick={() => doSave()}
+            isLoading={isSubmitting}
+          >
             <Icons.Send /> Send to {Object.keys(receiptMap)?.length || 0}{" "}
             donor(s)
           </LoadingBtn>
@@ -197,11 +285,40 @@ const DonorReceiptsSendingPopup = ({
     <PopupModal
       show={show}
       dialogClassName={"modal-80w"}
-      handleClose={() => handleClose && handleClose()}
+      handleClose={doClosePopup}
       header={
-        <b>
-          Sending Receipts to {Object.keys(receiptMap)?.length || 0} Donor(s)
-        </b>
+        <FlexContainer className={"gap-2 align-items-center"}>
+          <b>
+            Sending Receipts to {Object.keys(receiptMap)?.length || 0} Donor(s)
+          </b>
+          <FlexContainer
+            className={"gap-1 align-items-center cursor-pointer"}
+            onClick={() => {
+              if (isTesting === false) {
+                setIsTesting(true);
+                setTestingEmail(user?.SynCommunity?.OccupEmail || "");
+                return;
+              }
+              setIsTesting(false);
+              setTestingEmail("");
+            }}
+          >
+            {isTesting === true ? (
+              <Icons.CheckSquareFill className={"text-success"} />
+            ) : (
+              <Icons.Square />
+            )}
+            <span>is testing email</span>
+          </FlexContainer>
+          {isTesting === true ? (
+            <FormControl
+              value={testingEmail}
+              placeholder={"Please type in recipient for the testing email"}
+              style={{ width: "200px" }}
+              onChange={event => setTestingEmail(event.target.value || "")}
+            />
+          ) : null}
+        </FlexContainer>
       }
     >
       <Wrapper>{getContent()}</Wrapper>
