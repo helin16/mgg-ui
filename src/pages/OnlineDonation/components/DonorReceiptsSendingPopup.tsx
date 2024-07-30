@@ -160,7 +160,8 @@ const DonorReceiptsSendingPopup = ({
           donorId,
           fromDate: moment(fromDate).format("YYYY-MM-DD"),
           toDate: moment(toDate).format("YYYY-MM-DD"),
-          receiptNumbers: receipts.map(receipt => receipt.ReceiptNo)
+          // receiptNumbers: receipts.map(receipt => receipt.ReceiptNo)
+          receiptNumbers: [],
         })
       })
     ).then(() => {
