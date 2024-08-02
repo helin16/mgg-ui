@@ -12,6 +12,7 @@ import {
   SYN_NATIONALITY_DESCRIPTION_AUSTRALIA
 } from '../../../../types/Synergetic/Lookup/iSynLuNationality';
 import {SYN_COUNTRY_CODE_AUSTRALIA} from '../../../../types/Synergetic/Lookup/iSynLuCountry';
+import {ButtonVariant} from 'react-bootstrap/types';
 
 type iSchoolCensusDataSummaryDiv = {
   records: iSchoolCensusStudentData[];
@@ -103,12 +104,15 @@ const SchoolCensusDataSummaryDiv = ({records, unfilteredStudentRecords, startAnd
     })
   }, [records, unfilteredStudentRecords, startAndEndDateString]);
 
-  const getPanel = (title: string, recs: iSchoolCensusStudentData[], popupTitle?: any) => {
+  const getPanel = (title: string, recs: iSchoolCensusStudentData[], popupTitle?: any, variant?: ButtonVariant, isForNCCD = false) => {
     return (
       <SchoolCensusDataPopupBtn
         popupTitle={popupTitle}
         records={recs}
         className={'summary-div'}
+        variant={variant}
+        isForNCCD={isForNCCD}
+        totalStudents={summary.total}
         size={'lg'}>
         <h5>{title}</h5>
         <div>{recs.length}</div>
@@ -180,7 +184,7 @@ const SchoolCensusDataSummaryDiv = ({records, unfilteredStudentRecords, startAnd
         {getPanel('Indigenous', summary.indigenous, <h4>{summary.total.length} <u>Indigenous</u> Student{summary.indigenous.length > 1 ? 's' : ''}</h4>)}
         {getPanel('International', summary.international, <h4>{summary.international.length} <u>International</u> Student{summary.international.length > 1 ? 's' : ''}</h4>)}
         {getPanel('With Visa', summary.withVisa, <h4>{summary.withVisa.length} Student{summary.withVisa.length > 1 ? 's' : ''} <u>with visa</u></h4>)}
-        {getPanel('NCCD', summary.disability, <h4>{summary.disability.length} <u>NCCD</u> Student{summary.disability.length > 1 ? 's' : ''}</h4>)}
+        {getPanel('NCCD', summary.disability, <h4>{summary.disability.length} <u>NCCD</u> Student{summary.disability.length > 1 ? 's' : ''}</h4>, undefined, true)}
         {getPanel(
           'Around',
           summary.aroundTotal,

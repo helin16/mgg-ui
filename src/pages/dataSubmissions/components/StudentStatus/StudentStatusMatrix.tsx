@@ -228,7 +228,9 @@ const StudentStatusMatrix = () => {
             studentNationality2:
               `${currentStudent.StudentNationality2Code || ""}`.trim() === ""
                 ? ""
-                : `${currentStudent.StudentNationality2Description || ""}`
+                : `${currentStudent.StudentNationality2Description || ""}`,
+            DisabilityFlag: currentStudent.DisabilityFlag,
+            StudentSchoolFTE: currentStudent.StudentSchoolFTE,
           }
         };
       }, pastStudentMap);

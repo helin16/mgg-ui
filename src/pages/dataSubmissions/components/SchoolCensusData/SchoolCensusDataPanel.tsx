@@ -103,6 +103,9 @@ const SchoolCensusDataPanel = () => {
             studentCountryOfBirth: `${row.StudentCountryOfBirthDescription || ''}`,
             studentNationality: `${row.StudentNationalityCode || ''}`.trim() === '' ? '' : `${row.StudentNationalityDescription || ''}`,
             studentNationality2: `${row.StudentNationality2Code || ''}`.trim() === '' ? '' : `${row.StudentNationality2Description || ''}`,
+
+            DisabilityFlag: row.DisabilityFlag,
+            StudentSchoolFTE: row.StudentSchoolFTE,
           })),
         (record) => record.ID
       )
@@ -157,7 +160,7 @@ const SchoolCensusDataPanel = () => {
         return false;
       }
 
-      if (`${record.leavingDate || ''}`.trim() !== '' && moment(`${record.leavingDate || ''}`.trim()).isSameOrBefore(moment(`${startEndDataString.endDateStr}`))) {
+      if (`${record.leavingDate || ''}`.trim() !== '' && moment(`${record.leavingDate || ''}`.trim()).isSameOrBefore(moment(`${startEndDataString.startDateStr}`))) {
         return false;
       }
 
@@ -206,10 +209,12 @@ const SchoolCensusDataPanel = () => {
             Campus: (searchCriteria?.campusCodes || []).length === 0 ? SchoolCensusDataExportHelper.defaultCampusCodes : searchCriteria?.campusCodes,
           }),
           sort: 'YearLevelSort:ASC'
-        })
+        }),
       ]);
 
       if (isCanceled) return;
+
+
       setYearLevels(records[1]);
       setSchoolDays(schoolDaysStrings);
       if (records[0].length <= 0 || records[1].length <= 0) {
@@ -218,6 +223,7 @@ const SchoolCensusDataPanel = () => {
         setAbsenteeOnEndDateIds([]);
         return;
       }
+
       const [loadedNccds, absenteesOnEndDate] = await Promise.all([
         loadNccds(records[0], startEndDataString),
         getAbsenteesOnEndDate(records[0], startEndDataString),

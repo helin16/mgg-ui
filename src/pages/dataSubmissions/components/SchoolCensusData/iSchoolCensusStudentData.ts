@@ -29,6 +29,8 @@ type iSchoolCensusStudentData = {
   isInternationalStudent: boolean;
   isIndigenous: boolean;
   isPastStudent: boolean;
+  StudentSchoolFTE: boolean | null;
+  DisabilityFlag: boolean;
   extra?: any;
 };
 
