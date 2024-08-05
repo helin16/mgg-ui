@@ -16,11 +16,11 @@ export const tableStripeBgColor = "#f9f9f9";
 export const tableStripHoverBgColor = "#f5f5f5";
 
 const AppWrapper = styled.div`
-  font-family: "DM Serif Display", ui-sans-serif, system-ui, -apple-system,
-    BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans,
-    sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol,
-    Noto Color Emoji;
-
+  //font-family: "DM Serif Display", ui-sans-serif, system-ui, -apple-system,
+  //  BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans,
+  //  sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol,
+  //  Noto Color Emoji;
+  //
   color: #000;
   font-size: 0.865rem;
   line-height: 1.45;
