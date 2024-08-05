@@ -8,7 +8,7 @@ import {
   MGGS_MODULE_ID_ENROLLMENTS,
   MGGS_MODULE_ID_FINANCE,
   MGGS_MODULE_ID_FUNNEL,
-  MGGS_MODULE_ID_HOUSE_AWARDS,
+  MGGS_MODULE_ID_HOUSE_AWARDS, MGGS_MODULE_ID_HOY_CHAT_EMAIL,
   MGGS_MODULE_ID_MGG_APP_DEVICES,
   MGGS_MODULE_ID_ONLINE_DONATION,
   MGGS_MODULE_ID_OPEROO_SAFETY_ALERTS, MGGS_MODULE_ID_POWER_BI_REPORT,
@@ -42,6 +42,8 @@ import {URL_POWER_BI_DISPLAY} from '../../Url';
 import FunnelLeadsPage from '../../pages/funnel/FunnelLeads/FunnelLeadsPage';
 import PageNotFound from '../../components/PageNotFound';
 import AdmissionsPage from '../../pages/AttendanceBulk/AdmissionsPage';
+import HOYChatManagePage from '../../pages/HOYChat/HOYChatManagePage';
+import HOYChatForm from '../../pages/HOYChat/components/HOYChatForm';
 
 const schoolBoxIframeElementId = "remote";
 const SchoolBoxRouter = ({
@@ -229,6 +231,20 @@ const SchoolBoxRouter = ({
         <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_ADMISSIONS}>
           <AdmissionsPage />
         </ModuleAccessWrapper>
+      );
+    }
+    case "/hoyChat": {
+      removeSchoolBoxIframe();
+      return (
+        <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_HOY_CHAT_EMAIL}>
+          <HOYChatManagePage customFormPath={'/hoyChatForm'} customUrl={remoteUrl} />
+        </ModuleAccessWrapper>
+      );
+    }
+    case "/hoyChatForm": {
+      removeSchoolBoxIframe();
+      return (
+        <HOYChatForm />
       );
     }
     default: {
