@@ -15,6 +15,8 @@ const Wrapper = styled.div`
   }
 `;
 
+export const MAX_FILE_SIZE = 20 * 1024 * 1024;
+
 type iUploadFilePanel = {
   children?: any;
   className?: string;
@@ -33,7 +35,7 @@ const UploadFilePanel = ({
 }: iUploadFilePanel) => {
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const fileInputRef = useRef(null);
-  const MAX_FILE_SIZE = 20 * 1024 * 1024;
+
 
   const handleSelectedFiles = (fileList: FileList) => {
     if (fileList.length <= 0) {

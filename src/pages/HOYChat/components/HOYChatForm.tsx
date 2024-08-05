@@ -17,7 +17,7 @@ import iSchoolManagementTeam, {
 import SectionDiv from "../../../components/common/SectionDiv";
 import iVStudent from "../../../types/Synergetic/Student/iVStudent";
 import { CAMPUS_CODE_SENIOR } from "../../../types/Synergetic/Lookup/iSynLuCampus";
-import UploadFilePanel from "../../../components/Asset/UploadFilePanel";
+import UploadFilePanel, {MAX_FILE_SIZE} from "../../../components/Asset/UploadFilePanel";
 import iAsset from "../../../types/asset/iAsset";
 import AssetService from "../../../services/Asset/AssetService";
 import * as _ from "lodash";
@@ -435,7 +435,7 @@ const HOYChatForm = () => {
                     <div>
                       <b>NO VIDEOS PLEASE</b>
                     </div>
-                    <div>Max File Size: 20MB</div>
+                    <div>Max File Size: {UtilsService.formatBytesToHuman(MAX_FILE_SIZE)}</div>
                   </>
                 }
                 allowMultiple
