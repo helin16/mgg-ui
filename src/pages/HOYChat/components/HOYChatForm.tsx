@@ -31,6 +31,8 @@ import FormErrorDisplay, {
 } from "../../../components/form/FormErrorDisplay";
 import LoadingBtn from "../../../components/common/LoadingBtn";
 import HOYChatService from "../../../services/HOYChat/HOYChatService";
+import {FlexContainer} from '../../../styles';
+import MathHelper from '../../../helper/MathHelper';
 
 const Wrapper = styled.div``;
 
@@ -45,6 +47,8 @@ type iUpLoadingAsset = {
 };
 
 type iHoyMap = { [key: string]: iSchoolManagementTeam };
+
+const MAX_CHARS_FOR_COMMENTS = 300;
 
 const HOYChatForm = () => {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -359,6 +363,10 @@ const HOYChatForm = () => {
       });
   };
 
+  const getCharsLeft = () => {
+    return MathHelper.sub(MAX_CHARS_FOR_COMMENTS, `${submittingData?.comments || ''}`.length);
+  }
+
   const getContent = () => {
     if (isSavedSuccessfully === true) {
       return (
@@ -406,16 +414,20 @@ const HOYChatForm = () => {
                 }
               />
               <FormControl
-                className={"mconnect_textarea"}
+                className={"mconnect_textarea no-margin"}
                 isInvalid={"comments" in errorMap}
                 as={"textarea"}
                 rows={6}
-                placeholder={`Write what you would like to share with ${getYearLevelCoordinatorName()}.`}
-                onChange={event =>
-                  handleFieldChange("comments", event.target.value || "")
-                }
+                value={submittingData?.comments || ''}
+                placeholder={`Write what you would like to share with ${getYearLevelCoordinatorName()}. Max ${MAX_CHARS_FOR_COMMENTS} characters.`}
+                onChange={event => {
+                  handleFieldChange("comments", `${event.target.value || ""}`.substring(0, MAX_CHARS_FOR_COMMENTS))
+                }}
               />
-              <FormErrorDisplay errorsMap={errorMap} fieldName={"comments"} />
+              <FlexContainer className={'justify-content-between'}>
+                <div><FormErrorDisplay errorsMap={errorMap} fieldName={"comments"} /></div>
+                <div className={getCharsLeft() <= 0 ? 'text-danger' : 'text-muted'}>You can still type {MathHelper.sub(MAX_CHARS_FOR_COMMENTS, `${submittingData?.comments || ''}`.length)} characters.</div>
+              </FlexContainer>
             </Col>
           </Row>
         </SectionDiv>
@@ -431,9 +443,6 @@ const HOYChatForm = () => {
                   <>
                     <div>
                       Click here to upload files or drag file(s) to below area
-                    </div>
-                    <div>
-                      <b>NO VIDEOS PLEASE</b>
                     </div>
                     <div>Max File Size: {UtilsService.formatBytesToHuman(MAX_FILE_SIZE)}</div>
                   </>
