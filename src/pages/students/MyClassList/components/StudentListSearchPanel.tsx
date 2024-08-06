@@ -147,7 +147,7 @@ const StudentListSearchPanel = ({
 
   const getAdvSearchBtn = () => {
     if (!isModuleUser) {
-      return <div>1232</div>;
+      return <div />;
     }
 
     return (
