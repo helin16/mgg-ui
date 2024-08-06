@@ -370,7 +370,7 @@ const HOYChatForm = () => {
   const getContent = () => {
     if (isSavedSuccessfully === true) {
       return (
-        <Alert className={"bg-primary text-white"}>
+        <Alert className={"success-message"}>
           Thank you for your submission,{" "}
           {user?.SynCommunity?.Preferred || user?.firstName}. Your comment has
           been sent to {getYearLevelCoordinatorName()}.
@@ -426,7 +426,7 @@ const HOYChatForm = () => {
               />
               <FlexContainer className={'justify-content-between'}>
                 <div><FormErrorDisplay errorsMap={errorMap} fieldName={"comments"} /></div>
-                <div className={getCharsLeft() <= 0 ? 'text-danger' : 'text-muted'}>You can still type {MathHelper.sub(MAX_CHARS_FOR_COMMENTS, `${submittingData?.comments || ''}`.length)} characters.</div>
+                <div className={`char-counts ${getCharsLeft() <= 0 ? 'text-danger' : ''}`}>You can still type {MathHelper.sub(MAX_CHARS_FOR_COMMENTS, `${submittingData?.comments || ''}`.length)} characters.</div>
               </FlexContainer>
             </Col>
           </Row>
