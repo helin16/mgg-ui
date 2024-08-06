@@ -441,10 +441,7 @@ const HOYChatForm = () => {
                 uploadFn={uploadFiles}
                 description={
                   <>
-                    <div>
-                      Click here to upload files or drag file(s) to below area
-                    </div>
-                    <div>Max File Size: {UtilsService.formatBytesToHuman(MAX_FILE_SIZE)}</div>
+                    Click or drag here to attach files (maximum file size {UtilsService.formatBytesToHuman(MAX_FILE_SIZE)})
                   </>
                 }
                 allowMultiple
