@@ -382,7 +382,7 @@ const HOYChatForm = () => {
       <>
         <Row>
           <Col xs={12} md={6}>
-            <FormLabel isRequired label={"I would like to share my HOY:"} />
+            <FormLabel isRequired label={"I would like to share with my HOY:"} />
             <SelectBox
               className="mconnect_selectbox"
               isInvalid={"contactReason" in errorMap}
