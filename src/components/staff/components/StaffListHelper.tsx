@@ -156,7 +156,6 @@ const getListColumns = ({
     header: "Active Flag",
     format: TABLE_COLUMN_FORMAT_BOOLEAN,
     cell: (column: iTableColumn<iVStaff>, data: iVStaff) => {
-      console.log('data.ActiveFlag', data.ActiveFlag);
       return `${data.ActiveFlag === true ? "Y" : "N"}`
     }
 

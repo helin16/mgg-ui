@@ -7,8 +7,10 @@ import Page from '../../layouts/Page';
 import moment from 'moment-timezone';
 import MathHelper from '../../helper/MathHelper';
 import BudgetForecastPanel from '../../components/reports/BudgetForecast/BudgetForecastPanel';
+import MonthlyBillingReportPanel from './components/MonthlyBilling/MonthlyBillingReportPanel';
 
 const TAB_EXPIRING_CREDIT_CARDS = "EXPIRING_CREDIT_CARDS";
+const TAB_MONTHLY_BILLING_REPORT = "MONTHLY_BILLING_REPORT";
 const TAB_EXPIRING_FORECAST = "FORECAST_NEXT_YEAR";
 const FinancePage = () => {
   const [selectedTab, setSelectedTab] = useState(TAB_EXPIRING_CREDIT_CARDS);
@@ -24,6 +26,10 @@ const FinancePage = () => {
       >
         <Tab eventKey={TAB_EXPIRING_CREDIT_CARDS} title={"Expiring Credit Cards"}>
           <ExpiringCreditCardsPanel />
+        </Tab>
+
+        <Tab eventKey={TAB_MONTHLY_BILLING_REPORT} title={"Monthly Billing"}>
+          <MonthlyBillingReportPanel />
         </Tab>
 
         <Tab eventKey={TAB_EXPIRING_FORECAST} title={`Forecast ${MathHelper.add(moment().year(), 1)}`}>

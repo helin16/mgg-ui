@@ -191,7 +191,7 @@ const UnSyncdStudentAbsenceListPanel = ({ type }: iStudentAbsenceListPanel) => {
     if (selectedAbsences.length <= 0) {
       return null;
     }
-    console.log('selectedAbsences', selectedAbsences);
+    // console.log('selectedAbsences', selectedAbsences);
     const notApprovedAbsences = selectedAbsences.filter(
       record => `${record?.approved_at || ""}`.trim() === ""
     );

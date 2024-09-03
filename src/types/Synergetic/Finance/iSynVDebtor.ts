@@ -1,3 +1,6 @@
+
+export const SYN_DEBTOR_STATEMENT_GROUP_MONTHLY = 'MONTHLY';
+
 type iSynVDebtor = {
   DebtorID: number;
   DebtorStudentID: number;
