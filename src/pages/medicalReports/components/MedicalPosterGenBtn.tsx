@@ -14,6 +14,7 @@ import moment from "moment-timezone";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/makeReduxStore";
 import * as _ from 'lodash';
+import UtilsService from '../../../services/UtilsService';
 
 type iMedicalPoster = {
   students: iVStudent[];
@@ -60,7 +61,7 @@ const MedicalPoster = ({
       <Page size="A3" style={styles.page}>
         <View style={styles.header} fixed>
           <Image
-            src={"/images/mentone-logo-text.png"}
+            src={UtilsService.getFullUrl("images/mentone-logo-text.png")}
             style={{ width: "80px" }}
           />
           <View style={{ paddingRight: 55, textAlign: "right", width: "100%" }}>
