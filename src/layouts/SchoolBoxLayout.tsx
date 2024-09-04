@@ -46,7 +46,7 @@ const SchoolBoxLayout = () => {
       />
     );
   } catch (e) {
-    return getWrapper(<Alert variant={'warning'}>Error: can't get the url ({{remoteUrl}}).</Alert>);
+    return getWrapper(<Alert variant={'warning'}>Error: can't get the url ({remoteUrl}).</Alert>);
   }
 };
 

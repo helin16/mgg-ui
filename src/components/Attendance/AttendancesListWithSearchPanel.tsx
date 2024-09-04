@@ -329,7 +329,7 @@ const ResultTable = ({
       key: "PossibleAbsenceType",
       header: "Possible Absence Type",
       cell: (col: iTableColumn<T>, data: iSynVAttendance) => {
-        return <td key={col.key}>{data.PossibleAbsenceType}</td>;
+        return <td key={col.key}>{data.PossibleAbsenceType?.SynergyMeaning}</td>;
       },
       footer: () => null
     },

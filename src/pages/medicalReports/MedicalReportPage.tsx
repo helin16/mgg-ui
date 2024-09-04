@@ -119,7 +119,7 @@ const MedicalReportPage = () => {
         }),
         sort: `StudentNameInternal:ASC`,
       }, {
-        headers: {[HEADER_NAME_SELECTING_FIELDS]: JSON.stringify(['StudentID', 'StudentGiven1', 'StudentSurname', 'StudentForm', 'profileUrl'])}
+        headers: {[HEADER_NAME_SELECTING_FIELDS]: JSON.stringify(['StudentID', 'StudentGiven1', 'StudentSurname', 'StudentForm', 'profileUrl', 'FileYear', 'FileSemester'])}
       }),
       SynVMedicalConditionStudentService.getAll({
         where: JSON.stringify({

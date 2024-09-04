@@ -7,7 +7,6 @@ import {
   MGGS_MODULE_ID_ALUMNI_REQUEST, MGGS_MODULE_ID_CAMPUS_DISPLAY,
   MGGS_MODULE_ID_ENROLLMENTS,
   MGGS_MODULE_ID_FINANCE,
-  MGGS_MODULE_ID_FUNNEL,
   MGGS_MODULE_ID_HOUSE_AWARDS, MGGS_MODULE_ID_HOY_CHAT_EMAIL,
   MGGS_MODULE_ID_MGG_APP_DEVICES,
   MGGS_MODULE_ID_ONLINE_DONATION,
@@ -21,7 +20,6 @@ import MedicalReportPage from "../../pages/medicalReports/MedicalReportPage";
 import CustomScriptUrlGenPage from "../../pages/tools/CustomScriptUrlGenPage";
 import MyClassListPage from "../../pages/students/MyClassList/MyClassListPage";
 import BudgetTrackerPage from "../../pages/BudgetTracker/BudgetTrackerPage";
-import FunnelPage from "../../pages/funnel/FunnelPage";
 import AlumniRequestPage from "../../pages/alumni/AlumniRequestPage";
 import ParentDirectoryPage from "../../pages/parent/ParentDirectoryPage";
 import SchoolDataSubmissionsPage from "../../pages/dataSubmissions/SchoolDataSubmissionsPage";
@@ -39,7 +37,6 @@ import CampusDisplayManagementPage from '../../pages/CampusDisplay/CampusDisplay
 import PowerBIReportViewingPage from '../../pages/PowerBI/PowerBIReportViewingPage';
 import PowerBIReportManagerPage from '../../pages/PowerBI/Manager/PowerBIReportManagerPage';
 import {URL_POWER_BI_DISPLAY} from '../../Url';
-import FunnelLeadsPage from '../../pages/funnel/FunnelLeads/FunnelLeadsPage';
 import PageNotFound from '../../components/PageNotFound';
 import AdmissionsPage from '../../pages/AttendanceBulk/AdmissionsPage';
 import HOYChatManagePage from '../../pages/HOYChat/HOYChatManagePage';
@@ -115,22 +112,6 @@ const SchoolBoxRouter = ({
     case "/my_student": {
       removeSchoolBoxIframe();
       return <MyClassListPage />;
-    }
-    case "/funnel": {
-      removeSchoolBoxIframe();
-      return (
-        <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_FUNNEL}>
-          <FunnelPage />
-        </ModuleAccessWrapper>
-      );
-    }
-    case "/funnel/leads": {
-      removeSchoolBoxIframe();
-      return (
-        <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_FUNNEL}>
-          <FunnelLeadsPage />
-        </ModuleAccessWrapper>
-      );
     }
     case "/school_data_submission": {
       removeSchoolBoxIframe();

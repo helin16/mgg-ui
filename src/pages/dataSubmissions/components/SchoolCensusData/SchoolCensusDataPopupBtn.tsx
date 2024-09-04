@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {ReactNode, useState} from 'react';
 import {Button, ButtonProps, Tab, Table, Tabs} from 'react-bootstrap';
 import iSchoolCensusStudentData from './iSchoolCensusStudentData';
 import PopupModal from '../../../../components/common/PopupModal';
@@ -10,8 +10,8 @@ import styled from 'styled-components';
 
 type iSchoolCensusDataPopupBtn = ButtonProps & {
   records: iSchoolCensusStudentData[];
-  popupTitle?: any;
-  exportBtn?: any;
+  popupTitle?: ReactNode;
+  exportBtn?: ReactNode;
   showExtraFn?: (isTitleRow: boolean, record?: iSchoolCensusStudentData) => any;
   isForNCCD?: boolean;
   totalStudents?: iSchoolCensusStudentData[];
