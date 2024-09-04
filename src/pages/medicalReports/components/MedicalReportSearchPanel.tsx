@@ -116,7 +116,7 @@ const MedicalReportSearchPanel = ({onSearch, onClear, isSearching = false}: iSta
     <Wrapper>
       <Row>
         <Col sm={6}>
-          <FormLabel label={' '} />
+          <FormLabel label={'Search:'} />
           <Form.Control
             placeholder="Name of student or homeroom (e.g. 'Amanda', '9C')" value={searchCriteria.searchText}
             onChange={(event) => setSearchCriteria({
