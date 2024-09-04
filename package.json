@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "dependencies": {
     "@react-pdf/renderer": "^3.4.4",
     "@reduxjs/toolkit": "^1.8.1",
