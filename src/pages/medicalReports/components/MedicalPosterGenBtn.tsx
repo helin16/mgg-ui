@@ -39,7 +39,7 @@ const MedicalPoster = ({
     studentsDiv: { display: "flex", flexDirection: "row", flexWrap: "wrap" },
     studentDiv: {
       textAlign: "center",
-      width: "18.7%",
+      width: "12%",
       paddingTop: 10,
       paddingBottom: 10,
       paddingLeft: 10,
@@ -58,7 +58,7 @@ const MedicalPoster = ({
   });
   return (
     <Document>
-      <Page size="A3" style={styles.page}>
+      <Page size="A3" style={styles.page} orientation={'landscape'}>
         <View style={styles.header} fixed>
           <Image
             src={UtilsService.getFullUrl("images/mentone-logo-text.png")}
@@ -150,7 +150,7 @@ const MedicalPosterGenBtn = ({
     <PDFDownloadLink
       document={
         <MedicalPoster
-          students={students}
+          students={students.sort((st1, st2) => st1.StudentYearLevelSort > st2.StudentYearLevelSort ? 1 : -1)}
           conditionsMap={conditionsMap}
           conditionNames={getConditions()}
           fileYear={getFileYear()}
