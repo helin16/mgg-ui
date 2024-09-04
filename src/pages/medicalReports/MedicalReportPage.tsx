@@ -9,7 +9,7 @@ import SynVStudentService from '../../services/Synergetic/Student/SynVStudentSer
 import iVStudent from '../../types/Synergetic/Student/iVStudent';
 import SynVMedicalConditionStudentService from '../../services/Synergetic/Medical/SynVMedicalConditionStudentService';
 import iSynVMedicalConditionStudent from '../../types/Synergetic/iSynVMedicalConditionStudent';
-import {OP_LIKE, OP_OR} from '../../helper/ServiceHelper';
+import {OP_GT, OP_LIKE, OP_OR} from '../../helper/ServiceHelper';
 import moment from 'moment-timezone';
 import SynVStudentClassService from '../../services/Synergetic/Student/SynVStudentClassService';
 import ActionPlanDownloaderDropdown from './components/ActionPlanDownloaderDropdown';
@@ -116,6 +116,10 @@ const MedicalReportPage = () => {
           ...(criteria.yearLevels.length > 0 ? {StudentYearLevel: criteria.yearLevels} : {}),
           FileYear: (user?.SynCurrentFileSemester?.FileYear || moment().year()),
           FileSemester: (user?.SynCurrentFileSemester?.FileSemester || 1),
+          [OP_OR]: [
+            {StudentLeavingDate: null},
+            {StudentLeavingDate: {[OP_GT]: moment().utc().format('YYYY-MM-DD')}},
+          ],
         }),
         sort: `StudentNameInternal:ASC`,
       }, {
