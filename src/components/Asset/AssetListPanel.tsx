@@ -71,7 +71,7 @@ const Wrapper = styled.div`
       justify-content: start;
       .folder-div {
         display: flex;
-        justify-content: start;
+        justify-content: space-between;
         align-items: center;
         gap: 10px;
         width: 12rem;
@@ -81,10 +81,19 @@ const Wrapper = styled.div`
         padding: 0.5rem;
         border: 2px solid rgba(255, 255, 255, 0.75);
         cursor: pointer;
+        .edit-btn {
+          display: none;
+          .bi {
+            font-size: 16px;
+          }
+        }
 
         &:hover {
           background-color: rgba(13, 110, 253, 0.25);
           border-color: rgba(13, 110, 253, 0.25);
+          .edit-btn {
+            display: inline-block;
+          }
         }
 
         &.selected {
@@ -303,7 +312,7 @@ const AssetListPanel = ({
         {(assetFolderList?.data || []).map(folder => {
           return (
             <div
-              className={`folder-div ${
+              className={`folder-div full-width ${
                 (selectedFolderIds || []).indexOf(folder.id) >= 0
                   ? "selected"
                   : ""
@@ -326,8 +335,23 @@ const AssetListPanel = ({
                 }
               }}
             >
-              <Icons.Folder />
-              <span>{folder.name}</span>
+              <FlexContainer
+                className={"gap-1 align-items-center justify-content-start"}
+              >
+                <Icons.Folder />
+                <span>{folder.name}</span>
+              </FlexContainer>
+              <AssetFolderPopupBtn
+                className={"edit-btn no-padding no-margin"}
+                folder={folder}
+                size={"sm"}
+                variant={"link"}
+                folderType={folder.type}
+                parentId={folder?.parentId}
+                onSaved={() => setCount(MathHelper.add(count, 1))}
+              >
+                <Icons.Pencil />
+              </AssetFolderPopupBtn>
             </div>
           );
         })}
@@ -458,24 +482,30 @@ const AssetListPanel = ({
               const currentFolders = (assetFolderList?.data || []).filter(
                 folder => folderIds.indexOf(folder.id) < 0
               );
-              // @ts-ignore
-              setAssetList(currentAssets.length <= 0 ? null : {
-                ...(assetsList || {}),
-                data: currentAssets
-              });
-              // @ts-ignore
-              setAssetFolderList(currentFolders.length <= 0 ? null : {
-                ...(assetFolderList || {}),
-                data: currentFolders
-              });
+              setAssetList(
+                // @ts-ignore
+                currentAssets.length <= 0
+                  ? null
+                  : {
+                      ...(assetsList || {}),
+                      data: currentAssets
+                    }
+              );
+              setAssetFolderList(
+                // @ts-ignore
+                currentFolders.length <= 0
+                  ? null
+                  : {
+                      ...(assetFolderList || {}),
+                      data: currentFolders
+                    }
+              );
               onSelect && onSelect([]);
               onFolderSelected && onFolderSelected([]);
             }}
           >
             <Icons.Trash /> Delete{" "}
-            {totalSelected <= 0
-              ? ""
-              : `${totalSelected}`}
+            {totalSelected <= 0 ? "" : `${totalSelected}`}
           </DeleteConfirmPopupBtn>
         ) : null}
       </>
@@ -615,12 +645,35 @@ const AssetListPanel = ({
             onClick={() => {
               setCurrentPage(1);
               onListingFolder &&
-                onListingFolder(
-                  listingFolder?.parentId ? listingFolder?.parentId : null
-                );
+              onListingFolder(
+                listingFolder?.parentId ? listingFolder?.parentId : null
+              );
             }}
           >
-            <Icons.Reply />
+            <Icons.Reply/>
+          </div>
+          <div
+            className={"cursor-pointer"}
+            onClick={() => {
+              setCurrentPage(1);
+              onListingFolder &&
+              onListingFolder(null);
+            }}
+          >
+            <Icons.House />
+          </div>
+          <div>
+            <AssetFolderPopupBtn
+              className={"edit-btn no-padding no-margin"}
+              folder={listingFolder}
+              size={"sm"}
+              variant={"link"}
+              folderType={listingFolder.type}
+              parentId={listingFolder?.parentId}
+              onSaved={() => setCount(MathHelper.add(count, 1))}
+            >
+              <Icons.Pencil />
+            </AssetFolderPopupBtn>
           </div>
         </FlexContainer>
       </b>

@@ -13,7 +13,7 @@ type iAssetFolderPopupBtn = ButtonProps & {
   folder?: iAssetFolder | null;
   folderType?: string;
   onSaved: (saved: iAssetFolder, isCreated: boolean) => void;
-  parentId?: string;
+  parentId?: string | null;
 };
 
 const AssetFolderPopupBtn = ({
@@ -98,7 +98,6 @@ const AssetFolderPopupBtn = ({
             ? "Creating a folder"
             : `Updating folder: ${folder?.name}`
         }
-        size={"sm"}
         show={showingPopup === true}
         handleClose={() => handleClose()}
         footer={
@@ -115,12 +114,12 @@ const AssetFolderPopupBtn = ({
               onClick={() => doSave()}
               isLoading={isSaving === true}
             >
-              Create
+              {`${folder?.id || ''}`.trim() === '' ? 'Create' : 'Update'}
             </LoadingBtn>
           </>
         }
       >
-        <SectionDiv>
+        <SectionDiv className={'no-top'}>
           <FormLabel label={"Name"} isRequired />
           <FormControl
             isInvalid={"name" in errorMap}

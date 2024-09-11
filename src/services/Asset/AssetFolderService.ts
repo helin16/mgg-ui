@@ -13,7 +13,7 @@ const getAll = (params: iConfigParams = {}, config?: iConfigParams): Promise<iPa
 }
 
 const update = (id: string, params: iConfigParams = {}, config?: iConfigParams): Promise<iAssetFolder> => {
-  return AppService.post(`${endPoint}/${id}`, params, config).then(resp => resp.data);
+  return AppService.put(`${endPoint}/${id}`, params, config).then(resp => resp.data);
 }
 
 const deactivate = (id: string, params?: iConfigParams, config?: iConfigParams): Promise<iAssetFolder> => {
