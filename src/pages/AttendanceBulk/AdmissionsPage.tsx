@@ -14,6 +14,7 @@ const AdmissionsPage = () => {
       title={<h3>Admissions</h3>}
       moduleId={MGGS_MODULE_ID_ADMISSIONS}
       AdminPage={AdmissionsAdminPage}
+      className={'attendances-bulk-page'}
     >
       <Tabs
         activeKey={selectedTab}

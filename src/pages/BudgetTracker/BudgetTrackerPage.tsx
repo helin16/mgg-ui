@@ -60,7 +60,7 @@ const BudgetTrackerPage = () => {
   }
 
   return (
-    <Wrapper>
+    <Wrapper className={'bt-page'}>
       {getContent()}
     </Wrapper>
   )

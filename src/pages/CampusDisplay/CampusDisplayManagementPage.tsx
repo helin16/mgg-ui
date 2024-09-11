@@ -236,6 +236,7 @@ const CampusDisplayManagementPage = () => {
       title={<h3>Campus Display Management</h3>}
       AdminPage={CampusDisplayManagementAdminPage}
       moduleId={MGGS_MODULE_ID_CAMPUS_DISPLAY}
+      className={'campus-display-manage-page'}
       extraBtns={
         <ButtonGroup>
           <Button

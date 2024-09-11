@@ -14,7 +14,7 @@ const Wrapper = styled.div`
 const CampusDisplayByLocationIdPage = () => {
   const { locationId } = useParams();
   return (
-    <Wrapper>
+    <Wrapper className={'campus-display-page'}>
       <CampusDisplaySlideShowByLocationId
         locationId={locationId || ''}
         onCancel={() => {

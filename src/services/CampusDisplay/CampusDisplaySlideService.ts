@@ -12,6 +12,10 @@ const create = (params: iConfigParams, config?: iConfigParams): Promise<iCampusD
   return AppService.post(endPoint, params, config).then(resp => resp.data);
 }
 
+const createFromFolder = (folderId: string, params: iConfigParams, config?: iConfigParams): Promise<iCampusDisplaySlide[]> => {
+  return AppService.post(`${endPoint}/folder/${folderId}`, params, config).then(resp => resp.data);
+}
+
 const upload = (displayId: string, params: iConfigParams, config?: iConfigParams): Promise<iCampusDisplaySlide> => {
   return AppService.post(`${endPoint}/upload/${displayId}`, params, config).then(resp => resp.data);
 }
@@ -25,6 +29,7 @@ const deactivate = (id: string, params?: iConfigParams, config?: iConfigParams):
 }
 
 const CampusDisplaySlideService = {
+  createFromFolder,
   getAll,
   create,
   update,

@@ -101,7 +101,7 @@ const CampusDisplayPage = () => {
   };
 
   return (
-    <Wrapper>
+    <Wrapper className={'campus-display-page'}>
       <FlexContainer
         className={
           "justify-content-center align-content-center align-items-center flex-column h-100 gap-2 "

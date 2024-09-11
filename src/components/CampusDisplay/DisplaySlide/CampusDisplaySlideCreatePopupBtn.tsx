@@ -11,6 +11,7 @@ import AssetListPanel from "../../Asset/AssetListPanel";
 import { ASSET_TYPE_CAMPUS_DISPLAY } from "../../../types/asset/iAsset";
 import Toaster, { TOAST_TYPE_SUCCESS } from "../../../services/Toaster";
 import CampusDisplaySlideService from "../../../services/CampusDisplay/CampusDisplaySlideService";
+import MathHelper from "../../../helper/MathHelper";
 
 const Wrapper = styled.div``;
 const PopupBodyWrapper = styled.div`
@@ -44,6 +45,8 @@ const CampusDisplaySlideCreatePopupBtn = ({
   const [isCreating, setIsCreating] = useState(false);
   const [selectedAssetIds, setSelectedAssetIds] = useState<string[]>([]);
   const [allowDelete, setAllowDelete] = useState(false);
+  const [listingFolderId, setListingFolderId] = useState<string | null>(null);
+  const [selectedFolderIds, setSelectedFolderIds] = useState<string[]>([]);
 
   const handleClose = () => {
     if (isCreating === true) {
@@ -51,25 +54,47 @@ const CampusDisplaySlideCreatePopupBtn = ({
     }
     setShowingPopup(false);
     setSelectedAssetIds([]);
+    setSelectedFolderIds([]);
   };
 
   const doCreate = () => {
     setIsCreating(true);
-    Promise.all(
-      selectedAssetIds.map(selectedAssetId => {
+    Promise.all([
+      ...selectedAssetIds.map(selectedAssetId => {
         return CampusDisplaySlideService.create({
           displayId: display.id,
           assetId: selectedAssetId
         });
+      }),
+      ...selectedFolderIds.map(selectedFolderId => {
+        return CampusDisplaySlideService.createFromFolder(selectedFolderId, {
+          displayId: display.id
+        });
       })
-    )
+    ])
       .then(resp => {
         Toaster.showToast("Slides created successfully.", TOAST_TYPE_SUCCESS);
         setSelectedAssetIds([]);
         if (closeOnSaved === true) {
           setShowingPopup(false);
         }
-        onSaved(resp);
+        const slides = resp.slice(0, selectedAssetIds.length);
+        const folderSlides =
+          selectedAssetIds.length <= 0
+            ? resp
+            : resp.slice(MathHelper.add(selectedAssetIds.length, 1));
+        // @ts-ignore
+        onSaved([
+          ...slides,
+          // @ts-ignore
+          ...folderSlides.reduce(
+            // @ts-ignore
+            (arr: iCampusDisplaySlide[], slides: iCampusDisplaySlide[]) => {
+              return [...arr, ...slides];
+            },
+            []
+          )
+        ]);
       })
       .catch(err => {
         Toaster.showApiError(err);
@@ -80,6 +105,7 @@ const CampusDisplaySlideCreatePopupBtn = ({
   };
 
   const getPopupFooter = () => {
+    const totalSelected = MathHelper.add(selectedAssetIds.length, selectedFolderIds.length);
     return (
       <FlexContainer className={"justify-content-between space-above"}>
         <div />
@@ -93,15 +119,15 @@ const CampusDisplaySlideCreatePopupBtn = ({
           </LoadingBtn>
 
           <LoadingBtn
-            variant={selectedAssetIds.length <= 0 ? "secondary" : "primary"}
+            variant={totalSelected <= 0 ? "secondary" : "primary"}
             onClick={() => doCreate()}
-            disabled={selectedAssetIds.length <= 0}
+            disabled={totalSelected <= 0}
             isLoading={isCreating === true}
           >
             <Icons.Send /> Create{" "}
-            {selectedAssetIds.length <= 0
+            {totalSelected <= 0
               ? ""
-              : `${selectedAssetIds.length} slide(s)`}
+              : `slide(s)`}
           </LoadingBtn>
         </div>
       </FlexContainer>
@@ -124,11 +150,7 @@ const CampusDisplaySlideCreatePopupBtn = ({
               onClick={() => setAllowDelete(!allowDelete)}
             >
               <small>Allow delete?</small>{" "}
-              {allowDelete === true ? (
-                <Icons.Check2Square/>
-              ) : (
-                <Icons.Square />
-              )}
+              {allowDelete === true ? <Icons.Check2Square /> : <Icons.Square />}
             </div>
           </FlexContainer>
         }
@@ -142,6 +164,12 @@ const CampusDisplaySlideCreatePopupBtn = ({
             assetType={ASSET_TYPE_CAMPUS_DISPLAY}
             selectedAssetIds={selectedAssetIds}
             onSelect={newIds => setSelectedAssetIds(newIds)}
+            onListingFolder={folderId => setListingFolderId(folderId)}
+            listingFolderId={listingFolderId}
+            onFolderSelected={folderIds => {
+              setSelectedFolderIds(folderIds);
+            }}
+            selectedFolderIds={selectedFolderIds}
           />
         </PopupBodyWrapper>
         {getPopupFooter()}

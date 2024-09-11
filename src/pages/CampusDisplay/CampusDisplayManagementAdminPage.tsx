@@ -20,6 +20,8 @@ const CampusDisplayManagementAdminPage = ({ onNavBack }: AdminPageProps) => {
   const [selectedDisplay, setSelectedDisplay] = useState<iCampusDisplay | null>(
     null
   );
+  const [listingFolderId, setListingFolderId] = useState<string | null>(null);
+  const [selectedFolderIds, setSelectedFolderIds] = useState<string[]>([]);
 
   const handleSelectAPlayList = (selected: iCampusDisplay) => {
     setSelectedDisplay(selected.id === selectedDisplay?.id ? null : selected);
@@ -91,6 +93,12 @@ const CampusDisplayManagementAdminPage = ({ onNavBack }: AdminPageProps) => {
                         setViewingAssetId(diff.length > 0 ? diff[0]  : null);
                         setSelectedAssetIds(newIds);
                       }}
+                      onListingFolder={(folderId  ) => setListingFolderId(folderId)}
+                      listingFolderId={listingFolderId}
+                      onFolderSelected={(folderIds) => {
+                        setSelectedFolderIds(folderIds);
+                      }}
+                      selectedFolderIds={selectedFolderIds}
                     />
                   </Col>
                   {`${viewingAssetId || ''}`.trim() === '' ? null : (

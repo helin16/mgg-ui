@@ -4,6 +4,7 @@ import iAsset from '../../types/asset/iAsset';
 import axios from 'axios';
 
 export const HEADER_NAME_ASSET_TYPE = 'X-MGGS-ASSET-TYPE';
+export const HEADER_NAME_ASSET_FOLDER_ID = "X-MGGS-ASSET-FOLDER-ID";
 
 const endPoint = '/asset';
 

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import iPaginatedResult from "../../types/iPaginatedResult";
 import iAsset from "../../types/asset/iAsset";
 import AssetService, {
+  HEADER_NAME_ASSET_FOLDER_ID,
   HEADER_NAME_ASSET_TYPE
 } from "../../services/Asset/AssetService";
 import Toaster from "../../services/Toaster";
@@ -16,6 +17,10 @@ import UploadFilePanel from "./UploadFilePanel";
 import AssetThumbnail from "./AssetThumbnail";
 import DeleteConfirmPopupBtn from "../common/DeleteConfirm/DeleteConfirmPopupBtn";
 import AssetUrlEditPopupBtn from "./AssetUrlEditPopupBtn";
+import AssetFolderService from "../../services/Asset/AssetFolderService";
+import iAssetFolder from "../../types/asset/iAssetFolder";
+import AssetFolderPopupBtn from "./AssetFolderPopupBtn";
+import ButtonGroup from "react-bootstrap/ButtonGroup";
 
 const Wrapper = styled.div`
   height: 100%;
@@ -45,7 +50,7 @@ const Wrapper = styled.div`
       margin-bottom: 0.6rem;
 
       &.selected {
-        border-color: blue;
+        border-color: rgb(13, 110, 253);
       }
     }
 
@@ -56,6 +61,40 @@ const Wrapper = styled.div`
         width: 100%;
         height: 100%;
         color: white;
+      }
+    }
+
+    .folder-list {
+      width: 100%;
+      flex-wrap: wrap;
+      display: flex;
+      justify-content: start;
+      .folder-div {
+        display: flex;
+        justify-content: start;
+        align-items: center;
+        gap: 10px;
+        width: 12rem;
+        margin-right: 0.6rem;
+        margin-bottom: 0.6rem;
+        background-color: rgba(255, 255, 255, 0.75);
+        padding: 0.5rem;
+        border: 2px solid rgba(255, 255, 255, 0.75);
+        cursor: pointer;
+
+        &:hover {
+          background-color: rgba(13, 110, 253, 0.25);
+          border-color: rgba(13, 110, 253, 0.25);
+        }
+
+        &.selected {
+          border-color: rgb(13, 110, 253);
+        }
+
+        .bi {
+          font-weight: bold;
+          font-size: 20px;
+        }
       }
     }
   }
@@ -86,9 +125,11 @@ const Wrapper = styled.div`
     min-height: 300px;
   }
 
-  .create-from-url-btn {
-    padding: 2px 12px;
-    font-size: 11px;
+  .extra-btns {
+    .btn {
+      padding: 2px 12px;
+      font-size: 11px;
+    }
   }
 `;
 
@@ -100,6 +141,10 @@ type iAssetListPanel = {
   selectedAssetIds?: string[];
   excludeAssetIds?: string[];
   onSelect?: (selectedIds: string[]) => void;
+  onFolderSelected?: (folderIds: string[]) => void;
+  onListingFolder?: (folderId: string | null) => void;
+  listingFolderId?: string | null;
+  selectedFolderIds?: string[];
 };
 
 type iUpLoadingAsset = {
@@ -115,7 +160,11 @@ const AssetListPanel = ({
   forceReload = 0,
   selectedAssetIds = [],
   excludeAssetIds = [],
-  onSelect
+  onSelect,
+  listingFolderId,
+  onFolderSelected,
+  onListingFolder,
+  selectedFolderIds
 }: iAssetListPanel) => {
   const [count, setCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -125,43 +174,84 @@ const AssetListPanel = ({
   const [assetsList, setAssetList] = useState<iPaginatedResult<iAsset> | null>(
     null
   );
+  const [assetFolderList, setAssetFolderList] = useState<iPaginatedResult<
+    iAssetFolder
+  > | null>(null);
+  const [listingFolder, setListingFolder] = useState<iAssetFolder | null>(null);
 
   useEffect(() => {
     let isCanceled = false;
 
     setIsLoading(true);
-    AssetService.getAll({
-      where: JSON.stringify({
-        isActive: true,
-        ...(excludeAssetIdsRef.current.length <= 0
-          ? {}
-          : { id: { [OP_NOT]: excludeAssetIdsRef.current } }),
-        ...(`${assetType || ""}`.trim() === ""
-          ? {}
-          : { type: `${assetType || ""}`.trim() })
+    const listingFolderIdStr = `${listingFolderId || ""}`.trim();
+    Promise.all([
+      AssetService.getAll({
+        where: JSON.stringify({
+          isActive: true,
+          folderId: listingFolderId === "" ? null : listingFolderId,
+          ...(excludeAssetIdsRef.current.length <= 0
+            ? {}
+            : { id: { [OP_NOT]: excludeAssetIdsRef.current } }),
+          ...(`${assetType || ""}`.trim() === ""
+            ? {}
+            : { type: `${assetType || ""}`.trim() })
+        }),
+        sort: "createdAt:DESC",
+        perPage: 18,
+        currentPage
       }),
-      sort: "createdAt:DESC",
-      perPage: 18,
-      currentPage
-    })
+      AssetFolderService.getAll({
+        where: JSON.stringify({
+          isActive: true,
+          parentId: listingFolderId === "" ? null : listingFolderId,
+          ...(`${assetType || ""}`.trim() === ""
+            ? {}
+            : { type: `${assetType || ""}`.trim() })
+        }),
+        perPage: 99999,
+        sort: "createdAt:DESC"
+        // include: "Parent"
+      }),
+      ...(listingFolderIdStr !== ""
+        ? [
+            AssetFolderService.getAll({
+              where: JSON.stringify({
+                id: listingFolderIdStr
+              }),
+              perPage: 1
+            })
+          ]
+        : [])
+    ])
       .then(resp => {
         if (isCanceled) {
           return;
         }
-
         setAssetList(prev => ({
-          ...resp,
-          data: _.uniqBy(
-            [...(prev?.data || []), ...(resp.data || [])],
-            asset => asset.id
-          )
+          ...resp[0],
+          ...(currentPage <= 1
+            ? {}
+            : {
+                data: _.uniqBy(
+                  [...(prev?.data || []), ...(resp[0].data || [])],
+                  asset => asset.id
+                )
+              })
         }));
+        setAssetFolderList(resp[1]);
+        if (listingFolderIdStr === "") {
+          setListingFolder(null);
+        } else {
+          const listingFolders = resp[2].data || [];
+          setListingFolder(
+            listingFolders.length > 0 ? listingFolders[0] : null
+          );
+        }
       })
       .catch(err => {
         if (isCanceled) {
           return;
         }
-        Toaster.showApiError(err);
         Toaster.showApiError(err);
       })
       .finally(() => {
@@ -174,7 +264,7 @@ const AssetListPanel = ({
     return () => {
       isCanceled = true;
     };
-  }, [currentPage, assetType, count, forceReload]);
+  }, [currentPage, assetType, count, forceReload, listingFolderId]);
 
   useEffect(() => {
     // Update the ref when excludeAssetIds changes
@@ -203,9 +293,53 @@ const AssetListPanel = ({
     );
   };
 
+  const getFolderList = () => {
+    const folders = assetFolderList?.data || [];
+    if (folders.length <= 0) {
+      return null;
+    }
+    return (
+      <div className={"folder-list"}>
+        {(assetFolderList?.data || []).map(folder => {
+          return (
+            <div
+              className={`folder-div ${
+                (selectedFolderIds || []).indexOf(folder.id) >= 0
+                  ? "selected"
+                  : ""
+              }`}
+              key={folder.id}
+              onDoubleClick={() => {
+                setCurrentPage(1);
+                onFolderSelected && onFolderSelected([]);
+                onListingFolder && onListingFolder(folder.id);
+              }}
+              onClick={() => {
+                if (!onFolderSelected) {
+                  return;
+                }
+                const ids = _.uniq(selectedFolderIds || []);
+                if (ids.indexOf(folder.id) >= 0) {
+                  onFolderSelected(ids.filter(id => id !== folder.id));
+                } else {
+                  onFolderSelected([...ids, folder.id]);
+                }
+              }}
+            >
+              <Icons.Folder />
+              <span>{folder.name}</span>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   const getContent = () => {
     return (
       <div className={"list-wrapper"}>
+        {getFolderList()}
+
         {uploadingAssets.map(asset => {
           return (
             <FlexContainer
@@ -272,60 +406,76 @@ const AssetListPanel = ({
     );
   };
 
-  const getSelectedAssetsTitle = () => {
-    if ((selectedAssetIds || []).length < 0) {
+  const getClearSelectedBtn = (totalSelected: number) => {
+    if (!onSelect && !onFolderSelected) {
       return null;
     }
 
     return (
+      <span
+        className={"cursor-pointer"}
+        onClick={() => {
+          onSelect && onSelect([]);
+          onFolderSelected && onFolderSelected([]);
+        }}
+      >
+        <Icons.X /> Clear {totalSelected} selected{" "}
+      </span>
+    );
+  };
+
+  const getSelectedAssetsTitle = () => {
+    const totalSelected = MathHelper.add(
+      (selectedAssetIds || []).length,
+      (selectedFolderIds || []).length
+    );
+
+    return (
       <>
-        {onSelect ? (
-          <>
-            <Icons.X
-              className={"cursor-pointer"}
-              onClick={() => onSelect([])}
-            />{" "}
-            Clear
-          </>
-        ) : null}{" "}
-        {(selectedAssetIds || []).length} selected{" "}
+        {getClearSelectedBtn(totalSelected)}
         {allowDeletion === true ? (
           <DeleteConfirmPopupBtn
             size={"sm"}
             className={"delete-btn"}
-            variant={
-              (selectedAssetIds || []).length <= 0 ? "secondary" : "danger"
-            }
-            disabled={(selectedAssetIds || []).length <= 0}
+            variant={totalSelected <= 0 ? "secondary" : "danger"}
+            disabled={totalSelected <= 0}
             deletingFn={() =>
-              Promise.all(
-                selectedAssetIds.map(assetId =>
+              Promise.all([
+                ...selectedAssetIds.map(assetId =>
                   AssetService.deactivate(assetId)
+                ),
+                ...(selectedFolderIds || []).map(folderId =>
+                  AssetFolderService.deactivate(folderId)
                 )
-              )
+              ])
             }
             deletedCallbackFn={() => {
               const assetIds = selectedAssetIds || [];
+              const folderIds = selectedFolderIds || [];
               const currentAssets = (assetsList?.data || []).filter(
                 asset => assetIds.indexOf(asset.id) < 0
               );
-              if (currentAssets.length <= 0) {
-                setAssetList(null);
-                onSelect && onSelect([]);
-                return;
-              }
+              const currentFolders = (assetFolderList?.data || []).filter(
+                folder => folderIds.indexOf(folder.id) < 0
+              );
               // @ts-ignore
-              setAssetList({
+              setAssetList(currentAssets.length <= 0 ? null : {
                 ...(assetsList || {}),
                 data: currentAssets
               });
+              // @ts-ignore
+              setAssetFolderList(currentFolders.length <= 0 ? null : {
+                ...(assetFolderList || {}),
+                data: currentFolders
+              });
               onSelect && onSelect([]);
+              onFolderSelected && onFolderSelected([]);
             }}
           >
             <Icons.Trash /> Delete{" "}
-            {(selectedAssetIds || []).length <= 0
+            {totalSelected <= 0
               ? ""
-              : `${(selectedAssetIds || []).length} Asset(s)`}
+              : `${totalSelected}`}
           </DeleteConfirmPopupBtn>
         ) : null}
       </>
@@ -340,11 +490,15 @@ const AssetListPanel = ({
     const formData = new FormData();
     formData.append("file", file);
     const asType = `${assetType || ""}`.trim();
+    const listingFolderIdStr = `${listingFolderId || ""}`.trim();
 
     return AssetService.upload(formData, {
       headers: {
         "Content-Type": "multipart/form-data",
-        ...(asType !== "" ? { [HEADER_NAME_ASSET_TYPE]: asType } : {})
+        ...(asType !== "" ? { [HEADER_NAME_ASSET_TYPE]: asType } : {}),
+        ...(listingFolderIdStr !== ""
+          ? { [HEADER_NAME_ASSET_FOLDER_ID]: listingFolderIdStr }
+          : {})
       }
     })
       .then(resp => {
@@ -420,16 +574,56 @@ const AssetListPanel = ({
           }
           allowMultiple
         />
-        <AssetUrlEditPopupBtn
-          size={"sm"}
-          assetType={assetType}
-          mimeType={'video/youtube'}
-          className={"create-from-url-btn"}
-          onSaved={() => setCount(MathHelper.add(count, 1))}
-        >
-          Create from Link
-        </AssetUrlEditPopupBtn>
+        <ButtonGroup className={"extra-btns"}>
+          <AssetUrlEditPopupBtn
+            size={"sm"}
+            assetType={assetType}
+            variant={"outline-primary"}
+            mimeType={"video/youtube"}
+            className={"create-from-url-btn"}
+            onSaved={() => setCount(MathHelper.add(count, 1))}
+          >
+            Create from YouTube Link
+          </AssetUrlEditPopupBtn>
+          <AssetFolderPopupBtn
+            parentId={listingFolder?.id}
+            onSaved={() => setCount(MathHelper.add(count, 1))}
+            size={"sm"}
+            variant={"outline-success"}
+            folderType={assetType}
+          >
+            Create Folder
+          </AssetFolderPopupBtn>
+        </ButtonGroup>
       </>
+    );
+  };
+
+  const getFolderName = () => {
+    if (!listingFolder) {
+      return null;
+    }
+
+    return (
+      <b>
+        <FlexContainer className={"gap-2 align-items-end"}>
+          <div>
+            under <u>{listingFolder.name}</u>
+          </div>
+          <div
+            className={"cursor-pointer"}
+            onClick={() => {
+              setCurrentPage(1);
+              onListingFolder &&
+                onListingFolder(
+                  listingFolder?.parentId ? listingFolder?.parentId : null
+                );
+            }}
+          >
+            <Icons.Reply />
+          </div>
+        </FlexContainer>
+      </b>
     );
   };
 
@@ -440,7 +634,10 @@ const AssetListPanel = ({
           "title-row justify-content-between align-items-center space-below space-sm flex-wrap"
         }
       >
-        <b>Total {assetsList?.total} Asset(s)</b>
+        <FlexContainer className={"align-items-end gap-1"}>
+          <b>Total {assetsList?.total} Asset(s)</b>
+          {getFolderName()}
+        </FlexContainer>
         {getCreationDiv()}
         <div>{getSelectedAssetsTitle()}</div>
       </FlexContainer>
