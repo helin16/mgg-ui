@@ -312,7 +312,7 @@ const AssetListPanel = ({
         {(assetFolderList?.data || []).map(folder => {
           return (
             <div
-              className={`folder-div full-width ${
+              className={`folder-div ${
                 (selectedFolderIds || []).indexOf(folder.id) >= 0
                   ? "selected"
                   : ""
