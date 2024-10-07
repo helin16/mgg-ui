@@ -110,55 +110,62 @@ const MedicalReportExportDropdown = ({
       s: { r: number; c: number };
       e: { r: number; c: number };
     }[] = [];
-    students.forEach((student, sIndex) => {
-      const studentArr = [
-        `${student.StudentSurname}, ${student.StudentGiven1}`,
-        student.StudentForm
-      ];
-      if (!(student.StudentID in conditionsMap)) {
-        cellStyleMap = getRowStyle(rowNo, borderStyleObj, cellStyleMap);
-        rows.push([...studentArr, "", "", ""]);
-        rowNo = rowNo + 1;
-        return;
-      }
-
-      if (conditionsMap[student.StudentID].length > 1) {
-        mergeCells.push({
-          s: { r: rowNo - 1, c: 0 },
-          e: { r: rowNo + conditionsMap[student.StudentID].length - 2, c: 0 }
-        });
-        mergeCells.push({
-          s: { r: rowNo - 1, c: 1 },
-          e: { r: rowNo + conditionsMap[student.StudentID].length - 2, c: 1 }
-        });
-      }
-
-      conditionsMap[student.StudentID].forEach((condition, index) => {
-        const conditionArr = [
-          condition.ConditionTypeDescription,
-          condition.ConditionSeverityDescription,
-          condition.ConditionDetails
+    students
+      .sort((st1, st2) => {
+        return `${st1.StudentSurname}, ${st1.StudentGiven1}` >
+          `${st2.StudentSurname}, ${st2.StudentGiven1}`
+          ? 1
+          : -1;
+      })
+      .forEach((student, sIndex) => {
+        const studentArr = [
+          `${student.StudentSurname}, ${student.StudentGiven1}`,
+          student.StudentForm
         ];
-        if (index === 0) {
-          cellStyleMap = getRowStyle(
-            rowNo,
-            borderStyleObj,
-            cellStyleMap,
-            condition.ConditionSeverityDisplayColour
-          );
-          rows.push([...studentArr, ...conditionArr]);
-        } else {
-          cellStyleMap = getRowStyle(
-            rowNo,
-            undefined,
-            cellStyleMap,
-            condition.ConditionSeverityDisplayColour
-          );
-          rows.push(["", "", ...conditionArr]);
+        if (!(student.StudentID in conditionsMap)) {
+          cellStyleMap = getRowStyle(rowNo, borderStyleObj, cellStyleMap);
+          rows.push([...studentArr, "", "", ""]);
+          rowNo = rowNo + 1;
+          return;
         }
-        rowNo = rowNo + 1;
+
+        if (conditionsMap[student.StudentID].length > 1) {
+          mergeCells.push({
+            s: { r: rowNo - 1, c: 0 },
+            e: { r: rowNo + conditionsMap[student.StudentID].length - 2, c: 0 }
+          });
+          mergeCells.push({
+            s: { r: rowNo - 1, c: 1 },
+            e: { r: rowNo + conditionsMap[student.StudentID].length - 2, c: 1 }
+          });
+        }
+
+        conditionsMap[student.StudentID].forEach((condition, index) => {
+          const conditionArr = [
+            condition.ConditionTypeDescription,
+            condition.ConditionSeverityDescription,
+            condition.ConditionDetails
+          ];
+          if (index === 0) {
+            cellStyleMap = getRowStyle(
+              rowNo,
+              borderStyleObj,
+              cellStyleMap,
+              condition.ConditionSeverityDisplayColour
+            );
+            rows.push([...studentArr, ...conditionArr]);
+          } else {
+            cellStyleMap = getRowStyle(
+              rowNo,
+              undefined,
+              cellStyleMap,
+              condition.ConditionSeverityDisplayColour
+            );
+            rows.push(["", "", ...conditionArr]);
+          }
+          rowNo = rowNo + 1;
+        });
       });
-    });
     return { rows, cellStyleMap, mergeCells };
   };
 
@@ -218,7 +225,7 @@ const MedicalReportExportDropdown = ({
           <MedicalPosterGenBtn
             students={students}
             conditionsMap={conditionsMap}
-            renderBtn={(onClick) => (
+            renderBtn={onClick => (
               <Dropdown.Item onClick={onClick}>
                 <Icons.FilePdfFill /> gen poster
               </Dropdown.Item>
