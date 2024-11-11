@@ -5,6 +5,7 @@ import StudentReportService from '../../../../services/Synergetic/Student/Studen
 import iStudentReportYear from '../../../../types/Synergetic/Student/iStudentReportYear';
 import LinkBtn from '../../../../components/common/LinkBtn';
 import SectionDiv from '../../../../components/common/SectionDiv';
+import ReportMovingNotice from './DetailsComponents/ReportMovingNotice';
 
 const ReportedYearsList = ({student, onSelect}: {student: iVStudent, onSelect: (studentReportYear: iStudentReportYear) => void}) => {
   const [reportList, setReportList] = useState<{[key: number]: iStudentReportYear[]}>({});
@@ -77,6 +78,7 @@ const ReportedYearsList = ({student, onSelect}: {student: iVStudent, onSelect: (
 
   return (
     <div>
+      <ReportMovingNotice student={student} />
       <Image
         src={student.profileUrl}
         rounded
