@@ -14,7 +14,6 @@ import SynVDocumentService from "../../../../services/Synergetic/SynVDocumentSer
 import { DOCUMENT_CLASSIFICATION_CODE_ARCHIVED_STUDENT_REPORTS } from "../../../../types/Synergetic/iSynVDocument";
 import UploadFilePanel from "../../../../components/Asset/UploadFilePanel";
 import UtilsService from "../../../../services/UtilsService";
-import {HEADER_NAME_SELECTING_FIELDS} from '../../../../services/AppService';
 
 const Wrapper = styled.div`
   td.checkbox-col {
@@ -162,6 +161,7 @@ const ReportsUploader = () => {
         });
       });
       const typeTypes = data.fileName.split(".");
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const typeType = typeTypes.pop();
       const description = typeTypes.join(".");
       const submittingData = new FormData();
