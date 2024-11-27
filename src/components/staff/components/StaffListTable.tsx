@@ -59,7 +59,7 @@ const StaffListTable = ({
       }
       case TABLE_COLUMN_FORMAT_DATE: {
         const string =`${value || ""}`.trim();
-        return string === "" ? "" : moment(string).format("DD/MM/YYYY");
+        return string === "" ? "" : moment(string).format("DD MMM YYYY");
       }
       case TABLE_COLUMN_FORMAT_CALCULATED: {
         return typeof column.cell === 'function' ? column.cell(column, data) : '';
@@ -212,7 +212,7 @@ const StaffListTable = ({
         const dateString = `${latest[0].ExpiryDate || ""}`.trim();
         return (
           <div className={`skill-expiry-date ${className}`}>
-            {dateString === "" ? "" : moment(dateString).format("DD/MM/YYYY")}
+            {dateString === "" ? "" : moment(dateString).format("DD MMM YYYY")}
           </div>
         );
       }
