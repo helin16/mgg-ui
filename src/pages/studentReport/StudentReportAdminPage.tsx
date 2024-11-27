@@ -11,6 +11,7 @@ import AdminPageTabs from "../../layouts/AdminPageTabs";
 import GenComparativePopupBtn from "./components/Admin/GenComparativePopupBtn";
 import ExplanationPanel from "../../components/ExplanationPanel";
 import { FlexContainer } from "../../styles";
+import ReportsUploader from './components/Admin/ReportsUploader';
 
 const StudentReportAdminPage = ({
   backToReportFn
@@ -96,6 +97,13 @@ const StudentReportAdminPage = ({
                 </div>
                 <AdminEditingLockList />
               </div>
+            )
+          },
+          {
+            key: "synReportsUploader",
+            title: "Upload Reports to Synergetic",
+            component: (
+              <ReportsUploader />
             )
           }
         ]}
