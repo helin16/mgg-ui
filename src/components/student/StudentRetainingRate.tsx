@@ -8,6 +8,8 @@ import SynVStudentService from '../../services/Synergetic/Student/SynVStudentSer
 import iVStudent, {iVPastAndCurrentStudent} from '../../types/Synergetic/Student/iVStudent';
 import Table, {iTableColumn} from '../common/Table';
 import * as _ from 'lodash';
+import FileYearSelector from './FileYearSelector';
+import FormLabel from '../form/FormLabel';
 
 const Wrapper = styled.div``
 
@@ -18,18 +20,18 @@ type iStudentRetainingRate = {
 const StudentRetainingRate = ({ testId, className }: iStudentRetainingRate) => {
   const ComponentName = 'StudentRetainingRate';
   const testIdString = `${ComponentName}-${testId || ''}`;
+  const [currentYear, setCurrentYear] = useState(moment().year());
+  const [startYear, setStartYear] = useState(MathHelper.sub(moment().year(), 3));
   const [isLoading, setIsLoading] = useState(false);
   const [currentYearStudents, setCurrentYearStudents] = useState<iVStudent[]>([]);
   const [startYearStudents, setStartYearStudents] = useState<iVPastAndCurrentStudent[]>([]);
   const [rate, setRate] = useState<number | null>(null);
-  const currentYear = moment().year();
-  const startYear = MathHelper.sub(moment().year(), 3);
 
   useEffect(() => {
     let isCancelled = false;
     setIsLoading(true);
     Promise.all([
-      SynVStudentService.getCurrentVStudents({
+      SynVStudentService.getVPastAndCurrentStudentAll({
         where: JSON.stringify({
           StudentActiveFlag: true,
           FileYear: currentYear,
@@ -47,7 +49,7 @@ const StudentRetainingRate = ({ testId, className }: iStudentRetainingRate) => {
       })
     ]).then(resp => {
       if (isCancelled) { return }
-      const cYearStudents = _.uniqBy(resp[0] || [], (s => s.StudentID));
+      const cYearStudents = _.uniqBy(resp[1].data || [], (s => s.StudentID));
       const sYearStudents = _.uniqBy(resp[1].data || [], (s => s.StudentID));
       const startYearStudentIds = sYearStudents.map(s => s.StudentID);
       const currentYearStudentIds = cYearStudents.map(s => s.StudentID);
@@ -111,6 +113,14 @@ const StudentRetainingRate = ({ testId, className }: iStudentRetainingRate) => {
         <b>Retaining Rate</b>
         <div>Rate = those students enrolled in Year 9 in {startYear}, continued to complete Year 12 in {currentYear}</div>
       </Alert>
+      <div style={{width: '230px'}}>
+        <FormLabel label={'Year 12 Year:'} />
+        <FileYearSelector onSelect={(year) => {
+          const cYear = year || moment().year();
+          setCurrentYear(cYear);
+          setStartYear(MathHelper.sub(cYear, 3));
+        }} />
+      </div>
       {getContent()}
     </Wrapper>
   )
