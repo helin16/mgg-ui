@@ -115,7 +115,7 @@ const StudentRetainingRate = ({ testId, className }: iStudentRetainingRate) => {
       </Alert>
       <div style={{width: '230px'}}>
         <FormLabel label={'Year 12 Year:'} />
-        <FileYearSelector onSelect={(year) => {
+        <FileYearSelector value={currentYear} onSelect={(year) => {
           const cYear = year || moment().year();
           setCurrentYear(cYear);
           setStartYear(MathHelper.sub(cYear, 3));
