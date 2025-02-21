@@ -28,6 +28,7 @@ const getTitleRows = (extra: string[] = []) => [[
   'Visa Expiry',
   'Entry Date',
   'Left Date',
+  'Disabled?',
   'NCCD Category',
   'NCCD Level',
   ...extra,
@@ -95,6 +96,7 @@ const getCSVRow = (record: iSchoolCensusStudentData) => {
     `${record.visaExpiryDate || ''}`.trim() === '' ? '' : moment(record.visaExpiryDate).format('YYYY-MM-DD'),
     moment(record.entryDate).format('YYYY-MM-DD'),
     `${record.leavingDate || ''}`.trim() === '' ? '' : moment(record.leavingDate).format('YYYY-MM-DD'),
+    record.DisabilityFlag === true ? 'Y' : '',
     `${record.nccdStatusCategory}`.trim() === '' ? '' : `${record.nccdStatusCategory}`,
     `${record.nccdStatusAdjustmentLevel}`.trim() === '' ? '' : `${record.nccdStatusAdjustmentLevel}`,
   ]
