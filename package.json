@@ -10,7 +10,7 @@
     "@react-pdf/renderer": "^3.4.4",
     "@reduxjs/toolkit": "^1.8.1",
     "@sentry/react": "^7.60.0",
-    "@tinymce/tinymce-react": "^4.0.0",
+    "@tinymce/tinymce-react": "^6.0.0",
     "axios": "^1.6.4",
     "big.js": "^6.1.1",
     "bootstrap": "5.1.3",
