@@ -316,13 +316,14 @@ const StudentNumberForecastDashboard = ({
     );
     if ("StudentID" in record && record.StudentID in concessMap) {
       const sID = `${record.StudentID}`;
+      const nowStr = moment().utc().toISOString()
       // @ts-ignore
       currentConcessions = concessMap[sID]
         .filter(concession => {
           return (
-            (`${concession.EffectiveFromDate || ''}`.trim() <= `${currentFileYear}-12-31T00:00:00.000Z` ||
+            (`${concession.EffectiveFromDate || ''}`.trim() <= `${nowStr}` ||
               concession.EffectiveFromDate === null) &&
-            (`${concession.EffectiveToDate || ''}`.trim() >= `${currentFileYear}-12-31T00:00:00.000Z` ||
+            (`${concession.EffectiveToDate || ''}`.trim() >= `${nowStr}` ||
               concession.EffectiveToDate === null)
           );
         })
@@ -337,7 +338,7 @@ const StudentNumberForecastDashboard = ({
       nextYearConcessions = concessMap[sID]
         .filter(concession => {
           return (
-            (`${concession.EffectiveFromDate || ''}`.trim() <= `${nextFileYear}-12-31T00:00:00.000Z` ||
+            (`${concession.EffectiveFromDate || ''}`.trim() <= `${currentFileYear}-12-31T00:00:00.000Z` ||
               concession.EffectiveFromDate === null) &&
             (`${concession.EffectiveToDate || ''}`.trim() > `${currentFileYear}-12-31T00:00:00.000Z` ||
               concession.EffectiveToDate === null)
