@@ -75,7 +75,7 @@ const PowerBIReportViewer = ({reportId, student, className}: iPowerBIReportViewe
           tokenType: models.TokenType.Aad,
           settings: {
             filterPaneEnabled: false,
-            navContentPaneEnabled: false,
+            navContentPaneEnabled: true,
             // background: models.BackgroundType.Transparent
           },
           permissions: models.Permissions.Read,
