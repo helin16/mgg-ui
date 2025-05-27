@@ -16,7 +16,7 @@ const SubjectDescriptionDiv = ({result}: {result: iStudentReportResult}) => {
 
   return (
     <SectionDiv>
-      <h3 className={'text-danger text-italic'}>Subject Description</h3>
+      <h3 className={'text-danger text-italic'}>Achievement Standard</h3>
       <p>{result.AssessOverview}</p>
     </SectionDiv>
   )

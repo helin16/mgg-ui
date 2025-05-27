@@ -32,7 +32,7 @@ const AchievementStandardsDiv = ({results}: {results: iStudentReportResult[]}) =
     <>
       <GraphTable
         results={aSResults}
-        title={'Achievement Standards'}
+        title={''}
         resultTranslateMap={resultTranslateMap}
       />
 
