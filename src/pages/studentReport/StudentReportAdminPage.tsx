@@ -39,7 +39,7 @@ const StudentReportAdminPage = ({
 
   return (
     <AdminPage
-      title={<h3>Student Report Admin</h3>}
+      title={<h3>Student Wellbeing Module Admin</h3>}
       moduleId={MGGS_MODULE_ID_STUDENT_REPORT}
       onNavBack={() => backToReportFn && backToReportFn()}
     >

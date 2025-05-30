@@ -19,7 +19,7 @@ import {FlexContainer} from '../../../styles';
 import WellBeingGraphPanel from './WellBeingGraphs/WellBeingGraphPanel';
 import StudentParticipationPanel from './StudentParticipation/StudentParticipationPanel';
 
-const TAB_ACADEMIC_REPORTS = 'academicReports';
+// const TAB_ACADEMIC_REPORTS = 'academicReports';
 const TAB_STUDENT_PARTICIPATION = 'studentParticipation';
 const TAB_STANDARDISED_TESTS = 'standardisedTests';
 const TAB_SCHOOL_BASED_ASSESSMENTS = 'schoolBasedAssessments';
@@ -52,7 +52,7 @@ type iStudentDetailsPage = {student: iVStudent; onClearSelectedStudent?: () => v
 
 const StudentDetailsPage = ({student ,onClearSelectedStudent, showTitle = true}: iStudentDetailsPage) => {
   const {user} = useSelector((state: RootState) => state.auth);
-  const [selectedTab, setSelectedTab] = useState(TAB_ACADEMIC_REPORTS);
+  const [selectedTab, setSelectedTab] = useState(TAB_STUDENT_PARTICIPATION);
   const [selectedStudentReportYear, setSelectedStudentReportYear] = useState<iStudentReportYear | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [powerBIReports, setPowerBIReports] = useState<iPowerBiReportMap>({});
@@ -78,12 +78,12 @@ const StudentDetailsPage = ({student ,onClearSelectedStudent, showTitle = true}:
   const getTabs = () => {
     const reportKeys = Object.keys(powerBIReports);
     return (
-      <Tabs defaultActiveKey={selectedTab}
+      <Tabs
         className={'main-tabs'}
         activeKey={selectedTab}
         onSelect={(tabKey) => setSelectedTab(`${tabKey}`)}
       >
-        <Tab eventKey={TAB_ACADEMIC_REPORTS} title={'Academic Reports'} />
+        {/*<Tab eventKey={TAB_ACADEMIC_REPORTS} title={'Academic Reports'} />*/}
         {reportKeys.map(reportKey => {
           return <Tab key={reportKey} eventKey={reportKey} title={powerBIReports[reportKey].name} />
         })}
@@ -160,7 +160,6 @@ const StudentDetailsPage = ({student ,onClearSelectedStudent, showTitle = true}:
         >
           <h3>
             {getBackToMainBtn()}
-            Reports
           </h3>
         </PageTitle>
       )

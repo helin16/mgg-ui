@@ -56,7 +56,7 @@ const SearchPage = ({
   return (
     <Wrapper className={"search-box-wrapper"}>
       <h3>
-        Student Report
+        Student Wellbeing
         <span className={"pull-right"}>
           <ModuleAdminBtn
             onClick={() => setIsShowAdminPage(true)}
