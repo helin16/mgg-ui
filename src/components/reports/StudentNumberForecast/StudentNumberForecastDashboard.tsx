@@ -52,6 +52,7 @@ import {
   STUDENT_CONTACT_STUDENT_TYPE_FUTURE
 } from "../../../types/Synergetic/Student/iSynVStudentContactsCurrentPastFutureCombined";
 import { STUDENT_CONTACT_TYPE_SC1 } from "../../../types/Synergetic/Student/iStudentContact";
+import {CAMPUS_CODE_ELC, CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR} from '../../../types/Synergetic/Lookup/iSynLuCampus';
 
 const Wrapper = styled.div`
   .title-row {
@@ -468,6 +469,7 @@ const StudentNumberForecastDashboard = ({
           where: JSON.stringify({
             FileYear: currentFileYear,
             FileSemester: currentFileSemester,
+            StudentCampus: [CAMPUS_CODE_SENIOR, CAMPUS_CODE_JUNIOR, CAMPUS_CODE_ELC],
             // ID: [54941]
           })
         }),
@@ -498,7 +500,8 @@ const StudentNumberForecastDashboard = ({
           where: JSON.stringify({
             FutureStatus: FUTURE_STUDENT_STATUS_FINALISED,
             FutureEnrolYear: { [OP_LTE]: nextFileYear },
-            // FutureID: [54941]
+            FutureCampus: [CAMPUS_CODE_SENIOR, CAMPUS_CODE_JUNIOR, CAMPUS_CODE_ELC],
+            // FutureID: [53424]
           }),
           perPage: 99999999
         })

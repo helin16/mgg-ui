@@ -1,4 +1,4 @@
-import iVStudent from "../../../../types/Synergetic/Student/iVStudent";
+import iVStudent, {SYN_STUDENT_STATUS_ID_FINALISED} from "../../../../types/Synergetic/Student/iVStudent";
 import iFunnelLead from "../../../../types/Funnel/iFunnelLead";
 import moment from "moment-timezone";
 import * as XLSX from "sheetjs-style";
@@ -45,7 +45,7 @@ const getDefaultStudentRow = (record: iVStudent | iFunnelLead) => {
         : moment(record.StudentLeavingDate).format("YYYY-MM-DD")
       : "",
     // @ts-ignore
-    `${record.StudentYearLevelDescription || ""}`,
+    (record.isFuture === true || `${record.StudentStatus || ""}`.trim() === SYN_STUDENT_STATUS_ID_FINALISED) ? '' : `${record.StudentYearLevelDescription || ""}`,
     "StudentForm" in record ? record.StudentForm : "",
     "FullFeeFlag" in record && record.FullFeeFlag === true ? "Y" : "",
     // @ts-ignore
