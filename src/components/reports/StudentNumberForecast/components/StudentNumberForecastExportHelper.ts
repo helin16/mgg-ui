@@ -102,7 +102,7 @@ const getStudentRow = (record: iVStudent | iFunnelLead, showingFinanceFigures = 
         : moment(`${concession.EffectiveToDate || ""}`).format("YYYY-MM-DD"),
       `${concession.OverridePercentage}%`,
       // @ts-ignore
-      `${concession.concessionAmount || ''}`,
+      `${concession.concessionAmount || ''}`.trim() === '' ? '' : concession.concessionAmount,
       `${concession.Comment || ''}`
     ]);
   })
