@@ -1,6 +1,4 @@
-import iVStudent, {
-  SYN_STUDENT_STATUS_ID_FINALISED
-} from "../../../../types/Synergetic/Student/iVStudent";
+import iVStudent from "../../../../types/Synergetic/Student/iVStudent";
 import iFunnelLead from "../../../../types/Funnel/iFunnelLead";
 import moment from "moment-timezone";
 import * as XLSX from "sheetjs-style";
@@ -8,7 +6,9 @@ import UtilsService from "../../../../services/UtilsService";
 import * as _ from "lodash";
 import MathHelper from '../../../../helper/MathHelper';
 import iSynDebtorStudentConcession from '../../../../types/Synergetic/Finance/iSynDebtorStudentConcession';
+import iSynVDebtorFee from '../../../../types/Synergetic/Finance/iSynVDebtorFee';
 
+type iSiblingDiscountFee = iSynVDebtorFee & { discountAmount?: number };
 const getFinanceColumnTitles = (showingFinanceFigures = false) => {
   if (showingFinanceFigures !== true) {
     return [];
@@ -17,13 +17,13 @@ const getFinanceColumnTitles = (showingFinanceFigures = false) => {
     "Fee Total",
     "Tuition Fee",
     "Consolidated Charges",
-    "Concession Code",
-    "Concession Name",
-    "Concession From",
-    "Concession To",
-    "Concession %",
-    "Concession Amount",
-    "Concession Comments"
+    "Dis. Code",
+    "Dis. Name",
+    "Dis. From",
+    "Dis. To",
+    "Dis. %",
+    "Dis. Amount",
+    "Dis. Comments"
   ];
 };
 
@@ -45,30 +45,17 @@ const getDefaultStudentRow = (record: iVStudent | iFunnelLead) => {
         : moment(record.StudentLeavingDate).format("YYYY-MM-DD")
       : "",
     // @ts-ignore
-    `${record.StudentStatus || ""}`.trim() === SYN_STUDENT_STATUS_ID_FINALISED
-      ? ""
-      : // @ts-ignore
-      `${record.StudentYearLevelDescription || ""}`,
+    `${record.StudentYearLevelDescription || ""}`,
     "StudentForm" in record ? record.StudentForm : "",
     "FullFeeFlag" in record && record.FullFeeFlag === true ? "Y" : "",
     // @ts-ignore
-    `${record.StudentStatus || ""}`.trim() === SYN_STUDENT_STATUS_ID_FINALISED
-      ? // @ts-ignore
-      `${record.StudentEntryDate || ""}`.trim() === ""
-        ? ""
-        : // @ts-ignore
-        moment(record.StudentEntryDate).year()
-      : "student_starting_year" in record
-        ? record.student_starting_year
-        : "",
+    `${record.StudentEntryDate || ""}`.trim() === ""
+      ? ""
+      : // @ts-ignore
+      moment(record.StudentEntryDate).format("YYYY-MM-DD"),
     // @ts-ignore
-    `${record.StudentStatus || ""}`.trim() === SYN_STUDENT_STATUS_ID_FINALISED
-      ? // @ts-ignore
-      `${record.StudentYearLevelDescription || ""}`.trim()
-      : "student_starting_year_level" in record
-        ? record.student_starting_year_level
-        : "",
-    "pipeline_stage_name" in record ? record.pipeline_stage_name : "",
+    `${record.StudentYearLevelDescription || ""}`.trim(),
+    // "pipeline_stage_name" in record ? record.pipeline_stage_name : "",
   ]
 }
 
@@ -91,7 +78,11 @@ const getStudentRow = (record: iVStudent | iFunnelLead, showingFinanceFigures = 
     // @ts-ignore
     showingFuture === true ? ( record.nextYearConcessions || []) : ( record.currentConcessions || [])
   );
-  if (concessions.length <= 0) {
+  const siblingDiscounts = (
+    // @ts-ignore
+    showingFuture === true ? ( record.nextYearSiblingDiscounts || []) : ( record.currentSiblingDiscounts || [])
+  );
+  if (concessions.length <= 0 && siblingDiscounts.length <= 0) {
     return [defaultColumnsWithFinanceFigures];
   }
 
@@ -99,7 +90,8 @@ const getStudentRow = (record: iVStudent | iFunnelLead, showingFinanceFigures = 
   const returnArr: any[]  = [];
   concessions.forEach((concession: iSynDebtorStudentConcession, index: number) => {
     returnArr.push([
-      ...(index === 0 ? defaultColumnsWithFinanceFigures : _.range(0, defaultColumnsWithFinanceFigures.length).map(() => '')),
+      // ...(index === 0 ? defaultColumnsWithFinanceFigures : _.range(0, defaultColumnsWithFinanceFigures.length).map(() => '')),
+      ...defaultColumnsWithFinanceFigures,
       `${concession.FeeCode}`,
       `${concession.FeeCode in feeNameMap ? feeNameMap[concession.FeeCode] : ''}`,
       `${concession.EffectiveFromDate || ""}`.trim() === ""
@@ -112,6 +104,30 @@ const getStudentRow = (record: iVStudent | iFunnelLead, showingFinanceFigures = 
       // @ts-ignore
       `${concession.concessionAmount || ''}`,
       `${concession.Comment || ''}`
+    ]);
+  })
+  siblingDiscounts.forEach((discount: iSiblingDiscountFee, index: number) => {
+    returnArr.push([
+      // ...(index === 0 ? defaultColumnsWithFinanceFigures : _.range(0, defaultColumnsWithFinanceFigures.length).map(() => '')),
+      ...defaultColumnsWithFinanceFigures,
+      `${discount.FeeCode}`,
+      `${discount.FeeCode in feeNameMap ? feeNameMap[discount.FeeCode] : ''}`,
+      "",
+      "",
+      `${discount.DiscountPercentage}%`,
+      // @ts-ignore
+      MathHelper.mul(
+        showingFuture === true
+          ? // @ts-ignore
+          record.futureTuitionFees || 0
+          : // @ts-ignore
+          record.tuitionFees || 0,
+        MathHelper.div(
+          discount.DiscountPercentage || 0,
+          100
+        )
+      ),
+      `Sibling Discount`,
     ]);
   })
   return returnArr;
@@ -133,9 +149,9 @@ const downloadHeadCounts = (
       "Current Year Level",
       "Form",
       "Full Fee?",
-      "Proposing Entry Year",
-      "Proposing Entry Year Level",
-      "Lead Stage",
+      "Entry Date",
+      "Entry Year Level",
+      // "Lead Stage",
       ...getFinanceColumnTitles(showingFinanceFigures)
     ]
   ];
@@ -148,20 +164,24 @@ const downloadHeadCounts = (
         mergeCells.push({s: { r: rowNo, c: col }, e: { r: MathHelper.sub(MathHelper.add(rowNo, recordRows.length), 1), c: col }})
       })
     }
-    rowNo = MathHelper.add(rowNo, recordRows.length);
+    // skipping the next row
+    // rowNo = MathHelper.add(rowNo, recordRows.length);
+
+    // repeat the next row
+    rowNo = MathHelper.add(rowNo, 1);
     return recordRows;
   }).reduce((arr, rowA) => [...arr, ...rowA], []);
   // const {rows, cellStyleMap, mergeCells} = getRows(3); //start from row 3, as there are two title rows
   const ws = XLSX.utils.aoa_to_sheet([...titleRows, ...rows]);
 
-  const columRange = UtilsService.letterRange("A", showingFinanceFigures === true ? "U" : 'K');
+  const columRange = UtilsService.letterRange("A", showingFinanceFigures === true ? "T" : 'J');
   columRange.forEach(colRef => {
     ws[`${colRef}1`].s = {
       font: { sz: 14, bold: true }
     };
   });
 
-  ws["!merges"] = mergeCells;
+  // ws["!merges"] = mergeCells;
   const nowString = `${moment().format("DD_MMM_YYYY_HH_mm_ss")}`;
   const nextYear = `${moment().add(1, 'year').year()}`;
   const wb = XLSX.utils.book_new();

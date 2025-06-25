@@ -403,68 +403,31 @@ const StudentNumberDetailsPopupBtn = ({
     },
     {
       key: "ProposingEntryYear",
-      header: "Proposing Entry Year",
+      header: "Entry Date",
       cell: (col: iTableColumn<T>, record: iVStudent | iFunnelLead) => {
-        if (
-          // @ts-ignore
-          `${record.StudentStatus || ""}`.trim() ===
-          SYN_STUDENT_STATUS_ID_FINALISED
-        ) {
-          return (
-            <td key={col.key}>
-              {// @ts-ignore
+        return (
+          <td key={col.key}>
+            {// @ts-ignore
               `${record.StudentEntryDate || ""}`.trim() === ""
                 ? ""
                 : // @ts-ignore
-                  moment(record.StudentEntryDate).year()}
-            </td>
-          );
-        }
-        return (
-          <td key={col.key}>
-            {"student_starting_year" in record
-              ? record.student_starting_year
-              : ""}
+                moment(record.StudentEntryDate).format('ll')}
           </td>
         );
       }
     },
     {
       key: "proposingEntryYearLevel",
-      header: "Proposing Entry Year Level",
-      cell: (col: iTableColumn<T>, record: iVStudent | iFunnelLead) => {
-        if (
-          // @ts-ignore
-          `${record.StudentStatus || ""}`.trim() ===
-          SYN_STUDENT_STATUS_ID_FINALISED
-        ) {
-          return (
-            <td key={col.key}>
-              {
-                // @ts-ignore
-                record.StudentYearLevelDescription
-              }
-            </td>
-          );
-        }
-        return (
-          <td key={col.key}>
-            {"student_starting_year_level" in record
-              ? record.student_starting_year_level
-              : ""}
-          </td>
-        );
-      }
-    },
-    {
-      key: "leadStage",
-      header: "Lead Stage",
+      header: "Entry Year Level",
       cell: (col: iTableColumn<T>, record: iVStudent | iFunnelLead) => {
         return (
           <td key={col.key}>
-            {"pipeline_stage_name" in record ? record.pipeline_stage_name : ""}
+            {
+              // @ts-ignore
+              record.StudentEntryYearLevel
+            }
           </td>
-        );
+        )
       }
     },
     ...(showingFinanceFigures !== true
