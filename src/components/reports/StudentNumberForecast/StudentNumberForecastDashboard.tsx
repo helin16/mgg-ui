@@ -128,7 +128,7 @@ const initLeadMap: iLeadMap = {
   leadsAndTours: {}
 };
 
-const defaultCampusCodes = ["E", "J", "S"];
+const defaultCampusCodes = [CAMPUS_CODE_ELC, CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR];
 
 type iStudentNumberForecastDashboard = {
   showExplanationPanel?: boolean;
