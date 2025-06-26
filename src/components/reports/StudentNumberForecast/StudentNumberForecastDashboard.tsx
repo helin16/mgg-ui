@@ -11,7 +11,7 @@ import Toaster, { TOAST_TYPE_ERROR } from "../../../services/Toaster";
 import PageLoadingSpinner from "../../common/PageLoadingSpinner";
 import SynVStudentService from "../../../services/Synergetic/Student/SynVStudentService";
 import moment from "moment-timezone";
-import FunnelService from "../../../services/Funnel/FunnelService";
+// import FunnelService from "../../../services/Funnel/FunnelService";
 import iFunnelLead, {
   FUNNEL_STAGE_NAME_OFFER_ACCEPTED,
   FUNNEL_STAGE_NAME_STUDENT_LEARNING_PROFILE,
@@ -99,16 +99,16 @@ const Wrapper = styled.div`
   }
 `;
 
-const leadStatuses = [
-  FUNNEL_STAGE_NAME_EXPORTED,
-  FUNNEL_STAGE_NAME_OFFER_ACCEPTED,
-  FUNNEL_STAGE_NAME_STUDENT_LEARNING_PROFILE,
-  FUNNEL_STAGE_NAME_INTERVIEW,
-  FUNNEL_STAGE_NAME_OFFER_SENT,
-  FUNNEL_STAGE_NAME_ENQUIRY,
-  FUNNEL_STAGE_NAME_SCHOOL_VISIT,
-  FUNNEL_STAGE_NAME_APPLICATION_RECEIVED
-];
+// const leadStatuses = [
+//   FUNNEL_STAGE_NAME_EXPORTED,
+//   FUNNEL_STAGE_NAME_OFFER_ACCEPTED,
+//   FUNNEL_STAGE_NAME_STUDENT_LEARNING_PROFILE,
+//   FUNNEL_STAGE_NAME_INTERVIEW,
+//   FUNNEL_STAGE_NAME_OFFER_SENT,
+//   FUNNEL_STAGE_NAME_ENQUIRY,
+//   FUNNEL_STAGE_NAME_SCHOOL_VISIT,
+//   FUNNEL_STAGE_NAME_APPLICATION_RECEIVED
+// ];
 
 type iCommunityMap = { [key: number]: iVStudent };
 type iStudentMap = { [key: string]: iVStudent[] };
@@ -452,15 +452,16 @@ const StudentNumberForecastDashboard = ({
   useEffect(() => {
     let isCanceled = false;
     setIsLoading(true);
-    const yearLevelForLeads = getYearLevelForLead(selectedCampusCodes);
+    // const yearLevelForLeads = getYearLevelForLead(selectedCampusCodes);
 
     const getData = async () => {
       if (isCanceled) return;
       let currentStudMap: iStudentMap = {};
       let currentLeaverStudMap: iStudentMap = {};
+      const funnelLeads: iFunnelLead[] = [];
       const [
         vStudents,
-        { data: funnelLeads },
+        // { data: funnelLeads },
         luYearLevels,
         { data: vDebtorFees },
         { data: confirmedStudents }
@@ -473,17 +474,17 @@ const StudentNumberForecastDashboard = ({
             // ID: [54941]
           })
         }),
-        FunnelService.getAll({
-          where: JSON.stringify({
-            student_starting_year: [currentFileYear, nextFileYear],
-            isActive: true,
-            pipeline_stage_name: leadStatuses,
-            ...(yearLevelForLeads.length > 0
-              ? { student_starting_year_level: yearLevelForLeads }
-              : {})
-          }),
-          perPage: 99999999
-        }),
+        // FunnelService.getAll({
+        //   where: JSON.stringify({
+        //     student_starting_year: [currentFileYear, nextFileYear],
+        //     isActive: true,
+        //     pipeline_stage_name: leadStatuses,
+        //     ...(yearLevelForLeads.length > 0
+        //       ? { student_starting_year_level: yearLevelForLeads }
+        //       : {})
+        //   }),
+        //   perPage: 99999999
+        // }),
         SynLuYearLevelService.getAllYearLevels({
           where: JSON.stringify({
             Campus:
