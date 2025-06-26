@@ -509,14 +509,14 @@ const StudentNumberForecastDashboard = ({
       ]);
 
       const vStudents = currentStudents
-        // filter out students who hasn't started yet
-        .filter(vs => moment(vs.StudentEntryDate) <= moment().endOf('day'))
+        // // filter out students who hasn't started yet
+        // .filter(vs => moment(vs.StudentEntryDate) <= moment().endOf('day'))
         // filter out student who has left
         .filter(vs => {
           if (`${vs.StudentLeavingDate || ''}`.trim() === '') {
             return true;
           }
-          return moment(vs.StudentLeavingDate) >= moment().endOf('day')
+          return moment(vs.StudentLeavingDate).isAfter(moment().endOf('day'));
         })
       const yLevelMap = luYearLevels.reduce((map, yearLevel) => {
         return {
@@ -891,7 +891,18 @@ const StudentNumberForecastDashboard = ({
         const futureNextYear = [
           ...(currentYearStudentLowerLevel
             .filter(
-              student => `${student.StudentLeavingDate || ""}`.trim() === ""
+              student => {
+                return moment(student.StudentEntryDate).isBefore(moment().add(1, 'year').startOf('year'));
+              }
+            )
+            .filter(
+              student => {
+                const leavingDate = `${student.StudentLeavingDate || ""}`.trim();
+                if (leavingDate === "") {
+                  return true;
+                }
+                return moment(leavingDate).isAfter(moment().add(1, 'year').startOf('year'));
+              }
             )
             .map(student =>
               getFeeInfoForStudent(
@@ -954,6 +965,23 @@ const StudentNumberForecastDashboard = ({
     );
   };
 
+  const getCurrentStudentMapWithoutLateStarter = (studentMap: iStudentMap): iStudentMap => {
+    return Object.keys(studentMap).reduce((map, key) => {
+      const students = studentMap[key];
+      const filteredStudents = students.filter(student => {
+        const startingDate = `${student.StudentEntryDate || ""}`.trim();
+        if (startingDate === "") {
+          return true;
+        }
+        return moment(startingDate).isSameOrBefore(moment().endOf('day'));
+      });
+      return {
+        ...map,
+        [key]: filteredStudents
+      };
+    }, {});
+  }
+
   const getSumPanels = () => {
     if (showSumPanels !== true) {
       return null;
@@ -961,15 +989,11 @@ const StudentNumberForecastDashboard = ({
 
     return (
       <Row className={"section-row sum-div-wrapper"}>
-        {getSumPanel("Current Students", currentStudentMap.total)}
+        {getSumPanel("Current Students", getCurrentStudentMapWithoutLateStarter(currentStudentMap).total)}
         {getSumPanel("Current Leavers", currentStudentLeaverMap.total)}
         {getSumPanel("Confirmed", nextYearFunnelLeadMap.confirmed.total)}
         {getSumPanel("In Progress", nextYearFunnelLeadMap.inProgress.total)}
         {getSumPanel(`Future ${nextFileYear}`, futureNextYearMap.total)}
-        {getSumPanel(
-          "Leads & Tours",
-          nextYearFunnelLeadMap.leadsAndTours.total
-        )}
       </Row>
     );
   };
@@ -987,7 +1011,7 @@ const StudentNumberForecastDashboard = ({
           showingFinanceFigures={showingFinanceFigures}
           yearLevelMap={yearLevelMap}
           selectedCampusCodes={selectedCampusCodes}
-          currentStudentMap={currentStudentMap}
+          currentStudentMap={getCurrentStudentMapWithoutLateStarter(currentStudentMap)}
           currentStudentLeaverMap={currentStudentLeaverMap}
           nextYearFunnelLeadMap={nextYearFunnelLeadMap}
           futureNextYearMap={futureNextYearMap}
@@ -1077,23 +1101,27 @@ const StudentNumberForecastDashboard = ({
           checked={showingFinanceFigures === true}
           onChange={checked => setShowingFinanceFigures(checked)}
         />
-        <FlexContainer className={"with-gap align-items-center"}>
-          <div>Increasing for {nextFileYear}: </div>
-          <FormControl
-            placeholder={"increase percentage"}
-            defaultValue={increasingPercentage}
-            type={"number"}
-            className={"increasing-percentage"}
-            onBlur={event => setPercentage(event)}
-            onKeyDown={event => {
-              if (event.key !== "Enter") {
-                return;
-              }
-              setPercentage(event);
-            }}
-          />
-          <div>%</div>
-        </FlexContainer>
+        {
+          showingFinanceFigures === true && (
+            <FlexContainer className={"with-gap align-items-center"}>
+              <div>Increasing for {nextFileYear}: </div>
+              <FormControl
+                placeholder={"increase percentage"}
+                defaultValue={increasingPercentage}
+                type={"number"}
+                className={"increasing-percentage"}
+                onBlur={event => setPercentage(event)}
+                onKeyDown={event => {
+                  if (event.key !== "Enter") {
+                    return;
+                  }
+                  setPercentage(event);
+                }}
+              />
+              <div>%</div>
+            </FlexContainer>
+          )
+        }
       </>
     );
   };
