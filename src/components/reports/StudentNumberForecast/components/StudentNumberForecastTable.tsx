@@ -501,29 +501,6 @@ const StudentNumberForecastTable = ({
           },
         ]
       : []),
-    ...(showingFinanceFigures === true
-      ? []
-      : [
-          {
-            key: "leadsAndTours",
-            header: `Leads & Tours`,
-            cell: (col: iTableColumn<T>, data: ISynLuYearLevel) => {
-              return getCell(
-                col.key,
-                data,
-                nextYearFunnelLeadMap.leadsAndTours,
-                true
-              );
-            },
-            footer: (col: iTableColumn<T>) => {
-              const students =
-                "total" in nextYearFunnelLeadMap.leadsAndTours
-                  ? nextYearFunnelLeadMap.leadsAndTours.total
-                  : [];
-              return <td key={col.key}>{StudentPopupDiv(students, true)}</td>;
-            }
-          }
-        ])
   ];
 
   return (

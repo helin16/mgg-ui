@@ -460,7 +460,7 @@ const StudentNumberForecastDashboard = ({
       let currentLeaverStudMap: iStudentMap = {};
       const funnelLeads: iFunnelLead[] = [];
       const [
-        vStudents,
+        currentStudents,
         // { data: funnelLeads },
         luYearLevels,
         { data: vDebtorFees },
@@ -508,6 +508,16 @@ const StudentNumberForecastDashboard = ({
         })
       ]);
 
+      const vStudents = currentStudents
+        // filter out students who hasn't started yet
+        .filter(vs => moment(vs.StudentEntryDate) <= moment().endOf('day'))
+        // filter out student who has left
+        .filter(vs => {
+          if (`${vs.StudentLeavingDate || ''}`.trim() === '') {
+            return true;
+          }
+          return moment(vs.StudentLeavingDate) >= moment().endOf('day')
+        })
       const yLevelMap = luYearLevels.reduce((map, yearLevel) => {
         return {
           ...map,
@@ -529,7 +539,8 @@ const StudentNumberForecastDashboard = ({
         {}
       );
 
-      const currentSMap = vStudents.reduce((map: iCommunityMap, student) => {
+      const currentSMap = vStudents
+        .reduce((map: iCommunityMap, student) => {
         return {
           ...map,
           [student.StudentID]: student
@@ -1002,7 +1013,7 @@ const StudentNumberForecastDashboard = ({
             </b>
             <ul>
               <li>
-                <b>Current Student</b>: the number of student currently
+                <b>Current Student</b>: the number of student currently.(Excluding all students who hasn't started yet and left)
               </li>
               <li>
                 <b>Current Leavers</b>: current students who has a leaving date
