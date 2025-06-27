@@ -1041,7 +1041,7 @@ const StudentNumberForecastDashboard = ({
               </li>
               <li>
                 <b>Current Leavers</b>: current students who has a leaving date
-                set but not reached leaving date yet.
+                set and the leaving date is in the future.
               </li>
               <li>
                 <b>Confirmed</b>: All future students in Synergetic starting in{" "}
