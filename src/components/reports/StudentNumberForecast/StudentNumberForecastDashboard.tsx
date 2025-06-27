@@ -1041,26 +1041,15 @@ const StudentNumberForecastDashboard = ({
               </li>
               <li>
                 <b>Current Leavers</b>: current students who has a leaving date
-                set
+                set but not reached yet.
               </li>
               <li>
                 <b>Confirmed</b>: All future students in Synergetic starting in{" "}
                 {nextFileYear} with status "Application Finalised"
               </li>
               <li>
-                <b>In Progress</b>: the number of leads from Funnel with status:{" "}
-                {FUNNEL_STAGE_NAME_STUDENT_LEARNING_PROFILE},{" "}
-                {FUNNEL_STAGE_NAME_INTERVIEW} & {FUNNEL_STAGE_NAME_OFFER_SENT}
-              </li>
-              <li>
                 <b>Future {nextFileYear}</b>: = Current Student on Lower Year
                 Level + Confirmed - leavers.
-              </li>
-              <li>
-                <b>Leads & Tours</b>: the number of leads from Funnel with
-                status: {FUNNEL_STAGE_NAME_ENQUIRY},{" "}
-                {FUNNEL_STAGE_NAME_SCHOOL_VISIT} &{" "}
-                {FUNNEL_STAGE_NAME_APPLICATION_RECEIVED}
               </li>
             </ul>
           </>
