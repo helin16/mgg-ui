@@ -158,7 +158,19 @@ const downloadHeadCounts = (
   let rowNo = 1;
   const mergeCells: {s: { r: number, c: number }, e: { r: number, c: number }}[] = [];
   const rows = data.map((record: iVStudent | iFunnelLead) => {
-    const recordRows =  getStudentRow(record, showingFinanceFigures, showingFuture, feeNameMap);
+    const recordRows =  getStudentRow(record, showingFinanceFigures, showingFuture, feeNameMap)
+      // make the columns empty: Fee Total, Tuition Fees, Consolidate Fees when not the first row
+      .map((record, index) => {
+        if (index === 0) {
+          return record;
+        }
+        return record.map((cell, cIndex) => {
+          if ([10, 11, 12].indexOf(cIndex) >= 0) {
+            return '';
+          }
+          return cell;
+        });
+      });
     if (recordRows.length > 1) {
       _.range(0, 14).forEach(col => {
         mergeCells.push({s: { r: rowNo, c: col }, e: { r: MathHelper.sub(MathHelper.add(rowNo, recordRows.length), 1), c: col }})

@@ -9,6 +9,8 @@ import styled from "styled-components";
 import { mainBlue } from "../../../../AppWrapper";
 import UtilsService from "../../../../services/UtilsService";
 import MathHelper from "../../../../helper/MathHelper";
+import {DashSquare, PlusSquare} from 'react-bootstrap-icons';
+import {FlexContainer} from '../../../../styles';
 
 type iStudentMap = { [key: string]: iVStudent[] };
 type iMap = { [key: string]: iFunnelLead[] };
@@ -37,21 +39,34 @@ const Wrapper = styled.div`
   }
 
   .lead-table {
+    .expanded-cell,
+    .expanded-cell button {
+        font-size: 12px !important;
+        font-style: italic;
+    }
     thead {
       th {
         background: ${mainBlue};
         color: white !important;
       }
     }
-    td.sub-total {
-      background: #e9e9e9;
-      font-weight: bold;
-      :first-child {
-        text-align: right;
-      }
-      .btn {
-        font-weight: bold;
-      }
+    td {
+        &.sub-total {
+            background: #e9e9e9;
+            font-weight: bold;
+            :first-child {
+                text-align: right;
+            }
+            .btn {
+                font-weight: bold;
+            }
+        }
+        &.expanded-cell {
+            background-color: #f8f8f8 !important;
+            &.sub-total {
+                background: #e9e9e9 !important;
+            }
+        }
     }
     tfoot {
       font-weight: bold;
@@ -75,6 +90,9 @@ const StudentNumberForecastTable = ({
   selectedCampusCodes = ["S", "J", "E"]
 }: iStudentNumberForecastTable) => {
   const [yLevelArr, setYLevelArr] = useState<ISynLuYearLevel[]>([]);
+  const [expandedCurrent, setExpandedCurrent] = useState<boolean>(false);
+  const [expandedConfirmed, setExpandedConfirmed] = useState<boolean>(false);
+  const [expandedFuture, setExpandedFuture] = useState<boolean>(false);
 
   useEffect(() => {
     const arr = Object.values(yearLevelMap).sort((yl1, yl2) =>
@@ -100,20 +118,28 @@ const StudentNumberForecastTable = ({
 
   const getTotalAmountForStudent = (
     record: iVStudent | iFunnelLead,
-    forFuture: boolean = false
+    forFuture: boolean = false,
+    minusDiscounts: boolean = false
   ) => {
-    if (forFuture === true) {
-      // @ts-ignore
-      return MathHelper.add(record.futureTuitionFees || 0, record.futureConsolidateFees);
+    // @ts-ignore
+    const totalCharges  = forFuture === true ? MathHelper.add(record.futureTuitionFees || 0, record.futureConsolidateFees) : MathHelper.add(record.tuitionFees || 0, record.consolidateFees);
+    if (minusDiscounts === false) {
+      return totalCharges;
     }
     // @ts-ignore
-    return MathHelper.add(record.tuitionFees || 0, record.consolidateFees); //record.currentTotalFeeAmount || 0;
+    const concessionFees = forFuture === true ? record.futureConcessionFees || 0 : record.currentConcessionFees || 0;
+    // @ts-ignore
+    const siblingDisFees = forFuture === true ? record.nextYearSiblingDiscountFees || 0 : record.currentSiblingDiscountFees || 0;
+
+    const totalDiscounts = MathHelper.add(concessionFees, siblingDisFees);
+    return MathHelper.sub(totalCharges, totalDiscounts); //record.currentTotalFeeAmount || 0;
   };
 
   const StudentPopupDiv = (
     students: (iVStudent | iFunnelLead)[],
     forFuture: boolean = false,
-    content?: any
+    content?: any,
+    minusDiscounts: boolean = false
   ) => {
     if (students.length <= 0) {
       return null;
@@ -136,7 +162,7 @@ const StudentNumberForecastTable = ({
                 (sum, student) =>
                   MathHelper.add(
                     sum,
-                    getTotalAmountForStudent(student, forFuture)
+                    getTotalAmountForStudent(student, forFuture, minusDiscounts)
                   ),
                 0
               )
@@ -150,7 +176,9 @@ const StudentNumberForecastTable = ({
     key: string,
     data: ISynLuYearLevel,
     map: any,
-    forFuture: boolean = false
+    forFuture: boolean = false,
+    minusDiscounts: boolean = false,
+    className = ''
   ) => {
     if (data.Code === "subTotal") {
       const yearLevelCodes = yLevelArr
@@ -162,21 +190,22 @@ const StudentNumberForecastTable = ({
         []
       );
       return (
-        <td key={key} className={"sub-total"}>
-          {StudentPopupDiv(students, forFuture)}
+        <td key={key} className={`sub-total ${className}`}>
+          {StudentPopupDiv(students, forFuture, undefined, minusDiscounts)}
         </td>
       );
     }
 
     const students = data.Code in map ? map[data.Code] : [];
-    return <td key={key}>{StudentPopupDiv(students, forFuture)}</td>;
+    return <td key={key} className={className}>{StudentPopupDiv(students, forFuture, undefined, minusDiscounts)}</td>;
   };
 
   const getConcessionCell = (
     key: string,
     map: any,
     data?: ISynLuYearLevel,
-    forFuture: boolean = false
+    forFuture: boolean = false,
+    className = ''
   ) => {
     let students = [];
     if (!data) {
@@ -217,7 +246,7 @@ const StudentNumberForecastTable = ({
     });
 
     return (
-      <td key={key} className={data?.Code === "subTotal" ? "sub-total" : ""}>
+      <td key={key} className={`${data?.Code === "subTotal" ? "sub-total" : ""} ${className}`}>
         {StudentPopupDiv(
           studentsWithConcessions,
           forFuture,
@@ -248,7 +277,8 @@ const StudentNumberForecastTable = ({
     key: string,
     map: any,
     data?: ISynLuYearLevel,
-    forFuture: boolean = false
+    forFuture: boolean = false,
+    className = ''
   ) => {
     let students = [];
     if (!data) {
@@ -287,7 +317,7 @@ const StudentNumberForecastTable = ({
     });
 
     return (
-      <td key={key} className={data?.Code === "subTotal" ? "sub-total" : ""}>
+      <td key={key} className={`${data?.Code === "subTotal" ? "sub-total" : ""} ${className}`}>
         {StudentPopupDiv(
           studentsWithSiblingDiscounts,
           forFuture,
@@ -313,6 +343,31 @@ const StudentNumberForecastTable = ({
       </td>
     );
   };
+
+  const getExpandableThead = <T extends {}>(col: iTableColumn<T>, title: string, expandFn: () => void) => {
+    return (
+      <th key={col.key}>
+        <FlexContainer className={'gap-1 align-items-center'}>
+          <span>{title}</span>
+          {showingFinanceFigures === true && (
+            <span
+              className={'cursor-pointer text-center'}
+              onClick={expandFn}>
+                  {expandedCurrent === true ? <DashSquare /> : <PlusSquare />}
+                </span>
+          )}
+        </FlexContainer>
+      </th>
+    )
+  }
+
+  const getExpandedThead = <T extends {}>(col: iTableColumn<T>, title: string) => {
+    return (
+      <th key={col.key} className={'expanded-cell'}>
+        <small><i><u>{title}</u></i></small>
+      </th>
+    )
+  }
 
   const getColumns = <T extends {}>() => [
     {
@@ -344,45 +399,61 @@ const StudentNumberForecastTable = ({
     },
     {
       key: "currentStudent",
-      header: "Current Student",
+      header: (col: iTableColumn<T>) => {
+        return getExpandableThead(col, 'Current Student', () => setExpandedCurrent(!expandedCurrent));
+      },
       cell: (col: iTableColumn<T>, data: ISynLuYearLevel) => {
-        return getCell(col.key, data, currentStudentMap);
+        return getCell(col.key, data, currentStudentMap, false, true);
       },
       footer: (col: iTableColumn<T>) => {
         const students =
           "total" in currentStudentMap ? currentStudentMap.total : [];
-        return <td key={col.key}>{StudentPopupDiv(students)}</td>;
+        return <td key={col.key}>{StudentPopupDiv(students, false, undefined, true)}</td>;
       }
     },
-    ...(showingFinanceFigures === true
+    ...(showingFinanceFigures === true && expandedCurrent === true
       ? [
           {
-            key: "currentConcessions",
-            header: "Current Concessions",
+            key: "currentCharges",
+            header: (col: iTableColumn<T>) => getExpandedThead(col, 'Current Charges'),
             cell: (col: iTableColumn<T>, data: ISynLuYearLevel) => {
-              return getConcessionCell(col.key, currentStudentMap, data, false);
+              return getCell(col.key, data, currentStudentMap, false, false, 'expanded-cell');
+            },
+            footer: (col: iTableColumn<T>) => {
+              const students =
+                "total" in currentStudentMap ? currentStudentMap.total : [];
+              return <td key={col.key} className={'expanded-cell'}>{StudentPopupDiv(students, false)}</td>;
+            }
+          },
+          {
+            key: "currentConcessions",
+            header: (col: iTableColumn<T>) => getExpandedThead(col, 'Current Concessions'),
+            cell: (col: iTableColumn<T>, data: ISynLuYearLevel) => {
+              return getConcessionCell(col.key, currentStudentMap, data, false, 'expanded-cell');
             },
             footer: (col: iTableColumn<T>) => {
               return getConcessionCell(
                 col.key,
                 currentStudentMap,
                 undefined,
-                false
+                false,
+                'expanded-cell'
               );
             }
           },
           {
             key: "currentSiblingDiscounts",
-            header: "Current Sibling Disc.",
+            header: (col: iTableColumn<T>) => getExpandedThead(col, 'Current Sibling Disc.'),
             cell: (col: iTableColumn<T>, data: ISynLuYearLevel) => {
-              return getSiblingDiscountCell(col.key, currentStudentMap, data, false);
+              return getSiblingDiscountCell(col.key, currentStudentMap, data, false, 'expanded-cell');
             },
             footer: (col: iTableColumn<T>) => {
               return getSiblingDiscountCell(
                 col.key,
                 currentStudentMap,
                 undefined,
-                false
+                false,
+                'expanded-cell'
               );
             }
           }
@@ -404,99 +475,110 @@ const StudentNumberForecastTable = ({
     },
     {
       key: "confirmed",
-      header: "Confirmed",
+      header: (col: iTableColumn<T>) => {
+        return getExpandableThead(col, 'Confirmed', () => setExpandedConfirmed(!expandedConfirmed));
+      },
       cell: (col: iTableColumn<T>, data: ISynLuYearLevel) => {
-        return getCell(col.key, data, confirmedFutureStudentMap, true);
+        return getCell(col.key, data, confirmedFutureStudentMap, true, true);
       },
       footer: (col: iTableColumn<T>) => {
         const students =
           "total" in confirmedFutureStudentMap
             ? confirmedFutureStudentMap.total
             : [];
-        return <td key={col.key}>{StudentPopupDiv(students, true)}</td>;
+        return <td key={col.key}>{StudentPopupDiv(students, true, undefined, true)}</td>;
       }
     },
-    ...(showingFinanceFigures === true
+    ...(showingFinanceFigures === true  && expandedConfirmed === true
       ? [
         {
-          key: "confirmedConcessions",
-          header: "Confirmed Concessions",
+          key: "confirmedCharges",
+          header: (col: iTableColumn<T>) => getExpandedThead(col, 'Confirmed Charges'),
           cell: (col: iTableColumn<T>, data: ISynLuYearLevel) => {
-            return getConcessionCell(col.key, confirmedFutureStudentMap, data, true);;
+            return getCell(col.key, data, confirmedFutureStudentMap, true, false, 'expanded-cell');
           },
           footer: (col: iTableColumn<T>) => {
-            return getConcessionCell(col.key, confirmedFutureStudentMap, undefined, true);
+            const students =
+              "total" in confirmedFutureStudentMap
+                ? confirmedFutureStudentMap.total
+                : [];
+            return <td key={col.key} className={'expanded-cell'}>{StudentPopupDiv(students, true)}</td>;
+          }
+        },
+        {
+          key: "confirmedConcessions",
+          header: (col: iTableColumn<T>) => getExpandedThead(col, 'Confirmed Concessions'),
+          cell: (col: iTableColumn<T>, data: ISynLuYearLevel) => {
+            return getConcessionCell(col.key, confirmedFutureStudentMap, data, true, 'expanded-cell');
+          },
+          footer: (col: iTableColumn<T>) => {
+            return getConcessionCell(col.key, confirmedFutureStudentMap, undefined, true, 'expanded-cell');
           }
         },
         {
           key: "confirmedSibDisc",
-          header: "Confirmed Sibling Disc.",
+          header: (col: iTableColumn<T>) => getExpandedThead(col, 'Confirmed Sibling Disc.'),
           cell: (col: iTableColumn<T>, data: ISynLuYearLevel) => {
-            return getSiblingDiscountCell(col.key, confirmedFutureStudentMap, data, true);;
+            return getSiblingDiscountCell(col.key, confirmedFutureStudentMap, data, true, 'expanded-cell');
           },
           footer: (col: iTableColumn<T>) => {
-            return getSiblingDiscountCell(col.key, confirmedFutureStudentMap, undefined, true);
+            return getSiblingDiscountCell(col.key, confirmedFutureStudentMap, undefined, true, 'expanded-cell');
           }
         },
       ]
-      : [
-          {
-            key: "inProgress",
-            header: "In Progress",
-            cell: (col: iTableColumn<T>, data: ISynLuYearLevel) => {
-              return getCell(
-                col.key,
-                data,
-                nextYearFunnelLeadMap.inProgress,
-                true
-              );
-            },
-            footer: (col: iTableColumn<T>) => {
-              const students =
-                "total" in nextYearFunnelLeadMap.inProgress
-                  ? nextYearFunnelLeadMap.inProgress.total
-                  : [];
-              return <td key={col.key}>{StudentPopupDiv(students, true)}</td>;
-            }
-          }
-        ]),
+      : []),
     {
       key: "nextYear",
-      header: `Future ${nextFileYear}`,
+      header: (col: iTableColumn<T>) => {
+        return getExpandableThead(col,  `Future ${nextFileYear}`, () => setExpandedFuture(!expandedFuture));
+      },
       cell: (col: iTableColumn<T>, data: ISynLuYearLevel) => {
-        return getCell(col.key, data, futureNextYearMap, true);
+        return getCell(col.key, data, futureNextYearMap, true, true);
       },
       footer: (col: iTableColumn<T>) => {
         const students =
           "total" in futureNextYearMap ? futureNextYearMap.total : [];
-        return <td key={col.key}>{StudentPopupDiv(students, true)}</td>;
+        return <td key={col.key}>{StudentPopupDiv(students, true, undefined, true)}</td>;
       }
     },
-    ...(showingFinanceFigures === true
+    ...(showingFinanceFigures === true && expandedFuture === true
       ? [
           {
-            key: "futureConcessions",
-            header: `${nextFileYear} Concessions`,
+            key: "futureCharges",
+            header: (col: iTableColumn<T>) => getExpandedThead(col, `${nextFileYear} Charges`),
             cell: (col: iTableColumn<T>, data: ISynLuYearLevel) => {
-              return getConcessionCell(col.key, futureNextYearMap, data, true);
+              return getCell(col.key, data, futureNextYearMap, true, false, 'expanded-cell');
+            },
+            footer: (col: iTableColumn<T>) => {
+              const students =
+                "total" in futureNextYearMap ? futureNextYearMap.total : [];
+              return <td key={col.key} className={'expanded-cell'}>{StudentPopupDiv(students, true)}</td>;
+            }
+          },
+          {
+            key: "futureConcessions",
+            header: (col: iTableColumn<T>) => getExpandedThead(col, `${nextFileYear} Concessions`),
+            cell: (col: iTableColumn<T>, data: ISynLuYearLevel) => {
+              return getConcessionCell(col.key, futureNextYearMap, data, true, 'expanded-cell');
             },
             footer: (col: iTableColumn<T>) => {
               return getConcessionCell(
                 col.key,
                 futureNextYearMap,
                 undefined,
-                true
+                true,
+                'expanded-cell'
               );
             }
           },
           {
             key: "futureSibDisc",
-            header: `${nextFileYear} Sibling Disc.`,
+            header: (col: iTableColumn<T>) => getExpandedThead(col, `${nextFileYear} Sibling Disc.`),
             cell: (col: iTableColumn<T>, data: ISynLuYearLevel) => {
-              return getSiblingDiscountCell(col.key, futureNextYearMap, data, true);
+              return getSiblingDiscountCell(col.key, futureNextYearMap, data, true, 'expanded-cell');
             },
             footer: (col: iTableColumn<T>) => {
-              return getSiblingDiscountCell(col.key, futureNextYearMap, undefined, true);
+              return getSiblingDiscountCell(col.key, futureNextYearMap, undefined, true, 'expanded-cell');
             }
           },
         ]
