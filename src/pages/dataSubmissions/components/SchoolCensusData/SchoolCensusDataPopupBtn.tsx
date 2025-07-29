@@ -44,13 +44,47 @@ const SchoolCensusDataPopupBtn = ({records, popupTitle, children, showExtraFn, e
         </Tab>
 
         {studentWithDetailsButNoFlag.length > 0 && (
-          <Tab eventKey={'Need to fix Disabled Flag'} title={<span className={'text-danger'}>Needed to fix Disabled Flag: {studentWithDetailsButNoFlag.length}</span>}>
+          <Tab
+            eventKey={'Need to fix Disabled Flag'}
+            title={
+              <FlexContainer>
+                <span className={'text-danger'}>Needed to fix Disabled Flag: {studentWithDetailsButNoFlag.length}</span>
+                <CSVExportBtn
+                  className={'export-btn no-padding no-margin'}
+                  // @ts-ignore
+                  fetchingFnc={() => new Promise(resolve => {
+                    resolve(studentWithDisabledFlagButNoDetails)
+                  })}
+                  downloadFnc={SchoolCensusDataExportHelper.genCSVFile}
+                  btnTxt={''}
+                  size={'sm'}
+                  variant={'link'}
+                />
+              </FlexContainer>
+            }>
             {getTable(studentWithDetailsButNoFlag)}
           </Tab>
         )}
 
         {studentWithDisabledFlagButNoDetails.length > 0 && (
-          <Tab eventKey={'Need to fix Disability Details'} title={<span className={'text-danger'}>Needed to fix Disability Details: {studentWithDisabledFlagButNoDetails.length} </span>}>
+          <Tab
+            eventKey={'Need to fix Disability Details'}
+            title={
+              <FlexContainer className={'align-items-baseline gap-1'}>
+                <span className={'text-danger'}>Needed to fix Disability Details: {studentWithDisabledFlagButNoDetails.length} </span>
+                <CSVExportBtn
+                  className={'export-btn no-padding no-margin'}
+                  // @ts-ignore
+                  fetchingFnc={() => new Promise(resolve => {
+                    resolve(studentWithDisabledFlagButNoDetails)
+                  })}
+                  btnTxt={''}
+                  downloadFnc={SchoolCensusDataExportHelper.genCSVFile}
+                  size={'sm'}
+                  variant={'link'}
+                />
+              </FlexContainer>
+            }>
             {getTable(studentWithDisabledFlagButNoDetails)}
           </Tab>
         )}

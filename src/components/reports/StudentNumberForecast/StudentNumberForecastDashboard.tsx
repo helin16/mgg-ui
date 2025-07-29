@@ -214,33 +214,6 @@ const StudentNumberForecastDashboard = ({
     );
   };
 
-  const getYearLevelForLead = (campusCodes: string[]) => {
-    return campusCodes.reduce((array: string[], campusCode) => {
-      let codes: string[] = [];
-      switch (campusCode.trim().toUpperCase()) {
-        case "E": {
-          codes = ["ELC - Pre Prep", "ELC kinder"];
-          break;
-        }
-        case "J": {
-          codes = [
-            ...[1, 2, 3, 4, 5, 6].map(yearLevel => `Year ${yearLevel}`),
-            "Prep"
-          ];
-          break;
-        }
-        case "S": {
-          codes = [7, 8, 9, 10, 11, 12].map(yearLevel => `Year ${yearLevel}`);
-          break;
-        }
-        default: {
-          break;
-        }
-      }
-      return [...array, ...codes];
-    }, []);
-  };
-
   const getNextFeeWithIncreasingPercentage = (currentYearFee: number) => {
     return MathHelper.mul(
       currentYearFee,
