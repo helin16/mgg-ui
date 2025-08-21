@@ -98,3 +98,7 @@ ul, ol, dl {
 .pac-container {
     z-index: 99999999;
 }
+
+.display-flex {
+    display: flex;
+}

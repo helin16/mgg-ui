@@ -21,6 +21,9 @@ import {
 import ExplanationPanel from '../ExplanationPanel';
 import * as _ from 'lodash';
 import StudentNumberDetailsPopupBtn from '../reports/StudentNumberForecast/components/StudentNumberDetailsPopupBtn';
+import SynCampusSelector from '../student/SynCampusSelector';
+import PageTitle from '../PageTitle';
+import PanelTitle from '../PanelTitle';
 
 type iYearLevelMap = {[key: string]: iSynLuYearLevel[]}
 type iCampusMap = {[key: string]: iSynLuCampus}
@@ -91,25 +94,26 @@ const EnrolmentNumbersPanel = () => {
   const currentYear = moment().year();
   const nextYear = MathHelper.add(currentYear, 1);
   const lastYear = MathHelper.sub(currentYear, 1);
+  const [selectedCampusCodes, setSelectedCampusCodes] = useState(MGG_CAMPUS_CODES);
 
   useEffect(() => {
     let isCancel = false;
     setIsLoading(true);
     Promise.all([
       SynLuCampusService.getAllCampuses({
-        where: JSON.stringify({Code: MGG_CAMPUS_CODES}),
+        where: JSON.stringify({Code: selectedCampusCodes}),
       }),
       SynLuYearLevelService.getAllYearLevels({
-        where: JSON.stringify({Campus: MGG_CAMPUS_CODES}),
+        where: JSON.stringify({Campus: selectedCampusCodes}),
         sort: `YearLevelSort:ASC`
       }),
       SynVStudentService.getVPastAndCurrentStudentAll({
-        where: JSON.stringify({StudentCampus: MGG_CAMPUS_CODES, FileYear: currentYear}),
+        where: JSON.stringify({StudentCampus: selectedCampusCodes, FileYear: currentYear}),
         sort: `FileSemester:ASC`,
         perPage: 9999999999,
       }),
       SynVFutureStudentService.getAll({
-        where: JSON.stringify({FutureCampus: MGG_CAMPUS_CODES, FutureEnrolYear: [nextYear, currentYear]}),
+        where: JSON.stringify({FutureCampus: selectedCampusCodes, FutureEnrolYear: [nextYear, currentYear]}),
         perPage: 9999999999,
       })
     ]).then(([campuses, yLevels, currentAndPastStudentResult, futureStudentResult]) => {
@@ -144,7 +148,7 @@ const EnrolmentNumbersPanel = () => {
     return () => {
       isCancel = true;
     }
-  }, [currentYear]);
+  }, [currentYear, selectedCampusCodes, nextYear]);
 
   const getStudents = (students: iVPastAndCurrentStudent[], yearLevels: iSynLuYearLevel[] = [], statuses: string[] = []) => {
     return _.uniqBy(students, (student) => student.ID).filter(student => {
@@ -295,52 +299,85 @@ const EnrolmentNumbersPanel = () => {
           })
         }
         </tbody>
-        <tfoot>
-        <tr className={'campus-total'}>
-          <td className={'border-right'}>Total</td>
+        {selectedCampusCodes.length > 1 && (
+          <tfoot>
+          <tr className={'campus-total'}>
+            <td className={'border-right'}>Total</td>
 
-          <td>{getClickableNumber(getStudents(currentFutureStudents, [], [SYN_STUDENT_STATUS_ID_INTERVIEWED]))}</td>
-          <td>{getClickableNumber(getStudents(currentFutureStudents, [], [SYN_STUDENT_STATUS_ID_PLACE_OFFERED]))}</td>
-          <td
-            className={'border-right sm'}>{getClickableNumber(getStudents(currentFutureStudents, [], [SYN_STUDENT_STATUS_ID_FINALISED]))}</td>
+            <td>{getClickableNumber(getStudents(currentFutureStudents, [], [SYN_STUDENT_STATUS_ID_INTERVIEWED]))}</td>
+            <td>{getClickableNumber(getStudents(currentFutureStudents, [], [SYN_STUDENT_STATUS_ID_PLACE_OFFERED]))}</td>
+            <td
+              className={'border-right sm'}>{getClickableNumber(getStudents(currentFutureStudents, [], [SYN_STUDENT_STATUS_ID_FINALISED]))}</td>
 
-          <td>{getClickableNumber(getStudents(startDuringYearStudents))}</td>
-          <td>{getClickableNumber(getStudents(startBeginningOfYear))}</td>
-          <td>{getClickableNumber(getStudents(startBeforeCurrent))}</td>
-          <td>{getClickableNumber(getStudents(currentStudents, [], [SYN_STUDENT_STATUS_ID_REPEATING]))}</td>
-          <td>{getClickableNumber(getStudents(leavingStudents, [], [SYN_STUDENT_STATUS_LEAVE_OF_ABSENCE]))}</td>
-          <td>{getClickableNumber(getStudents(leavingStudents, [], [SYN_STUDENT_STATUS_ID_LEAVING]))}</td>
-          <td className={'border-right sm'}>{getClickableNumber(getStudents(currentStudents))}</td>
-          <td className={'border-right'}>{getClickableNumber(getStudents(leftStudents))}</td>
+            <td>{getClickableNumber(getStudents(startDuringYearStudents))}</td>
+            <td>{getClickableNumber(getStudents(startBeginningOfYear))}</td>
+            <td>{getClickableNumber(getStudents(startBeforeCurrent))}</td>
+            <td>{getClickableNumber(getStudents(currentStudents, [], [SYN_STUDENT_STATUS_ID_REPEATING]))}</td>
+            <td>{getClickableNumber(getStudents(leavingStudents, [], [SYN_STUDENT_STATUS_LEAVE_OF_ABSENCE]))}</td>
+            <td>{getClickableNumber(getStudents(leavingStudents, [], [SYN_STUDENT_STATUS_ID_LEAVING]))}</td>
+            <td className={'border-right sm'}>{getClickableNumber(getStudents(currentStudents))}</td>
+            <td className={'border-right'}>{getClickableNumber(getStudents(leftStudents))}</td>
 
-          <td>{getClickableNumber(getStudents(nextYearStudents, [], [SYN_STUDENT_STATUS_ID_INTERVIEWED]))}</td>
-          <td>{getClickableNumber(getStudents(nextYearStudents, [], [SYN_STUDENT_STATUS_ID_PLACE_OFFERED]))}</td>
-          <td>{getClickableNumber(getStudents(nextYearStudents, [], [SYN_STUDENT_STATUS_ID_FINALISED]))}</td>
-          <td>{getClickableNumber(getStudents(nextYearStudents, [], [SYN_STUDENT_STATUS_ID_INTERVIEWED, SYN_STUDENT_STATUS_ID_PLACE_OFFERED, SYN_STUDENT_STATUS_ID_FINALISED]))}</td>
-        </tr>
-        </tfoot>
+            <td>{getClickableNumber(getStudents(nextYearStudents, [], [SYN_STUDENT_STATUS_ID_INTERVIEWED]))}</td>
+            <td>{getClickableNumber(getStudents(nextYearStudents, [], [SYN_STUDENT_STATUS_ID_PLACE_OFFERED]))}</td>
+            <td>{getClickableNumber(getStudents(nextYearStudents, [], [SYN_STUDENT_STATUS_ID_FINALISED]))}</td>
+            <td>{getClickableNumber(getStudents(nextYearStudents, [], [SYN_STUDENT_STATUS_ID_INTERVIEWED, SYN_STUDENT_STATUS_ID_PLACE_OFFERED, SYN_STUDENT_STATUS_ID_FINALISED]))}</td>
+          </tr>
+          </tfoot>
+        )}
       </Table>
     )
   }
 
+  const getExplanationPanel = () => {
+    return (
+      <ExplanationPanel
+        variant={'info'}
+        dismissible
+        text={
+          <>
+            Current status for <u><b>{currentYear}</b></u> and <u><b>{nextYear}</b></u>:
+            <ul>
+              <li><b>NEW (During Year)</b>: All students' entry date is after Jan {currentYear}</li>
+              <li><b>NEW (Start of Year)</b>: All students' entry date is in Jan {currentYear}</li>
+              <li><b>CONTINUED</b>: All students' entry date is before Jan {currentYear}</li>
+              <li><b>REPEATING</b>: All current students' status
+                is <b>{SYN_STUDENT_STATUS_ID_REPEATING}</b> (Repeating).
+              </li>
+              <li><b>LEAVE OF ABSENCE</b>: All current students' status is <b>{SYN_STUDENT_STATUS_LEAVE_OF_ABSENCE}</b>.
+              </li>
+              <li><b>LEAVING</b>: All current students' status is <b>{SYN_STUDENT_STATUS_ID_LEAVING}(Leaving)</b> and
+                leaving date is in the future.
+              </li>
+              <li><b>LEFT</b>: All current students' leaving date is in the past.</li>
+            </ul>
+          </>}
+      />
+    )
+  }
+
   return <Wrapper>
-    <ExplanationPanel
-      variant={'info'}
-      dismissible
-      text={
-        <>
-          Current status for <u><b>{currentYear}</b></u> and <u><b>{nextYear}</b></u>:
-          <ul>
-            <li><b>NEW (During Year)</b>: All students' entry date is after Jan {currentYear}</li>
-            <li><b>NEW (Start of Year)</b>: All students' entry date is in Jan {currentYear}</li>
-          <li><b>CONTINUED</b>: All students' entry date is before Jan {currentYear}</li>
-          <li><b>REPEATING</b>: All current students' status is <b>{SYN_STUDENT_STATUS_ID_REPEATING}</b> (Repeating).</li>
-          <li><b>LEAVE OF ABSENCE</b>: All current students' status is <b>{SYN_STUDENT_STATUS_LEAVE_OF_ABSENCE}</b>.</li>
-          <li><b>LEAVING</b>: All current students' status is <b>{SYN_STUDENT_STATUS_ID_LEAVING}(Leaving)</b> and leaving date is in the future.</li>
-          <li><b>LEFT</b>: All current students' leaving date is in the past.</li>
-        </ul>
-      </>}
-    />
+    {getExplanationPanel()}
+    <PanelTitle className={"title-row section-row display-flex align-items-center gap-2"}>
+      <b className={"title"}>Campuses: </b>
+      <SynCampusSelector
+        className={"campus-selector"}
+        allowClear={false}
+        isMulti
+        values={selectedCampusCodes}
+        onSelect={values => {
+          const codes = (values === null
+              ? []
+              : Array.isArray(values)
+                ? values
+                : [values]
+          )
+            .map(value => `${value?.value || ''}`.trim())
+            .filter(code => code !== "");
+          setSelectedCampusCodes(codes);
+        }}
+      />
+    </PanelTitle>
     {getContent()}
   </Wrapper>
 }
