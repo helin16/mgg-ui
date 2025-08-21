@@ -5,8 +5,13 @@ export const SYN_STUDENT_STATUS_ID_NEW = '1';
 export const SYN_STUDENT_STATUS_ID_REPEATING = '2';
 export const SYN_STUDENT_STATUS_ID_LEAVING = '5';
 export const SYN_STUDENT_STATUS_ID_LEFT = '4';
-export const SYN_STUDENT_STATUS_ID_FINALISED = 'F';
 export const SYN_STUDENT_STATUS_PAST = 'PAST';
+export const SYN_STUDENT_STATUS_LEAVE_OF_ABSENCE = 'LOA';
+
+
+export const SYN_STUDENT_STATUS_ID_INTERVIEWED = 'I';
+export const SYN_STUDENT_STATUS_ID_PLACE_OFFERED = 'PO';
+export const SYN_STUDENT_STATUS_ID_FINALISED = 'F';
 
 type iVStudent = {
   StudentID: number;

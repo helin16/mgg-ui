@@ -9,26 +9,37 @@ import moment from 'moment-timezone';
 import StudentNumberForecastDashboard
   from '../../components/reports/StudentNumberForecast/StudentNumberForecastDashboard';
 import MathHelper from '../../helper/MathHelper';
+import EnrolmentNumbersPanel from '../../components/Enrollments/EnrolmentNumbersPanel';
 
-const TAB_EXPIRING_PASSPORTS = 'EXPIRING_PASSPORTS';
-const TAB_FORECAST_NEXT_YEAR = 'FORECAST_NEXT_YEAR';
+enum TabNames {
+  EXPIRING_PASSPORTS = 'EXPIRING_PASSPORTS',
+  ENROLMENT_NUMBER = 'ENROLMENT_NUMBER',
+  FORECAST_NEXT_YEAR = 'FORECAST_NEXT_YEAR',
+}
+
 const EnrolmentManagementPage = () => {
-  const defaultSelectedTab = TAB_EXPIRING_PASSPORTS;
-  const [selectedTab, setSelectedTab] = useState(TAB_EXPIRING_PASSPORTS);
+  const [selectedTab, setSelectedTab] = useState(TabNames.ENROLMENT_NUMBER);
   return (
-    <Page title={<h3>ENROLLMENTS Manager</h3>} AdminPage={EnrolmentManagementAdminPage} moduleId={MGGS_MODULE_ID_ENROLLMENTS}>
+    <Page title={<h3>Enrolments</h3>} AdminPage={EnrolmentManagementAdminPage} moduleId={MGGS_MODULE_ID_ENROLLMENTS}>
       <Tabs
         activeKey={selectedTab}
-        onSelect={k => setSelectedTab(k || defaultSelectedTab)}
+        onSelect={(k) => setSelectedTab(k as TabNames)}
         unmountOnExit
       >
-        <Tab title={'Expiring Passports/Visas'}  eventKey={TAB_EXPIRING_PASSPORTS}>
+        <Tab title={`Enrolment Numbers`}  eventKey={TabNames.ENROLMENT_NUMBER}>
+          <SectionDiv>
+            <EnrolmentNumbersPanel />
+          </SectionDiv>
+        </Tab>
+
+        <Tab title={'Expiring Passports/Visas'}  eventKey={TabNames.EXPIRING_PASSPORTS}>
           <SectionDiv>
             <ExpiringPassportsAndVisas />
           </SectionDiv>
         </Tab>
 
-        <Tab title={`Forecast ${MathHelper.add(moment().year(), 1)}`}  eventKey={TAB_FORECAST_NEXT_YEAR}>
+
+        <Tab title={`Forecast ${MathHelper.add(moment().year(), 1)}`}  eventKey={TabNames.FORECAST_NEXT_YEAR}>
           <SectionDiv>
             <StudentNumberForecastDashboard />
           </SectionDiv>

@@ -2,6 +2,7 @@ export const CAMPUS_CODE_JUNIOR = 'J';
 export const CAMPUS_CODE_SENIOR = 'S';
 export const CAMPUS_CODE_ELC = 'E';
 
+export const MGG_CAMPUS_CODES = [CAMPUS_CODE_ELC, CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR]
 type iSynLuCampus = {
   Campus: string;
   Code: number;
