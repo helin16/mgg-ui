@@ -170,7 +170,7 @@ const SchoolBoxRouter = ({
         </ModuleAccessWrapper>
       );
     }
-    case "/ENROLLMENTS_admin": {
+    case "/enrolments_admin": {
       removeSchoolBoxIframe();
       return (
         <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_ENROLLMENTS}>
