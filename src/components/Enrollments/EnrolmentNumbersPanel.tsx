@@ -12,7 +12,7 @@ import SynVStudentService from '../../services/Synergetic/Student/SynVStudentSer
 import SynVFutureStudentService from '../../services/Synergetic/SynVFutureStudentService';
 import {
   iVPastAndCurrentStudent,
-  SYN_STUDENT_STATUS_ID_LEAVING, SYN_STUDENT_STATUS_ID_NEW,
+  SYN_STUDENT_STATUS_ID_LEAVING, SYN_STUDENT_STATUS_ID_NEW, SYN_STUDENT_STATUS_ID_NORMAL,
   SYN_STUDENT_STATUS_ID_REPEATING,
   SYN_STUDENT_STATUS_LEAVE_OF_ABSENCE
 } from '../../types/Synergetic/Student/iVStudent';
@@ -206,12 +206,12 @@ const EnrolmentNumbersPanel = () => {
     }
 
     const currentStudents = Object.values(currentStudentsMap);
-    const newStudentsThisYear = currentStudents.filter(student => student.StudentStatus === SYN_STUDENT_STATUS_ID_NEW);
-    const leavingStudents = currentStudents.filter(student => moment(student.StudentLeavingDate).isAfter(moment()));
+    const currentNotLeftStudents = currentStudents.filter(student => `${student.StudentLeavingDate || ''}`.trim() === '' || moment(student.StudentLeavingDate).isSameOrBefore(moment()));
+    const newStudentsThisYear = currentNotLeftStudents.filter(student => student.StudentStatus === SYN_STUDENT_STATUS_ID_NEW);
+    const normalStudentsThisYear = currentNotLeftStudents.filter(student => student.StudentStatus === SYN_STUDENT_STATUS_ID_NORMAL);
     const leftStudents = currentStudents.filter(student => moment(student.StudentLeavingDate).isSameOrBefore(moment()));
     const startDuringYearStudents = newStudentsThisYear.filter(student => moment(student.StudentEntryDate).month() > 0);
     const startBeginningOfYear = newStudentsThisYear.filter(student => moment(student.StudentEntryDate).month() === 0);
-    const startBeforeCurrent = currentStudents.filter(student => moment(student.StudentEntryDate).isBefore(moment().year(currentYear).startOf('year')));
     const currentFutureStudents = Object.values(futureStudentsMap).filter(student => student.FileYear === currentYear);
 
     const nextYearStudents =  Object.values(futureStudentsMap).filter(student => student.FileYear === nextYear);
@@ -267,12 +267,12 @@ const EnrolmentNumbersPanel = () => {
 
                         <td>{getClickableNumber(getStudents(startDuringYearStudents, [yearLevel]))}</td>
                         <td>{getClickableNumber(getStudents(startBeginningOfYear, [yearLevel]))}</td>
-                        <td>{getClickableNumber(getStudents(startBeforeCurrent, [yearLevel]))}</td>
-                        <td>{getClickableNumber(getStudents(currentStudents, [yearLevel], [SYN_STUDENT_STATUS_ID_REPEATING]))}</td>
-                        <td>{getClickableNumber(getStudents(leavingStudents, [yearLevel], [SYN_STUDENT_STATUS_LEAVE_OF_ABSENCE]))}</td>
-                        <td>{getClickableNumber(getStudents(leavingStudents, [yearLevel], [SYN_STUDENT_STATUS_ID_LEAVING]))}</td>
+                        <td>{getClickableNumber(getStudents(normalStudentsThisYear, [yearLevel]))}</td>
+                        <td>{getClickableNumber(getStudents(currentNotLeftStudents, [yearLevel], [SYN_STUDENT_STATUS_ID_REPEATING]))}</td>
+                        <td>{getClickableNumber(getStudents(currentNotLeftStudents, [yearLevel], [SYN_STUDENT_STATUS_LEAVE_OF_ABSENCE]))}</td>
+                        <td>{getClickableNumber(getStudents(currentNotLeftStudents, [yearLevel], [SYN_STUDENT_STATUS_ID_LEAVING]))}</td>
                         <td
-                          className={'border-right sm'}>{getClickableNumber(getStudents(currentStudents, [yearLevel]))}</td>
+                          className={'border-right sm'}>{getClickableNumber(getStudents(currentNotLeftStudents, [yearLevel]))}</td>
                         <td className={'border-right'}>{getClickableNumber(getStudents(leftStudents, [yearLevel]))}</td>
 
                         {
@@ -292,12 +292,12 @@ const EnrolmentNumbersPanel = () => {
 
                   <td>{getClickableNumber(getStudents(startDuringYearStudents, campusYearLevels))}</td>
                   <td>{getClickableNumber(getStudents(startBeginningOfYear, campusYearLevels))}</td>
-                  <td>{getClickableNumber(getStudents(startBeforeCurrent, campusYearLevels))}</td>
-                  <td>{getClickableNumber(getStudents(currentStudents, campusYearLevels, [SYN_STUDENT_STATUS_ID_REPEATING]))}</td>
-                  <td>{getClickableNumber(getStudents(leavingStudents, campusYearLevels, [SYN_STUDENT_STATUS_LEAVE_OF_ABSENCE]))}</td>
-                  <td>{getClickableNumber(getStudents(leavingStudents, campusYearLevels, [SYN_STUDENT_STATUS_ID_LEAVING]))}</td>
+                  <td>{getClickableNumber(getStudents(normalStudentsThisYear, campusYearLevels))}</td>
+                  <td>{getClickableNumber(getStudents(currentNotLeftStudents, campusYearLevels, [SYN_STUDENT_STATUS_ID_REPEATING]))}</td>
+                  <td>{getClickableNumber(getStudents(currentNotLeftStudents, campusYearLevels, [SYN_STUDENT_STATUS_LEAVE_OF_ABSENCE]))}</td>
+                  <td>{getClickableNumber(getStudents(currentNotLeftStudents, campusYearLevels, [SYN_STUDENT_STATUS_ID_LEAVING]))}</td>
                   <td
-                    className={'border-right sm'}>{getClickableNumber(getStudents(currentStudents, campusYearLevels))}</td>
+                    className={'border-right sm'}>{getClickableNumber(getStudents(currentNotLeftStudents, campusYearLevels))}</td>
                   <td className={'border-right'}>{getClickableNumber(getStudents(leftStudents, campusYearLevels))}</td>
 
                   {
@@ -321,11 +321,11 @@ const EnrolmentNumbersPanel = () => {
 
             <td>{getClickableNumber(getStudents(startDuringYearStudents))}</td>
             <td>{getClickableNumber(getStudents(startBeginningOfYear))}</td>
-            <td>{getClickableNumber(getStudents(startBeforeCurrent))}</td>
-            <td>{getClickableNumber(getStudents(currentStudents, [], [SYN_STUDENT_STATUS_ID_REPEATING]))}</td>
-            <td>{getClickableNumber(getStudents(leavingStudents, [], [SYN_STUDENT_STATUS_LEAVE_OF_ABSENCE]))}</td>
-            <td>{getClickableNumber(getStudents(leavingStudents, [], [SYN_STUDENT_STATUS_ID_LEAVING]))}</td>
-            <td className={'border-right sm'}>{getClickableNumber(getStudents(currentStudents))}</td>
+            <td>{getClickableNumber(getStudents(normalStudentsThisYear))}</td>
+            <td>{getClickableNumber(getStudents(currentNotLeftStudents, [], [SYN_STUDENT_STATUS_ID_REPEATING]))}</td>
+            <td>{getClickableNumber(getStudents(currentNotLeftStudents, [], [SYN_STUDENT_STATUS_LEAVE_OF_ABSENCE]))}</td>
+            <td>{getClickableNumber(getStudents(currentNotLeftStudents, [], [SYN_STUDENT_STATUS_ID_LEAVING]))}</td>
+            <td className={'border-right sm'}>{getClickableNumber(getStudents(currentNotLeftStudents))}</td>
             <td className={'border-right'}>{getClickableNumber(getStudents(leftStudents))}</td>
 
             {
