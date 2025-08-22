@@ -6,7 +6,6 @@ import LoadComponents from './LoadComponents';
 import Sentry from './components/error/Sentry';
 
 Sentry.init();
-
 const appRoot = document.getElementById('mgg-root');
 if (appRoot) {
   ReactDOM.render(
