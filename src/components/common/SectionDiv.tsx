@@ -16,9 +16,10 @@ const Wrapper = styled.div`
     margin-bottom: 1.2rem;
   }
 `
-const SectionDiv = ({children, ...props}: any) => {
+const SectionDiv = ({children, title, ...props}: any) => {
   return (
     <Wrapper {...props}>
+      {title}
       {children}
     </Wrapper>
   )

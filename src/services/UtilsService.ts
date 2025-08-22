@@ -123,6 +123,16 @@ const getWeekDaysShort = () => {
   return ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
 }
 
+const stripQuotes = (str: string): string => {
+  if (str.startsWith("'")) {
+    str = str.slice(1);
+  }
+  if (str.endsWith("'")) {
+    str = str.slice(0, -1);
+  }
+  return str;
+}
+
 const UtilsService = {
   formatBytesToHuman,
   isNumeric,
@@ -140,6 +150,7 @@ const UtilsService = {
   getUrlParams,
   openNewWindow,
   getWeekDaysShort,
+  stripQuotes,
 }
 
 export default UtilsService;

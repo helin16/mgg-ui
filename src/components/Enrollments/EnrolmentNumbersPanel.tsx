@@ -12,9 +12,7 @@ import SynVStudentService from '../../services/Synergetic/Student/SynVStudentSer
 import SynVFutureStudentService from '../../services/Synergetic/SynVFutureStudentService';
 import {
   iVPastAndCurrentStudent,
-  SYN_STUDENT_STATUS_ID_FINALISED,
-  SYN_STUDENT_STATUS_ID_INTERVIEWED,
-  SYN_STUDENT_STATUS_ID_LEAVING, SYN_STUDENT_STATUS_ID_PLACE_OFFERED,
+  SYN_STUDENT_STATUS_ID_LEAVING, SYN_STUDENT_STATUS_ID_NEW,
   SYN_STUDENT_STATUS_ID_REPEATING,
   SYN_STUDENT_STATUS_LEAVE_OF_ABSENCE
 } from '../../types/Synergetic/Student/iVStudent';
@@ -22,12 +20,16 @@ import ExplanationPanel from '../ExplanationPanel';
 import * as _ from 'lodash';
 import StudentNumberDetailsPopupBtn from '../reports/StudentNumberForecast/components/StudentNumberDetailsPopupBtn';
 import SynCampusSelector from '../student/SynCampusSelector';
-import PageTitle from '../PageTitle';
 import PanelTitle from '../PanelTitle';
+import MggsModuleService from '../../services/Module/MggsModuleService';
+import {MGGS_MODULE_ID_ENROLLMENTS} from '../../types/modules/iModuleUser';
+import SynLuFutureStatusService from '../../services/Synergetic/Lookup/SynLuFutureStatusService';
+import iSynLuFutureStatus from '../../types/Synergetic/Lookup/iSynLuFutureStatus';
 
 type iYearLevelMap = {[key: string]: iSynLuYearLevel[]}
 type iCampusMap = {[key: string]: iSynLuCampus}
 type iStudentMap = {[key: number]: iVPastAndCurrentStudent}
+type iFutureStatusMap = {[key: string]: iSynLuFutureStatus}
 const Wrapper = styled.div`
     .border-right {
         border-right: 2px black solid;
@@ -95,11 +97,15 @@ const EnrolmentNumbersPanel = () => {
   const nextYear = MathHelper.add(currentYear, 1);
   const lastYear = MathHelper.sub(currentYear, 1);
   const [selectedCampusCodes, setSelectedCampusCodes] = useState(MGG_CAMPUS_CODES);
+  const [currentFutureStatuses, setCurrentFutureStatuses] = useState<iSynLuFutureStatus[]>([]);
+  const [futureStatuses, setFutureStatuses] = useState<iSynLuFutureStatus[]>([]);
 
   useEffect(() => {
     let isCancel = false;
     setIsLoading(true);
     Promise.all([
+      MggsModuleService.getModule(MGGS_MODULE_ID_ENROLLMENTS),
+      SynLuFutureStatusService.getAll({}),
       SynLuCampusService.getAllCampuses({
         where: JSON.stringify({Code: selectedCampusCodes}),
       }),
@@ -116,7 +122,7 @@ const EnrolmentNumbersPanel = () => {
         where: JSON.stringify({FutureCampus: selectedCampusCodes, FutureEnrolYear: [nextYear, currentYear]}),
         perPage: 9999999999,
       })
-    ]).then(([campuses, yLevels, currentAndPastStudentResult, futureStudentResult]) => {
+    ]).then(([module, futureStatuses, campuses, yLevels, currentAndPastStudentResult, futureStudentResult]) => {
       if (isCancel) { return }
       const yearLvlMap = yLevels.reduce((map, yLevel) => ({
         ...map,
@@ -126,6 +132,14 @@ const EnrolmentNumbersPanel = () => {
         ...map,
         [campus.Code]: campus,
       }), {}));
+      const currentFutureStatusCodes: string[] = module.settings?.enrolmentNumbers?.currentFutureStatuses || [];
+      const futureStatusCodes: string[] = module.settings?.enrolmentNumbers?.futureStatuses || [];
+      const futureStatusMap = futureStatuses.reduce((map: iFutureStatusMap, status) => ({
+        ...map,
+        [status.Code]: status,
+      }), {});
+      setCurrentFutureStatuses(currentFutureStatusCodes.map(code => futureStatusMap[code] || null).filter(status => status !== null))
+      setFutureStatuses(futureStatusCodes.map(code => futureStatusMap[code] || null).filter(status => status !== null))
       setYearLevelCampusMap(yLevels.reduce((map: iYearLevelMap, yLevel) => ({
         ...map,
         [yLevel.Campus]: [...(map[yLevel.Campus] || []), yLevel],
@@ -192,11 +206,11 @@ const EnrolmentNumbersPanel = () => {
     }
 
     const currentStudents = Object.values(currentStudentsMap);
-    const newStudentsThisYear = currentStudents.filter(student => moment(student.StudentEntryDate).year() === currentYear);
+    const newStudentsThisYear = currentStudents.filter(student => student.StudentStatus === SYN_STUDENT_STATUS_ID_NEW);
     const leavingStudents = currentStudents.filter(student => moment(student.StudentLeavingDate).isAfter(moment()));
     const leftStudents = currentStudents.filter(student => moment(student.StudentLeavingDate).isSameOrBefore(moment()));
-    const startDuringYearStudents = newStudentsThisYear.filter(student => moment(student.StudentEntryDate).month() === 1);
-    const startBeginningOfYear = newStudentsThisYear.filter(student => moment(student.StudentEntryDate).month() !== 1);
+    const startDuringYearStudents = newStudentsThisYear.filter(student => moment(student.StudentEntryDate).month() > 0);
+    const startBeginningOfYear = newStudentsThisYear.filter(student => moment(student.StudentEntryDate).month() === 0);
     const startBeforeCurrent = currentStudents.filter(student => moment(student.StudentEntryDate).isBefore(moment().year(currentYear).startOf('year')));
     const currentFutureStudents = Object.values(futureStudentsMap).filter(student => student.FileYear === currentYear);
 
@@ -206,19 +220,20 @@ const EnrolmentNumbersPanel = () => {
         <thead>
         <tr>
           <th rowSpan={3} className={'border-right'}></th>
-          <th colSpan={11} className={'text-center current-current'}>{currentYear}</th>
-          <th colSpan={6} className={'future text-center'}>{nextYear}</th>
+          <th colSpan={MathHelper.add(currentFutureStatuses.length, 8)} className={'text-center current-current'}>{currentYear}</th>
+          <th colSpan={MathHelper.add(futureStatuses.length, 1)} className={'future text-center'}>{nextYear}</th>
         </tr>
         <tr>
-          <th colSpan={3} className={`current-future text-center`}>Future</th>
+          <th colSpan={currentFutureStatuses.length} className={`current-future text-center`}>Future</th>
           <th colSpan={7} className={`current-current text-center`}>Current</th>
           <th className={'current-past text-center'}>Past</th>
-          <th colSpan={6} className={'future text-center'}>Future</th>
+          <th colSpan={MathHelper.add(futureStatuses.length, 1)} className={'future text-center'}>Future</th>
         </tr>
         <tr className={'count-header'}>
-          <th className={`current-future`}>Interviewed</th>
-          <th className={`current-future`}>Place offered</th>
-          <th className={`current-future border-right sm`}>Finalised</th>
+          {
+            currentFutureStatuses.map((status, index) => (<th className={`current-future ${index < MathHelper.sub(currentFutureStatuses.length, 1) ? '' : 'border-right sm'}`} key={status.Code || ''}>{status.Description || ''}</th>))
+          }
+
           <th className={`current-current`}>New<br/><small>(during year)</small></th>
           <th className={`current-current`}>New<br/><small>(start of year)</small></th>
           <th className={`current-current`}>Continued<br/><small>from {lastYear}</small></th>
@@ -227,11 +242,9 @@ const EnrolmentNumbersPanel = () => {
           <th className={`current-current`}>Leaving</th>
           <th className={`total-header current-current`}>Total</th>
           <th className={`current-past`}>LEFT</th>
-
-
-          <th className={'future'}>Interviewed</th>
-          <th className={'future'}>Place offered</th>
-          <th className={'future'}>Finalised</th>
+          {
+            futureStatuses.map(status => (<th className={`future`} key={status.Code || ''}>{status.Description || ''}</th>))
+          }
           <th className={`total-header future`}>Total</th>
         </tr>
         </thead>
@@ -247,10 +260,9 @@ const EnrolmentNumbersPanel = () => {
                       <tr key={`${campusCode}-${yearLevel.YearLevelSort}`} className={'year-level-row'}>
                         <td className={'border-right'}>{yearLevel.Description}</td>
 
-                        <td>{getClickableNumber(getStudents(currentFutureStudents, [yearLevel], [SYN_STUDENT_STATUS_ID_INTERVIEWED]))}</td>
-                        <td>{getClickableNumber(getStudents(currentFutureStudents, [yearLevel], [SYN_STUDENT_STATUS_ID_PLACE_OFFERED]))}</td>
-                        <td
-                          className={'border-right sm'}>{getClickableNumber(getStudents(currentFutureStudents, [yearLevel], [SYN_STUDENT_STATUS_ID_FINALISED]))}</td>
+                        {
+                          currentFutureStatuses.map((status, index) => (<td className={`${index < MathHelper.sub(currentFutureStatuses.length, 1) ? '' : 'border-right sm'}`} key={status.Code || ''}>{getClickableNumber(getStudents(currentFutureStudents, [yearLevel], [status.Code]))}</td>))
+                        }
 
                         <td>{getClickableNumber(getStudents(startDuringYearStudents, [yearLevel]))}</td>
                         <td>{getClickableNumber(getStudents(startBeginningOfYear, [yearLevel]))}</td>
@@ -262,10 +274,10 @@ const EnrolmentNumbersPanel = () => {
                           className={'border-right sm'}>{getClickableNumber(getStudents(currentStudents, [yearLevel]))}</td>
                         <td className={'border-right'}>{getClickableNumber(getStudents(leftStudents, [yearLevel]))}</td>
 
-                        <td>{getClickableNumber(getStudents(nextYearStudents, [yearLevel], [SYN_STUDENT_STATUS_ID_INTERVIEWED]))}</td>
-                        <td>{getClickableNumber(getStudents(nextYearStudents, [yearLevel], [SYN_STUDENT_STATUS_ID_PLACE_OFFERED]))}</td>
-                        <td>{getClickableNumber(getStudents(nextYearStudents, [yearLevel], [SYN_STUDENT_STATUS_ID_FINALISED]))}</td>
-                        <td>{getClickableNumber(getStudents(nextYearStudents, [yearLevel], [SYN_STUDENT_STATUS_ID_INTERVIEWED, SYN_STUDENT_STATUS_ID_PLACE_OFFERED, SYN_STUDENT_STATUS_ID_FINALISED]))}</td>
+                        {
+                          futureStatuses.map((status, index) => (<td key={status.Code || ''}>{getClickableNumber(getStudents(nextYearStudents, [yearLevel], [status.Code]))}</td>))
+                        }
+                        <td>{getClickableNumber(getStudents(nextYearStudents, [yearLevel], futureStatuses.map(status => status.Code)))}</td>
                       </tr>
                     )
                   })
@@ -273,11 +285,9 @@ const EnrolmentNumbersPanel = () => {
                 <tr key={`${campusCode}-total`} className={'campus-total'}>
                   <td
                     className={'border-right'}>{campusCode in campusMap ? campusMap[campusCode].Description : campusCode}</td>
-
-                  <td>{getClickableNumber(getStudents(currentFutureStudents, campusYearLevels, [SYN_STUDENT_STATUS_ID_INTERVIEWED]))}</td>
-                  <td>{getClickableNumber(getStudents(currentFutureStudents, campusYearLevels, [SYN_STUDENT_STATUS_ID_PLACE_OFFERED]))}</td>
-                  <td
-                    className={'border-right sm'}>{getClickableNumber(getStudents(currentFutureStudents, campusYearLevels, [SYN_STUDENT_STATUS_ID_FINALISED]))}</td>
+                  {
+                    currentFutureStatuses.map((status, index) => (<td className={`${index < MathHelper.sub(currentFutureStatuses.length, 1) ? '' : 'border-right sm'}`} key={status.Code || ''}>{getClickableNumber(getStudents(currentFutureStudents, campusYearLevels, [status.Code]))}</td>))
+                  }
 
                   <td>{getClickableNumber(getStudents(startDuringYearStudents, campusYearLevels))}</td>
                   <td>{getClickableNumber(getStudents(startBeginningOfYear, campusYearLevels))}</td>
@@ -289,10 +299,10 @@ const EnrolmentNumbersPanel = () => {
                     className={'border-right sm'}>{getClickableNumber(getStudents(currentStudents, campusYearLevels))}</td>
                   <td className={'border-right'}>{getClickableNumber(getStudents(leftStudents, campusYearLevels))}</td>
 
-                  <td>{getClickableNumber(getStudents(nextYearStudents, campusYearLevels, [SYN_STUDENT_STATUS_ID_INTERVIEWED]))}</td>
-                  <td>{getClickableNumber(getStudents(nextYearStudents, campusYearLevels, [SYN_STUDENT_STATUS_ID_PLACE_OFFERED]))}</td>
-                  <td>{getClickableNumber(getStudents(nextYearStudents, campusYearLevels, [SYN_STUDENT_STATUS_ID_FINALISED]))}</td>
-                  <td>{getClickableNumber(getStudents(nextYearStudents, campusYearLevels, [SYN_STUDENT_STATUS_ID_INTERVIEWED, SYN_STUDENT_STATUS_ID_PLACE_OFFERED, SYN_STUDENT_STATUS_ID_FINALISED]))}</td>
+                  {
+                    futureStatuses.map((status, index) => (<td key={status.Code || ''}>{getClickableNumber(getStudents(nextYearStudents, campusYearLevels, [status.Code]))}</td>))
+                  }
+                  <td>{getClickableNumber(getStudents(nextYearStudents, campusYearLevels, futureStatuses.map(status => status.Code)))}</td>
                 </tr>
               </>
             )
@@ -304,10 +314,9 @@ const EnrolmentNumbersPanel = () => {
           <tr className={'campus-total'}>
             <td className={'border-right'}>Total</td>
 
-            <td>{getClickableNumber(getStudents(currentFutureStudents, [], [SYN_STUDENT_STATUS_ID_INTERVIEWED]))}</td>
-            <td>{getClickableNumber(getStudents(currentFutureStudents, [], [SYN_STUDENT_STATUS_ID_PLACE_OFFERED]))}</td>
-            <td
-              className={'border-right sm'}>{getClickableNumber(getStudents(currentFutureStudents, [], [SYN_STUDENT_STATUS_ID_FINALISED]))}</td>
+            {
+              currentFutureStatuses.map((status, index) => (<td className={`${index < MathHelper.sub(currentFutureStatuses.length, 1) ? '' : 'border-right sm'}`} key={status.Code || ''}>{getClickableNumber(getStudents(currentFutureStudents, [], [status.Code]))}</td>))
+            }
 
             <td>{getClickableNumber(getStudents(startDuringYearStudents))}</td>
             <td>{getClickableNumber(getStudents(startBeginningOfYear))}</td>
@@ -318,10 +327,10 @@ const EnrolmentNumbersPanel = () => {
             <td className={'border-right sm'}>{getClickableNumber(getStudents(currentStudents))}</td>
             <td className={'border-right'}>{getClickableNumber(getStudents(leftStudents))}</td>
 
-            <td>{getClickableNumber(getStudents(nextYearStudents, [], [SYN_STUDENT_STATUS_ID_INTERVIEWED]))}</td>
-            <td>{getClickableNumber(getStudents(nextYearStudents, [], [SYN_STUDENT_STATUS_ID_PLACE_OFFERED]))}</td>
-            <td>{getClickableNumber(getStudents(nextYearStudents, [], [SYN_STUDENT_STATUS_ID_FINALISED]))}</td>
-            <td>{getClickableNumber(getStudents(nextYearStudents, [], [SYN_STUDENT_STATUS_ID_INTERVIEWED, SYN_STUDENT_STATUS_ID_PLACE_OFFERED, SYN_STUDENT_STATUS_ID_FINALISED]))}</td>
+            {
+              futureStatuses.map((status, index) => (<td key={status.Code || ''}>{getClickableNumber(getStudents(nextYearStudents, [], [status.Code]))}</td>))
+            }
+            <td>{getClickableNumber(getStudents(nextYearStudents, [], futureStatuses.map(status => status.Code)))}</td>
           </tr>
           </tfoot>
         )}
@@ -338,8 +347,8 @@ const EnrolmentNumbersPanel = () => {
           <>
             Current status for <u><b>{currentYear}</b></u> and <u><b>{nextYear}</b></u>:
             <ul>
-              <li><b>NEW (During Year)</b>: All students' entry date is after Jan {currentYear}</li>
-              <li><b>NEW (Start of Year)</b>: All students' entry date is in Jan {currentYear}</li>
+              <li><b>NEW (During Year)</b>: All current students' status {SYN_STUDENT_STATUS_ID_NEW}(NEW) after 1st of Jan {currentYear}</li>
+              <li><b>NEW (Start of Year)</b>: All current students' status {SYN_STUDENT_STATUS_ID_NEW}(NEW) on 1st of Jan {currentYear}</li>
               <li><b>CONTINUED</b>: All students' entry date is before Jan {currentYear}</li>
               <li><b>REPEATING</b>: All current students' status
                 is <b>{SYN_STUDENT_STATUS_ID_REPEATING}</b> (Repeating).
