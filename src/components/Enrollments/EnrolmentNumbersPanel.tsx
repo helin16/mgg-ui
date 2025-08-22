@@ -219,7 +219,7 @@ const EnrolmentNumbersPanel = () => {
       <Table hover size={'sm'}>
         <thead>
         <tr>
-          <th rowSpan={3} className={'border-right'}></th>
+          <th rowSpan={2} className={'border-right'}></th>
           <th colSpan={MathHelper.add(currentFutureStatuses.length, 8)} className={'text-center current-current'}>{currentYear}</th>
           <th colSpan={MathHelper.add(futureStatuses.length, 1)} className={'future text-center'}>{nextYear}</th>
         </tr>
@@ -230,6 +230,7 @@ const EnrolmentNumbersPanel = () => {
           <th colSpan={MathHelper.add(futureStatuses.length, 1)} className={'future text-center'}>Future</th>
         </tr>
         <tr className={'count-header'}>
+          <th className={'border-right'}></th>
           {
             currentFutureStatuses.map((status, index) => (<th className={`current-future ${index < MathHelper.sub(currentFutureStatuses.length, 1) ? '' : 'border-right sm'}`} key={status.Code || ''}>{status.Description || ''}</th>))
           }
