@@ -1,7 +1,7 @@
 import {useTable, useBlockLayout, useResizeColumns} from 'react-table';
 import { useSticky } from 'react-table-sticky';
 import styled from 'styled-components';
-import {useEffect, useMemo, useState} from 'react';
+import {ReactNode, useEffect, useMemo, useState} from 'react';
 import {Spinner} from 'react-bootstrap';
 import {FlexContainer} from '../../styles';
 
@@ -179,7 +179,7 @@ const ReactTableWithFixedColumns = ({
           <tr {...footerGroup.getHeaderGroupProps()} className="tr">
             {footerGroup.headers.map((column) => (
               <td {...column.getHeaderProps()} className="td">
-                {column.render('Footer')}
+                {column.render('Footer') as ReactNode}
               </td>
             ))}
           </tr>
@@ -208,7 +208,7 @@ const ReactTableWithFixedColumns = ({
             <tr {...headerGroup.getHeaderGroupProps()} className="tr">
               {headerGroup.headers.map((column) => (
                 <th {...column.getHeaderProps()} className="th">
-                  {column.render('Header')}
+                  {column.render('Header') as ReactNode}
                   <div
                     // @ts-ignore
                     {...column.getResizerProps()}
@@ -233,7 +233,7 @@ const ReactTableWithFixedColumns = ({
                   }
                   return (
                     <td {...cell.getCellProps()} className={`td`}>
-                      {cell.render('Cell')}
+                      {cell.render('Cell') as ReactNode}
                     </td>
                   )
                 })}

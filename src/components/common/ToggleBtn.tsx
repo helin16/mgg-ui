@@ -1,4 +1,4 @@
-import BootstrapSwitchButton from 'bootstrap-switch-button-react'
+import Switch from 'react-switch'
 import styled, {CSSProperties} from 'styled-components';
 
 type iToggle = {
@@ -69,7 +69,7 @@ const ToggleBtn = ({
   return (
     <Wrapper className={`${className || ''} ${isDisabled === true ? 'disabled' : ''}`} style={style}>
       {/*// @ts-ignore*/}
-      <BootstrapSwitchButton
+      <Switch
         disabled={isDisabled}
         checked={checked}
         style={btnStyle}

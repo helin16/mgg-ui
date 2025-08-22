@@ -1,6 +1,6 @@
 import iCampusDisplaySlide from "../../../types/CampusDisplay/iCampusDisplaySlide";
 import { FlexContainer } from "../../../styles";
-import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import CampusDisplaySlideEditPopupBtn from "./CampusDisplaySlideCreatePopupBtn";
 import * as Icons from "react-bootstrap-icons";
 import React from "react";

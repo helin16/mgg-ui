@@ -159,7 +159,9 @@ const MedicalPosterGenBtn = ({
       }
       fileName={fileName}
     >
-      {props => {
+      {
+        // @ts-ignore
+        (props: any) => {
         return renderBtn(() => {
           if (props.url) {
             window.open(props.url, fileName);

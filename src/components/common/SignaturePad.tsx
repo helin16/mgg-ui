@@ -68,6 +68,7 @@ const SignaturePad = ({ onSign, canvasProps, signature, onClear, isDisabled, set
     }
     return (
       <>
+        {/*// @ts-ignore */}
         <SignatureCanvas
           penColor="black"
           onEnd={() => handleSave()}
