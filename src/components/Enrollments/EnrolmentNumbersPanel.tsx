@@ -37,6 +37,9 @@ const Wrapper = styled.div`
             border-right: 1px #aaa solid;
         }
     }
+    td {
+        border-right: 1px #efefef solid;
+    }
     tr {
         >:first-child {
             width: 200px;
