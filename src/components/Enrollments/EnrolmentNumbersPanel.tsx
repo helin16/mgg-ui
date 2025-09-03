@@ -209,7 +209,7 @@ const EnrolmentNumbersPanel = () => {
     }
 
     const currentStudents = Object.values(currentStudentsMap);
-    const currentNotLeftStudents = currentStudents.filter(student => `${student.StudentLeavingDate || ''}`.trim() === '' || moment(student.StudentLeavingDate).isSameOrBefore(moment()));
+    const currentNotLeftStudents = currentStudents.filter(student => `${student.StudentLeavingDate || ''}`.trim() === '' || moment(student.StudentLeavingDate).isAfter(moment()));
     const newStudentsThisYear = currentNotLeftStudents.filter(student => student.StudentStatus === SYN_STUDENT_STATUS_ID_NEW);
     const normalStudentsThisYear = currentNotLeftStudents.filter(student => student.StudentStatus === SYN_STUDENT_STATUS_ID_NORMAL);
     const leftStudents = currentStudents.filter(student => moment(student.StudentLeavingDate).isSameOrBefore(moment()));
