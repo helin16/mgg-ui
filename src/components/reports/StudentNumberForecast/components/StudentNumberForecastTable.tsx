@@ -11,6 +11,12 @@ import UtilsService from "../../../../services/UtilsService";
 import MathHelper from "../../../../helper/MathHelper";
 import {DashSquare, PlusSquare} from 'react-bootstrap-icons';
 import {FlexContainer} from '../../../../styles';
+import {
+  CAMPUS_CODE_ELC,
+  CAMPUS_CODE_JUNIOR,
+  CAMPUS_CODE_SENIOR,
+  MGG_CAMPUS_CODES
+} from '../../../../types/Synergetic/Lookup/iSynLuCampus';
 
 type iStudentMap = { [key: string]: iVStudent[] };
 type iMap = { [key: string]: iFunnelLead[] };
@@ -87,7 +93,7 @@ const StudentNumberForecastTable = ({
   futureNextYearMap,
   showingFinanceFigures,
   feeNameMap,
-  selectedCampusCodes = ["S", "J", "E"]
+  selectedCampusCodes = MGG_CAMPUS_CODES
 }: iStudentNumberForecastTable) => {
   const [yLevelArr, setYLevelArr] = useState<ISynLuYearLevel[]>([]);
   const [expandedCurrent, setExpandedCurrent] = useState<boolean>(false);
@@ -98,17 +104,17 @@ const StudentNumberForecastTable = ({
     const arr = Object.values(yearLevelMap).sort((yl1, yl2) =>
       yl1.YearLevelSort > yl2.YearLevelSort ? 1 : -1
     );
-    const campusCodesForE = _.intersection(selectedCampusCodes, ["E"]);
-    const campusCodesForJS = _.intersection(selectedCampusCodes, ["J", "S"]);
+    const campusCodesForE = _.intersection(selectedCampusCodes, [CAMPUS_CODE_ELC]);
+    const campusCodesForJS = _.intersection(selectedCampusCodes, [CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR]);
     setYLevelArr([
       // @ts-ignore
-      ...arr.filter(yl => yl.Campus === "E"),
+      ...arr.filter(yl => yl.Campus === CAMPUS_CODE_ELC),
       ...(campusCodesForE.length > 0
         ? // @ts-ignore
           [{ Code: "subTotal", campuses: campusCodesForE }]
         : []),
       // @ts-ignore
-      ...arr.filter(yl => ["J", "S"].indexOf(yl.Campus) >= 0),
+      ...arr.filter(yl => [CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR].indexOf(yl.Campus) >= 0),
       // @ts-ignore
       ...(campusCodesForJS.length > 0
         ? [{ Code: "subTotal", campuses: campusCodesForJS }]

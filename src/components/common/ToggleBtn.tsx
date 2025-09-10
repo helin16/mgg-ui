@@ -14,6 +14,10 @@ type iToggle = {
 }
 const Wrapper = styled.div`
   display: inline-block;
+    
+  input[type="checkbox"] {
+      display: none;
+  }
   
   &.disabled {
     .btn {
