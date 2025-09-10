@@ -16,7 +16,7 @@ const Wrapper = styled.div`
   display: inline-block;
     
   input[type="checkbox"] {
-      display: none;
+      display: none !important;
   }
   
   &.disabled {
