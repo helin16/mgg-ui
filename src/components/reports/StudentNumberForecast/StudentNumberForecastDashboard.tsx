@@ -52,7 +52,12 @@ import {
   STUDENT_CONTACT_STUDENT_TYPE_FUTURE
 } from "../../../types/Synergetic/Student/iSynVStudentContactsCurrentPastFutureCombined";
 import { STUDENT_CONTACT_TYPE_SC1 } from "../../../types/Synergetic/Student/iStudentContact";
-import {CAMPUS_CODE_ELC, CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR} from '../../../types/Synergetic/Lookup/iSynLuCampus';
+import {
+  CAMPUS_CODE_ELC,
+  CAMPUS_CODE_JUNIOR,
+  CAMPUS_CODE_SENIOR,
+  MGG_CAMPUS_CODES
+} from '../../../types/Synergetic/Lookup/iSynLuCampus';
 
 const Wrapper = styled.div`
   .title-row {
@@ -99,20 +104,9 @@ const Wrapper = styled.div`
   }
 `;
 
-// const leadStatuses = [
-//   FUNNEL_STAGE_NAME_EXPORTED,
-//   FUNNEL_STAGE_NAME_OFFER_ACCEPTED,
-//   FUNNEL_STAGE_NAME_STUDENT_LEARNING_PROFILE,
-//   FUNNEL_STAGE_NAME_INTERVIEW,
-//   FUNNEL_STAGE_NAME_OFFER_SENT,
-//   FUNNEL_STAGE_NAME_ENQUIRY,
-//   FUNNEL_STAGE_NAME_SCHOOL_VISIT,
-//   FUNNEL_STAGE_NAME_APPLICATION_RECEIVED
-// ];
-
 type iCommunityMap = { [key: number]: iVStudent };
 type iStudentMap = { [key: string]: iVStudent[] };
-type iMap = { [key: string]: iFunnelLead[] };
+type iMap = { [key: string]: any[] };
 type iTuitionFeeMap = { [key: string]: iSynVDebtorFee[] };
 type iStudentConcessionMap = { [key: string]: iSynDebtorStudentConcession[] };
 type iSiblingDiscountFee = iSynVDebtorFee & { discountAmount?: number };
@@ -837,12 +831,13 @@ const StudentNumberForecastDashboard = ({
 
   useEffect(() => {
     if (selectedCampusCodes.length <= 0) {
-      setSelectedCampusCodes(["E", "J", "S"]);
+      setSelectedCampusCodes(MGG_CAMPUS_CODES);
     }
   }, [selectedCampusCodes]);
 
   useEffect(() => {
     setFutureNextYearMap(
+      // @ts-ignore
       yearLevelCodes.reduce((map, code, currentIndex) => {
         const nextYearConfirmed =
           code in confirmedFutureStudentMap
@@ -888,7 +883,6 @@ const StudentNumberForecastDashboard = ({
                 communityMap
               )
             )),
-
         ];
         return {
           ...map,

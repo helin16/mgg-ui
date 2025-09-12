@@ -14,13 +14,14 @@ type iSynCampusSelector = {
   className?: string;
   filterEmptyCodes?: boolean;
   isDisabled?: boolean;
+  limitedCodes?: string[];
 };
 
 export const translateCampusToOption = (campus: ISynLuCampus) => {
   return {value: campus.Code, data: campus, label: campus.Description}
 }
 
-const SynCampusSelector = ({values, onSelect, allowClear, className, isDisabled = false, filterEmptyCodes = false,  showIndicator = true, isMulti = false}: iSynCampusSelector) => {
+const SynCampusSelector = ({values, onSelect, allowClear, className, isDisabled = false, filterEmptyCodes = false,  showIndicator = true, isMulti = false, limitedCodes = []}: iSynCampusSelector) => {
   const [optionMap, setOptionMap] = useState<{ [key: string]: iAutoCompleteSingle }>({});
   const [isLoading, setIsLoading] = useState(false);
 
@@ -31,6 +32,7 @@ const SynCampusSelector = ({values, onSelect, allowClear, className, isDisabled 
     SynLuCampusService.getAllCampuses({
         where: JSON.stringify({
           ActiveFlag: true,
+          ...(limitedCodes?.length <= 0 ? {} : { Code: limitedCodes}),
         })
       })
       .then(resp => {
@@ -56,7 +58,7 @@ const SynCampusSelector = ({values, onSelect, allowClear, className, isDisabled 
     return () => {
       isCancelled = true;
     }
-  }, [optionMap, filterEmptyCodes]);
+  }, [optionMap, filterEmptyCodes, limitedCodes]);
 
   const getSelectedValues = () => {
     if (!values) {

@@ -538,6 +538,16 @@ const StudentNumberDetailsPopupBtn = ({
     }
 
     // @ts-ignore
+    const r1YL = Number(r1.StudentYearLevel || 0);
+    // @ts-ignore
+    const r2YL = Number(r2.StudentYearLevel || 0);
+    if (r1YL > r2YL) {
+      return 1;
+    } else if (r1YL < r2YL) {
+      return -1;
+    }
+
+    // @ts-ignore
     const r1Form = `${r1.StudentForm || ""}`;
     // @ts-ignore
     const r2Form = `${r2.StudentForm || ""}`;
@@ -604,59 +614,9 @@ const StudentNumberDetailsPopupBtn = ({
                 .filter(
                   record =>
                     // @ts-ignore
-                    `${record.StudentID || ""}`.trim() !== "" &&
-                    // @ts-ignore
-                    `${record.StudentStatus || ""}`.trim() !==
-                      SYN_STUDENT_STATUS_ID_FINALISED
+                    `${record.StudentID || ""}`.trim() !== ""
                 )
                 .sort(sortStudents),
-              ...records
-                .filter(
-                  record =>
-                    // @ts-ignore
-                    `${record.StudentID || ""}`.trim() !== "" &&
-                    // @ts-ignore
-                    `${record.StudentStatus || ""}`.trim() ===
-                      SYN_STUDENT_STATUS_ID_FINALISED
-                )
-                .sort(sortStudents),
-              ...records
-                // @ts-ignore
-                .filter(record => `${record.StudentID || ""}`.trim() === "")
-                .sort((r1, r2) => {
-                  // @ts-ignore
-                  const r1StartingYL = `${r1.student_starting_year_level ||
-                    ""}`;
-                  // @ts-ignore
-                  const r2StartingYL = `${r2.student_starting_year_level ||
-                    ""}`;
-                  if (r1StartingYL > r2StartingYL) {
-                    return 1;
-                  } else if (r1StartingYL < r2StartingYL) {
-                    return -1;
-                  }
-
-                  // @ts-ignore
-                  const r1Name = `${r1.student_first_name || ""}`;
-                  // @ts-ignore
-                  const r2Name = `${r2.student_first_name || ""}`;
-                  if (r1Name > r2Name) {
-                    return 1;
-                  } else if (r1Name < r2Name) {
-                    return -1;
-                  }
-                  // @ts-ignore
-                  const r1LName = `${r1.student_last_name || ""}`;
-                  // @ts-ignore
-                  const r2LName = `${r2.student_last_name || ""}`;
-                  if (r1LName > r2LName) {
-                    return 1;
-                  } else if (r1LName < r2LName) {
-                    return -1;
-                  }
-
-                  return 0;
-                })
             ]}
           />
         </TableWrapper>
