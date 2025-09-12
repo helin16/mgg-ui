@@ -44,6 +44,11 @@ const getDefaultStudentRow = (record: iVStudent | iFunnelLead) => {
         ? ""
         : moment(record.StudentLeavingDate).format("YYYY-MM-DD")
       : "",
+    "StudentReturningDate" in record
+      ? `${record.StudentReturningDate || ""}`.trim() === ""
+        ? ""
+        : moment(record.StudentReturningDate).format("YYYY-MM-DD")
+      : "",
     // @ts-ignore
     (record.isFuture === true || `${record.StudentStatus || ""}`.trim() === SYN_STUDENT_STATUS_ID_FINALISED) ? '' : `${record.StudentYearLevelDescription || ""}`,
     "StudentForm" in record ? record.StudentForm : "",
@@ -146,6 +151,7 @@ const downloadHeadCounts = (
       "Last Name",
       "Status",
       "Leaving Date",
+      "Returning Date",
       "Current Year Level",
       "Form",
       "Full Fee?",

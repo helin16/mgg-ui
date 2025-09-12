@@ -26,6 +26,7 @@ import {MGGS_MODULE_ID_ENROLLMENTS} from '../../types/modules/iModuleUser';
 import SynLuFutureStatusService from '../../services/Synergetic/Lookup/SynLuFutureStatusService';
 import iSynLuFutureStatus from '../../types/Synergetic/Lookup/iSynLuFutureStatus';
 import {FlexContainer} from '../../styles';
+import {FUTURE_STUDENT_STATUS_FINALISED} from '../../types/Synergetic/iSynVFutureStudent';
 
 type iYearLevelMap = {[key: string]: iSynLuYearLevel[]}
 type iCampusMap = {[key: string]: iSynLuCampus}
@@ -214,15 +215,20 @@ const EnrolmentNumbersPanel = () => {
     const selectedYearLevels = Object.keys(yearLevelCampusMap).filter(campusCode => selectedCampusCodes.indexOf(campusCode) >= 0).reduce((arr: iSynLuYearLevel[], campusCode) => [...arr, ...(yearLevelCampusMap[campusCode] || [])], []);
     const currentStudents = Object.values(currentStudentsMap);
     const currentNotLeftStudents = currentStudents.filter(student => `${student.StudentLeavingDate || ''}`.trim() === '' || moment(student.StudentLeavingDate).isAfter(moment()));
+    const currentNotLeftStudents_started = currentNotLeftStudents.filter(student => moment(student.StudentEntryDate).isSameOrBefore(moment()));
     const currentNotLeavingNextYearStudents = currentStudents.filter(student => `${student.StudentLeavingDate || ''}`.trim() === '' || moment(student.StudentLeavingDate).isAfter(moment().add(1, 'year').startOf('year')));
     const newStudentsThisYear = currentNotLeftStudents.filter(student => student.StudentStatus === SYN_STUDENT_STATUS_ID_NEW);
     const normalStudentsThisYear = currentNotLeftStudents.filter(student => student.StudentStatus === SYN_STUDENT_STATUS_ID_NORMAL);
     const leftStudents = currentStudents.filter(student => moment(student.StudentLeavingDate).isSameOrBefore(moment()));
+
     const startDuringYearStudents = newStudentsThisYear.filter(student => moment(student.StudentEntryDate).month() > 0);
+    const startDuringYearStudents_started = startDuringYearStudents.filter(student => moment(student.StudentEntryDate).isSameOrBefore(moment()));
+    const startDuringYearStudents_notStarted = startDuringYearStudents.filter(student => moment(student.StudentEntryDate).isAfter(moment()));
     const startBeginningOfYear = newStudentsThisYear.filter(student => moment(student.StudentEntryDate).month() === 0);
     const currentFutureStudents = Object.values(futureStudentsMap).filter(student => student.FileYear === currentYear);
 
     const nextYearStudents =  Object.values(futureStudentsMap).filter(student => student.FileYear === nextYear);
+    const nextYearReturningStudents = [...currentStudents, ...nextYearStudents].filter(student => moment(student.StudentReturningDate).year() === nextYear);
     const studentsFromLowerYearLevelMap: {[key: string]: iVPastAndCurrentStudent[]} = yearLevels.reduce((map, yrLvl) => {
       const currentYearLvlIndex = _.findIndex(yearLevels, yearLvl => yearLvl.Code === yrLvl.Code);
       const previousIndex = currentYearLvlIndex - 1;
@@ -233,19 +239,20 @@ const EnrolmentNumbersPanel = () => {
         [yrLvl.Code]: studentsFromLowerYearLevel
       }
     }, {});
+
     return (
       <Table hover size={'sm'}>
         <thead>
         <tr>
           <th rowSpan={2} className={'border-right'}></th>
           <th colSpan={MathHelper.add(currentFutureStatuses.length, 8)} className={'text-center current-current'}>{currentYear}</th>
-          <th colSpan={MathHelper.add(futureStatuses.length, 2)} className={'future text-center'}>{nextYear}</th>
+          <th colSpan={MathHelper.add(futureStatuses.length, 3)} className={'future text-center'}>{nextYear}</th>
         </tr>
         <tr>
           <th colSpan={currentFutureStatuses.length} className={`current-future text-center`}>Future</th>
           <th colSpan={7} className={`current-current text-center`}>Current</th>
           <th className={'current-past text-center'}>Past</th>
-          <th colSpan={MathHelper.add(futureStatuses.length, 2)} className={'future text-center'}>Future</th>
+          <th colSpan={MathHelper.add(futureStatuses.length, 3)} className={'future text-center'}>Future</th>
         </tr>
         <tr className={'count-header'}>
           <th className={'border-right'}></th>
@@ -266,6 +273,7 @@ const EnrolmentNumbersPanel = () => {
 
           {/* future */}
           <th className={`future`}>Continue <br/><small>From {currentYear}</small></th>
+          <th className={`future`}>Returning <br/><small>in {nextYear}</small></th>
           {
             futureStatuses.map(status => (
               <th className={`future`} key={`future-${status.Code || 'no-status'}`}>{status.Description || ''}</th>))
@@ -288,23 +296,37 @@ const EnrolmentNumbersPanel = () => {
                           <td className={'border-right'}>{yearLevel.Description}</td>
 
                           {
-                            currentFutureStatuses.map((status, index) => (<td
-                              className={`${index < MathHelper.sub(currentFutureStatuses.length, 1) ? '' : 'border-right sm'}`}
-                              key={status.Code || ''}>{getClickableNumber(getStudents(currentFutureStudents, [yearLevel], [status.Code]))}</td>))
+                            currentFutureStatuses.map((status, index) => {
+                              return (
+                                <td
+                                  className={`${index < MathHelper.sub(currentFutureStatuses.length, 1) ? '' : 'border-right sm'}`}
+                                  key={status.Code || ''}>
+                                  {
+                                    getClickableNumber(
+                                      [
+                                        ...getStudents(currentFutureStudents,[yearLevel],[status.Code]),
+                                        ...(status.Code === FUTURE_STUDENT_STATUS_FINALISED ? getStudents(startDuringYearStudents_notStarted, [yearLevel]) : [])
+                                      ]
+                                    )
+                                  }
+                                </td>
+                              )
+                            })
                           }
 
-                          <td>{getClickableNumber(getStudents(startDuringYearStudents, [yearLevel]))}</td>
+                          <td>{getClickableNumber(getStudents(startDuringYearStudents_started, [yearLevel]))}</td>
                           <td>{getClickableNumber(getStudents(startBeginningOfYear, [yearLevel]))}</td>
                           <td>{getClickableNumber(getStudents(normalStudentsThisYear, [yearLevel]))}</td>
                           <td>{getClickableNumber(getStudents(currentNotLeftStudents, [yearLevel], [SYN_STUDENT_STATUS_ID_REPEATING]))}</td>
                           <td>{getClickableNumber(getStudents(currentNotLeftStudents, [yearLevel], [SYN_STUDENT_STATUS_LEAVE_OF_ABSENCE]))}</td>
                           <td>{getClickableNumber(getStudents(currentNotLeftStudents, [yearLevel], [SYN_STUDENT_STATUS_ID_LEAVING]))}</td>
                           <td
-                            className={'border-right sm'}>{getClickableNumber(getStudents(currentNotLeftStudents, [yearLevel]))}</td>
+                            className={'border-right sm'}>{getClickableNumber(getStudents(currentNotLeftStudents_started, [yearLevel]))}</td>
                           <td className={'border-right'}>{getClickableNumber(getStudents(leftStudents, [yearLevel]))}</td>
 
                           {/* future */}
                           <td>{yearLevel.Code in studentsFromLowerYearLevelMap ? getClickableNumber(studentsFromLowerYearLevelMap[yearLevel.Code]) : ''}</td>
+                          <td>{getClickableNumber(getStudents(nextYearReturningStudents, [yearLevel]))}</td>
                           {/*<td>{previousYearLevel?.Code}</td>*/}
                           {
                             futureStatuses.map((status, index) => (<td
@@ -312,7 +334,8 @@ const EnrolmentNumbersPanel = () => {
                           }
                           <td>{getClickableNumber([
                             ...studentsFromLowerYearLevelMap[yearLevel.Code],
-                            ...getStudents([...nextYearStudents], [yearLevel], futureStatuses.map(status => status.Code))
+                            ...getStudents([...nextYearStudents], [yearLevel], futureStatuses.map(status => status.Code)),
+                            ...getStudents(nextYearReturningStudents, [yearLevel]),
                           ])}</td>
                         </tr>
                       )
@@ -322,19 +345,29 @@ const EnrolmentNumbersPanel = () => {
                     <td
                       className={'border-right'}>{campusCode in campusMap ? campusMap[campusCode].Description : campusCode}</td>
                     {
-                      currentFutureStatuses.map((status, index) => (<td className={`${index < MathHelper.sub(currentFutureStatuses.length, 1) ? '' : 'border-right sm'}`} key={status.Code || ''}>{getClickableNumber(getStudents(currentFutureStudents, campusYearLevels, [status.Code]))}</td>))
+                      currentFutureStatuses.map((status, index) => {
+                        return (
+                          <td className={`${index < MathHelper.sub(currentFutureStatuses.length, 1) ? '' : 'border-right sm'}`} key={status.Code || ''}>
+                            {getClickableNumber([
+                              ...getStudents(currentFutureStudents, campusYearLevels, [status.Code]),
+                              ...(status.Code === FUTURE_STUDENT_STATUS_FINALISED ? getStudents(startDuringYearStudents_notStarted, campusYearLevels) : [])
+                            ])}
+                          </td>
+                        );
+                      })
                     }
 
-                    <td>{getClickableNumber(getStudents(startDuringYearStudents, campusYearLevels))}</td>
+                    <td>{getClickableNumber(getStudents(startDuringYearStudents_started, campusYearLevels))}</td>
                     <td>{getClickableNumber(getStudents(startBeginningOfYear, campusYearLevels))}</td>
                     <td>{getClickableNumber(getStudents(normalStudentsThisYear, campusYearLevels))}</td>
                     <td>{getClickableNumber(getStudents(currentNotLeftStudents, campusYearLevels, [SYN_STUDENT_STATUS_ID_REPEATING]))}</td>
                     <td>{getClickableNumber(getStudents(currentNotLeftStudents, campusYearLevels, [SYN_STUDENT_STATUS_LEAVE_OF_ABSENCE]))}</td>
                     <td>{getClickableNumber(getStudents(currentNotLeftStudents, campusYearLevels, [SYN_STUDENT_STATUS_ID_LEAVING]))}</td>
                     <td
-                      className={'border-right sm'}>{getClickableNumber(getStudents(currentNotLeftStudents, campusYearLevels))}</td>
+                      className={'border-right sm'}>{getClickableNumber(getStudents(currentNotLeftStudents_started, campusYearLevels))}</td>
                     <td className={'border-right'}>{getClickableNumber(getStudents(leftStudents, campusYearLevels))}</td>
 
+                    {/* future */}
                     <td>
                       {
                         getClickableNumber(
@@ -343,6 +376,11 @@ const EnrolmentNumbersPanel = () => {
                             []
                           )
                         )
+                      }
+                    </td>
+                    <td>
+                      {
+                        getClickableNumber(getStudents(nextYearReturningStudents, campusYearLevels))
                       }
                     </td>
                     {
@@ -355,7 +393,8 @@ const EnrolmentNumbersPanel = () => {
                             (arr: iVPastAndCurrentStudent[], yrLvl) => ([...arr, ...(yrLvl.Code in studentsFromLowerYearLevelMap ? studentsFromLowerYearLevelMap[yrLvl.Code] : [])]),
                             []
                           ),
-                          ...getStudents(nextYearStudents, campusYearLevels, futureStatuses.map(status => status.Code))
+                          ...getStudents(nextYearStudents, campusYearLevels, futureStatuses.map(status => status.Code)),
+                          ...getStudents(nextYearReturningStudents, campusYearLevels),
                         ])
                       }
                     </td>
@@ -371,16 +410,27 @@ const EnrolmentNumbersPanel = () => {
             <td className={'border-right'}>Total</td>
 
             {
-              currentFutureStatuses.map((status, index) => (<td className={`${index < MathHelper.sub(currentFutureStatuses.length, 1) ? '' : 'border-right sm'}`} key={status.Code || ''}>{getClickableNumber(getStudents(currentFutureStudents.filter(student => selectedCampusCodes.indexOf(student.StudentCampus) >= 0), [], [status.Code]))}</td>))
+              currentFutureStatuses.map((status, index) => {
+                return (
+                  <td className={`${index < MathHelper.sub(currentFutureStatuses.length, 1) ? '' : 'border-right sm'}`} key={status.Code || ''}>
+                    {
+                      getClickableNumber([
+                        ...getStudents(currentFutureStudents, selectedYearLevels, [status.Code]),
+                        ...(status.Code === FUTURE_STUDENT_STATUS_FINALISED ? getStudents(startDuringYearStudents_notStarted, selectedYearLevels) : [])
+                      ])
+                    }
+                  </td>
+                )
+              })
             }
 
-            <td>{getClickableNumber(getStudents(startDuringYearStudents.filter(student => selectedCampusCodes.indexOf(student.StudentCampus) >= 0)))}</td>
-            <td>{getClickableNumber(getStudents(startBeginningOfYear.filter(student => selectedCampusCodes.indexOf(student.StudentCampus) >= 0)))}</td>
-            <td>{getClickableNumber(getStudents(normalStudentsThisYear.filter(student => selectedCampusCodes.indexOf(student.StudentCampus) >= 0)))}</td>
-            <td>{getClickableNumber(getStudents(currentNotLeftStudents.filter(student => selectedCampusCodes.indexOf(student.StudentCampus) >= 0), [], [SYN_STUDENT_STATUS_ID_REPEATING]))}</td>
-            <td>{getClickableNumber(getStudents(currentNotLeftStudents.filter(student => selectedCampusCodes.indexOf(student.StudentCampus) >= 0), [], [SYN_STUDENT_STATUS_LEAVE_OF_ABSENCE]))}</td>
-            <td>{getClickableNumber(getStudents(currentNotLeftStudents.filter(student => selectedCampusCodes.indexOf(student.StudentCampus) >= 0), [], [SYN_STUDENT_STATUS_ID_LEAVING]))}</td>
-            <td className={'border-right sm'}>{getClickableNumber(getStudents(currentNotLeftStudents.filter(student => selectedCampusCodes.indexOf(student.StudentCampus) >= 0)))}</td>
+            <td>{getClickableNumber(getStudents(startDuringYearStudents_started, selectedYearLevels))}</td>
+            <td>{getClickableNumber(getStudents(startBeginningOfYear, selectedYearLevels))}</td>
+            <td>{getClickableNumber(getStudents(normalStudentsThisYear, selectedYearLevels))}</td>
+            <td>{getClickableNumber(getStudents(currentNotLeftStudents, selectedYearLevels, [SYN_STUDENT_STATUS_ID_REPEATING]))}</td>
+            <td>{getClickableNumber(getStudents(currentNotLeftStudents, selectedYearLevels, [SYN_STUDENT_STATUS_LEAVE_OF_ABSENCE]))}</td>
+            <td>{getClickableNumber(getStudents(currentNotLeftStudents, selectedYearLevels, [SYN_STUDENT_STATUS_ID_LEAVING]))}</td>
+            <td className={'border-right sm'}>{getClickableNumber(getStudents(currentNotLeftStudents_started.filter(student => selectedCampusCodes.indexOf(student.StudentCampus) >= 0)))}</td>
             <td className={'border-right'}>{getClickableNumber(getStudents(leftStudents.filter(student => selectedCampusCodes.indexOf(student.StudentCampus) >= 0)))}</td>
 
             {/* future */}
@@ -389,14 +439,20 @@ const EnrolmentNumbersPanel = () => {
                 getClickableNumber(selectedYearLevels.reduce((arr: iVPastAndCurrentStudent[], selectedYearLevel) => [...arr, ...(studentsFromLowerYearLevelMap[selectedYearLevel.Code] || [])], []))
               }
             </td>
+            <td>
+              {
+                getClickableNumber(getStudents(nextYearReturningStudents, selectedYearLevels))
+              }
+            </td>
             {
-              futureStatuses.map((status, index) => (<td key={status.Code || ''}>{getClickableNumber(getStudents(nextYearStudents.filter(student => selectedCampusCodes.indexOf(student.StudentCampus) >= 0), [], [status.Code]))}</td>))
+              futureStatuses.map((status, index) => (<td key={status.Code || ''}>{getClickableNumber(getStudents(nextYearStudents, selectedYearLevels, [status.Code]))}</td>))
             }
             <td>
               {
                 getClickableNumber([
                   ...selectedYearLevels.reduce((arr: iVPastAndCurrentStudent[], selectedYearLevel) => [...arr, ...(studentsFromLowerYearLevelMap[selectedYearLevel.Code] || [])], []),
-                  ...getStudents(nextYearStudents.filter(student => selectedCampusCodes.indexOf(student.StudentCampus) >= 0), [], futureStatuses.map(status => status.Code)),
+                  ...getStudents(nextYearStudents, selectedYearLevels, futureStatuses.map(status => status.Code)),
+                  ...getStudents(nextYearReturningStudents, selectedYearLevels),
                 ])
               }
             </td>
@@ -415,15 +471,29 @@ const EnrolmentNumbersPanel = () => {
         text={
           <FlexContainer>
             <div>
+              Future students for <u><b>{currentYear}</b></u>:
+              <ul>
+                {
+                  currentFutureStatuses.map((status) => (
+                    <li key={status.Code}><b>{status.Description}</b>: All future student has EnrolYear
+                      in {currentYear} and with status <u>{status.Description}</u>{status.Code === FUTURE_STUDENT_STATUS_FINALISED ? <> <br />and any current students in <b>NEW (During Year)</b> with <b>EntryDate in the future</b></> : null}.</li>))
+                }
+              </ul>
+            </div>
+            <div>
               Current students for <u><b>{currentYear}</b></u>:
               <ul>
-                <li><b>NEW (During Year)</b>: All current students' status {SYN_STUDENT_STATUS_ID_NEW}(NEW) after 1st of Jan {currentYear}</li>
-                <li><b>NEW (Start of Year)</b>: All current students' status {SYN_STUDENT_STATUS_ID_NEW}(NEW) on 1st of Jan {currentYear}</li>
-                <li><b>CONTINUED <small>from {lastYear}</small></b>: All students' entry date is before Jan {currentYear}</li>
+                <li><b>NEW (During Year)</b>: All current students' status {SYN_STUDENT_STATUS_ID_NEW}(NEW) after 1st of
+                  Jan {currentYear}</li>
+                <li><b>NEW (Start of Year)</b>: All current students' status {SYN_STUDENT_STATUS_ID_NEW}(NEW) on 1st of
+                  Jan {currentYear}</li>
+                <li><b>CONTINUED <small>from {lastYear}</small></b>: All students' entry date is before
+                  Jan {currentYear}</li>
                 <li><b>REPEATING</b>: All current students' status
                   is <b>{SYN_STUDENT_STATUS_ID_REPEATING}</b> (Repeating).
                 </li>
-                <li><b>LEAVE OF ABSENCE</b>: All current students' status is <b>{SYN_STUDENT_STATUS_LEAVE_OF_ABSENCE}</b>.
+                <li><b>LEAVE OF ABSENCE</b>: All current students' status
+                  is <b>{SYN_STUDENT_STATUS_LEAVE_OF_ABSENCE}</b>.
                 </li>
                 <li><b>LEAVING</b>: All current students' status is <b>{SYN_STUDENT_STATUS_ID_LEAVING}(Leaving)</b> and
                   leaving date is in the future.
@@ -431,14 +501,20 @@ const EnrolmentNumbersPanel = () => {
                 <li><b>LEFT</b>: All current students' leaving date is in the past.</li>
               </ul>
             </div>
-
             <div>
               Future students for <u><b>{nextYear}</b></u>:
               <ul>
-                <li><b>CONTINUED <small>from {currentYear}</small></b>: All current students' from lower year level who has no leaving date or leaving date is after 1st of Jan {nextYear}</li>
+                <li>
+                  <b>CONTINUED <small>from {currentYear}</small></b>: All current students' from lower year level who
+                  has no leaving date or leaving date is after 1st of Jan {nextYear}
+                </li>
+                <li>
+                  <b>RETURNING <small>in {nextYear}</small></b>: All current students or future students has returning date in {nextYear}.
+                </li>
                 {
                   futureStatuses.map((status) => (
-                    <li key={status.Code}><b>{status.Description}</b>: All future student has EnrolYear in {nextYear} and with status <u>{status.Description}</u>.</li>))
+                    <li key={status.Code}><b>{status.Description}</b>: All future student has EnrolYear
+                      in {nextYear} and with status <u>{status.Description}</u>.</li>))
                 }
               </ul>
             </div>

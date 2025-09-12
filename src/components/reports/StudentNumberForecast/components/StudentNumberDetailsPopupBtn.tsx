@@ -360,6 +360,21 @@ const StudentNumberDetailsPopupBtn = ({
       }
     },
     {
+      key: "StudentReturningDate",
+      header: "Returning Date",
+      cell: (col: iTableColumn<T>, record: iVStudent | iFunnelLead) => {
+        return (
+          <td key={col.key}>
+            {"StudentReturningDate" in record
+              ? `${record.StudentReturningDate || ""}`.trim() === ""
+                ? ""
+                : moment(record.StudentReturningDate).format("ll")
+              : ""}
+          </td>
+        );
+      }
+    },
+    {
       key: "currentYearLevel",
       header: "Current Year Level",
       cell: (col: iTableColumn<T>, record: iVStudent | iFunnelLead) => {
