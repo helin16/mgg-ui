@@ -503,11 +503,11 @@ const EnrolmentNumbersPanel = () => {
             <div>
               Current students for <u><b>{currentYear}</b></u>:
               <ul>
-                <li><b>NEW (During Year)</b>: All current students' status {SYN_STUDENT_STATUS_ID_NEW}(NEW) after 1st of
+                <li><b>CONTINUED <small>from {lastYear}</small></b>: All students' entry date is before
                   Jan {currentYear}</li>
                 <li><b>NEW (Start of Year)</b>: All current students' status {SYN_STUDENT_STATUS_ID_NEW}(NEW) on 1st of
                   Jan {currentYear}</li>
-                <li><b>CONTINUED <small>from {lastYear}</small></b>: All students' entry date is before
+                <li><b>NEW (During Year)</b>: All current students' status {SYN_STUDENT_STATUS_ID_NEW}(NEW) after 1st of
                   Jan {currentYear}</li>
                 <li><b>REPEATING</b>: All current students' status
                   is <b>{SYN_STUDENT_STATUS_ID_REPEATING}</b> (Repeating).
