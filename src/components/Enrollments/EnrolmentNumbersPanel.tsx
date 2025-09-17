@@ -239,6 +239,20 @@ const EnrolmentNumbersPanel = () => {
         [yrLvl.Code]: studentsFromLowerYearLevel
       }
     }, {});
+    const studentsReturningNextYearLevelMap: {[key: string]: iVPastAndCurrentStudent[]} = yearLevels.reduce((map, yrLvl) => {
+      const studentsReturningYearLevel = getStudents(nextYearReturningStudents, [yrLvl]);
+
+      const currentYearLvlIndex = _.findIndex(yearLevels, yearLvl => yearLvl.Code === yrLvl.Code);
+      const nextYrLvlIndex = currentYearLvlIndex + 1;
+      const nextYearLvl = yearLevels[nextYrLvlIndex] || null;
+      if (!nextYearLvl) {
+        return map;
+      }
+      return {
+        ...map,
+        [nextYearLvl.Code]: studentsReturningYearLevel
+      }
+    }, {});
 
     return (
       <Table hover size={'sm'}>
@@ -326,7 +340,7 @@ const EnrolmentNumbersPanel = () => {
 
                           {/* future */}
                           <td>{yearLevel.Code in studentsFromLowerYearLevelMap ? getClickableNumber(studentsFromLowerYearLevelMap[yearLevel.Code]) : ''}</td>
-                          <td>{getClickableNumber(getStudents(nextYearReturningStudents, [yearLevel]))}</td>
+                          <td>{yearLevel.Code in studentsReturningNextYearLevelMap ? getClickableNumber(studentsReturningNextYearLevelMap[yearLevel.Code]) : ''}</td>
                           {/*<td>{previousYearLevel?.Code}</td>*/}
                           {
                             futureStatuses.map((status, index) => (<td
@@ -335,7 +349,7 @@ const EnrolmentNumbersPanel = () => {
                           <td>{getClickableNumber([
                             ...studentsFromLowerYearLevelMap[yearLevel.Code],
                             ...getStudents([...nextYearStudents], [yearLevel], futureStatuses.map(status => status.Code)),
-                            ...getStudents(nextYearReturningStudents, [yearLevel]),
+                            ...(yearLevel.Code in studentsReturningNextYearLevelMap ? studentsReturningNextYearLevelMap[yearLevel.Code] : []),
                           ])}</td>
                         </tr>
                       )
