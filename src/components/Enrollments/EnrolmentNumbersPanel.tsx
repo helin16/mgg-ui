@@ -411,7 +411,10 @@ const EnrolmentNumbersPanel = () => {
                             []
                           ),
                           ...getStudents(nextYearStudents, campusYearLevels, futureStatuses.map(status => status.Code)),
-                          ...getStudents(nextYearReturningStudents, campusYearLevels),
+                          ...campusYearLevels.reduce(
+                            (arr: iVPastAndCurrentStudent[], yrLvl) => ([...arr, ...(yrLvl.Code in studentsReturningNextYearLevelMap ? studentsReturningNextYearLevelMap[yrLvl.Code] : [])]),
+                            []
+                          ),
                         ])
                       }
                     </td>
@@ -469,7 +472,7 @@ const EnrolmentNumbersPanel = () => {
                 getClickableNumber([
                   ...selectedYearLevels.reduce((arr: iVPastAndCurrentStudent[], selectedYearLevel) => [...arr, ...(studentsFromLowerYearLevelMap[selectedYearLevel.Code] || [])], []),
                   ...getStudents(nextYearStudents, selectedYearLevels, futureStatuses.map(status => status.Code)),
-                  ...getStudents(nextYearReturningStudents, selectedYearLevels),
+                  ...selectedYearLevels.reduce((arr: iVPastAndCurrentStudent[], selectedYearLevel) => [...arr, ...(studentsReturningNextYearLevelMap[selectedYearLevel.Code] || [])], []),
                 ])
               }
             </td>
