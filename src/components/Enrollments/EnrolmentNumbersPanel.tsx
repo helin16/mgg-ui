@@ -276,9 +276,9 @@ const EnrolmentNumbersPanel = () => {
               key={`current-${status.Code || 'no-status'}`}>{status.Description || ''}</th>))
           }
 
-          <th className={`current-current`}>New<br/><small>(during year)</small></th>
-          <th className={`current-current`}>New<br/><small>(start of year)</small></th>
           <th className={`current-current`}>Continued<br/><small>from {lastYear}</small></th>
+          <th className={`current-current`}>New<br/><small>(start of year)</small></th>
+          <th className={`current-current`}>New<br/><small>(during year)</small></th>
           <th className={`current-current`}>Repeating<br/><small>level in {nextYear}</small></th>
           <th className={`current-current`}>Leave of<br/><small>absence</small></th>
           <th className={`current-current`}>Leaving</th>
@@ -328,9 +328,9 @@ const EnrolmentNumbersPanel = () => {
                             })
                           }
 
-                          <td>{getClickableNumber(getStudents(startDuringYearStudents_started, [yearLevel]))}</td>
-                          <td>{getClickableNumber(getStudents(startBeginningOfYear, [yearLevel]))}</td>
                           <td>{getClickableNumber(getStudents(normalStudentsThisYear, [yearLevel]))}</td>
+                          <td>{getClickableNumber(getStudents(startBeginningOfYear, [yearLevel]))}</td>
+                          <td>{getClickableNumber(getStudents(startDuringYearStudents_started, [yearLevel]))}</td>
                           <td>{getClickableNumber(getStudents(currentNotLeftStudents, [yearLevel], [SYN_STUDENT_STATUS_ID_REPEATING]))}</td>
                           <td>{getClickableNumber(getStudents(currentNotLeftStudents, [yearLevel], [SYN_STUDENT_STATUS_LEAVE_OF_ABSENCE]))}</td>
                           <td>{getClickableNumber(getStudents(currentNotLeftStudents, [yearLevel], [SYN_STUDENT_STATUS_ID_LEAVING]))}</td>
@@ -371,9 +371,9 @@ const EnrolmentNumbersPanel = () => {
                       })
                     }
 
-                    <td>{getClickableNumber(getStudents(startDuringYearStudents_started, campusYearLevels))}</td>
-                    <td>{getClickableNumber(getStudents(startBeginningOfYear, campusYearLevels))}</td>
                     <td>{getClickableNumber(getStudents(normalStudentsThisYear, campusYearLevels))}</td>
+                    <td>{getClickableNumber(getStudents(startBeginningOfYear, campusYearLevels))}</td>
+                    <td>{getClickableNumber(getStudents(startDuringYearStudents_started, campusYearLevels))}</td>
                     <td>{getClickableNumber(getStudents(currentNotLeftStudents, campusYearLevels, [SYN_STUDENT_STATUS_ID_REPEATING]))}</td>
                     <td>{getClickableNumber(getStudents(currentNotLeftStudents, campusYearLevels, [SYN_STUDENT_STATUS_LEAVE_OF_ABSENCE]))}</td>
                     <td>{getClickableNumber(getStudents(currentNotLeftStudents, campusYearLevels, [SYN_STUDENT_STATUS_ID_LEAVING]))}</td>
@@ -394,7 +394,10 @@ const EnrolmentNumbersPanel = () => {
                     </td>
                     <td>
                       {
-                        getClickableNumber(getStudents(nextYearReturningStudents, campusYearLevels))
+                        getClickableNumber(campusYearLevels.reduce(
+                          (arr: iVPastAndCurrentStudent[], yrLvl) => ([...arr, ...(yrLvl.Code in studentsReturningNextYearLevelMap ? studentsReturningNextYearLevelMap[yrLvl.Code] : [])]),
+                          []
+                        ))
                       }
                     </td>
                     {
@@ -438,9 +441,9 @@ const EnrolmentNumbersPanel = () => {
               })
             }
 
-            <td>{getClickableNumber(getStudents(startDuringYearStudents_started, selectedYearLevels))}</td>
-            <td>{getClickableNumber(getStudents(startBeginningOfYear, selectedYearLevels))}</td>
             <td>{getClickableNumber(getStudents(normalStudentsThisYear, selectedYearLevels))}</td>
+            <td>{getClickableNumber(getStudents(startBeginningOfYear, selectedYearLevels))}</td>
+            <td>{getClickableNumber(getStudents(startDuringYearStudents_started, selectedYearLevels))}</td>
             <td>{getClickableNumber(getStudents(currentNotLeftStudents, selectedYearLevels, [SYN_STUDENT_STATUS_ID_REPEATING]))}</td>
             <td>{getClickableNumber(getStudents(currentNotLeftStudents, selectedYearLevels, [SYN_STUDENT_STATUS_LEAVE_OF_ABSENCE]))}</td>
             <td>{getClickableNumber(getStudents(currentNotLeftStudents, selectedYearLevels, [SYN_STUDENT_STATUS_ID_LEAVING]))}</td>
