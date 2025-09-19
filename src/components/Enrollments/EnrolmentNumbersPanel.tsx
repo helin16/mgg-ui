@@ -611,8 +611,8 @@ const EnrolmentNumbersPanel = () => {
       </FlexContainer>
       <FlexContainer className={'gap-2 align-items-center justify-content-end'}>
         <label className={'display-flex gap-2 align-items-center justify-content-start'}>
-          <span>Show/Hide Explanation Panel</span>
-          <ToggleBtn on={'Show Expl.'} off={'Hide Expl.'} checked={showingExplanationPanel} onChange={() => setShowingExplanationPanel(!showingExplanationPanel)} />
+          <span className={'text-white'}>Show/Hide Explanation Panel</span>
+          <ToggleBtn size={'sm'} on={'Show Expl.'} off={'Hide Expl.'} checked={showingExplanationPanel} onChange={() => setShowingExplanationPanel(!showingExplanationPanel)} />
         </label>
         <LoadingBtn size={'sm'} variant={'outline-light'} onClick={() => { setForceReload(prevState => prevState + 1)}} isLoading={isLoading}><ArrowClockwise /> Refresh</LoadingBtn>
       </FlexContainer>
