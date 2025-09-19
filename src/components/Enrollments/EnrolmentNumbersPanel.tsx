@@ -30,6 +30,7 @@ import {FUTURE_STUDENT_STATUS_FINALISED} from '../../types/Synergetic/iSynVFutur
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import {ArrowClockwise} from 'react-bootstrap-icons';
 import LoadingBtn from '../common/LoadingBtn';
+import ToggleBtn from '../common/ToggleBtn';
 
 enum FullFeeStudentsTypes {
   All = 'All',
@@ -116,6 +117,7 @@ const EnrolmentNumbersPanel = () => {
   const [futureStatuses, setFutureStatuses] = useState<iSynLuFutureStatus[]>([]);
   const [yearLevels, setYearLevels] = useState<iSynLuYearLevel[]>([]);
   const [forceReload, setForceReload] = useState(0);
+  const [showingExplanationPanel, setShowingExplanationPanel] = useState(false);
 
   useEffect(() => {
     let isCancel = false;
@@ -509,10 +511,14 @@ const EnrolmentNumbersPanel = () => {
   }
 
   const getExplanationPanel = () => {
+    if (showingExplanationPanel !== true) {
+      return null;
+    }
     return (
       <ExplanationPanel
         variant={'info'}
         dismissible
+        onDismiss={() => { setShowingExplanationPanel(false) }}
         text={
           <FlexContainer>
             <div>
@@ -538,12 +544,12 @@ const EnrolmentNumbersPanel = () => {
                   is <b>{SYN_STUDENT_STATUS_ID_REPEATING}</b> (Repeating).
                 </li>
                 <li><b>LEAVE OF ABSENCE</b>: All current students' status
-                  is <b>{SYN_STUDENT_STATUS_LEAVE_OF_ABSENCE}</b>.
+                  is <b>{SYN_STUDENT_STATUS_LEAVE_OF_ABSENCE}</b> and having a leaving date in the future.
                 </li>
                 <li><b>LEAVING</b>: All current students' status is <b>{SYN_STUDENT_STATUS_ID_LEAVING}(Leaving)</b> and
                   leaving date is in the future.
                 </li>
-                <li><b>LEFT</b>: All current students' leaving date is in the past.</li>
+                <li><b>LEFT</b>: All current students(including LOA)' leaving date is in the past.</li>
               </ul>
             </div>
             <div>
@@ -603,9 +609,13 @@ const EnrolmentNumbersPanel = () => {
           </ButtonGroup>
         </FlexContainer>
       </FlexContainer>
-      <div>
+      <FlexContainer className={'gap-2 align-items-center justify-content-end'}>
+        <label className={'display-flex gap-2 align-items-center justify-content-start'}>
+          <span>Show/Hide Explanation Panel</span>
+          <ToggleBtn on={'Show Expl.'} off={'Hide Expl.'} checked={showingExplanationPanel} onChange={() => setShowingExplanationPanel(!showingExplanationPanel)} />
+        </label>
         <LoadingBtn size={'sm'} variant={'outline-light'} onClick={() => { setForceReload(prevState => prevState + 1)}} isLoading={isLoading}><ArrowClockwise /> Refresh</LoadingBtn>
-      </div>
+      </FlexContainer>
     </PanelTitle>
     {getContent()}
   </Wrapper>
