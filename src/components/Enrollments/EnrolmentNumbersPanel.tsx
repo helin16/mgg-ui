@@ -34,7 +34,7 @@ import ToggleBtn from '../common/ToggleBtn';
 
 enum FullFeeStudentsTypes {
   All = 'All',
-  DomesticOnly = 'Domestic ONLY',
+  DomesticOnly = 'Domestic Only',
   InternationalOnly = 'International Only',
 }
 
