@@ -2,10 +2,10 @@ import iVStudent, {
   SYN_STUDENT_STATUS_ID_FINALISED
 } from "../../../../types/Synergetic/Student/iVStudent";
 import iFunnelLead from "../../../../types/Funnel/iFunnelLead";
-import { Button, ButtonProps, Table as BTable } from "react-bootstrap";
+import {Button, ButtonProps, Spinner, Table as BTable} from "react-bootstrap";
 import PopupModal from "../../../common/PopupModal";
 import moment from "moment-timezone";
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import Table, { iTableColumn } from "../../../common/Table";
 import UtilsService from "../../../../services/UtilsService";
 import styled from "styled-components";
@@ -17,6 +17,10 @@ import CSVExportBtn from "../../../form/CSVExportBtn";
 import StudentNumberForecastExportHelper from "./StudentNumberForecastExportHelper";
 import iSynDebtorStudentConcession from '../../../../types/Synergetic/Finance/iSynDebtorStudentConcession';
 import iSynVDebtorFee from '../../../../types/Synergetic/Finance/iSynVDebtorFee';
+import iSynLuYearLevel from '../../../../types/Synergetic/Lookup/iSynLuYearLevel';
+import SynLuYearLevelService from '../../../../services/Synergetic/Lookup/SynLuYearLevelService';
+import {MGG_CAMPUS_CODES} from '../../../../types/Synergetic/Lookup/iSynLuCampus';
+import Toaster from '../../../../services/Toaster';
 
 type iStudentNumberDetailsPopup = ButtonProps & {
   records: (iVStudent | iFunnelLead)[];
@@ -39,6 +43,7 @@ const TableWrapper = styled.div`
   }
 `;
 
+type iYearLevelMap = {[key: string]: iSynLuYearLevel};
 const StudentNumberDetailsPopupBtn = ({
   records,
   feeNameMap = {},
@@ -47,9 +52,39 @@ const StudentNumberDetailsPopupBtn = ({
   ...rest
 }: iStudentNumberDetailsPopup) => {
   const [isShowing, setIsShowing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [yrLvlMap, setYrLvlMap] = useState<iYearLevelMap>({});
   const handleClose = () => {
     setIsShowing(false);
   };
+  useEffect(() => {
+    if (!isShowing) {
+      return;
+    }
+    let isCanceled = false;
+    setIsLoading(true);
+    SynLuYearLevelService.getAllYearLevels({
+      where: JSON.stringify({Campus: MGG_CAMPUS_CODES}),
+      sort: `YearLevelSort:ASC`
+    }).then(resp => {
+      if (isCanceled) { return }
+      setYrLvlMap((resp || []).reduce((map: iYearLevelMap, yearLevel) => {
+        return {
+          ...map,
+          [yearLevel.Code]: yearLevel,
+        }
+      }, {}))
+    }).catch(err => {
+      if (isCanceled) { return }
+      Toaster.showApiError(err);
+    }).finally(() => {
+      if (isCanceled) { return }
+      setIsLoading(false)
+    })
+    return () => {
+      isCanceled = true;
+    }
+  }, [isShowing]);
 
   const getConcessionDetails = (record: iVStudent | iFunnelLead) => {
     // @ts-ignore
@@ -401,6 +436,20 @@ const StudentNumberDetailsPopupBtn = ({
         return (
           <td key={col.key}>
             {"StudentForm" in record ? record.StudentForm : ""}
+          </td>
+        );
+      }
+    },
+    {
+      key: "nextYearLvl",
+      header: "Next Year Level",
+      cell: (col: iTableColumn<T>, record: iVStudent | iFunnelLead) => {
+        const nextYearLevelCode = "StudentOverrideNextYearLevel" in record ? record.StudentOverrideNextYearLevel || '' : '';
+        return (
+          <td key={col.key}>
+            {isLoading === true ? <Spinner /> : (
+              nextYearLevelCode in yrLvlMap ?  yrLvlMap[nextYearLevelCode].Description : ""
+            )}
           </td>
         );
       }

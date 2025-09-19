@@ -28,6 +28,8 @@ import iSynLuFutureStatus from '../../types/Synergetic/Lookup/iSynLuFutureStatus
 import {FlexContainer} from '../../styles';
 import {FUTURE_STUDENT_STATUS_FINALISED} from '../../types/Synergetic/iSynVFutureStudent';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import {ArrowClockwise} from 'react-bootstrap-icons';
+import LoadingBtn from '../common/LoadingBtn';
 
 enum FullFeeStudentsTypes {
   All = 'All',
@@ -113,6 +115,7 @@ const EnrolmentNumbersPanel = () => {
   const [currentFutureStatuses, setCurrentFutureStatuses] = useState<iSynLuFutureStatus[]>([]);
   const [futureStatuses, setFutureStatuses] = useState<iSynLuFutureStatus[]>([]);
   const [yearLevels, setYearLevels] = useState<iSynLuYearLevel[]>([]);
+  const [forceReload, setForceReload] = useState(0);
 
   useEffect(() => {
     let isCancel = false;
@@ -177,7 +180,7 @@ const EnrolmentNumbersPanel = () => {
     return () => {
       isCancel = true;
     }
-  }, [currentYear, selectedCampusCodes, nextYear]);
+  }, [currentYear, selectedCampusCodes, nextYear, forceReload]);
 
   const getStudents = (students: iVPastAndCurrentStudent[], yearLevels: iSynLuYearLevel[] = [], statuses: string[] = []) => {
     return _.uniqBy(students, (student) => student.ID).filter(student => {
@@ -247,14 +250,18 @@ const EnrolmentNumbersPanel = () => {
     const currentFutureStudents = Object.values(futureStudentsMap).filter(student => student.FileYear === currentYear).filter(filterFullFeeFlag);
     const nextYearStudents =  Object.values(futureStudentsMap).filter(student => student.FileYear === nextYear).filter(filterFullFeeFlag);
     const nextYearReturningStudents = [...currentStudents, ...nextYearStudents].filter(student => moment(student.StudentReturningDate).year() === nextYear);
+    const currentNotLeavingNextYearStudents_notRepeating = currentNotLeavingNextYearStudents.filter(student => `${student.StudentOverrideNextYearLevel || ''}`.trim() === '')
+    const currentNotLeavingNextYearStudents_repeating = currentNotLeavingNextYearStudents.filter(student => `${student.StudentOverrideNextYearLevel || ''}`.trim() !== '')
     const studentsFromLowerYearLevelMap: {[key: string]: iVPastAndCurrentStudent[]} = yearLevels.reduce((map, yrLvl) => {
       const currentYearLvlIndex = _.findIndex(yearLevels, yearLvl => yearLvl.Code === yrLvl.Code);
       const previousIndex = currentYearLvlIndex - 1;
       const previousYearLevel = yearLevels[previousIndex] || null;
-      const studentsFromLowerYearLevel = previousYearLevel === null ? [] : getStudents(currentNotLeavingNextYearStudents, [previousYearLevel]);
+      const studentsFromLowerYearLevel = previousYearLevel === null ? [] : getStudents(currentNotLeavingNextYearStudents_notRepeating, [previousYearLevel])
       return {
         ...map,
-        [yrLvl.Code]: studentsFromLowerYearLevel
+        [yrLvl.Code]: [...studentsFromLowerYearLevel, ...currentNotLeavingNextYearStudents_repeating.filter(student => {
+          return `${student.StudentOverrideNextYearLevel || ''}`.trim() === `${yrLvl.Code}`
+        })],
       }
     }, {});
     const studentsReturningNextYearLevelMap: {[key: string]: iVPastAndCurrentStudent[]} = yearLevels.reduce((map, yrLvl) => {
@@ -563,37 +570,42 @@ const EnrolmentNumbersPanel = () => {
 
   return <Wrapper>
     {getExplanationPanel()}
-    <PanelTitle className={"title-row section-row display-flex align-items-center gap-2"}>
+    <PanelTitle className={"title-row section-row display-flex align-items-center gap-2 justify-content-between"}>
       <FlexContainer className={'gap-2 align-items-center justify-content-start'}>
-        <b className={"title"}>Campuses: </b>
-        <SynCampusSelector
-          className={"campus-selector"}
-          allowClear={false}
-          isMulti
-          limitedCodes={MGG_CAMPUS_CODES}
-          values={selectedCampusCodes}
-          onSelect={values => {
-            const codes = (values === null
-                ? []
-                : Array.isArray(values)
-                  ? values
-                  : [values]
-            )
-              .map(value => `${value?.value || ''}`.trim())
-              .filter(code => code !== "");
-            setSelectedCampusCodes(codes);
-          }}
-        />
+        <FlexContainer className={'gap-2 align-items-center justify-content-start'}>
+          <b className={"title"}>Campuses: </b>
+          <SynCampusSelector
+            className={"campus-selector"}
+            allowClear={false}
+            isMulti
+            limitedCodes={MGG_CAMPUS_CODES}
+            values={selectedCampusCodes}
+            onSelect={values => {
+              const codes = (values === null
+                  ? []
+                  : Array.isArray(values)
+                    ? values
+                    : [values]
+              )
+                .map(value => `${value?.value || ''}`.trim())
+                .filter(code => code !== "");
+              setSelectedCampusCodes(codes);
+            }}
+          />
+        </FlexContainer>
+        <FlexContainer className={'gap-2 align-items-center justify-content-start'}>
+          <ButtonGroup>
+            {
+              Object.values(FullFeeStudentsTypes).map(type => {
+                return <Button key={type} onClick={() => {setSelectedFullFeeStudentType(type)}} variant={type === selectedFullFeeStudentType ? 'info' : 'light'}>{type}</Button>
+              })
+            }
+          </ButtonGroup>
+        </FlexContainer>
       </FlexContainer>
-      <FlexContainer className={'gap-2 align-items-center justify-content-start'}>
-        <ButtonGroup>
-          {
-            Object.values(FullFeeStudentsTypes).map(type => {
-              return <Button key={type} onClick={() => {setSelectedFullFeeStudentType(type)}} variant={type === selectedFullFeeStudentType ? 'info' : 'light'}>{type}</Button>
-            })
-          }
-        </ButtonGroup>
-      </FlexContainer>
+      <div>
+        <LoadingBtn size={'sm'} variant={'outline-light'} onClick={() => { setForceReload(prevState => prevState + 1)}} isLoading={isLoading}><ArrowClockwise /> Refresh</LoadingBtn>
+      </div>
     </PanelTitle>
     {getContent()}
   </Wrapper>
