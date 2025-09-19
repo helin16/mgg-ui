@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import MathHelper from '../../helper/MathHelper';
 import moment from 'moment-timezone';
-import {Spinner, Table} from 'react-bootstrap';
+import {Button, Spinner, Table} from 'react-bootstrap';
 import React, {useEffect, useState} from 'react';
 import iSynLuYearLevel from '../../types/Synergetic/Lookup/iSynLuYearLevel';
 import Toaster from '../../services/Toaster';
@@ -27,6 +27,13 @@ import SynLuFutureStatusService from '../../services/Synergetic/Lookup/SynLuFutu
 import iSynLuFutureStatus from '../../types/Synergetic/Lookup/iSynLuFutureStatus';
 import {FlexContainer} from '../../styles';
 import {FUTURE_STUDENT_STATUS_FINALISED} from '../../types/Synergetic/iSynVFutureStudent';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
+
+enum FullFeeStudentsTypes {
+  All = 'All',
+  DomesticOnly = 'Domestic ONLY',
+  InternationalOnly = 'International Only',
+}
 
 type iYearLevelMap = {[key: string]: iSynLuYearLevel[]}
 type iCampusMap = {[key: string]: iSynLuCampus}
@@ -94,6 +101,7 @@ const Wrapper = styled.div`
 `;
 const EnrolmentNumbersPanel = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedFullFeeStudentType, setSelectedFullFeeStudentType] = useState(FullFeeStudentsTypes.All);
   const [campusMap, setCampusMap] = useState<iCampusMap>({});
   const [yearLevelCampusMap, setYearLevelCampusMap] = useState<iYearLevelMap>({});
   const [currentStudentsMap, setCurrentStudentsMap] = useState<iStudentMap>({});
@@ -206,6 +214,16 @@ const EnrolmentNumbersPanel = () => {
     </StudentNumberDetailsPopupBtn>
   }
 
+  const filterFullFeeFlag = (student: iVPastAndCurrentStudent) => {
+    if (selectedFullFeeStudentType === FullFeeStudentsTypes.DomesticOnly) {
+      return student.FullFeeFlag === false;
+    }
+    if (selectedFullFeeStudentType === FullFeeStudentsTypes.InternationalOnly) {
+      return student.FullFeeFlag === true;
+    }
+    return true;
+  }
+
 
   const getContent = () => {
     if (isLoading === true) {
@@ -213,7 +231,7 @@ const EnrolmentNumbersPanel = () => {
     }
 
     const selectedYearLevels = Object.keys(yearLevelCampusMap).filter(campusCode => selectedCampusCodes.indexOf(campusCode) >= 0).reduce((arr: iSynLuYearLevel[], campusCode) => [...arr, ...(yearLevelCampusMap[campusCode] || [])], []);
-    const currentStudents = Object.values(currentStudentsMap);
+    const currentStudents = Object.values(currentStudentsMap).filter(filterFullFeeFlag);
     const currentNotLeftStudents = currentStudents.filter(student => `${student.StudentLeavingDate || ''}`.trim() === '' || moment(student.StudentLeavingDate).isAfter(moment()));
     const currentNotLeftStudents_started = currentNotLeftStudents.filter(student => moment(student.StudentEntryDate).isSameOrBefore(moment()));
     const currentNotLeavingNextYearStudents = currentStudents.filter(student => `${student.StudentLeavingDate || ''}`.trim() === '' || moment(student.StudentLeavingDate).isAfter(moment().add(1, 'year').startOf('year')));
@@ -225,9 +243,9 @@ const EnrolmentNumbersPanel = () => {
     const startDuringYearStudents_started = startDuringYearStudents.filter(student => moment(student.StudentEntryDate).isSameOrBefore(moment()));
     const startDuringYearStudents_notStarted = startDuringYearStudents.filter(student => moment(student.StudentEntryDate).isAfter(moment()));
     const startBeginningOfYear = newStudentsThisYear.filter(student => moment(student.StudentEntryDate).month() === 0);
-    const currentFutureStudents = Object.values(futureStudentsMap).filter(student => student.FileYear === currentYear);
 
-    const nextYearStudents =  Object.values(futureStudentsMap).filter(student => student.FileYear === nextYear);
+    const currentFutureStudents = Object.values(futureStudentsMap).filter(student => student.FileYear === currentYear).filter(filterFullFeeFlag);
+    const nextYearStudents =  Object.values(futureStudentsMap).filter(student => student.FileYear === nextYear).filter(filterFullFeeFlag);
     const nextYearReturningStudents = [...currentStudents, ...nextYearStudents].filter(student => moment(student.StudentReturningDate).year() === nextYear);
     const studentsFromLowerYearLevelMap: {[key: string]: iVPastAndCurrentStudent[]} = yearLevels.reduce((map, yrLvl) => {
       const currentYearLvlIndex = _.findIndex(yearLevels, yearLvl => yearLvl.Code === yrLvl.Code);
@@ -546,25 +564,36 @@ const EnrolmentNumbersPanel = () => {
   return <Wrapper>
     {getExplanationPanel()}
     <PanelTitle className={"title-row section-row display-flex align-items-center gap-2"}>
-      <b className={"title"}>Campuses: </b>
-      <SynCampusSelector
-        className={"campus-selector"}
-        allowClear={false}
-        isMulti
-        limitedCodes={MGG_CAMPUS_CODES}
-        values={selectedCampusCodes}
-        onSelect={values => {
-          const codes = (values === null
-              ? []
-              : Array.isArray(values)
-                ? values
-                : [values]
-          )
-            .map(value => `${value?.value || ''}`.trim())
-            .filter(code => code !== "");
-          setSelectedCampusCodes(codes);
-        }}
-      />
+      <FlexContainer className={'gap-2 align-items-center justify-content-start'}>
+        <b className={"title"}>Campuses: </b>
+        <SynCampusSelector
+          className={"campus-selector"}
+          allowClear={false}
+          isMulti
+          limitedCodes={MGG_CAMPUS_CODES}
+          values={selectedCampusCodes}
+          onSelect={values => {
+            const codes = (values === null
+                ? []
+                : Array.isArray(values)
+                  ? values
+                  : [values]
+            )
+              .map(value => `${value?.value || ''}`.trim())
+              .filter(code => code !== "");
+            setSelectedCampusCodes(codes);
+          }}
+        />
+      </FlexContainer>
+      <FlexContainer className={'gap-2 align-items-center justify-content-start'}>
+        <ButtonGroup>
+          {
+            Object.values(FullFeeStudentsTypes).map(type => {
+              return <Button key={type} onClick={() => {setSelectedFullFeeStudentType(type)}} variant={type === selectedFullFeeStudentType ? 'info' : 'light'}>{type}</Button>
+            })
+          }
+        </ButtonGroup>
+      </FlexContainer>
     </PanelTitle>
     {getContent()}
   </Wrapper>
