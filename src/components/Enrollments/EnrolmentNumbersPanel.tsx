@@ -550,7 +550,7 @@ const EnrolmentNumbersPanel = () => {
               Future students for <u><b>{nextYear}</b></u>:
               <ul>
                 <li>
-                  <b>CONTINUED <small>from {currentYear}</small></b>: All current students' from lower year level who
+                  <b>CONTINUED <small>from {currentYear}</small></b>: All current students' (from lower year level or repeating the current year level) who
                   has no leaving date or leaving date is after 1st of Jan {nextYear}
                 </li>
                 <li>
