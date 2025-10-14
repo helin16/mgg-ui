@@ -28,6 +28,7 @@ const SynCampusSelector = ({values, onSelect, allowClear, className, isDisabled 
   useEffect(() => {
     let isCancelled = false;
     if (Object.keys(optionMap).length > 0) { return }
+
     setIsLoading(true);
     SynLuCampusService.getAllCampuses({
         where: JSON.stringify({
@@ -58,7 +59,7 @@ const SynCampusSelector = ({values, onSelect, allowClear, className, isDisabled 
     return () => {
       isCancelled = true;
     }
-  }, [optionMap, filterEmptyCodes, limitedCodes]);
+  }, []);
 
   const getSelectedValues = () => {
     if (!values) {

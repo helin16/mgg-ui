@@ -8,10 +8,12 @@ import moment from 'moment-timezone';
 import MathHelper from '../../helper/MathHelper';
 import BudgetForecastPanel from '../../components/reports/BudgetForecast/BudgetForecastPanel';
 import MonthlyBillingReportPanel from './components/MonthlyBilling/MonthlyBillingReportPanel';
+import CreditorBPayPanel from '../../components/BPay/CreditorBPayPanel';
 
 const TAB_EXPIRING_CREDIT_CARDS = "EXPIRING_CREDIT_CARDS";
 const TAB_MONTHLY_BILLING_REPORT = "MONTHLY_BILLING_REPORT";
 const TAB_EXPIRING_FORECAST = "FORECAST_NEXT_YEAR";
+const TAB_CREDITOR_BPAY_BATCH = "CREDITOR_BPAY_BATCH";
 const FinancePage = () => {
   const [selectedTab, setSelectedTab] = useState(TAB_EXPIRING_CREDIT_CARDS);
 
@@ -34,6 +36,10 @@ const FinancePage = () => {
 
         <Tab eventKey={TAB_EXPIRING_FORECAST} title={`Forecast ${MathHelper.add(moment().year(), 1)}`}>
           <BudgetForecastPanel />
+        </Tab>
+
+        <Tab eventKey={TAB_CREDITOR_BPAY_BATCH} title={`BPay Batching`}>
+          <CreditorBPayPanel />
         </Tab>
 
       </Tabs>

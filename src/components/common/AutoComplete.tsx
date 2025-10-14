@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { debounce } from "lodash";
 import InputGroup from 'react-bootstrap/InputGroup';
 import {dangerRed} from '../../AppWrapper';
+import {useEffect, useMemo} from 'react';
 
 export type iAutoCompleteSingle = {
   label: any;
@@ -87,11 +88,24 @@ const AutoComplete = ({
   inputProps,
   className,
 }: iAutoComplete) => {
-  const debouncedHandleSearchFn = debounce(handleSearchFn, 600);
-  const loadOptions = async (keyword: string) => {
-    const results = await debouncedHandleSearchFn(keyword);
-    return renderOptionItemFn(results || []);
-  };
+  const debouncedSearch = useMemo(
+    () =>
+      debounce(
+        async (inputValue: string, resolve: (opts: iAutoCompleteSingle[]) => void) => {
+          const results = await handleSearchFn(inputValue);
+          resolve(renderOptionItemFn(results || []));
+        },
+        500
+      ),
+    [handleSearchFn, renderOptionItemFn]
+  );
+
+  useEffect(() => () => debouncedSearch.cancel(), [debouncedSearch]);
+
+  const loadOptions = (inputValue: string) =>
+    new Promise<iAutoCompleteSingle[]>((resolve) => {
+      debouncedSearch(inputValue, resolve);
+    });
 
   const getPrepend = () => {
     if (!prepend) {
@@ -121,7 +135,7 @@ const AutoComplete = ({
         placeholder={placeholder}
         // @ts-ignore
         onChange={onChange}
-        cacheOptions
+        cacheOptions={false}
         defaultOptions={false}
         loadOptions={loadOptions}
         className={'form-control'}

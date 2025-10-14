@@ -15,6 +15,13 @@ import InputGroup from "react-bootstrap/InputGroup";
 import MailGunService from '../../../services/MailGun/MailGunService';
 import EmailService from '../../../services/Email/EmailService';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import {useSelector} from 'react-redux';
+import {RootState} from '../../../redux/makeReduxStore';
+import SynTagService from '../../../services/Synergetic/SynTagService';
+import SynCommunityService from '../../../services/Synergetic/Community/SynCommunityService';
+import SynPVCommunityService from '../../../services/Synergetic/Community/SynPVCommunityService';
+import {HEADER_NAME_SELECTING_FIELDS} from '../../../services/AppService';
+import iSynPVCommunity from '../../../types/Synergetic/Community/iSynPVCommunity';
 
 export type iSynEmailRecipient = {
   email: string;
@@ -60,7 +67,10 @@ const Wrapper = styled.div`
 const SynEmailSendPanel = ({ template, onSelect, onSentSuccess }: iSynEmailSendPanel) => {
   const [showPreview, setShowPreview] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [recipients, setRecipients] = useState<iSynEmailRecipient[]>([]);
+  const [myTaggedCommunityProfiles, setMyTaggedCommunityProfiles] = useState<iSynPVCommunity[]>([]);
+  const {user: currentUser} = useSelector((state: RootState) => state.auth);
   const [
     inputtingEmail,
     setInputtingEmail
@@ -73,6 +83,51 @@ const SynEmailSendPanel = ({ template, onSelect, onSentSuccess }: iSynEmailSendP
   useEffect(() => {
     handleSelect();
   }, [recipients, handleSelect]);
+
+  useEffect(() => {
+    const networkLogin = `${currentUser?.SynCommunity?.NetworkLogin || ''}`.trim();
+    if (networkLogin === '') {
+      return;
+    }
+
+    const getData = async () => {
+      const tags = await SynTagService.getAll({
+        where: JSON.stringify({
+          LoginName: `MGG\\${networkLogin}`,
+        }),
+        perPage: 9999999,
+      });
+      const synIds = (tags.data || []).map(i => i.ID);
+      if (synIds.length <= 0) {
+        return;
+      }
+      return SynPVCommunityService.getAll({
+        where: JSON.stringify({
+          ID: synIds,
+        }),
+        perPage: 9999999,
+      }, {
+        headers: {
+          [HEADER_NAME_SELECTING_FIELDS]: JSON.stringify(['ID', 'DefaultEmail', 'PreferredFormal'])
+        },
+      })
+    }
+    let isCanceled = false;
+    setIsLoading(true);
+    getData().then(resp => {
+      if (isCanceled) { return }
+      setMyTaggedCommunityProfiles(resp?.data || []);
+    }).catch(err => {
+      if (isCanceled) { return }
+      Toaster.showApiError(err);
+    }).finally(() => {
+      if (isCanceled) { return }
+      setIsLoading(false);
+    })
+    return () => {
+      isCanceled = true;
+    }
+  }, [currentUser]);
 
   const getPreview = () => {
     if (showPreview !== true) {
@@ -173,12 +228,12 @@ const SynEmailSendPanel = ({ template, onSelect, onSentSuccess }: iSynEmailSendP
                 <Icons.XLg /> Clear
               </Button>
               <ButtonGroup>
-                <LoadingBtn variant={"primary"} isLoading={isSending} onClick={() => sendEmails(EmailService.sendHtml)}>
+                <LoadingBtn variant={"primary"} isLoading={isLoading || isSending} onClick={() => sendEmails(EmailService.sendHtml)}>
                   <Icons.Send /> Send to {recipients.length} recipient(s)
                 </LoadingBtn>
                 <DropdownButton as={ButtonGroup} title={''}>
                   <Dropdown.Item eventKey="1">
-                    <LoadingBtn variant={"danger"} isLoading={isSending} onClick={() => sendEmails(MailGunService.sendHtml)}>
+                    <LoadingBtn variant={"danger"} isLoading={isLoading || isSending} onClick={() => sendEmails(MailGunService.sendHtml)}>
                       <Icons.Send /> Using MailGun to send to {recipients.length} recipient(s)
                     </LoadingBtn>
                   </Dropdown.Item>
@@ -191,17 +246,21 @@ const SynEmailSendPanel = ({ template, onSelect, onSentSuccess }: iSynEmailSendP
     );
   };
 
-  const addingRecipient = (recipient: iSynEmailRecipient) => {
-    if (!recipient || `${recipient.email || ""}`.trim() === "") {
+  const addingRecipients = (recipients: iSynEmailRecipient[]) => {
+    const recipientsWithEmail = recipients.filter(recipient => `${recipient.email || ""}`.trim() !== "");
+    if (recipientsWithEmail.length <= 0) {
       return;
     }
-    if (!UtilsService.validateEmail(recipient.email)) {
-      Toaster.showToast(`Invalid email ${recipient.email}`, TOAST_TYPE_ERROR);
-      return;
+    const recipientsWithEmailWithValidEmail = [];
+    for (const recipient of recipientsWithEmail) {
+      if (!UtilsService.validateEmail(recipient.email)) {
+        Toaster.showToast(`Invalid email ${recipient.email}`, TOAST_TYPE_ERROR);
+        continue;
+      }
+      recipientsWithEmailWithValidEmail.push(recipient);
     }
-
     const uniqueReceipts = _.uniqBy(
-      [recipient, ...recipients].filter(
+      [...recipientsWithEmailWithValidEmail, ...recipients].filter(
         recipient => `${recipient?.email || ""}`.trim() !== ""
       ),
       recipient => recipient?.email || ""
@@ -211,11 +270,35 @@ const SynEmailSendPanel = ({ template, onSelect, onSentSuccess }: iSynEmailSendP
     return;
   };
 
+  const getLoadTagListBtn = () => {
+    if (myTaggedCommunityProfiles.length <= 0) {
+      return null;
+    }
+    return (
+      <SectionDiv>
+        <LoadingBtn
+          isLoading={isLoading || isSending}
+          variant={"primary"}
+          onClick={() => {
+            addingRecipients(myTaggedCommunityProfiles.map(myTaggedCommunityProfile => ({
+                  email: myTaggedCommunityProfile.DefaultEmail,
+                  name: `${myTaggedCommunityProfile.PreferredFormal || ''}`.trim(),
+                }) ))
+          }}
+        >
+          <FlexContainer className={'gap-1 align-items-center justify-content-center'}>
+            <Icons.Download /><span>Load from my Synergetic tag list</span>
+          </FlexContainer>
+        </LoadingBtn>
+      </SectionDiv>
+    )
+  }
+
   return (
     <Wrapper>
       <div>
         <FormLabel label={"Recipients"} isRequired />
-        <InputGroup>
+        <FlexContainer className={'gap-1 align-items-center justify-content-start'}>
           <FormControl
             placeholder={"email address: test@test.com"}
             value={inputtingEmail?.email || ""}
@@ -229,7 +312,7 @@ const SynEmailSendPanel = ({ template, onSelect, onSentSuccess }: iSynEmailSendP
               if (event.key !== "Enter" || !inputtingEmail) {
                 return;
               }
-              addingRecipient(inputtingEmail);
+              addingRecipients([inputtingEmail]);
             }}
           />
           <FormControl
@@ -239,7 +322,7 @@ const SynEmailSendPanel = ({ template, onSelect, onSentSuccess }: iSynEmailSendP
               if (event.key !== "Enter" || !inputtingEmail) {
                 return;
               }
-              addingRecipient(inputtingEmail);
+              addingRecipients([inputtingEmail]);
             }}
             onChange={event =>
               setInputtingEmail({
@@ -249,15 +332,19 @@ const SynEmailSendPanel = ({ template, onSelect, onSentSuccess }: iSynEmailSendP
               })
             }
           />
-          <Button
+          <LoadingBtn
+            isLoading={isLoading || isSending}
             variant={"secondary"}
             onClick={() => {
-              inputtingEmail && addingRecipient(inputtingEmail);
+              inputtingEmail && addingRecipients([inputtingEmail]);
             }}
           >
-            <Icons.Plus /> Add
-          </Button>
-        </InputGroup>
+            <FlexContainer className={'gap-1 align-items-center justify-content-center'}>
+              <Icons.Plus /><span>Add</span>
+            </FlexContainer>
+          </LoadingBtn>
+        </FlexContainer>
+        {getLoadTagListBtn()}
         {getRecipientDivs()}
         {getBtnsDiv()}
       </div>
