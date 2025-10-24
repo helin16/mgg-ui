@@ -41,6 +41,8 @@ import PageNotFound from '../../components/PageNotFound';
 import AdmissionsPage from '../../pages/AttendanceBulk/AdmissionsPage';
 import HOYChatManagePage from '../../pages/HOYChat/HOYChatManagePage';
 import HOYChatForm from '../../pages/HOYChat/components/HOYChatForm';
+import StudentSubjectList from '../../components/timeTable/StudentSubjectList';
+import {useSearchParams} from 'react-router-dom';
 
 const schoolBoxIframeElementId = "remote";
 const SchoolBoxRouter = ({
@@ -50,6 +52,7 @@ const SchoolBoxRouter = ({
   path: string;
   remoteUrl: string;
 }) => {
+  const [searchParams] = useSearchParams();
   const removeSchoolBoxIframe = () => {
     const schoolBoxIframeElement = document.querySelector(
       `iframe#${schoolBoxIframeElementId}`
@@ -226,6 +229,13 @@ const SchoolBoxRouter = ({
       removeSchoolBoxIframe();
       return (
         <HOYChatForm />
+      );
+    }
+    case "/studentSubjectList": {
+      removeSchoolBoxIframe();
+      return (
+        //@ts-ignore
+        <StudentSubjectList studentSynId={`${searchParams.get('synId') || ''}`.trim()} />
       );
     }
     default: {
