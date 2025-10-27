@@ -86,7 +86,7 @@ const getFullUrl = (path: string) => {
 }
 
 const getModuleUrl = (customUrl: string, customBaseUrl?: string, customAuthPath = THIRD_PARTY_AUTH_PATH, mConnectBaseUrl?: string) => {
-  const { full } = SchoolBoxHelper.getModuleUrl(customUrl, customBaseUrl, customAuthPath);
+  const { full } = SchoolBoxHelper.getModuleUrl(customUrl, customBaseUrl, customAuthPath, mConnectBaseUrl);
   return full;
 }
 
