@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import {Moment} from 'moment-timezone';
 import {Buffer} from 'buffer';
-import {THIRD_PARTY_AUTH_PATH} from '../helper/SchoolBoxHelper';
+import SchoolBoxHelper, {THIRD_PARTY_AUTH_PATH} from '../helper/SchoolBoxHelper';
 import {iConfigParams} from './AppService';
 import Toaster, {TOAST_TYPE_WARNING} from './Toaster';
 
@@ -80,16 +80,14 @@ const stripHTMLTags = (html: string) => {
 const getFullUrl = (path: string) => {
   const p = `${path || ''}`.trim();
   const newPath = p.startsWith('/') ? p.substring(1) : p;
-  const appUrl = `${process.env.PUBLIC_URL || ''}`.trim();
+  const appUrl = `${process.env.REACT_APP_PUBLIC_URL || ''}`.trim();
   const apUrl = appUrl.endsWith('/') ? appUrl.slice(0, -1) : appUrl;
   return `${apUrl}/${newPath}`;
 }
 
 const getModuleUrl = (customUrl: string, customBaseUrl?: string, customAuthPath = THIRD_PARTY_AUTH_PATH, mConnectBaseUrl?: string) => {
-  const customPathBased64 = Buffer.from(customUrl).toString('base64');
-  const url = `${customBaseUrl || (process.env.PUBLIC_URL || '')}${customAuthPath}/${customPathBased64}`;
-  const base64 = Buffer.from(url).toString('base64');
-  return `${mConnectBaseUrl || ''}/modules/remote/${base64}`;
+  const { full } = SchoolBoxHelper.getModuleUrl(customUrl, customBaseUrl, customAuthPath);
+  return full;
 }
 
 const getUrlParams = (params: iConfigParams = {}) => {

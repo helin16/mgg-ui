@@ -1,5 +1,5 @@
 const getThumbnail = (url: string) => {
-  if (url.trim().includes(process.env.PUBLIC_URL || 'localhost') || url.trim().toLowerCase().includes('mentonegirls.vic.edu.au')) {
+  if (url.trim().includes(process.env.REACT_APP_PUBLIC_URL || 'localhost') || url.trim().toLowerCase().includes('mentonegirls.vic.edu.au')) {
     return `${url}?thumb=1`;
   }
 
