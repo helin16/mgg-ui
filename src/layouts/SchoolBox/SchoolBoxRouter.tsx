@@ -113,7 +113,7 @@ const SchoolBoxRouter = ({
         <CustomScriptUrlGenPage customUrl={remoteUrl} customUrlPath={path} />
       );
     }
-    case "/my_student": {
+    case SchoolBoxUrls.MyClassList: {
       removeSchoolBoxIframe();
       return <MyClassListPage />;
     }
