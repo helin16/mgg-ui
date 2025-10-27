@@ -22,7 +22,7 @@ enum TabKeys {
 }
 const Wrapper = styled.div``;
 type iEditPanel = {
-  settings: any;
+  settings?: any;
   activeTabKey: TabKeys;
   onTabSelected: (key: TabKeys) => void;
   onUpdate: (data: any) => void;
@@ -35,7 +35,7 @@ const EditPanel = ({ settings: studentBookListConfig, onUpdate, activeTabKey, on
   const handleUpdate = (newData = {}) => {
     setAddingNewHidingName(defaultAddHidingState);
     onUpdate({
-      ...studentBookListConfig,
+      ...(studentBookListConfig || {}),
       ...newData,
     });
   };
@@ -58,14 +58,14 @@ const EditPanel = ({ settings: studentBookListConfig, onUpdate, activeTabKey, on
           <SectionDiv>the Subject / Book list will <b>HIDE</b> all subjects with name containing any of the words: </SectionDiv>
           <FlexContainer className={'align-items-start justify-content-start gap-1 space-below'}>
             {
-              (studentBookListConfig.hideNames || []).map((item: string, index: number) => (
+              (studentBookListConfig?.hideNames || []).map((item: string, index: number) => (
                 <h4>
                   <Badge key={index} bg="secondary">
                     <FlexContainer className={'align-items-center justify-content-start gap-1'}>
                       <span>{item}</span>
                       <Icons.X className={'cursor-pointer'} onClick={() => {
                         handleUpdate({
-                          hideNames: (studentBookListConfig.hideNames || []).filter((str: string) => `${str || ''}`.trim() !== `${item || ''}`.trim())
+                          hideNames: (studentBookListConfig?.hideNames || []).filter((str: string) => `${str || ''}`.trim() !== `${item || ''}`.trim())
                         })
                       }}/>
                     </FlexContainer>
@@ -85,7 +85,7 @@ const EditPanel = ({ settings: studentBookListConfig, onUpdate, activeTabKey, on
                     variant={'secondary'}
                     onClick={() => {
                       handleUpdate({
-                        hideNames: _.uniq([...studentBookListConfig.hideNames || [], addingNewHidingName.newName].filter(str => `${str || ''}`.trim() !== ''))
+                        hideNames: _.uniq([...(studentBookListConfig?.hideNames || []), addingNewHidingName.newName].filter(str => `${str || ''}`.trim() !== ''))
                       })
                     }}
                   >
@@ -108,7 +108,7 @@ const EditPanel = ({ settings: studentBookListConfig, onUpdate, activeTabKey, on
           <SectionDiv>Below wording will be displayed <b>ABOVE</b> the Subject / Book list</SectionDiv>
           <RichTextEditor
             key={'pre-list'}
-            value={studentBookListConfig.preListText || ''}
+            value={studentBookListConfig?.preListText || ''}
             onChange={(newValue) => {
               handleUpdate({ preListText: newValue });
             }}
@@ -118,7 +118,7 @@ const EditPanel = ({ settings: studentBookListConfig, onUpdate, activeTabKey, on
           <SectionDiv>Below wording will be displayed <b>BELOW</b> the Subject / Book list</SectionDiv>
           <RichTextEditor
             key={'post-list'}
-            value={studentBookListConfig.postListText || ''}
+            value={studentBookListConfig?.postListText || ''}
             onChange={(newValue) => {
               handleUpdate({ postListText: newValue });
             }}

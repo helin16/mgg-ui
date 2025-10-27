@@ -45,7 +45,7 @@ const MyClassListPage = () => {
               This page is designed for teachers export student list, in order
               to import them into external tools like: Education Perfect. Data
               is pulled from Synergetic directly.
-              <h6 className={"text-danger text-capitalize"}>{errorMsg}</h6>
+              <h6 className={"text-capitalize"}>{errorMsg}</h6>
             </>
           }
         />
