@@ -132,7 +132,7 @@ const StudentSubjectList = ({className, studentSynId}: iStudentSubjectList) => {
     if (isModuleUser !== true) {
       return null;
     }
-    const { full } = SchoolBoxHelper.getModuleUrl(SchoolBoxUrls.MyClassList);
+    const { relative } = SchoolBoxHelper.getModuleUrl(SchoolBoxUrls.MyClassList);
     return <Alert dismissible>
       <h5>Module Admin view only</h5>
       This module is design to get list subjects for student to purchase book before term starts, without import the future time tables.
@@ -140,7 +140,7 @@ const StudentSubjectList = ({className, studentSynId}: iStudentSubjectList) => {
         <b>Subject info</b> is from the latest File Semester in Synergetic and its TimeTable Config. The .tfx file pushed by TimeTabler.
       </div>
       <div>
-        <b>Configuration</b> you can change the settings from <b>Admin btn</b> on top right corner of <a href={full}>My Class List Page</a>.
+        <b>Configuration</b> you can change the settings from <b>Admin btn</b> on top right corner of <a href={relative}>My Class List Page</a>.
       </div>
     </Alert>
   }

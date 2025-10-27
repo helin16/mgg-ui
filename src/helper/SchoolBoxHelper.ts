@@ -26,17 +26,16 @@ const getAllParams = () => {
   return {};
 }
 
-const getModuleUrl = (path: string, baseUrl: string = '', authPath: string = '', mConnectBaseUrl: string = '') => {
+const getModuleUrl = (path: string, baseUrl: string = '', authPath: string = '', mConnectBaseUrl?: string) => {
   const customBaseUrl = getBaseUrl(baseUrl);
   const customAuthPath = `${authPath || ''}`.trim() === '' ? THIRD_PARTY_AUTH_PATH : authPath;
   const customPathBased64 = Buffer.from(path).toString('base64');
   const url = `${customBaseUrl}${customAuthPath}/${customPathBased64}`;
   const base64 = Buffer.from(url).toString('base64');
   const relativeUrl = `/modules/remote/${base64}${UtilsService.getUrlParams(getAllParams())}`;
-  const fullBaseUrl = `${mConnectBaseUrl || ''}`.trim() === '' ? customBaseUrl : mConnectBaseUrl;
   return {
     relative: relativeUrl,
-    full: `${fullBaseUrl}${relativeUrl}`,
+    full: `${mConnectBaseUrl || ''}${relativeUrl}`,
   }
 }
 
