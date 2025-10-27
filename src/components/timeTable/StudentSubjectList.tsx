@@ -12,6 +12,8 @@ import Page401 from '../Page401';
 import SynVStudentContactAllAddressService from '../../services/Synergetic/Student/SynVStudentContactAllAddressService';
 import {OP_OR} from '../../helper/ServiceHelper';
 import {STUDENT_CONTACT_TYPE_SC1} from '../../types/Synergetic/Student/iStudentContact';
+import MggsModuleService from '../../services/Module/MggsModuleService';
+import {MGGS_MODULE_ID_MY_CLASS_LIST} from '../../types/modules/iModuleUser';
 
 const Wrapper = styled.div``
 type iStudentSubjectList = {
@@ -28,6 +30,8 @@ const StudentSubjectList = ({className, studentSynId}: iStudentSubjectList) => {
   const [fileSemester, setFileSemester] = useState<string>('');
   const [currentStudent, setCurrentStudent] = useState<iVPastAndCurrentStudent | null>(null);
   const [currentUserIsParent, setCurrentUserIsParent] = useState(false);
+  const [preListText, setPreListText] = useState<string>('');
+  const [postListText, setPostListText] = useState<string>('');
 
   useEffect(() => {
     if (currentUserSynId === '') {
@@ -41,6 +45,7 @@ const StudentSubjectList = ({className, studentSynId}: iStudentSubjectList) => {
     let isCancelled = false;
     setIsLoading(true);
     Promise.all([
+      MggsModuleService.getModule(MGGS_MODULE_ID_MY_CLASS_LIST),
       SynTimeTableService.getStudentSubjects(studentSynIdStr),
       SynVStudentService.getVPastAndCurrentStudentAll({
         where: JSON.stringify({
@@ -60,8 +65,15 @@ const StudentSubjectList = ({className, studentSynId}: iStudentSubjectList) => {
         perPage: 1,
       })
     ])
-      .then(([ttResult, studentResult, relationResult]) => {
+      .then(([module, ttResult, studentResult, relationResult]) => {
         if (isCancelled) { return }
+        const settings = module.settings?.studentBookList || {};
+        const hidingNames = (settings.hideNames || [])
+          .map((name: string) => `${name || ''}`.trim().toLowerCase())
+          .filter((name: string) => name !== '')
+        setPreListText(`${settings.preListText || ''}`.trim());
+        setPostListText(`${settings.postListText || ''}`.trim());
+
         const students = studentResult.data || [];
         setFileYear(ttResult.FileYear || '');
         setFileSemester(ttResult.FileSemester || '');
@@ -69,8 +81,11 @@ const StudentSubjectList = ({className, studentSynId}: iStudentSubjectList) => {
           (ttResult.Classes || [])
             .reduce((arr: string[], classInfo: {Class?: { SubjectName: string }}) => [...arr, classInfo.Class?.SubjectName], [])
             .filter((subjectName: string) => {
-              const subjName = `${subjectName || ''}`.toLowerCase();
-              return subjName.indexOf('assembly') < 0 && subjName.indexOf('house') < 0 && subjName.indexOf('tutor group') < 0 && subjName.indexOf('gsv') < 0
+              const subjName = `${subjectName || ''}`.trim().toLowerCase();
+              if (subjName === '') {
+                return false;
+              }
+              return !hidingNames.some((name: string) => subjName.includes(name));
             })
         );
         setCurrentStudent(students.length > 0 ? students[0] : null);
@@ -78,7 +93,6 @@ const StudentSubjectList = ({className, studentSynId}: iStudentSubjectList) => {
       })
       .catch(err=> {
         if (isCancelled) { return }
-        console.error(err);
         Toaster.showApiError(err);
       })
       .finally(() => {
@@ -90,9 +104,17 @@ const StudentSubjectList = ({className, studentSynId}: iStudentSubjectList) => {
     }
   }, [studentSynIdStr, currentUserSynId]);
 
+  const getTextPanel = (html: string) => {
+    if (`${html || ''}`.trim() === '') {
+      return null;
+    }
+    return <div dangerouslySetInnerHTML={{__html: html}}></div>
+  }
+
   const getList = () => {
     return (
       <>
+        {getTextPanel(preListText)}
         <h3>Subjects for <u><i>{currentStudent?.StudentNameInternal}</i></u> - Semester {fileSemester}, {fileYear}</h3>
         <Table
           hover
@@ -106,6 +128,7 @@ const StudentSubjectList = ({className, studentSynId}: iStudentSubjectList) => {
               }
             },
           ]} rows={subjects.sort()} />
+          {getTextPanel(postListText)}
       </>
     )
   }

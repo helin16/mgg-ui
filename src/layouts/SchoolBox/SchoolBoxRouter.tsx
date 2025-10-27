@@ -43,6 +43,7 @@ import HOYChatManagePage from '../../pages/HOYChat/HOYChatManagePage';
 import HOYChatForm from '../../pages/HOYChat/components/HOYChatForm';
 import StudentSubjectList from '../../components/timeTable/StudentSubjectList';
 import {useSearchParams} from 'react-router-dom';
+import SchoolBoxUrls from './SchoolBoxUrls';
 
 const schoolBoxIframeElementId = "remote";
 const SchoolBoxRouter = ({
@@ -231,7 +232,7 @@ const SchoolBoxRouter = ({
         <HOYChatForm />
       );
     }
-    case "/studentSubjectList": {
+    case SchoolBoxUrls.StudentBookList: {
       removeSchoolBoxIframe();
       return (
         //@ts-ignore

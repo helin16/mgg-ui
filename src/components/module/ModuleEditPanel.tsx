@@ -23,6 +23,7 @@ const ModuleEditPanel = ({moduleId, roleId, getChildren, getSubmitData}: iModule
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [module, setModule] = useState<iModule | null>(null);
+  const [reload, setReload] = useState(0);
 
   useEffect(() => {
     let isCanceled = false;
@@ -41,7 +42,7 @@ const ModuleEditPanel = ({moduleId, roleId, getChildren, getSubmitData}: iModule
     return () => {
       isCanceled = true;
     }
-  }, [moduleId, roleId]);
+  }, [moduleId, roleId, reload]);
 
   const updateModule = () => {
     const data = getSubmitData ? getSubmitData() : {};
@@ -57,8 +58,10 @@ const ModuleEditPanel = ({moduleId, roleId, getChildren, getSubmitData}: iModule
       })
       .then(resp => {
         setModule(resp);
+        setReload(reload + 1);
         Toaster.showToast('Module Updated.', TOAST_TYPE_SUCCESS);
       }).catch(err => {
+        console.error(err);
         Toaster.showApiError(err);
       }).finally(() => {
         setIsSaving(false);
