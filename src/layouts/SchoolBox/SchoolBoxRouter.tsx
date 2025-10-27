@@ -1,16 +1,15 @@
 import React from "react";
 import StudentReport from "../../pages/studentReport/StudentReport";
-import OperooSafetyAlertsPage from "../../pages/operoo/OperooSafetyAlertsPage";
 import ModuleAccessWrapper from "../../components/module/ModuleAccessWrapper";
 import {
   MGGS_MODULE_ID_ADMISSIONS,
-  MGGS_MODULE_ID_ALUMNI_REQUEST, MGGS_MODULE_ID_CAMPUS_DISPLAY,
+  MGGS_MODULE_ID_CAMPUS_DISPLAY,
   MGGS_MODULE_ID_ENROLLMENTS,
   MGGS_MODULE_ID_FINANCE,
   MGGS_MODULE_ID_HOUSE_AWARDS, MGGS_MODULE_ID_HOY_CHAT_EMAIL,
   MGGS_MODULE_ID_MGG_APP_DEVICES,
   MGGS_MODULE_ID_ONLINE_DONATION,
-  MGGS_MODULE_ID_OPEROO_SAFETY_ALERTS, MGGS_MODULE_ID_POWER_BI_REPORT,
+  MGGS_MODULE_ID_POWER_BI_REPORT,
   MGGS_MODULE_ID_SCHOOL_DATA_SUBMISSION,
   MGGS_MODULE_ID_STAFF_LIST,
   MGGS_MODULE_ID_SYN_EMAIL_TEMPLATE
@@ -20,7 +19,6 @@ import MedicalReportPage from "../../pages/medicalReports/MedicalReportPage";
 import CustomScriptUrlGenPage from "../../pages/tools/CustomScriptUrlGenPage";
 import MyClassListPage from "../../pages/students/MyClassList/MyClassListPage";
 import BudgetTrackerPage from "../../pages/BudgetTracker/BudgetTrackerPage";
-import AlumniRequestPage from "../../pages/alumni/AlumniRequestPage";
 import ParentDirectoryPage from "../../pages/parent/ParentDirectoryPage";
 import SchoolDataSubmissionsPage from "../../pages/dataSubmissions/SchoolDataSubmissionsPage";
 import StudentAbsenceParentSubmissionForm from "../../components/StudentAbsence/StudentAbsenceParentSubmissionForm";
@@ -71,11 +69,11 @@ const SchoolBoxRouter = ({
   }
 
   switch (path) {
-    case "/bt": {
+    case SchoolBoxUrls.BudgetTracker: {
       removeSchoolBoxIframe();
       return <BudgetTrackerPage />;
     }
-    case "/parent/directory": {
+    case SchoolBoxUrls.ParentDirectory: {
       removeSchoolBoxIframe();
       return <ParentDirectoryPage />;
     }
@@ -87,15 +85,7 @@ const SchoolBoxRouter = ({
       removeSchoolBoxIframe();
       return <StudentAttendanceRateReportPage />;
     }
-    case "/operoo/safetyAlerts": {
-      removeSchoolBoxIframe();
-      return (
-        <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_OPEROO_SAFETY_ALERTS}>
-          <OperooSafetyAlertsPage />
-        </ModuleAccessWrapper>
-      );
-    }
-    case "/score_board/home": {
+    case SchoolBoxUrls.HouseAwards: {
       removeSchoolBoxIframe();
       return (
         <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_HOUSE_AWARDS}>
@@ -103,11 +93,11 @@ const SchoolBoxRouter = ({
         </ModuleAccessWrapper>
       );
     }
-    case "/medial/action_plan": {
+    case SchoolBoxUrls.MedicalActionPlans: {
       removeSchoolBoxIframe();
       return <MedicalReportPage />;
     }
-    case "/helper/url/mconnect": {
+    case SchoolBoxUrls.ModuleUrlHelper: {
       removeSchoolBoxIframe();
       return (
         <CustomScriptUrlGenPage customUrl={remoteUrl} customUrlPath={path} />
@@ -117,19 +107,11 @@ const SchoolBoxRouter = ({
       removeSchoolBoxIframe();
       return <MyClassListPage />;
     }
-    case "/school_data_submission": {
+    case SchoolBoxUrls.DataSubmission: {
       removeSchoolBoxIframe();
       return (
         <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_SCHOOL_DATA_SUBMISSION}>
           <SchoolDataSubmissionsPage />
-        </ModuleAccessWrapper>
-      );
-    }
-    case "/alumni/admin": {
-      removeSchoolBoxIframe();
-      return (
-        <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_ALUMNI_REQUEST}>
-          <AlumniRequestPage />
         </ModuleAccessWrapper>
       );
     }
@@ -142,7 +124,7 @@ const SchoolBoxRouter = ({
       removeSchoolBoxIframe();
       return <StudentAbsencePage />;
     }
-    case "/mobile_devices": {
+    case SchoolBoxUrls.MobileAppDevices: {
       removeSchoolBoxIframe();
       return (
         <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_MGG_APP_DEVICES}>
@@ -150,7 +132,7 @@ const SchoolBoxRouter = ({
         </ModuleAccessWrapper>
       );
     }
-    case "/finance": {
+    case SchoolBoxUrls.Finance: {
       removeSchoolBoxIframe();
       return (
         <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_FINANCE}>
@@ -158,7 +140,7 @@ const SchoolBoxRouter = ({
         </ModuleAccessWrapper>
       );
     }
-    case "/online_donation/admin": {
+    case SchoolBoxUrls.OnlineDonationAdmin: {
       removeSchoolBoxIframe();
       return (
         <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_ONLINE_DONATION}>
@@ -174,7 +156,7 @@ const SchoolBoxRouter = ({
         </ModuleAccessWrapper>
       );
     }
-    case "/enrolments_admin": {
+    case SchoolBoxUrls.Enrolments: {
       removeSchoolBoxIframe();
       return (
         <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_ENROLLMENTS}>
@@ -194,7 +176,7 @@ const SchoolBoxRouter = ({
         </ModuleAccessWrapper>
       );
     }
-    case "/campusDisplay/manage": {
+    case SchoolBoxUrls.CampusDisplayAdmin: {
       removeSchoolBoxIframe();
       return (
         <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_CAMPUS_DISPLAY}>
@@ -202,7 +184,7 @@ const SchoolBoxRouter = ({
         </ModuleAccessWrapper>
       );
     }
-    case "/powerbi/manager": {
+    case SchoolBoxUrls.PowerBI: {
       removeSchoolBoxIframe();
       return (
         <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_POWER_BI_REPORT}>
@@ -210,7 +192,7 @@ const SchoolBoxRouter = ({
         </ModuleAccessWrapper>
       );
     }
-    case "/admissions": {
+    case SchoolBoxUrls.Admissions: {
       removeSchoolBoxIframe();
       return (
         <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_ADMISSIONS}>
@@ -218,7 +200,7 @@ const SchoolBoxRouter = ({
         </ModuleAccessWrapper>
       );
     }
-    case "/hoyChat": {
+    case SchoolBoxUrls.HOYChatAdmin: {
       removeSchoolBoxIframe();
       return (
         <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_HOY_CHAT_EMAIL}>
@@ -226,7 +208,7 @@ const SchoolBoxRouter = ({
         </ModuleAccessWrapper>
       );
     }
-    case "/hoyChatForm": {
+    case SchoolBoxUrls.HOYChatForm: {
       removeSchoolBoxIframe();
       return (
         <HOYChatForm />

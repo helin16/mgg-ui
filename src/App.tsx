@@ -12,9 +12,7 @@ import PingService from './services/PingService';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import AlumniRegistrationPage from './pages/alumni/AlumniRegistrationPage';
 import {
-  URL_ALUMNI_REGISTRATION,
   URL_ASSET_PICK_UP,
   URL_CAMPUS_DISPLAY_PAGE, URL_CAMPUS_DISPLAY_SLIDE_SHOW_BY_LOCATION_PAGE, URL_ENEWS_VIEW_PAGE,
   URL_ONLINE_DONATION
@@ -48,7 +46,6 @@ const Router = () => {
           <Route path={URL_CAMPUS_DISPLAY_SLIDE_SHOW_BY_LOCATION_PAGE} element={<CampusDisplayByLocationIdPage />} />
 
 
-          <Route path={URL_ALUMNI_REGISTRATION} element={<AlumniRegistrationPage />} />
           <Route path={URL_ONLINE_DONATION} element={<OnlineDonationPage />} />
 
           <Route path={URL_ENEWS_VIEW_PAGE} element={<ENewsViewingPage />} />

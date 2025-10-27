@@ -1,6 +1,5 @@
 import * as _ from 'lodash';
 import {Moment} from 'moment-timezone';
-import {Buffer} from 'buffer';
 import SchoolBoxHelper, {THIRD_PARTY_AUTH_PATH} from '../helper/SchoolBoxHelper';
 import {iConfigParams} from './AppService';
 import Toaster, {TOAST_TYPE_WARNING} from './Toaster';
