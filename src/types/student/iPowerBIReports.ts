@@ -3,7 +3,3 @@ export type iPowerBIReport = {
   reportId: string;
   sort: number;
 };
-
-export type iPowerBiReportMap = {
-  [key: string]: iPowerBIReport
-}

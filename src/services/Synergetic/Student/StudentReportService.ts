@@ -5,7 +5,6 @@ import iStudentReportComparativeResultMap from '../../../types/Synergetic/Studen
 import iStudentReportCoCurricular from '../../../types/Synergetic/Student/iStudentReportCoCurricular';
 import iStudentReportAward from '../../../types/Synergetic/Student/iStudentReportAward';
 import iAsset from '../../../types/asset/iAsset';
-import {iPowerBiReportMap} from '../../../types/student/iPowerBIReports';
 import iStudentReportStyle from '../../../types/Synergetic/Student/iStudentReportStyle';
 import iPaginatedResult from '../../../types/iPaginatedResult';
 
