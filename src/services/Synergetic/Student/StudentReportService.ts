@@ -58,10 +58,6 @@ const emailStudentReportPDF = (studentId: string | number, reportYearId: string 
   return AppService.post(`${baseEndPoint}/email/${studentId}/${reportYearId}`, params).then(resp => resp.data);
 };
 
-const getPowerBIReports = (studentId: string | number, params: iConfigParams = {}): Promise<iPowerBiReportMap> => {
-  return AppService.get(`${baseEndPoint}/getPowerBIReportIds/${studentId}`, params).then(resp => resp.data);
-};
-
 const genComparativeResults = (params: iConfigParams): Promise<{ success: boolean}> => {
   return AppService.post(`${baseEndPoint}/comparative`, params).then(resp => resp.data);
 }
@@ -80,7 +76,6 @@ const StudentReportService = {
   getStudentReportAwardsForAStudent,
   getStudentReportDownloadPDF,
   emailStudentReportPDF,
-  getPowerBIReports,
   genComparativeResults,
 }
 

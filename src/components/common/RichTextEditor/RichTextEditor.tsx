@@ -132,13 +132,13 @@ const RichTextEditor = ({value, plugins, toolBar, settings, onChange, className,
           removed_menuitems: 'newdocument',
           document_base_url: '',
           relative_urls: false,
-          setup: (editor) => {
+          setup: (editor: any) => {
             editor.on('init', () => {
               // Set isLoading to false when TinyMCE is initialized
               setIsLoading(false);
             });
 
-            editor.on('blur', (event) => {
+            editor.on('blur', (event: any) => {
               onBlur && onBlur(event);
             });
           },

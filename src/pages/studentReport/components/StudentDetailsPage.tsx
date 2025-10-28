@@ -1,7 +1,7 @@
 import iVStudent from '../../../types/Synergetic/Student/iVStudent';
 import PageTitle from '../../../components/PageTitle';
-import {Button, Spinner, Tab, Tabs} from 'react-bootstrap';
-import {useEffect, useState} from 'react';
+import {Button, Tab, Tabs} from 'react-bootstrap';
+import {useState} from 'react';
 import styled from 'styled-components';
 import * as Icon from 'react-bootstrap-icons';
 import iStudentReportYear from '../../../types/Synergetic/Student/iStudentReportYear';
@@ -9,9 +9,6 @@ import ReportedYearsList from './AcademicReports/ReportedYearsList';
 import StudentAcademicReportDetails from './AcademicReports/StudentAcademicReportDetails';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../redux/makeReduxStore';
-import StudentReportService from '../../../services/Synergetic/Student/StudentReportService';
-import {iPowerBiReportMap} from '../../../types/student/iPowerBIReports';
-import PowerBIReportViewer from '../../../components/powerBI/PowerBIReportViewer';
 import {mainBlue} from '../../../AppWrapper';
 import StudentStatusBadge from './AcademicReports/StudentStatusBadge';
 import {FlexContainer} from '../../../styles';
@@ -19,8 +16,6 @@ import WellBeingGraphPanel from './WellBeingGraphs/WellBeingGraphPanel';
 import StudentParticipationPanel from './StudentParticipation/StudentParticipationPanel';
 
 const TAB_STUDENT_PARTICIPATION = 'studentParticipation';
-const TAB_STANDARDISED_TESTS = 'standardisedTests';
-const TAB_SCHOOL_BASED_ASSESSMENTS = 'schoolBasedAssessments';
 const TAB_WELL_BEING = 'wellBeing';
 
 const Wrapper = styled.div`
@@ -49,39 +44,16 @@ const StudentDetailsPage = ({student ,onClearSelectedStudent, showTitle = true}:
   const {user} = useSelector((state: RootState) => state.auth);
   const [selectedTab, setSelectedTab] = useState(TAB_STUDENT_PARTICIPATION);
   const [selectedStudentReportYear, setSelectedStudentReportYear] = useState<iStudentReportYear | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [powerBIReports, setPowerBIReports] = useState<iPowerBiReportMap>({});
-
-  useEffect(() => {
-    let isCancelled = false;
-
-    setIsLoading(true)
-    StudentReportService.getPowerBIReports(student.StudentID)
-      .then(resp => {
-        if (isCancelled === true) { return; }
-        setPowerBIReports(resp);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-
-    return () => {
-      isCancelled = true;
-    }
-  }, [student]);
 
   const getTabs = () => {
-    const reportKeys = Object.keys(powerBIReports);
     return (
       <Tabs
         className={'main-tabs'}
         activeKey={selectedTab}
         onSelect={(tabKey) => setSelectedTab(`${tabKey}`)}
       >
-        {/*<Tab eventKey={TAB_ACADEMIC_REPORTS} title={'Academic Reports'} />*/}
-        {reportKeys.map(reportKey => {
-          return <Tab key={reportKey} eventKey={reportKey} title={powerBIReports[reportKey].name} />
-        })}
+        <Tab key={TAB_STUDENT_PARTICIPATION} eventKey={TAB_STUDENT_PARTICIPATION} title={'Student Participation (Staff Only)'} />
+        <Tab key={TAB_WELL_BEING} eventKey={TAB_WELL_BEING} title={'WellBeing (Staff Only)'} />
       </Tabs>
     )
   }
@@ -91,12 +63,6 @@ const StudentDetailsPage = ({student ,onClearSelectedStudent, showTitle = true}:
       return <StudentParticipationPanel student={student}/>
       // return <PowerBIReportViewer reportId={powerBIReports[selectedTab].reportId || ''} student={student}/>
     }
-    if (selectedTab === TAB_STANDARDISED_TESTS) {
-      return <PowerBIReportViewer reportId={powerBIReports[selectedTab].reportId || ''} student={student}/>
-    }
-    if (selectedTab === TAB_SCHOOL_BASED_ASSESSMENTS) {
-      return <PowerBIReportViewer reportId={powerBIReports[selectedTab].reportId || ''} student={student}/>
-    }
     if (selectedTab === TAB_WELL_BEING) {
       return <WellBeingGraphPanel student={student}/>
     }
@@ -104,9 +70,6 @@ const StudentDetailsPage = ({student ,onClearSelectedStudent, showTitle = true}:
   }
 
   const getContent = () => {
-    if (isLoading === true) {
-      return <Spinner animation={'border'} />;
-    }
     if (selectedStudentReportYear !== null) {
       return (
         <StudentAcademicReportDetails
