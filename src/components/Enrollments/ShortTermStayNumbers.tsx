@@ -109,7 +109,7 @@ const ShortTermStayNumbers = ({className, header}: iShortTermStayNumbers) => {
         <Table
           hover
           striped
-          rows={Object.keys(studentMap)}
+          rows={selectedYears.map(yr => `${yr}`)}
           columns={[
             {
               key: 'year',
