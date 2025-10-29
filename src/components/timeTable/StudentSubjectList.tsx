@@ -150,7 +150,7 @@ const StudentSubjectList = ({className, studentSynId}: iStudentSubjectList) => {
       <>
         {getStaffGuideLines()}
         {getTextPanel(preListText)}
-        <h3>Subjects for <u><i>{currentStudent?.StudentNameInternal}</i></u> - Semester {fileSemester}, {fileYear}</h3>
+        <div style={{fontSize: '18px'}}><u><i>{currentStudent?.StudentNameInternal}</i></u> - Semester {fileSemester}, {fileYear}</div>
         <Table
           hover
           striped

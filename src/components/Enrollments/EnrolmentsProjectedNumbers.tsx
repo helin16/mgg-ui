@@ -14,6 +14,7 @@ import SynLuFutureStatusSelector from '../lookup/SynLuFutureStatusSelector';
 import Table, {iTableColumn} from '../common/Table';
 import SynLuFutureStatusService from '../../services/Synergetic/Lookup/SynLuFutureStatusService';
 import iSynLuFutureStatus from '../../types/Synergetic/Lookup/iSynLuFutureStatus';
+import SynVStudentService from '../../services/Synergetic/Student/SynVStudentService';
 
 type iFutureEnrolmentsMap = {[key: number | string]: iSynVFutureStudent[]}
 const Wrapper = styled.div``;
@@ -51,14 +52,20 @@ const EnrolmentsProjectedNumbers = ({className, header}: iEnrolmentsProjectedNum
           FutureStatus: selectedStatusCodes,
         }),
         perPage: 99999999,
+      }),
+      SynVStudentService.getCurrentVStudents({
+        where: JSON.stringify({
+          FileYear: currentYear,
+        })
       })
     ])
-      .then(([futureStatuses, futureStudentResult]) => {
+      .then(([futureStatuses, futureStudentResult, currentStudentResult]) => {
         if (isCanceled) { return }
         const fStudentsMap = (futureStudentResult.data || []).reduce((map: iFutureEnrolmentsMap, fStudent) => ({
           ...map,
           [`${fStudent.FutureEnrolYear}`]: [...(map[`${fStudent.FutureEnrolYear}`] || []), fStudent],
         }), {});
+        // const currentStudents = currentStudent || [];
         setFutureEnrolmentsMap(fStudentsMap);
         setFutureStatusMap(futureStatuses.reduce((map: iFutureStatusMap, futureStatus) => ({ ...map, [futureStatus.Code]: futureStatus }), {}))
       })
