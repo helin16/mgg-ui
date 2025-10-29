@@ -115,9 +115,24 @@ const EnrolmentsProjectedNumbers = ({className, header}: iEnrolmentsProjectedNum
       }
       const fSt = yr in futureEnrolmentsMap ? futureEnrolmentsMap[yr] : [];
       return [...arr, ...fSt];
-    }, [])
+    }, []);
+
     return fStudents
       .filter(fStudent => statusCodes.length <= 0 ?  true : statusCodes.indexOf(fStudent.StudentStatus) >= 0)
+  }
+
+  const getFutureLeftTotal = (year: string  | number, statusCodes: string[] = [], isExact = true) => {
+    const yearNumber = Number(year);
+    const yearDiff = MathHelper.sub(yearNumber, currentYear);
+    return getFutureTotal(year, statusCodes, isExact).filter(student => {
+      let yearLevel = Number(student.StudentEntryYearLevel);
+      if (yearLevel === 30) {
+        yearLevel = -2;
+      } else if (yearLevel === 40) {
+        yearLevel = -1;
+      }
+      return MathHelper.add(yearLevel, yearDiff) > 12;
+    })
   }
 
   const getCurrentStudents = (year: string | number) => {
@@ -183,8 +198,10 @@ const EnrolmentsProjectedNumbers = ({className, header}: iEnrolmentsProjectedNum
   }
 
   const getTotal = (year: string | number) => {
+    const lastYear = MathHelper.sub(Number(year), 1);
     const continuedStudents = getContinuedStudents(year);
-    const previousYearFuture = getFutureTotal(MathHelper.sub(Number(year), 1), [], false);
+    const previousYearFutureLeftIds = getFutureLeftTotal(lastYear, [], false).map(student => student.StudentID);
+    const previousYearFuture = getFutureTotal(lastYear, [], false).filter(student => previousYearFutureLeftIds.indexOf(student.StudentID) < 0);
     const futureStudents = getFutureTotal(year);
     const returningStudents = getCurrentStudentReturningInThatYear(year)
       .filter(student => {
@@ -304,7 +321,8 @@ const EnrolmentsProjectedNumbers = ({className, header}: iEnrolmentsProjectedNum
               key: 'lastYearFuture',
               header: (col: iTableColumn<string>) => <th key={col.key}>+ Future Prev Year(s)</th>,
               cell: (col, data) => {
-                const records = getFutureTotal(MathHelper.sub(Number(data), 1), [], false);
+                const lastYear = MathHelper.sub(Number(data), 1);
+                const records = getFutureTotal(lastYear, [], false);
 
                 if (records.length <= 0) {
                   return <td key={col.key}></td>;
@@ -312,7 +330,28 @@ const EnrolmentsProjectedNumbers = ({className, header}: iEnrolmentsProjectedNum
                 return <td key={col.key}>
                   <StudentNumberDetailsPopupBtn
                     records={records}
-                    variant={'link'}>
+                    variant={'link'}
+                  >
+                    {records.length}
+                  </StudentNumberDetailsPopupBtn>
+                </td>
+              },
+            },
+            {
+              key: 'lastYearFutureGrade',
+              header: (col: iTableColumn<string>) => <th key={col.key}>- Future Prev Year(s) Graduate</th>,
+              cell: (col, data) => {
+                const lastYear = MathHelper.sub(Number(data), 1);
+                const records = getFutureLeftTotal(lastYear, [], false);
+
+                if (records.length <= 0) {
+                  return <td key={col.key}></td>;
+                }
+                return <td key={col.key}>
+                  <StudentNumberDetailsPopupBtn
+                    records={records}
+                    variant={'link'}
+                  >
                     {records.length}
                   </StudentNumberDetailsPopupBtn>
                 </td>
