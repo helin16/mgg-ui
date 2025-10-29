@@ -11,7 +11,11 @@ import {iVPastAndCurrentStudent} from '../../types/Synergetic/Student/iVStudent'
 import Page401 from '../Page401';
 import SynVStudentContactAllAddressService from '../../services/Synergetic/Student/SynVStudentContactAllAddressService';
 import {OP_OR} from '../../helper/ServiceHelper';
-import {STUDENT_CONTACT_TYPE_SC1} from '../../types/Synergetic/Student/iStudentContact';
+import {
+  STUDENT_CONTACT_TYPE_SC1,
+  STUDENT_CONTACT_TYPE_SC2,
+  STUDENT_CONTACT_TYPE_SC3
+} from '../../types/Synergetic/Student/iStudentContact';
 import MggsModuleService from '../../services/Module/MggsModuleService';
 import {MGGS_MODULE_ID_MY_CLASS_LIST} from '../../types/modules/iModuleUser';
 import AuthService from '../../services/AuthService';
@@ -63,7 +67,7 @@ const StudentSubjectList = ({className, studentSynId}: iStudentSubjectList) => {
       SynVStudentContactAllAddressService.getAll({
         where: JSON.stringify({
           StudentID: studentSynIdStr,
-          StudentContactType: [STUDENT_CONTACT_TYPE_SC1],
+          StudentContactType: [STUDENT_CONTACT_TYPE_SC1, STUDENT_CONTACT_TYPE_SC2, STUDENT_CONTACT_TYPE_SC3],
           [OP_OR]: [
             { StudentContactID: currentUserSynId },
             { StudentContactSpouseID: currentUserSynId },
