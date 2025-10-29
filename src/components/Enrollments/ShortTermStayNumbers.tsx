@@ -14,6 +14,7 @@ import SynVStudentService from '../../services/Synergetic/Student/SynVStudentSer
 import {CAMPUS_CODE_SHORT_TERM} from '../../types/Synergetic/Lookup/iSynLuCampus';
 import SynLuYearLevelService from '../../services/Synergetic/Lookup/SynLuYearLevelService';
 import iSynLuYearLevel from '../../types/Synergetic/Lookup/iSynLuYearLevel';
+import * as _ from 'lodash';
 
 type iStudentMap = {[key: number | string]: iVPastAndCurrentStudent[]}
 const Wrapper = styled.div``;
@@ -59,7 +60,7 @@ const ShortTermStayNumbers = ({className, header}: iShortTermStayNumbers) => {
         const students = (studentResult.data || []);
         const sMap = students.reduce((map: iStudentMap, student) => ({
           ...map,
-          [`${student.FileYear}`]: [...(map[`${student.FileYear}`] || []), student],
+          [`${student.FileYear}`]: _.uniqBy([...(map[`${student.FileYear}`] || []), student], (st) => st.StudentID),
         }), {});
         setStudentMap(sMap);
         setStudentYrLvls(students.map(student => `${student.StudentYearLevel || ''}`));
