@@ -11,7 +11,7 @@ import {FlexContainer} from '../../styles';
 import Table from '../common/Table';
 import {iVPastAndCurrentStudent} from '../../types/Synergetic/Student/iVStudent';
 import SynVStudentService from '../../services/Synergetic/Student/SynVStudentService';
-import {CAMPUS_CODE_SHORT_TERM, MGG_CAMPUS_CODES} from '../../types/Synergetic/Lookup/iSynLuCampus';
+import {MGG_CAMPUS_CODES} from '../../types/Synergetic/Lookup/iSynLuCampus';
 import * as _ from 'lodash';
 
 type iStudentMap = {[key: number | string]: iVPastAndCurrentStudent[]}
@@ -139,7 +139,7 @@ const RetentionRatesPanel = ({className, header}: iRetentionRatesPanel) => {
               onSelects={(years) => {setSelectedYears(years === null ? defaultYears : years)}}
             />
           </div>
-          <Alert>Short Terms Stay Students: All Student with Campus Code is {CAMPUS_CODE_SHORT_TERM}.</Alert>
+          <Alert>All Year 12 students who is leaving in Dec are NOT treated as leavers.</Alert>
         </FlexContainer>
         <Table
           hover
