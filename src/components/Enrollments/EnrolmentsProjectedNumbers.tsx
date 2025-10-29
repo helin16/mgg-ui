@@ -108,8 +108,15 @@ const EnrolmentsProjectedNumbers = ({className, header}: iEnrolmentsProjectedNum
     )
   }
 
-  const getFutureTotal = (year: string  | number, statusCodes: string[] = []) => {
-    return (futureEnrolmentsMap[year] || [])
+  const getFutureTotal = (year: string  | number, statusCodes: string[] = [], isExact = true) => {
+    const fStudents = isExact === true ? (futureEnrolmentsMap[year] || []) : Object.keys(futureEnrolmentsMap).reduce((arr: iVStudent[], yr) => {
+      if (Number(yr) > Number(year)) {
+        return arr;
+      }
+      const fSt = yr in futureEnrolmentsMap ? futureEnrolmentsMap[yr] : [];
+      return [...arr, ...fSt];
+    }, [])
+    return fStudents
       .filter(fStudent => statusCodes.length <= 0 ?  true : statusCodes.indexOf(fStudent.StudentStatus) >= 0)
   }
 
@@ -177,7 +184,7 @@ const EnrolmentsProjectedNumbers = ({className, header}: iEnrolmentsProjectedNum
 
   const getTotal = (year: string | number) => {
     const continuedStudents = getContinuedStudents(year);
-    const previousYearFuture = getFutureTotal(MathHelper.sub(Number(year), 1));
+    const previousYearFuture = getFutureTotal(MathHelper.sub(Number(year), 1), [], false);
     const futureStudents = getFutureTotal(year);
     const returningStudents = getCurrentStudentReturningInThatYear(year)
       .filter(student => {
@@ -295,9 +302,9 @@ const EnrolmentsProjectedNumbers = ({className, header}: iEnrolmentsProjectedNum
             },
             {
               key: 'lastYearFuture',
-              header: (col: iTableColumn<string>) => <th key={col.key}>+ Future Prev Year</th>,
+              header: (col: iTableColumn<string>) => <th key={col.key}>+ Future Prev Year(s)</th>,
               cell: (col, data) => {
-                const records = getFutureTotal(MathHelper.sub(Number(data), 1));
+                const records = getFutureTotal(MathHelper.sub(Number(data), 1), [], false);
 
                 if (records.length <= 0) {
                   return <td key={col.key}></td>;
