@@ -1,6 +1,7 @@
 export const CAMPUS_CODE_JUNIOR = 'J';
 export const CAMPUS_CODE_SENIOR = 'S';
 export const CAMPUS_CODE_ELC = 'E';
+export const CAMPUS_CODE_SHORT_TERM = 'INC';
 
 export const MGG_CAMPUS_CODES = [CAMPUS_CODE_ELC, CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR]
 type iSynLuCampus = {

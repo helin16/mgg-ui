@@ -4,36 +4,48 @@ import { useState } from "react";
 import { Tab, Tabs } from "react-bootstrap";
 import AcaraDataPanel from "./ACARA/AcaraDataPanel";
 import StudentStatusMatrix from "./StudentStatus/StudentStatusMatrix";
+import VRTQAPanel from './VRTQA/VRTQAPanel';
 
-const TAB_NAME_CENSUS = "census";
-const TAB_NAME_ACARA = "ACARA";
-const TAB_NAME_STUDENT_STATUS_MATRIX = "STUDENT_STATUS_MATRIX";
+
+enum TabNames {
+  Census = "census",
+  Acara = "Acara",
+  Matrix = "Matrix",
+  VRTQA = "VRTQA",
+}
 
 const Wrapper = styled.div``;
 const SchoolDataSubmissionsPanel = () => {
-  const [selectedTab, setSelectedTab] = useState(TAB_NAME_CENSUS);
+  const [selectedTab, setSelectedTab] = useState<TabNames>(TabNames.Census);
 
   return (
     <Wrapper>
       <Tabs
         unmountOnExit
         activeKey={selectedTab}
-        onSelect={k => setSelectedTab(k || TAB_NAME_CENSUS)}
+        onSelect={k => setSelectedTab(k as TabNames || TabNames.Census)}
         className="mb-3"
       >
-        <Tab eventKey={TAB_NAME_CENSUS} title={"Census"}>
+        <Tab eventKey={TabNames.Census} title={"Census"}>
           <SchoolCensusDataPanel />
         </Tab>
 
-        <Tab eventKey={TAB_NAME_ACARA} title={"ACARA / SFOE"}>
+        <Tab eventKey={TabNames.Acara} title={"ACARA / SFOE"}>
           <AcaraDataPanel />
         </Tab>
 
         <Tab
-          eventKey={TAB_NAME_STUDENT_STATUS_MATRIX}
+          eventKey={TabNames.Matrix}
           title={"Student Status Matrix"}
         >
           <StudentStatusMatrix />
+        </Tab>
+
+        <Tab
+          eventKey={TabNames.VRTQA}
+          title={"VRTQA"}
+        >
+          <VRTQAPanel />
         </Tab>
       </Tabs>
     </Wrapper>
