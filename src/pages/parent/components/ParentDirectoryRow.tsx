@@ -72,12 +72,21 @@ const ParentDirectoryRow = ({studentId, contacts, onEmailPopulated}: iParentDire
     return getCanBeShownContacts().length > 0;
   }
 
-  const getParentDiv = (name: string, mobilePhone: string, email: string) => {
+  const getParentDiv = (
+    show: boolean,
+    name: string,
+    mobilePhone: string,
+    email: string,
+    hideMobile: boolean = false
+  ) => {
+    if (show !== true) {
+      return null;
+    }
     const nameStr = `${name || ''}`.trim();
-    const mobilePhoneStr = `${mobilePhone || ''}`.trim();
+    const mobilePhoneStr = hideMobile === true ? '' : `${mobilePhone || ''}`.trim();
     const emailStr = `${email || ''}`.trim();
     if (nameStr === '') {
-      return nameStr;
+      return null;
     }
     if (emailStr !== '') {
       onEmailPopulated(emailStr);
@@ -113,14 +122,12 @@ const ParentDirectoryRow = ({studentId, contacts, onEmailPopulated}: iParentDire
     }
     // have to show the spouse
     if (`${shownContact.StudentContactSpouseID || ''}`.trim() !== '') {
-      if (!(shownContact.StudentContactSpouseID in communityMap) || communityMap[shownContact.StudentContactSpouseID].DirectoryIncludeFlag === false) {
-        return null;
-      }
       return getParentDiv(
+        (shownContact.StudentContactSpouseID in communityMap) && communityMap[shownContact.StudentContactSpouseID].DirectoryIncludeFlag === true,
         shownContact.StudentContactSpouseNameExternal,
-        (shownContact.StudentContactSpouseID in communityMap && communityMap[shownContact.StudentContactSpouseID].SilentMobilePhoneFlag === false)
-          ? shownContact.StudentContactSpouseDefaultMobilePhone : '',
+        shownContact.StudentContactSpouseDefaultMobilePhone,
         shownContact.StudentContactSpouseDefaultEmail,
+        shownContact.StudentContactSpouseID in communityMap && communityMap[shownContact.StudentContactSpouseID].SilentMobilePhoneFlag === false
       );
     }
     const moreToShow = canBeShownContacts.filter(cont => cont.StudentContactID !== shownContact.StudentContactID);
@@ -129,10 +136,11 @@ const ParentDirectoryRow = ({studentId, contacts, onEmailPopulated}: iParentDire
     }
     const nextContact = moreToShow[0];
     return getParentDiv(
+      (nextContact.StudentContactID in communityMap) && communityMap[nextContact.StudentContactID].DirectoryIncludeFlag === true,
       nextContact.StudentContactNameExternal,
-      (nextContact.StudentContactID in communityMap && communityMap[nextContact.StudentContactID].SilentMobilePhoneFlag === false)
-        ? nextContact.StudentContactDefaultMobilePhone : '',
-      nextContact.StudentContactDefaultEmail
+      nextContact.StudentContactDefaultMobilePhone,
+      nextContact.StudentContactDefaultEmail,
+      nextContact.StudentContactID in communityMap && communityMap[nextContact.StudentContactID].SilentMobilePhoneFlag === false
     );
   }
 
@@ -151,10 +159,11 @@ const ParentDirectoryRow = ({studentId, contacts, onEmailPopulated}: iParentDire
       <>
         {
           getParentDiv(
+            (contact.StudentContactID in communityMap) && communityMap[contact.StudentContactID].DirectoryIncludeFlag === true,
           contact.StudentContactNameExternal,
-          (contact.StudentContactID in communityMap && communityMap[contact.StudentContactID].SilentMobilePhoneFlag === false)
-            ? contact.StudentContactDefaultMobilePhone : '',
-          contact.StudentContactDefaultEmail
+          contact.StudentContactDefaultMobilePhone,
+          contact.StudentContactDefaultEmail,
+contact.StudentContactID in communityMap && communityMap[contact.StudentContactID].SilentMobilePhoneFlag === false
         )}
         {getSecondParent(contact)}
       </>
