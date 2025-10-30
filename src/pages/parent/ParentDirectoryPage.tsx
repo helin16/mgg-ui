@@ -58,11 +58,11 @@ const Wrapper = styled.div`
     }
   }
 `;
-
+type iContactMap = { [key: string]: iSynVStudentContactAllAddress[] };
 const ParentDirectoryPage = () => {
   const {user} = useSelector((state: RootState) => state.auth);
   const [isLoading, setIsLoading] = useState(false);
-  const [contactMap, setContactMap] = useState<{ [key: string]: iSynVStudentContactAllAddress[] }>({});
+  const [contactMap, setContactMap] = useState<iContactMap>({});
   const [searchCriteria, setSearchCriteria] = useState<iParentDirectorySearchCriteria>({});
   const [showSearchPanel, setShowSearchPanel] = useState(false);
 
@@ -91,7 +91,7 @@ const ParentDirectoryPage = () => {
         ...(!searchCriteria.yearLevel ? {} : {StudentYearLevel: searchCriteria.yearLevel.Code}),
       }),
       perPage: 9999,
-      sort: 'StudentSurname:ASC'
+      sort: 'StudentSurname:ASC,StudentContactType:ASC'
     }, {
       headers: {[HEADER_NAME_SELECTING_FIELDS]: JSON.stringify([
         'StudentID',
@@ -99,6 +99,7 @@ const ParentDirectoryPage = () => {
         'StudentName',
         'StudentHouseDescription',
         'StudentContactID',
+        'StudentContactType',
         'StudentContactNameExternal',
         'StudentContactDefaultEmail',
         'StudentContactDefaultMobilePhone',
@@ -111,11 +112,12 @@ const ParentDirectoryPage = () => {
       ])}
     }).then(resp => {
       if (isCanceled) return;
-      setContactMap(resp.data.reduce((map, contact) => {
+      setContactMap(resp.data.reduce((map: iContactMap, contact) => {
+        const currentContacts = (contact.StudentID in map ? map[contact.StudentID] : []);
         return {
           ...map,
           // @ts-ignore
-          [contact.StudentID]: [...(contact.StudentID in map ? map[contact.StudentID] : []), contact],
+          [contact.StudentID]: [...currentContacts, contact],
         }
       }, {}));
     }).catch(error => {
@@ -226,7 +228,7 @@ const ParentDirectoryPage = () => {
         {getSearchPanel()}
         {
           Object.keys(contactMap).map(studentId => {
-            return <ParentDirectoryRow contact={contactMap[studentId][0]} key={studentId} onEmailPopulated={(email) => recipientEmails.current = _.uniq([...recipientEmails.current.split(','), email]).join(',')}/>
+            return <ParentDirectoryRow studentId={studentId} contacts={contactMap[studentId]} key={studentId} onEmailPopulated={(email) => recipientEmails.current = _.uniq([...recipientEmails.current.split(','), email]).join(',')}/>
           })
         }
       </>

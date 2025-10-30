@@ -52,7 +52,7 @@ const ParentDirectorySearchPanel = ({onChanged, className, isSearching = false}:
   const [form, setForm] = useState<iSynLuForm | null>(null)
   const [yearLevel, setYearLevel] = useState<ISynLuYearLevel | null>(null);
   const [searchText, setSearchText] = useState('');
-  const [limitFormCodes, setLimitFormCodes] = useState<string[] | null>(null);
+  const [limitFormCodes, setLimitFormCodes] = useState<string[]>([]);
   const [limitYearLevelCodes, setYearLevelCodes] = useState<string[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -157,7 +157,7 @@ const ParentDirectorySearchPanel = ({onChanged, className, isSearching = false}:
           <SynFormSelector
             classname={'form-selector'}
             values={form ? [`${form?.Code}`] : []}
-            limitCodes={limitFormCodes || []}
+            limitCodes={limitFormCodes}
             onSelect={(options) => {
               // @ts-ignore
               setForm(options?.data || null);
