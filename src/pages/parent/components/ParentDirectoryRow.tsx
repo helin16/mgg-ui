@@ -127,7 +127,7 @@ const ParentDirectoryRow = ({studentId, contacts, onEmailPopulated}: iParentDire
         shownContact.StudentContactSpouseNameExternal,
         shownContact.StudentContactSpouseDefaultMobilePhone,
         shownContact.StudentContactSpouseDefaultEmail,
-        shownContact.StudentContactSpouseID in communityMap && communityMap[shownContact.StudentContactSpouseID].SilentMobilePhoneFlag === false
+        shownContact.StudentContactSpouseID in communityMap && communityMap[shownContact.StudentContactSpouseID].SilentMobilePhoneFlag === true
       );
     }
     const moreToShow = canBeShownContacts.filter(cont => cont.StudentContactID !== shownContact.StudentContactID);
@@ -140,7 +140,7 @@ const ParentDirectoryRow = ({studentId, contacts, onEmailPopulated}: iParentDire
       nextContact.StudentContactNameExternal,
       nextContact.StudentContactDefaultMobilePhone,
       nextContact.StudentContactDefaultEmail,
-      nextContact.StudentContactID in communityMap && communityMap[nextContact.StudentContactID].SilentMobilePhoneFlag === false
+      nextContact.StudentContactID in communityMap && communityMap[nextContact.StudentContactID].SilentMobilePhoneFlag === true
     );
   }
 
@@ -163,7 +163,7 @@ const ParentDirectoryRow = ({studentId, contacts, onEmailPopulated}: iParentDire
           contact.StudentContactNameExternal,
           contact.StudentContactDefaultMobilePhone,
           contact.StudentContactDefaultEmail,
-contact.StudentContactID in communityMap && communityMap[contact.StudentContactID].SilentMobilePhoneFlag === false
+contact.StudentContactID in communityMap && communityMap[contact.StudentContactID].SilentMobilePhoneFlag === true
         )}
         {getSecondParent(contact)}
       </>
