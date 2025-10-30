@@ -25,7 +25,7 @@ const AdmissionsPage = () => {
         unmountOnExit
       >
         <Tab eventKey={TAB_BULK_EDIT_ATTENDANCES} title={"Bulk edit attendances"}>
-          <AttendancesListWithSearchPanel />
+          <AttendancesListWithSearchPanel allowEdit={true} />
         </Tab>
         <Tab eventKey={TAB_STUDENT_RETAINING_RATE} title={"Student Retaining Rate"}>
           <StudentRetainingRate />

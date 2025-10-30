@@ -11,12 +11,14 @@ import StudentNumberForecastDashboard
 import MathHelper from '../../helper/MathHelper';
 import EnrolmentNumbersPanel from '../../components/Enrollments/EnrolmentNumbersPanel';
 import VRTQAPanel from '../dataSubmissions/components/VRTQA/VRTQAPanel';
+import AttendancesListWithSearchPanel from '../../components/Attendance/AttendancesListWithSearchPanel';
 
 enum TabNames {
   EXPIRING_PASSPORTS = 'EXPIRING_PASSPORTS',
   ENROLMENT_NUMBER = 'ENROLMENT_NUMBER',
   FORECAST_NEXT_YEAR = 'FORECAST_NEXT_YEAR',
   VRTQA = 'VRTQA',
+  Attendances = 'Attendances',
 }
 
 const EnrolmentManagementPage = () => {
@@ -31,6 +33,12 @@ const EnrolmentManagementPage = () => {
         <Tab title={`Enrolment Numbers`}  eventKey={TabNames.ENROLMENT_NUMBER}>
           <SectionDiv>
             <EnrolmentNumbersPanel />
+          </SectionDiv>
+        </Tab>
+
+        <Tab title={`Attendances`}  eventKey={TabNames.Attendances}>
+          <SectionDiv>
+            <AttendancesListWithSearchPanel />
           </SectionDiv>
         </Tab>
 

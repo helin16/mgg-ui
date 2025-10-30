@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import DateRangeSelector from "../common/DateRangeSelector";
-import { useEffect, useState } from "react";
+import {useCallback, useEffect, useState} from "react";
 import moment from "moment-timezone";
 import FormLabel from "../form/FormLabel";
 import SelectBox from "../common/SelectBox";
@@ -24,13 +24,14 @@ import { iVPastAndCurrentStudent } from "../../types/Synergetic/Student/iVStuden
 import CheckBox from "../common/CheckBox";
 import * as _ from "lodash";
 import PopupModal from "../common/PopupModal";
-import { Button, ButtonProps, FormControl } from "react-bootstrap";
+import {Alert, Button, ButtonProps, FormControl, ProgressBar} from "react-bootstrap";
 import SectionDiv from "../common/SectionDiv";
 import ExplanationPanel from "../ExplanationPanel";
 import SynLuAbsenceReasonSelector from "../Absence/SynLuAbsenceReasonSelector";
 import SynLuAbsenceTypeSelector from "../Absence/SynLuAbsenceTypeSelector";
 import SynAttendanceService from "../../services/Synergetic/Attendance/SynAttendanceService";
 import iSynAttendance from "../../types/Synergetic/Attendance/iSynAttendance";
+import AttendanceHelper from './AttendanceHelper';
 
 const Wrapper = styled.div`
   .result-panel {
@@ -160,6 +161,7 @@ const SearchPanel = ({ onSearch, isSearching }: iSearchPanel) => {
 
 type iResultTable = {
   isSearching?: boolean;
+  allowSelect?: boolean;
   selectedSequences?: number[];
   data: iPaginatedResult<iSynVAttendance>;
   onRecordsSelected?: (seqs: number[]) => void;
@@ -170,13 +172,18 @@ const ResultTable = ({
   isSearching,
   selectedSequences,
   onRecordsSelected,
-  onLoadNextPage
+  onLoadNextPage,
+  allowSelect = false,
 }: iResultTable) => {
   const selectedSeqs = selectedSequences || [];
-  const getColumns = <T extends {}>() => [
-    {
+
+  const getCheckBoxCol = () => {
+    if (allowSelect !== true) {
+      return [];
+    }
+    return [{
       key: "select-box",
-      header: (col: iTableColumn<T>) => {
+      header: (col: iTableColumn<iSynVAttendance>) => {
         const attendanceRecordSeqs = _.uniq(
           (data?.data || [])
             .filter(record => record.AttendedFlag === false)
@@ -205,7 +212,7 @@ const ResultTable = ({
           </th>
         );
       },
-      cell: (col: iTableColumn<T>, data: iSynVAttendance) => {
+      cell: (col: iTableColumn<iSynVAttendance>, data: iSynVAttendance) => {
         if (data.AttendedFlag !== false) {
           return <td key={col.key}></td>;
         }
@@ -227,30 +234,11 @@ const ResultTable = ({
           </td>
         );
       },
-      footer: (col: iTableColumn<T>) => {
-        if (
-          (data?.data || []).length <= 0 ||
-          (data?.currentPage || 0) >= (data?.pages || 0)
-        ) {
-          return null;
-        }
-        return (
-          <td key={col.key} className={"text-center"} colSpan={11}>
-            <LoadingBtn
-              isLoading={isSearching}
-              variant={"outline-primary"}
-              onClick={() =>
-                onLoadNextPage &&
-                onLoadNextPage(MathHelper.add(data.currentPage || 1, 1))
-              }
-            >
-              <Icons.ArrowDown /> Load Next {data.perPage} record(s){" "}
-              <Icons.ArrowDown />
-            </LoadingBtn>
-          </td>
-        );
-      }
-    },
+    }];
+  }
+
+  const getColumns = <T extends {}>() => [
+    ...getCheckBoxCol(),
     {
       key: "Attendance Date",
       header: "Date",
@@ -265,7 +253,29 @@ const ResultTable = ({
           </td>
         );
       },
-      footer: () => null
+      footer: (col: iTableColumn<T>) => {
+        if (
+          (data?.data || []).length <= 0 ||
+          (data?.currentPage || 0) >= (data?.pages || 0)
+        ) {
+          return null;
+        }
+        return (
+          <td key={col.key} className={"text-center"} colSpan={10}>
+            <LoadingBtn
+              isLoading={isSearching}
+              variant={"outline-primary"}
+              onClick={() =>
+                onLoadNextPage &&
+                onLoadNextPage(MathHelper.add(data.currentPage || 1, 1))
+              }
+            >
+              <Icons.ArrowDown /> Load Next {data.perPage} record(s){" "}
+              <Icons.ArrowDown />
+            </LoadingBtn>
+          </td>
+        );
+      }
     },
     {
       key: "Period",
@@ -494,18 +504,131 @@ const PopupBtnPanel = ({ selectedSeqs, onSaved, ...props }: iPopupPanel) => {
   );
 };
 
-const AttendancesListWithSearchPanel = () => {
+type iExportingPopup = {
+  show?: boolean;
+  getDataFn: (cPage: number, pageSize?: number) => Promise<iPaginatedResult<iSynVAttendance>>;
+  onClose?: () => void;
+}
+const ExportingPopup = ({show, getDataFn, onClose}: iExportingPopup) => {
+  const [isExporting, setIsExporting] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [results, setResults] = useState<iPaginatedResult<iSynVAttendance> | null>(null);
+
+  const handleClose = useCallback(() => {
+    setIsExporting(false);
+    setResults(null);
+    setCurrentPage(1);
+    onClose && onClose();
+  }, [onClose]);
+
+  useEffect(() => {
+    if (show !== true) {
+      handleClose();
+      return;
+    }
+    let isCanceled = false;
+    setIsExporting(true);
+    getDataFn(currentPage, 1000)
+      .then(resp => {
+        if (isCanceled) { return }
+        const totalPages = resp.pages || 0;
+        const data = (resp.data || []);
+        setResults(prev => ({...resp, data: [...(prev?.data || []), ...data]}));
+        if (currentPage >= totalPages || data.length < 0) {
+          setIsExporting(false);
+          return;
+        }
+        setCurrentPage(MathHelper.add(currentPage, 1));
+      })
+      .catch(err => {
+        if (isCanceled) { return }
+        Toaster.showApiError(err);
+        setIsExporting(false);
+      })
+    return () => {
+      isCanceled = false;
+    }
+  }, [show, getDataFn, handleClose, currentPage]);
+
+  return (
+    <PopupModal
+      show={show}
+      title={isExporting === true ? `Exporting record(s)...` : 'Ready to download'}
+      handleClose={() => {
+        if (isExporting) {
+          return;
+        }
+        handleClose();
+      }}
+    >
+      {
+        isExporting === true && (
+          <>
+            <Alert variant={'danger'}>Exporting record(s), please don't close this browser.</Alert>
+            <FlexContainer className={'gap-2 align-items-center justify-content-start'}>
+              <div>{(results?.data || []).length}</div>
+              <div>/</div>
+              <div>{results?.total}</div>
+            </FlexContainer>
+            <ProgressBar now={(results?.data || []).length} max={results?.total || 0}/>
+          </>
+        )
+      }
+      <FlexContainer className={'justify-content-end gap-3'}>
+        <LoadingBtn isLoading={isExporting} onClick={() => AttendanceHelper.genAttendanceExcel(results?.data || [])}>Click here to Download</LoadingBtn>
+      </FlexContainer>
+    </PopupModal>
+  )
+}
+
+type iAttendancesListWithSearchPanel = {
+  allowEdit?: boolean
+}
+const AttendancesListWithSearchPanel = ({allowEdit = false}: iAttendancesListWithSearchPanel) => {
+  const defaultPageSize = 50;
   const [count, setCount] = useState(0);
   const [selectedSeqs, setSelectedSeqs] = useState<number[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [perPage] = useState(50);
+  const [perPage] = useState(defaultPageSize);
   const [searchCriteria, setSearchCriteria] = useState<iSearchCriteria | null>(
     null
   );
   const [isSearching, setIsSearching] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [result, setResult] = useState<iPaginatedResult<
     iSynVAttendance
   > | null>(null);
+
+  const getData = useCallback(async (cPage: number, pageSize: number = defaultPageSize) => {
+    return SynVAttendanceService.getAll({
+      where: JSON.stringify({
+        AttendanceDate: {
+          [OP_BETWEEN]: [
+            `${searchCriteria?.dateRange?.start || ""}`.replace(
+              "T00:00:00Z",
+              ""
+            ),
+            `${searchCriteria?.dateRange?.end || ""}`.replace("T00:00:00Z", "")
+          ]
+        },
+        ...((searchCriteria?.periods || []).length <= 0
+          ? {}
+          : { AttendancePeriod: searchCriteria?.periods || [] }),
+        ...(searchCriteria?.attendedFlag === null
+          ? {}
+          : { AttendedFlag: searchCriteria?.attendedFlag }),
+        ...((searchCriteria?.studentIds || []).length <= 0
+          ? {}
+          : { ID: searchCriteria?.studentIds || [] })
+      }),
+      sort: "AttendanceDate:ASC,AttendancePeriod:ASC",
+      perPage: pageSize,
+      currentPage: cPage,
+      include: "SynCommunity"
+    })
+  }, [
+    searchCriteria
+  ])
 
   useEffect(() => {
     if (Object.keys(searchCriteria || {}).length <= 0) {
@@ -530,33 +653,7 @@ const AttendancesListWithSearchPanel = () => {
 
     let isCanceled = false;
     setIsSearching(true);
-    SynVAttendanceService.getAll({
-      where: JSON.stringify({
-        AttendanceDate: {
-          [OP_BETWEEN]: [
-            `${searchCriteria?.dateRange?.start || ""}`.replace(
-              "T00:00:00Z",
-              ""
-            ),
-            `${searchCriteria?.dateRange?.end || ""}`.replace("T00:00:00Z", "")
-          ]
-        },
-        ...((searchCriteria?.periods || []).length <= 0
-          ? {}
-          : { AttendancePeriod: searchCriteria?.periods || [] }),
-        ...(searchCriteria?.attendedFlag === null
-          ? {}
-          : { AttendedFlag: searchCriteria?.attendedFlag }),
-        ...((searchCriteria?.studentIds || []).length <= 0
-          ? {}
-          : { ID: searchCriteria?.studentIds || [] })
-      }),
-      sort: "AttendanceDate:ASC,AttendancePeriod:ASC",
-      perPage,
-      currentPage,
-      include: "SynCommunity"
-    })
-      .then(resp => {
+    getData(currentPage, perPage).then(resp => {
         if (isCanceled) {
           return;
         }
@@ -590,11 +687,7 @@ const AttendancesListWithSearchPanel = () => {
     perPage,
     currentPage,
     searchCriteria,
-    searchCriteria?.dateRange?.start,
-    searchCriteria?.dateRange?.end,
-    searchCriteria?.periods,
-    searchCriteria?.studentIds,
-    searchCriteria?.attendedFlag
+    getData,
   ]);
 
   const getResultTable = () => {
@@ -612,6 +705,7 @@ const AttendancesListWithSearchPanel = () => {
 
     return (
       <ResultTable
+        allowSelect={allowEdit}
         data={result}
         selectedSequences={selectedSeqs}
         onRecordsSelected={(seqs: number[]) => setSelectedSeqs(seqs)}
@@ -622,6 +716,9 @@ const AttendancesListWithSearchPanel = () => {
   };
 
   const getBulkActionBtnPanel = () => {
+    if (allowEdit !== true) {
+      return null;
+    }
     return (
       <div>
         <PopupBtnPanel
@@ -638,16 +735,39 @@ const AttendancesListWithSearchPanel = () => {
     );
   };
 
+  const startExport = () => {
+    setIsExporting(true);
+  }
+
+  const getExportBtn = () => {
+    const totalCount = (result?.total || 0);
+    if (totalCount <= 0) {
+      return null;
+    }
+    return (
+      <>
+        <Button variant={'link'} onClick={() => startExport()}>
+          <Icons.Download />{' '}
+          Export
+        </Button>
+        <ExportingPopup getDataFn={getData} show={isExporting} onClose={() => setIsExporting(false)} />
+      </>
+    )
+  }
+
   return (
     <Wrapper>
-      <SearchPanel
-        onSearch={(criteria: iSearchCriteria) => {
-          setSearchCriteria(criteria);
-          setCount(MathHelper.add(count, 1));
-          setCurrentPage(1);
-          setSelectedSeqs([]);
-        }}
-      />
+      <FlexContainer className={'justify-content-between align-items-end gap-2'}>
+        <SearchPanel
+          onSearch={(criteria: iSearchCriteria) => {
+            setSearchCriteria(criteria);
+            setCount(MathHelper.add(count, 1));
+            setCurrentPage(1);
+            setSelectedSeqs([]);
+          }}
+        />
+        {getExportBtn()}
+      </FlexContainer>
 
       <div className={"result-panel"}>
         {getBulkActionBtnPanel()}
