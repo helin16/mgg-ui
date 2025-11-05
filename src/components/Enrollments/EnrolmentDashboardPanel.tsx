@@ -10,7 +10,7 @@ import iSynLuCampus, {MGG_CAMPUS_CODES} from '../../types/Synergetic/Lookup/iSyn
 import SynLuCampusService from '../../services/Synergetic/Lookup/SynLuCampusService';
 import SynVStudentService from '../../services/Synergetic/Student/SynVStudentService';
 import SynVFutureStudentService from '../../services/Synergetic/SynVFutureStudentService';
-import  {
+import {
   iVPastAndCurrentStudent,
   SYN_STUDENT_STATUS_ID_REPEATING,
 } from '../../types/Synergetic/Student/iVStudent';
@@ -214,7 +214,7 @@ const EnrolmentDashboardPanel = () => {
   const getCurrentPastTds = (leftStudents: iVPastAndCurrentStudent[], yrLvls: iSynLuYearLevel[] = []) => {
     return (
       <>
-        <td className={'current-past'}>
+        <td className={'current-past'} key={'left'}>
           {
             getClickableNumber(
               getStudents(leftStudents.filter((student) => {
@@ -227,7 +227,7 @@ const EnrolmentDashboardPanel = () => {
               ), yrLvls))
           }
         </td>
-        <td className={'current-past'}>
+        <td className={'current-past'} key={'loa'}>
           {
             getClickableNumber(getStudents(leftStudents.filter((student) => {
               const returningDate = `${student.StudentReturningDate || ''}`.trim();
@@ -238,7 +238,7 @@ const EnrolmentDashboardPanel = () => {
             }), yrLvls))
           }
         </td>
-        <td className={'current-past total border-right sm'}>{getClickableNumber(getStudents(leftStudents, yrLvls))}</td>
+        <td className={'current-past total border-right sm'} key={'left-total'}>{getClickableNumber(getStudents(leftStudents, yrLvls))}</td>
       </>
     )
   }
@@ -286,7 +286,7 @@ const EnrolmentDashboardPanel = () => {
     })
   }
 
-  const getFutureFutureTds = (studentsEndOfCurrentYear: iVPastAndCurrentStudent[], futureStudents: iVPastAndCurrentStudent[], yrLvls: iSynLuYearLevel[] = []) => {
+  const getFutureFutureTds = (studentsEndOfCurrentYear: iVPastAndCurrentStudent[], futureStudents: iVPastAndCurrentStudent[], leftStudents: iVPastAndCurrentStudent[], yrLvls: iSynLuYearLevel[] = []) => {
     const yrLvlCodes = yrLvls.map(yrLvl => `${yrLvl.Code}`.trim());
     const futureStatusCodes = futureStatuses.map(status => status.Code);
     const currentNotLeavingNextYearStudents_notRepeating = studentsEndOfCurrentYear.filter(student => `${student.StudentOverrideNextYearLevel || ''}`.trim() === '');
@@ -309,28 +309,54 @@ const EnrolmentDashboardPanel = () => {
       .filter(student => yrLvlCodes.length <= 0 ? true :  yrLvlCodes.indexOf(`${student.StudentEntryYearLevel}`.trim()) >= 0)
       .filter(student => futureStatusCodes.indexOf(`${student.StudentStatus}`.trim()) >=0 )
     );
-
-    const continuedFromCurrentYear = getUniqStudents(Object.keys(studentsFromLowerYearLevelMap)
-          .filter(yrLvlCode => yrLvlCodes.length <= 0 ? true : yrLvlCodes.indexOf(yrLvlCode) >=0)
-          .map(ylCode => ylCode in studentsFromLowerYearLevelMap ? studentsFromLowerYearLevelMap[ylCode] : [])
-          .reduce((arr: iVPastAndCurrentStudent[], studentArr: iVPastAndCurrentStudent[]) => [...arr, ...studentArr], []));
     const repeatingStudents = getUniqStudents(currentNotLeavingNextYearStudents_repeating
       .filter(student => yrLvlCodes.length <= 0 ? true :  yrLvlCodes.indexOf(`${student.StudentOverrideNextYearLevel}`.trim()) >= 0));
+
+    const studentsFromLowerYearLevel = Object.keys(studentsFromLowerYearLevelMap)
+      .filter(yrLvlCode => yrLvlCodes.length <= 0 ? true : yrLvlCodes.indexOf(yrLvlCode) >=0)
+      .map(ylCode => ylCode in studentsFromLowerYearLevelMap ? studentsFromLowerYearLevelMap[ylCode] : [])
+      .reduce((arr: iVPastAndCurrentStudent[], studentArr: iVPastAndCurrentStudent[]) => [...arr, ...studentArr], []);
+    const continuedFromCurrentYear = getUniqStudents([
+      ...studentsFromLowerYearLevel,
+      ...repeatingStudents,
+    ]);
+    const loaStudents = getUniqStudents(
+      leftStudents
+        .filter(student => `${student.StudentReturningDate || ''}`.trim() !== '' && moment(`${student.StudentReturningDate || ''}`.trim()).year() === nextYear)
+        .filter(student => {
+          if (yrLvlCodes.length <= 0) {
+            return true;
+          }
+          let returningYearLevel = `${student.StudentOverrideNextYearLevel || ''}`.trim();
+          if (returningYearLevel === '') {
+            const currentYearLvlIndex = _.findIndex(yearLevels, yearLvl => yearLvl.Code === student.StudentYearLevel);
+            const nextIndex = currentYearLvlIndex + 1;
+            const nextYearLevel = yearLevels[nextIndex] || null;
+            if (!nextYearLevel) {
+              return false;
+            }
+
+            return yrLvlCodes.indexOf(`${nextYearLevel?.Code}`.trim()) >= 0
+          }
+
+          return yrLvlCodes.indexOf(returningYearLevel) >= 0
+        })
+    );
     const futureStudentsNextYearTotal = getUniqStudents([
       ...continuedFromCurrentYear,
-      ...repeatingStudents,
+      ...loaStudents,
       ...futureStudentsNextYear,
     ])
     return (
       <>
-        <td className={'future'}>{getClickableNumber(getStudents(continuedFromCurrentYear))}</td>
-        <td className={'future'}>{getClickableNumber(getStudents(repeatingStudents))}</td>
+        <td className={'future'} key={`future-continued`}>{getClickableNumber(getStudents(continuedFromCurrentYear))}</td>
+        <td className={'future'} key={`future-loa`}>{getClickableNumber(getStudents(loaStudents))}</td>
         {
           futureStatusCodes.map((fStatusCode) => (
             <td key={`future-${fStatusCode}`} className={'future'}>{getClickableNumber(getStudents(futureStudentsNextYear, [], [fStatusCode]))}</td>
           ))
         }
-        <td className={'future'}>{getClickableNumber(getStudents(futureStudentsNextYearTotal))}</td>
+        <td className={'future'} key={`future-total`}>{getClickableNumber(getStudents(futureStudentsNextYearTotal))}</td>
       </>
     )
   }
@@ -379,7 +405,7 @@ const EnrolmentDashboardPanel = () => {
     });
 
     return <tr key={key} className={className}>
-      <td className={'border-right'}>{title}</td>
+      <td className={'border-right'} key={'year-level'}>{title}</td>
       {getCurrentPastTds(leftStudents, yrLvls)}
       {getCurrentFutureTds(futureStudentsCurrentYear, newStudentsCurrentYear, yrLvls)}
 
@@ -393,7 +419,7 @@ const EnrolmentDashboardPanel = () => {
       <td className={'total border-right sm'}>{getClickableNumber(getStudents(studentsToday, yrLvls))}</td>
       <td className={'border-right'}>{getClickableNumber(getStudents(studentsEndOfCurrentYear, yrLvls))}</td>
 
-      {getFutureFutureTds(studentsEndOfCurrentYear, futureStudents, yrLvls)}
+      {getFutureFutureTds(studentsEndOfCurrentYear, futureStudents, leftStudents, yrLvls)}
     </tr>
   }
 
