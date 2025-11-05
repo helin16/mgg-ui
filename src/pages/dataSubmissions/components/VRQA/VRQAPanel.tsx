@@ -12,7 +12,7 @@ enum TabNames {
   Retentions= 'Retentions',
 }
 const Wrapper = styled.div``
-const VRTQAPanel = () => {
+const VRQAPanel = () => {
   const [selectedTab, setSelectedTab] = useState<TabNames>(TabNames.FutureNumbers);
   return (
     <Wrapper>
@@ -44,4 +44,4 @@ const VRTQAPanel = () => {
   )
 }
 
-export default VRTQAPanel;
+export default VRQAPanel;

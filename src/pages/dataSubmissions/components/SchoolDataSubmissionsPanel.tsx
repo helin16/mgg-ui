@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Tab, Tabs } from "react-bootstrap";
 import AcaraDataPanel from "./ACARA/AcaraDataPanel";
 import StudentStatusMatrix from "./StudentStatus/StudentStatusMatrix";
-import VRTQAPanel from './VRTQA/VRTQAPanel';
+import VRQAPanel from './VRQA/VRQAPanel';
 
 
 enum TabNames {
@@ -43,9 +43,9 @@ const SchoolDataSubmissionsPanel = () => {
 
         <Tab
           eventKey={TabNames.VRTQA}
-          title={"VRTQA"}
+          title={"VRQA"}
         >
-          <VRTQAPanel />
+          <VRQAPanel />
         </Tab>
       </Tabs>
     </Wrapper>

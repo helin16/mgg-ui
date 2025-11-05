@@ -9,20 +9,20 @@ import moment from 'moment-timezone';
 import StudentNumberForecastDashboard
   from '../../components/reports/StudentNumberForecast/StudentNumberForecastDashboard';
 import MathHelper from '../../helper/MathHelper';
-import EnrolmentNumbersPanel from '../../components/Enrollments/EnrolmentNumbersPanel';
-import VRTQAPanel from '../dataSubmissions/components/VRTQA/VRTQAPanel';
+import VRQAPanel from '../dataSubmissions/components/VRQA/VRQAPanel';
 import AttendancesListWithSearchPanel from '../../components/Attendance/AttendancesListWithSearchPanel';
+import EnrolmentDashboardPanel from '../../components/Enrollments/EnrolmentDashboardPanel';
 
 enum TabNames {
+  STUDENT_NUMBERS = 'STUDENT_NUMBERS',
   EXPIRING_PASSPORTS = 'EXPIRING_PASSPORTS',
-  ENROLMENT_NUMBER = 'ENROLMENT_NUMBER',
   FORECAST_NEXT_YEAR = 'FORECAST_NEXT_YEAR',
-  VRTQA = 'VRTQA',
+  VRQA = 'VRQA',
   Attendances = 'Attendances',
 }
 
 const EnrolmentManagementPage = () => {
-  const [selectedTab, setSelectedTab] = useState(TabNames.ENROLMENT_NUMBER);
+  const [selectedTab, setSelectedTab] = useState(TabNames.STUDENT_NUMBERS);
   return (
     <Page title={<h3>Enrolments</h3>} AdminPage={EnrolmentManagementAdminPage} moduleId={MGGS_MODULE_ID_ENROLLMENTS}>
       <Tabs
@@ -30,9 +30,9 @@ const EnrolmentManagementPage = () => {
         onSelect={(k) => setSelectedTab(k as TabNames)}
         unmountOnExit
       >
-        <Tab title={`Enrolment Numbers`}  eventKey={TabNames.ENROLMENT_NUMBER}>
+        <Tab title={`Enrolment Numbers`}  eventKey={TabNames.STUDENT_NUMBERS}>
           <SectionDiv>
-            <EnrolmentNumbersPanel />
+            <EnrolmentDashboardPanel />
           </SectionDiv>
         </Tab>
 
@@ -54,9 +54,9 @@ const EnrolmentManagementPage = () => {
           </SectionDiv>
         </Tab>
 
-        <Tab title={`VRTQA`}  eventKey={TabNames.VRTQA}>
+        <Tab title={`VRQA`}  eventKey={TabNames.VRQA}>
           <SectionDiv>
-            <VRTQAPanel />
+            <VRQAPanel />
           </SectionDiv>
         </Tab>
       </Tabs>
