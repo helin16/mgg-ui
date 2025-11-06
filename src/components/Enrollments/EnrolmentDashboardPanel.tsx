@@ -12,7 +12,6 @@ import SynVStudentService from '../../services/Synergetic/Student/SynVStudentSer
 import SynVFutureStudentService from '../../services/Synergetic/SynVFutureStudentService';
 import {
   iVPastAndCurrentStudent,
-  SYN_STUDENT_STATUS_ID_REPEATING,
 } from '../../types/Synergetic/Student/iVStudent';
 import * as _ from 'lodash';
 import StudentNumberDetailsPopupBtn from '../reports/StudentNumberForecast/components/StudentNumberDetailsPopupBtn';
@@ -339,14 +338,13 @@ const EnrolmentDashboardPanel = () => {
     const { yrLvls, currentStudents, futureStudents } = data;
 
     const leftStudents = currentStudents.filter(student => moment(student.StudentLeavingDate).isSameOrBefore(moment()));
+    const continuedStudentsFromLastYear = currentStudents.filter(student => moment(student.StudentEntryDate).year() < currentYear);
 
     const futureStudentsCurrentYear = futureStudents.filter(student => student.FileYear === currentYear);
 
     const currentNotLeftStudents = getStudentsNotLeftYet(currentStudents);
-    const continuedStudentsFromLastYear = currentNotLeftStudents.filter(student => moment(student.StudentEntryDate).year() < currentYear);
     const newStudentsCurrentYear = currentNotLeftStudents.filter(student => moment(student.StudentEntryDate).year() === currentYear);
 
-    const normalStudentsThisYear_notLeaving = getStudentsNotLeftYet(continuedStudentsFromLastYear).filter(student => `${student.StudentLeavingDate || ''}`.trim() === '');
     const normalStudentsThisYear_leaving = getStudentsNotLeftYet(continuedStudentsFromLastYear).filter(student => `${student.StudentLeavingDate || ''}`.trim() !== '' &&  moment(`${student.StudentLeavingDate || ''}`.trim()).isAfter(moment()));
     const normalStudentsThisYear_leaving_notComeBack = normalStudentsThisYear_leaving.filter(student => `${student.StudentReturningDate || ''}`.trim() === '');
     const normalStudentsThisYear_leaving_willComeBack = normalStudentsThisYear_leaving.filter(student => `${student.StudentReturningDate || ''}`.trim() !== '' &&  moment(`${student.StudentReturningDate || ''}`.trim()).isAfter(moment()));
@@ -354,33 +352,25 @@ const EnrolmentDashboardPanel = () => {
     const startBeginningOfYear = newStudentsCurrentYear.filter(student => moment(student.StudentEntryDate).month() === 0);
     const startDuringYearStudents = newStudentsCurrentYear.filter(student => moment(student.StudentEntryDate).month() > 0);
 
-    const normalStudentsThisYear_notLeaving_noStatus = normalStudentsThisYear_notLeaving.filter(student => [SYN_STUDENT_STATUS_ID_REPEATING].indexOf(student.StudentStatus) < 0)
-    const normalStudentsThisYear_loa = currentNotLeftStudents.filter(student => `${student.StudentReturningDate || ''}`.trim() !== '');
-    const studentsToday = getUniqStudents([
-      ...currentNotLeftStudents,
-      ...startBeginningOfYear,
+    const leftStudent_willComeBack = leftStudents.filter(student => `${student.StudentReturningDate || ''}`.trim() !== '' &&  moment(`${student.StudentReturningDate || ''}`.trim()).isAfter(moment()));
+    const currentDay1 = [...continuedStudentsFromLastYear, ...startBeginningOfYear];
+    const studentsToday = getUniqStudents(getStudentsNotLeftYet([
+      ...currentDay1,
       ...startDuringYearStudents,
-    ]);
+    ]));
     const studentsEndOfCurrentYear = getUniqStudents([
       ...studentsToday,
       ...futureStudentsCurrentYear,
-    ]).filter(student => {
-      const leavingDate = `${student.StudentLeavingDate || ''}`.trim();
-      if (leavingDate === '') {
-        return true;
-      }
-      return moment(leavingDate).isAfter(moment().endOf('year'));
-    });
+    ]);
 
-    const currentDay1 = [...normalStudentsThisYear_notLeaving_noStatus, ...startBeginningOfYear];
     return <tr key={key} className={className}>
       <td className={'border-right'}>{title}</td>
-      <td className={'current'} data-col={'continued-prev'}>{getClickableNumber(getStudents(normalStudentsThisYear_notLeaving_noStatus, yrLvls))}</td>
+      <td className={'current'} data-col={'continued-prev'}>{getClickableNumber(getStudents(continuedStudentsFromLastYear, yrLvls))}</td>
       <td className={'current'} data-col={'start-of-year'}>{getClickableNumber(getStudents(startBeginningOfYear, yrLvls))}</td>
       <td className={'current total border-right sm'} data-col={'current-day-1'}>{getClickableNumber(getStudents(currentDay1, yrLvls))}</td>
       <td className={'current'} data-col={'start-during'}>{getClickableNumber(getStudents(startDuringYearStudents, yrLvls))}</td>
       <td className={'current'} data-col={'left-during'}>{getClickableNumber(getStudents(leftStudents, yrLvls))}</td>
-      <td className={'current'} data-col={'loa-during'}>{getClickableNumber(getStudents(normalStudentsThisYear_loa, yrLvls))}</td>
+      <td className={'current'} data-col={'loa-during'}>{getClickableNumber(getStudents(leftStudent_willComeBack, yrLvls))}</td>
       <td className={'current total'} data-col={'total-today'}>{getClickableNumber(getStudents(studentsToday, yrLvls))}</td>
 
 
