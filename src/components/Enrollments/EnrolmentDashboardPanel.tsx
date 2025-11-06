@@ -75,11 +75,14 @@ const Wrapper = styled.div`
 
     tr.count-header {
         th {
-            writing-mode: vertical-rl;   /* make text vertical */
-            text-orientation: mixed;     /* keep characters upright */
-            transform: rotate(180deg);   /* flip so it goes bottom → top */
-            white-space: nowrap;         /* prevent wrapping */
-            text-align: left !important;
+            > div {
+                float: right;
+                writing-mode: vertical-rl;   /* make text vertical */
+                text-orientation: mixed;     /* keep characters upright */
+                transform: rotate(180deg);   /* flip so it goes bottom → top */
+                //white-space: nowrap;         /* prevent wrapping */
+                text-align: left !important;
+            }
         }
     }
 `;
@@ -415,34 +418,36 @@ const EnrolmentDashboardPanel = () => {
         </tr>
         <tr className={'count-header'}>
           <th className={'border-right'}></th>
-          <th className={`current`} data-col={'continued-prev'}>Continued<br/><small>from {lastYear}</small></th>
-          <th className={`current`} data-col={'start-of-year'}>New<br/><small>(start of year)</small></th>
-          <th className={`current total border-right sm`} data-col={'current-day-1'}>DAY
-            1 {currentYear}<br/><small>TOTAL</small></th>
-          <th className={`current border-right sm`} data-col={'start-during'}>NEW<br/><small>(During year)</small></th>
+          <th className={`current`} data-col={'continued-prev'}><div>Continued<br/><small>from {lastYear}</small></div></th>
+          <th className={`current`} data-col={'start-of-year'}><div>New<br/><small>(start of year)</small></div></th>
+          <th className={`current total border-right sm`} data-col={'current-day-1'}><div>DAY
+            1 {currentYear}<br/><small>TOTAL</small></div></th>
+          <th className={`current border-right sm`} data-col={'start-during'}><div>NEW<br/><small>(During year)</small></div></th>
 
-          <th className={`current`} data-col={'left-during'}>LEFT<br/><small>(During year)</small></th>
-          <th className={`current`} data-col={'loa-returning'}>L.O.A<br/><small>(Returning)</small></th>
-          <th className={`current total`} data-col={'total-today'}>TOTAL<br/>TODAY</th>
-          <th className={`current`} data-col={'future-loa'}>APPROVED<br/><small>FUTURE L.O.A.</small></th>
-          <th className={`current`} data-col={'not-returning'}>NOT RETURNING<br/><small>NEXT YEAR</small></th>
+          <th className={`current`} data-col={'left-during'}><div>LEFT<br/><small>(During year)</small></div></th>
+          <th className={`current`} data-col={'loa-returning'}><div>L.O.A<br/><small>(Returning)</small></div></th>
+          <th className={`current total`} data-col={'total-today'}><div>TOTAL<br/>TODAY</div></th>
+          <th className={`current`} data-col={'future-loa'}><div>APPROVED<br/><small>FUTURE L.O.A.</small></div></th>
+          <th className={`current`} data-col={'not-returning'}><div>NOT RETURNING<br/><small>NEXT YEAR</small></div></th>
           {
             currentFutureStatuses.map((status, index) => (<th
               className={`current ${index < MathHelper.sub(currentFutureStatuses.length, 1) ? '' : 'border-right sm'}`}
-              key={`current-${status.Code || 'no-status'}`} data-col={`future-${status.Code || 'no-status'}`}>{status.Description || ''}</th>))
+              key={`current-${status.Code || 'no-status'}`} data-col={`future-${status.Code || 'no-status'}`}><div>{status.Description || ''}</div>
+            </th>))
           }
-          <th className={`current total border-right`} data-col={'total-year-end'}>TOTAL<br/><small>AT YEAR END</small></th>
+          <th className={`current total border-right`} data-col={'total-year-end'}><div>TOTAL<br/><small>AT YEAR END</small></div></th>
 
 
           {/* Future columns */}
-          <th className={`future`} data-col={'continued-prev'}>Continued<br/><small>from {currentYear}</small></th>
-          <th className={`future`} data-col={'loa'}>Returning L.O.A<br/><small>from {currentYear}</small></th>
+          <th className={`future`} data-col={'continued-prev'}><div>Continued<br/><small>from {currentYear}</small></div></th>
+          <th className={`future`} data-col={'loa'}><div>Returning L.O.A<br/><small>from {currentYear}</small></div></th>
           {
             futureStatuses.map((status, index) => (<th
               className={`future`}
-              key={`future-${status.Code || 'no-status'}`}>{status.Description || ''}</th>))
+              key={`future-${status.Code || 'no-status'}`}><div>{status.Description || ''}</div>
+            </th>))
           }
-          <th className={`total future border-right`}>Total START</th>
+          <th className={`total future border-right`}><div>Total START</div></th>
 
         </tr>
         </thead>
