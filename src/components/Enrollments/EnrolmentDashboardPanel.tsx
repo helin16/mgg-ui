@@ -355,7 +355,7 @@ const EnrolmentDashboardPanel = () => {
     const startDuringYearStudents = newStudentsCurrentYear.filter(student => moment(student.StudentEntryDate).month() > 0);
 
     const normalStudentsThisYear_notLeaving_noStatus = normalStudentsThisYear_notLeaving.filter(student => [SYN_STUDENT_STATUS_ID_REPEATING].indexOf(student.StudentStatus) < 0)
-    const normalStudentsThisYear_loa = currentNotLeftStudents.filter(student => [SYN_STUDENT_STATUS_ID_REPEATING].indexOf(student.StudentStatus) >= 0)
+    const normalStudentsThisYear_loa = currentNotLeftStudents.filter(student => `${student.StudentReturningDate || ''}`.trim() !== '');
     const studentsToday = getUniqStudents([
       ...currentNotLeftStudents,
       ...startBeginningOfYear,
