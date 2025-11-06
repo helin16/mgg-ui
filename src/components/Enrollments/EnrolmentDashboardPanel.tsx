@@ -211,38 +211,6 @@ const EnrolmentDashboardPanel = () => {
     return true;
   }
 
-  const getCurrentPastTds = (leftStudents: iVPastAndCurrentStudent[], yrLvls: iSynLuYearLevel[] = []) => {
-    return (
-      <>
-        <td className={'current-past'} key={'left'}>
-          {
-            getClickableNumber(
-              getStudents(leftStudents.filter((student) => {
-                  const returningDate = `${student.StudentReturningDate || ''}`.trim();
-                  if (returningDate === '') {
-                    return true;
-                  }
-                  return moment(returningDate).isSameOrBefore(moment());
-                }
-              ), yrLvls))
-          }
-        </td>
-        <td className={'current-past'} key={'loa'}>
-          {
-            getClickableNumber(getStudents(leftStudents.filter((student) => {
-              const returningDate = `${student.StudentReturningDate || ''}`.trim();
-              if (returningDate === '') {
-                return false;
-              }
-              return moment(returningDate).isAfter(moment());
-            }), yrLvls))
-          }
-        </td>
-        <td className={'current-past total border-right sm'} key={'left-total'}>{getClickableNumber(getStudents(leftStudents, yrLvls))}</td>
-      </>
-    )
-  }
-
   const getCurrentFutureTds = (currentFutureStudents: iVPastAndCurrentStudent[], newStudentsThisYear: iVPastAndCurrentStudent[], yrLvls: iSynLuYearLevel[] = []) => {
     const startDuringYearStudents = newStudentsThisYear.filter(student => moment(student.StudentEntryDate).month() > 0);
     // const startDuringYearStudents_started = startDuringYearStudents.filter(student => moment(student.StudentEntryDate).isSameOrBefore(moment()));
@@ -254,7 +222,8 @@ const EnrolmentDashboardPanel = () => {
           currentFutureStatuses.map((status, index) => {
             return (
               <td
-                className={`${index < MathHelper.sub(currentFutureStatuses.length, 1) ? '' : 'border-right sm'}`}
+                className={`current ${index < MathHelper.sub(currentFutureStatuses.length, 1) ? '' : 'border-right sm'}`}
+                data-col={`future-${status.Code || 'no-status'}`}
                 key={status.Code || ''}>
                 {
                   getClickableNumber(
@@ -386,10 +355,9 @@ const EnrolmentDashboardPanel = () => {
     const startDuringYearStudents = newStudentsCurrentYear.filter(student => moment(student.StudentEntryDate).month() > 0);
 
     const normalStudentsThisYear_notLeaving_noStatus = normalStudentsThisYear_notLeaving.filter(student => [SYN_STUDENT_STATUS_ID_REPEATING].indexOf(student.StudentStatus) < 0)
+    const normalStudentsThisYear_loa = currentNotLeftStudents.filter(student => [SYN_STUDENT_STATUS_ID_REPEATING].indexOf(student.StudentStatus) >= 0)
     const studentsToday = getUniqStudents([
-      ...normalStudentsThisYear_notLeaving,
-      ...normalStudentsThisYear_leaving_willComeBack,
-      ...normalStudentsThisYear_leaving_notComeBack,
+      ...currentNotLeftStudents,
       ...startBeginningOfYear,
       ...startDuringYearStudents,
     ]);
@@ -404,20 +372,22 @@ const EnrolmentDashboardPanel = () => {
       return moment(leavingDate).isAfter(moment().endOf('year'));
     });
 
+    const currentDay1 = [...normalStudentsThisYear_notLeaving_noStatus, ...startBeginningOfYear];
     return <tr key={key} className={className}>
-      <td className={'border-right'} key={'year-level'}>{title}</td>
-      {getCurrentPastTds(leftStudents, yrLvls)}
-      {getCurrentFutureTds(futureStudentsCurrentYear, newStudentsCurrentYear, yrLvls)}
+      <td className={'border-right'}>{title}</td>
+      <td className={'current'} data-col={'continued-prev'}>{getClickableNumber(getStudents(normalStudentsThisYear_notLeaving_noStatus, yrLvls))}</td>
+      <td className={'current'} data-col={'start-of-year'}>{getClickableNumber(getStudents(startBeginningOfYear, yrLvls))}</td>
+      <td className={'current total border-right sm'} data-col={'current-day-1'}>{getClickableNumber(getStudents(currentDay1, yrLvls))}</td>
+      <td className={'current'} data-col={'start-during'}>{getClickableNumber(getStudents(startDuringYearStudents, yrLvls))}</td>
+      <td className={'current'} data-col={'left-during'}>{getClickableNumber(getStudents(leftStudents, yrLvls))}</td>
+      <td className={'current'} data-col={'loa-during'}>{getClickableNumber(getStudents(normalStudentsThisYear_loa, yrLvls))}</td>
+      <td className={'current total'} data-col={'total-today'}>{getClickableNumber(getStudents(studentsToday, yrLvls))}</td>
 
-      <td
-        className={'current-current'}>{getClickableNumber(getStudents(normalStudentsThisYear_notLeaving_noStatus, yrLvls))}</td>
-      <td>{getClickableNumber(getStudents(normalStudentsThisYear_notLeaving, yrLvls, [SYN_STUDENT_STATUS_ID_REPEATING]))}</td>
-      <td className={'current-current'}>{getClickableNumber(getStudents(startBeginningOfYear, yrLvls))}</td>
-      <td className={'current-current'}>{getClickableNumber(getStudents(startDuringYearStudents, yrLvls))}</td>
-      <td>{getClickableNumber(getStudents(normalStudentsThisYear_leaving_willComeBack, yrLvls))}</td>
-      <td>{getClickableNumber(getStudents(normalStudentsThisYear_leaving_notComeBack, yrLvls))}</td>
-      <td className={'total border-right sm'}>{getClickableNumber(getStudents(studentsToday, yrLvls))}</td>
-      <td className={'border-right'}>{getClickableNumber(getStudents(studentsEndOfCurrentYear, yrLvls))}</td>
+
+      <td className={'current'} data-col={'future-loa'}>{getClickableNumber(getStudents(normalStudentsThisYear_leaving_willComeBack, yrLvls))}</td>
+      <td className={'current'} data-col={'not-returning'}>{getClickableNumber(getStudents(normalStudentsThisYear_leaving_notComeBack, yrLvls))}</td>
+      {getCurrentFutureTds(currentStudents, futureStudentsCurrentYear, yrLvls)}
+      <td className={'current total border-right'} data-col={'total-year-end'}>{getClickableNumber(getStudents(studentsEndOfCurrentYear, yrLvls))}</td>
 
       {getFutureFutureTds(studentsEndOfCurrentYear, futureStudents, leftStudents, yrLvls)}
     </tr>
@@ -435,41 +405,45 @@ const EnrolmentDashboardPanel = () => {
         <thead>
         <tr>
           <th className={'border-right'}></th>
-          <th colSpan={MathHelper.add(currentFutureStatuses.length, 11)} className={'current border-right'}>{currentYear}</th>
+          <th colSpan={MathHelper.add(currentFutureStatuses.length, 10)} className={'current border-right'}>{currentYear}</th>
           <th colSpan={MathHelper.add(futureStatuses.length, 3)} className={'future'}>{nextYear}</th>
         </tr>
         <tr>
           <th className={'border-right'}></th>
-          <th colSpan={3} className={`current-past border-right sm`}>Past {currentYear}</th>
-          {currentFutureStatuses.length > 0 && (<th colSpan={currentFutureStatuses.length} className={'current-future border-right sm'}>Future {currentYear}</th>)}
-          <th colSpan={8} className={`current-current  border-right`}>Current {currentYear}</th>
+          <th colSpan={3} className={`current border-right sm`}>Past</th>
+          <th className={`current border-right sm`}></th>
+          <th colSpan={2} className={`current border-right sm`}>Existing {currentYear}</th>
+          <th className={`current`} data-col={'total-today'}></th>
+          <th className={`current`} data-col={'total-today'}></th>
+          <th className={`current`} data-col={'total-today'}></th>
+          {currentFutureStatuses.length > 0 && (<th colSpan={currentFutureStatuses.length} className={'current border-right sm'} data-col={'future'}>Future {currentYear}</th>)}
+          <th className={`current border-right`} data-col={'total-year-end'}></th>
           <th colSpan={MathHelper.add(futureStatuses.length, 3)} className={'future'}>Future {nextYear}</th>
         </tr>
         <tr className={'count-header'}>
           <th className={'border-right'}></th>
-          <th className={`current-past`}>LEFT MGGS <br />DURING YEAR</th>
-          <th className={`current-past`}>L.O.A<br/><small>(RETURNING)</small></th>
-          <th className={`total current-past border-right sm`}>TOTAL</th>
+          <th className={`current`} data-col={'continued-prev'}>Continued<br/><small>from {lastYear}</small></th>
+          <th className={`current`} data-col={'start-of-year'}>New<br/><small>(start of year)</small></th>
+          <th className={`current total border-right sm`} data-col={'current-day-1'}>DAY
+            1 {currentYear}<br/><small>TOTAL</small></th>
+          <th className={`current border-right sm`} data-col={'start-during'}>NEW<br/><small>(During year)</small></th>
 
+          <th className={`current`} data-col={'left-during'}>LEFT<br/><small>(During year)</small></th>
+          <th className={`current`} data-col={'loa-returning'}>L.O.A<br/><small>(Returning)</small></th>
+          <th className={`current total`} data-col={'total-today'}>TOTAL<br/>TODAY</th>
+          <th className={`current`} data-col={'future-loa'}>APPROVED<br/><small>FUTURE L.O.A.</small></th>
+          <th className={`current`} data-col={'not-returning'}>NOT RETURNING<br/><small>NEXT YEAR</small></th>
           {
             currentFutureStatuses.map((status, index) => (<th
-              className={`current-future ${index < MathHelper.sub(currentFutureStatuses.length, 1) ? '' : 'border-right sm'}`}
-              key={`current-${status.Code || 'no-status'}`}>{status.Description || ''}</th>))
+              className={`current ${index < MathHelper.sub(currentFutureStatuses.length, 1) ? '' : 'border-right sm'}`}
+              key={`current-${status.Code || 'no-status'}`} data-col={`future-${status.Code || 'no-status'}`}>{status.Description || ''}</th>))
           }
-
-          <th className={`current-current`}>Continued<br/><small>from {lastYear}</small></th>
-          <th className={`current-current`}>REPEATING<br /><small>YEAR LEVEL</small></th>
-          <th className={`current-current`}>New<br/><small>(start of year)</small></th>
-          <th className={`current-current`}>New<br/><small>(during year)</small></th>
-          <th className={`current-current`}>APPROVED<br/><small>FUTURE L.O.A.</small></th>
-          <th className={`current-current`}>NOT RETURNING<br/>NEXT YEAR</th>
-          <th className={`current-current total`}>TOTAL<br/>TODAY</th>
-          <th className={`current-current border-right`}>Total<br/><small>At Year End</small></th>
+          <th className={`current total border-right`} data-col={'total-year-end'}>TOTAL<br/><small>AT YEAR END</small></th>
 
 
-          <th className={`future`}>Continued<br/><small>from {currentYear}</small></th>
-          <th className={`future`}>Returning L.O.A<br/><small>from {currentYear}</small></th>
-
+          {/* Future columns */}
+          <th className={`future`} data-col={'continued-prev'}>Continued<br/><small>from {currentYear}</small></th>
+          <th className={`future`} data-col={'loa'}>Returning L.O.A<br/><small>from {currentYear}</small></th>
           {
             futureStatuses.map((status, index) => (<th
               className={`future`}
