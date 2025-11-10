@@ -349,8 +349,7 @@ const EnrolmentDashboardPanel = () => {
 
     const futureStudentsCurrentYear = futureStudents.filter(student => student.FileYear === currentYear);
 
-    const currentNotLeftStudents = getStudentsNotLeftYet(currentStudents);
-    const newStudentsCurrentYear = currentNotLeftStudents.filter(student => moment(student.StudentEntryDate).year() === currentYear);
+    const newStudentsCurrentYear = currentStudents.filter(student => moment(student.StudentEntryDate).year() === currentYear);
 
 
     const startBeginningOfYear = newStudentsCurrentYear.filter(student => moment(student.StudentEntryDate).month() === 0);
