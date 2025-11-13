@@ -43,7 +43,7 @@ const SchoolDataSubmissionsPanel = () => {
 
         <Tab
           eventKey={TabNames.VRTQA}
-          title={"VRQA"}
+          title={"Future Enrolments"}
         >
           <VRQAPanel />
         </Tab>

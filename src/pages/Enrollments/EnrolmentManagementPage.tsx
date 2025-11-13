@@ -17,7 +17,7 @@ enum TabNames {
   STUDENT_NUMBERS = 'STUDENT_NUMBERS',
   EXPIRING_PASSPORTS = 'EXPIRING_PASSPORTS',
   FORECAST_NEXT_YEAR = 'FORECAST_NEXT_YEAR',
-  VRQA = 'VRQA',
+  VRQA = 'Future Enrolments',
   Attendances = 'Attendances',
 }
 
@@ -54,7 +54,7 @@ const EnrolmentManagementPage = () => {
           </SectionDiv>
         </Tab>
 
-        <Tab title={`VRQA`}  eventKey={TabNames.VRQA}>
+        <Tab title={`Future Enrolments`}  eventKey={TabNames.VRQA}>
           <SectionDiv>
             <VRQAPanel />
           </SectionDiv>
