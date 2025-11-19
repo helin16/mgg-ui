@@ -223,6 +223,23 @@ const EnrolmentsProjectedNumbers = ({className, header}: iEnrolmentsProjectedNum
     return _.uniqBy(totalStudents, st => st.StudentID);
   }
 
+  const getExtraEnrolmentsColumns = () => [{
+    key: 'applicationDate',
+    header: 'Application Date',
+    cell: (col: iTableColumn<string>, record: iVStudent) => {
+      const entryDate = `${record.StudentEntryDate || ''}`.trim();
+      const applicationDate = `${record.StudentApplicationDate || ''}`.trim();
+      if (entryDate === '' || applicationDate === '') {
+        return <td key={col.key}></td>
+      }
+      return (
+        <td key={col.key}>
+          {moment(record.StudentEntryDate).isAfter(moment()) ?  moment(applicationDate).format('ll') : ''}
+        </td>
+      );
+    }
+  }]
+
   const getContent = () => {
     if (isLoading) {
       return <Spinner />
@@ -365,7 +382,7 @@ const EnrolmentsProjectedNumbers = ({className, header}: iEnrolmentsProjectedNum
                 if (records.length <= 0) {
                   return <td key={col.key}></td>;
                 }
-                return <td key={col.key}><StudentNumberDetailsPopupBtn records={records} variant={'link'}>{records.length}</StudentNumberDetailsPopupBtn></td>;
+                return <td key={col.key}><StudentNumberDetailsPopupBtn records={records} variant={'link'} extraColumns={getExtraEnrolmentsColumns()}>{records.length}</StudentNumberDetailsPopupBtn></td>;
               }
             }))),
             {
@@ -376,6 +393,7 @@ const EnrolmentsProjectedNumbers = ({className, header}: iEnrolmentsProjectedNum
                 return (
                   <td key={col.key} className={'text-right'}>
                     <StudentNumberDetailsPopupBtn
+                      extraColumns={getExtraEnrolmentsColumns()}
                       records={records}
                       variant={'link'}>
                       {records.length}

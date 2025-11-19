@@ -27,6 +27,7 @@ type iStudentNumberDetailsPopup = ButtonProps & {
   feeNameMap?: { [key: string]: string };
   showingFinanceFigures?: boolean;
   showingFuture?: boolean;
+  extraColumns?: iTableColumn<iVStudent | iFunnelLead>[]
 };
 
 const TableWrapper = styled.div`
@@ -49,6 +50,7 @@ const StudentNumberDetailsPopupBtn = ({
   feeNameMap = {},
   showingFuture = false,
   showingFinanceFigures = false,
+  extraColumns = [],
   ...rest
 }: iStudentNumberDetailsPopup) => {
   const [isShowing, setIsShowing] = useState(false);
@@ -494,6 +496,7 @@ const StudentNumberDetailsPopupBtn = ({
         )
       }
     },
+    ...extraColumns,
     ...(showingFinanceFigures !== true
       ? []
       : [
