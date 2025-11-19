@@ -234,7 +234,7 @@ const EnrolmentsProjectedNumbers = ({className, header}: iEnrolmentsProjectedNum
       }
       return (
         <td key={col.key}>
-          {moment(record.StudentEntryDate).isAfter(moment()) ?  moment(applicationDate).format('ll') : ''}
+          {moment(record.StudentEntryDate).isAfter(moment()) ?  moment(applicationDate).format('YYYY-MM-DD') : ''}
         </td>
       );
     }

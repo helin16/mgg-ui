@@ -13,14 +13,13 @@ import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Popover from "react-bootstrap/Popover";
 import MathHelper from "../../../../helper/MathHelper";
 import { FlexContainer } from "../../../../styles";
-import CSVExportBtn from "../../../form/CSVExportBtn";
-import StudentNumberForecastExportHelper from "./StudentNumberForecastExportHelper";
 import iSynDebtorStudentConcession from '../../../../types/Synergetic/Finance/iSynDebtorStudentConcession';
 import iSynVDebtorFee from '../../../../types/Synergetic/Finance/iSynVDebtorFee';
 import iSynLuYearLevel from '../../../../types/Synergetic/Lookup/iSynLuYearLevel';
 import SynLuYearLevelService from '../../../../services/Synergetic/Lookup/SynLuYearLevelService';
 import {MGG_CAMPUS_CODES} from '../../../../types/Synergetic/Lookup/iSynLuCampus';
 import Toaster from '../../../../services/Toaster';
+import CSVExportFromHtmlTableBtn from '../../../form/CSVExportFromHtmlTableBtn';
 
 type iStudentNumberDetailsPopup = ButtonProps & {
   records: (iVStudent | iFunnelLead)[];
@@ -53,12 +52,19 @@ const StudentNumberDetailsPopupBtn = ({
   extraColumns = [],
   ...rest
 }: iStudentNumberDetailsPopup) => {
+  const nowString = `${moment().format("DD_MMM_YYYY_HH_mm_ss")}`;
   const [isShowing, setIsShowing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [tableHtmlId, setTableHtmlId] = useState('');
   const [yrLvlMap, setYrLvlMap] = useState<iYearLevelMap>({});
   const handleClose = () => {
     setIsShowing(false);
   };
+
+  useEffect(() => {
+    setTableHtmlId(`popupBtn_${Math.random()}`);
+  }, []);
+
   useEffect(() => {
     if (!isShowing) {
       return;
@@ -128,14 +134,14 @@ const StudentNumberDetailsPopupBtn = ({
                           ? ""
                           : moment(
                               `${concession.EffectiveFromDate || ""}`
-                            ).format("DD MMM YYYY")}
+                            ).format("YYYY-MM-DD")}
                       </td>
                       <td>
                         {`${concession.EffectiveToDate || ""}`.trim() === ""
                           ? ""
                           : moment(
                               `${concession.EffectiveToDate || ""}`
-                            ).format("DD MMM YYYY")}
+                            ).format("YYYY-MM-DD")}
                       </td>
                       <td>{concession.OverridePercentage}%</td>
                       <td>
@@ -390,7 +396,7 @@ const StudentNumberDetailsPopupBtn = ({
             {"StudentLeavingDate" in record
               ? `${record.StudentLeavingDate || ""}`.trim() === ""
                 ? ""
-                : moment(record.StudentLeavingDate).format("ll")
+                : moment(record.StudentLeavingDate).format("YYYY-MM-DD")
               : ""}
           </td>
         );
@@ -405,7 +411,7 @@ const StudentNumberDetailsPopupBtn = ({
             {"StudentReturningDate" in record
               ? `${record.StudentReturningDate || ""}`.trim() === ""
                 ? ""
-                : moment(record.StudentReturningDate).format("ll")
+                : moment(record.StudentReturningDate).format("YYYY-MM-DD")
               : ""}
           </td>
         );
@@ -477,7 +483,7 @@ const StudentNumberDetailsPopupBtn = ({
               `${record.StudentEntryDate || ""}`.trim() === ""
                 ? ""
                 : // @ts-ignore
-                moment(record.StudentEntryDate).format('ll')}
+                moment(record.StudentEntryDate).format('YYYY-MM-DD')}
           </td>
         );
       }
@@ -651,28 +657,13 @@ const StudentNumberDetailsPopupBtn = ({
         title={
           <FlexContainer className={"with-gap lg-gap"}>
             <div>{records.length} students:</div>
-            <CSVExportBtn // @ts-ignore
-              fetchingFnc={() =>
-                new Promise(resolve => {
-                  resolve(records);
-                })
-              }
-              downloadFnc={() =>
-                StudentNumberForecastExportHelper.downloadHeadCounts(
-                  records || [],
-                  showingFinanceFigures,
-                  showingFuture,
-                  feeNameMap
-                )
-              }
-              size={"sm"}
-              btnTxt={"Export"}
-            />
+            <CSVExportFromHtmlTableBtn tableHtmlId={tableHtmlId} fileName={`students_${nowString}.csv`} />
           </FlexContainer>
         }
       >
         <TableWrapper>
           <Table
+            id={tableHtmlId}
             hover
             responsive
             columns={getColumns<iVStudent | iFunnelLead>()}
