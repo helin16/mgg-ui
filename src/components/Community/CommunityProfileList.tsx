@@ -60,7 +60,7 @@ const CommunityProfileList = ({
                 value = option?.value;
               }
               onCreate &&
-                onCreate(`${value || ""}`.trim() === "" ? Number(value) : "");
+                onCreate(`${value || ""}`.trim() !== "" ? Number(value) : "");
             }}
           />
         </div>
