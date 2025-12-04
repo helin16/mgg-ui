@@ -588,8 +588,8 @@ const EnrolmentDashboardPanel = () => {
                 {transitionDate.TransitionEndAt && <small>{moment(transitionDate.TransitionEndAt).format('ll')}</small>}
               </FlexContainer>
               <FlexContainer className={'gap-2 align-items-center justify-content-start'}>
-                <label>Show Trans. Cols?</label>
-                <ToggleBtn on={'Show Trans. Cols'} off={'Hide Trans. Cols'} checked={showTransitColumns} onChange={() => setShowTransitColumns(!showTransitColumns)} />
+                <label className={'text-white'}>Show Trans. Cols?</label>
+                <ToggleBtn size={'sm'} on={'Show Trans. Cols'} off={'Hide Trans. Cols'} checked={showTransitColumns} onChange={() => setShowTransitColumns(!showTransitColumns)} />
               </FlexContainer>
             </>
           )
