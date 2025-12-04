@@ -26,6 +26,9 @@ import {FUTURE_STUDENT_STATUS_FINALISED} from '../../types/Synergetic/iSynVFutur
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import {ArrowClockwise} from 'react-bootstrap-icons';
 import LoadingBtn from '../common/LoadingBtn';
+import SynLuTransitionDateService from '../../services/Synergetic/Lookup/SynLuTransitionDateService';
+import iSynLuTransitionDate from '../../types/Synergetic/Lookup/iSynLuTransitionDate';
+import ToggleBtn from '../common/ToggleBtn';
 
 enum FullFeeStudentsTypes {
   All = 'All',
@@ -101,6 +104,8 @@ const EnrolmentDashboardPanel = () => {
   const [currentFutureStatuses, setCurrentFutureStatuses] = useState<iSynLuFutureStatus[]>([]);
   const [futureStatuses, setFutureStatuses] = useState<iSynLuFutureStatus[]>([]);
   const [yearLevels, setYearLevels] = useState<iSynLuYearLevel[]>([]);
+  const [showTransitColumns, setShowTransitColumns] = useState(false);
+  const [transitionDate, setTransitionDate] = useState<iSynLuTransitionDate | null>(null);
 
 
   useEffect(() => {
@@ -124,8 +129,11 @@ const EnrolmentDashboardPanel = () => {
       SynVFutureStudentService.getAll({
         where: JSON.stringify({FutureCampus: MGG_CAMPUS_CODES, FutureEnrolYear: [nextYear, currentYear]}),
         perPage: 9999999999,
+      }),
+      SynLuTransitionDateService.getAll({
+        where: JSON.stringify({ FileYear: currentYear }),
       })
-    ]).then(([module, futureStatuses, campuses, yLevels, currentAndPastStudentResult, futureStudentResult]) => {
+    ]).then(([module, futureStatuses, campuses, yLevels, currentAndPastStudentResult, futureStudentResult, transDates]) => {
       if (isCancel) { return }
       const yearLvlMap = yLevels.reduce((map, yLevel) => ({
         ...map,
@@ -156,6 +164,8 @@ const EnrolmentDashboardPanel = () => {
         ...map,
         [student.FutureID]: SynVFutureStudentService.mapFutureStudentToCurrent(student, yearLvlMap) as iVPastAndCurrentStudent,
       }), {}));
+      setTransitionDate(transDates.length > 0 ? transDates[0] : null);
+      setShowTransitColumns(transDates.length > 0 && moment().isSameOrAfter(moment(transDates[0].TransitionStartAt)));
     }).catch(err => {
       if (isCancel) { return }
       Toaster.showApiError(err)
@@ -368,21 +378,44 @@ const EnrolmentDashboardPanel = () => {
       ...studentsToday,
       ...futureStudentsCurrentYear,
     ]);
+    const transitionedInStudents = transitionDate ? newStudentsCurrentYear.filter(st => moment(st.StudentEntryDate).isSameOrAfter(moment(transitionDate.TransitionStartAt))) : [];
+    const transitionedOutStudents = transitionDate ? leftStudents.filter(st => moment(st.StudentLeavingDate).isSameOrAfter(moment(transitionDate.TransitionStartAt))) : [];
     return <tr key={key} className={className}>
       <td className={'border-right'}>{title}</td>
-      <td className={'current'} data-col={'continued-prev'}>{getClickableNumber(getStudents(continuedStudentsFromLastYear, yrLvls))}</td>
-      <td className={'current'} data-col={'start-of-year'}>{getClickableNumber(getStudents(startBeginningOfYear, yrLvls))}</td>
-      <td className={'current total border-right sm'} data-col={'current-day-1'}>{getClickableNumber(getStudents(currentDay1, yrLvls))}</td>
-      <td className={'current'} data-col={'start-during'}>{getClickableNumber(getStudents(startDuringYearStudents, yrLvls))}</td>
+      <td className={'current'}
+          data-col={'continued-prev'}>{getClickableNumber(getStudents(continuedStudentsFromLastYear, yrLvls))}</td>
+      <td className={'current'}
+          data-col={'start-of-year'}>{getClickableNumber(getStudents(startBeginningOfYear, yrLvls))}</td>
+      <td className={'current total border-right sm'}
+          data-col={'current-day-1'}>{getClickableNumber(getStudents(currentDay1, yrLvls))}</td>
+      <td className={'current'}
+          data-col={'start-during'}>{getClickableNumber(getStudents(startDuringYearStudents, yrLvls))}</td>
       <td className={'current'} data-col={'left-during'}>{getClickableNumber(getStudents(leftStudents, yrLvls))}</td>
-      <td className={'current'} data-col={'loa-during'}>{getClickableNumber(getStudents(leftStudent_willComeBack, yrLvls))}</td>
-      <td className={'current total'} data-col={'total-today'}>{getClickableNumber(getStudents(studentsToday, yrLvls))}</td>
+      {
+        showTransitColumns && (
+          <>
+            <td className={`current`} data-col={'transitioned-in'}>
+              {getClickableNumber(getStudents(transitionedInStudents, yrLvls))}
+            </td>
+            <td className={`current`} data-col={'transitioned-out'}>
+              {getClickableNumber(getStudents(transitionedOutStudents, yrLvls))}
+            </td>
+          </>
+        )
+      }
+      <td className={'current'}
+          data-col={'loa-during'}>{getClickableNumber(getStudents(leftStudent_willComeBack, yrLvls))}</td>
+      <td className={'current total'}
+          data-col={'total-today'}>{getClickableNumber(getStudents(studentsToday, yrLvls))}</td>
 
 
-      <td className={'current'} data-col={'future-loa'}>{getClickableNumber(getStudents(normalStudentsThisYear_leaving_willComeBack, yrLvls))}</td>
-      <td className={'current'} data-col={'not-returning'}>{getClickableNumber(getStudents(normalStudentsThisYear_leaving_notComeBack, yrLvls))}</td>
+      <td className={'current'}
+          data-col={'future-loa'}>{getClickableNumber(getStudents(normalStudentsThisYear_leaving_willComeBack, yrLvls))}</td>
+      <td className={'current'}
+          data-col={'not-returning'}>{getClickableNumber(getStudents(normalStudentsThisYear_leaving_notComeBack, yrLvls))}</td>
       {getCurrentFutureTds(currentStudents, futureStudentsCurrentYear, yrLvls)}
-      <td className={'current total border-right'} data-col={'total-year-end'}>{getClickableNumber(getStudents(studentsEndOfCurrentYear, yrLvls))}</td>
+      <td className={'current total border-right'}
+          data-col={'total-year-end'}>{getClickableNumber(getStudents(studentsEndOfCurrentYear, yrLvls))}</td>
 
       {getFutureFutureTds(studentsEndOfCurrentYear, futureStudents, leftStudents, yrLvls)}
     </tr>
@@ -400,14 +433,14 @@ const EnrolmentDashboardPanel = () => {
         <thead>
         <tr>
           <th className={'border-right'}></th>
-          <th colSpan={MathHelper.add(currentFutureStatuses.length, 10)} className={'current border-right'}>{currentYear}</th>
+          <th colSpan={MathHelper.add(currentFutureStatuses.length, MathHelper.add(10, showTransitColumns ? 2 : 0))} className={'current border-right'}>{currentYear}</th>
           <th colSpan={MathHelper.add(futureStatuses.length, 3)} className={'future'}>{nextYear}</th>
         </tr>
         <tr>
           <th className={'border-right'}></th>
           <th colSpan={3} className={`current border-right sm`}>Past</th>
           <th className={`current border-right sm`}></th>
-          <th colSpan={2} className={`current border-right sm`}>Existing {currentYear}</th>
+          <th colSpan={MathHelper.add(2, showTransitColumns ? 2 : 0)} className={`current border-right sm`}>Existing {currentYear}</th>
           <th className={`current`} data-col={'total-today'}></th>
           <th className={`current`} data-col={'total-today'}></th>
           <th className={`current`} data-col={'total-today'}></th>
@@ -424,7 +457,20 @@ const EnrolmentDashboardPanel = () => {
           <th className={`current border-right sm`} data-col={'start-during'}><div>NEW<br/><small>(During year)</small></div></th>
 
           <th className={`current`} data-col={'left-during'}><div>LEFT<br/><small>(During year)</small></div></th>
-          <th className={`current`} data-col={'loa-returning'}><div>L.O.A<br/><small>(Returning)</small></div></th>
+          {
+            showTransitColumns && (
+              <>
+                <th className={`current`} data-col={'transitioned-in'}>
+                  <div>Transitioned<br/>IN</div>
+                </th>
+                <th className={`current`} data-col={'transitioned-out'}>
+                  <div>Transitioned<br/>OUT</div>
+                </th>
+              </>
+            )}
+          <th className={`current`} data-col={'loa-returning'}>
+            <div>L.O.A<br/><small>(Returning)</small></div>
+          </th>
           <th className={`current total`} data-col={'total-today'}><div>TOTAL<br/>TODAY</div></th>
           <th className={`current`} data-col={'future-loa'}><div>APPROVED<br/><small>FUTURE L.O.A.</small></div></th>
           <th className={`current`} data-col={'not-returning'}><div>NOT RETURNING<br/><small>NEXT YEAR</small></div></th>
@@ -531,7 +577,23 @@ const EnrolmentDashboardPanel = () => {
           </ButtonGroup>
         </FlexContainer>
       </FlexContainer>
-      <FlexContainer className={'gap-2 align-items-center justify-content-end'}>
+      <FlexContainer className={'gap-4 align-items-center justify-content-end'}>
+        {
+          transitionDate && (
+            <>
+              <FlexContainer className={'gap-2 align-items-center justify-content-start'}>
+                <small>Trans. Date:</small>
+                <small>{moment(transitionDate.TransitionStartAt).format('ll')}</small>
+                <small>~</small>
+                {transitionDate.TransitionEndAt && <small>{moment(transitionDate.TransitionEndAt).format('ll')}</small>}
+              </FlexContainer>
+              <FlexContainer className={'gap-2 align-items-center justify-content-start'}>
+                <label>Show Trans. Cols?</label>
+                <ToggleBtn on={'Show Trans. Cols'} off={'Hide Trans. Cols'} checked={showTransitColumns} onChange={() => setShowTransitColumns(!showTransitColumns)} />
+              </FlexContainer>
+            </>
+          )
+        }
         <LoadingBtn size={'sm'} variant={'outline-light'} onClick={() => { setForceReload(prevState => prevState + 1)}} isLoading={isLoading}><ArrowClockwise /> Refresh</LoadingBtn>
       </FlexContainer>
     </PanelTitle>
