@@ -40,6 +40,8 @@ import SynVAttendancesWithAbsenceService
 import iSynVAttendancesWithAbsence from '../../../../types/Synergetic/Attendance/iSynVAttendancesWithAbsence';
 import MggsModuleService from '../../../../services/Module/MggsModuleService';
 import {MGGS_MODULE_ID_REPORTS_STUDENT_ATTENDANCE_RATE} from '../../../../types/modules/iModuleUser';
+import SynLuAbsenceTypeService from '../../../../services/Synergetic/Lookup/SynLuAbsenceTypeService';
+import iSynLuAbsenceType from '../../../../types/Synergetic/Absence/iSynLuAbsenceType';
 
 type iDateRange = {
   StartDate: string;
@@ -64,6 +66,7 @@ const StudentAttendanceRateReport = () => {
   const [searchingDateRange, setSearchingDateRange] = useState(initDateRange);
   const [searchingSchoolDays, setSearchingSchoolDays] = useState<string[]>([]);
   const [searchingSchoolDaysAll, setSearchingSchoolDaysAll] = useState<iSchoolDay[]>([]);
+  const [luAbsenceTypeMap, setLuAbsenceTypeMap] = useState<{[key: string]: iSynLuAbsenceType}>({});
   const [searchingCampusCodes, setSearchingCampusCodes] = useState<string[]>(
     defaultCampusCodes
   );
@@ -102,7 +105,10 @@ const StudentAttendanceRateReport = () => {
         start: moment(startDateStr).format('YYYY-MM-DD'),
         end: moment(endDateStr).format('YYYY-MM-DD'),
       }),
-      MggsModuleService.getModule(MGGS_MODULE_ID_REPORTS_STUDENT_ATTENDANCE_RATE)
+      MggsModuleService.getModule(MGGS_MODULE_ID_REPORTS_STUDENT_ATTENDANCE_RATE),
+      SynLuAbsenceTypeService.getAll({
+        where: JSON.stringify({ ActiveFlag: true })
+      }),
     ])
       .then(resp => {
         if (isCanceled) {
@@ -110,6 +116,7 @@ const StudentAttendanceRateReport = () => {
         }
         const sDays: string[] = (resp[0] || []).filter(day => day.isSchoolDay === true).map(day => day.date);
         setSearchingSchoolDays(_.uniq(sDays));
+        setLuAbsenceTypeMap(resp[2].reduce((map, record) => ({...map, [record.Code]: record}), {}));
         setSearchingSchoolDaysAll(resp[0] || []);
         setExcludingPeriodsMap((resp[1].settings?.excludingDates || []).reduce((map: iExcludingPeriodMap, period: any) => {
           const key = `${period.yearLevelCode || ''}`.trim();
@@ -198,6 +205,10 @@ const StudentAttendanceRateReport = () => {
         ...results
           .map(result => result.data)
           .reduce((arr, row) => [...arr, ...row], [])
+          .map(record => ({
+            ...record,
+            AttendedFlag: record?.AttendedFlag === true ? true : !(record.PossibleAbsenceCode in luAbsenceTypeMap && luAbsenceTypeMap[record.PossibleAbsenceCode].CountAsAbsenceFlag),
+          }))
       ];
       setLoadingPercentage(
         MathHelper.mul(MathHelper.div(doneIds.length, IDs.length), 100)
