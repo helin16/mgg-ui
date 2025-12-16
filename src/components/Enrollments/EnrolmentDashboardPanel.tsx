@@ -29,6 +29,7 @@ import LoadingBtn from '../common/LoadingBtn';
 import SynLuTransitionDateService from '../../services/Synergetic/Lookup/SynLuTransitionDateService';
 import iSynLuTransitionDate from '../../types/Synergetic/Lookup/iSynLuTransitionDate';
 import ToggleBtn from '../common/ToggleBtn';
+import SynFileSemesterService from '../../services/Synergetic/SynFileSemesterService';
 
 enum FullFeeStudentsTypes {
   All = 'All',
@@ -91,9 +92,10 @@ const Wrapper = styled.div`
 `;
 const EnrolmentDashboardPanel = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const currentYear = moment().year();
-  const nextYear = MathHelper.add(currentYear, 1);
-  const lastYear = MathHelper.sub(currentYear, 1);
+  const [currentYear, setCurrentYear] = useState(moment().year());
+  const [nextYear, setNextYear] = useState(MathHelper.add(moment().year(), 1));
+  const [lastYear, setLastYear] = useState(MathHelper.sub(moment().year(), 1));
+
   const [selectedFullFeeStudentType, setSelectedFullFeeStudentType] = useState(FullFeeStudentsTypes.All);
   const [selectedCampusCodes, setSelectedCampusCodes] = useState(MGG_CAMPUS_CODES);
   const [forceReload, setForceReload] = useState(0);
@@ -109,36 +111,50 @@ const EnrolmentDashboardPanel = () => {
 
 
   useEffect(() => {
-    let isCancel = false;
-    setIsLoading(true);
-    Promise.all([
-      MggsModuleService.getModule(MGGS_MODULE_ID_ENROLLMENTS),
-      SynLuFutureStatusService.getAll({}),
-      SynLuCampusService.getAllCampuses({
-        where: JSON.stringify({Code: MGG_CAMPUS_CODES}),
-      }),
-      SynLuYearLevelService.getAllYearLevels({
-        where: JSON.stringify({Campus: MGG_CAMPUS_CODES}),
-        sort: `YearLevelSort:ASC`
-      }),
-      SynVStudentService.getVPastAndCurrentStudentAll({
-        where: JSON.stringify({StudentCampus: MGG_CAMPUS_CODES, FileYear: currentYear}),
-        sort: `FileSemester:ASC`,
-        perPage: 9999999999,
-      }),
-      SynVFutureStudentService.getAll({
-        where: JSON.stringify({FutureCampus: MGG_CAMPUS_CODES, FutureEnrolYear: [nextYear, currentYear]}),
-        perPage: 9999999999,
-      }),
-      SynLuTransitionDateService.getAll({
-        where: JSON.stringify({ FileYear: currentYear }),
-      })
-    ]).then(([module, futureStatuses, campuses, yLevels, currentAndPastStudentResult, futureStudentResult, transDates]) => {
+    const getData = async () => {
+      const result = await SynFileSemesterService.getFileSemesters({
+        where: JSON.stringify({
+          SystemCurrentFlag: true
+        })
+      });
+      let cYear = moment().year();
+      if (result.length > 0) {
+        cYear = result[0].FileYear;
+      }
+      const nYear = MathHelper.add(cYear, 1);
+      const lYear = MathHelper.sub(cYear, 1);
+      const [module, futureStatuses, campuses, yLevels, currentAndPastStudentResult, futureStudentResult, transDates] = await Promise.all([
+        MggsModuleService.getModule(MGGS_MODULE_ID_ENROLLMENTS),
+        SynLuFutureStatusService.getAll({}),
+        SynLuCampusService.getAllCampuses({
+          where: JSON.stringify({Code: MGG_CAMPUS_CODES}),
+        }),
+        SynLuYearLevelService.getAllYearLevels({
+          where: JSON.stringify({Campus: MGG_CAMPUS_CODES}),
+          sort: `YearLevelSort:ASC`
+        }),
+        SynVStudentService.getVPastAndCurrentStudentAll({
+          where: JSON.stringify({StudentCampus: MGG_CAMPUS_CODES, FileYear: cYear}),
+          sort: `FileSemester:ASC`,
+          perPage: 9999999999,
+        }),
+        SynVFutureStudentService.getAll({
+          where: JSON.stringify({FutureCampus: MGG_CAMPUS_CODES, FutureEnrolYear: [nYear, cYear]}),
+          perPage: 9999999999,
+        }),
+        SynLuTransitionDateService.getAll({
+          where: JSON.stringify({ FileYear: cYear }),
+        })
+      ]);
+
       if (isCancel) { return }
       const yearLvlMap = yLevels.reduce((map, yLevel) => ({
         ...map,
         [yLevel.Code]: yLevel,
       }), {});
+      setCurrentYear(cYear);
+      setNextYear(nYear);
+      setLastYear(lYear);
       setYearLevels(yLevels);
       setCampusMap(campuses.reduce((map: iCampusMap, campus) => ({
         ...map,
@@ -166,7 +182,11 @@ const EnrolmentDashboardPanel = () => {
       }), {}));
       setTransitionDate(transDates.length > 0 ? transDates[0] : null);
       setShowTransitColumns(transDates.length > 0 && moment().isSameOrAfter(moment(transDates[0].TransitionStartAt)));
-    }).catch(err => {
+    }
+
+    let isCancel = false;
+    setIsLoading(true);
+    getData().catch(err => {
       if (isCancel) { return }
       Toaster.showApiError(err)
     }).finally(() => {
@@ -176,7 +196,7 @@ const EnrolmentDashboardPanel = () => {
     return () => {
       isCancel = true;
     }
-  }, [currentYear, selectedCampusCodes, nextYear, forceReload]);
+  }, [selectedCampusCodes, forceReload]);
 
   const getStudents = (students: iVPastAndCurrentStudent[], yearLevels: iSynLuYearLevel[] = [], statuses: string[] = []) => {
     const yearLevelCodes = yearLevels.map(yl => `${yl.Code}`.trim());
