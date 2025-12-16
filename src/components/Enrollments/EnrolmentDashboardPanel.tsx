@@ -374,6 +374,7 @@ const EnrolmentDashboardPanel = () => {
     yrLvls?: iSynLuYearLevel[]
   }
   const getTR = ({ yrLvls, currentStudents, futureStudents }: iGetTR, title: React.ReactNode, key: string, className: string) => {
+    const currentFutureStatusCodes = currentFutureStatuses.map(status => status.Code);
     const leftStudents = currentStudents.filter(student => moment(student.StudentLeavingDate).isSameOrBefore(moment()));
     const continuedStudentsFromLastYear = currentStudents.filter(student => moment(student.StudentEntryDate).year() < currentYear);
 
@@ -396,7 +397,7 @@ const EnrolmentDashboardPanel = () => {
     const normalStudentsThisYear_leaving_willComeBack = normalStudentsThisYear_leaving.filter(student => `${student.StudentReturningDate || ''}`.trim() !== '' &&  moment(`${student.StudentReturningDate || ''}`.trim()).isAfter(moment()));
     const studentsEndOfCurrentYear = getUniqStudents([
       ...studentsToday,
-      ...futureStudentsCurrentYear,
+      ...(futureStudentsCurrentYear.filter(std => currentFutureStatusCodes.indexOf(std.StudentStatus) >=0 )),
     ]);
     const transitionedInStudents = transitionDate ? newStudentsCurrentYear.filter(st => moment(st.StudentEntryDate).isSameOrAfter(moment(transitionDate.TransitionStartAt))) : [];
     const transitionedOutStudents = transitionDate ? leftStudents.filter(st => moment(st.StudentLeavingDate).isSameOrAfter(moment(transitionDate.TransitionStartAt))) : [];
