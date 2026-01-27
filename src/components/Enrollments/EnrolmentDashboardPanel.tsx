@@ -172,7 +172,7 @@ const EnrolmentDashboardPanel = () => {
         ...map,
         [yLevel.Campus]: [...(map[yLevel.Campus] || []), yLevel],
       }), {}));
-      setCurrentStudentsMap((currentAndPastStudentResult.data || []).reduce((map: iStudentMap, student) => ({
+      setCurrentStudentsMap((currentAndPastStudentResult.data || []).filter(student => `${student.StudentLeavingDate || ''}`.trim() === '' || moment(`${student.StudentLeavingDate || ''}`.trim()).year() >= currentYear).reduce((map: iStudentMap, student) => ({
         ...map,
         [student.ID]: student,
       }), {}));
@@ -376,7 +376,7 @@ const EnrolmentDashboardPanel = () => {
   const getTR = ({ yrLvls, currentStudents, futureStudents }: iGetTR, title: React.ReactNode, key: string, className: string) => {
     const currentFutureStatusCodes = currentFutureStatuses.map(status => status.Code);
     const leftStudents = currentStudents.filter(student => moment(student.StudentLeavingDate).isSameOrBefore(moment()));
-    const continuedStudentsFromLastYear = currentStudents.filter(student => moment(student.StudentEntryDate).year() < currentYear).filter(student => `${student.StudentLeavingDate || ''}`.trim() === '' || moment(`${student.StudentLeavingDate || ''}`.trim()).year() >= currentYear);
+    const continuedStudentsFromLastYear = currentStudents.filter(student => moment(student.StudentEntryDate).year() < currentYear);
 
     const futureStudentsCurrentYear = futureStudents.filter(student => student.FileYear === currentYear);
 
