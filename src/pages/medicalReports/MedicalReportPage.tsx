@@ -22,6 +22,7 @@ import MedicalReportExportDropdown from "./components/MedicalReportExportDropdow
 import Page401 from "../../components/Page401";
 import * as _ from 'lodash';
 import SynPhotoService from "../../services/Synergetic/SynPhotoService";
+import UtilsService from "../../services/UtilsService";
 
 const ResultWrapper = styled.div`
   padding: 1rem 0;
@@ -244,7 +245,7 @@ const MedicalReportPage = () => {
               const photosMap: {[key: number]: string} = ((await Promise.all(studentIDs.map(stId => SynPhotoService.getPhoto(stId)
                   .then(resp => {
                       if (!resp || !('Photo' in resp)) {
-                          return [stId, '/images/User-avatar.png'];
+                          return [stId, UtilsService.getFullUrl("images/User-avatar.png")];
                       } else {
                           return [stId, SynPhotoService.convertBufferToUrl(resp.Photo.data, resp.PhotoType)];
                       }
