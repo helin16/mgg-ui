@@ -20,6 +20,8 @@ import SynVDocumentService from "../../services/Synergetic/SynVDocumentService";
 import { HEADER_NAME_SELECTING_FIELDS } from "../../services/AppService";
 import MedicalReportExportDropdown from "./components/MedicalReportExportDropdown";
 import Page401 from "../../components/Page401";
+import * as _ from 'lodash';
+import SynPhotoService from "../../services/Synergetic/SynPhotoService";
 
 const ResultWrapper = styled.div`
   padding: 1rem 0;
@@ -102,172 +104,190 @@ const MedicalReportPage = () => {
     {}
   );
 
-  const onSearch = (criteria: iSearchState) => {
-    setIsSearching(true);
-    const conditionsWhere = {
-      ...(criteria.conditionTypes.length > 0
-        ? { ConditionTypeCode: criteria.conditionTypes }
-        : {}),
-      ...(criteria.conditionSeverities.length > 0
-        ? { ConditionSeverityCode: criteria.conditionSeverities }
-        : {})
-    };
-    Promise.all([
-      SynVStudentService.getCurrentVStudents(
-        {
-          where: JSON.stringify({
-            ...(`${criteria.searchText || ""}`.trim() !== ""
-              ? {
-                  [OP_OR]: [
-                    {
-                      StudentForm: {
-                        [OP_LIKE]: `%${`${criteria.searchText || ""}`.trim()}%`
-                      }
-                    },
-                    {
-                      StudentNameInternal: {
-                        [OP_LIKE]: `%${`${criteria.searchText || ""}`.trim()}%`
-                      }
-                    },
-                    {
-                      StudentNameExternal: {
-                        [OP_LIKE]: `%${`${criteria.searchText || ""}`.trim()}%`
-                      }
-                    }
-                  ]
-                }
+  const onSearch = async (criteria: iSearchState) => {
+      setIsSearching(true);
+      const conditionsWhere = {
+          ...(criteria.conditionTypes.length > 0
+              ? {ConditionTypeCode: criteria.conditionTypes}
               : {}),
-            ...(criteria.campuses.length > 0
-              ? { StudentCampus: criteria.campuses }
-              : {}),
-            ...(criteria.yearLevels.length > 0
-              ? { StudentYearLevel: criteria.yearLevels }
-              : {}),
-            FileYear: user?.SynCurrentFileSemester?.FileYear || moment().year(),
-            FileSemester: user?.SynCurrentFileSemester?.FileSemester || 1,
-            [OP_OR]: [
-              { StudentLeavingDate: null },
-              {
-                StudentLeavingDate: {
-                  [OP_GT]: moment()
-                    .utc()
-                    .format("YYYY-MM-DD")
-                }
-              }
-            ]
-          }),
-          sort: `StudentNameInternal:ASC`
-        },
-        {
-          headers: {
-            [HEADER_NAME_SELECTING_FIELDS]: JSON.stringify([
-              "StudentID",
-              "StudentGiven1",
-              "StudentSurname",
-              "StudentForm",
-              "profileUrl",
-              "FileYear",
-              "FileSemester",
-              "StudentYearLevelSort"
-            ])
-          }
-        }
-      ),
-      SynVMedicalConditionStudentService.getAll(
-        {
-          where: JSON.stringify({
-            ...conditionsWhere,
-            ConditionActiveFlag: true
-          })
-        },
-        {
-          headers: {
-            [HEADER_NAME_SELECTING_FIELDS]: JSON.stringify([
-              "ID",
-              "MedicalConditionSeq",
-              "ConditionTypeDescription",
-              "ConditionSeverityDisplayColour",
-              "ConditionSeverityDescription",
-              "ConditionDetails"
-            ])
-          }
-        }
-      ),
-      ...(criteria.classCodes.length === 0
-        ? []
-        : [
-            SynVStudentClassService.getAll(
-              {
-                where: JSON.stringify({
-                  ClassCode: criteria.classCodes,
-                  FileYear:
-                    user?.SynCurrentFileSemester?.FileYear || moment().year(),
-                  FileSemester: user?.SynCurrentFileSemester?.FileSemester || 1
-                }),
-                perPage: "99999"
-              },
-              {
-                headers: {
-                  [HEADER_NAME_SELECTING_FIELDS]: JSON.stringify([
-                    "StudentID",
-                    "ClassCode"
-                  ])
-                }
-              }
-            )
-          ])
-    ])
-      .then(resp => {
-        setConditionsMap(
-          resp[1].reduce((map, condition) => {
-            if (!(condition.ID in map)) {
-              return {
-                ...map,
-                [condition.ID]: [condition]
-              };
-            }
-            // @ts-ignore
-            const existing = map[condition.ID];
-            return {
-              ...map,
-              [condition.ID]: [...existing, ...[condition]]
-            };
-          }, {})
-        );
+          ...(criteria.conditionSeverities.length > 0
+              ? {ConditionSeverityCode: criteria.conditionSeverities}
+              : {})
+      };
+      try {
+          const resp = await Promise.all([
+              SynVStudentService.getCurrentVStudents(
+                  {
+                      where: JSON.stringify({
+                          ...(`${criteria.searchText || ""}`.trim() !== ""
+                              ? {
+                                  [OP_OR]: [
+                                      {
+                                          StudentForm: {
+                                              [OP_LIKE]: `%${`${criteria.searchText || ""}`.trim()}%`
+                                          }
+                                      },
+                                      {
+                                          StudentNameInternal: {
+                                              [OP_LIKE]: `%${`${criteria.searchText || ""}`.trim()}%`
+                                          }
+                                      },
+                                      {
+                                          StudentNameExternal: {
+                                              [OP_LIKE]: `%${`${criteria.searchText || ""}`.trim()}%`
+                                          }
+                                      }
+                                  ]
+                              }
+                              : {}),
+                          ...(criteria.campuses.length > 0
+                              ? { StudentCampus: criteria.campuses }
+                              : {}),
+                          ...(criteria.yearLevels.length > 0
+                              ? { StudentYearLevel: criteria.yearLevels }
+                              : {}),
+                          FileYear: user?.SynCurrentFileSemester?.FileYear || moment().year(),
+                          FileSemester: user?.SynCurrentFileSemester?.FileSemester || 1,
+                          [OP_OR]: [
+                              { StudentLeavingDate: null },
+                              {
+                                  StudentLeavingDate: {
+                                      [OP_GT]: moment()
+                                          .utc()
+                                          .format("YYYY-MM-DD")
+                                  }
+                              }
+                          ]
+                      }),
+                      sort: `StudentNameInternal:ASC`
+                  },
+                  {
+                      headers: {
+                          [HEADER_NAME_SELECTING_FIELDS]: JSON.stringify([
+                              "StudentID",
+                              "StudentGiven1",
+                              "StudentSurname",
+                              "StudentForm",
+                              "profileUrl",
+                              "FileYear",
+                              "FileSemester",
+                              "StudentYearLevelSort"
+                          ])
+                      }
+                  }
+              ),
+              SynVMedicalConditionStudentService.getAll(
+                  {
+                      where: JSON.stringify({
+                          ...conditionsWhere,
+                          ConditionActiveFlag: true
+                      })
+                  },
+                  {
+                      headers: {
+                          [HEADER_NAME_SELECTING_FIELDS]: JSON.stringify([
+                              "ID",
+                              "MedicalConditionSeq",
+                              "ConditionTypeDescription",
+                              "ConditionSeverityDisplayColour",
+                              "ConditionSeverityDescription",
+                              "ConditionDetails"
+                          ])
+                      }
+                  }
+              ),
+              ...(criteria.classCodes.length === 0
+                  ? []
+                  : [
+                      SynVStudentClassService.getAll(
+                          {
+                              where: JSON.stringify({
+                                  ClassCode: criteria.classCodes,
+                                  FileYear:
+                                      user?.SynCurrentFileSemester?.FileYear || moment().year(),
+                                  FileSemester: user?.SynCurrentFileSemester?.FileSemester || 1
+                              }),
+                              perPage: "99999"
+                          },
+                          {
+                              headers: {
+                                  [HEADER_NAME_SELECTING_FIELDS]: JSON.stringify([
+                                      "StudentID",
+                                      "ClassCode"
+                                  ])
+                              }
+                          }
+                      )
+                  ]),
+          ]);
 
-        const classCodeStudentIds = (resp[2]?.data || []).map(
-          studentClass => studentClass.StudentID
-        );
-        if (
-          Object.keys(conditionsWhere).length <= 0 &&
-          classCodeStudentIds.length <= 0
-        ) {
-          setStudents(resp[0]);
-        } else {
-          const conditionStudentIds = resp[1].map(condition => condition.ID);
-          setStudents(
-            resp[0].filter(student => {
-              if (Object.keys(conditionsWhere).length <= 0) {
-                return classCodeStudentIds.indexOf(student.StudentID) >= 0;
-              }
-              if (classCodeStudentIds.length <= 0) {
-                return conditionStudentIds.indexOf(student.StudentID) >= 0;
-              }
-              return (
-                classCodeStudentIds.indexOf(student.StudentID) >= 0 &&
-                conditionStudentIds.indexOf(student.StudentID) >= 0
-              );
-            })
+          setConditionsMap(
+              resp[1].reduce((map, condition) => {
+                  if (!(condition.ID in map)) {
+                      return {
+                          ...map,
+                          [condition.ID]: [condition]
+                      };
+                  }
+                  // @ts-ignore
+                  const existing = map[condition.ID];
+                  return {
+                      ...map,
+                      [condition.ID]: [...existing, ...[condition]]
+                  };
+              }, {})
           );
-        }
-      })
-      .catch(err => {
-        Toaster.showApiError(err);
-      })
-      .finally(() => {
-        setIsSearching(false);
-      });
-  };
+          let students = resp[0] || [];
+          if (criteria.photoFromSyn === true) {
+              const studentArr = resp[0] || [];
+              const studentIDs = _.uniq(studentArr.map(st => st.StudentID));
+              const photosMap: {[key: number]: string} = ((await Promise.all(studentIDs.map(stId => SynPhotoService.getPhoto(stId)
+                  .then(resp => {
+                      if (!resp || !('Photo' in resp)) {
+                          return [stId, '/images/User-avatar.png'];
+                      } else {
+                          return [stId, SynPhotoService.convertBufferToUrl(resp.Photo.data, resp.PhotoType)];
+                      }
+                  })))) || []).reduce((map, [stdId, url]) => ({
+                  ...map,
+                  [stdId]: url
+              }), {});
+              students = studentArr.map(student => ({
+                  ...student,
+                  profileUrl: student.StudentID in photosMap ? photosMap[student.StudentID] : '',
+              }))
+          }
+
+          const classCodeStudentIds = (resp[2]?.data || []).map(
+              studentClass => studentClass.StudentID
+          );
+          if (
+              Object.keys(conditionsWhere).length <= 0 &&
+              classCodeStudentIds.length <= 0
+          ) {
+              setStudents(students);
+          } else {
+              const conditionStudentIds = resp[1].map(condition => condition.ID);
+              setStudents(
+                  students.filter(student => {
+                      if (Object.keys(conditionsWhere).length <= 0) {
+                          return classCodeStudentIds.indexOf(student.StudentID) >= 0;
+                      }
+                      if (classCodeStudentIds.length <= 0) {
+                          return conditionStudentIds.indexOf(student.StudentID) >= 0;
+                      }
+                      return (
+                          classCodeStudentIds.indexOf(student.StudentID) >= 0 &&
+                          conditionStudentIds.indexOf(student.StudentID) >= 0
+                      );
+                  })
+              );
+          }
+          setIsSearching(false);
+      } catch (e) {
+          Toaster.showApiError(e);
+      }
+  }
 
   useEffect(() => {
     if (students.length <= 0) return;

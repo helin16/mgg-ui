@@ -14,6 +14,7 @@ import {useSelector} from 'react-redux';
 import {RootState} from '../../../redux/makeReduxStore';
 import moment from 'moment-timezone';
 import UtilsService from '../../../services/UtilsService';
+import ToggleBtn from "../../../components/common/ToggleBtn";
 
 const Wrapper = styled.div`
   .search-btn-wrapper {
@@ -32,6 +33,7 @@ export type iSearchState = {
   conditionTypes: string[];
   conditionSeverities: string[];
   classCodes: string[];
+  photoFromSyn: boolean;
 }
 const initialSearchState: iSearchState = {
   searchText: '',
@@ -40,6 +42,7 @@ const initialSearchState: iSearchState = {
   conditionTypes: [],
   conditionSeverities: [],
   classCodes: [],
+  photoFromSyn: false,
 }
 
 type iState = {
@@ -95,7 +98,7 @@ const MedicalReportSearchPanel = ({onSearch, onClear, isSearching = false}: iSta
               })}
             />
           </Col>
-          <Col sm={6} md={3}>
+          <Col sm={4} md={2}>
             <FormLabel label={'Year Levels'} />
             <YearLevelSelector
               allowClear
@@ -106,6 +109,10 @@ const MedicalReportSearchPanel = ({onSearch, onClear, isSearching = false}: iSta
                 yearLevels: (values === null ? [] : Array.isArray(values) ? values : [values]).map(value => `${value.value}`),
               })}
             />
+          </Col>
+          <Col sm={2} md={1}>
+            <FormLabel label={'Photo from Syn?'} />
+            <ToggleBtn checked={searchCriteria.photoFromSyn} onChange={(values) => setSearchCriteria({...searchCriteria, photoFromSyn: values})} on={'yes'} off={'no'}/>
           </Col>
         </Row>
       </Collapse>
