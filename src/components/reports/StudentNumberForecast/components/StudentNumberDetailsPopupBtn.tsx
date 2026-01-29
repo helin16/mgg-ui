@@ -502,6 +502,20 @@ const StudentNumberDetailsPopupBtn = ({
         )
       }
     },
+    {
+      key: "StudentPreviousSchoolDescription",
+      header: "Previous School",
+      cell: (col: iTableColumn<T>, record: iVStudent | iFunnelLead) => {
+        return (
+          <td key={col.key}>
+            {
+              // @ts-ignore
+              `${record.StudentPreviousSchool || ''}`.trim() === '' ? '' : record.StudentPreviousSchoolDescription
+            }
+          </td>
+        )
+      }
+    },
     ...extraColumns,
     ...(showingFinanceFigures !== true
       ? []

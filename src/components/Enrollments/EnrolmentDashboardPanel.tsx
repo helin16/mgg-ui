@@ -117,7 +117,7 @@ const EnrolmentDashboardPanel = () => {
           SystemCurrentFlag: true
         })
       });
-      let cYear = moment().year();
+      let cYear = currentYear;
       if (result.length > 0) {
         cYear = result[0].FileYear;
       }
@@ -196,7 +196,7 @@ const EnrolmentDashboardPanel = () => {
     return () => {
       isCancel = true;
     }
-  }, [selectedCampusCodes, forceReload]);
+  }, [selectedCampusCodes, forceReload, currentYear]);
 
   const getStudents = (students: iVPastAndCurrentStudent[], yearLevels: iSynLuYearLevel[] = [], statuses: string[] = []) => {
     const yearLevelCodes = yearLevels.map(yl => `${yl.Code}`.trim());
