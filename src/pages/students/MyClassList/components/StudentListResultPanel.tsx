@@ -524,6 +524,42 @@ const StudentListResultPanel = ({
         }
       },
       {
+        key: "parent1-occupType",
+        header: "Parent Occup Type",
+        isDefault: true,
+        group: "Parent",
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
+          const parent =
+              data.StudentID in parentMap ? parentMap[data.StudentID] : null;
+          return (
+              <td
+                  key={col.key}
+                  className={`${col.key}`}
+              >
+                {`${parent?.StudentContactOccupType || ''}`.trim()}
+              </td>
+          );
+        }
+      },
+      {
+        key: "parent1-occupDesc",
+        header: "Parent Occup Desc",
+        isDefault: true,
+        group: "Parent",
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
+          const parent =
+              data.StudentID in parentMap ? parentMap[data.StudentID] : null;
+          return (
+              <td
+                  key={col.key}
+                  className={`${col.key}`}
+              >
+                {`${parent?.StudentContactOccupDesc || ''}`.trim()}
+              </td>
+          );
+        }
+      },
+      {
         key: "parent2-id",
         header: "Parent2 ID",
         group: "Parent",
@@ -584,6 +620,42 @@ const StudentListResultPanel = ({
             <td key={col.key} className={col.key}>
               {parent?.StudentContactSpouseDefaultMobilePhone || ""}
             </td>
+          );
+        }
+      },
+      {
+        key: "parent2-occupType",
+        header: "Parent2 Occup Type",
+        isDefault: true,
+        group: "Parent",
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
+          const parent =
+              data.StudentID in parentMap ? parentMap[data.StudentID] : null;
+          return (
+              <td
+                  key={col.key}
+                  className={`${col.key}`}
+              >
+                {`${parent?.StudentContactSpouseOccupType || ''}`.trim()}
+              </td>
+          );
+        }
+      },
+      {
+        key: "parent2-occupDesc",
+        header: "Parent2 Occup Desc",
+        isDefault: true,
+        group: "Parent",
+        cell: (col: iTableColumn<iVStudent>, data: iVStudent) => {
+          const parent =
+              data.StudentID in parentMap ? parentMap[data.StudentID] : null;
+          return (
+              <td
+                  key={col.key}
+                  className={`${col.key}`}
+              >
+                {`${parent?.StudentContactSpouseOccupDesc || ''}`.trim()}
+              </td>
           );
         }
       },

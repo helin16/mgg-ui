@@ -121,7 +121,13 @@ const MyClassList = () => {
                 "StudentContactSpouseNameExternal",
                 "StudentContactSpouseDefaultMobilePhone",
                 "StudentContactSpouseDefaultEmail",
-                "StudentParentsSeparatedFlag"
+                "StudentParentsSeparatedFlag",
+                "StudentContactOccupCode",
+                "StudentContactOccupType",
+                "StudentContactOccupDesc",
+                "StudentContactSpouseOccupCode",
+                "StudentContactSpouseOccupType",
+                "StudentContactSpouseOccupDesc",
               ])
             }
           }
