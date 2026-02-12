@@ -22,7 +22,6 @@ import {MGGS_MODULE_ID_ENROLLMENTS} from '../../types/modules/iModuleUser';
 import SynLuFutureStatusService from '../../services/Synergetic/Lookup/SynLuFutureStatusService';
 import iSynLuFutureStatus from '../../types/Synergetic/Lookup/iSynLuFutureStatus';
 import {FlexContainer} from '../../styles';
-import {FUTURE_STUDENT_STATUS_FINALISED} from '../../types/Synergetic/iSynVFutureStudent';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import {ArrowClockwise} from 'react-bootstrap-icons';
 import LoadingBtn from '../common/LoadingBtn';
@@ -260,8 +259,8 @@ const EnrolmentDashboardPanel = () => {
                 {
                   getClickableNumber(
                     [
-                      ...getStudents(currentFutureStudents, yrLvls, [status.Code]),
-                      ...(status.Code === FUTURE_STUDENT_STATUS_FINALISED ? getStudents(startDuringYearStudents_notStarted, yrLvls) : [])
+                      ...getStudents([...currentFutureStudents, ...startDuringYearStudents_notStarted], yrLvls, [status.Code]),
+                      // ...(status.Code === FUTURE_STUDENT_STATUS_FINALISED ? getStudents(startDuringYearStudents_notStarted, yrLvls) : [])
                     ]
                   )
                 }
@@ -396,10 +395,10 @@ const EnrolmentDashboardPanel = () => {
     const normalStudentsThisYear_leaving_willComeBack = normalStudentsThisYear_leaving.filter(student => `${student.StudentReturningDate || ''}`.trim() !== '' &&  moment(`${student.StudentReturningDate || ''}`.trim()).isAfter(moment()));
 
     // const startDuringYearStudents_started = startDuringYearStudents.filter(student => moment(student.StudentEntryDate).isSameOrBefore(moment()));
-    const startDuringYearStudents_notStarted = futureStudentsCurrentYear.filter(student => moment(student.StudentEntryDate).isAfter(moment()));
+    // const startDuringYearStudents_notStarted = futureStudentsCurrentYear.filter(student => moment(student.StudentEntryDate).isAfter(moment()));
     const studentsEndOfCurrentYear = getUniqStudents([
       ...studentsToday,
-      ...startDuringYearStudents_notStarted,
+      // ...startDuringYearStudents_notStarted,
       ...(futureStudentsCurrentYear.filter(std => currentFutureStatusCodes.indexOf(std.StudentStatus) >=0 )),
     ]);
     const transitionedInStudents = transitionDate ? newStudentsCurrentYear.filter(st => moment(st.StudentEntryDate).isSameOrAfter(moment(transitionDate.TransitionStartAt))) : [];
