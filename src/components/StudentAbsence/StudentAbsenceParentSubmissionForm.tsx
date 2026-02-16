@@ -30,20 +30,24 @@ import StudentAbsenceService from '../../services/StudentAbsences/StudentAbsence
 const Wrapper = styled.div``;
 
 const reasons = [
-  'Late arrival',
-  'Positive COVID Case',
-  'COVID House Hold Contact',
   'Medical / Illness',
   'Medical Appointment',
   'Refusal to attend school',
   'Parent Choice',
   'Religious / Cultural',
+  'Other'
+]
+const absenceTypes = [
+  'Full day',
+  'Early departure',
+  'Late arrival',
 ]
 const StudentAbsenceParentSubmissionForm = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [students, setStudents] = useState<iVStudent[]>([]);
   const [selectedReason, setSelectedReason] = useState('');
+  const [absenceType, setAbsenceType] = useState(absenceTypes[0]);
   const [selectedStudents, setSelectedStudents] = useState<iVStudent[]>([]);
   const [absenceDateFrom, setAbsenceDateFrom] = useState<string>(moment().format('YYYY-MM-DD'));
   const [absenceDateTo, setAbsenceDateTo] = useState<string>(moment().format('YYYY-MM-DD'));
@@ -198,12 +202,31 @@ const StudentAbsenceParentSubmissionForm = () => {
         <div className={'text-success'}>
           {
             absenceDateIsToday === true ?
-              <Icons.CheckSquareFill style={{fontSize: '24px'}} className={'cursor-pointer'} onClick={() => setAbsenceDateIsToday(!absenceDateIsToday)}/>
+              <Icons.CheckSquareFill style={{fontSize: '24px'}} className={'cursor-pointer'} onClick={() => {
+                setAbsenceDateIsToday(!absenceDateIsToday);
+                setAbsenceType(absenceTypes[0]);
+              }}/>
               :
               <Icons.Square style={{fontSize: '24px'}} className={'cursor-pointer'} onClick={() => setAbsenceDateIsToday(!absenceDateIsToday)}/>
           }
         </div>
-        {absenceDateIsToday === true ? null: (
+        {absenceDateIsToday === true ? (
+            <SelectBox
+              value={absenceType ? {
+                value: absenceType,
+                label: `${absenceType}`
+              } : null}
+              options={absenceTypes.map(type => ({
+                value: type,
+                label: `${type}`
+              }))}
+              onChange={option =>
+                  setAbsenceType(
+                      option === null ? null : option.value
+                  )
+              }
+            />
+          ): (
           <FlexContainer className={'with-gap lg-gap'}>
             <DateTimePicker
               isValidDate={(cDate, sDate) => {
@@ -268,6 +291,7 @@ const StudentAbsenceParentSubmissionForm = () => {
     // setIsSubmitting(true);
     const data = {
       students: selectedStudents.map(student => ({ID: student.StudentID, Surname: student.StudentSurname, Given1: student.StudentGiven1})),
+      absenceType: absenceType,
       reason: selectedReason,
       parentContact: parentContactNumber,
       absenceDateFrom: absenceDateFrom,
@@ -334,7 +358,7 @@ const StudentAbsenceParentSubmissionForm = () => {
           />
           <FormErrorDisplay errorsMap={errorMap} fieldName={'parentContactNumber'} />
         </Col>
-        <Col md={6}>
+        <Col md={4}>
           <FormLabel label={"Today?"} isRequired />
           {getAbsenceDateDiv()}
         </Col>
