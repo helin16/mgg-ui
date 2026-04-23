@@ -18,6 +18,10 @@ type iEditPanel = {
 const EditPanel = ({module, onUpdate}: iEditPanel) => {
   const [expiryCCTemplate, setExpiryCCTemplate] = useState(module.settings?.expiryCC?.templateName || '');
   const [expiryCCRecipients, setExpiryCCRecipients] = useState(module.settings?.expiryCC?.recipients || '');
+  const [bpayBatchUserId, setBpayBatchUserId] = useState(module.settings?.bpayBatch?.batchUserId || '');
+  const [bpayCustomerShortName, setBpayCustomerShortName] = useState(module.settings?.bpayBatch?.customerShortName || '');
+  const [bpayPayerBankBSB, setBpayPayerBankBSB] = useState(module.settings?.bpayBatch?.payerBankBSB || '');
+  const [bpayPayerBankAcc, setBpayPayerBankAcc] = useState(module.settings?.bpayBatch?.payerBankAcc || '');
 
   const handleUpdate = () => {
     onUpdate({
@@ -26,6 +30,13 @@ const EditPanel = ({module, onUpdate}: iEditPanel) => {
         ...(module?.settings?.expiryCC || {}),
         templateName: expiryCCTemplate,
         recipients: expiryCCRecipients,
+      },
+      bpayBatch: {
+        ...(module?.settings?.bpayBatch || {}),
+        batchUserId: bpayBatchUserId,
+        customerShortName: bpayCustomerShortName,
+        payerBankBSB: bpayPayerBankBSB,
+        payerBankAcc: bpayPayerBankAcc,
       },
     })
   }
@@ -51,6 +62,50 @@ const EditPanel = ({module, onUpdate}: iEditPanel) => {
             value={ expiryCCRecipients }
             onChange={(event) => {
               setExpiryCCRecipients(event.target.value);
+            }}
+            onBlur={() => handleUpdate()}
+          />
+        </SectionDiv>
+      </SectionDiv>
+      <SectionDiv>
+        <h5>BPAY Batch File Settings</h5>
+        <ExplanationPanel text={'These values are used when generating the BPAY batch file header.'} />
+        <SectionDiv>
+          <h6>Batch User ID</h6>
+          <Form.Control
+            value={bpayBatchUserId}
+            onChange={(event) => {
+              setBpayBatchUserId(event.target.value);
+            }}
+            onBlur={() => handleUpdate()}
+          />
+        </SectionDiv>
+        <SectionDiv>
+          <h6>Customer Short Name</h6>
+          <Form.Control
+            value={bpayCustomerShortName}
+            onChange={(event) => {
+              setBpayCustomerShortName(event.target.value);
+            }}
+            onBlur={() => handleUpdate()}
+          />
+        </SectionDiv>
+        <SectionDiv>
+          <h6>Payer Bank BSB</h6>
+          <Form.Control
+            value={bpayPayerBankBSB}
+            onChange={(event) => {
+              setBpayPayerBankBSB(event.target.value);
+            }}
+            onBlur={() => handleUpdate()}
+          />
+        </SectionDiv>
+        <SectionDiv>
+          <h6>Payer Bank Account</h6>
+          <Form.Control
+            value={bpayPayerBankAcc}
+            onChange={(event) => {
+              setBpayPayerBankAcc(event.target.value);
             }}
             onBlur={() => handleUpdate()}
           />
