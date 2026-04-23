@@ -1,39 +1,46 @@
 import {iAutoCompleteSingle} from '../common/AutoComplete';
 import {useEffect, useState} from 'react';
 import {Spinner} from 'react-bootstrap';
-import SynLuYearLevelService from '../../services/Synergetic/SynLuYearLevelService';
-import iLuYearLevel from '../../types/Synergetic/iLuYearLevel';
+import SynLuYearLevelService from '../../services/Synergetic/Lookup/SynLuYearLevelService';
+import ISynLuYearLevel from '../../types/Synergetic/Lookup/iSynLuYearLevel';
 import SelectBox from '../common/SelectBox';
+import {CAMPUS_CODE_ELC, CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR} from '../../types/Synergetic/Lookup/iSynLuCampus';
+import UtilsService from '../../services/UtilsService';
+import Toaster from '../../services/Toaster';
 
 type iYearLevelSelector = {
   values?: iAutoCompleteSingle[] | string[];
   campusCodes?: string[];
-  onSelect?: (yearLevel: iAutoCompleteSingle | null) => void;
+  onSelect?: (yearLevel: iAutoCompleteSingle | iAutoCompleteSingle[] | null) => void;
   allowClear?: boolean;
   showIndicator?: boolean;
+  isMulti?: boolean;
+  classname?: string;
+  limitCodes?: string[];
+  isDisabled?: boolean;
 };
 
-export const translateYearLevelToOption = (yearLevel: iLuYearLevel) => {
-  return {value: yearLevel.Code, data: yearLevel, label: yearLevel.Description}
+const getLabel = (yearLevel: ISynLuYearLevel) => {
+  return UtilsService.isNumeric(yearLevel.Description) ? `Year ${yearLevel.Description}` : yearLevel.Description;
+}
+export const translateYearLevelToOption = (yearLevel: ISynLuYearLevel) => {
+  return {value: yearLevel.Code, data: yearLevel, label: getLabel(yearLevel)}
 }
 
-const YearLevelSelector = ({values, onSelect, allowClear, campusCodes, showIndicator = true}: iYearLevelSelector) => {
+const YearLevelSelector = ({isDisabled, values, onSelect, allowClear, limitCodes = [], campusCodes, classname, showIndicator = true, isMulti = false}: iYearLevelSelector) => {
   const [optionsMap, setOptionsMap] = useState<{[key: string]: iAutoCompleteSingle}>({});
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    let isCancelled = false;
     if (Object.keys(optionsMap).length > 0) { return }
-
+    let isCancelled = false;
     setIsLoading(true);
-    const where = campusCodes && campusCodes.length > 0 ? {
-      where: JSON.stringify({
-        Campus: campusCodes
-      })
-    } : {};
     // @ts-ignore
     SynLuYearLevelService.getAllYearLevels({
-        ...where,
+        where: JSON.stringify({
+          Campus: campusCodes || [CAMPUS_CODE_JUNIOR, CAMPUS_CODE_ELC, CAMPUS_CODE_SENIOR],
+          ...(limitCodes?.length > 0 ? {Code: limitCodes} : {}),
+        }),
         sort: 'YearLevelSort:ASC',
       })
       .then(resp => {
@@ -45,16 +52,21 @@ const YearLevelSelector = ({values, onSelect, allowClear, campusCodes, showIndic
           };
         }, {}))
       })
+      .catch(err => {
+        if (isCancelled === true) { return }
+        Toaster.showApiError(err);
+      })
       .finally(() => {
+        if (isCancelled === true) { return }
         setIsLoading(false);
       })
     return () => {
       isCancelled = true;
     }
-  }, [campusCodes, optionsMap]);
+  }, [optionsMap, campusCodes, limitCodes]);
 
   if (isLoading === true) {
-    return <Spinner animation={'border'} />;
+    return <Spinner animation={'border'} size={'sm'}/>;
   }
 
   const getSelectedValues = () => {
@@ -84,10 +96,13 @@ const YearLevelSelector = ({values, onSelect, allowClear, campusCodes, showIndic
 
   return (
     <SelectBox
+      className={classname}
       options={getOptions()}
+      isMulti={isMulti}
       onChange={onSelect}
       value={getSelectedValues()}
       isClearable={allowClear}
+      isDisabled={isDisabled}
       showDropdownIndicator={showIndicator}
     />
   )

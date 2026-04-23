@@ -1,0 +1,12 @@
+<!--######-->
+<!--### IMPORTANT !!!!!-->
+<!--### THIS IS THE JS SCRIPT YOU NEED TO ADD TO SCHOOL BOX -> ADMINISTRATION -> SYSTEM SETTINGS -> SITE -> Custom JavaScript-->
+<!--### without doing this first, none of the custom script will run.-->
+
+<script src="https://appdev.mentonegirls.vic.edu.au/AppLoader/MggAppLoader.js"></script>
+<script>
+  const BASE_URL = 'https://appdev.mentonegirls.vic.edu.au';
+  window.onload = function() {
+    (new SchoolBoxAppLoader()).init(BASE_URL);
+  }
+</script>

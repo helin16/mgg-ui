@@ -11,9 +11,18 @@ const canAccessModule = (moduleId: string | number): Promise<{[key: number]: {ca
   return AppService.get(`${endPoint}/canAccess?moduleId=${moduleId}`).then(resp => resp.data);
 };
 
+const isModuleRole = async (moduleId: string | number, roleId: number) => {
+  const result = await canAccessModule(moduleId);
+  if (!result[roleId]) {
+    return false;
+  }
+  return result[roleId].canAccess === true;
+}
+
 const AuthService = {
   authSchoolBox,
   canAccessModule,
+  isModuleRole,
 }
 
 export default AuthService;

@@ -16,6 +16,7 @@ type iUser = iBaseType & {
   isParent?: boolean;
   isStudent?: boolean;
   isTeacher?: boolean;
+  isCasualStaff?: boolean;
 };
 
 export default iUser;

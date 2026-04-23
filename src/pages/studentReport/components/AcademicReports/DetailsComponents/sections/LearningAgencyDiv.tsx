@@ -1,6 +1,6 @@
 import iStudentReportResult, {
   STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_LEARNING_AGENCY
-} from '../../../../../../types/Synergetic/iStudentReportResult';
+} from '../../../../../../types/Synergetic/Student/iStudentReportResult';
 import {useEffect, useState} from 'react';
 import GraphTable from './GraphTable';
 

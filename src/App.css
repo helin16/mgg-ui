@@ -6,8 +6,99 @@ a {
     padding-left: 0px;
 }
 
+.text-size-12 {
+    font-size: 12px !important;
+}
+
+.text-size-14 {
+    font-size: 14px !important;
+}
+
 .ellipsis {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+.PopupModal.full-width .modal-dialog {
+    max-width: calc(100% - 10px);
+}
+.modal-dialog.modal-80w {
+    max-width: 80vw;
+}
+.modal-dialog.modal-90w {
+    max-width: 90vw;
+}
+
+input[type="checkbox"] {
+    width: 16px !important;
+    height: 16px !important;
+    display: inline-block !important;
+    opacity: 1 !important;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.no-margin {
+    margin: 0px !important;
+}
+
+.no-padding {
+    padding: 0px !important;
+}
+
+
+.panel-wrapper.space-below {
+    margin-bottom: 1rem;
+}
+
+.float-right {
+    float: right;
+}
+
+.section-row {
+    margin-bottom: 2rem;
+}
+.content-row {
+    margin-bottom: 0.6rem;
+}
+
+/* trying to avoid conflict in SchoolBox's css */
+.card {
+    word-wrap: inherit !important;
+    background-clip: inherit !important;
+    background-color: inherit !important;
+    border: inherit !important;
+    border-radius: inherit !important;
+    display: inherit !important;
+    flex-direction: inherit !important;
+    min-width: inherit !important;
+    position: inherit !important;
+}
+
+.row {
+    margin-left: inherit !important;
+    width: calc(100% - 2px);
+}
+
+ul, ol, dl {
+/*    margin-bottom: 0px !important;*/
+/*    margin-top: 0px !important;*/
+/*    margin-left: 0px !important;*/
+/*    margin-right: 0px !important;*/
+
+    padding-left: 0px !important;
+/*    padding-bottom: 0px !important;*/
+/*    padding-right: 0px !important;*/
+/*    padding-right: 0px !important;*/
+}
+
+/* Google MAP AutoComplete */
+.pac-container {
+    z-index: 99999999;
+}
+
+.display-flex {
+    display: flex;
 }

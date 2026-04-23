@@ -7,10 +7,21 @@ import store, {RootState} from './redux/makeReduxStore';
 import AppWrapper from './AppWrapper';
 import './App.css';
 import AssetPickupPage from './pages/assets/AssetPickupPage';
-import {Button} from 'react-bootstrap';
-import * as Icon from 'react-bootstrap-icons';
 import {setIsProd} from './redux/reduxers/app.slice';
 import PingService from './services/PingService';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import {
+  URL_ASSET_PICK_UP,
+  URL_CAMPUS_DISPLAY_PAGE, URL_CAMPUS_DISPLAY_SLIDE_SHOW_BY_LOCATION_PAGE, URL_ENEWS_VIEW_PAGE,
+  URL_ONLINE_DONATION
+} from './Url';
+import OnlineDonationPage from './pages/OnlineDonation/OnlineDonationPage';
+import PageNotFoundWithTechSupport from './components/PageNotFoundWithTechSupport';
+import CampusDisplayPage from './pages/CampusDisplay/CampusDisplayPage';
+import CampusDisplayByLocationIdPage from './pages/CampusDisplay/CampusDisplayByLocationIdPage';
+import ENewsViewingPage from './pages/ENews/ENewsViewingPage';
 
 const Router = () => {
   const {isProd} = useSelector((state: RootState) => state.app);
@@ -18,32 +29,43 @@ const Router = () => {
   useEffect(() => {
     PingService.ping()
       .then(res => {
-        dispatch(setIsProd({isProd: res.isProd === true}));
+        dispatch(setIsProd({isProd: res.isProd === true, backendSchoolBoxUrl: res.schoolBoxUrl }));
       })
       .catch(() => {
-        dispatch(setIsProd({isProd: false}));
+        dispatch(setIsProd({isProd: false, backendSchoolBoxUrl: undefined}));
       })
   }, [dispatch])
   return (
     <AppWrapper className={isProd !== true ? 'test-app' : ''}>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={
-            <PageNotFound
-              title={'Service Support'}
-              description={'Mentone Girls\' Grammar Service Support'}
-              primaryBtn={
-                <Button variant="primary" href={'https://mentonegirls.vic.edu.au'}>
-                  <Icon.HouseDoorFill /> {' '}Home
-                </Button>
-              }
-              secondaryBtn={<div />}/>}
-          />
-          <Route path="/asset/pickup" element={<AssetPickupPage />} />
+          <Route path="/" element={<PageNotFoundWithTechSupport />} />
+          <Route path={URL_ASSET_PICK_UP} element={<AssetPickupPage />} />
+
+          <Route path={URL_CAMPUS_DISPLAY_PAGE} element={<CampusDisplayPage />} />
+          <Route path={URL_CAMPUS_DISPLAY_SLIDE_SHOW_BY_LOCATION_PAGE} element={<CampusDisplayByLocationIdPage />} />
+
+
+          <Route path={URL_ONLINE_DONATION} element={<OnlineDonationPage />} />
+
+          <Route path={URL_ENEWS_VIEW_PAGE} element={<ENewsViewingPage />} />
+
+
           <Route path="/modules/remote/:code" element={<SchoolBoxLayout />} />
           <Route path="*" element={<PageNotFound />} />
         </Routes>
       </BrowserRouter>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </AppWrapper>
   )
 }

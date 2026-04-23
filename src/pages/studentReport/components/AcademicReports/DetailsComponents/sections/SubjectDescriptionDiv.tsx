@@ -1,5 +1,5 @@
-import iStudentReportResult from '../../../../../../types/Synergetic/iStudentReportResult';
-import SectionDiv from './SectionDiv';
+import iStudentReportResult from '../../../../../../types/Synergetic/Student/iStudentReportResult';
+import SectionDiv from '../../../../../../components/common/SectionDiv';
 import React, {useEffect, useState} from 'react';
 
 const SubjectDescriptionDiv = ({result}: {result: iStudentReportResult}) => {
@@ -16,7 +16,7 @@ const SubjectDescriptionDiv = ({result}: {result: iStudentReportResult}) => {
 
   return (
     <SectionDiv>
-      <h3 className={'text-danger text-italic'}>Subject Description</h3>
+      <h3 className={'text-danger text-italic'}>Achievement Standard</h3>
       <p>{result.AssessOverview}</p>
     </SectionDiv>
   )

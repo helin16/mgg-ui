@@ -2,10 +2,26 @@ import styled from 'styled-components';
 
 export const FlexContainer = styled.div`
   display: flex;
-  
+  //width: 100%;
+  &.with-gap,
   &.withGap {
-    > * {
-      padding: 2px;
+    gap: 2px;
+    &.lg-gap {
+      gap: 1rem;
+    }
+  }
+
+  &.flex-row {
+    flex-direction: row;
+  }
+
+  &.flex-col {
+    flex-direction: column;
+  }
+  
+  &.flex-wrap {
+    &.wrap {
+      flex-wrap: wrap;
     }
   }
   
@@ -13,5 +29,40 @@ export const FlexContainer = styled.div`
     &.space-between {
       justify-content: space-between;
     }
+    &.flex-end {
+      justify-content: flex-end;
+    }
+  }
+  
+  &.align-items {
+    &.center {
+      align-items: center;
+    }
+    &.end {
+      align-items: flex-end;
+    }
+  }
+
+  &.space-below {
+    margin-bottom: 0.8rem;
+    &.space-sm {
+      margin-bottom: 0.4rem;
+    }
+  }
+  &.space-above {
+    margin-top: 0.8rem;
+    &.space-sm {
+      margin-top: 0.4rem;
+    }
+  }
+
+  &.wrap {
+    flex-wrap: wrap;
+  }
+  &.full-width {
+    width: 100%;
+  }
+  .full-width {
+    width: 100%;
   }
 `

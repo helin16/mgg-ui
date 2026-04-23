@@ -37,6 +37,7 @@ const SignatureInput = ({canvasProps, className, setSignatureInputPad}: iSignatu
   return (
     <Wrapper className={`signature-input-wrapper ${className}`}>
       {getClearBtn()}
+      {/*// @ts-ignore */}
       <SignatureCanvas
         penColor='black'
         ref={(ref) => { setSignaturePad(ref) }}

@@ -3,7 +3,7 @@ import PowerBIService from '../../services/PowerBIService';
 import {Spinner} from 'react-bootstrap';
 import {PowerBIEmbed} from 'powerbi-client-react';
 import { models } from 'powerbi-client';
-import iVStudent from '../../types/Synergetic/iVStudent';
+import iVStudent from '../../types/Synergetic/Student/iVStudent';
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
@@ -11,7 +11,9 @@ const Wrapper = styled.div`
     height: 100vh;
   }
 `;
-const PowerBIReportViewer = ({reportId, student}: {reportId: string; student: iVStudent}) => {
+
+type iPowerBIReportViewer = {reportId: string; student?: iVStudent; className?: string};
+const PowerBIReportViewer = ({reportId, student, className}: iPowerBIReportViewer) => {
   const [isLoading, setIsLoading] = useState(false);
   const [accessToken, setAccessToken] = useState('');
   const [report, setReport] = useState(null);
@@ -44,23 +46,28 @@ const PowerBIReportViewer = ({reportId, student}: {reportId: string; student: iV
     return null;
   }
 
-  const getFilter = () => {
+  const getStudentFilters = () => {
+    if (!student) {
+      return {};
+    }
     return {
-      filterType: models.FilterType.Basic,
-      $schema: 'http://powerbi.com/product/schema',
-      target: {
-        table: 'vStudents',
-        column: 'ID'
-      },
-      operator: 'In',
-      values: [student.StudentID]
+      filters: [{
+        filterType: models.FilterType.Basic,
+        $schema: 'http://powerbi.com/product/schema',
+        target: {
+          table: 'vStudents',
+          column: 'ID'
+        },
+        operator: 'In',
+        values: [student.StudentID]
+      }]
     };
   }
 
   return (
-    <Wrapper>
+    <Wrapper className={className}>
       <PowerBIEmbed
-        embedConfig = {{
+        embedConfig={{
           type: 'report',   // Supported types: report, dashboard, tile, visual and qna
           id: reportId,
           embedUrl: `https://app.powerbi.com/reportEmbed?reportId=${reportId}`,
@@ -68,12 +75,12 @@ const PowerBIReportViewer = ({reportId, student}: {reportId: string; student: iV
           tokenType: models.TokenType.Aad,
           settings: {
             filterPaneEnabled: false,
-            navContentPaneEnabled: false,
-            background: models.BackgroundType.Transparent
+            navContentPaneEnabled: true,
+            // background: models.BackgroundType.Transparent
           },
           permissions: models.Permissions.Read,
           viewMode: models.ViewMode.View,
-          filters: [getFilter()],
+          ...getStudentFilters(),
           pageView: "oneColumn",
         }}
 
@@ -85,9 +92,7 @@ const PowerBIReportViewer = ({reportId, student}: {reportId: string; student: iV
               console.error(event);}]
           ])
         }
-
         cssClassName = { "power-bi-report-wrapper" }
-
         getEmbeddedComponent = { (embeddedReport) => {
           // @ts-ignore
           setReport(embeddedReport);

@@ -3,14 +3,20 @@ import "react-datetime/css/react-datetime.css";
 import moment from 'moment';
 import styled from 'styled-components';
 import * as Icons from 'react-bootstrap-icons'
+import {FormControl} from 'react-bootstrap';
 
 type iDateTimePicker = {
   value?: Date | string;
   onChange?: (selected: any) => void;
   dateFormat?: string;
+  timeFormat?: string | boolean;
   displayTimeZone?: string;
   className?: string;
   allowClear?: boolean;
+  isDisabled?: boolean;
+  inputClassName?: string;
+  placeholder?: string;
+  isValidDate?: (currentDate: Date, selectedDate: Date) => boolean;
 }
 
 const Wrapper = styled.div`
@@ -19,6 +25,9 @@ const Wrapper = styled.div`
   &.form-control {
     font-size: 13px;
     padding: 0px;
+    input {
+      font-size: 1rem !important;
+    }
     &.is-invalid {
       padding-right: calc(1.5em + 0.75rem);
     }
@@ -58,7 +67,7 @@ const Wrapper = styled.div`
   }
 `
 const DateTimePicker = ({
-  onChange, value, displayTimeZone, className, allowClear, dateFormat = 'D / MMM / YYYY'
+  onChange, value, isValidDate, displayTimeZone, inputClassName, className, allowClear, isDisabled, placeholder, timeFormat = true, dateFormat = 'DD / MMM / YYYY h:m a'
 }: iDateTimePicker) => {
 
   const getValue = () => {
@@ -85,18 +94,25 @@ const DateTimePicker = ({
 
   return (
     <Wrapper className={className}>
-      <Datetime
-        inputProps={{placeholder: 'Pick a date and time...'}}
-        className={'datetime-picker'}
-        onChange={onChange}
-        value={getValue()}
-        dateFormat={dateFormat}
-        displayTimeZone={displayTimeZone}
-        renderInput={(props) => {
-          return <input {...props} value={value ? props.value : ''} />
-        }}
-      />
-      { getClearBtn() }
+      {
+        <>
+          {/*// @ts-ignore*/}
+          <Datetime
+            isValidDate={isValidDate}
+            inputProps={{placeholder: placeholder || 'Pick a date and time...'}}
+            className={'datetime-picker'}
+            onChange={onChange}
+            value={getValue()}
+            dateFormat={dateFormat}
+            timeFormat={timeFormat}
+            displayTimeZone={displayTimeZone}
+            renderInput={({className: clsName, ...props}) => {
+              return <FormControl className={`${clsName} ${inputClassName}`} {...props} value={value ? props.value : ''} disabled={isDisabled}/>
+            }}
+          />
+          { getClearBtn() }
+        </>
+      }
     </Wrapper>
   )
 };

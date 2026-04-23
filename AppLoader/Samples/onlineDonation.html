@@ -1,0 +1,13 @@
+<!--######-->
+<!--### IMPORTANT !!!!!-->
+<!--### THIS IS THE JS SCRIPT YOU NEED TO ADD TO Render components on a page-->
+<!--### without doing this first, none of the custom script will run.-->
+
+<script src="https://app.mentonegirls.vic.edu.au/AppLoader/MggAppLoader.js"></script>
+<script>
+  const BASE_URL = 'https://app.mentonegirls.vic.edu.au';
+  window.onload = function() {
+    (new AppLoader()).init(BASE_URL);
+  }
+</script>
+<div mgg-app-loader="online-donation"></div>

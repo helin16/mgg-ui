@@ -11,14 +11,20 @@ const deleteUser = (moduleId: string | number, roleId: string | number, synerget
   return AppService.delete(`${endPoint}/${moduleId}/${roleId}/${synergeticId}`).then(resp => resp.data);
 };
 
+
 const createUser = (moduleId: string | number, roleId: string | number, synergeticId: string | number, params: iConfigParams = {}): Promise<iModuleUser> => {
   return AppService.post(`${endPoint}/${moduleId}/${roleId}/${synergeticId}`, params).then(resp => resp.data);
+};
+
+const updateUser = (moduleId: string | number, roleId: string | number, synergeticId: string | number, params: iConfigParams): Promise<iModuleUser> => {
+  return AppService.put(`${endPoint}/${moduleId}/${roleId}/${synergeticId}`, params).then(resp => resp.data);
 };
 
 const UserService = {
   getUsers,
   deleteUser,
   createUser,
+  updateUser,
 }
 
 export default UserService;

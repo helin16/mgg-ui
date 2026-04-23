@@ -68,15 +68,15 @@ type iSynCommunity = {
   // OccupAddressPAFVersion: string;
   // OccupAddressDPIDBarcode: string;
   // ParkingSpace: string;
-  // NetworkLogin: string;
+  NetworkLogin: string;
   // Barcode: string;
-  // SilentMobilePhoneFlag: boolean;
+  SilentMobilePhoneFlag: boolean;
   // MobilePhoneActual: string;
   // SilentOccupMobilePhoneFlag: boolean;
   // OccupMobilePhoneActual: string;
-  // DirectoryIncludeFlag: boolean;
+  DirectoryIncludeFlag: boolean;
   // DirectoryProvideFlag: boolean;
-  // NameInternal: string;
+  NameInternal: string;
   // NameInternalOverrideFlag: boolean;
   // NameExternal: string;
   // NameExternalOverrideFlag: boolean;
@@ -106,7 +106,7 @@ type iSynCommunity = {
   // NeighbourIslandLanguageLevelCode: string;
   // DietaryRequirements: string | null;
   // PhysicalRequirements: string | null;
-  // HighestQualificationLevel: string;
+  HighestQualificationLevel: string;
   // PublishToAssociatedFlag: boolean;
   // HighestNonNationalQualificationCode: string;
   // OccupDescIncludeInMailAddressFlag: boolean;

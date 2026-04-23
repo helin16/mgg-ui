@@ -1,21 +1,40 @@
 import styled from 'styled-components';
-import iStudentReportResult from '../../../../../../types/Synergetic/iStudentReportResult';
+import iStudentReportResult from '../../../../../../types/Synergetic/Student/iStudentReportResult';
 import {ProgressBar} from 'react-bootstrap';
-import SectionDiv from './SectionDiv';
+import SectionDiv from '../../../../../../components/common/SectionDiv';
+import * as _ from 'lodash';
 
-const Wrapper = styled.div`
+export const ResultTableWrapper = styled.div`
+  &.responsive {
+    @media only print, screen and (max-width: 40em) {
+      .result-row,
+      .result-table {
+        width: 100%;
+      }
+      .result-row {
+        display: block;
+      }
+      .result-table {
+        text-align: right;
+        padding-top: 1.6rem;
+      }
+    }
+  }
+  
   .result-row {
     display: flex;
     //padding: 2px 0;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: flex-start;
     
     &.title-row {
       font-weight: bold;
     }
     
+    
     .result-table {
       width: 380px;
+      min-width: 320px;
       display: flex;
       justify-content: space-between;
       .progress {
@@ -46,10 +65,6 @@ const GraphTable = ({
   results, title, resultTranslateMap, resultTranslateFn
 }: iGraphTable) => {
 
-  if (results.length <= 0) {
-    return null;
-  }
-
   const resultTableClassName = 'text-right d-none d-xl-block d-xxl-block';
   const resultTextClassName = 'text-right d-block d-xl-none d-xxl-none';
   const resultTranslateFunction = resultTranslateFn || defaultResultTranslateFn;
@@ -74,14 +89,19 @@ const GraphTable = ({
     )
   }
 
+  if (results.length <= 0) {
+    return null;
+  }
+
   return (
     <SectionDiv>
-      <Wrapper>
+      <ResultTableWrapper>
         <div className={'result-row title-row'}>
           <div className={'text-uppercase'}>{title}</div>
           {getResultColTitle()}
         </div>
-        {results.map(result => {
+        {_.uniqBy(results, (result) => result.AssessAreaHeading)
+          .map(result => {
           if (!resultTranslateMap) {
             return (
               <div key={result.AssessAreaHeading} className={'result-row'}>
@@ -107,7 +127,7 @@ const GraphTable = ({
             </div>
           )
         })}
-      </Wrapper>
+      </ResultTableWrapper>
     </SectionDiv>
   )
 };

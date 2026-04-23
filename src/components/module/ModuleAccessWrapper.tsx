@@ -4,16 +4,19 @@ import {RootState} from '../../redux/makeReduxStore';
 import AuthService from '../../services/AuthService';
 import {Spinner} from 'react-bootstrap';
 import Page401 from '../Page401';
+import Toaster from '../../services/Toaster';
 
 type iModuleAccessWrapper = {
   moduleId: number;
   roleId?: number;
   silentMode?: boolean;
-  children: React.ReactElement;
+  accessDenyPanel?: React.ReactElement | null;
+  children: React.ReactElement | null;
+  btns?: any;
 }
-const ModuleAccessWrapper = ({moduleId, roleId, silentMode = false, children}: iModuleAccessWrapper) => {
+const ModuleAccessWrapper = ({moduleId, roleId, silentMode = false, accessDenyPanel, children, btns}: iModuleAccessWrapper) => {
   const {user} = useSelector((state: RootState) => state.auth);
-  const [canAccess, setCanAccess] = useState(false);
+  const [canAccess, setCanAccess] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -37,7 +40,7 @@ const ModuleAccessWrapper = ({moduleId, roleId, silentMode = false, children}: i
       })
       .catch(err => {
         if (isCanceled) return;
-        console.error(err);
+        Toaster.showApiError(err);
       })
       .finally(() => {
         if (isCanceled) return;
@@ -47,9 +50,9 @@ const ModuleAccessWrapper = ({moduleId, roleId, silentMode = false, children}: i
     return () => {
       isCanceled = true;
     }
-  }, [user]);
+  }, [user, moduleId, roleId]);
 
-  if (isLoading) {
+  if (isLoading || canAccess === null) {
     return <Spinner animation={'border'} />
   }
 
@@ -57,7 +60,12 @@ const ModuleAccessWrapper = ({moduleId, roleId, silentMode = false, children}: i
     if (silentMode) {
       return null;
     }
-    return <Page401 />
+
+    if (accessDenyPanel) {
+      return accessDenyPanel;
+    }
+
+    return <Page401 description={<h4>Please contact IT or Module Admins for assistant</h4>} btns={btns} />
   }
 
   return <>{children}</>

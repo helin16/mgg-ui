@@ -2,6 +2,7 @@ import styled from 'styled-components';
 import { ReactElement} from 'react';
 import {mainRed} from '../AppWrapper';
 import SchoolCrest from '../components/SchoolCrest';
+import Page from './Page';
 
 const Wrapper = styled.div`
   .school-crest {
@@ -28,12 +29,16 @@ const RedPage = ({children, title}: iRedPage) => {
   }
   document.body.style.backgroundColor = mainRed;
   document.body.style.color = 'white';
-  return <Wrapper className={'red-page'}>
-    <SchoolCrest className={'school-crest'}/>
-    <div className={'display'} >
-      {children}
-    </div>
-  </Wrapper>
+  return (
+    <Page>
+      <Wrapper className={'red-page'}>
+        <SchoolCrest className={'school-crest'}/>
+        <div className={'display'} >
+          {children}
+        </div>
+      </Wrapper>
+    </Page>
+  );
 }
 
 export default RedPage;

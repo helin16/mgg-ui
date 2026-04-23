@@ -1,13 +1,17 @@
-import {useEffect, useState} from 'react';
-import iVStudent from '../../types/Synergetic/iVStudent';
-import StudentContactService from '../../services/Synergetic/StudentContactService';
-import {STUDENT_CONTACT_TYPE_SC1, STUDENT_CONTACT_TYPE_SC2, STUDENT_CONTACT_TYPE_SC3} from '../../types/Synergetic/iStudentContact';
+import React, {useEffect, useState} from 'react';
+import iVStudent, {iVPastAndCurrentStudent} from '../../types/Synergetic/Student/iVStudent';
+import StudentContactService from '../../services/Synergetic/Student/StudentContactService';
+import {STUDENT_CONTACT_TYPE_SC1} from '../../types/Synergetic/Student/iStudentContact';
 import {Image, Spinner} from 'react-bootstrap';
-import CommunityService from '../../services/Synergetic/CommunityService';
+import SynCommunityService from '../../services/Synergetic/Community/SynCommunityService';
 import {OP_OR} from '../../helper/ServiceHelper';
 import * as _ from 'lodash';
-import SynVStudentService from '../../services/Synergetic/SynVStudentService';
+import SynVStudentService from '../../services/Synergetic/Student/SynVStudentService';
 import styled from 'styled-components';
+import StudentStatusBadge from '../../pages/studentReport/components/AcademicReports/StudentStatusBadge';
+import {FlexContainer} from '../../styles';
+import ContactSupportPopupBtn from '../support/ContactSupportPopupBtn';
+import PageNotFound from '../PageNotFound';
 
 const Wrapper = styled.div`
   .student-div {
@@ -33,9 +37,10 @@ const Wrapper = styled.div`
 type iStudentGridForAParent = {
   parentSynId: string | number;
   onSelect?: (student: iVStudent) => void;
+  contactTypes?: string[];
 };
 const StudentGridForAParent = ({
-    parentSynId, onSelect
+    parentSynId, onSelect, contactTypes = [STUDENT_CONTACT_TYPE_SC1]
  }: iStudentGridForAParent) => {
   const [students, setStudents] = useState<iVStudent[]>([]);
   const [parentIds, setParentIds] = useState<number[]>([]);
@@ -48,7 +53,7 @@ const StudentGridForAParent = ({
     let isCancelled = false;
     if (!parentSynId) { return; }
     setIsLoadingCommunity(true);
-    CommunityService.getCommunityProfiles({
+    SynCommunityService.getCommunityProfiles({
         where: JSON.stringify({ [OP_OR]: [ {SpouseID: parentSynId}, {ID: parentSynId} ] })
       })
       .then(resp => {
@@ -69,6 +74,7 @@ const StudentGridForAParent = ({
   }, [parentSynId]);
 
   useEffect(() => {
+
     let isCancelled = false;
     if (parentIds.length <= 0) { return }
 
@@ -76,7 +82,7 @@ const StudentGridForAParent = ({
     StudentContactService.getStudentContacts({
       where: JSON.stringify({
         LinkedID: parentIds,
-        ContactType: [STUDENT_CONTACT_TYPE_SC1, STUDENT_CONTACT_TYPE_SC2, STUDENT_CONTACT_TYPE_SC3],
+        ContactType: contactTypes,
       }),
     })
       .then(res => {
@@ -89,7 +95,7 @@ const StudentGridForAParent = ({
     return () => {
       isCancelled = true;
     }
-  }, [parentIds]);
+  }, [parentIds, contactTypes]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -97,11 +103,25 @@ const StudentGridForAParent = ({
 
     setIsLoadingStudents(true);
     Promise.all(studentIds.map(studentId => {
-        return SynVStudentService.getCurrentVStudent(studentId)
+        return SynVStudentService.getVPastAndCurrentStudentAll({
+          where: JSON.stringify({StudentId: studentId}),
+          perPage: 1,
+          sort: 'FileYear:DESC,FileSemester:DESC'
+        })
       }))
       .then(resp => {
         if (isCancelled === true) { return }
-        setStudents(resp);
+        const studentsMap = resp.reduce(
+          (map: { [key: number]: iVPastAndCurrentStudent }, res) => {
+            const arr = res.data || [];
+            return {
+              ...map,
+              ...(arr.length <= 0 ? {} : {[arr[0].StudentID]: arr[0]}),
+            }
+          },
+          {}
+        );
+        setStudents(Object.values(studentsMap));
       })
       .finally(() => {
         setIsLoadingStudents(false);
@@ -114,23 +134,46 @@ const StudentGridForAParent = ({
   const getStudentProfileDiv = (student: iVStudent) => {
     return (
       <div className={'student-div'} key={student.StudentID} onClick={() => onSelect && onSelect(student)}>
-        <Image src={student.profileUrl} />
+        <Image src={student.profileUrl} className={'profile-img'}/>
         <div className={'title-div'}>
           <div><b>{student.StudentGiven1} {student.StudentSurname}</b></div>
           <div>{student.StudentFormHomeRoom} ({student.StudentID})</div>
+          <StudentStatusBadge student={student} />
         </div>
       </div>
     )
   }
 
   if (isLoadingCommunity === true || isLoadingContacts === true || isLoadingStudents === true) {
-    return <Spinner animation={'border'} />
+    return <Spinner animation={'border'} size={'sm'}/>
+  }
+
+  if (students.length <= 0) {
+    return <PageNotFound
+      title={`Oops, we can NOT find your daughter(s)' profile.`}
+      description={
+        <span>
+              Sorry we can't find your daughter(s)' profile. <br />
+              If you believe there is an issue, please report this to the
+              School.<br />
+              If she is a student left the school, please click on "Report this issue" button,
+              we will email you a copy of her report.
+            </span>
+      }
+      secondaryBtn={
+        <ContactSupportPopupBtn variant="link">
+          Report this issue
+        </ContactSupportPopupBtn>
+      }
+    />
   }
 
   return (
     <Wrapper>
       <h4>Please select one of your daughter's profile below: </h4>
-      {students.map(student => getStudentProfileDiv(student))}
+      <FlexContainer className={'flex-wrap wrap'}>
+        {students.map(student => getStudentProfileDiv(student))}
+      </FlexContainer>
     </Wrapper>
   );
 };

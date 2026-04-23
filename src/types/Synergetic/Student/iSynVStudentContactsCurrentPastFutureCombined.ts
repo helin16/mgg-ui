@@ -1,0 +1,62 @@
+
+export const STUDENT_CONTACT_STUDENT_TYPE_CURRENT = 'Current';
+export const STUDENT_CONTACT_STUDENT_TYPE_FUTURE = 'Future';
+export const STUDENT_CONTACT_STUDENT_TYPE_PAST = 'Past';
+
+type iSynVStudentContactsCurrentPastFutureCombined = {
+  StudentID: number;
+  StudentSurname: string;
+  StudentName: string;
+  StudentGender: string;
+  StudentGiven1: string;
+  StudentGiven2: string;
+  StudentPreferred: string;
+  StudentLegalFullName: string;
+  StudentStatus: string;
+  StudentStatusSynergyMeaning: string;
+  StudentBirthDate: Date | string | null;
+  StudentApplicationDate: Date | string | null;
+  StudentEntryDate: Date | string | null;
+  StudentLeftDate: Date | string | null;
+  StudentLeavingReason: string;
+  StudentLeavingDestination: string;
+  StudentLeavingDestinationDescription: string;
+  StudentReturningDate: Date | string | null;
+  FileYear: number | null;
+  StudentCampus: string;
+  StudentYearLevel: number | null;
+  StudentYearLevelDescription: string | null;
+  StudentYearLevelSort: number | null;
+  StudentType: string;
+  StudentEnquirySource: string;
+  StudentFullFeeFlag: boolean;
+  StudentFamilyPosition: number;
+  PreviousSchool: string;
+  PreviousSchoolDescription: string;
+  StudentEmail: string;
+  StudentOccupEmail: string;
+  StudentSubSchool: string | null;
+  ContactID: number;
+  ContactType: string | null;
+  ContactPrimaryOnlyFlag: boolean;
+  ContactNormalMailFlag: boolean;
+  ContactReportsFlag: boolean;
+  ContactParentFlag: boolean;
+  ContactLivesWithFlag: number;
+  ContactMailName: string;
+  ContactAddressComma: string | null;
+  ContactAddressFull: string | null;
+  ContactSurname: string;
+  StudentContactSpouseID: number;
+  SudentContactHomeAddressComma: string | null;
+  StudentContactHomeAddressFull: string | null;
+  StudentContactHomeAddressSameFlag: boolean;
+  StudentContactDefaultMobilePhone: string;
+  StudentContactDefaultEmail: string;
+  StudentContactOccupCompany: string;
+  StudentContactOccupDescription: string;
+  StudentContactOccupCode: string | null;
+  StudentContactOccupPhone: string;
+}
+
+export default iSynVStudentContactsCurrentPastFutureCombined;

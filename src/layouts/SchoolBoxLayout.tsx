@@ -4,6 +4,7 @@ import {Alert} from 'react-bootstrap';
 import SchoolBoxComponent from './SchoolBox/SchoolBoxComponent';
 
 import styled from 'styled-components';
+import {THIRD_PARTY_AUTH_PATH} from '../helper/SchoolBoxHelper';
 
 const SchoolBoxWrapper = styled.div`
   padding: 10px; 
@@ -32,7 +33,7 @@ const SchoolBoxLayout = () => {
     const url = new URL(remoteUrl);
     const urlParams = url.searchParams;
 
-    const newPath = url.pathname.replace('/3rdPartyAuth/', '');
+    const newPath = url.pathname.replace(`${THIRD_PARTY_AUTH_PATH}/`, '');
     const finalPath = atob(newPath || '');
     return getWrapper(
       <SchoolBoxComponent
@@ -45,7 +46,7 @@ const SchoolBoxLayout = () => {
       />
     );
   } catch (e) {
-    return getWrapper(<Alert variant={'warning'}>Error: can't get the url ({{remoteUrl}}).</Alert>);
+    return getWrapper(<Alert variant={'warning'}>Error: can't get the url ({remoteUrl}).</Alert>);
   }
 };
 

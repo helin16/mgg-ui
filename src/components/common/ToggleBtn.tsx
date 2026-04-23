@@ -1,7 +1,11 @@
-import BootstrapSwitchButton from 'bootstrap-switch-button-react'
-import styled from 'styled-components';
+import Switch from 'react-switch'
+import styled, {CSSProperties} from 'styled-components';
 
 type iToggle = {
+  className?: string;
+  isDisabled?: boolean;
+  style?: CSSProperties;
+  btnStyle?: string;
   size?: 'lg' | 'sm' | 'xs';
   on: any;
   off: any;
@@ -10,6 +14,21 @@ type iToggle = {
 }
 const Wrapper = styled.div`
   display: inline-block;
+    
+  input[type="checkbox"] {
+      display: none !important;
+  }
+  
+  &.disabled {
+    .btn {
+      cursor: initial !important;
+    }
+    .btn-success {
+      background-color: #777 !important;
+      border-color:  #777 !important;
+    }
+  }
+  
   .switch {
     span {
       position: absolute;
@@ -42,15 +61,22 @@ const Wrapper = styled.div`
   .switch-off {
     background-color: #ccc !important;
   }
+  
+  .btn {
+    margin: 0px; 
+  }
 `
 const ToggleBtn = ({
-  size, on, off, checked, onChange
+  size, on, off, checked, onChange, className, style, btnStyle, isDisabled
 }: iToggle) => {
 
   return (
-    <Wrapper>
-      <BootstrapSwitchButton
+    <Wrapper className={`${className || ''} ${isDisabled === true ? 'disabled' : ''}`} style={style}>
+      {/*// @ts-ignore*/}
+      <Switch
+        disabled={isDisabled}
         checked={checked}
+        style={btnStyle}
         onstyle={'success'}
         size={size}
         onlabel={on}

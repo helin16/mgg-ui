@@ -9,11 +9,12 @@ import AwardsDiv from '../sections/AwardsDiv';
 import TeachersDiv from '../sections/TeacherDiv';
 import ApproachesToLearningDiv from '../sections/ApproachesToLearningDiv';
 import {iStudentAcademicReportResultMap} from '../../StudentAcademicReportDetails';
-import iVStudent from '../../../../../../types/Synergetic/iVStudent';
-import iStudentReportYear from '../../../../../../types/Synergetic/iStudentReportYear';
-import iStudentReportResult from '../../../../../../types/Synergetic/iStudentReportResult';
+import iVStudent from '../../../../../../types/Synergetic/Student/iVStudent';
+import iStudentReportYear from '../../../../../../types/Synergetic/Student/iStudentReportYear';
+import iStudentReportResult from '../../../../../../types/Synergetic/Student/iStudentReportResult';
 import LearningAreaGraph from '../sections/LearningAreaGraph';
 import LearningAgencyDiv from '../sections/LearningAgencyDiv';
+import PersonalAndSocialDevelopmentDiv from '../sections/PersonalAndSocialDevelopmentDiv';
 
 type iJnrGraphHomeGroupPage = {
   student: iVStudent;
@@ -54,6 +55,7 @@ const JnrGraphHomeGroupPage = ({
 
       <AttitudeAndManagementDiv results={resultList} />
       <LearningAgencyDiv results={resultList} />
+      <PersonalAndSocialDevelopmentDiv results={resultList} />
       <ApproachesToLearningDiv results={resultList} />
       <ReflectionDiv results={resultList} />
 

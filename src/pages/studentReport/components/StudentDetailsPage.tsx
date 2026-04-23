@@ -1,28 +1,22 @@
-import iVStudent from '../../../types/Synergetic/iVStudent';
+import iVStudent from '../../../types/Synergetic/Student/iVStudent';
 import PageTitle from '../../../components/PageTitle';
-import {Button, Spinner, Tab, Tabs} from 'react-bootstrap';
-import {useEffect, useState} from 'react';
+import {Button, Tab, Tabs} from 'react-bootstrap';
+import {useState} from 'react';
 import styled from 'styled-components';
 import * as Icon from 'react-bootstrap-icons';
-import iStudentReportYear from '../../../types/Synergetic/iStudentReportYear';
+import iStudentReportYear from '../../../types/Synergetic/Student/iStudentReportYear';
 import ReportedYearsList from './AcademicReports/ReportedYearsList';
 import StudentAcademicReportDetails from './AcademicReports/StudentAcademicReportDetails';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../../redux/makeReduxStore';
-import StudentReportService from '../../../services/Synergetic/StudentReportService';
-import {iPowerBiReportMap} from '../../../types/student/iPowerBIReports';
-import PowerBIReportViewer from '../../../components/powerBI/PowerBIReportViewer';
-import AssessmentGraph from './AssessmentGraph/AssessmentGraph';
 import {mainBlue} from '../../../AppWrapper';
+import StudentStatusBadge from './AcademicReports/StudentStatusBadge';
+import {FlexContainer} from '../../../styles';
+import WellBeingGraphPanel from './WellBeingGraphs/WellBeingGraphPanel';
+import StudentParticipationPanel from './StudentParticipation/StudentParticipationPanel';
 
-const TAB_ACADEMIC_REPORTS = 'academicReports';
 const TAB_STUDENT_PARTICIPATION = 'studentParticipation';
-const TAB_STANDARDISED_TESTS = 'standardisedTests';
-const TAB_SCHOOL_BASED_ASSESSMENTS = 'schoolBasedAssessments';
 const TAB_WELL_BEING = 'wellBeing';
-
-const REPORT_ID_ASSESSMENT_GRAPH = 'ASSESSMENT_GRAPH';
-
 
 const Wrapper = styled.div`
   font-size: 14px;
@@ -44,77 +38,45 @@ const Wrapper = styled.div`
 `;
 
 
-const StudentDetailsPage = ({student ,onClearSelectedStudent}: {student: iVStudent; onClearSelectedStudent: () => void}) => {
+type iStudentDetailsPage = {student: iVStudent; onClearSelectedStudent?: () => void; showTitle?: boolean}
+
+const StudentDetailsPage = ({student ,onClearSelectedStudent, showTitle = true}: iStudentDetailsPage) => {
   const {user} = useSelector((state: RootState) => state.auth);
-  const [selectedTab, setSelectedTab] = useState(TAB_ACADEMIC_REPORTS);
+  const [selectedTab, setSelectedTab] = useState(TAB_STUDENT_PARTICIPATION);
   const [selectedStudentReportYear, setSelectedStudentReportYear] = useState<iStudentReportYear | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [powerBIReports, setPowerBIReports] = useState<iPowerBiReportMap>({});
-
-  useEffect(() => {
-    let isCancelled = false;
-
-    setIsLoading(true)
-    StudentReportService.getPowerBIReports(student.StudentID)
-      .then(resp => {
-        if (isCancelled === true) { return; }
-        setPowerBIReports(resp);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-
-    return () => {
-      isCancelled = true;
-    }
-  }, [student]);
 
   const getTabs = () => {
-    const reportKeys = Object.keys(powerBIReports);
     return (
-      <Tabs defaultActiveKey={selectedTab}
+      <Tabs
         className={'main-tabs'}
         activeKey={selectedTab}
         onSelect={(tabKey) => setSelectedTab(`${tabKey}`)}
       >
-        <Tab eventKey={TAB_ACADEMIC_REPORTS} title={'Academic Reports'} />
-        {reportKeys.map(reportKey => {
-          return <Tab key={reportKey} eventKey={reportKey} title={powerBIReports[reportKey].name} />
-        })}
+        <Tab key={TAB_STUDENT_PARTICIPATION} eventKey={TAB_STUDENT_PARTICIPATION} title={'Student Participation (Staff Only)'} />
+        <Tab key={TAB_WELL_BEING} eventKey={TAB_WELL_BEING} title={'WellBeing (Staff Only)'} />
       </Tabs>
     )
   }
 
   const getTabContent = () => {
     if (selectedTab === TAB_STUDENT_PARTICIPATION) {
-      return <PowerBIReportViewer reportId={powerBIReports[selectedTab].reportId || ''} student={student}/>
-    }
-    if (selectedTab === TAB_STANDARDISED_TESTS) {
-      return <PowerBIReportViewer reportId={powerBIReports[selectedTab].reportId || ''} student={student}/>
-    }
-    if (selectedTab === TAB_SCHOOL_BASED_ASSESSMENTS) {
-      if (powerBIReports[selectedTab].reportId === REPORT_ID_ASSESSMENT_GRAPH) {
-        return <AssessmentGraph student={student} />
-      }
-      return <PowerBIReportViewer reportId={powerBIReports[selectedTab].reportId || ''} student={student}/>
+      return <StudentParticipationPanel student={student}/>
+      // return <PowerBIReportViewer reportId={powerBIReports[selectedTab].reportId || ''} student={student}/>
     }
     if (selectedTab === TAB_WELL_BEING) {
-      return <PowerBIReportViewer reportId={powerBIReports[selectedTab].reportId || ''} student={student}/>
+      return <WellBeingGraphPanel student={student}/>
     }
     return <ReportedYearsList student={student} onSelect={(studentReportYear) => setSelectedStudentReportYear(studentReportYear)}/>
   }
 
   const getContent = () => {
-    if (isLoading === true) {
-      return <Spinner animation={'border'} />;
-    }
     if (selectedStudentReportYear !== null) {
       return (
         <StudentAcademicReportDetails
           student={student}
           studentReportYear={selectedStudentReportYear}
           onClearReportYear={() => setSelectedStudentReportYear(null) }
-          onClearSelectedStudent={() => onClearSelectedStudent() }
+          onClearSelectedStudent={onClearSelectedStudent }
         />
       );
     }
@@ -123,31 +85,44 @@ const StudentDetailsPage = ({student ,onClearSelectedStudent}: {student: iVStude
       if (user?.isStudent === true) {
         return null;
       }
+
+      if (onClearSelectedStudent) {
+        return (
+          <Button variant={'link'} title={'back to search'} size={'sm'} onClick={() => onClearSelectedStudent()}>
+            <Icon.ArrowLeft />
+          </Button>
+        )
+      }
+    }
+
+    const getPageTitle = () => {
+      if (showTitle !== true) {
+        return null;
+      }
+
       return (
-        <Button variant={'link'} title={'back to search'} size={'sm'} onClick={() => onClearSelectedStudent()}>
-          <Icon.ArrowLeft />
-        </Button>
+        <PageTitle
+          operations={
+            <FlexContainer className={'withGap justify-content flex-end align-items center'}>
+              <StudentStatusBadge student={student} />
+              <h3 className={'text-right'}>
+                {student.StudentGiven1} {' '}
+                {student.StudentSurname} {' '}
+                ({student.StudentID})
+              </h3>
+            </FlexContainer>
+          }
+        >
+          <h3>
+            {getBackToMainBtn()}
+          </h3>
+        </PageTitle>
       )
     }
 
     return (
       <>
-        <PageTitle
-          operations={
-            <h3 className={'text-right'}>
-              {student.StudentGiven1} {' '}
-              {student.StudentSurname} {' '}
-              ({student.StudentID}) {' '}
-              {student.StudentFormHomeRoom}
-            </h3>
-          }
-        >
-          <h3>
-            {getBackToMainBtn()}
-            Reports
-          </h3>
-        </PageTitle>
-
+        {getPageTitle()}
         {getTabs()}
         {getTabContent()}
       </>

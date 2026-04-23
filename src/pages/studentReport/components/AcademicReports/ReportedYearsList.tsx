@@ -1,10 +1,11 @@
-import iVStudent from '../../../../types/Synergetic/iVStudent';
+import iVStudent from '../../../../types/Synergetic/Student/iVStudent';
 import {Image, Spinner} from 'react-bootstrap';
 import React, {useEffect, useState} from 'react';
-import StudentReportService from '../../../../services/Synergetic/StudentReportService';
-import iStudentReportYear from '../../../../types/Synergetic/iStudentReportYear';
+import StudentReportService from '../../../../services/Synergetic/Student/StudentReportService';
+import iStudentReportYear from '../../../../types/Synergetic/Student/iStudentReportYear';
 import LinkBtn from '../../../../components/common/LinkBtn';
-import SectionDiv from './DetailsComponents/sections/SectionDiv';
+import SectionDiv from '../../../../components/common/SectionDiv';
+import ReportMovingNotice from './DetailsComponents/ReportMovingNotice';
 
 const ReportedYearsList = ({student, onSelect}: {student: iVStudent, onSelect: (studentReportYear: iStudentReportYear) => void}) => {
   const [reportList, setReportList] = useState<{[key: number]: iStudentReportYear[]}>({});
@@ -18,7 +19,7 @@ const ReportedYearsList = ({student, onSelect}: {student: iVStudent, onSelect: (
         if (isCancelled === true) return;
         const listMap = resp
           .sort((reportYear1, reportYear2) => {
-            return reportYear1.FileYear > reportYear2.FileYear && reportYear1.FileSemester > reportYear2.FileSemester ? -1 : 1
+            return reportYear1.FileYear > reportYear2.FileYear && reportYear1.FileSemester > reportYear2.FileSemester ? 1 : -1
           })
           .reduce((map, reportYear) => {
             return {
@@ -56,7 +57,7 @@ const ReportedYearsList = ({student, onSelect}: {student: iVStudent, onSelect: (
     if (Object.keys(reportList).length <= 0) {
       return null;
     }
-    return Object.keys(reportList).map(fileYear => {
+    return Object.keys(reportList).reverse().map(fileYear => {
       return (
         <SectionDiv key={fileYear}>
           <h6>{fileYear}</h6>
@@ -77,10 +78,13 @@ const ReportedYearsList = ({student, onSelect}: {student: iVStudent, onSelect: (
 
   return (
     <div>
+      <ReportMovingNotice student={student} />
       <Image
         src={student.profileUrl}
         rounded
-        className={'pull-right'} />
+        className={'pull-right'}
+        style={{padding: '1.3rem', width: '18rem'}}
+      />
       <div>
         <p>Select the academic report you want to view from the list below.</p>
         <div className={'reported-years-list'}>

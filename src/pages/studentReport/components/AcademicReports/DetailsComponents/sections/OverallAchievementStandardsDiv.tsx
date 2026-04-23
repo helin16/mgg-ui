@@ -1,7 +1,7 @@
 import iStudentReportResult, {
   STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_OVERALL_GRADE,
   STUDENT_REPORT_RESULT_ASSESS_AREA_TYPE_OVERALL_GRADE_JNR
-} from '../../../../../../types/Synergetic/iStudentReportResult';
+} from '../../../../../../types/Synergetic/Student/iStudentReportResult';
 import {useEffect, useState} from 'react';
 import styled from 'styled-components';
 
