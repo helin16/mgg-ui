@@ -1,12 +1,13 @@
 import EmailEditor, { EditorRef, EmailEditorProps } from "react-email-editor";
-import type { Editor } from "react-email-editor/dist/types";
 import { useRef } from "react";
 import styled from "styled-components";
+
+type iEmailEditorInstance = NonNullable<EditorRef["editor"]>;
 
 type iEmailTemplateBuilder = {
   designData: any;
   editorRef: (editor: EditorRef | null) => void;
-  onUpdated?: (editor: Editor, data: any) => void;
+  onUpdated?: (editor: iEmailEditorInstance, data: any) => void;
 };
 
 const Wrapper = styled.div``;
