@@ -599,17 +599,13 @@ const CreditorBPayPanel = () => {
           </div>
         ) : null}
         {workingBatch ? (
-          <div className={'mt-3'}>
-            <BPayBatchResultPanel
-              batch={workingBatch}
-              onDeleteBatchItem={isGeneratedBatch(editingBatch) ? undefined : handleDeleteDraftItem}
-              successMessage={successMessage}
-            />
-          </div>
+          <BPayBatchResultPanel
+            batch={workingBatch}
+            onDeleteBatchItem={isGeneratedBatch(editingBatch) ? undefined : handleDeleteDraftItem}
+            successMessage={successMessage}
+          />
         ) : successMessage ? (
-          <div className={'mt-3'}>
-            <BPayBatchResultPanel batch={workingBatch} successMessage={successMessage} />
-          </div>
+          <BPayBatchResultPanel batch={workingBatch} successMessage={successMessage} />
         ) : null}
       </>
     );
