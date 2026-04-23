@@ -3,6 +3,20 @@
 This project is the UI components of the whole system.
 All UI hosted on Netlify()
 
+## Engineering conventions
+
+Project governance lives in `.specify/memory/constitution.md`.
+
+Current repo rules:
+
+- New module work must declare its route entry point, access model, and `moduleId`.
+- Components should use shared domain services in `src/services/` and contracts in `src/types/`
+  instead of calling `axios` directly.
+- User-facing async flows must show loading, success, and error states through shared UI
+  patterns such as `Toaster`, validation helpers, and access wrappers.
+- Changes to sensitive school workflows, embeds, uploads, payments, or config must include
+  explicit verification and risk review.
+
 
 ## Local dev environment
 
