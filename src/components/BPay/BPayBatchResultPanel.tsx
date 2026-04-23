@@ -1,5 +1,5 @@
 import React from 'react';
-import {Alert, Button, Card} from 'react-bootstrap';
+import {Alert, Button} from 'react-bootstrap';
 import * as Icons from 'react-bootstrap-icons';
 import Table, {iTableColumn} from '../common/Table';
 import iCreditorBPayBatch from '../../types/BPay/iCreditorBPayBatch';
@@ -207,25 +207,23 @@ const BPayBatchResultPanel = ({
     <div>
       {successMessage ? <Alert variant={'success'}>{successMessage}</Alert> : null}
       {getBatchSections(batch).map((section: iCreditorBPayBatchSection, index: number) => (
-        <Card key={`${section.id || section.Id || index}`}>
-          <Card.Body className={'no-padding'}>
-            <Card.Title>
-              {section.Creditor?.name
-                ? `${section.Creditor.name} [${section.Creditor.id}]`
-                : (section.customerName || section.title || `Section ${index + 1}`)}
-            </Card.Title>
-            <Card.Subtitle className={'text-muted'}>
-              {getSectionItems(section).length} item(s) | Total ${calculateSectionTotal(section).toFixed(2)}
-            </Card.Subtitle>
-            <Table<iCreditorBPayBatchSectionItem>
-              columns={itemColumns}
-              hover
-              rows={getSectionItems(section)}
-              size={'sm'}
-              striped
-            />
-          </Card.Body>
-        </Card>
+        <div key={`${section.id || section.Id || index}`}>
+          <div className={'h5'}>
+            {section.Creditor?.name
+              ? `${section.Creditor.name} [${section.Creditor.id}]`
+              : (section.customerName || section.title || `Section ${index + 1}`)}
+          </div>
+          <div className={'text-muted'}>
+            {getSectionItems(section).length} item(s) | Total ${calculateSectionTotal(section).toFixed(2)}
+          </div>
+          <Table<iCreditorBPayBatchSectionItem>
+            columns={itemColumns}
+            hover
+            rows={getSectionItems(section)}
+            size={'sm'}
+            striped
+          />
+        </div>
       ))}
     </div>
   );
