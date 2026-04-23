@@ -207,14 +207,14 @@ const BPayBatchResultPanel = ({
     <div>
       {successMessage ? <Alert variant={'success'}>{successMessage}</Alert> : null}
       {getBatchSections(batch).map((section: iCreditorBPayBatchSection, index: number) => (
-        <Card className={'mb-3'} key={`${section.id || section.Id || index}`}>
-            <Card.Body className={'no-padding'}>
+        <Card key={`${section.id || section.Id || index}`}>
+          <Card.Body className={'no-padding'}>
             <Card.Title>
               {section.Creditor?.name
                 ? `${section.Creditor.name} [${section.Creditor.id}]`
                 : (section.customerName || section.title || `Section ${index + 1}`)}
             </Card.Title>
-            <Card.Subtitle className={'mb-2 text-muted'}>
+            <Card.Subtitle className={'text-muted'}>
               {getSectionItems(section).length} item(s) | Total ${calculateSectionTotal(section).toFixed(2)}
             </Card.Subtitle>
             <Table<iCreditorBPayBatchSectionItem>
