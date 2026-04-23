@@ -1,4 +1,5 @@
-import EmailEditor, { EditorRef, EmailEditorProps, Editor } from "react-email-editor";
+import EmailEditor, { EditorRef, EmailEditorProps } from "react-email-editor";
+import type { Editor } from "react-email-editor/dist/types";
 import { useRef } from "react";
 import styled from "styled-components";
 
