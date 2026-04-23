@@ -1,12 +1,14 @@
 import iBaseType from '../iBaseType';
+import iCreditorBPayBatchSection from './iCreditorBPayBatchSection';
 
 type iCreditorBPayBatch = iBaseType & {
-  creditorId: number;
+  Id?: string;
   totalAmount: number | null;
-  generatedAt: Date | null;
+  generatedAt: Date | string | null;
   generatedById?: string | null;
   comments: string | null;
   content: any | null;
+  Sections?: iCreditorBPayBatchSection[];
 }
 
 export default iCreditorBPayBatch;
