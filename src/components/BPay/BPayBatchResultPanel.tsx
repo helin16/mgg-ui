@@ -163,7 +163,7 @@ const BPayBatchResultPanel = ({
                 size={'sm'}
                 variant={'outline-primary'}
               >
-                Download again
+                Download
               </Button>
             ) : null}
             <DeleteConfirmPopupBtn

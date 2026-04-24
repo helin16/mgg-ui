@@ -1,5 +1,6 @@
 import {
   appendItemToBatch,
+  buildLodgementReferencesFromCreditorName,
   findExistingSectionForCreditor,
   getBatchItemCount,
   getBatchStatusLabel,
@@ -210,6 +211,20 @@ describe('CreditorBPayPanelHelper', () => {
     expect(hasUnsavedBatchEntry({amount: '15.00'})).toBe(true);
     // @ts-ignore
     expect(hasUnsavedBatchEntry({selectedCreditor: {CreditorID: 9}})).toBe(true);
+  });
+
+  test('buildLodgementReferencesFromCreditorName splits creditor name across BPAY lodgement fields', () => {
+    expect(buildLodgementReferencesFromCreditorName('  Example   Creditor   Name  Pty Ltd  ')).toEqual({
+      reference1: 'Example Cr',
+      reference2: 'editor Name Pty Ltd',
+      reference3: null,
+    });
+
+    expect(buildLodgementReferencesFromCreditorName('1234567890ABCDEFGHIJ1234567890KLMNOPQRST1234567890UVWXYZ')).toEqual({
+      reference1: '1234567890',
+      reference2: 'ABCDEFGHIJ1234567890',
+      reference3: 'KLMNOPQRST1234567890UVWXYZ',
+    });
   });
 
   test('getBatchItemCount prefers item arrays and falls back to itemCount', () => {

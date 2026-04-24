@@ -242,6 +242,15 @@ export const buildCreateSectionItemPayload = (
   };
 };
 
+export const buildLodgementReferencesFromCreditorName = (creditorName?: string | null) => {
+  const normalizedCreditorName = `${creditorName || ''}`.replace(/\s+/g, ' ').trim();
+  return {
+    reference1: normalizedCreditorName.slice(0, 10) || null,
+    reference2: normalizedCreditorName.slice(10, 30) || null,
+    reference3: normalizedCreditorName.slice(30, 80) || null,
+  };
+};
+
 export const calculateSectionTotal = (section?: iCreditorBPayBatchSection | null) => {
   const items = getSectionItems(section);
   if (items.length <= 0) {
