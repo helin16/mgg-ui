@@ -1,13 +1,14 @@
 import styled from 'styled-components';
+import JSZip from 'jszip';
+import {pdf} from '@react-pdf/renderer';
 import ExplanationPanel from '../ExplanationPanel';
 import SynCreditorSelector from '../synCreditor/SynCreditorSelector';
 import iSynVCreditor from '../../types/Synergetic/Finance/iSynVCreditor';
 import iSynCreditorBPayInfo from '../../types/Synergetic/Finance/iSynCreditorBPayInfo';
 import {iAutoCompleteSingle} from '../common/AutoComplete';
 import {Alert, Button, Col, FormGroup, Row, Spinner} from 'react-bootstrap';
-import {useEffect, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import SynCreditorBPayInfoService from '../../services/Synergetic/Finance/SynCreditorBPayInfoService';
-import SynVCreditorService from '../../services/Synergetic/Finance/SynVCreditorService';
 import Toaster, {TOAST_TYPE_ERROR, TOAST_TYPE_SUCCESS} from '../../services/Toaster';
 import FormLabel from '../form/FormLabel';
 import FormErrorDisplay, {iErrorMap} from '../form/FormErrorDisplay';
@@ -19,8 +20,10 @@ import iCreditorBPayBatch from '../../types/BPay/iCreditorBPayBatch';
 import iCreditorBPayBatchSection from '../../types/BPay/iCreditorBPayBatchSection';
 import iCreditorBPayBatchSectionItem from '../../types/BPay/iCreditorBPayBatchSectionItem';
 import BPayBatchResultPanel from './BPayBatchResultPanel';
+import BPayBatchExportPdf from './BPayBatchExportPdf';
 import {
   appendItemToBatch,
+  buildLodgementReferencesFromCreditorName,
   buildCreateSectionItemPayload,
   calculateBatchTotal,
   findExistingSectionForCreditor,
@@ -77,13 +80,13 @@ const hasDraftBatchItems = (batch?: iCreditorBPayBatch | null) => {
   return (batch?.Sections || []).some(section => (section.Items || []).length > 0);
 };
 const isGeneratedBatch = (batch?: iCreditorBPayBatch | null) => Boolean(batch?.generatedAt);
-const getBatchDownloadFileName = (batch?: iCreditorBPayBatch | null) => {
+const getBatchDownloadBaseName = (batch?: iCreditorBPayBatch | null) => {
   const sourceDate = batch?.generatedAt || batch?.updatedAt || batch?.createdAt || new Date().toISOString();
   const parsedDate = new Date(sourceDate);
   const safeDate = Number.isNaN(parsedDate.getTime()) ? new Date() : parsedDate;
   const datePart = `${safeDate.getFullYear()}${`${safeDate.getMonth() + 1}`.padStart(2, '0')}${`${safeDate.getDate()}`.padStart(2, '0')}`;
   const timePart = `${`${safeDate.getHours()}`.padStart(2, '0')}${`${safeDate.getMinutes()}`.padStart(2, '0')}${`${safeDate.getSeconds()}`.padStart(2, '0')}`;
-  return `NAB_BPAY_${datePart}_${timePart}.bpb`;
+  return `NAB_BPAY_${datePart}_${timePart}`;
 };
 const normalizeStoredBatchSections = (batch?: iCreditorBPayBatch | null): iCreditorBPayBatchSection[] => {
   const contentSections = Array.isArray(batch?.content?.sections) ? batch?.content?.sections : [];
@@ -110,20 +113,6 @@ const normalizeStoredBatchSections = (batch?: iCreditorBPayBatch | null): iCredi
     })),
   }));
 };
-const getBatchCreditorId = (batch?: iCreditorBPayBatch | null) => {
-  const sections = batch?.Sections || [];
-  for (const section of sections) {
-    if (section?.Creditor?.id !== null && section?.Creditor?.id !== undefined) {
-      return Number(section.Creditor.id);
-    }
-    const firstItem = (section?.Items || [])[0];
-    if (firstItem?.creditorId !== null && firstItem?.creditorId !== undefined) {
-      return Number(firstItem.creditorId);
-    }
-  }
-  return 0;
-};
-
 const CreditorBPayPanel = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [batches, setBatches] = useState<iCreditorBPayBatch[]>([]);
@@ -214,7 +203,7 @@ const CreditorBPayPanel = () => {
     };
   };
 
-  const loadBatches = async (showErrorToast = false) => {
+  const loadBatches = useCallback(async (showErrorToast = false) => {
     setIsLoadingBatches(true);
     setBatchLoadError(null);
     try {
@@ -232,11 +221,11 @@ const CreditorBPayPanel = () => {
     } finally {
       setIsLoadingBatches(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     void loadBatches();
-  }, []);
+  }, [loadBatches]);
 
   useEffect(() => {
     if (selectedCreditor === null) {
@@ -284,16 +273,6 @@ const CreditorBPayPanel = () => {
     setModalContentKey(prev => prev + 1);
   };
 
-  const getCreditorById = async (creditorId?: number | null) => {
-    if (!creditorId) {
-      return null;
-    }
-    const response = await SynVCreditorService.getAll({
-      where: JSON.stringify({CreditorID: creditorId}),
-    });
-    return response.data?.[0] || null;
-  };
-
   const onCreditorSelected = (option: iAutoCompleteSingle | null) => {
     setSelectedCreditor(option?.data || null);
     setBPayInfos([]);
@@ -321,6 +300,28 @@ const CreditorBPayPanel = () => {
   };
 
   const downloadBatchAgain = async (batch: iCreditorBPayBatch) => {
+    const downloadBatchFiles = async (content: any, sourceBatch: iCreditorBPayBatch) => {
+      const zip = new JSZip();
+      const baseName = getBatchDownloadBaseName(sourceBatch);
+      const bpbContent = typeof content === 'string'
+        ? content
+        : new Uint8Array(content.data || content);
+      const pdfBlob = await pdf(<BPayBatchExportPdf batch={sourceBatch} />).toBlob();
+
+      zip.file(`${baseName}.bpb`, bpbContent);
+      zip.file(`${baseName}.pdf`, pdfBlob);
+
+      const zipBlob = await zip.generateAsync({type: 'blob'});
+      const downloadUrl = URL.createObjectURL(zipBlob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `${baseName}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(downloadUrl);
+    };
+
     const batchId = `${batch.id || batch.Id || ''}`.trim();
     if (batchId === '') {
       return;
@@ -329,23 +330,22 @@ const CreditorBPayPanel = () => {
     setActiveBatchActionId(batchId);
     try {
       const latestBatch = await CreditorBPayBatchService.get(batchId);
-      const content = latestBatch?.content?.generatedFileContent || latestBatch?.content;
+      const hydratedBatch = await getBatchWithDetails(latestBatch);
+      const regeneratedBatch = await CreditorBPayBatchService.update(
+        batchId,
+        buildBatchPayloadFromBatch(hydratedBatch, true)
+      );
+      const content = regeneratedBatch?.content?.generatedFileContent || regeneratedBatch?.content;
       if (!content) {
         Toaster.showToast('No generated file content was found for this batch.', TOAST_TYPE_ERROR);
         return;
       }
-
-      const blob = typeof content === 'string'
-        ? new Blob([content], {type: 'text/plain;charset=utf-8'})
-        : new Blob([new Uint8Array(content.data || content)], {type: 'application/octet-stream'});
-      const downloadUrl = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.download = getBatchDownloadFileName(latestBatch || batch);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(downloadUrl);
+      await loadBatches();
+      await downloadBatchFiles(content, {
+        ...hydratedBatch,
+        ...regeneratedBatch,
+        Sections: hydratedBatch.Sections,
+      });
     } catch (err) {
       Toaster.showApiError(err);
     } finally {
@@ -425,39 +425,39 @@ const CreditorBPayPanel = () => {
     setWorkingBatch((nextBatch.Sections || []).length > 0 ? nextBatch : null);
   };
 
-  const buildBatchPayload = (generateFile: boolean) => {
-    const resolvedCreditorId = Number(
-      selectedCreditor?.CreditorID
-      || getBatchCreditorId(workingBatch)
-      || 0
-    );
+  const buildBatchPayloadFromBatch = (batch: iCreditorBPayBatch | null | undefined, generateFile: boolean) => {
     return {
-      totalAmount: calculateBatchTotal(workingBatch),
+      totalAmount: calculateBatchTotal(batch),
       generatedAt: null,
       generatedById: null,
-      comments: workingBatch?.comments || null,
+      comments: batch?.comments || null,
       content: null,
       generateFile,
-      sections: (workingBatch?.Sections || []).map(draftSection => ({
+      sections: (batch?.Sections || []).map(draftSection => ({
         totalAmount: Number(draftSection.totalAmount || 0),
         customerName: draftSection.customerName || draftSection.title || draftSection.Creditor?.name || selectedCreditor?.CreditorNameExternal || '',
         Creditor: draftSection.Creditor || null,
         date: draftSection.date || new Date().toISOString(),
         items: (draftSection.Items || []).map(draftItem => ({
+          ...buildLodgementReferencesFromCreditorName(
+            draftItem.creditorName
+            || draftSection.Creditor?.name
+            || draftSection.customerName
+            || draftSection.title
+          ),
           creditorId: Number(draftItem.creditorId),
           billerCode: draftItem.billerCode || null,
           referenceNum: draftItem.reference || draftItem.reference1 || null,
           payerBankBSB: draftItem.payerBankBSB || null,
           payerBankAcc: draftItem.payerBankAcc || null,
-          reference1: draftItem.reference1 || null,
-          reference2: draftItem.reference2 || null,
-          reference3: draftItem.reference3 || null,
           amount: Number(draftItem.amount || draftItem.amt || 0),
           comments: draftItem.comments || draftItem.description || null,
         })),
       })),
     };
   };
+
+  const buildBatchPayload = (generateFile: boolean) => buildBatchPayloadFromBatch(workingBatch, generateFile);
 
   const submitDraftBatch = async (generateFile: boolean) => {
     if (!workingBatch || (workingBatch.Sections || []).length <= 0) {
