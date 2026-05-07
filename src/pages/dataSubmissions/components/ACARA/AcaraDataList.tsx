@@ -22,7 +22,21 @@ const Wrapper = styled.div`
       width: 350px;
     }
   }
+
+  .status-badges {
+    gap: 4px;
+  }
 `;
+
+const getStatusBadges = (isInvalid?: boolean, isWarning?: boolean) => {
+  return (
+    <FlexContainer className={"status-badges"}>
+      {isInvalid === true ? <Badge bg={'danger'}>Invalid</Badge> : null}
+      {isWarning === true ? <Badge bg={'warning'}>Warning</Badge> : null}
+    </FlexContainer>
+  );
+};
+
 const AcaraDataList = ({ records, isLoading = false }: iAcaraDataList) => {
   if (records.length <= 0) {
     return null;
@@ -42,18 +56,22 @@ const AcaraDataList = ({ records, isLoading = false }: iAcaraDataList) => {
       parentHomeLanguageCode,
       parentHomeLanguageDescription,
       parentHomeLanguageLangValidFlag,
+      parentHomeLanguageLangWarningFlag,
 
       parentHighestSchoolEducation,
       parentHighestSchoolEducationCode,
       parentHighestSchoolEducationValidFlag,
+      parentHighestSchoolEducationWarningFlag,
 
       parentHighestNonSchoolEducation,
       parentHighestNonSchoolEducationValidFlag,
+      parentHighestNonSchoolEducationWarningFlag,
       parentHighestNonSchoolEducationCode,
       parentHighestNonSchoolEducationDescription,
 
       parentOccupationGroup,
       parentOccupationGroupValidFlag,
+      parentOccupationGroupWarningFlag,
       parentOccupationGroupCode,
       parentOccupationGroupDescription,
     } = parentInfo;
@@ -74,7 +92,7 @@ const AcaraDataList = ({ records, isLoading = false }: iAcaraDataList) => {
                 <div>
                   {parentHomeLanguageCode} - {parentHomeLanguageDescription} [<b>Acara</b>: {parentMainSLG}]
                 </div>
-                <div>{parentHomeLanguageLangValidFlag === true ? null : <Badge bg={'danger'}>Invalid</Badge> }</div>
+                <div>{getStatusBadges(parentHomeLanguageLangValidFlag !== true, parentHomeLanguageLangWarningFlag === true)}</div>
               </FlexContainer>
             </td>
           </tr>
@@ -85,7 +103,7 @@ const AcaraDataList = ({ records, isLoading = false }: iAcaraDataList) => {
                 <div>
                   {parentHighestSchoolEducationCode} [<b>Acara</b>: {parentHighestSchoolEducation}]
                 </div>
-                <div>{parentHighestSchoolEducationValidFlag === true ? null : <Badge bg={'danger'}>Invalid</Badge> }</div>
+                <div>{getStatusBadges(parentHighestSchoolEducationValidFlag !== true, parentHighestSchoolEducationWarningFlag === true)}</div>
               </FlexContainer>
             </td>
           </tr>
@@ -97,7 +115,7 @@ const AcaraDataList = ({ records, isLoading = false }: iAcaraDataList) => {
                   {parentHighestNonSchoolEducationCode} - {parentHighestNonSchoolEducationDescription}
                   [<b>Acara</b>: {parentHighestNonSchoolEducation}]
                 </div>
-                <div>{parentHighestNonSchoolEducationValidFlag === true ? null : <Badge bg={'danger'}>Invalid</Badge> }</div>
+                <div>{getStatusBadges(parentHighestNonSchoolEducationValidFlag !== true, parentHighestNonSchoolEducationWarningFlag === true)}</div>
               </FlexContainer>
             </td>
           </tr>
@@ -109,7 +127,7 @@ const AcaraDataList = ({ records, isLoading = false }: iAcaraDataList) => {
                   {parentOccupationGroupCode} - {parentOccupationGroupDescription}
                   [<b>Acara</b>: {parentOccupationGroup}]
                 </div>
-                <div>{parentOccupationGroupValidFlag === true ? null : <Badge bg={'danger'}>Invalid</Badge> }</div>
+                <div>{getStatusBadges(parentOccupationGroupValidFlag !== true, parentOccupationGroupWarningFlag === true)}</div>
               </FlexContainer>
             </td>
           </tr>
@@ -185,8 +203,9 @@ const AcaraDataList = ({ records, isLoading = false }: iAcaraDataList) => {
               </div>
               <div>
                 <b>Acara Code</b>: {row.studentMainSLG}{" "}
-                {row.studentMainSLGValidFlag === true ? null : (
-                  <Badge bg={"danger"}>Not Valid</Badge>
+                {getStatusBadges(
+                  row.studentMainSLGValidFlag !== true,
+                  row.studentMainSLGWarningFlag === true
                 )}
               </div>
             </td>

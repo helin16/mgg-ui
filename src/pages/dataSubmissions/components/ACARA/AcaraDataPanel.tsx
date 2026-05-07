@@ -3,7 +3,7 @@ import SchoolCensusDataSearchPanel, {
   iSchoolCensusDataSearchCriteria,
   LOCALSTORAGE_START_AND_END_NAME_ACARA
 } from "../SchoolCensusData/SchoolCensusDataSearchPanel";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Toaster, { TOAST_TYPE_ERROR } from "../../../../services/Toaster";
 import SynFileSemesterService from "../../../../services/Synergetic/SynFileSemesterService";
 import * as _ from "lodash";
@@ -26,9 +26,11 @@ import SynLuQualificationLevelService from "../../../../services/Synergetic/Look
 import iSynOccupationPosition from "../../../../types/Synergetic/Lookup/iSynLuOccupationPosition";
 import CSVExportBtn from "../../../../components/form/CSVExportBtn";
 import AcaraDataExportHelper from "./AcaraDataExportHelper";
-import {Dropdown} from 'react-bootstrap';
+import AcaraDataPanelHelper from "./AcaraDataPanelHelper";
+import {Dropdown, Form} from 'react-bootstrap';
 import * as Icons from 'react-bootstrap-icons'
 import styled from 'styled-components';
+import { FlexContainer } from "../../../../styles";
 
 const ACARA_SCHOOL_ID = "46195";
 const ACARA_SCHOOL_NAME = `Mentone Girls' Grammar School`;
@@ -42,6 +44,19 @@ const DropdownWrapper = styled.div`
     }
   }
 `;
+
+const ControlsWrapper = styled(FlexContainer)`
+  gap: 8px;
+
+  .filter-controls {
+    gap: 8px;
+  }
+
+  .export-control {
+    margin-left: 20px;
+  }
+`;
+
 const AcaraDataPanel = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [
@@ -49,6 +64,8 @@ const AcaraDataPanel = () => {
     setSearchCriteria
   ] = useState<iSchoolCensusDataSearchCriteria | null>(null);
   const [records, setRecords] = useState<iAcaraData[] | null>(null);
+  const [showInvalidOnly, setShowInvalidOnly] = useState(false);
+  const [showWarningOnly, setShowWarningOnly] = useState(false);
 
   useEffect(() => {
     if (searchCriteria === null) return;
@@ -138,6 +155,9 @@ const AcaraDataPanel = () => {
       ]);
 
       const filteredStudents = students.filter((student) => {
+        if (student.FullFeeFlag === true) {
+          return false;
+        }
 
         if (`${student.StudentEntryDate}`.replace('T00:00:00Z', '') > startEndDataString.endDateStr.replace('T00:00:00Z', '')) {
           return false;
@@ -287,6 +307,7 @@ const AcaraDataPanel = () => {
           [`parent${index}HighestSchoolEducation`]: parentId === '' ? '' : highestSchoolEdu,
           [`parent${index}HighestSchoolEducationCode`]: parentId === '' ? '' : (parentProfile?.HighestSecondaryYearLevel || ""),
           [`parent${index}HighestSchoolEducationValidFlag`]: parentId === '' ? '' : AcaraDataHelper.validateHighestSchoolEdu(highestSchoolEdu),
+          [`parent${index}HighestSchoolEducationWarningFlag`]: parentId === '' ? false : AcaraDataHelper.hasHighestSchoolEduWarning(highestSchoolEdu),
 
           [`parent${index}HomeLanguageCode`]: parentId === '' ? '' : homeLanguage?.Code || "",
           [`parent${index}HomeLanguageDescription`]: parentId === '' ? '' :
@@ -295,11 +316,13 @@ const AcaraDataPanel = () => {
           [`parent${index}MainSLGValidFlag`]: parentId === '' ? '' : AcaraDataHelper.validateLanguageCode(
             parentMainSLG
           ),
+          [`parent${index}MainSLGWarningFlag`]: parentId === '' ? false : AcaraDataHelper.hasLanguageWarning(parentMainSLG),
 
           [`parent${index}HighestNonSchoolEducation`]: parentId === '' ? '' : parentNonSchoolQL,
           [`parent${index}HighestNonSchoolEducationValidFlag`]: parentId === '' ? '' : AcaraDataHelper.validateQualificationLevel(
             parentNonSchoolQL
           ),
+          [`parent${index}HighestNonSchoolEducationWarningFlag`]: parentId === '' ? false : AcaraDataHelper.hasQualificationLevelWarning(parentNonSchoolQL),
           [`parent${index}HighestNonSchoolEducationCode`]: parentId === '' ? '' :
           qualificationLevel?.Code || "",
           [`parent${index}HighestNonSchoolEducationDescription`]: parentId === '' ? '' :
@@ -309,6 +332,7 @@ const AcaraDataPanel = () => {
           [`parent${index}OccupationGroupValidFlag`]: parentId === '' ? '' : AcaraDataHelper.validateOccupGroup(
             parentOccGroup
           ),
+          [`parent${index}OccupationGroupWarningFlag`]: parentId === '' ? false : AcaraDataHelper.hasOccupGroupWarning(parentOccGroup),
           [`parent${index}OccupationGroupCode`]: parentId === '' ? '' : occupationPosition?.Code || "",
           [`parent${index}OccupationGroupDescription`]: parentId === '' ? '' :
           occupationPosition?.Description || ""
@@ -346,6 +370,9 @@ const AcaraDataPanel = () => {
               studentMainSLGValidFlag: AcaraDataHelper.validateLanguageCode(
                 studentMainSLG
               ),
+              studentMainSLGWarningFlag: AcaraDataHelper.hasLanguageWarning(
+                studentMainSLG
+              ),
               studentHomeLanguageCode: row.StudentHomeLanguageCode,
               studentHomeLanguageDescription:
                 row.StudentHomeLanguageDescription,
@@ -376,74 +403,116 @@ const AcaraDataPanel = () => {
     };
   }, [searchCriteria]);
 
+  const filteredRecords = useMemo(() => {
+    return AcaraDataPanelHelper.getFilteredRecords(
+      records || [],
+      showInvalidOnly,
+      showWarningOnly
+    );
+  }, [records, showInvalidOnly, showWarningOnly]);
+
+  const invalidCount = useMemo(() => {
+    return AcaraDataPanelHelper.getInvalidRecordCount(records || []);
+  }, [records]);
+
+  const warningCount = useMemo(() => {
+    return AcaraDataPanelHelper.getWarningRowCount(records || []);
+  }, [records]);
+
+  const warningOccurrenceCount = useMemo(() => {
+    return AcaraDataPanelHelper.getWarningOccurrenceCount(records || []);
+  }, [records]);
+
   const getExportBtn = () => {
     if ((records || []).length === 0) {
       return null;
     }
     return (
-      <DropdownWrapper>
-        <Dropdown>
-          <Dropdown.Toggle size={'sm'}>
-            <Icons.Download /> {' '} Export
-          </Dropdown.Toggle>
+      <ControlsWrapper className={"align-items end"}>
+        <FlexContainer className={"filter-controls align-items end"}>
+          {invalidCount > 0 ? (
+            <Form.Check
+              type={"checkbox"}
+              id={"acara-invalid-only"}
+              label={`${invalidCount} Invalid`}
+              checked={showInvalidOnly}
+              onChange={(event) => setShowInvalidOnly(event.target.checked)}
+            />
+          ) : null}
+          {warningCount > 0 ? (
+            <Form.Check
+              type={"checkbox"}
+              id={"acara-warning-only"}
+              label={`Warning: ${warningOccurrenceCount} / ${warningCount}`}
+              checked={showWarningOnly}
+              onChange={(event) => setShowWarningOnly(event.target.checked)}
+            />
+          ) : null}
+        </FlexContainer>
+        <DropdownWrapper className={"export-control"}>
+          <Dropdown>
+            <Dropdown.Toggle size={'sm'}>
+              <Icons.Download /> {' '} Export
+            </Dropdown.Toggle>
 
-          <Dropdown.Menu>
-            <Dropdown.Item>
-              <CSVExportBtn
-                // @ts-ignore
-                fetchingFnc={() =>
-                  new Promise(resolve => {
-                    resolve(records);
-                  })
-                }
-                downloadFnc={() =>
-                  AcaraDataExportHelper.genAcaraExcel(records || [], {
-                    schoolId: ACARA_SCHOOL_ID,
-                    schoolName: ACARA_SCHOOL_NAME
-                  })
-                }
-                size={"sm"}
-                variant={'success'}
-                btnTxt={'Submission Data'}
-              />
-            </Dropdown.Item>
-            <Dropdown.Item>
-              <CSVExportBtn
-                // @ts-ignore
-                fetchingFnc={() =>
-                  new Promise(resolve => {
-                    resolve(records);
-                  })
-                }
-                downloadFnc={() =>
-                  AcaraDataExportHelper.genSFOEExcel(records || [])
-                }
-                size={"sm"}
-                variant={'info'}
-                btnTxt={'Independent School / SFOE'}
-              />
-            </Dropdown.Item>
-            <Dropdown.Item>
-              <CSVExportBtn
-                // @ts-ignore
-                fetchingFnc={() =>
-                  new Promise(resolve => {
-                    resolve(records);
-                  })
-                }
-                downloadFnc={() =>
-                  AcaraDataExportHelper.genTotalExcel(records || [], {
-                    schoolId: ACARA_SCHOOL_ID,
-                    schoolName: ACARA_SCHOOL_NAME
-                  })
-                }
-                btnTxt={'Raw Data'}
-                size={"sm"}
-              />
-            </Dropdown.Item>
-          </Dropdown.Menu>
-        </Dropdown>
-      </DropdownWrapper>
+            <Dropdown.Menu>
+              <Dropdown.Item>
+                <CSVExportBtn
+                  // @ts-ignore
+                  fetchingFnc={() =>
+                    new Promise(resolve => {
+                      resolve(records);
+                    })
+                  }
+                  downloadFnc={() =>
+                    AcaraDataExportHelper.genAcaraExcel(records || [], {
+                      schoolId: ACARA_SCHOOL_ID,
+                      schoolName: ACARA_SCHOOL_NAME
+                    })
+                  }
+                  size={"sm"}
+                  variant={'success'}
+                  btnTxt={'Submission Data'}
+                />
+              </Dropdown.Item>
+              <Dropdown.Item>
+                <CSVExportBtn
+                  // @ts-ignore
+                  fetchingFnc={() =>
+                    new Promise(resolve => {
+                      resolve(records);
+                    })
+                  }
+                  downloadFnc={() =>
+                    AcaraDataExportHelper.genSFOEExcel(records || [])
+                  }
+                  size={"sm"}
+                  variant={'info'}
+                  btnTxt={'Independent School / SFOE'}
+                />
+              </Dropdown.Item>
+              <Dropdown.Item>
+                <CSVExportBtn
+                  // @ts-ignore
+                  fetchingFnc={() =>
+                    new Promise(resolve => {
+                      resolve(records);
+                    })
+                  }
+                  downloadFnc={() =>
+                    AcaraDataExportHelper.genTotalExcel(records || [], {
+                      schoolId: ACARA_SCHOOL_ID,
+                      schoolName: ACARA_SCHOOL_NAME
+                    })
+                  }
+                  btnTxt={'Raw Data'}
+                  size={"sm"}
+                />
+              </Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown>
+        </DropdownWrapper>
+      </ControlsWrapper>
     );
   };
 
@@ -467,7 +536,7 @@ const AcaraDataPanel = () => {
         btns={getExportBtn()}
       />
 
-      <AcaraDataList isLoading={isLoading} records={records || []} />
+      <AcaraDataList isLoading={isLoading} records={filteredRecords} />
     </div>
   );
 };

@@ -21,6 +21,7 @@ type iAcaraData = {
   studentHomeLanguageDescription: string;
   studentMainSLG: string;
   studentMainSLGValidFlag: boolean;
+  studentMainSLGWarningFlag?: boolean;
 
   parent1ID: number | null;
   parent1Name: string  | null;
@@ -33,30 +34,38 @@ type iAcaraData = {
   parent1HighestNonSchoolEducationDescription: string | null;
   parent1MainSLG: string | null;
   parent1MainSLGValidFlag: boolean;
+  parent1MainSLGWarningFlag?: boolean;
   parent1HomeLanguageCode: string | null;
   parent1HomeLanguageDescription: string | null;
   parent1OccupationGroup: string | null;
   parent1OccupationGroupValidFlag: boolean;
+  parent1HighestSchoolEducationWarningFlag?: boolean;
   parent1OccupationGroupCode: string | null;
   parent1OccupationGroupDescription: string | null;
+  parent1HighestNonSchoolEducationWarningFlag?: boolean;
+  parent1OccupationGroupWarningFlag?: boolean;
 
   parent2ID: number | null;
   parent2Name: string  | null;
   parent2HighestSchoolEducation: string | null;
   parent2HighestSchoolEducationCode: string | null;
   parent2HighestSchoolEducationValidFlag: boolean;
+  parent2HighestSchoolEducationWarningFlag?: boolean;
   parent2HighestNonSchoolEducation: string | null;
   parent2HighestNonSchoolEducationValidFlag: boolean;
   parent2HighestNonSchoolEducationCode: string | null;
   parent2HighestNonSchoolEducationDescription: string | null;
+  parent2HighestNonSchoolEducationWarningFlag?: boolean;
   parent2MainSLG: string | null;
   parent2MainSLGValidFlag: boolean;
+  parent2MainSLGWarningFlag?: boolean;
   parent2HomeLanguageCode: string | null;
   parent2HomeLanguageDescription: string | null;
   parent2OccupationGroup: string | null;
   parent2OccupationGroupValidFlag: boolean;
   parent2OccupationGroupCode: string | null;
   parent2OccupationGroupDescription: string | null;
+  parent2OccupationGroupWarningFlag?: boolean;
 
   extra?: any;
 };
