@@ -2702,6 +2702,10 @@ const validateLanguageCode = (code: string) => {
   return expectedCodes.indexOf(`${code}`.trim()) >= 0;
 }
 
+const hasLanguageWarning = (code: string) => {
+  return ['0000', '0001', '0002'].indexOf(`${code || ''}`.trim()) >= 0;
+}
+
 
 // "Please enter a number of 0, 5, 6, 7 or 8 for father/parent 2/guardian 2 highest level of non-school education completed:
 // 7 = Bachelor degree or above;
@@ -2730,6 +2734,10 @@ const validateQualificationLevel = (qLevel: string) => {
   return expectedCodes.indexOf(`${qLevel}`.trim()) >= 0;
 }
 
+const hasQualificationLevelWarning = (qLevel: string) => {
+  return `${qLevel || ''}`.trim() === '0';
+}
+
 // "Please enter a number from 1, 2, 3, 4, 8 or 9 for father/parent 2/guardian 2 occupation group:
 // 1 = Senior management in large business organisation, government administration and defence, and qualified professionals;
 // 2 = Other business managers, arts/media/sportspersons and associate professionals;
@@ -2750,6 +2758,14 @@ const validateOccupGroup = (oGrp: string) => {
   return expectedCodes.indexOf(`${oGrp}`.trim()) >= 0;
 }
 
+const hasHighestSchoolEduWarning = (yearLevel: string) => {
+  return `${yearLevel || ''}`.trim() === '0';
+}
+
+const hasOccupGroupWarning = (oGrp: string) => {
+  return `${oGrp || ''}`.trim() === '9';
+}
+
 
 const parseParentInfo = (data: iAcaraData, parentIndex: number) => {
   // @ts-ignore
@@ -2768,6 +2784,8 @@ const parseParentInfo = (data: iAcaraData, parentIndex: number) => {
 
   // @ts-ignore
   const parentHomeLanguageLangValidFlag = data[`parent${parentIndex}MainSLGValidFlag`];
+  // @ts-ignore
+  const parentHomeLanguageLangWarningFlag = data[`parent${parentIndex}MainSLGWarningFlag`];
 
   // @ts-ignore
   const parentHighestSchoolEducation = data[`parent${parentIndex}HighestSchoolEducation`];
@@ -2775,11 +2793,15 @@ const parseParentInfo = (data: iAcaraData, parentIndex: number) => {
   const parentHighestSchoolEducationCode = data[`parent${parentIndex}HighestSchoolEducationCode`];
   // @ts-ignore
   const parentHighestSchoolEducationValidFlag = data[`parent${parentIndex}HighestSchoolEducationValidFlag`];
+  // @ts-ignore
+  const parentHighestSchoolEducationWarningFlag = data[`parent${parentIndex}HighestSchoolEducationWarningFlag`];
 
   // @ts-ignore
   const parentHighestNonSchoolEducation = data[`parent${parentIndex}HighestNonSchoolEducation`];
   // @ts-ignore
   const parentHighestNonSchoolEducationValidFlag = data[`parent${parentIndex}HighestNonSchoolEducationValidFlag`];
+  // @ts-ignore
+  const parentHighestNonSchoolEducationWarningFlag = data[`parent${parentIndex}HighestNonSchoolEducationWarningFlag`];
   // @ts-ignore
   const parentHighestNonSchoolEducationCode = data[`parent${parentIndex}HighestNonSchoolEducationCode`];
   // @ts-ignore
@@ -2790,6 +2812,8 @@ const parseParentInfo = (data: iAcaraData, parentIndex: number) => {
   const parentOccupationGroup = data[`parent${parentIndex}OccupationGroup`];
   // @ts-ignore
   const parentOccupationGroupValidFlag = data[`parent${parentIndex}OccupationGroupValidFlag`];
+  // @ts-ignore
+  const parentOccupationGroupWarningFlag = data[`parent${parentIndex}OccupationGroupWarningFlag`];
   // @ts-ignore
   const parentOccupationGroupCode = data[`parent${parentIndex}OccupationGroupCode`];
   // @ts-ignore
@@ -2804,21 +2828,114 @@ const parseParentInfo = (data: iAcaraData, parentIndex: number) => {
     parentHomeLanguageCode,
     parentHomeLanguageDescription,
     parentHomeLanguageLangValidFlag,
+    parentHomeLanguageLangWarningFlag,
 
     parentHighestSchoolEducation,
     parentHighestSchoolEducationCode,
     parentHighestSchoolEducationValidFlag,
+    parentHighestSchoolEducationWarningFlag,
 
     parentHighestNonSchoolEducation,
     parentHighestNonSchoolEducationValidFlag,
+    parentHighestNonSchoolEducationWarningFlag,
     parentHighestNonSchoolEducationCode,
     parentHighestNonSchoolEducationDescription,
 
     parentOccupationGroup,
     parentOccupationGroupValidFlag,
+    parentOccupationGroupWarningFlag,
     parentOccupationGroupCode,
     parentOccupationGroupDescription,
   }
+}
+
+const hasInvalidRecord = (data: iAcaraData) => {
+  if (data.studentMainSLGValidFlag !== true) {
+    return true;
+  }
+
+  for (const index of [1, 2]) {
+    // @ts-ignore
+    const parentId = `${data[`parent${index}ID`] || ''}`.trim();
+    if (parentId === '') {
+      continue;
+    }
+
+    // @ts-ignore
+    if (data[`parent${index}MainSLGValidFlag`] !== true) {
+      return true;
+    }
+    // @ts-ignore
+    if (data[`parent${index}HighestSchoolEducationValidFlag`] !== true) {
+      return true;
+    }
+    // @ts-ignore
+    if (data[`parent${index}HighestNonSchoolEducationValidFlag`] !== true) {
+      return true;
+    }
+    // @ts-ignore
+    if (data[`parent${index}OccupationGroupValidFlag`] !== true) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+const hasWarningRecord = (data: iAcaraData) => {
+  if (data.studentMainSLGWarningFlag === true) {
+    return true;
+  }
+
+  for (const index of [1, 2]) {
+    // @ts-ignore
+    const parentId = `${data[`parent${index}ID`] || ''}`.trim();
+    if (parentId === '') {
+      continue;
+    }
+
+    // @ts-ignore
+    if (data[`parent${index}MainSLGWarningFlag`] === true) {
+      return true;
+    }
+    // @ts-ignore
+    if (data[`parent${index}HighestSchoolEducationWarningFlag`] === true) {
+      return true;
+    }
+    // @ts-ignore
+    if (data[`parent${index}HighestNonSchoolEducationWarningFlag`] === true) {
+      return true;
+    }
+    // @ts-ignore
+    if (data[`parent${index}OccupationGroupWarningFlag`] === true) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+const countWarningOccurrences = (data: iAcaraData) => {
+  let count = data.studentMainSLGWarningFlag === true ? 1 : 0;
+
+  for (const index of [1, 2]) {
+    // @ts-ignore
+    const parentId = `${data[`parent${index}ID`] || ''}`.trim();
+    if (parentId === '') {
+      continue;
+    }
+
+    // @ts-ignore
+    count += data[`parent${index}MainSLGWarningFlag`] === true ? 1 : 0;
+    // @ts-ignore
+    count += data[`parent${index}HighestSchoolEducationWarningFlag`] === true ? 1 : 0;
+    // @ts-ignore
+    count += data[`parent${index}HighestNonSchoolEducationWarningFlag`] === true ? 1 : 0;
+    // @ts-ignore
+    count += data[`parent${index}OccupationGroupWarningFlag`] === true ? 1 : 0;
+  }
+
+  return count;
 }
 
 const AcaraDataHelper = {
@@ -2826,17 +2943,24 @@ const AcaraDataHelper = {
   translateATSIStatus,
   translateLanguageCode,
   validateLanguageCode,
+  hasLanguageWarning,
 
   translateHighestSchoolEdu,
   validateHighestSchoolEdu,
+  hasHighestSchoolEduWarning,
 
   translateQualificationLevel,
   validateQualificationLevel,
+  hasQualificationLevelWarning,
 
   translateOccupGroup,
   validateOccupGroup,
+  hasOccupGroupWarning,
 
   parseParentInfo,
+  hasInvalidRecord,
+  hasWarningRecord,
+  countWarningOccurrences,
 };
 
 export default AcaraDataHelper;
