@@ -1,36 +1,10 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import AcaraDataList from '../../../pages/dataSubmissions/components/ACARA/AcaraDataList';
+import { PageLoadingSpinnerTestId } from '../../../components/common/__mocks__/PageLoadingSpinner';
 
-jest.mock('../../../components/common/PageLoadingSpinner', () => {
-  return function MockPageLoadingSpinner() {
-    return <div>Loading...</div>;
-  };
-});
-
-jest.mock('../../../components/common/Table', () => {
-  return function MockTable(props: any) {
-    const columns = props.columns || [];
-    const rows = props.rows || [];
-
-    return (
-      <table>
-        <tbody>
-          {rows.map((row: any, rowIndex: number) => (
-            <tr key={row.ID || rowIndex}>
-              {columns.map((column: any) => {
-                if (typeof column.cell === 'function') {
-                  return column.cell(column, row, rowIndex);
-                }
-                return <td key={column.key}>{row[column.key]}</td>;
-              })}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    );
-  };
-});
+jest.mock('../../../components/common/PageLoadingSpinner');
+jest.mock('../../../components/common/Table');
 
 const buildRecord = (overrides: Record<string, unknown> = {}) => {
   return {
@@ -109,7 +83,7 @@ describe('AcaraDataList', () => {
       <AcaraDataList isLoading={true} records={[buildRecord()]} />
     );
 
-    expect(view).toContain('Loading...');
+    expect(view).toContain(PageLoadingSpinnerTestId);
   });
 
   test('renders invalid and warning badges for changed ACARA statuses', () => {

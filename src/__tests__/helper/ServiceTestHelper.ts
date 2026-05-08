@@ -197,8 +197,8 @@ const testCustom = ({
   expectedArgs: any[];
   response?: any;
 }) =>
-  describe(name, () => {
-    test('', async () => {
+  describe(`${name}`, () => {
+    test('.', async () => {
       const fakeResp = response === undefined ? TestHelper.getFakeParams().fakeResp : response;
       (AppService as any)[appMethod] = jest.fn().mockResolvedValueOnce({data: fakeResp});
 
