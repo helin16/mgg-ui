@@ -2,7 +2,11 @@ import ServiceTestHelper from '../../../helper/ServiceTestHelper';
 import SynVAttendanceService from '../../../../services/Synergetic/Attendance/SynVAttendanceService';
 
 describe('SynVAttendanceService', () => {
-  const endPoint = '/syn/vAttendance';
-
-  ServiceTestHelper.testGetAll(endPoint, SynVAttendanceService.getAll);
+  ServiceTestHelper.testCustom({
+    name: 'getAll',
+    serviceFn: SynVAttendanceService.getAll,
+    appMethod: 'get',
+    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    expectedArgs: ["/syn/vAttendance", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+  });
 });

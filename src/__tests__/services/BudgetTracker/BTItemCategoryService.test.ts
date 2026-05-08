@@ -2,10 +2,32 @@ import ServiceTestHelper from '../../helper/ServiceTestHelper';
 import BTItemCategoryService from '../../../services/BudgetTracker/BTItemCategoryService';
 
 describe('BTItemCategoryService', () => {
-  const endPoint = '/bt/itemCategory';
-
-  ServiceTestHelper.testGetAll(endPoint, BTItemCategoryService.getAll);
-  ServiceTestHelper.testCreate(endPoint, BTItemCategoryService.create);
-  ServiceTestHelper.testUpdate(endPoint, BTItemCategoryService.update);
-  ServiceTestHelper.testDeactivate(endPoint, BTItemCategoryService.deactivate);
+  ServiceTestHelper.testCustom({
+    name: 'getAll',
+    serviceFn: BTItemCategoryService.getAll,
+    appMethod: 'get',
+    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    expectedArgs: ["/bt/itemCategory", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+  });
+  ServiceTestHelper.testCustom({
+    name: 'create',
+    serviceFn: BTItemCategoryService.create,
+    appMethod: 'post',
+    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    expectedArgs: ["/bt/itemCategory", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+  });
+  ServiceTestHelper.testCustom({
+    name: 'update',
+    serviceFn: BTItemCategoryService.update,
+    appMethod: 'put',
+    callArgs: ["123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    expectedArgs: ["/bt/itemCategory/123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+  });
+  ServiceTestHelper.testCustom({
+    name: 'deactivate',
+    serviceFn: BTItemCategoryService.deactivate,
+    appMethod: 'delete',
+    callArgs: ["123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    expectedArgs: ["/bt/itemCategory/123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+  });
 });

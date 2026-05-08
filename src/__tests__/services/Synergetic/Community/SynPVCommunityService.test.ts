@@ -2,7 +2,11 @@ import ServiceTestHelper from '../../../helper/ServiceTestHelper';
 import SynPVCommunityService from '../../../../services/Synergetic/Community/SynPVCommunityService';
 
 describe('SynPVCommunityService', () => {
-  const endPoint = '/syn/pvCommunity';
-
-  ServiceTestHelper.testGetAll(endPoint, SynPVCommunityService.getAll);
+  ServiceTestHelper.testCustom({
+    name: 'getAll',
+    serviceFn: SynPVCommunityService.getAll,
+    appMethod: 'get',
+    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    expectedArgs: ["/syn/pvCommunity", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+  });
 });

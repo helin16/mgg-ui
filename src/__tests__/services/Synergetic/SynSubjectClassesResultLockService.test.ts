@@ -4,7 +4,13 @@ import SynSubjectClassesResultLockService from '../../../services/Synergetic/Syn
 describe('SynSubjectClassesResultLockService', () => {
   const endPoint = '/syn/subjectClassesResultLock';
 
-  ServiceTestHelper.testGetAll(endPoint, SynSubjectClassesResultLockService.getAll);
+  ServiceTestHelper.testCustom({
+    name: 'getAll',
+    serviceFn: SynSubjectClassesResultLockService.getAll,
+    appMethod: 'get',
+    callArgs: [{fakeParams: 'value'}],
+    expectedArgs: [endPoint, {fakeParams: 'value'}],
+  });
   ServiceTestHelper.testCustom({
     name: 'deleteLock',
     serviceFn: SynSubjectClassesResultLockService.deleteLock,

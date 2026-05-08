@@ -2,7 +2,11 @@ import ServiceTestHelper from '../../../helper/ServiceTestHelper';
 import SynLuStaffCategoryService from '../../../../services/Synergetic/Lookup/SynLuStaffCategoryService';
 
 describe('SynLuStaffCategoryService', () => {
-  const endPoint = '/syn/luStaffCategory';
-
-  ServiceTestHelper.testGetAll(endPoint, SynLuStaffCategoryService.getAll);
+  ServiceTestHelper.testCustom({
+    name: 'getAll',
+    serviceFn: SynLuStaffCategoryService.getAll,
+    appMethod: 'get',
+    callArgs: [{"fakeParams":"value"}],
+    expectedArgs: ["/syn/luStaffCategory", {"fakeParams":"value"}],
+  });
 });

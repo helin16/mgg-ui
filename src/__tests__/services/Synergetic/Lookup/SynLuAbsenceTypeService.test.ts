@@ -2,7 +2,11 @@ import ServiceTestHelper from '../../../helper/ServiceTestHelper';
 import SynLuAbsenceTypeService from '../../../../services/Synergetic/Lookup/SynLuAbsenceTypeService';
 
 describe('SynLuAbsenceTypeService', () => {
-  const endPoint = '/syn/luAbsenceType/';
-
-  ServiceTestHelper.testGetAll(endPoint, SynLuAbsenceTypeService.getAll);
+  ServiceTestHelper.testCustom({
+    name: 'getAll',
+    serviceFn: SynLuAbsenceTypeService.getAll,
+    appMethod: 'get',
+    callArgs: [{"fakeParams":"value"}],
+    expectedArgs: ["/syn/luAbsenceType/", {"fakeParams":"value"}],
+  });
 });

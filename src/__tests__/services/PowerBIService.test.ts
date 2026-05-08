@@ -1,4 +1,5 @@
 import ServiceTestHelper from '../helper/ServiceTestHelper';
+import AppService from '../../services/AppService';
 import PowerBIService from '../../services/PowerBIService';
 
 describe('PowerBIService', () => {
@@ -11,13 +12,17 @@ describe('PowerBIService', () => {
     callArgs: [],
     expectedArgs: [`${endPoint}/accessToken`, {}],
   });
-  ServiceTestHelper.testCustom({
-    name: 'getMSReports',
-    serviceFn: PowerBIService.getMSReports,
-    appMethod: 'get',
-    callArgs: [],
-    expectedArgs: [`${endPoint}/ms`, {}],
-    response: {value: {fakeResp: 'value'}},
+  describe('getMSReports', () => {
+    test('', async () => {
+      AppService.get = jest.fn().mockResolvedValueOnce({
+        data: {
+          value: {fakeResp: 'value'},
+        },
+      }) as any;
+
+      await expect(PowerBIService.getMSReports()).resolves.toEqual({fakeResp: 'value'});
+      expect(AppService.get).toHaveBeenCalledWith(`${endPoint}/ms`, {});
+    });
   });
   ServiceTestHelper.testGetAll(endPoint, PowerBIService.getAll);
   ServiceTestHelper.testCustom({

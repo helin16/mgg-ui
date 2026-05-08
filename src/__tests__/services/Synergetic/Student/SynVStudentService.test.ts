@@ -2,8 +2,6 @@ import ServiceTestHelper from '../../../helper/ServiceTestHelper';
 import SynVStudentService from '../../../../services/Synergetic/Student/SynVStudentService';
 
 describe('SynVStudentService', () => {
-  const endPoint = '/syn/vStudent';
-
   ServiceTestHelper.testCustom({
     name: 'getCurrentVStudents',
     serviceFn: SynVStudentService.getCurrentVStudents,
@@ -11,7 +9,13 @@ describe('SynVStudentService', () => {
     callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
     expectedArgs: ["/syn/vStudent/current/", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
   });
-  ServiceTestHelper.testGetAll(endPoint, SynVStudentService.searchVStudents);
+  ServiceTestHelper.testCustom({
+    name: 'searchVStudents',
+    serviceFn: SynVStudentService.searchVStudents,
+    appMethod: 'get',
+    callArgs: ["search", {"fakeParams":"value"}],
+    expectedArgs: ["/syn/vStudent", {"fakeParams":"value","searchTxt":"search"}],
+  });
   ServiceTestHelper.testCustom({
     name: 'getCurrentVStudent',
     serviceFn: SynVStudentService.getCurrentVStudent,
