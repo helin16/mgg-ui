@@ -2,7 +2,11 @@ import ServiceTestHelper from '../../../helper/ServiceTestHelper';
 import SynStudentStaticService from '../../../../services/Synergetic/Student/SynStudentStaticService';
 
 describe('SynStudentStaticService', () => {
-  const endPoint = '/syn/studentStatic';
-
-  ServiceTestHelper.testGetAll(endPoint, SynStudentStaticService.getAll);
+  ServiceTestHelper.testCustom({
+    name: 'getAll',
+    serviceFn: SynStudentStaticService.getAll,
+    appMethod: 'get',
+    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    expectedArgs: ["/syn/studentStatic", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+  });
 });

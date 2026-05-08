@@ -4,7 +4,13 @@ import SynAddressService from '../../../services/Synergetic/SynAddressService';
 describe('SynAddressService', () => {
   const endPoint = '/syn/address';
 
-  ServiceTestHelper.testGetAll(endPoint, SynAddressService.getAll);
+  ServiceTestHelper.testCustom({
+    name: 'getAll',
+    serviceFn: SynAddressService.getAll,
+    appMethod: 'get',
+    callArgs: [{fakeParams: 'value'}],
+    expectedArgs: [endPoint, {fakeParams: 'value'}],
+  });
 
   describe('address helpers', () => {
     test('format and map address objects', () => {

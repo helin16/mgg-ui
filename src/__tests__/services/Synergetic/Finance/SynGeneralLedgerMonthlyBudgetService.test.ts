@@ -2,9 +2,13 @@ import ServiceTestHelper from '../../../helper/ServiceTestHelper';
 import SynGeneralLedgerMonthlyBudgetService from '../../../../services/Synergetic/Finance/SynGeneralLedgerMonthlyBudgetService';
 
 describe('SynGeneralLedgerMonthlyBudgetService', () => {
-  const endPoint = '/syn/generalLedgerMonthlyBudget';
-
-  ServiceTestHelper.testGetAll(endPoint, SynGeneralLedgerMonthlyBudgetService.getAll);
+  ServiceTestHelper.testCustom({
+    name: 'getAll',
+    serviceFn: SynGeneralLedgerMonthlyBudgetService.getAll,
+    appMethod: 'get',
+    callArgs: [{"fakeParams":"value"}],
+    expectedArgs: ["/syn/generalLedgerMonthlyBudget", {"fakeParams":"value"}],
+  });
   ServiceTestHelper.testCustom({
     name: 'getAllByYearAndGLCode',
     serviceFn: SynGeneralLedgerMonthlyBudgetService.getAllByYearAndGLCode,

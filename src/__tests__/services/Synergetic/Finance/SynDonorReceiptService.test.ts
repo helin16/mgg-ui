@@ -2,8 +2,6 @@ import ServiceTestHelper from '../../../helper/ServiceTestHelper';
 import SynDonorReceiptService from '../../../../services/Synergetic/Finance/SynDonorReceiptService';
 
 describe('SynDonorReceiptService', () => {
-  const endPoint = '/syn/donationReceipt';
-
   ServiceTestHelper.testCustom({
     name: 'genPDF',
     serviceFn: SynDonorReceiptService.genPDF,

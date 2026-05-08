@@ -2,7 +2,11 @@ import ServiceTestHelper from '../../../helper/ServiceTestHelper';
 import SynVCreditorService from '../../../../services/Synergetic/Finance/SynVCreditorService';
 
 describe('SynVCreditorService', () => {
-  const endPoint = '/syn/vCreditor';
-
-  ServiceTestHelper.testGetAll(endPoint, SynVCreditorService.getAll);
+  ServiceTestHelper.testCustom({
+    name: 'getAll',
+    serviceFn: SynVCreditorService.getAll,
+    appMethod: 'get',
+    callArgs: [{"fakeParams":"value"}],
+    expectedArgs: ["/syn/vCreditor", {"fakeParams":"value"}],
+  });
 });

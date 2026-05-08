@@ -31,9 +31,8 @@ describe('SynFileSemesterService', () => {
     test('maps semester lookups and missing lists', async () => {
       AppService.get = jest
         .fn()
-        .mockResolvedValueOnce({data: [{FileSemester: 1}]})
-        .mockResolvedValueOnce({data: {}})
-        as any;
+        .mockResolvedValueOnce({data: {data: [{FileSemester: 1}]}})
+        .mockResolvedValueOnce({data: {}}) as any;
 
       await expect(
         SynFileSemesterService.getFileSemesterFromStartAndEndDate({

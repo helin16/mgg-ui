@@ -2,7 +2,11 @@ import ServiceTestHelper from '../../../helper/ServiceTestHelper';
 import SynTagListCommunityService from '../../../../services/Synergetic/Tag/SynTagListCommunityService';
 
 describe('SynTagListCommunityService', () => {
-  const endPoint = '/syn/tagListCommunity';
-
-  ServiceTestHelper.testGetAll(endPoint, SynTagListCommunityService.getAll);
+  ServiceTestHelper.testCustom({
+    name: 'getAll',
+    serviceFn: SynTagListCommunityService.getAll,
+    appMethod: 'get',
+    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    expectedArgs: ["/syn/tagListCommunity", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+  });
 });

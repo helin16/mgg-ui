@@ -2,7 +2,11 @@ import ServiceTestHelper from '../../../helper/ServiceTestHelper';
 import SynTagListService from '../../../../services/Synergetic/Tag/SynTagListService';
 
 describe('SynTagListService', () => {
-  const endPoint = '/syn/tagList';
-
-  ServiceTestHelper.testGetAll(endPoint, SynTagListService.getAll);
+  ServiceTestHelper.testCustom({
+    name: 'getAll',
+    serviceFn: SynTagListService.getAll,
+    appMethod: 'get',
+    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    expectedArgs: ["/syn/tagList", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+  });
 });

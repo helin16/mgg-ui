@@ -31,7 +31,7 @@ describe('AuthService', () => {
 
   describe('isModuleRole', () => {
     test('checks the requested role access', async () => {
-      AppService.get = jest.fn().mockResolvedValueOnce({
+      AppService.get = jest.fn().mockResolvedValue({
         data: {
           3: {canAccess: true},
           4: {canAccess: false},

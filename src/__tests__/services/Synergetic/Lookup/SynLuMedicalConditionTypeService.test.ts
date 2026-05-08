@@ -2,7 +2,11 @@ import ServiceTestHelper from '../../../helper/ServiceTestHelper';
 import SynLuMedicalConditionTypeService from '../../../../services/Synergetic/Lookup/SynLuMedicalConditionTypeService';
 
 describe('SynLuMedicalConditionTypeService', () => {
-  const endPoint = '/syn/luMedicalConditionType';
-
-  ServiceTestHelper.testGetAll(endPoint, SynLuMedicalConditionTypeService.getAllMedicalConditionTypes);
+  ServiceTestHelper.testCustom({
+    name: 'getAllMedicalConditionTypes',
+    serviceFn: SynLuMedicalConditionTypeService.getAllMedicalConditionTypes,
+    appMethod: 'get',
+    callArgs: [{"fakeParams":"value"}],
+    expectedArgs: ["/syn/luMedicalConditionType", {"fakeParams":"value"}],
+  });
 });

@@ -2,8 +2,6 @@ import ServiceTestHelper from '../../helper/ServiceTestHelper';
 import SynTimeTableService from '../../../services/Synergetic/SynTimeTableService';
 
 describe('SynTimeTableService', () => {
-  const endPoint = '/syn/timeTable';
-
   ServiceTestHelper.testCustom({
     name: 'importTimeTable',
     serviceFn: SynTimeTableService.importTimeTable,

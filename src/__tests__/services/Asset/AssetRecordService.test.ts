@@ -2,9 +2,13 @@ import ServiceTestHelper from '../../helper/ServiceTestHelper';
 import AssetRecordService from '../../../services/Asset/AssetRecordService';
 
 describe('AssetRecordService', () => {
-  const endPoint = '/assetRecord';
-
-  ServiceTestHelper.testGetAll(endPoint, AssetRecordService.getAssetRecords);
+  ServiceTestHelper.testCustom({
+    name: 'getAssetRecords',
+    serviceFn: AssetRecordService.getAssetRecords,
+    appMethod: 'get',
+    callArgs: [{"fakeParams":"value"}],
+    expectedArgs: ["/assetRecord", {"fakeParams":"value"}],
+  });
   ServiceTestHelper.testCustom({
     name: 'pickup',
     serviceFn: AssetRecordService.pickup,

@@ -2,11 +2,39 @@ import ServiceTestHelper from '../../helper/ServiceTestHelper';
 import MggAppService from '../../../services/Settings/MggAppService';
 
 describe('MggAppService', () => {
-  const endPoint = '/app';
-
-  ServiceTestHelper.testGetAll(endPoint, MggAppService.getAll);
-  ServiceTestHelper.testGet(endPoint, MggAppService.get);
-  ServiceTestHelper.testCreate(endPoint, MggAppService.create);
-  ServiceTestHelper.testUpdate(endPoint, MggAppService.update);
-  ServiceTestHelper.testDeactivate(endPoint, MggAppService.deactivate);
+  ServiceTestHelper.testCustom({
+    name: 'getAll',
+    serviceFn: MggAppService.getAll,
+    appMethod: 'get',
+    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    expectedArgs: ["/app", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+  });
+  ServiceTestHelper.testCustom({
+    name: 'get',
+    serviceFn: MggAppService.get,
+    appMethod: 'get',
+    callArgs: ["123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    expectedArgs: ["/app/123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+  });
+  ServiceTestHelper.testCustom({
+    name: 'create',
+    serviceFn: MggAppService.create,
+    appMethod: 'post',
+    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    expectedArgs: ["/app", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+  });
+  ServiceTestHelper.testCustom({
+    name: 'update',
+    serviceFn: MggAppService.update,
+    appMethod: 'put',
+    callArgs: ["123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    expectedArgs: ["/app/123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+  });
+  ServiceTestHelper.testCustom({
+    name: 'deactivate',
+    serviceFn: MggAppService.deactivate,
+    appMethod: 'delete',
+    callArgs: ["123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    expectedArgs: ["/app/123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+  });
 });

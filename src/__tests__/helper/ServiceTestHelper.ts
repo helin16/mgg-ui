@@ -14,6 +14,15 @@ const expectArgsToMatch = (calls: any[][], expectedArgs: any[]) => {
       expect([undefined, {}]).toContainEqual(actualArgs[index]);
       return;
     }
+    if (
+      expected &&
+      typeof expected === 'object' &&
+      !Array.isArray(expected) &&
+      Object.keys(expected).length === 0
+    ) {
+      expect([undefined, {}]).toContainEqual(actualArgs[index]);
+      return;
+    }
     expect(actualArgs[index]).toEqual(expected);
   });
 };

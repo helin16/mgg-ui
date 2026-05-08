@@ -2,7 +2,11 @@ import ServiceTestHelper from '../../../helper/ServiceTestHelper';
 import SynVGeneralLedgerService from '../../../../services/Synergetic/Finance/SynVGeneralLedgerService';
 
 describe('SynVGeneralLedgerService', () => {
-  const endPoint = '/syn/vGeneralLedger';
-
-  ServiceTestHelper.testGetAll(endPoint, SynVGeneralLedgerService.getAll);
+  ServiceTestHelper.testCustom({
+    name: 'getAll',
+    serviceFn: SynVGeneralLedgerService.getAll,
+    appMethod: 'get',
+    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    expectedArgs: ["/syn/vGeneralLedger", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+  });
 });

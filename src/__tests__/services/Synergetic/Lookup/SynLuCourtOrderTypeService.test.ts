@@ -2,7 +2,11 @@ import ServiceTestHelper from '../../../helper/ServiceTestHelper';
 import SynLuCourtOrderTypeService from '../../../../services/Synergetic/Lookup/SynLuCourtOrderTypeService';
 
 describe('SynLuCourtOrderTypeService', () => {
-  const endPoint = '/syn/luCourtOrderType';
-
-  ServiceTestHelper.testGetAll(endPoint, SynLuCourtOrderTypeService.getAll);
+  ServiceTestHelper.testCustom({
+    name: 'getAll',
+    serviceFn: SynLuCourtOrderTypeService.getAll,
+    appMethod: 'get',
+    callArgs: [{"fakeParams":"value"}],
+    expectedArgs: ["/syn/luCourtOrderType", {"fakeParams":"value"}],
+  });
 });

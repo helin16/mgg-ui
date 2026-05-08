@@ -2,7 +2,11 @@ import ServiceTestHelper from '../../../helper/ServiceTestHelper';
 import SynLuDepartmentService from '../../../../services/Synergetic/Lookup/SynLuDepartmentService';
 
 describe('SynLuDepartmentService', () => {
-  const endPoint = '/syn/luDepartment';
-
-  ServiceTestHelper.testGetAll(endPoint, SynLuDepartmentService.getAll);
+  ServiceTestHelper.testCustom({
+    name: 'getAll',
+    serviceFn: SynLuDepartmentService.getAll,
+    appMethod: 'get',
+    callArgs: [{"fakeParams":"value"}],
+    expectedArgs: ["/syn/luDepartment", {"fakeParams":"value"}],
+  });
 });

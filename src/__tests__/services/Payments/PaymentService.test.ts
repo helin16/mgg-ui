@@ -2,8 +2,6 @@ import ServiceTestHelper from '../../helper/ServiceTestHelper';
 import PaymentService from '../../../services/Payments/PaymentService';
 
 describe('PaymentService', () => {
-  const endPoint = '/cp';
-
   ServiceTestHelper.testCustom({
     name: 'getWestpacSettings',
     serviceFn: PaymentService.getWestpacSettings,

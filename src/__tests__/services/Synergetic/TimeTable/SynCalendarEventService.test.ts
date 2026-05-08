@@ -2,7 +2,11 @@ import ServiceTestHelper from '../../../helper/ServiceTestHelper';
 import SynCalendarEventService from '../../../../services/Synergetic/TimeTable/SynCalendarEventService';
 
 describe('SynCalendarEventService', () => {
-  const endPoint = '/syn/calendarEvent';
-
-  ServiceTestHelper.testGetAll(endPoint, SynCalendarEventService.getAll);
+  ServiceTestHelper.testCustom({
+    name: 'getAll',
+    serviceFn: SynCalendarEventService.getAll,
+    appMethod: 'get',
+    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    expectedArgs: ["/syn/calendarEvent", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+  });
 });
