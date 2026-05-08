@@ -1,53 +1,16 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import BTGLDetailsPage from '../../../pages/BudgetTracker/BTGLDetailsPage';
+import { BTGLJournalInMonthPanelTestId } from '../../../pages/BudgetTracker/components/__mocks__/BTGLJournalInMonthPanel';
 
-jest.mock('../../../pages/BudgetTracker/components/BTGLDetailsPanel', () => {
-  return function MockBTGLDetailsPanel() {
-    return <div>Details Panel</div>;
-  };
-});
-
-jest.mock('../../../pages/BudgetTracker/components/BTGLJournalListPanel', () => {
-  return function MockBTGLJournalListPanel() {
-    return <div>Journal List Panel</div>;
-  };
-});
-
-jest.mock('../../../pages/BudgetTracker/components/BTGLJournalInMonthPanel', () => {
-  return function MockBTGLJournalInMonthPanel() {
-    return <div>Journal In Month Panel</div>;
-  };
-});
-
-jest.mock('../../../pages/BudgetTracker/components/BTItemCreatePopupBtn', () => {
-  return function MockBTItemCreatePopupBtn(props: any) {
-    return <div>{props.children}</div>;
-  };
-});
-
-jest.mock('../../../pages/BudgetTracker/components/BTItemBulkCreatePopupBtn', () => {
-  return function MockBTItemBulkCreatePopupBtn(props: any) {
-    return <div>{props.children}</div>;
-  };
-});
-
-jest.mock('../../../components/common/LoadingBtn', () => {
-  return function MockLoadingBtn(props: any) {
-    return <button>{props.children}</button>;
-  };
-});
-
-jest.mock('../../../services/BudgetTracker/BTLockDownService', () => ({
-  getAll: jest.fn(() => Promise.resolve([])),
-}));
-
-jest.mock('../../../services/Toaster', () => ({
-  __esModule: true,
-  default: {
-    showApiError: jest.fn(),
-  },
-}));
+jest.mock('../../../pages/BudgetTracker/components/BTGLDetailsPanel');
+jest.mock('../../../pages/BudgetTracker/components/BTGLJournalListPanel');
+jest.mock('../../../pages/BudgetTracker/components/BTGLJournalInMonthPanel');
+jest.mock('../../../pages/BudgetTracker/components/BTItemCreatePopupBtn');
+jest.mock('../../../pages/BudgetTracker/components/BTItemBulkCreatePopupBtn');
+jest.mock('../../../components/common/LoadingBtn');
+jest.mock('../../../services/BudgetTracker/BTLockDownService');
+jest.mock('../../../services/Toaster');
 
 describe('BTGLDetailsPage', () => {
   test('renders options with new item and bulk create item buttons', () => {
@@ -63,6 +26,6 @@ describe('BTGLDetailsPage', () => {
     expect(view).toContain('Options');
     expect(view).toContain('New Item');
     expect(view).toContain('Bulk Create Items');
-    expect(view).toContain('Journal In Month Panel');
+    expect(view).toContain(BTGLJournalInMonthPanelTestId);
   });
 });

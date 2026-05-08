@@ -1,12 +1,7 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import BTItemsTable from '../../../pages/BudgetTracker/components/BTItemsTable';
-
-jest.mock('../../../pages/BudgetTracker/components/BTItemCreatePopupBtn', () => {
-  return function MockBTItemCreatePopupBtn(props: any) {
-    return <div className={props.className}>{props.children}</div>;
-  };
-});
+jest.mock('../../../pages/BudgetTracker/components/BTItemCreatePopupBtn');
 
 describe('BTItemsTable', () => {
   test('renders rows, sorts by category name, and formats amounts', () => {

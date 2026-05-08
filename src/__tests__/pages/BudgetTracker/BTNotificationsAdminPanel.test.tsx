@@ -1,30 +1,10 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import BTNotificationsAdminPanel from '../../../pages/BudgetTracker/components/admin/BTNotificationsAdminPanel';
-
-jest.mock('../../../components/common/PageLoadingSpinner', () => {
-  return function MockPageLoadingSpinner() {
-    return <div>Loading...</div>;
-  };
-});
-
-jest.mock('../../../components/ExplanationPanel', () => {
-  return function MockExplanationPanel(props: any) {
-    return <div>{props.text}</div>;
-  };
-});
-
-jest.mock('../../../components/module/ModuleEmailTemplateNameEditor', () => {
-  return function MockModuleEmailTemplateNameEditor(props: any) {
-    return <div>Editor:{props.value}</div>;
-  };
-});
-
-jest.mock('../../../components/common/LoadingBtn', () => {
-  return function MockLoadingBtn(props: any) {
-    return <button>{props.children}</button>;
-  };
-});
+jest.mock('../../../components/common/PageLoadingSpinner');
+jest.mock('../../../components/ExplanationPanel');
+jest.mock('../../../components/module/ModuleEmailTemplateNameEditor');
+jest.mock('../../../components/common/LoadingBtn');
 
 describe('BTNotificationsAdminPanel', () => {
   afterEach(() => {
