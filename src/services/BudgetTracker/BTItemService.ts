@@ -21,6 +21,10 @@ const update = (id: number, data: iConfigParams = {}, config: AxiosRequestConfig
   return appService.put(`${endPoint}/${id}`, data, config).then(({data}) => data);
 };
 
+const deactivate = (id: number, params?: iConfigParams, config: AxiosRequestConfig = {}): Promise<{ success: boolean }> => {
+  return appService.delete(`${endPoint}/${id}`, params, config).then(({data}) => data);
+};
+
 
 export type iBTItemSum = {
   requested: number;
@@ -54,6 +58,7 @@ const BTItemService = {
   getAmountByType,
   create,
   update,
+  deactivate,
   getBTItemStatusNameFromItem,
 };
 

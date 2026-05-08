@@ -7,7 +7,6 @@ import iCreditorBPayBatchSection from '../../types/BPay/iCreditorBPayBatchSectio
 import iCreditorBPayBatchSectionItem from '../../types/BPay/iCreditorBPayBatchSectionItem';
 import DeleteConfirmPopupBtn from '../common/DeleteConfirm/DeleteConfirmPopupBtn';
 import {
-  calculateBatchTotal,
   calculateSectionTotal,
   getBatchId,
   getBatchItemCount,
