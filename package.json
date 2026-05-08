@@ -66,6 +66,11 @@
       "react-app/jest"
     ]
   },
+  "jest": {
+    "testMatch": [
+      "<rootDir>/src/**/?(*.)+(test).{js,jsx,ts,tsx}"
+    ]
+  },
   "browserslist": {
     "production": [
       ">0.2%",

@@ -53,6 +53,19 @@ describe('BTItemService', () => {
       declined: 7,
       pending: 14,
     });
+
+    expect(
+      BTItemService.getAmountByType({
+        item_quantity: 2,
+        item_cost: 8,
+        approved: true,
+      })
+    ).toEqual({
+      requested: 16,
+      approved: 0,
+      declined: 0,
+      pending: 0,
+    });
   });
 
   test('getBTItemStatusNameFromItem resolves declined, approved and new statuses', () => {
