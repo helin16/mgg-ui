@@ -6,6 +6,7 @@ import * as Icons from 'react-bootstrap-icons';
 import BTGLJournalInMonthPanel from './components/BTGLJournalInMonthPanel';
 import BTGLDetailsPanel from './components/BTGLDetailsPanel';
 import BTItemCreatePopupBtn from './components/BTItemCreatePopupBtn';
+import BTItemBulkCreatePopupBtn from './components/BTItemBulkCreatePopupBtn';
 import MathHelper from '../../helper/MathHelper';
 import BTGLJournalListPanel from './components/BTGLJournalListPanel';
 import iBTLockDown from '../../types/BudgetTacker/iBTLockDown';
@@ -115,6 +116,15 @@ const BTGLDetailsPage = ({gl, selectedYear, onNavBack}: iGLDetailsPage) => {
               <Icons.Plus /> New Item
             </Button>
           </BTItemCreatePopupBtn>
+          <BTItemBulkCreatePopupBtn
+            onItemsSaved={() => setCount(MathHelper.add(count, 1))}
+            gl={gl}
+            forYear={showingYear}
+          >
+            <Button variant={'outline-primary'} size={'sm'} style={{width: '100%'}}>
+              <Icons.Upload /> Bulk Create Items
+            </Button>
+          </BTItemBulkCreatePopupBtn>
         </div>
       </div>
     )

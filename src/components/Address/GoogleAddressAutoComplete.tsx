@@ -96,7 +96,7 @@ const GoogleAddressAutoComplete = ({
         document.body.removeChild(document.getElementById(scriptId));
       }
     };
-  }, []);
+  }, [inputHTMLID, onSelect, scriptId]);
 
   return (
     <Wrapper>

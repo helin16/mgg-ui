@@ -33,6 +33,7 @@ import LoadingBtn from "../../../components/common/LoadingBtn";
 import AuthService from '../../../services/AuthService';
 import {MGGS_MODULE_ID_BUDGET_TRACKER} from '../../../types/modules/iModuleUser';
 import {ROLE_ID_ADMIN} from '../../../types/modules/iRole';
+import DeleteConfirmPopupBtn from "../../../components/common/DeleteConfirm/DeleteConfirmPopupBtn";
 
 type iBTGLDetailsPanel = {
   gl: iSynGeneralLedger;
@@ -61,6 +62,10 @@ const initialBTItemMap: iBTItemMap = {
   requestedNotByMe: []
 };
 const Wrapper = styled.div`
+  .op-btns {
+    margin-bottom: 0.75rem;
+  }
+
   .year-selector-wrapper {
     display: inline-block;
     margin-left: 10px;
@@ -119,6 +124,30 @@ const Wrapper = styled.div`
 `;
 
 type iBTCategoryMap = { [key: string]: iBTItemCategory };
+export const canShowDeleteForSelectedItems = ({
+  isReadOnly,
+  isModuleAdmin,
+  selectedItems,
+  currentUserSynergyId
+}: {
+  isReadOnly: boolean;
+  isModuleAdmin: boolean;
+  selectedItems: iBTItem[];
+  currentUserSynergyId?: number | null;
+}) => {
+  return (
+    isReadOnly !== true &&
+    selectedItems.length > 0 &&
+    (
+      isModuleAdmin === true ||
+      selectedItems.every(
+        item =>
+          item.creator_id === currentUserSynergyId &&
+          BTItemService.getBTItemStatusNameFromItem(item) === BT_ITEM_STATUS_NEW
+      )
+    )
+  );
+};
 const BTGLDetailsPanel = ({
   gl,
   showingYear,
@@ -453,51 +482,86 @@ const BTGLDetailsPanel = ({
     if (isModuleAdmin !== true || (!hasFilter && selectedItems.length <= 0)) {
       return null;
     }
+    const canDeleteSelectedItems = canShowDeleteForSelectedItems({
+      isReadOnly,
+      isModuleAdmin,
+      selectedItems,
+      currentUserSynergyId: currentUser?.synergyId
+    });
     return (
-      <ButtonGroup className={"op-btns"} size={"sm"}>
-        {hasFilter === true ? (
-          <Button
-            variant={"outline-secondary"}
-            onClick={() => {
+      <FlexContainer className={"op-btns justify-content-between align-items-center"}>
+        <ButtonGroup size={"sm"}>
+          {hasFilter === true ? (
+            <Button
+              variant={"outline-secondary"}
+              onClick={() => {
+                setSelectedItems([]);
+                setShowingFilter({ categoryGuid: "", status: "" });
+              }}
+            >
+              <Icons.X /> Reset Filter
+            </Button>
+          ) : null}
+          {isReadOnly === true || selectedItems.length <= 0 ? null : (
+            <ButtonGroup size={"sm"}>
+              <Button
+                variant={"secondary"}
+                onClick={() =>
+                  setShowingBulkPopupType(BT_ITEM_STATUS_NEW.toUpperCase())
+                }
+              >
+                Set {selectedItems.length} Item(s) to{" "}
+                {BT_ITEM_STATUS_NEW.toUpperCase()}
+              </Button>
+              <Button
+                variant={"success"}
+                onClick={() =>
+                  setShowingBulkPopupType(BT_ITEM_STATUS_APPROVED.toUpperCase())
+                }
+              >
+                Approve {selectedItems.length} Item(s)
+              </Button>
+              <Button
+                variant={"danger"}
+                onClick={() =>
+                  setShowingBulkPopupType(BT_ITEM_STATUS_DECLINED.toUpperCase())
+                }
+              >
+                Decline {selectedItems.length} Item(s)
+              </Button>
+            </ButtonGroup>
+          )}
+        </ButtonGroup>
+        {canDeleteSelectedItems ? (
+          <DeleteConfirmPopupBtn
+            size={"sm"}
+            variant={"outline-danger"}
+            confirmBtnString={`Delete ${selectedItems.length} Item(s)`}
+            title={"Delete selected items?"}
+            description={
+              <div>
+                You are about to delete {selectedItems.length} selected item(s) from{" "}
+                <b>{gl.GLCode}</b>.
+              </div>
+            }
+            deletingFn={() =>
+              Promise.all(
+                selectedItems
+                  .filter(item => `${item.id || ""}`.trim() !== "")
+                  .map(item => BTItemService.deactivate(Number(item.id)))
+              )
+            }
+            deletedCallbackFn={() => {
               setSelectedItems([]);
-              setShowingFilter({ categoryGuid: "", status: "" });
+              setCount(MathHelper.add(count, 1));
             }}
           >
-            <Icons.X /> Reset Filter
-          </Button>
-        ) : null}
-        {isReadOnly === true || selectedItems.length <= 0 ? null : (
-          <ButtonGroup size={"sm"}>
-            <Button
-              variant={"secondary"}
-              onClick={() =>
-                setShowingBulkPopupType(BT_ITEM_STATUS_NEW.toUpperCase())
-              }
-            >
-              Set {selectedItems.length} Item(s) to{" "}
-              {BT_ITEM_STATUS_NEW.toUpperCase()}
-            </Button>
-            <Button
-              variant={"success"}
-              onClick={() =>
-                setShowingBulkPopupType(BT_ITEM_STATUS_APPROVED.toUpperCase())
-              }
-            >
-              {BT_ITEM_STATUS_APPROVED.toUpperCase()} {selectedItems.length}{" "}
-              Item(s)
-            </Button>
-            <Button
-              variant={"danger"}
-              onClick={() =>
-                setShowingBulkPopupType(BT_ITEM_STATUS_DECLINED.toUpperCase())
-              }
-            >
-              {BT_ITEM_STATUS_DECLINED.toUpperCase()} {selectedItems.length}{" "}
-              Item(s)
-            </Button>
-          </ButtonGroup>
+            <Icons.Trash /> Delete {selectedItems.length} Item(s)
+          </DeleteConfirmPopupBtn>
+        ) : (
+          <div />
         )}
-      </ButtonGroup>
+      </FlexContainer>
     );
   };
 
