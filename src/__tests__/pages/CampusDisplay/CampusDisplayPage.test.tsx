@@ -1,11 +1,7 @@
 import React from 'react';
-import {render, screen} from '@testing-library/react';
+import { render } from '@testing-library/react';
 import mockComponentTestHelper from '../../helper/ComponentTestHelper';
 import CampusDisplayPage from '../../../pages/CampusDisplay/CampusDisplayPage';
-import { FormLabelKey, FormLabelTestId } from '../../../components/form/__mocks__/FormLabel';
-import { SchoolLogoKey, SchoolLogoTestId } from '../../../components/__mocks__/SchoolLogo';
-import { SectionDivKey, SectionDivTestId } from '../../../components/common/__mocks__/SectionDiv';
-import { PageLoadingSpinnerKey, PageLoadingSpinnerTestId } from '../../../components/common/__mocks__/PageLoadingSpinner';
 jest.mock('../../../components/form/FormLabel');
 jest.mock('../../../components/SchoolLogo');
 jest.mock('../../../components/common/SectionDiv');

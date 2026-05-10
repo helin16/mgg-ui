@@ -1,10 +1,9 @@
 import React from 'react';
-import {render, screen} from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import mockComponentTestHelper from '../../../helper/ComponentTestHelper';
 import { AdminPageKey, AdminPageTestId } from '../../../../layouts/__mocks__/AdminPage';
-import { AdminPageTabsKey, AdminPageTabsTestId } from '../../../../layouts/__mocks__/AdminPageTabs';
+import { AdminPageTabsKey } from '../../../../layouts/__mocks__/AdminPageTabs';
 import MyClassLisAdminPage from '../../../../pages/students/MyClassList/MyClassLisAdminPage';
-import { StudentSubjectListModuleSettingsKey, StudentSubjectListModuleSettingsTestId } from '../../../../components/timeTable/__mocks__/StudentSubjectListModuleSettings';
 jest.mock('../../../../layouts/AdminPage');
 jest.mock('../../../../layouts/AdminPageTabs');
 jest.mock('../../../../components/timeTable/StudentSubjectListModuleSettings');

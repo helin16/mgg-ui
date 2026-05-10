@@ -1,14 +1,9 @@
 import React from 'react';
-import {render, screen} from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import mockComponentTestHelper from '../../../helper/ComponentTestHelper';
 import { AdminPageKey, AdminPageTestId } from '../../../../layouts/__mocks__/AdminPage';
-import { AdminPageTabsKey, AdminPageTabsTestId } from '../../../../layouts/__mocks__/AdminPageTabs';
+import { AdminPageTabsKey } from '../../../../layouts/__mocks__/AdminPageTabs';
 import StudentAttendanceRateReportAdminPage from '../../../../pages/reports/StudentAttendanceReport/StudentAttendanceRateReportAdminPage';
-import { SectionDivKey, SectionDivTestId } from '../../../../components/common/__mocks__/SectionDiv';
-import { ExplanationPanelKey, ExplanationPanelTestId } from '../../../../components/__mocks__/ExplanationPanel';
-import { ModuleUserListKey, ModuleUserListTestId } from '../../../../components/module/__mocks__/ModuleUserList';
-import { SchoolManagementTableKey, SchoolManagementTableTestId } from '../../../../components/SchoolManagement/__mocks__/SchoolManagementTable';
-import { StudentAttendanceRateReportModuleSettingsKey, StudentAttendanceRateReportModuleSettingsTestId } from '../../../../pages/reports/StudentAttendanceReport/components/__mocks__/StudentAttendanceRateReportModuleSettings';
 jest.mock('../../../../layouts/AdminPage');
 jest.mock('../../../../layouts/AdminPageTabs');
 jest.mock('../../../../components/common/SectionDiv');

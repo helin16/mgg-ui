@@ -1,11 +1,11 @@
 import React from 'react';
-import {render, screen} from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import mockComponentTestHelper from '../../../helper/ComponentTestHelper';
 import PowerBIReportManagerPage from '../../../../pages/PowerBI/Manager/PowerBIReportManagerPage';
-import {MGGS_MODULE_ID_POWER_BI_REPORT} from '../../../../types/modules/iModuleUser';
+import { MGGS_MODULE_ID_POWER_BI_REPORT } from '../../../../types/modules/iModuleUser';
 import { PageKey, PageTestId } from '../../../../layouts/__mocks__/Page';
 import { ExplanationPanelKey, ExplanationPanelTestId } from '../../../../components/__mocks__/ExplanationPanel';
-import { PowerBIListPanelKey, PowerBIListPanelTestId } from '../../../../components/powerBI/__mocks__/PowerBIListPanel';
+import { PowerBIListPanelTestId } from '../../../../components/powerBI/__mocks__/PowerBIListPanel';
 
 
 jest.mock('../../../../layouts/Page');

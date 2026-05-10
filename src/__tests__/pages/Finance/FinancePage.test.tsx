@@ -1,14 +1,9 @@
 import React from 'react';
-import {render, screen} from '@testing-library/react';
-import moment from 'moment-timezone';
+import { render, screen } from '@testing-library/react';
 import mockComponentTestHelper from '../../helper/ComponentTestHelper';
 import FinancePage from '../../../pages/Finance/FinancePage';
-import {MGGS_MODULE_ID_FINANCE} from '../../../types/modules/iModuleUser';
+import { MGGS_MODULE_ID_FINANCE } from '../../../types/modules/iModuleUser';
 import { PageKey, PageTestId } from '../../../layouts/__mocks__/Page';
-import { ExpiringCreditCardsPanelKey, ExpiringCreditCardsPanelTestId } from '../../../pages/Finance/components/SynDebtorPaymentMethod/__mocks__/ExpiringCreditCardsPanel';
-import { MonthlyBillingReportPanelKey, MonthlyBillingReportPanelTestId } from '../../../pages/Finance/components/MonthlyBilling/__mocks__/MonthlyBillingReportPanel';
-import { BudgetForecastPanelKey, BudgetForecastPanelTestId } from '../../../components/reports/BudgetForecast/__mocks__/BudgetForecastPanel';
-import { CreditorBPayPanelKey, CreditorBPayPanelTestId } from '../../../components/BPay/__mocks__/CreditorBPayPanel';
 
 
 jest.mock('../../../layouts/Page');
