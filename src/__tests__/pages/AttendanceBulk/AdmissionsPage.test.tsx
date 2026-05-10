@@ -3,13 +3,10 @@ import {render, screen} from '@testing-library/react';
 import mockComponentTestHelper from '../../helper/ComponentTestHelper';
 import AdmissionsPage from '../../../pages/AttendanceBulk/AdmissionsPage';
 import {MGGS_MODULE_ID_ADMISSIONS} from '../../../types/modules/iModuleUser';
-import { TabKey, TabsKey, TabsTestId } from '../../../../__mocks__/react-bootstrap';
 import { PageKey, PageTestId } from '../../../layouts/__mocks__/Page';
 
 
 jest.mock('../../../layouts/Page');
-
-jest.mock('react-bootstrap');
 
 jest.mock('../../../components/Attendance/AttendancesListWithSearchPanel');
 

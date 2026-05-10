@@ -74,6 +74,7 @@
           "src/**/*.test.tsx"
         ],
         "rules": {
+          "import/first": "off",
           "jest/no-mocks-import": "off"
         }
       }
