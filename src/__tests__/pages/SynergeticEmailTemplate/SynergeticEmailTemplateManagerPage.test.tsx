@@ -1,11 +1,8 @@
 import React from 'react';
-import {render, screen} from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import mockComponentTestHelper from '../../helper/ComponentTestHelper';
 import { PageKey, PageTestId } from '../../../layouts/__mocks__/Page';
 import SynergeticEmailTemplateManagerPage from '../../../pages/SynergeticEmailTemplate/SynergeticEmailTemplateManagerPage';
-import { SynergeticEmailTemplateListKey, SynergeticEmailTemplateListTestId } from '../../../pages/SynergeticEmailTemplate/components/__mocks__/SynergeticEmailTemplateList';
-import { SynergeticEmailTemplateManagerAdminPageKey, SynergeticEmailTemplateManagerAdminPageTestId } from '../../../pages/SynergeticEmailTemplate/__mocks__/SynergeticEmailTemplateManagerAdminPage';
-import { MessageListPanelKey, MessageListPanelTestId } from '../../../components/common/Message/__mocks__/MessageListPanel';
 jest.mock('../../../layouts/Page');
 jest.mock('../../../pages/SynergeticEmailTemplate/components/SynergeticEmailTemplateList');
 jest.mock('../../../pages/SynergeticEmailTemplate/SynergeticEmailTemplateManagerAdminPage');

@@ -2,11 +2,12 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import AcaraDataList from '../../../pages/dataSubmissions/components/ACARA/AcaraDataList';
 import { PageLoadingSpinnerTestId } from '../../../components/common/__mocks__/PageLoadingSpinner';
+import iAcaraData from '../../../pages/dataSubmissions/components/ACARA/iAcaraData';
 
 jest.mock('../../../components/common/PageLoadingSpinner');
 jest.mock('../../../components/common/Table');
 
-const buildRecord = (overrides: Record<string, unknown> = {}) => {
+const buildRecord = (overrides: Partial<iAcaraData> = {}): iAcaraData => {
   return {
     ID: 1,
     Given1: 'Ada',
@@ -79,7 +80,6 @@ const buildRecord = (overrides: Record<string, unknown> = {}) => {
 describe('AcaraDataList', () => {
   test('renders loading spinner when loading', () => {
     const view = renderToStaticMarkup(
-      // @ts-ignore
       <AcaraDataList isLoading={true} records={[buildRecord()]} />
     );
 
@@ -88,7 +88,6 @@ describe('AcaraDataList', () => {
 
   test('renders invalid and warning badges for changed ACARA statuses', () => {
     const view = renderToStaticMarkup(
-      // @ts-ignore
       <AcaraDataList
         records={[
           buildRecord({
@@ -108,7 +107,6 @@ describe('AcaraDataList', () => {
 
   test('does not render parent section when parent id is missing', () => {
     const view = renderToStaticMarkup(
-      // @ts-ignore
       <AcaraDataList
         records={[
           buildRecord({

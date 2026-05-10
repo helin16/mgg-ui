@@ -1,13 +1,9 @@
 import React from 'react';
-import {render, screen} from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import mockComponentTestHelper from '../../helper/ComponentTestHelper';
 import { AdminPageKey, AdminPageTestId } from '../../../layouts/__mocks__/AdminPage';
-import { AdminPageTabsKey, AdminPageTabsTestId } from '../../../layouts/__mocks__/AdminPageTabs';
+import { AdminPageTabsKey } from '../../../layouts/__mocks__/AdminPageTabs';
 import HouseAwardAdminPage from '../../../pages/houseAwards/HouseAwardAdminPage';
-import { HouseAwardEventTableKey, HouseAwardEventTableTestId } from '../../../pages/houseAwards/components/__mocks__/HouseAwardEventTable';
-import { HouseAwardEventTypeTableKey, HouseAwardEventTypeTableTestId } from '../../../pages/houseAwards/components/__mocks__/HouseAwardEventTypeTable';
-import { SectionDivKey, SectionDivTestId } from '../../../components/common/__mocks__/SectionDiv';
-import { SynLuHouseTableKey, SynLuHouseTableTestId } from '../../../components/HouseAwards/__mocks__/SynLuHouseTable';
 jest.mock('../../../layouts/AdminPage');
 jest.mock('../../../layouts/AdminPageTabs');
 jest.mock('../../../pages/houseAwards/components/HouseAwardEventTable');

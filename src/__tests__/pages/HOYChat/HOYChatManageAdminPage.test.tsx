@@ -1,11 +1,9 @@
 import React from 'react';
-import {render, screen} from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import mockComponentTestHelper from '../../helper/ComponentTestHelper';
 import { AdminPageKey, AdminPageTestId } from '../../../layouts/__mocks__/AdminPage';
-import { AdminPageTabsKey, AdminPageTabsTestId } from '../../../layouts/__mocks__/AdminPageTabs';
+import { AdminPageTabsKey } from '../../../layouts/__mocks__/AdminPageTabs';
 import HOYChatManageAdminPage from '../../../pages/HOYChat/HOYChatManageAdminPage';
-import { HOYChatModuleSettingsKey, HOYChatModuleSettingsTestId } from '../../../pages/HOYChat/components/__mocks__/HOYChatModuleSettings';
-import { MessageListPanelKey, MessageListPanelTestId } from '../../../components/common/Message/__mocks__/MessageListPanel';
 jest.mock('../../../layouts/AdminPage');
 jest.mock('../../../layouts/AdminPageTabs');
 jest.mock('../../../pages/HOYChat/components/HOYChatModuleSettings');
