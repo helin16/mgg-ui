@@ -6,7 +6,7 @@ describe('EmailService', () => {
     name: 'sendHtml',
     serviceFn: EmailService.sendHtml,
     appMethod: 'post',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/email/send/html", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/email/send/html"),
   });
 });

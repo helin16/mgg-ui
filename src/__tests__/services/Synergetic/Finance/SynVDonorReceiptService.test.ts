@@ -6,7 +6,7 @@ describe('SynVDonorReceiptService', () => {
     name: 'getAll',
     serviceFn: SynVDonorReceiptService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/syn/vDonorReceipt", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/syn/vDonorReceipt"),
   });
 });

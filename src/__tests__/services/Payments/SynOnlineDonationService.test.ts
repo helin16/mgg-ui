@@ -6,7 +6,7 @@ describe('SynOnlineDonationService', () => {
     name: 'getAll',
     serviceFn: SynOnlineDonationService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/syn/onlineDonation", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/syn/onlineDonation"),
   });
 });

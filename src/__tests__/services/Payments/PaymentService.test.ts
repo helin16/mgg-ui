@@ -6,14 +6,14 @@ describe('PaymentService', () => {
     name: 'getWestpacSettings',
     serviceFn: PaymentService.getWestpacSettings,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/cp/westpac", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/cp/westpac"),
   });
   ServiceTestHelper.testCustom({
     name: 'makeADonation',
     serviceFn: PaymentService.makeADonation,
     appMethod: 'post',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/cp/donation", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/cp/donation"),
   });
 });

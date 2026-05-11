@@ -6,35 +6,35 @@ describe('MggAppDeviceService', () => {
     name: 'getAll',
     serviceFn: MggAppDeviceService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/appDevice", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/appDevice"),
   });
   ServiceTestHelper.testCustom({
     name: 'get',
     serviceFn: MggAppDeviceService.get,
     appMethod: 'get',
-    callArgs: ["123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/appDevice/123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgsWithId(),
+    expectedArgs: ServiceTestHelper.getExpectedArgsWithId("/appDevice"),
   });
   ServiceTestHelper.testCustom({
     name: 'create',
     serviceFn: MggAppDeviceService.create,
     appMethod: 'post',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/appDevice", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/appDevice"),
   });
   ServiceTestHelper.testCustom({
     name: 'update',
     serviceFn: MggAppDeviceService.update,
     appMethod: 'put',
-    callArgs: ["123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/appDevice/123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgsWithId(),
+    expectedArgs: ServiceTestHelper.getExpectedArgsWithId("/appDevice"),
   });
   ServiceTestHelper.testCustom({
     name: 'deactivate',
     serviceFn: MggAppDeviceService.deactivate,
     appMethod: 'delete',
-    callArgs: ["123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/appDevice/123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgsWithId(),
+    expectedArgs: ServiceTestHelper.getExpectedArgsWithId("/appDevice"),
   });
 });

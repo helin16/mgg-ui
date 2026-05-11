@@ -6,7 +6,7 @@ describe('SynTagListCommunityService', () => {
     name: 'getAll',
     serviceFn: SynTagListCommunityService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/syn/tagListCommunity", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/syn/tagListCommunity"),
   });
 });

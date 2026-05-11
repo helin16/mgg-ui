@@ -6,7 +6,7 @@ describe('SynCommunityLegalService', () => {
     name: 'getAll',
     serviceFn: SynCommunityLegalService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/syn/communityLegal", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/syn/communityLegal"),
   });
 });

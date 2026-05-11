@@ -6,7 +6,7 @@ describe('SynLuRelationshipService', () => {
     name: 'getAll',
     serviceFn: SynLuRelationshipService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/syn/luRelationship", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/syn/luRelationship"),
   });
 });

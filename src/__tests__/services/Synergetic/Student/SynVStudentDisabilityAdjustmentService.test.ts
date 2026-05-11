@@ -6,7 +6,7 @@ describe('SynVStudentDisabilityAdjustmentService', () => {
     name: 'getAll',
     serviceFn: SynVStudentDisabilityAdjustmentService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/syn/vStudentDisabilityAdjustment", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/syn/vStudentDisabilityAdjustment"),
   });
 });

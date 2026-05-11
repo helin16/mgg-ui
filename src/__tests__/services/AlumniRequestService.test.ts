@@ -1,33 +1,36 @@
 import ServiceTestHelper from '../helper/ServiceTestHelper';
+import TestHelper from '../helper/TestHelper';
 import AlumniRequestService from '../../services/AlumniRequestService';
 
 describe('AlumniRequestService', () => {
+  const {fakeId, fakeParams, fakeConfig} = TestHelper.getFakeParams();
+
   ServiceTestHelper.testCustom({
     name: 'getAll',
     serviceFn: AlumniRequestService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/alumniRequest", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/alumniRequest"),
   });
   ServiceTestHelper.testCustom({
     name: 'create',
     serviceFn: AlumniRequestService.create,
     appMethod: 'post',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/alumniRequest", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/alumniRequest"),
   });
   ServiceTestHelper.testCustom({
     name: 'approve',
     serviceFn: AlumniRequestService.approve,
     appMethod: 'put',
-    callArgs: ["123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/alumniRequest/123/approve", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: [fakeId, fakeParams, fakeConfig],
+    expectedArgs: [`/alumniRequest/${fakeId}/approve`, fakeParams, fakeConfig],
   });
   ServiceTestHelper.testCustom({
     name: 'deactivate',
     serviceFn: AlumniRequestService.deactivate,
     appMethod: 'delete',
-    callArgs: ["123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/alumniRequest/123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgsWithId(),
+    expectedArgs: ServiceTestHelper.getExpectedArgsWithId("/alumniRequest"),
   });
 });

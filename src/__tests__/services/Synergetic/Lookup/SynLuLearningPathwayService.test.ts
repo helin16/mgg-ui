@@ -6,7 +6,7 @@ describe('SynLuLearningPathwayService', () => {
     name: 'getAll',
     serviceFn: SynLuLearningPathwayService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/syn/luLearningPathway", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/syn/luLearningPathway"),
   });
 });

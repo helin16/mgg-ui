@@ -6,7 +6,7 @@ describe('SynLuDocumentClassificationService', () => {
     name: 'getAll',
     serviceFn: SynLuDocumentClassificationService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/syn/luDocumentClassification", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/syn/luDocumentClassification"),
   });
 });

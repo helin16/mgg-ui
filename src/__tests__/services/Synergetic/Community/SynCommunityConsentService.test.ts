@@ -6,7 +6,7 @@ describe('SynCommunityConsentService', () => {
     name: 'getAll',
     serviceFn: SynCommunityConsentService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/syn/communityConsent", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/syn/communityConsent"),
   });
 });

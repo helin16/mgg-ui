@@ -6,7 +6,7 @@ describe('SupportService', () => {
     name: 'reportIssue',
     serviceFn: SupportService.reportIssue,
     appMethod: 'post',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/support/email", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/support/email"),
   });
 });

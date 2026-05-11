@@ -6,7 +6,7 @@ describe('SynLuConsentTypeService', () => {
     name: 'getAll',
     serviceFn: SynLuConsentTypeService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/syn/luConsentType", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/syn/luConsentType"),
   });
 });

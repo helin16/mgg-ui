@@ -6,7 +6,7 @@ describe('SynVDebtorService', () => {
     name: 'getAll',
     serviceFn: SynVDebtorService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/syn/vDebtor", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/syn/vDebtor"),
   });
 });

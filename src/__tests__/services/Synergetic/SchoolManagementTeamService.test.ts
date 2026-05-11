@@ -6,35 +6,35 @@ describe('SchoolManagementTeamService', () => {
     name: 'getSchoolManagementTeams',
     serviceFn: SchoolManagementTeamService.getSchoolManagementTeams,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/smt", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/smt"),
   });
   ServiceTestHelper.testCustom({
     name: 'create',
     serviceFn: SchoolManagementTeamService.create,
     appMethod: 'post',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/smt", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/smt"),
   });
   ServiceTestHelper.testCustom({
     name: 'copyAllPreviousToCurrent',
     serviceFn: SchoolManagementTeamService.copyAllPreviousToCurrent,
     appMethod: 'post',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/smt/copyToCurrent", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/smt/copyToCurrent"),
   });
   ServiceTestHelper.testCustom({
     name: 'update',
     serviceFn: SchoolManagementTeamService.update,
     appMethod: 'put',
-    callArgs: ["123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/smt/123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgsWithId(),
+    expectedArgs: ServiceTestHelper.getExpectedArgsWithId("/smt"),
   });
   ServiceTestHelper.testCustom({
     name: 'remove',
     serviceFn: SchoolManagementTeamService.remove,
     appMethod: 'delete',
-    callArgs: ["123", {"fakeParams":"value"}],
-    expectedArgs: ["/smt/123", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgsWithId(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgsWithId('/smt'),
   });
 });

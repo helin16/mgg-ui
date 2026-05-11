@@ -6,7 +6,7 @@ describe('SynLuVisaService', () => {
     name: 'getAll',
     serviceFn: SynLuVisaService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/syn/luVisa", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/syn/luVisa"),
   });
 });

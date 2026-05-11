@@ -6,7 +6,7 @@ describe('SynVActivityService', () => {
     name: 'getAllById',
     serviceFn: SynVActivityService.getAllById,
     appMethod: 'get',
-    callArgs: ["123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/syn/vActivity/123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgsWithId(),
+    expectedArgs: ServiceTestHelper.getExpectedArgsWithId("/syn/vActivity"),
   });
 });

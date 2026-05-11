@@ -6,7 +6,7 @@ describe('SynSubjectClassService', () => {
     name: 'getAll',
     serviceFn: SynSubjectClassService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/syn/subjectClass", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/syn/subjectClass"),
   });
 });

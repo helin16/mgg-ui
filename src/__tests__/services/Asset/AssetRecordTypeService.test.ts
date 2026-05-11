@@ -6,14 +6,14 @@ describe('AssetRecordTypeService', () => {
     name: 'getAll',
     serviceFn: AssetRecordTypeService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/assetRecordType", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/assetRecordType"),
   });
   ServiceTestHelper.testCustom({
     name: 'get',
     serviceFn: AssetRecordTypeService.get,
     appMethod: 'get',
-    callArgs: ["123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/assetRecordType/123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgsWithId(),
+    expectedArgs: ServiceTestHelper.getExpectedArgsWithId("/assetRecordType"),
   });
 });

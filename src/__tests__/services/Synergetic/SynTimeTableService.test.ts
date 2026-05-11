@@ -6,14 +6,14 @@ describe('SynTimeTableService', () => {
     name: 'importTimeTable',
     serviceFn: SynTimeTableService.importTimeTable,
     appMethod: 'post',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/syn/timeTable/import", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/syn/timeTable/import"),
   });
   ServiceTestHelper.testCustom({
     name: 'getStudentSubjects',
     serviceFn: SynTimeTableService.getStudentSubjects,
     appMethod: 'get',
-    callArgs: ["123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/syn/timeTable/studentSubjects/123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgsWithId(),
+    expectedArgs: ServiceTestHelper.getExpectedArgsWithId("/syn/timeTable/studentSubjects"),
   });
 });

@@ -6,7 +6,7 @@ describe('SynCommunitySkillService', () => {
     name: 'getAll',
     serviceFn: SynCommunitySkillService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/syn/communitySkill", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/syn/communitySkill"),
   });
 });

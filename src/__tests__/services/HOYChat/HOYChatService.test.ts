@@ -6,7 +6,7 @@ describe('HOYChatService', () => {
     name: 'submitForm',
     serviceFn: HOYChatService.submitForm,
     appMethod: 'post',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/hoyChat/send", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/hoyChat/send"),
   });
 });

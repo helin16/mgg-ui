@@ -6,7 +6,7 @@ describe('SynVAbsenceService', () => {
     name: 'getAll',
     serviceFn: SynVAbsenceService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/syn/vAbsence", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/syn/vAbsence"),
   });
 });

@@ -6,7 +6,7 @@ describe('StudentContactService', () => {
     name: 'getStudentContacts',
     serviceFn: StudentContactService.getStudentContacts,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/syn/studentContact", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/syn/studentContact"),
   });
 });

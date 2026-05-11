@@ -6,28 +6,28 @@ describe('CampusDisplayService', () => {
     name: 'getAll',
     serviceFn: CampusDisplayService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/campusDisplay", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/campusDisplay"),
   });
   ServiceTestHelper.testCustom({
     name: 'create',
     serviceFn: CampusDisplayService.create,
     appMethod: 'post',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/campusDisplay", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/campusDisplay"),
   });
   ServiceTestHelper.testCustom({
     name: 'update',
     serviceFn: CampusDisplayService.update,
     appMethod: 'put',
-    callArgs: ["123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/campusDisplay/123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgsWithId(),
+    expectedArgs: ServiceTestHelper.getExpectedArgsWithId("/campusDisplay"),
   });
   ServiceTestHelper.testCustom({
     name: 'deactivate',
     serviceFn: CampusDisplayService.deactivate,
     appMethod: 'delete',
-    callArgs: ["123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/campusDisplay/123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgsWithId(),
+    expectedArgs: ServiceTestHelper.getExpectedArgsWithId("/campusDisplay"),
   });
 });

@@ -6,7 +6,7 @@ describe('SynLuQualificationLevelService', () => {
     name: 'getAll',
     serviceFn: SynLuQualificationLevelService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/syn/luQualificationLevel", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/syn/luQualificationLevel"),
   });
 });

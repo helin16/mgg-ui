@@ -6,7 +6,7 @@ describe('SBUserService', () => {
     name: 'getAll',
     serviceFn: SBUserService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/sb/user", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/sb/user"),
   });
 });

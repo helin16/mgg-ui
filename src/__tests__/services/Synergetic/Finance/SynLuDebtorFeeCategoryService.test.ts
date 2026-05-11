@@ -6,7 +6,7 @@ describe('SynLuDebtorFeeCategoryService', () => {
     name: 'getAll',
     serviceFn: SynLuDebtorFeeCategoryService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/syn/luDebtorFeeCategory", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/syn/luDebtorFeeCategory"),
   });
 });

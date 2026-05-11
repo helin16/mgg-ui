@@ -6,7 +6,7 @@ describe('SynGeneralLedgerUserService', () => {
     name: 'getAll',
     serviceFn: SynGeneralLedgerUserService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/syn/generalLedgerUser", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/syn/generalLedgerUser"),
   });
 });

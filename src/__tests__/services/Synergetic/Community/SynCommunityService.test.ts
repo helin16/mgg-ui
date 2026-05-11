@@ -6,7 +6,7 @@ describe('SynCommunityService', () => {
     name: 'getCommunityProfiles',
     serviceFn: SynCommunityService.getCommunityProfiles,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/syn/community", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/syn/community"),
   });
 });

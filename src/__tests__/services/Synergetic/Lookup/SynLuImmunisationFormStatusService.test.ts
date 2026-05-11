@@ -6,7 +6,7 @@ describe('SynLuImmunisationFormStatusService', () => {
     name: 'getAll',
     serviceFn: SynLuImmunisationFormStatusService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/syn/luImmunisationFormStatus", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/syn/luImmunisationFormStatus"),
   });
 });

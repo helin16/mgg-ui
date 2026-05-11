@@ -6,7 +6,7 @@ describe('SynLuFormService', () => {
     name: 'getAll',
     serviceFn: SynLuFormService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/syn/luForm/", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/syn/luForm/"),
   });
 });

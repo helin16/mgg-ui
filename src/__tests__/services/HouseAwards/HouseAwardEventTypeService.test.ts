@@ -6,35 +6,35 @@ describe('HouseAwardEventTypeService', () => {
     name: 'getEventTypes',
     serviceFn: HouseAwardEventTypeService.getEventTypes,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/houseAwards/eventType", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/houseAwards/eventType"),
   });
   ServiceTestHelper.testCustom({
     name: 'getEventType',
     serviceFn: HouseAwardEventTypeService.getEventType,
     appMethod: 'get',
-    callArgs: ["123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/houseAwards/eventType/123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgsWithId(),
+    expectedArgs: ServiceTestHelper.getExpectedArgsWithId("/houseAwards/eventType"),
   });
   ServiceTestHelper.testCustom({
     name: 'createEventType',
     serviceFn: HouseAwardEventTypeService.createEventType,
     appMethod: 'post',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/houseAwards/eventType", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/houseAwards/eventType"),
   });
   ServiceTestHelper.testCustom({
     name: 'updateEventType',
     serviceFn: HouseAwardEventTypeService.updateEventType,
     appMethod: 'put',
-    callArgs: ["123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/houseAwards/eventType/123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgsWithId(),
+    expectedArgs: ServiceTestHelper.getExpectedArgsWithId("/houseAwards/eventType"),
   });
   ServiceTestHelper.testCustom({
     name: 'deleteEventType',
     serviceFn: HouseAwardEventTypeService.deleteEventType,
     appMethod: 'delete',
-    callArgs: ["123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/houseAwards/eventType/123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgsWithId(),
+    expectedArgs: ServiceTestHelper.getExpectedArgsWithId("/houseAwards/eventType"),
   });
 });
