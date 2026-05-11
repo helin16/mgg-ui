@@ -1,7 +1,11 @@
 import Sentry from '../../../components/error/Sentry';
 import * as SentryLib from '@sentry/react';
 
-jest.mock('@sentry/react', () => require('../../../../__mocks__/@sentry/react'));
+jest.mock('@sentry/react', () => ({
+  __esModule: true,
+  init: jest.fn(),
+  default: {init: jest.fn()},
+}));
 
 describe('Sentry', () => {
   const originalEnv = process.env.REACT_APP_SENTRY_DSN;

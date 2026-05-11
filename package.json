@@ -52,7 +52,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build; yarn build:appLoader",
-    "test": "react-scripts test",
+    "test": "react-scripts test --watchAll=false",
+    "test:watch": "react-scripts test",
     "eject": "react-scripts eject",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run --record --key 3d9d7df6-b33f-4a65-9979-956bb72e037a",
