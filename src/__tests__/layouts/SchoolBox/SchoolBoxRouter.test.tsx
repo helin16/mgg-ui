@@ -48,7 +48,13 @@ describe('SchoolBoxRouter', () => {
 
   const renderRouter = (path: string, entry = '/') =>
     render(
-      <MemoryRouter initialEntries={[entry]}>
+      <MemoryRouter
+          initialEntries={[entry]}
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+        }}
+      >
         <SchoolBoxRouter path={path} remoteUrl="https://remote.schoolbox" />
       </MemoryRouter>
     );

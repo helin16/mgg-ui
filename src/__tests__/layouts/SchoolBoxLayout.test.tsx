@@ -16,7 +16,13 @@ describe('SchoolBoxLayout', () => {
 
   const renderLayout = (code: string) =>
     render(
-      <MemoryRouter initialEntries={[`/modules/remote/${code}`]}>
+      <MemoryRouter
+          initialEntries={[`/modules/remote/${code}`]}
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}
+      >
         <Routes>
           <Route path="/modules/remote/:code" element={<SchoolBoxLayout />} />
         </Routes>

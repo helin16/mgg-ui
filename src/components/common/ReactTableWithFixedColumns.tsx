@@ -204,10 +204,10 @@ const ReactTableWithFixedColumns = ({
     <Wrapper className={`${className || ''} ${isLoading === true ? 'loading' : ''}`}>
       <table {...getTableProps()} className={`table sticky ${hover ? 'hover' : ''}`} id={htmlId}>
         <thead className="header">
-          {headerGroups.map((headerGroup) => (
-            <tr {...headerGroup.getHeaderGroupProps()} className="tr">
-              {headerGroup.headers.map((column) => (
-                <th {...column.getHeaderProps()} className="th">
+          {headerGroups.map((headerGroup, index) => (
+            <tr {...headerGroup.getHeaderGroupProps()} className="tr" key={index}>
+              {headerGroup.headers.map((column, colIndex) => (
+                <th {...column.getHeaderProps()} className="th" key={`column-${colIndex}`}>
                   {column.render('Header') as ReactNode}
                   <div
                     // @ts-ignore
@@ -221,18 +221,18 @@ const ReactTableWithFixedColumns = ({
           ))}
         </thead>
         <tbody {...getTableBodyProps()} className="body">
-          {rows.map((row) => {
+          {rows.map((row, index) => {
             prepareRow(row);
             return (
-              <tr {...row.getRowProps()} className="tr">
-                {row.cells.map((cell) => {
+              <tr {...row.getRowProps()} className="tr" key={`row-${index}`}>
+                {row.cells.map((cell, colIndex) => {
                   // @ts-ignore
                   if (cell.column.CellRender) {
                     // @ts-ignore
                     return cell.column.CellRender(cell, {...cell.getCellProps(), className: 'td'});
                   }
                   return (
-                    <td {...cell.getCellProps()} className={`td`}>
+                    <td {...cell.getCellProps()} className={`td`}  key={`col-${colIndex}`}>
                       {cell.render('Cell') as ReactNode}
                     </td>
                   )

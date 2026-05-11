@@ -18,7 +18,13 @@ describe('CampusDisplayByLocationIdPage', () => {
 
   test('renders slideshow page composition with route params', () => {
     render(
-      <MemoryRouter initialEntries={['/cd/loc/42']}>
+      <MemoryRouter
+          initialEntries={['/cd/loc/42']}
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}
+      >
         <Routes>
           <Route
             path={URL_CAMPUS_DISPLAY_SLIDE_SHOW_BY_LOCATION_PAGE}

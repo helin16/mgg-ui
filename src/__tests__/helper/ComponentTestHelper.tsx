@@ -47,7 +47,10 @@ const mockComponent =
   };
 
 const renderWithRouter = (children: ReactNode) => {
-  return render(<MemoryRouter>{children}</MemoryRouter>);
+  return render(<MemoryRouter future={{
+    v7_startTransition: true,
+    v7_relativeSplatPath: true,
+  }}>{children}</MemoryRouter>);
 };
 
 const getKeyAndTestId = (prefix: string) => {
