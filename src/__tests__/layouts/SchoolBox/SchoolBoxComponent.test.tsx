@@ -52,7 +52,10 @@ describe('SchoolBoxComponent', () => {
   });
 
   const renderComponent = (ui: React.ReactNode, entry = '/') =>
-    render(<MemoryRouter initialEntries={[entry]}>{ui}</MemoryRouter>);
+    render(<MemoryRouter initialEntries={[entry]} future={{
+      v7_startTransition: true,
+      v7_relativeSplatPath: true,
+    }}>{ui}</MemoryRouter>);
 
   test('shows an invalid params alert when required params are missing', async () => {
     renderComponent(<SchoolBoxComponent path="/finance" remoteUrl="https://sb" />, '/?id=1');
@@ -78,9 +81,7 @@ describe('SchoolBoxComponent', () => {
       />
     );
 
-    await waitFor(() =>
-      expect(screen.getByTestId(SchoolBoxDebugInfoTestId)).toBeInTheDocument()
-    );
+    await screen.findByTestId(SchoolBoxDebugInfoTestId);
 
     expect(screen.getByTestId(SchoolBoxRouterTestId)).toBeInTheDocument();
     expect(screen.getByTestId(SchoolBoxUrlCheckPopupTestId)).toBeInTheDocument();

@@ -10,4 +10,6 @@ const ImageWithPlaceholder = ComponentTestHelper.mockComponent(
   ImageWithPlaceholderTestId
 );
 
+export const getImagePlaceHolder = jest.fn(() => 'image-placeholder');
+
 export default ImageWithPlaceholder;
