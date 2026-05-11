@@ -1,33 +1,36 @@
 import ServiceTestHelper from '../../../helper/ServiceTestHelper';
+import TestHelper from '../../../helper/TestHelper';
 import SynLuTransitionDateService from '../../../../services/Synergetic/Lookup/SynLuTransitionDateService';
 
 describe('SynLuTransitionDateService', () => {
+  const {fakeId, fakeParams} = TestHelper.getFakeParams();
+
   ServiceTestHelper.testCustom({
     name: 'getAll',
     serviceFn: SynLuTransitionDateService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/syn/luTransitionDate", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/syn/luTransitionDate"),
   });
   ServiceTestHelper.testCustom({
     name: 'getById',
     serviceFn: SynLuTransitionDateService.getById,
     appMethod: 'get',
-    callArgs: ["123", {"fakeParams":"value"}],
-    expectedArgs: ["/syn/luTransitionDate/123", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgsWithId(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgsWithId('/syn/luTransitionDate'),
   });
   ServiceTestHelper.testCustom({
     name: 'create',
     serviceFn: SynLuTransitionDateService.create,
     appMethod: 'post',
-    callArgs: [{"fakeParams":"value"}, {"fakeParams":"value"}],
-    expectedArgs: ["/syn/luTransitionDate", {"fakeParams":"value"}, {"fakeParams":"value"}],
+    callArgs: [fakeParams, fakeParams],
+    expectedArgs: ['/syn/luTransitionDate', fakeParams, fakeParams],
   });
   ServiceTestHelper.testCustom({
     name: 'updateById',
     serviceFn: SynLuTransitionDateService.updateById,
     appMethod: 'put',
-    callArgs: ["123", {"fakeParams":"value"}],
-    expectedArgs: ["/syn/luTransitionDate/123", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgsWithId(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgsWithId('/syn/luTransitionDate'),
   });
 });

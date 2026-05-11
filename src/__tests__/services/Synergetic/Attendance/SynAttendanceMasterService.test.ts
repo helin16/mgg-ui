@@ -6,7 +6,7 @@ describe('SynAttendanceMasterService', () => {
     name: 'getAll',
     serviceFn: SynAttendanceMasterService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/syn/attendanceMaster", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/syn/attendanceMaster"),
   });
 });

@@ -6,7 +6,7 @@ describe('MailGunService', () => {
     name: 'sendHtml',
     serviceFn: MailGunService.sendHtml,
     appMethod: 'post',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/mailgun/send/html", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/mailgun/send/html"),
   });
 });

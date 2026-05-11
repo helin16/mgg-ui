@@ -1,6 +1,7 @@
 import React, {ReactNode} from 'react';
 import {cleanup, render} from '@testing-library/react';
 import {MemoryRouter} from 'react-router-dom';
+import TestHelper from './TestHelper';
 
 type CalledParamsMap = {
   [key: string]: any[];
@@ -75,6 +76,7 @@ const prepare = () => {
   });
 
   beforeEach(() => {
+    TestHelper.resetFaker();
     reset();
     cleanup();
   });

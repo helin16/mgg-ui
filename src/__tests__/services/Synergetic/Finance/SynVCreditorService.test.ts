@@ -6,7 +6,7 @@ describe('SynVCreditorService', () => {
     name: 'getAll',
     serviceFn: SynVCreditorService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/syn/vCreditor", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/syn/vCreditor"),
   });
 });

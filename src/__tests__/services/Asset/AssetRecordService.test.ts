@@ -6,14 +6,14 @@ describe('AssetRecordService', () => {
     name: 'getAssetRecords',
     serviceFn: AssetRecordService.getAssetRecords,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/assetRecord", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/assetRecord"),
   });
   ServiceTestHelper.testCustom({
     name: 'pickup',
     serviceFn: AssetRecordService.pickup,
     appMethod: 'put',
-    callArgs: ["123", {"fakeParams":"value"}],
-    expectedArgs: ["/assetRecord/123/pickup", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgsWithId(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgsWithIdAndSuffix('/assetRecord', 'pickup'),
   });
 });

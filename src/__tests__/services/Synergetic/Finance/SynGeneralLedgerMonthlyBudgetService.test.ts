@@ -1,19 +1,23 @@
 import ServiceTestHelper from '../../../helper/ServiceTestHelper';
+import TestHelper from '../../../helper/TestHelper';
 import SynGeneralLedgerMonthlyBudgetService from '../../../../services/Synergetic/Finance/SynGeneralLedgerMonthlyBudgetService';
 
 describe('SynGeneralLedgerMonthlyBudgetService', () => {
+  const {fakeId, fakeParams, fakeConfig} = TestHelper.getFakeParams();
+  const fakeYear = TestHelper.faker.date.anytime().getFullYear().toString();
+
   ServiceTestHelper.testCustom({
     name: 'getAll',
     serviceFn: SynGeneralLedgerMonthlyBudgetService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/syn/generalLedgerMonthlyBudget", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/syn/generalLedgerMonthlyBudget"),
   });
   ServiceTestHelper.testCustom({
     name: 'getAllByYearAndGLCode',
     serviceFn: SynGeneralLedgerMonthlyBudgetService.getAllByYearAndGLCode,
     appMethod: 'get',
-    callArgs: ["123", "value", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/syn/generalLedgerMonthlyBudget/123/value", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: [fakeId, fakeYear, fakeParams, fakeConfig],
+    expectedArgs: [`/syn/generalLedgerMonthlyBudget/${fakeId}/${fakeYear}`, fakeParams, fakeConfig],
   });
 });

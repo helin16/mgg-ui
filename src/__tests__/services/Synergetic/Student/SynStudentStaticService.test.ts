@@ -6,7 +6,7 @@ describe('SynStudentStaticService', () => {
     name: 'getAll',
     serviceFn: SynStudentStaticService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/syn/studentStatic", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/syn/studentStatic"),
   });
 });

@@ -6,7 +6,7 @@ describe('SynVStudentAwardService', () => {
     name: 'getAll',
     serviceFn: SynVStudentAwardService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/syn/vStudentAward", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/syn/vStudentAward"),
   });
 });

@@ -6,7 +6,7 @@ describe('SynDebtorStudentConcessionService', () => {
     name: 'getAll',
     serviceFn: SynDebtorStudentConcessionService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/syn/debtorStudentConcession", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/syn/debtorStudentConcession"),
   });
 });

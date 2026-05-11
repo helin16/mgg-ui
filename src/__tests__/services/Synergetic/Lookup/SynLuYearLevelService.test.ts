@@ -6,7 +6,7 @@ describe('SynLuYearLevelService', () => {
     name: 'getAllYearLevels',
     serviceFn: SynLuYearLevelService.getAllYearLevels,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/syn/luYearLevel", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/syn/luYearLevel"),
   });
 });

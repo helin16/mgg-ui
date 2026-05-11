@@ -6,8 +6,8 @@ describe('SynVFutureStudentService', () => {
     name: 'getAll',
     serviceFn: SynVFutureStudentService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/syn/vFutureStudent", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/syn/vFutureStudent"),
   });
 
   describe('mapFutureStudentToCurrent', () => {

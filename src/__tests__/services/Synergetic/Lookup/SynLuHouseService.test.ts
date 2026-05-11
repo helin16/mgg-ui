@@ -6,7 +6,7 @@ describe('SynLuHouseService', () => {
     name: 'getLuHouses',
     serviceFn: SynLuHouseService.getLuHouses,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/syn/luHouse/", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/syn/luHouse/"),
   });
 });

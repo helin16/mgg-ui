@@ -6,7 +6,7 @@ describe('SynLuCourtOrderTypeService', () => {
     name: 'getAll',
     serviceFn: SynLuCourtOrderTypeService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/syn/luCourtOrderType", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/syn/luCourtOrderType"),
   });
 });

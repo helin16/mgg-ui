@@ -6,7 +6,7 @@ describe('SynLuCampusService', () => {
     name: 'getAllCampuses',
     serviceFn: SynLuCampusService.getAllCampuses,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/syn/luCampus", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/syn/luCampus"),
   });
 });

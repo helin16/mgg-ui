@@ -6,7 +6,7 @@ describe('SynLuMedicalConditionTypeService', () => {
     name: 'getAllMedicalConditionTypes',
     serviceFn: SynLuMedicalConditionTypeService.getAllMedicalConditionTypes,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/syn/luMedicalConditionType", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/syn/luMedicalConditionType"),
   });
 });

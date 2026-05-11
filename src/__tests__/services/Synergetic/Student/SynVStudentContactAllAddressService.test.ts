@@ -6,7 +6,7 @@ describe('SynVStudentContactAllAddressService', () => {
     name: 'getAll',
     serviceFn: SynVStudentContactAllAddressService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/syn/vStudentContactAllAddress", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/syn/vStudentContactAllAddress"),
   });
 });

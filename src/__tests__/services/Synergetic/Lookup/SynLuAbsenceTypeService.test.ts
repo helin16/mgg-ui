@@ -6,7 +6,7 @@ describe('SynLuAbsenceTypeService', () => {
     name: 'getAll',
     serviceFn: SynLuAbsenceTypeService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/syn/luAbsenceType/", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/syn/luAbsenceType/"),
   });
 });

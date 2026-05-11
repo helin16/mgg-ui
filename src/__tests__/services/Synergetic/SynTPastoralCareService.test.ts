@@ -6,7 +6,7 @@ describe('SynTPastoralCareService', () => {
     name: 'getAll',
     serviceFn: SynTPastoralCareService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/syn/tPastoralCare", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/syn/tPastoralCare"),
   });
 });

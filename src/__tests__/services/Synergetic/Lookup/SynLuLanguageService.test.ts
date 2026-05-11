@@ -6,7 +6,7 @@ describe('SynLuLanguageService', () => {
     name: 'getAll',
     serviceFn: SynLuLanguageService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/syn/luLanguage", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/syn/luLanguage"),
   });
 });

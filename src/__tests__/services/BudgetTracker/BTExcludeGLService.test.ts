@@ -6,21 +6,21 @@ describe('BTExcludeGLService', () => {
     name: 'getAll',
     serviceFn: BTExcludeGLService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/bt/glExcludeCodes", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/bt/glExcludeCodes"),
   });
   ServiceTestHelper.testCustom({
     name: 'create',
     serviceFn: BTExcludeGLService.create,
     appMethod: 'post',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/bt/glExcludeCodes", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/bt/glExcludeCodes"),
   });
   ServiceTestHelper.testCustom({
     name: 'deactivate',
     serviceFn: BTExcludeGLService.deactivate,
     appMethod: 'delete',
-    callArgs: ["123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/bt/glExcludeCodes/123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgsWithId(),
+    expectedArgs: ServiceTestHelper.getExpectedArgsWithId("/bt/glExcludeCodes"),
   });
 });

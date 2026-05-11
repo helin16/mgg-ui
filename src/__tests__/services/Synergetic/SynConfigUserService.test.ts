@@ -6,7 +6,7 @@ describe('SynConfigUserService', () => {
     name: 'getAll',
     serviceFn: SynConfigUserService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/syn/configUser", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/syn/configUser"),
   });
 });

@@ -6,7 +6,7 @@ describe('SynLuFundService', () => {
     name: 'getAll',
     serviceFn: SynLuFundService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/syn/luFund/", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/syn/luFund/"),
   });
 });

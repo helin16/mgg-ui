@@ -6,7 +6,7 @@ describe('SynLuOccupationPositionService', () => {
     name: 'getAll',
     serviceFn: SynLuOccupationPositionService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/syn/luOccupationPosition", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/syn/luOccupationPosition"),
   });
 });

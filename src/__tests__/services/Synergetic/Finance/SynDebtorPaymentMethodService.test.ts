@@ -6,14 +6,14 @@ describe('SynDebtorPaymentMethodService', () => {
     name: 'getAll',
     serviceFn: SynDebtorPaymentMethodService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/syn/debtorPaymentMethod", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/syn/debtorPaymentMethod"),
   });
   ServiceTestHelper.testCustom({
     name: 'getAllCurrent',
     serviceFn: SynDebtorPaymentMethodService.getAllCurrent,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/syn/debtorPaymentMethod/current", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/syn/debtorPaymentMethod/current"),
   });
 });

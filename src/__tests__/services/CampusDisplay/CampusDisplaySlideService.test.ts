@@ -6,42 +6,42 @@ describe('CampusDisplaySlideService', () => {
     name: 'createFromFolder',
     serviceFn: CampusDisplaySlideService.createFromFolder,
     appMethod: 'post',
-    callArgs: ["123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/campusDisplaySlide/folder/123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgsWithId(),
+    expectedArgs: ServiceTestHelper.getExpectedArgsWithId("/campusDisplaySlide/folder"),
   });
   ServiceTestHelper.testCustom({
     name: 'getAll',
     serviceFn: CampusDisplaySlideService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/campusDisplaySlide", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/campusDisplaySlide"),
   });
   ServiceTestHelper.testCustom({
     name: 'create',
     serviceFn: CampusDisplaySlideService.create,
     appMethod: 'post',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/campusDisplaySlide", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/campusDisplaySlide"),
   });
   ServiceTestHelper.testCustom({
     name: 'update',
     serviceFn: CampusDisplaySlideService.update,
     appMethod: 'put',
-    callArgs: ["123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/campusDisplaySlide/123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgsWithId(),
+    expectedArgs: ServiceTestHelper.getExpectedArgsWithId("/campusDisplaySlide"),
   });
   ServiceTestHelper.testCustom({
     name: 'upload',
     serviceFn: CampusDisplaySlideService.upload,
     appMethod: 'post',
-    callArgs: ["123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/campusDisplaySlide/upload/123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgsWithId(),
+    expectedArgs: ServiceTestHelper.getExpectedArgsWithId("/campusDisplaySlide/upload"),
   });
   ServiceTestHelper.testCustom({
     name: 'deactivate',
     serviceFn: CampusDisplaySlideService.deactivate,
     appMethod: 'delete',
-    callArgs: ["123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/campusDisplaySlide/123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgsWithId(),
+    expectedArgs: ServiceTestHelper.getExpectedArgsWithId("/campusDisplaySlide"),
   });
 });

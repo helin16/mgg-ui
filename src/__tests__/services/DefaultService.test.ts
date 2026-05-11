@@ -6,7 +6,7 @@ describe('DefaultService', () => {
     name: 'getRoot',
     serviceFn: DefaultService.getRoot,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs('/'),
   });
 });

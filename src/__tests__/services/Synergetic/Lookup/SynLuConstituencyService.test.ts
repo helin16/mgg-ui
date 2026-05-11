@@ -6,7 +6,7 @@ describe('SynLuConstituencyService', () => {
     name: 'getAll',
     serviceFn: SynLuConstituencyService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/syn/luConstituency", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/syn/luConstituency"),
   });
 });

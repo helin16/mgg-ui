@@ -6,7 +6,7 @@ describe('SynLearningAreaService', () => {
     name: 'getLearningAreas',
     serviceFn: SynLearningAreaService.getLearningAreas,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/syn/learningArea", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/syn/learningArea"),
   });
 });

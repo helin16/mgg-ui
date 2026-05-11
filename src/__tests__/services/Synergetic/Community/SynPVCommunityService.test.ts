@@ -6,7 +6,7 @@ describe('SynPVCommunityService', () => {
     name: 'getAll',
     serviceFn: SynPVCommunityService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/syn/pvCommunity", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/syn/pvCommunity"),
   });
 });

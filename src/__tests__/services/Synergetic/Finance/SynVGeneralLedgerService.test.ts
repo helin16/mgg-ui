@@ -6,7 +6,7 @@ describe('SynVGeneralLedgerService', () => {
     name: 'getAll',
     serviceFn: SynVGeneralLedgerService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/syn/vGeneralLedger", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/syn/vGeneralLedger"),
   });
 });

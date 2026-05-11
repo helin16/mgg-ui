@@ -6,7 +6,7 @@ describe('SynVStudentCoCurricularService', () => {
     name: 'getAll',
     serviceFn: SynVStudentCoCurricularService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/syn/vStudentCoCurricular", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/syn/vStudentCoCurricular"),
   });
 });

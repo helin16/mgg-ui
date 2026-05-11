@@ -6,14 +6,14 @@ describe('SynDonorReceiptService', () => {
     name: 'genPDF',
     serviceFn: SynDonorReceiptService.genPDF,
     appMethod: 'post',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/syn/donationReceipt/genPDF", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/syn/donationReceipt/genPDF"),
   });
   ServiceTestHelper.testCustom({
     name: 'sendEmail',
     serviceFn: SynDonorReceiptService.sendEmail,
     appMethod: 'post',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/syn/donationReceipt/email", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/syn/donationReceipt/email"),
   });
 });

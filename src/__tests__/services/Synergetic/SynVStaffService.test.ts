@@ -6,7 +6,7 @@ describe('SynVStaffService', () => {
     name: 'getStaffList',
     serviceFn: SynVStaffService.getStaffList,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/syn/vStaff", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/syn/vStaff"),
   });
 });

@@ -6,7 +6,7 @@ describe('SynLuStaffCategoryService', () => {
     name: 'getAll',
     serviceFn: SynLuStaffCategoryService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/syn/luStaffCategory", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/syn/luStaffCategory"),
   });
 });

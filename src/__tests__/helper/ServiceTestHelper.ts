@@ -4,6 +4,66 @@ import TestHelper from './TestHelper';
 type ServiceFn = (...args: any[]) => Promise<any>;
 const EMPTY = '__empty__';
 
+const getCallArgs = () => {
+  const {fakeParams, fakeConfig} = TestHelper.getFakeParams();
+
+  return [fakeParams, fakeConfig];
+};
+
+const getParamsOnlyCallArgs = () => {
+  const {fakeParams} = TestHelper.getFakeParams();
+
+  return [fakeParams];
+};
+
+const getCallArgsWithId = () => {
+  const {fakeId} = TestHelper.getFakeParams();
+
+  return [fakeId, ...getCallArgs()];
+};
+
+const getParamsOnlyCallArgsWithId = () => {
+  const {fakeId} = TestHelper.getFakeParams();
+
+  return [fakeId, ...getParamsOnlyCallArgs()];
+};
+
+const getExpectedArgs = (endPoint: string) => {
+  const {fakeParams, fakeConfig} = TestHelper.getFakeParams();
+
+  return [endPoint, fakeParams, fakeConfig];
+};
+
+const getParamsOnlyExpectedArgs = (endPoint: string) => {
+  const {fakeParams} = TestHelper.getFakeParams();
+
+  return [endPoint, fakeParams];
+};
+
+const getExpectedArgsWithId = (endPoint: string) => {
+  const {fakeId, fakeParams, fakeConfig} = TestHelper.getFakeParams();
+
+  return [`${endPoint}/${fakeId}`, fakeParams, fakeConfig];
+};
+
+const getExpectedArgsWithIdAndSuffix = (endPoint: string, suffix: string) => {
+  const {fakeId, fakeParams, fakeConfig} = TestHelper.getFakeParams();
+
+  return [`${endPoint}/${fakeId}/${suffix}`, fakeParams, fakeConfig];
+};
+
+const getParamsOnlyExpectedArgsWithId = (endPoint: string) => {
+  const {fakeId, fakeParams} = TestHelper.getFakeParams();
+
+  return [`${endPoint}/${fakeId}`, fakeParams];
+};
+
+const getParamsOnlyExpectedArgsWithIdAndSuffix = (endPoint: string, suffix: string) => {
+  const {fakeId, fakeParams} = TestHelper.getFakeParams();
+
+  return [`${endPoint}/${fakeId}/${suffix}`, fakeParams];
+};
+
 const expectArgsToMatch = (calls: any[][], expectedArgs: any[]) => {
   expect(calls).toHaveLength(1);
   const actualArgs = calls[0];
@@ -211,6 +271,16 @@ const testCustom = ({
   });
 
 const ServiceTestHelper = {
+  getCallArgs,
+  getCallArgsWithId,
+  getExpectedArgs,
+  getExpectedArgsWithId,
+  getExpectedArgsWithIdAndSuffix,
+  getParamsOnlyCallArgs,
+  getParamsOnlyCallArgsWithId,
+  getParamsOnlyExpectedArgs,
+  getParamsOnlyExpectedArgsWithId,
+  getParamsOnlyExpectedArgsWithIdAndSuffix,
   testGetAll,
   testGet,
   testCreate,

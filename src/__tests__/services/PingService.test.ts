@@ -6,7 +6,7 @@ describe('PingService', () => {
     name: 'ping',
     serviceFn: PingService.ping,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/ping", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/ping"),
   });
 });

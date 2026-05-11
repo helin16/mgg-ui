@@ -6,7 +6,7 @@ describe('SynJobPositionService', () => {
     name: 'getAll',
     serviceFn: SynJobPositionService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/syn/jobPosition", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/syn/jobPosition"),
   });
 });

@@ -6,7 +6,7 @@ describe('SynTagService', () => {
     name: 'getAll',
     serviceFn: SynTagService.getAll,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}],
-    expectedArgs: ["/syn/tag", {"fakeParams":"value"}],
+    callArgs: ServiceTestHelper.getParamsOnlyCallArgs(),
+    expectedArgs: ServiceTestHelper.getParamsOnlyExpectedArgs("/syn/tag"),
   });
 });

@@ -6,28 +6,28 @@ describe('HouseAwardScoreService', () => {
     name: 'getScores',
     serviceFn: HouseAwardScoreService.getScores,
     appMethod: 'get',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/houseAwards/score", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/houseAwards/score"),
   });
   ServiceTestHelper.testCustom({
     name: 'createScore',
     serviceFn: HouseAwardScoreService.createScore,
     appMethod: 'post',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/houseAwards/score", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/houseAwards/score"),
   });
   ServiceTestHelper.testCustom({
     name: 'deleteScore',
     serviceFn: HouseAwardScoreService.deleteScore,
     appMethod: 'delete',
-    callArgs: ["123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/houseAwards/score/123", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgsWithId(),
+    expectedArgs: ServiceTestHelper.getExpectedArgsWithId("/houseAwards/score"),
   });
   ServiceTestHelper.testCustom({
     name: 'awardScores',
     serviceFn: HouseAwardScoreService.awardScores,
     appMethod: 'post',
-    callArgs: [{"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
-    expectedArgs: ["/houseAwards/score/award", {"fakeParams":"value"}, {"headers":{"fakeConfig":"value"}}],
+    callArgs: ServiceTestHelper.getCallArgs(),
+    expectedArgs: ServiceTestHelper.getExpectedArgs("/houseAwards/score/award"),
   });
 });
