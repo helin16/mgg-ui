@@ -9,4 +9,16 @@ describe('app.slice', () => {
       backendSchoolBoxUrl: 'https://sb',
     });
   });
+
+  test('merges the payload into an existing state', () => {
+    expect(
+      appReducer(
+        {isProd: false, backendSchoolBoxUrl: 'https://old'},
+        setIsProd({isProd: true, backendSchoolBoxUrl: 'https://new'})
+      )
+    ).toEqual({
+      isProd: true,
+      backendSchoolBoxUrl: 'https://new',
+    });
+  });
 });
