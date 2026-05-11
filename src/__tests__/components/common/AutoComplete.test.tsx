@@ -2,7 +2,25 @@ import React from 'react';
 import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import AutoComplete from '../../../components/common/AutoComplete';
 
-jest.mock('react-select/async', () => require('../../../../__mocks__/react-select/async'));
+jest.mock('react-select/async', () => ({
+  __esModule: true,
+  default: ({ onSelected, onChange }: any) => {
+      const handleSelect = onSelected ?? onChange;
+      return (
+          <div data-testid="AsyncReactSelectTestId">
+            <button
+                type="button"
+                onClick={() => handleSelect({ label: 'Option 1', value: '1' })}
+            >
+              Load Async Options
+            </button>
+            <button type="button" onClick={() => handleSelect(null)}>
+              Clear Selection
+            </button>
+          </div>
+      );
+    },
+}));
 
 describe('AutoComplete', () => {
   test('loads async options and forwards the selected value', async () => {
