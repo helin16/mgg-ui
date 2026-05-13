@@ -1,5 +1,7 @@
 jest.mock('@react-pdf/renderer', () => ({
-  PDFDownloadLink: () => null,
+  pdf: jest.fn(() => ({
+    toBlob: jest.fn(),
+  })),
   Document: () => null,
   Page: () => null,
   Text: () => null,

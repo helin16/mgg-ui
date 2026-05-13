@@ -1,8 +1,8 @@
 import iVStudent from "../../../types/Synergetic/Student/iVStudent";
 import iSynVMedicalConditionStudent from "../../../types/Synergetic/iSynVMedicalConditionStudent";
-import React from "react";
+import React, { useState } from "react";
 import {
-  PDFDownloadLink,
+  pdf,
   Document,
   Page,
   Text,
@@ -120,8 +120,9 @@ const MedicalPosterGenBtn = ({
   conditionsMap
 }: iMedicalPosterGenBtn) => {
   const { user: currentUser } = useSelector((state: RootState) => state.auth);
+  const [isGenerating, setIsGenerating] = useState(false);
   const fileName = `Medical_condition_poster_${moment().format(
-    "YYYY_MMM_DD_HH_ii_ss"
+    "YYYY_MMM_DD_HH_mm_ss"
   )}.pdf`;
 
   const getFileYear = () => {
@@ -146,29 +147,37 @@ const MedicalPosterGenBtn = ({
     return _.uniq(conditionNames).filter(name => name !== '').join(', ');
   }
 
-  return (
-    <PDFDownloadLink
-      document={
+  const onGeneratePoster = async () => {
+    if (isGenerating) {
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const blob = await pdf(
         <MedicalPoster
-          students={students.sort((st1, st2) => st1.StudentYearLevelSort > st2.StudentYearLevelSort ? 1 : -1)}
+          students={[...students].sort((st1, st2) => st1.StudentYearLevelSort > st2.StudentYearLevelSort ? 1 : -1)}
           conditionsMap={conditionsMap}
           conditionNames={getConditions()}
           fileYear={getFileYear()}
           fileSemester={getFileSemester()}
         />
-      }
-      fileName={fileName}
-    >
-      {
-        // @ts-ignore
-        (props: any) => {
-        return renderBtn(() => {
-          if (props.url) {
-            window.open(props.url, fileName);
-          }
-        }, props.loading);
-      }}
-    </PDFDownloadLink>
+      ).toBlob();
+      const downloadUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(downloadUrl);
+    } finally {
+      setIsGenerating(false);
+    }
+  }
+
+  return (
+    renderBtn(onGeneratePoster, isGenerating)
   );
 };
 
