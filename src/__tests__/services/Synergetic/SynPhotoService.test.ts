@@ -15,10 +15,10 @@ describe('SynPhotoService', () => {
   describe('convertBufferToUrl', () => {
     test('converts binary photo data to a data URL', () => {
       expect(SynPhotoService.convertBufferToUrl(Uint8Array.from([97, 98, 99]), 'jpg')).toBe(
-        'data::image/jpg;base64,YWJj'
+        'data:image/jpg;base64,YWJj'
       );
       expect(SynPhotoService.convertBufferToUrl(Uint8Array.from([97, 98, 99]))).toBe(
-        'data::image/png;base64,YWJj'
+        'data:image/png;base64,YWJj'
       );
     });
   });

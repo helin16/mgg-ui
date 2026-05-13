@@ -20,6 +20,9 @@ import SynVDocumentService from "../../services/Synergetic/SynVDocumentService";
 import { HEADER_NAME_SELECTING_FIELDS } from "../../services/AppService";
 import MedicalReportExportDropdown from "./components/MedicalReportExportDropdown";
 import Page401 from "../../components/Page401";
+import * as _ from 'lodash';
+import SynPhotoService from "../../services/Synergetic/SynPhotoService";
+import UtilsService from "../../services/UtilsService";
 
 const ResultWrapper = styled.div`
   padding: 1rem 0;
@@ -235,7 +238,24 @@ const MedicalReportPage = () => {
                   };
               }, {})
           );
-          const students = resp[0] || [];
+          const studentArr = resp[0] || [];
+          const studentIDs = _.uniq(studentArr.map(st => st.StudentID));
+          const photosMap: {[key: number]: string} = ((await Promise.all(studentIDs.map(stId => SynPhotoService.getPhoto(stId)
+              .then(resp => {
+                  if (!resp || !('Photo' in resp)) {
+                      return [stId, UtilsService.getFullUrl("images/User-avatar.png")];
+                  } else {
+                      return [stId, SynPhotoService.convertBufferToUrl(resp.Photo.data, resp.PhotoType)];
+                  }
+              })
+              .catch(() => [stId, UtilsService.getFullUrl("images/User-avatar.png")])))) || []).reduce((map, [stdId, url]) => ({
+              ...map,
+              [stdId]: url
+          }), {});
+          const students = studentArr.map(student => ({
+              ...student,
+              profileUrl: student.StudentID in photosMap ? photosMap[student.StudentID] : student.profileUrl,
+          }));
 
           const classCodeStudentIds = (resp[2]?.data || []).map(
               studentClass => studentClass.StudentID
