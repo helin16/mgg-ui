@@ -10,7 +10,7 @@ const getPhoto = (id: string | number, params = {}): Promise<iSynPhoto> => {
 const convertBufferToUrl = (data: any, type = 'png') => {
   // @ts-ignore
   const base64String = (new Buffer.from(data)).toString('base64');
-  return `data::image/${type.toLowerCase()};base64,${base64String}`;
+  return `data:image/${type.toLowerCase()};base64,${base64String}`;
 }
 
 const SynPhotoService = {
@@ -19,4 +19,3 @@ const SynPhotoService = {
 };
 
 export default SynPhotoService;
-
