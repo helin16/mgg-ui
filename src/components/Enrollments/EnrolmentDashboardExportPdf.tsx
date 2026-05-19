@@ -82,22 +82,24 @@ const styles = StyleSheet.create({
     borderRightColor: '#F8FAFC',
   },
   rowLabel: {
-    paddingVertical: 5,
-    paddingHorizontal: 4,
+    paddingVertical: 4,
+    paddingHorizontal: 3,
     borderRightWidth: 1,
     borderRightColor: '#E6EAF0',
     fontSize: 6,
     textAlign: 'right',
   },
   cell: {
-    paddingVertical: 5,
-    paddingHorizontal: 2,
+    paddingVertical: 4,
+    paddingHorizontal: 1,
     textAlign: 'center',
     borderRightWidth: 1,
     borderRightColor: '#E6EAF0',
-    fontSize: 6,
+    fontSize: 8,
   },
 });
+
+const disableHyphenation = (word: string | null) => [word || ''];
 
 const EnrolmentDashboardExportPdf = ({
   columns,
@@ -120,39 +122,40 @@ const EnrolmentDashboardExportPdf = ({
     <Document>
       <Page size="A4" orientation="landscape" style={styles.page}>
         <View style={styles.header} fixed>
-          <Text style={styles.title}>Enrolment Numbers</Text>
-          <Text style={styles.subtle}>Generated: {moment().format('DD MMM YYYY h:mm A')}</Text>
-          <Text style={styles.subtle}>Campuses: {selectedCampusLabels.join(', ') || '-'}</Text>
-          <Text style={styles.subtle}>Student Type: {selectedFullFeeStudentType}</Text>
+          <Text style={styles.title} hyphenationCallback={disableHyphenation}>Enrolment Numbers</Text>
+          <Text style={styles.subtle} hyphenationCallback={disableHyphenation}>Generated: {moment().format('DD MMM YYYY h:mm A')}</Text>
+          <Text style={styles.subtle} hyphenationCallback={disableHyphenation}>Campuses: {selectedCampusLabels.join(', ') || '-'}</Text>
+          <Text style={styles.subtle} hyphenationCallback={disableHyphenation}>Student Type: {selectedFullFeeStudentType}</Text>
         </View>
 
         <View style={styles.table}>
           <View style={[styles.row, styles.headerRow]} fixed>
-            <Text style={[styles.headerCell, {width: rowLabelWidth, borderBottomWidth: 0}]}></Text>
-            <Text style={[styles.headerCell, {width: getSpanWidth(currentYearColumnCount)}]}>{currentYear}</Text>
-            <Text style={[styles.headerCell, {width: getSpanWidth(futureYearColumnCount), borderRightWidth: 0}]}>{nextYear}</Text>
+            <Text style={[styles.headerCell, {width: rowLabelWidth, borderBottomWidth: 0}]} hyphenationCallback={disableHyphenation}></Text>
+            <Text style={[styles.headerCell, {width: getSpanWidth(currentYearColumnCount)}]} hyphenationCallback={disableHyphenation}>{currentYear}</Text>
+            <Text style={[styles.headerCell, {width: getSpanWidth(futureYearColumnCount), borderRightWidth: 0}]} hyphenationCallback={disableHyphenation}>{nextYear}</Text>
           </View>
 
           <View style={[styles.row, styles.headerRow]} fixed>
-            <Text style={[styles.headerCell, {width: rowLabelWidth, borderBottomWidth: 0}]}></Text>
-            <Text style={[styles.headerCell, {width: getSpanWidth(3)}]}>Past</Text>
-            <Text style={[styles.headerCell, {width: getSpanWidth(1)}]}></Text>
-            <Text style={[styles.headerCell, {width: getSpanWidth(2 + (showTransitColumns ? 2 : 0))}]}>{`Existing ${currentYear}`}</Text>
-            <Text style={[styles.headerCell, {width: getSpanWidth(1)}]}></Text>
-            <Text style={[styles.headerCell, {width: getSpanWidth(1)}]}></Text>
-            <Text style={[styles.headerCell, {width: getSpanWidth(1)}]}></Text>
+            <Text style={[styles.headerCell, {width: rowLabelWidth, borderBottomWidth: 0}]} hyphenationCallback={disableHyphenation}></Text>
+            <Text style={[styles.headerCell, {width: getSpanWidth(3)}]} hyphenationCallback={disableHyphenation}>Past</Text>
+            <Text style={[styles.headerCell, {width: getSpanWidth(1)}]} hyphenationCallback={disableHyphenation}></Text>
+            <Text style={[styles.headerCell, {width: getSpanWidth(2 + (showTransitColumns ? 2 : 0))}]} hyphenationCallback={disableHyphenation}>{`Existing ${currentYear}`}</Text>
+            <Text style={[styles.headerCell, {width: getSpanWidth(1)}]} hyphenationCallback={disableHyphenation}></Text>
+            <Text style={[styles.headerCell, {width: getSpanWidth(1)}]} hyphenationCallback={disableHyphenation}></Text>
+            <Text style={[styles.headerCell, {width: getSpanWidth(1)}]} hyphenationCallback={disableHyphenation}></Text>
             {currentFutureStatusCount > 0 && (
-              <Text style={[styles.headerCell, {width: getSpanWidth(currentFutureStatusCount)}]}>{`Future ${currentYear}`}</Text>
+              <Text style={[styles.headerCell, {width: getSpanWidth(currentFutureStatusCount)}]} hyphenationCallback={disableHyphenation}>{`Future ${currentYear}`}</Text>
             )}
-            <Text style={[styles.headerCell, {width: getSpanWidth(1)}]}></Text>
-            <Text style={[styles.headerCell, {width: getSpanWidth(futureYearColumnCount), borderRightWidth: 0}]}>{`Future ${nextYear}`}</Text>
+            <Text style={[styles.headerCell, {width: getSpanWidth(1)}]} hyphenationCallback={disableHyphenation}></Text>
+            <Text style={[styles.headerCell, {width: getSpanWidth(futureYearColumnCount), borderRightWidth: 0}]} hyphenationCallback={disableHyphenation}>{`Future ${nextYear}`}</Text>
           </View>
 
           <View style={[styles.row, styles.headerRow]} fixed>
-            <Text style={[styles.headerCell, {width: rowLabelWidth}]}></Text>
+            <Text style={[styles.headerCell, {width: rowLabelWidth}]} hyphenationCallback={disableHyphenation}></Text>
             {columns.map((column, index) => (
               <Text
                 key={column.key}
+                hyphenationCallback={disableHyphenation}
                 style={[
                   styles.headerCell,
                   column.isTotal ? styles.totalCell : {},
@@ -170,6 +173,7 @@ const EnrolmentDashboardExportPdf = ({
           {rows.map((row) => (
             <View key={row.label} style={row.isSummary ? [styles.row, styles.summaryRow] : styles.row} wrap={false}>
               <Text
+                hyphenationCallback={disableHyphenation}
                 style={[
                   styles.rowLabel,
                   row.isSummary ? styles.summaryCell : {},
@@ -181,6 +185,7 @@ const EnrolmentDashboardExportPdf = ({
               {columns.map((column, index) => (
                 <Text
                   key={`${row.label}-${column.key}`}
+                  hyphenationCallback={disableHyphenation}
                   style={[
                     styles.cell,
                     row.isSummary ? styles.summaryCell : {},
