@@ -3,6 +3,7 @@ import MathHelper from '../../helper/MathHelper';
 import moment from 'moment-timezone';
 import {Button, Spinner, Table} from 'react-bootstrap';
 import React, {useEffect, useState} from 'react';
+import {pdf} from '@react-pdf/renderer';
 import iSynLuYearLevel from '../../types/Synergetic/Lookup/iSynLuYearLevel';
 import Toaster from '../../services/Toaster';
 import SynLuYearLevelService from '../../services/Synergetic/Lookup/SynLuYearLevelService';
@@ -23,12 +24,16 @@ import SynLuFutureStatusService from '../../services/Synergetic/Lookup/SynLuFutu
 import iSynLuFutureStatus from '../../types/Synergetic/Lookup/iSynLuFutureStatus';
 import {FlexContainer} from '../../styles';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
-import {ArrowClockwise} from 'react-bootstrap-icons';
+import {ArrowClockwise, FileEarmarkPdf} from 'react-bootstrap-icons';
 import LoadingBtn from '../common/LoadingBtn';
 import SynLuTransitionDateService from '../../services/Synergetic/Lookup/SynLuTransitionDateService';
 import iSynLuTransitionDate from '../../types/Synergetic/Lookup/iSynLuTransitionDate';
 import ToggleBtn from '../common/ToggleBtn';
 import SynFileSemesterService from '../../services/Synergetic/SynFileSemesterService';
+import EnrolmentDashboardExportPdf, {
+  iEnrolmentDashboardExportColumn,
+  iEnrolmentDashboardExportRow,
+} from './EnrolmentDashboardExportPdf';
 
 enum FullFeeStudentsTypes {
   All = 'All',
@@ -40,6 +45,17 @@ type iYearLevelMap = {[key: string]: iSynLuYearLevel[]}
 type iCampusMap = {[key: string]: iSynLuCampus}
 type iStudentMap = {[key: number]: iVPastAndCurrentStudent}
 type iFutureStatusMap = {[key: string]: iSynLuFutureStatus}
+type iDashboardColumn = iEnrolmentDashboardExportColumn & {
+  className: string;
+  dataCol: string;
+}
+type iDashboardRow = {
+  key: string;
+  label: string;
+  className: string;
+  cells: {[key: string]: iVPastAndCurrentStudent[]};
+  isSummary?: boolean;
+}
 const Wrapper = styled.div`
     .border-right {
         border-right: 2px black solid;
@@ -107,6 +123,7 @@ const EnrolmentDashboardPanel = () => {
   const [yearLevels, setYearLevels] = useState<iSynLuYearLevel[]>([]);
   const [showTransitColumns, setShowTransitColumns] = useState(false);
   const [transitionDate, setTransitionDate] = useState<iSynLuTransitionDate | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
 
   useEffect(() => {
@@ -242,78 +259,118 @@ const EnrolmentDashboardPanel = () => {
     return true;
   }
 
-  const getCurrentFutureTds = (currentFutureStudents: iVPastAndCurrentStudent[], newStudentsThisYear: iVPastAndCurrentStudent[], yrLvls: iSynLuYearLevel[] = []) => {
-    const startDuringYearStudents = newStudentsThisYear.filter(student => moment(student.StudentEntryDate).month() > 0);
-    // const startDuringYearStudents_started = startDuringYearStudents.filter(student => moment(student.StudentEntryDate).isSameOrBefore(moment()));
-    const startDuringYearStudents_notStarted = startDuringYearStudents.filter(student => moment(student.StudentEntryDate).isAfter(moment()));
+  const getDashboardColumns = (): iDashboardColumn[] => {
+    const columns: iDashboardColumn[] = [
+      {key: 'current-continued-prev', label: `Continued from ${lastYear}`, className: 'current', dataCol: 'continued-prev', isTotal: false},
+      {key: 'current-start-of-year', label: 'New (start of year)', className: 'current', dataCol: 'start-of-year', isTotal: false},
+      {key: 'current-day-1', label: `Day 1 ${currentYear} Total`, className: 'current total border-right sm', dataCol: 'current-day-1', isTotal: true},
+      {key: 'current-start-during', label: 'New (during year)', className: 'current border-right sm', dataCol: 'start-during', isTotal: false},
+      {key: 'current-left-during', label: 'Left (during year)', className: 'current', dataCol: 'left-during', isTotal: false},
+    ];
 
-    return (
-      <>
-        {
-          currentFutureStatuses.map((status, index) => {
-            return (
-              <td
-                className={`current ${index < MathHelper.sub(currentFutureStatuses.length, 1) ? '' : 'border-right sm'}`}
-                data-col={`future-${status.Code || 'no-status'}`}
-                key={status.Code || ''}>
-                {
-                  getClickableNumber(
-                    [
-                      ...getStudents([...currentFutureStudents, ...startDuringYearStudents_notStarted], yrLvls, [status.Code]),
-                      // ...(status.Code === FUTURE_STUDENT_STATUS_FINALISED ? getStudents(startDuringYearStudents_notStarted, yrLvls) : [])
-                    ]
-                  )
-                }
-              </td>
-            )
-          })
-        }
-      </>
-    )
+    if (showTransitColumns) {
+      columns.push(
+        {key: 'current-transitioned-in', label: 'Transitioned In', className: 'current', dataCol: 'transitioned-in', isTotal: false},
+        {key: 'current-transitioned-out', label: 'Transitioned Out', className: 'current', dataCol: 'transitioned-out', isTotal: false},
+      );
+    }
+
+    columns.push(
+      {key: 'current-loa-during', label: 'L.O.A. (Returning)', className: 'current', dataCol: 'loa-returning', isTotal: false},
+      {key: 'current-total-today', label: 'Total Today', className: 'current total', dataCol: 'total-today', isTotal: true},
+      {key: 'current-future-loa', label: 'Approved Future L.O.A.', className: 'current', dataCol: 'future-loa', isTotal: false},
+      {key: 'current-not-returning', label: 'Not Returning Next Year', className: 'current', dataCol: 'not-returning', isTotal: false},
+    );
+
+    currentFutureStatuses.forEach((status, index) => {
+      columns.push({
+        key: `current-status-${status.Code || 'no-status'}`,
+        label: status.Description || status.Code || '',
+        className: `current ${index < MathHelper.sub(currentFutureStatuses.length, 1) ? '' : 'border-right sm'}`.trim(),
+        dataCol: `future-${status.Code || 'no-status'}`,
+        isTotal: false,
+      });
+    });
+
+    columns.push({key: 'current-total-year-end', label: 'Total at Year End', className: 'current total border-right', dataCol: 'total-year-end', isTotal: true});
+    columns.push({key: 'future-continued-prev', label: `Continued from ${currentYear}`, className: 'future', dataCol: 'continued-prev', isTotal: false});
+    columns.push({key: 'future-loa', label: `Returning L.O.A. from ${currentYear}`, className: 'future', dataCol: 'loa', isTotal: false});
+
+    futureStatuses.forEach((status) => {
+      columns.push({
+        key: `future-status-${status.Code || 'no-status'}`,
+        label: status.Description || status.Code || '',
+        className: 'future',
+        dataCol: `future-${status.Code || 'no-status'}`,
+        isTotal: false,
+      });
+    });
+
+    columns.push({key: 'future-total-start', label: 'Total Start', className: 'total future border-right', dataCol: 'total-start', isTotal: true});
+
+    return columns;
   }
 
-  const getUniqStudents = (students: iVPastAndCurrentStudent[]) => {
-    return _.uniqBy(students, st => st.StudentID);
+  type iGetRowCells = {
+    currentStudents: iVPastAndCurrentStudent[];
+    futureStudents: iVPastAndCurrentStudent[];
+    yrLvls?: iSynLuYearLevel[]
   }
 
-  const getStudentsNotLeftYet = (students: iVPastAndCurrentStudent[]) => {
-    return students.filter(student => {
-      const leavingDate = `${student.StudentLeavingDate || ''}`.trim();
-      if (leavingDate === '') {
-        return true;
-      }
-      return moment(leavingDate).isAfter(moment());
-    })
-  }
-
-  const getFutureFutureTds = (studentsEndOfCurrentYear: iVPastAndCurrentStudent[], futureStudents: iVPastAndCurrentStudent[], leftStudents: iVPastAndCurrentStudent[], yrLvls: iSynLuYearLevel[] = []) => {
-    const yrLvlCodes = yrLvls.map(yrLvl => `${yrLvl.Code}`.trim());
+  const getDashboardRowCells = ({ yrLvls, currentStudents, futureStudents }: iGetRowCells) => {
+    const safeCurrentStudents = currentStudents.filter(Boolean);
+    const safeFutureStudents = futureStudents.filter(Boolean);
+    const currentFutureStatusCodes = currentFutureStatuses.map(status => status.Code);
+    const leftStudents = safeCurrentStudents.filter(student => moment(student.StudentLeavingDate).isSameOrBefore(moment()));
+    const continuedStudentsFromLastYear = safeCurrentStudents.filter(student => moment(student.StudentEntryDate).year() < currentYear);
+    const futureStudentsCurrentYear = safeFutureStudents.filter(student => student.FileYear === currentYear);
+    const newStudentsCurrentYear = safeCurrentStudents.filter(student => moment(student.StudentEntryDate).year() === currentYear);
+    const startBeginningOfYear = newStudentsCurrentYear.filter(student => moment(student.StudentEntryDate).month() === 0);
+    const startDuringYearStudents = newStudentsCurrentYear.filter(student => moment(student.StudentEntryDate).month() > 0);
+    const startDuringYearStudentsNotStarted = startDuringYearStudents.filter(student => moment(student.StudentEntryDate).isAfter(moment()));
+    const leftStudentWillComeBack = leftStudents.filter(student => `${student.StudentReturningDate || ''}`.trim() !== '' &&  moment(`${student.StudentReturningDate || ''}`.trim()).isAfter(moment()));
+    const currentDay1 = [...continuedStudentsFromLastYear, ...startBeginningOfYear];
+    const studentsToday = getUniqStudents(getStudentsNotLeftYet([
+      ...currentDay1,
+      ...startDuringYearStudents,
+    ]));
+    const normalStudentsThisYearLeaving = getStudentsNotLeftYet(studentsToday).filter(student => `${student.StudentLeavingDate || ''}`.trim() !== '' &&  moment(`${student.StudentLeavingDate || ''}`.trim()).isAfter(moment()));
+    const normalStudentsThisYearLeavingNotComeBack = normalStudentsThisYearLeaving.filter(student => `${student.StudentReturningDate || ''}`.trim() === '');
+    const normalStudentsThisYearLeavingWillComeBack = normalStudentsThisYearLeaving.filter(student => `${student.StudentReturningDate || ''}`.trim() !== '' &&  moment(`${student.StudentReturningDate || ''}`.trim()).isAfter(moment()));
+    const studentsEndOfCurrentYear = getUniqStudents([
+      ...studentsToday,
+      ...(futureStudentsCurrentYear.filter(std => currentFutureStatusCodes.indexOf(std.StudentStatus) >=0 )),
+    ]);
+    const transitionedInStudents = transitionDate ? newStudentsCurrentYear.filter(st => moment(st.StudentEntryDate).isSameOrAfter(moment(transitionDate.TransitionStartAt))) : [];
+    const transitionedOutStudents = transitionDate ? leftStudents.filter(st => moment(st.StudentLeavingDate).isSameOrAfter(moment(transitionDate.TransitionStartAt))) : [];
+    const yrLvlCodes = (yrLvls || []).map(yrLvl => `${yrLvl.Code}`.trim());
     const futureStatusCodes = futureStatuses.map(status => status.Code);
-    const currentNotLeavingNextYearStudents_notRepeating = studentsEndOfCurrentYear.filter(student => `${student.StudentOverrideNextYearLevel || ''}`.trim() === '');
-    const currentNotLeavingNextYearStudents_repeating = studentsEndOfCurrentYear.filter(student => `${student.StudentOverrideNextYearLevel || ''}`.trim() !== '');
+    const currentNotLeavingNextYearStudentsNotRepeating = studentsEndOfCurrentYear.filter(student => `${student.StudentOverrideNextYearLevel || ''}`.trim() === '');
+    const currentNotLeavingNextYearStudentsRepeating = studentsEndOfCurrentYear.filter(student => `${student.StudentOverrideNextYearLevel || ''}`.trim() !== '');
     const studentsFromLowerYearLevelMap: {[key: string]: iVPastAndCurrentStudent[]} = yearLevels.reduce((map, yrLvl) => {
-      const currentYearLvlIndex = _.findIndex(yearLevels, yearLvl => yearLvl.Code === yrLvl.Code);
+      const currentYearLvlIndex = _.findIndex(yearLevels, yearLevel => yearLevel.Code === yrLvl.Code);
       const previousIndex = currentYearLvlIndex - 1;
       const previousYearLevel = yearLevels[previousIndex] || null;
-      const studentsFromLowerYearLevel = previousIndex < 0 || previousYearLevel === null ? [] : getStudents(currentNotLeavingNextYearStudents_notRepeating, [previousYearLevel])
+      const studentsFromLowerYearLevel = previousIndex < 0 || previousYearLevel === null ? [] : getStudents(currentNotLeavingNextYearStudentsNotRepeating, [previousYearLevel]);
       return {
         ...map,
-        [`${yrLvl.Code}`.trim()]: [...studentsFromLowerYearLevel, ...currentNotLeavingNextYearStudents_notRepeating.filter(student => {
-          return `${student.StudentOverrideNextYearLevel || ''}`.trim() === `${yrLvl.Code}`
-        })],
+        [`${yrLvl.Code}`.trim()]: [
+          ...studentsFromLowerYearLevel,
+          ...currentNotLeavingNextYearStudentsNotRepeating.filter(student => `${student.StudentOverrideNextYearLevel || ''}`.trim() === `${yrLvl.Code}`)
+        ],
       }
     }, {});
     const futureStudentsNextYear = getUniqStudents(
       futureStudents
-      .filter(st => st.FileYear === nextYear)
-      .filter(student => yrLvlCodes.length <= 0 ? true :  yrLvlCodes.indexOf(`${student.StudentEntryYearLevel}`.trim()) >= 0)
-      .filter(student => futureStatusCodes.indexOf(`${student.StudentStatus}`.trim()) >=0 )
+        .filter(Boolean)
+        .filter(st => st.FileYear === nextYear)
+        .filter(student => yrLvlCodes.length <= 0 ? true : yrLvlCodes.indexOf(`${student.StudentEntryYearLevel}`.trim()) >= 0)
+        .filter(student => futureStatusCodes.indexOf(`${student.StudentStatus}`.trim()) >=0 )
     );
-    const repeatingStudents = getUniqStudents(currentNotLeavingNextYearStudents_repeating
-      .filter(student => yrLvlCodes.length <= 0 ? true :  yrLvlCodes.indexOf(`${student.StudentOverrideNextYearLevel}`.trim()) >= 0));
-
+    const repeatingStudents = getUniqStudents(currentNotLeavingNextYearStudentsRepeating
+      .filter(student => yrLvlCodes.length <= 0 ? true : yrLvlCodes.indexOf(`${student.StudentOverrideNextYearLevel}`.trim()) >= 0));
     const studentsFromLowerYearLevel = Object.keys(studentsFromLowerYearLevelMap)
-      .filter(yrLvlCode => yrLvlCodes.length <= 0 ? true : yrLvlCodes.indexOf(yrLvlCode) >=0)
+      .filter(yrLvlCode => yrLvlCodes.length <= 0 ? true : yrLvlCodes.indexOf(yrLvlCode) >= 0)
       .map(ylCode => ylCode in studentsFromLowerYearLevelMap ? studentsFromLowerYearLevelMap[ylCode] : [])
       .reduce((arr: iVPastAndCurrentStudent[], studentArr: iVPastAndCurrentStudent[]) => [...arr, ...studentArr], []);
     const continuedFromCurrentYear = getUniqStudents([
@@ -335,7 +392,7 @@ const EnrolmentDashboardPanel = () => {
           }
           let returningYearLevel = `${student.StudentOverrideNextYearLevel || ''}`.trim();
           if (returningYearLevel === '') {
-            const currentYearLvlIndex = _.findIndex(yearLevels, yearLvl => yearLvl.Code === student.StudentYearLevel);
+            const currentYearLvlIndex = _.findIndex(yearLevels, yearLevel => yearLevel.Code === student.StudentYearLevel);
             const nextIndex = currentYearLvlIndex + 1;
             const nextYearLevel = yearLevels[nextIndex] || null;
             if (!nextYearLevel) {
@@ -352,96 +409,169 @@ const EnrolmentDashboardPanel = () => {
       ...continuedFromCurrentYear,
       ...loaStudents,
       ...futureStudentsNextYear,
-    ])
-    return (
-      <>
-        <td className={'future'} key={`future-continued`}>{getClickableNumber(getStudents(continuedFromCurrentYear))}</td>
-        <td className={'future'} key={`future-loa`}>{getClickableNumber(getStudents(loaStudents))}</td>
-        {
-          futureStatusCodes.map((fStatusCode) => (
-            <td key={`future-${fStatusCode}`} className={'future'}>{getClickableNumber(getStudents(futureStudentsNextYear, [], [fStatusCode]))}</td>
-          ))
-        }
-        <td className={'future'} key={`future-total`}>{getClickableNumber(getStudents(futureStudentsNextYearTotal))}</td>
-      </>
-    )
-  }
-
-  type iGetTR = {
-    currentStudents: iVPastAndCurrentStudent[];
-    futureStudents: iVPastAndCurrentStudent[];
-    yrLvls?: iSynLuYearLevel[]
-  }
-  const getTR = ({ yrLvls, currentStudents, futureStudents }: iGetTR, title: React.ReactNode, key: string, className: string) => {
-    const currentFutureStatusCodes = currentFutureStatuses.map(status => status.Code);
-    const leftStudents = currentStudents.filter(student => moment(student.StudentLeavingDate).isSameOrBefore(moment()));
-    const continuedStudentsFromLastYear = currentStudents.filter(student => moment(student.StudentEntryDate).year() < currentYear);
-
-    const futureStudentsCurrentYear = futureStudents.filter(student => student.FileYear === currentYear);
-    const newStudentsCurrentYear = currentStudents.filter(student => moment(student.StudentEntryDate).year() === currentYear);
-
-
-    const startBeginningOfYear = newStudentsCurrentYear.filter(student => moment(student.StudentEntryDate).month() === 0);
-    const startDuringYearStudents = newStudentsCurrentYear.filter(student => moment(student.StudentEntryDate).month() > 0);
-
-    const leftStudent_willComeBack = leftStudents.filter(student => `${student.StudentReturningDate || ''}`.trim() !== '' &&  moment(`${student.StudentReturningDate || ''}`.trim()).isAfter(moment()));
-    const currentDay1 = [...continuedStudentsFromLastYear, ...startBeginningOfYear];
-    const studentsToday = getUniqStudents(getStudentsNotLeftYet([
-      ...currentDay1,
-      ...startDuringYearStudents,
-    ]));
-    const normalStudentsThisYear_leaving = getStudentsNotLeftYet(studentsToday).filter(student => `${student.StudentLeavingDate || ''}`.trim() !== '' &&  moment(`${student.StudentLeavingDate || ''}`.trim()).isAfter(moment()));
-    const normalStudentsThisYear_leaving_notComeBack = normalStudentsThisYear_leaving.filter(student => `${student.StudentReturningDate || ''}`.trim() === '');
-    const normalStudentsThisYear_leaving_willComeBack = normalStudentsThisYear_leaving.filter(student => `${student.StudentReturningDate || ''}`.trim() !== '' &&  moment(`${student.StudentReturningDate || ''}`.trim()).isAfter(moment()));
-
-    // const startDuringYearStudents_started = startDuringYearStudents.filter(student => moment(student.StudentEntryDate).isSameOrBefore(moment()));
-    // const startDuringYearStudents_notStarted = futureStudentsCurrentYear.filter(student => moment(student.StudentEntryDate).isAfter(moment()));
-    const studentsEndOfCurrentYear = getUniqStudents([
-      ...studentsToday,
-      // ...startDuringYearStudents_notStarted,
-      ...(futureStudentsCurrentYear.filter(std => currentFutureStatusCodes.indexOf(std.StudentStatus) >=0 )),
     ]);
-    const transitionedInStudents = transitionDate ? newStudentsCurrentYear.filter(st => moment(st.StudentEntryDate).isSameOrAfter(moment(transitionDate.TransitionStartAt))) : [];
-    const transitionedOutStudents = transitionDate ? leftStudents.filter(st => moment(st.StudentLeavingDate).isSameOrAfter(moment(transitionDate.TransitionStartAt))) : [];
-    return <tr key={key} className={className}>
-      <td className={'border-right'}>{title}</td>
-      <td className={'current'}
-          data-col={'continued-prev'}>{getClickableNumber(getStudents(continuedStudentsFromLastYear, yrLvls))}</td>
-      <td className={'current'}
-          data-col={'start-of-year'}>{getClickableNumber(getStudents(startBeginningOfYear, yrLvls))}</td>
-      <td className={'current total border-right sm'}
-          data-col={'current-day-1'}>{getClickableNumber(getStudents(currentDay1, yrLvls))}</td>
-      <td className={'current'}
-          data-col={'start-during'}>{getClickableNumber(getStudents(startDuringYearStudents, yrLvls))}</td>
-      <td className={'current'} data-col={'left-during'}>{getClickableNumber(getStudents(leftStudents, yrLvls))}</td>
-      {
-        showTransitColumns && (
-          <>
-            <td className={`current`} data-col={'transitioned-in'}>
-              {getClickableNumber(getStudents(transitionedInStudents, yrLvls))}
-            </td>
-            <td className={`current`} data-col={'transitioned-out'}>
-              {getClickableNumber(getStudents(transitionedOutStudents, yrLvls))}
-            </td>
-          </>
-        )
+
+    const cells: {[key: string]: iVPastAndCurrentStudent[]} = {
+      'current-continued-prev': getStudents(continuedStudentsFromLastYear, yrLvls),
+      'current-start-of-year': getStudents(startBeginningOfYear, yrLvls),
+      'current-day-1': getStudents(currentDay1, yrLvls),
+      'current-start-during': getStudents(startDuringYearStudents, yrLvls),
+      'current-left-during': getStudents(leftStudents, yrLvls),
+      'current-loa-during': getStudents(leftStudentWillComeBack, yrLvls),
+      'current-total-today': getStudents(studentsToday, yrLvls),
+      'current-future-loa': getStudents(normalStudentsThisYearLeavingWillComeBack, yrLvls),
+      'current-not-returning': getStudents(normalStudentsThisYearLeavingNotComeBack, yrLvls),
+      'current-total-year-end': getStudents(studentsEndOfCurrentYear, yrLvls),
+      'future-continued-prev': getStudents(continuedFromCurrentYear),
+      'future-loa': getStudents(loaStudents),
+      'future-total-start': getStudents(futureStudentsNextYearTotal),
+    };
+
+    if (showTransitColumns) {
+      cells['current-transitioned-in'] = getStudents(transitionedInStudents, yrLvls);
+      cells['current-transitioned-out'] = getStudents(transitionedOutStudents, yrLvls);
+    }
+
+    currentFutureStatuses.forEach((status) => {
+      cells[`current-status-${status.Code || 'no-status'}`] = getStudents(
+        [...safeCurrentStudents, ...startDuringYearStudentsNotStarted],
+        yrLvls,
+        [status.Code]
+      );
+    });
+
+    futureStatuses.forEach((status) => {
+      cells[`future-status-${status.Code || 'no-status'}`] = getStudents(futureStudentsNextYear, [], [status.Code]);
+    });
+
+    return cells;
+  }
+
+  const getUniqStudents = (students: iVPastAndCurrentStudent[]) => {
+    return _.uniqBy(students, st => st.StudentID);
+  }
+
+  const getStudentsNotLeftYet = (students: iVPastAndCurrentStudent[]) => {
+    return students.filter(student => {
+      const leavingDate = `${student.StudentLeavingDate || ''}`.trim();
+      if (leavingDate === '') {
+        return true;
       }
-      <td className={'current'}
-          data-col={'loa-during'}>{getClickableNumber(getStudents(leftStudent_willComeBack, yrLvls))}</td>
-      <td className={'current total'}
-          data-col={'total-today'}>{getClickableNumber(getStudents(studentsToday, yrLvls))}</td>
+      return moment(leavingDate).isAfter(moment());
+    })
+  }
 
-
-      <td className={'current'}
-          data-col={'future-loa'}>{getClickableNumber(getStudents(normalStudentsThisYear_leaving_willComeBack, yrLvls))}</td>
-      <td className={'current'}
-          data-col={'not-returning'}>{getClickableNumber(getStudents(normalStudentsThisYear_leaving_notComeBack, yrLvls))}</td>
-      {getCurrentFutureTds(currentStudents, futureStudentsCurrentYear, yrLvls)}
-      <td className={'current total border-right'}
-          data-col={'total-year-end'}>{getClickableNumber(getStudents(studentsEndOfCurrentYear, yrLvls))}</td>
-
-      {getFutureFutureTds(studentsEndOfCurrentYear, futureStudents, leftStudents, yrLvls)}
+  const getTR = (row: iDashboardRow) => {
+    const columns = getDashboardColumns();
+    return <tr key={row.key} className={row.className}>
+      <td className={'border-right'}>{row.label}</td>
+      {
+        columns.map(column => (
+          <td key={column.key} className={column.className} data-col={column.dataCol}>
+            {getClickableNumber(row.cells[column.key] || [])}
+          </td>
+        ))
+      }
     </tr>
+  }
+
+  const getVisibleDashboardRows = (currentStudents: iVPastAndCurrentStudent[], futureStudents: iVPastAndCurrentStudent[]): iDashboardRow[] => {
+    const rows: iDashboardRow[] = [];
+
+    Object.keys(yearLevelCampusMap)
+      .filter(campusCode => selectedCampusCodes.indexOf(campusCode) >= 0)
+      .forEach(campusCode => {
+        const campusYearLevels = yearLevelCampusMap[campusCode] || [];
+        campusYearLevels.forEach((yearLevel) => {
+          rows.push({
+            key: `${campusCode}-${yearLevel.YearLevelSort}`,
+            label: yearLevel.Description,
+            className: 'year-level-row',
+            cells: getDashboardRowCells({
+              currentStudents,
+              futureStudents,
+              yrLvls: [yearLevel],
+            }),
+          });
+        });
+
+        rows.push({
+          key: `${campusCode}-total`,
+          label: campusCode in campusMap ? campusMap[campusCode].Description : campusCode,
+          className: 'campus-total',
+          isSummary: true,
+          cells: getDashboardRowCells({
+            currentStudents,
+            futureStudents,
+            yrLvls: campusYearLevels,
+          }),
+        });
+      });
+
+    if (selectedCampusCodes.length > 1) {
+      rows.push({
+        key: 'grand-total',
+        label: 'Total',
+        className: 'campus-total',
+        isSummary: true,
+        cells: getDashboardRowCells({
+          currentStudents,
+          futureStudents,
+        }),
+      });
+    }
+
+    return rows;
+  }
+
+  const onExportPdf = async () => {
+    if (isLoading || isExporting) {
+      return;
+    }
+
+    const currentStudents = Object.values(currentStudentsMap).filter(Boolean).filter(filterFullFeeFlag);
+    const futureStudents = Object.values(futureStudentsMap).filter(Boolean).filter(filterFullFeeFlag);
+    const columns = getDashboardColumns();
+    const rows = getVisibleDashboardRows(currentStudents, futureStudents);
+    const exportRows: iEnrolmentDashboardExportRow[] = rows.map(row => ({
+      label: row.label,
+      isSummary: row.isSummary,
+      values: columns.reduce((map, column) => ({
+        ...map,
+        [column.key]: row.cells[column.key]?.length || 0,
+      }), {}),
+    }));
+    const selectedCampusLabels = selectedCampusCodes.map(code => campusMap[code]?.Description || code);
+    const fileName = `Enrolment_Numbers_${moment().format('YYYY_MMM_DD_HH_mm_ss')}.pdf`;
+
+    setIsExporting(true);
+    try {
+      const blob = await pdf(
+        <EnrolmentDashboardExportPdf
+          columns={columns}
+          rows={exportRows}
+          selectedCampusLabels={selectedCampusLabels}
+          selectedFullFeeStudentType={selectedFullFeeStudentType}
+          currentYear={currentYear}
+          nextYear={nextYear}
+          currentFutureStatusCount={currentFutureStatuses.length}
+          futureStatusCount={futureStatuses.length}
+          showTransitColumns={showTransitColumns}
+        />
+      ).toBlob();
+      const downloadUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(downloadUrl);
+    } catch (err) {
+      Toaster.showApiError(err);
+    } finally {
+      setIsExporting(false);
+    }
   }
 
   const getContent = () => {
@@ -449,8 +579,9 @@ const EnrolmentDashboardPanel = () => {
       return <Spinner animation={'border'}/>
     }
 
-    const currentStudents = Object.values(currentStudentsMap).filter(filterFullFeeFlag);
-    const futureStudents = Object.values(futureStudentsMap).filter(filterFullFeeFlag);
+    const currentStudents = Object.values(currentStudentsMap).filter(Boolean).filter(filterFullFeeFlag);
+    const futureStudents = Object.values(futureStudentsMap).filter(Boolean).filter(filterFullFeeFlag);
+    const visibleRows = getVisibleDashboardRows(currentStudents, futureStudents);
     return (
       <Table hover size={'sm'}>
         <thead>
@@ -521,43 +652,17 @@ const EnrolmentDashboardPanel = () => {
         </thead>
         <tbody>
         {
-          Object.keys(yearLevelCampusMap)
-            .filter(campusCode => selectedCampusCodes.indexOf(campusCode) >= 0)
-            .map(campusCode => {
-              const campusYearLevels = yearLevelCampusMap[campusCode] || [];
-              return (
-                <>
-                  {
-                    // each year level
-                    (campusYearLevels).map((yearLevel) => {
-                      return getTR({
-                        currentStudents,
-                        futureStudents,
-                        yrLvls: [yearLevel]
-                      }, yearLevel.Description, `${campusCode}-${yearLevel.YearLevelSort}`, 'year-level-row');
-                    })
-                  }
-                  {
-                    // Campus total
-                    getTR({
-                      currentStudents,
-                      futureStudents,
-                      yrLvls: campusYearLevels
-                    }, campusCode in campusMap ? campusMap[campusCode].Description : campusCode, `${campusCode}-total`, 'campus-total')
-                  }
-                </>
-              )
-            })
+          visibleRows
+            .filter(row => row.key !== 'grand-total')
+            .map(row => getTR(row))
         }
         </tbody>
-        {selectedCampusCodes.length > 1 && (
+        {visibleRows.some(row => row.key === 'grand-total') && (
           <tfoot>
           {
-            // Campus total
-            getTR({
-              currentStudents,
-              futureStudents,
-            }, 'Total', '', 'campus-total')
+            visibleRows
+              .filter(row => row.key === 'grand-total')
+              .map(row => getTR(row))
           }
           </tfoot>
         )}
@@ -618,6 +723,7 @@ const EnrolmentDashboardPanel = () => {
           )
         }
         <LoadingBtn size={'sm'} variant={'outline-light'} onClick={() => { setForceReload(prevState => prevState + 1)}} isLoading={isLoading}><ArrowClockwise /> Refresh</LoadingBtn>
+        <LoadingBtn size={'sm'} variant={'outline-light'} onClick={onExportPdf} isLoading={isLoading || isExporting}><FileEarmarkPdf /> Export PDF</LoadingBtn>
       </FlexContainer>
     </PanelTitle>
     {getContent()}
