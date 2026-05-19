@@ -95,6 +95,10 @@ describe('EnrolmentDashboardExportPdf', () => {
   test('renders document metadata and grouped headers', () => {
     render(<EnrolmentDashboardExportPdf {...defaultProps} />);
 
+    expect(JSON.parse(screen.getByTestId('page').getAttribute('data-props') || '{}')).toMatchObject({
+      size: 'A4',
+      orientation: 'landscape',
+    });
     expect(screen.getByText('Enrolment Numbers')).toBeInTheDocument();
     expect(screen.getByText('Generated: 20 May 2026 9:02 AM')).toBeInTheDocument();
     expect(screen.getByText('Campuses: Early Learning Centre, Junior, Senior')).toBeInTheDocument();
@@ -106,6 +110,11 @@ describe('EnrolmentDashboardExportPdf', () => {
     expect(screen.getByText('Existing 2026')).toBeInTheDocument();
     expect(screen.getByText('Future 2026')).toBeInTheDocument();
     expect(screen.getByText('Future 2027')).toBeInTheDocument();
+
+    expect(getStyle(screen.getByText('Kindergarten'))).toMatchObject({
+      width: '10%',
+      textAlign: 'right',
+    });
   });
 
   test('applies total column and summary row styling to exported cells', () => {
