@@ -110,15 +110,15 @@ const EnrolmentDashboardExportPdf = ({
   futureStatusCount,
   showTransitColumns,
 }: iEnrolmentDashboardExportPdf) => {
-  const rowLabelWidth = '14%';
-  const dataColumnWidth = `${86 / Math.max(columns.length, 1)}%`;
-  const getSpanWidth = (span: number) => `${(86 * span) / Math.max(columns.length, 1)}%`;
+  const rowLabelWidth = '10%';
+  const dataColumnWidth = `${90 / Math.max(columns.length, 1)}%`;
+  const getSpanWidth = (span: number) => `${(90 * span) / Math.max(columns.length, 1)}%`;
   const currentYearColumnCount = 10 + (showTransitColumns ? 2 : 0) + currentFutureStatusCount;
   const futureYearColumnCount = 3 + futureStatusCount;
 
   return (
     <Document>
-      <Page size="A3" orientation="landscape" style={styles.page}>
+      <Page size="A4" orientation="landscape" style={styles.page}>
         <View style={styles.header} fixed>
           <Text style={styles.title}>Enrolment Numbers</Text>
           <Text style={styles.subtle}>Generated: {moment().format('DD MMM YYYY h:mm A')}</Text>
