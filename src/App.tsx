@@ -14,6 +14,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {
   URL_ASSET_PICK_UP,
+  URL_CLIPBOARD_CONCUSSION_ALERT_TEST_PAGE,
   URL_CAMPUS_DISPLAY_PAGE, URL_CAMPUS_DISPLAY_SLIDE_SHOW_BY_LOCATION_PAGE, URL_ENEWS_VIEW_PAGE,
   URL_ONLINE_DONATION
 } from './Url';
@@ -22,6 +23,7 @@ import PageNotFoundWithTechSupport from './components/PageNotFoundWithTechSuppor
 import CampusDisplayPage from './pages/CampusDisplay/CampusDisplayPage';
 import CampusDisplayByLocationIdPage from './pages/CampusDisplay/CampusDisplayByLocationIdPage';
 import ENewsViewingPage from './pages/ENews/ENewsViewingPage';
+import ClipboardConcussionAlertTestPage from './pages/Clipboard/ClipboardConcussionAlertTestPage';
 
 const Router = () => {
   const {isProd} = useSelector((state: RootState) => state.app);
@@ -50,8 +52,14 @@ const Router = () => {
 
           <Route path={URL_ENEWS_VIEW_PAGE} element={<ENewsViewingPage />} />
 
+          <Route
+            path={URL_CLIPBOARD_CONCUSSION_ALERT_TEST_PAGE}
+            element={<ClipboardConcussionAlertTestPage />}
+          />
+
 
           <Route path="/modules/remote/:code" element={<SchoolBoxLayout />} />
+
           <Route path="*" element={<PageNotFound />} />
         </Routes>
       </BrowserRouter>

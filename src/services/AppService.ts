@@ -5,6 +5,7 @@ import iPaginatedResult from "../types/iPaginatedResult";
 
 export const HEADER_NAME_APP_TOKEN = "X-MGGS-TOKEN";
 export const HEADER_NAME_SELECTING_FIELDS = "X-MGGS-SELECT-FIELDS";
+export const MAX_PAGE_SIZE = 9999;
 
 export type iConfigParams = {
   [key: string]: any;
