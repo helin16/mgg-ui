@@ -2,6 +2,7 @@ import ReactDOM from "react-dom";
 import React, {ReactComponentElement} from "react";
 import OnlineDonation from './pages/OnlineDonation/OnlineDonation';
 import ClipboardConcussionAlert from './components/Clipboard/ClipboardConcussionAlert';
+import ClipboardStudentSessionAlert from './components/Clipboard/ClipboardStudentSessionAlert';
 import {ToastContainer} from 'react-toastify';
 
 const load = (query: string, component: ReactComponentElement<any>) => {
@@ -106,6 +107,62 @@ const loadStudentConussionAlertForAClassCode = () => {
   );
 }
 
+const loadStudentSessionAlertForAClassCode = () => {
+  const attendanceUrlData = getAttendanceModifyUrlData(window.location.pathname);
+  if (!attendanceUrlData) {
+    return;
+  }
+
+  const container = document.querySelector('#container');
+  if (!container) {
+    return;
+  }
+
+  const sessionAlertRootId = 'mgg-clipboard-student-session-alert-root';
+  let sessionAlertRoot = container.querySelector(`#${sessionAlertRootId}`) as HTMLElement | null;
+  
+  if (!sessionAlertRoot) {
+    // Try to find concussion alert root first
+    let insertBeforeElement = container.querySelector('#mgg-clipboard-concussion-alert-root');
+    
+    // If concussion alert root doesn't exist, find the first row after attendance-time-steps
+    if (!insertBeforeElement) {
+      const attendanceTimeSteps = container.querySelector('#attendance-time-steps');
+      if (attendanceTimeSteps) {
+        let firstRowAfterAttendanceTimeSteps = attendanceTimeSteps.nextElementSibling;
+        while (
+          firstRowAfterAttendanceTimeSteps &&
+          firstRowAfterAttendanceTimeSteps instanceof HTMLElement &&
+          !firstRowAfterAttendanceTimeSteps.classList.contains('row')
+        ) {
+          firstRowAfterAttendanceTimeSteps = firstRowAfterAttendanceTimeSteps.nextElementSibling;
+        }
+        insertBeforeElement = firstRowAfterAttendanceTimeSteps;
+      }
+    }
+
+    if (insertBeforeElement && insertBeforeElement.parentElement) {
+      sessionAlertRoot = document.createElement('div');
+      sessionAlertRoot.id = sessionAlertRootId;
+      insertBeforeElement.parentElement.insertBefore(sessionAlertRoot, insertBeforeElement.nextSibling);
+    }
+  }
+
+  if (!sessionAlertRoot) {
+    return;
+  }
+
+  ReactDOM.render(
+    <ClipboardStudentSessionAlert
+      classCode={attendanceUrlData.classCode}
+      currentDate={attendanceUrlData.currentDate}
+      periodNumber={attendanceUrlData.periodNumber}
+      sessionTypeLabel="Music class"
+    />,
+    sessionAlertRoot
+  );
+}
+
 const loadAll = () => {
   load(
     '[mgg-app-loader="online-donation"]',
@@ -113,10 +170,12 @@ const loadAll = () => {
   );
 
   loadStudentConussionAlertForAClassCode();
+  loadStudentSessionAlertForAClassCode();
 }
 
 const LoadComponents = {
   loadStudentConussionAlertForAClassCode,
+  loadStudentSessionAlertForAClassCode,
   loadAll,
 }
 

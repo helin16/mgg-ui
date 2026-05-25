@@ -39,24 +39,34 @@ const getIncidentDisplayName = (incident: iClipboardIncident) => {
   return fullName === '' ? 'Unknown student' : fullName;
 };
 
-const getIncidentStaffName = (incident: iClipboardIncident) => {
-  const staff = incident.staff || incident.staffMember;
-  const firstName = `${staff?.firstName || ''}`.trim();
-  const lastName = `${staff?.lastName || ''}`.trim();
-  const fullName = `${firstName} ${lastName}`.trim();
-  return fullName === '' ? 'Unknown staff' : fullName;
-};
-
 const getIncidentUrl = (incident: iClipboardIncident) => {
   return `https://go.clipboard.app/incidents/${incident.id}`;
 };
 
-const getIncidentDateTime = (incident: iClipboardIncident) => {
-  const dateTime = moment.utc(incident.dateTime).local();
-  if (!dateTime.isValid()) {
-    return 'Unknown date time';
+const getIncidentReturnDate = (incident: iClipboardIncident) => {
+  return incident.returnToPlayDate;
+};
+
+const getIncidentReturnDateText = (incident: iClipboardIncident, currentMoment: moment.Moment) => {
+  const returnDateRaw = getIncidentReturnDate(incident);
+  if (`${returnDateRaw || ''}`.trim() === '') {
+    return 'No Return Date';
   }
-  return dateTime.format('ddd DD MMM YYYY h:mm A');
+
+  const returnDate = moment.utc(returnDateRaw).local();
+  if (!returnDate.isValid()) {
+    return 'No Return Date';
+  }
+
+  const dateText = returnDate.format('Do MMMM YYYY');
+  const relativeText = returnDate.clone().startOf('day').from(currentMoment.clone().startOf('day'));
+
+  return `the ${dateText} (${relativeText})`;
+};
+
+const getIncidentReasonText = (incident: iClipboardIncident) => {
+  const reason = `${incident.returnToPlayReason || ''}`.trim();
+  return reason === '' ? 'Concussion' : reason;
 };
 
 const ClipboardConcussionAlert = ({
@@ -128,7 +138,7 @@ const ClipboardConcussionAlert = ({
         }
 
         const activeIncidents = (incidentResp.data || []).filter((incident: iClipboardIncident) => {
-          const restrictionDate = incident.RestrictedEndDate || incident.ReviewDate;
+          const restrictionDate = getIncidentReturnDate(incident);
           if (`${restrictionDate || ''}`.trim() === '') {
             return true;
           }
@@ -168,24 +178,29 @@ const ClipboardConcussionAlert = ({
 
   return (
     <Wrapper className={className}>
-      {incidents.map((incident, index) => {
-        const studentName = getIncidentDisplayName(incident);
-        const staffName = getIncidentStaffName(incident);
-        const incidentDateTime = getIncidentDateTime(incident);
-        const incidentUrl = getIncidentUrl(incident);
-        const reason = 'Concussion';
+      <Alert variant={'danger'}>
+        {incidents.map((incident, index) => {
+          const studentName = getIncidentDisplayName(incident);
+          const returnDateText = getIncidentReturnDateText(incident, currentMoment);
+          const hasNoReturnDate = returnDateText === 'No Return Date';
+          const reasonText = getIncidentReasonText(incident);
+          const incidentUrl = getIncidentUrl(incident);
 
-        return (
-          <Alert key={`${incident.id}-${index}`} variant={'warning'}>
-            <strong>
-              <a href={incidentUrl} target={'_blank'} rel={'noreferrer'}>
-                {studentName}
-              </a>
-            </strong>{' '}
-            is confirmed with &quot;{reason}&quot; in Clipboard by <strong>{staffName}</strong> at {incidentDateTime}.
-          </Alert>
-        );
-      })}
+          return (
+            <div key={`${incident.id}-${index}`}>
+              {index > 0 && <br />}
+              <strong>
+                <a href={incidentUrl} target={'_blank'} rel={'noreferrer'}>
+                  {studentName}
+                </a>
+              </strong>{' '}
+              {hasNoReturnDate
+                ? `should not return to play due to "${reasonText}".`
+                : `should not return to play until ${returnDateText} due to "${reasonText}".`}
+            </div>
+          );
+        })}
+      </Alert>
     </Wrapper>
   );
 };
