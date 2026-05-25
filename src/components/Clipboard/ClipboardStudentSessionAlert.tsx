@@ -1,17 +1,34 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import moment, { Moment } from 'moment-timezone';
-import { Alert } from 'react-bootstrap';
 
 import SynVStudentClassService from '../../services/Synergetic/Student/SynVStudentClassService';
-import SynTimetableDefinitionService, { iTimetablePeriod } from '../../services/Synergetic/TimeTable/SynTimetableDefinitionService';
+import SynTimetableDefinitionService from '../../services/Synergetic/TimeTable/SynTimetableDefinitionService';
 import ClipboardSessionService, { iClipboardSessionQueryParams } from '../../services/Clipboard/ClipboardSessionService';
 import Toaster from '../../services/Toaster';
 import iSynVStudentClass from '../../types/Synergetic/Student/iSynVStudentClass';
 import iClipboardSession from '../../types/Clipboard/iClipboardSession';
 import { HEADER_NAME_SELECTING_FIELDS, MAX_PAGE_SIZE } from '../../services/AppService';
 
-const Wrapper = styled.div``;
+const Wrapper = styled.div`
+  position: relative;
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 1rem;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  background-color: #fff3cd;
+  border-color: #ffeaa7;
+  color: #856404;
+
+  a {
+    color: #664d03;
+    text-decoration: underline;
+
+    &:hover {
+      color: #523000;
+    }
+  }
+`;
 
 type iClipboardStudentSessionAlertProps = {
   classCode: string;
@@ -114,13 +131,6 @@ const isSessionOverlappingPeriod = (
   // Session overlaps with period if:
   // sessionStart < periodEnd AND sessionEnd > periodStart
   return sessionStart.isBefore(periodEnd) && sessionEnd.isAfter(periodStart);
-};
-
-const getStudentDisplayName = (studentClass: iSynVStudentClass) => {
-  // Extract student info from studentClass
-  // This depends on the structure of iSynVStudentClass
-  // For now, we'll return the StudentID
-  return `${studentClass.StudentID || 'Unknown Student'}`;
 };
 
 const ClipboardStudentSessionAlert = ({
@@ -281,7 +291,7 @@ const ClipboardStudentSessionAlert = ({
     return () => {
       isCanceled = true;
     };
-  }, [classCode, currentMoment, periodNumber, activityIds]);
+  }, [classCode, currentDate, currentMoment, periodNumber, activityIds]);
 
   if (isLoading) {
     return null;
@@ -293,33 +303,29 @@ const ClipboardStudentSessionAlert = ({
 
   return (
     <Wrapper className={className}>
-      {matchedStudents.length > 0 && (
-        <Alert variant={'warning'}>
-          {matchedStudents.map((studentClass, index) => {
-            const studentId = `${studentClass.StudentID || ''}`.trim();
-            const studentNameData = studentNamesMapRef.current.get(studentId);
-            const sessions = studentActivitiesMapRef.current.get(studentId) || [];
+      {matchedStudents.map((studentClass, index) => {
+        const studentId = `${studentClass.StudentID || ''}`.trim();
+        const studentNameData = studentNamesMapRef.current.get(studentId);
+        const sessions = studentActivitiesMapRef.current.get(studentId) || [];
 
-            if (sessions.length === 0 || !studentNameData) {
-              return null;
-            }
+        if (sessions.length === 0 || !studentNameData) {
+          return null;
+        }
 
-            const {firstName, lastName} = studentNameData;
-            const displayName = `${lastName}, ${firstName}`;
+        const {firstName, lastName} = studentNameData;
+        const displayName = `${lastName}, ${firstName}`;
 
-            return (
-              <div key={`${studentClass.StudentID}-${index}`}>
-                {sessions.map((session, sessionIndex) => (
-                  <div key={`${studentId}-${sessionIndex}`}>
-                    <a href={`https://go.clipboard.app/schedule/session/${session.sessionId}`} target="_blank" rel="noopener noreferrer">{displayName}</a> is scheduled to have <b>{session.activity}</b> at <b><u>{session.location}</u></b> now.
-                  </div>
-                ))}
-                {index < matchedStudents.length - 1 && <br />}
+        return (
+          <div key={`${studentClass.StudentID}-${index}`}>
+            {sessions.map((session, sessionIndex) => (
+              <div key={`${studentId}-${sessionIndex}`}>
+                <a href={`https://go.clipboard.app/schedule/session/${session.sessionId}`} target="_blank" rel="noopener noreferrer">{displayName}</a> is scheduled to have <b>{session.activity}</b> at <b><u>{session.location}</u></b> now.
               </div>
-            );
-          })}
-        </Alert>
-      )}
+            ))}
+            {index < matchedStudents.length - 1 && <br />}
+          </div>
+        );
+      })}
     </Wrapper>
   );
 };

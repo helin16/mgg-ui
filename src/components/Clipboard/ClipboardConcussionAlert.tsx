@@ -1,7 +1,6 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import styled from 'styled-components';
 import moment from 'moment-timezone';
-import {Alert} from 'react-bootstrap';
 
 import SynVStudentClassService from '../../services/Synergetic/Student/SynVStudentClassService';
 import ClipboardIncidentService from '../../services/Clipboard/ClipboardIncidentService';
@@ -10,7 +9,29 @@ import iSynVStudentClass from '../../types/Synergetic/Student/iSynVStudentClass'
 import iClipboardIncident from '../../types/Clipboard/iClipboardIncident';
 import {HEADER_NAME_SELECTING_FIELDS, MAX_PAGE_SIZE} from '../../services/AppService';
 
-const Wrapper = styled.div``;
+const Wrapper = styled.div`
+  position: relative;
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 1rem;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+
+  a {
+    color: #004085;
+    text-decoration: underline;
+
+    &:hover {
+      color: #002752;
+    }
+  }
+
+  strong {
+    color: #721c24;
+  }
+`;
 
 type iClipboardConcussionAlertProps = {
   classCode: string;
@@ -178,29 +199,27 @@ const ClipboardConcussionAlert = ({
 
   return (
     <Wrapper className={className}>
-      <Alert variant={'danger'}>
-        {incidents.map((incident, index) => {
-          const studentName = getIncidentDisplayName(incident);
-          const returnDateText = getIncidentReturnDateText(incident, currentMoment);
-          const hasNoReturnDate = returnDateText === 'No Return Date';
-          const reasonText = getIncidentReasonText(incident);
-          const incidentUrl = getIncidentUrl(incident);
+      {incidents.map((incident, index) => {
+        const studentName = getIncidentDisplayName(incident);
+        const returnDateText = getIncidentReturnDateText(incident, currentMoment);
+        const hasNoReturnDate = returnDateText === 'No Return Date';
+        const reasonText = getIncidentReasonText(incident);
+        const incidentUrl = getIncidentUrl(incident);
 
-          return (
-            <div key={`${incident.id}-${index}`}>
-              {index > 0 && <br />}
-              <strong>
-                <a href={incidentUrl} target={'_blank'} rel={'noreferrer'}>
-                  {studentName}
-                </a>
-              </strong>{' '}
-              {hasNoReturnDate
-                ? `should not return to play due to "${reasonText}".`
-                : `should not return to play until ${returnDateText} due to "${reasonText}".`}
-            </div>
-          );
-        })}
-      </Alert>
+        return (
+          <div key={`${incident.id}-${index}`}>
+            {index > 0 && <br />}
+            <strong>
+              <a href={incidentUrl} target={'_blank'} rel={'noreferrer'}>
+                {studentName}
+              </a>
+            </strong>{' '}
+            {hasNoReturnDate
+              ? `should not return to play due to "${reasonText}".`
+              : `should not return to play until ${returnDateText} due to "${reasonText}".`}
+          </div>
+        );
+      })}
     </Wrapper>
   );
 };
