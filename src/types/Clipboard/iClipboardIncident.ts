@@ -19,6 +19,8 @@ type iClipboardIncident = iBaseType & {
   location: string | null;
   studentConcerned: iClipboardIncidentStudent | null;
   dateTime: string | null;
+  returnToPlayDate?: Date | string | null;
+  returnToPlayReason?: string | null;
   concussionStatus: 'none' | 'potential' | 'confirmed' | 'any' | string;
   archived: boolean;
   Diagnosis: string | null;
