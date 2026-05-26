@@ -226,7 +226,7 @@ describe('ClipboardStudentSessionAlert', () => {
       <ClipboardStudentSessionAlert classCode="7A-ENG" currentDate={currentDate} periodNumber={1} />
     );
 
-    expect(await screen.findByText('Calnan, Gabriella is scheduled to have Math Tutoring at Room 101 now.')).toBeInTheDocument();
+    expect(await screen.findByText('Calnan, Gabriella is scheduled to have Math Tutoring at Room 101 for current period.')).toBeInTheDocument();
 
     const link = screen.getByRole('link', { name: 'Calnan, Gabriella' });
     expect(link).toHaveAttribute('href', 'https://go.clipboard.app/schedule/session/12345');
