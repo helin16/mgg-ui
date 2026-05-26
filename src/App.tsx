@@ -23,7 +23,7 @@ import PageNotFoundWithTechSupport from './components/PageNotFoundWithTechSuppor
 import CampusDisplayPage from './pages/CampusDisplay/CampusDisplayPage';
 import CampusDisplayByLocationIdPage from './pages/CampusDisplay/CampusDisplayByLocationIdPage';
 import ENewsViewingPage from './pages/ENews/ENewsViewingPage';
-import ClipboardConcussionAlertTestPage from './pages/Clipboard/ClipboardConcussionAlertTestPage';
+import ClipboardConcussionSessionsTestPage from './pages/Clipboard/ClipboardConcussionAlertTestPage';
 
 const Router = () => {
   const {isProd} = useSelector((state: RootState) => state.app);
@@ -54,7 +54,7 @@ const Router = () => {
 
           <Route
             path={URL_CLIPBOARD_CONCUSSION_ALERT_TEST_PAGE}
-            element={<ClipboardConcussionAlertTestPage />}
+            element={<ClipboardConcussionSessionsTestPage />}
           />
 
 
