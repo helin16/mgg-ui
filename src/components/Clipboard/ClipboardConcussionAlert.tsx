@@ -90,6 +90,25 @@ const getIncidentReasonText = (incident: iClipboardIncident) => {
   return reason === '' ? 'Concussion' : reason;
 };
 
+const getIncidentDateTimeText = (incident: iClipboardIncident) => {
+  const incidentDate = incident.dateTime;
+  if (!incidentDate) {
+    return '';
+  }
+  const incidentMoment = moment.utc(incidentDate).local();
+  return incidentMoment.isValid() ? incidentMoment.format('Do MMMM YYYY') : '';
+};
+
+const getIncidentDaysAgo = (incident: iClipboardIncident) => {
+  const incidentDate = incident.dateTime;
+  if (!incidentDate) {
+    return 0;
+  }
+  const incidentMoment = moment.utc(incidentDate).local();
+  const today = moment();
+  return incidentMoment.isValid() ? today.diff(incidentMoment, 'days') : 0;
+};
+
 const ClipboardConcussionAlert = ({
   classCode,
   currentDate,
@@ -150,7 +169,7 @@ const ClipboardConcussionAlert = ({
         const incidentResp = await ClipboardIncidentService.getAll({
           sisIds: studentIds,
           concussionStatuses: ['confirmed'],
-          startDateTime: currentMoment.clone().startOf('day').toISOString(),
+          startDateTime: currentMoment.clone().subtract(21, 'days').startOf('day').toISOString(),
           endDateTime: currentMoment.clone().endOf('day').toISOString(),
         });
 
@@ -201,9 +220,9 @@ const ClipboardConcussionAlert = ({
     <Wrapper className={className}>
       {incidents.map((incident, index) => {
         const studentName = getIncidentDisplayName(incident);
-        const returnDateText = getIncidentReturnDateText(incident, currentMoment);
-        const hasNoReturnDate = returnDateText === 'No Return Date';
         const reasonText = getIncidentReasonText(incident);
+        const dateTimeText = getIncidentDateTimeText(incident);
+        const daysAgo = getIncidentDaysAgo(incident);
         const incidentUrl = getIncidentUrl(incident);
 
         return (
@@ -214,9 +233,7 @@ const ClipboardConcussionAlert = ({
                 {studentName}
               </a>
             </strong>{' '}
-            {hasNoReturnDate
-              ? `should not return to play due to "${reasonText}".`
-              : `should not return to play until ${returnDateText} due to "${reasonText}".`}
+            should not return to play due to "{reasonText}" on {dateTimeText} ({daysAgo} days ago).
           </div>
         );
       })}
