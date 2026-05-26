@@ -67,6 +67,42 @@ describe('ClipboardConcussionAlert', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
+  test('queries incidents for the last 21 days', async () => {
+    mockedStudentClassService.getAll.mockResolvedValue({
+      data: [
+        { StudentID: 54610, ClassCode: '7A-ENG', FileYear: 2026, FileSemester: 1 },
+      ],
+      currentPage: 1,
+      pageLength: 1,
+      numRecords: 1,
+      lastPage: 1,
+    } as any);
+
+    mockedClipboardIncidentService.getAll.mockResolvedValue({
+      data: [],
+      currentPage: 1,
+      pageLength: 1,
+      numRecords: 0,
+      lastPage: 1,
+    } as any);
+
+    render(
+      <ClipboardConcussionAlert classCode={'7A-ENG'} currentDate={currentDate} periodNumber={1} />
+    );
+
+    const startDateTime = moment(currentDate).subtract(21, 'days').startOf('day').toISOString();
+    const endDateTime = moment(currentDate).endOf('day').toISOString();
+
+    await waitFor(() => {
+      expect(mockedClipboardIncidentService.getAll).toHaveBeenCalledWith({
+        sisIds: ['54610'],
+        concussionStatuses: ['confirmed'],
+        startDateTime,
+        endDateTime,
+      });
+    });
+  });
+
   test('renders an alert for active confirmed concussion incidents', async () => {
     mockedStudentClassService.getAll.mockResolvedValue({
       data: [
@@ -84,7 +120,7 @@ describe('ClipboardConcussionAlert', () => {
           id: 45858,
           studentConcerned: { id: 54610, firstName: 'Gabriella', legalFirstName: null, lastName: 'Calnan', smsId: '54610' },
           staff: { id: 111, firstName: 'Charlotte', lastName: 'Ryan' },
-          dateTime: '2026-05-25T10:00:00Z',
+          dateTime: '2026-05-11T10:00:00Z',
           returnToPlayDate: '2026-05-28T00:00:00Z',
           concussionStatus: 'confirmed',
           archived: false,
@@ -107,16 +143,16 @@ describe('ClipboardConcussionAlert', () => {
       <ClipboardConcussionAlert classCode={'7A-ENG'} currentDate={currentDate} periodNumber={1} />
     );
 
-    const currentMoment = moment(currentDate);
-    const returnMoment = moment.utc('2026-05-28T00:00:00Z').local();
-    const expectedDate = returnMoment.format('Do MMMM YYYY');
-    const expectedRelative = returnMoment.clone().startOf('day').from(currentMoment.clone().startOf('day'));
+    const incidentMoment = moment.utc('2026-05-11T10:00:00Z').local();
+    const expectedDate = incidentMoment.format('Do MMMM YYYY');
+    const today = moment('2026-05-25');
+    const daysAgo = today.diff(incidentMoment, 'days');
 
-    const startDateTime = moment(currentDate).startOf('day').toISOString();
+    const startDateTime = moment(currentDate).subtract(21, 'days').startOf('day').toISOString();
     const endDateTime = moment(currentDate).endOf('day').toISOString();
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      `Gabriella Calnan should not return to play until the ${expectedDate} (${expectedRelative}) due to "Concussion".`
+      `Gabriella Calnan should not return to play due to "Concussion" on ${expectedDate} (${daysAgo} days ago).`
     );
     expect(screen.getByRole('link', {name: 'Gabriella Calnan'})).toHaveAttribute(
       'href',
@@ -140,7 +176,7 @@ describe('ClipboardConcussionAlert', () => {
     });
   });
 
-  test('renders No Return Date when returnToPlayDate is missing', async () => {
+  test('renders alert with incident date and days ago', async () => {
     mockedStudentClassService.getAll.mockResolvedValue({
       data: [
         { StudentID: 54610, ClassCode: '7A-ENG' },
@@ -176,14 +212,19 @@ describe('ClipboardConcussionAlert', () => {
     } as any);
 
     render(
-      <ClipboardConcussionAlert classCode={'7A-ENG'} currentDate={'2026-05-11'} periodNumber={1} />
+      <ClipboardConcussionAlert classCode={'7A-ENG'} currentDate={'2026-05-25'} periodNumber={1} />
     );
 
-    const startDateTime = moment('2026-05-11').startOf('day').toISOString();
-    const endDateTime = moment('2026-05-11').endOf('day').toISOString();
+    const incidentMoment = moment.utc('2026-05-10T10:00:00Z').local();
+    const expectedDate = incidentMoment.format('Do MMMM YYYY');
+    const today = moment('2026-05-25');
+    const daysAgo = today.diff(incidentMoment, 'days');
+
+    const startDateTime = moment('2026-05-25').subtract(21, 'days').startOf('day').toISOString();
+    const endDateTime = moment('2026-05-25').endOf('day').toISOString();
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Gabriella Calnan should not return to play due to "Concussion".'
+      `Gabriella Calnan should not return to play due to "Concussion" on ${expectedDate} (${daysAgo} days ago).`
     );
     expect(screen.getByRole('link', {name: 'Gabriella Calnan'})).toHaveAttribute(
       'href',
@@ -197,7 +238,7 @@ describe('ClipboardConcussionAlert', () => {
     });
   });
 
-  test('uses returnToPlayDate as the return date source when provided', async () => {
+  test('uses incident dateTime for display, not returnToPlayDate', async () => {
     mockedStudentClassService.getAll.mockResolvedValue({
       data: [
         { StudentID: 54610, ClassCode: '7A-ENG' },
@@ -214,8 +255,8 @@ describe('ClipboardConcussionAlert', () => {
           id: 45858,
           studentConcerned: { id: 54610, firstName: 'Brooke', legalFirstName: null, lastName: 'Beekman', smsId: '54610' },
           staffMember: { id: 222, firstName: 'Charlotte', lastName: 'Ryan' },
-          dateTime: '2026-05-10 18:24:00',
-          returnToPlayDate: '2026-06-01 14:00:00',
+          dateTime: '2026-05-10T18:24:00Z',
+          returnToPlayDate: '2026-06-01T14:00:00Z',
           concussionStatus: 'confirmed',
           archived: false,
           Diagnosis: 'Concussion',
@@ -237,13 +278,13 @@ describe('ClipboardConcussionAlert', () => {
       <ClipboardConcussionAlert classCode={'7A-ENG'} currentDate={'2026-06-01'} periodNumber={1} />
     );
 
-    const currentMoment = moment('2026-06-01');
-    const returnMoment = moment.utc('2026-06-01 14:00:00').local();
-    const expectedDate = returnMoment.format('Do MMMM YYYY');
-    const expectedRelative = returnMoment.clone().startOf('day').from(currentMoment.clone().startOf('day'));
+    const incidentMoment = moment.utc('2026-05-10T18:24:00Z').local();
+    const expectedDate = incidentMoment.format('Do MMMM YYYY');
+    const today = moment('2026-06-01');
+    const daysAgo = today.diff(incidentMoment, 'days');
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      `Brooke Beekman should not return to play until the ${expectedDate} (${expectedRelative}) due to "Concussion".`
+      `Brooke Beekman should not return to play due to "Concussion" on ${expectedDate} (${daysAgo} days ago).`
     );
   });
 
@@ -263,8 +304,8 @@ describe('ClipboardConcussionAlert', () => {
         {
           id: 45860,
           studentConcerned: { id: 54610, firstName: 'Brooke', legalFirstName: null, lastName: 'Beekman', smsId: '54610' },
-          dateTime: '2026-05-10 18:24:00',
-          returnToPlayDate: '2026-06-01 14:00:00',
+          dateTime: '2026-05-10T18:24:00Z',
+          returnToPlayDate: '2026-06-01T14:00:00Z',
           returnToPlayReason: 'Potential concussion',
           concussionStatus: 'confirmed',
           archived: false,
@@ -287,13 +328,13 @@ describe('ClipboardConcussionAlert', () => {
       <ClipboardConcussionAlert classCode={'7A-ENG'} currentDate={'2026-06-01'} periodNumber={1} />
     );
 
-    const currentMoment = moment('2026-06-01');
-    const returnMoment = moment.utc('2026-06-01 14:00:00').local();
-    const expectedDate = returnMoment.format('Do MMMM YYYY');
-    const expectedRelative = returnMoment.clone().startOf('day').from(currentMoment.clone().startOf('day'));
+    const incidentMoment = moment.utc('2026-05-10T18:24:00Z').local();
+    const expectedDate = incidentMoment.format('Do MMMM YYYY');
+    const today = moment('2026-06-01');
+    const daysAgo = today.diff(incidentMoment, 'days');
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      `Brooke Beekman should not return to play until the ${expectedDate} (${expectedRelative}) due to "Potential concussion".`
+      `Brooke Beekman should not return to play due to "Potential concussion" on ${expectedDate} (${daysAgo} days ago).`
     );
   });
 });
