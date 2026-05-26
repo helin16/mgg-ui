@@ -339,7 +339,7 @@ const ClipboardStudentSessionAlert = ({
           <div key={`${studentClass.StudentID}-${index}`}>
             {sessions.map((session, sessionIndex) => (
               <div key={`${studentId}-${sessionIndex}`}>
-                <a href={`https://go.clipboard.app/schedule/session/${session.sessionId}`} target="_blank" rel="noopener noreferrer">{displayName}</a> is scheduled to have <b>{session.activity}</b> at <b><u>{session.location}</u></b> now.
+                <a href={`https://go.clipboard.app/schedule/session/${session.sessionId}`} target="_blank" rel="noopener noreferrer">{displayName}</a> is scheduled to have <b>{session.activity}</b> at <b><u>{session.location}</u></b> for current period.
               </div>
             ))}
             {index < matchedStudents.length - 1 && <br />}
