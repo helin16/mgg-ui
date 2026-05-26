@@ -115,6 +115,23 @@ const getTodayDateRange = (currentDate: string | Date): { start: Moment; end: Mo
   };
 };
 
+const isSessionHappeningToday = (session: iClipboardSession, currentDate: string | Date): boolean => {
+  try {
+    const sessionStart = moment.utc(session.startDateTime).tz('Australia/Melbourne');
+    const todayRange = getTodayDateRange(currentDate);
+
+    if (!sessionStart.isValid()) {
+      return false;
+    }
+
+    // Check if session start date is the same as today (in local timezone)
+    return sessionStart.isSame(todayRange.start, 'day');
+  } catch (err) {
+    console.error('Error checking if session is happening today:', err);
+    return false;
+  }
+};
+
 const isSessionOverlappingPeriod = (
   session: iClipboardSession,
   periodStart: Moment,
@@ -211,7 +228,8 @@ const ClipboardStudentSessionAlert = ({
           return;
         }
 
-        // Query sessions for today (full day)
+        // Query sessions for today (full day in UTC)
+        // Additional filtering will be done on the UI side to handle timezone conversion correctly
         const todayRange = getTodayDateRange(currentDate);
         const queryParams: iClipboardSessionQueryParams = {
           sisIds: studentIds,
@@ -222,6 +240,7 @@ const ClipboardStudentSessionAlert = ({
           includeStatuses: ['confirmed'],
           includeTeams: true,
           includeStaff: true,
+          perPage: MAX_PAGE_SIZE,
         };
 
         const sessionResp = await ClipboardSessionService.getAll(queryParams);
@@ -231,10 +250,11 @@ const ClipboardStudentSessionAlert = ({
         }
 
         // Get unique students and their activities from matching sessions
+        // Filter sessions that are happening today and overlapping with the period
         const matchingSessionStudents = new Map<string, Array<{activity: string; location: string; sessionId: string}>>();
         (sessionResp.data || []).forEach((session: iClipboardSession) => {
-          // Check if session overlaps with period time
-          if (isSessionOverlappingPeriod(session, periodTiming.start, periodTiming.end)) {
+          // Check if session is happening today (in Melbourne timezone) and overlaps with period time
+          if (isSessionHappeningToday(session, currentDate) && isSessionOverlappingPeriod(session, periodTiming.start, periodTiming.end)) {
             // Add SMS IDs from session students to matched students with activity and location
             if ((session as any).students && (session as any).students.length > 0) {
               const activityName = (session as any).activity?.name || 'activity';
