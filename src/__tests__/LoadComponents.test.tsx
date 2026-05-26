@@ -20,6 +20,11 @@ jest.mock('../components/Clipboard/ClipboardConcussionAlert', () => ({
   default: (props: any) => <div data-testid={'clipboard-concussion-alert'} {...props} />,
 }));
 
+jest.mock('../components/Clipboard/ClipboardStudentSessionAlert', () => ({
+  __esModule: true,
+  default: (props: any) => <div data-testid={'clipboard-student-session-alert'} {...props} />,
+}));
+
 describe('LoadComponents', () => {
   const mockedReactDOM = ReactDOM as jest.Mocked<typeof ReactDOM>;
   const originalPathname = window.location.pathname;

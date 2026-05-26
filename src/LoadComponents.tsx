@@ -157,7 +157,43 @@ const loadStudentSessionAlertForAClassCode = () => {
       classCode={attendanceUrlData.classCode}
       currentDate={attendanceUrlData.currentDate}
       periodNumber={attendanceUrlData.periodNumber}
-      sessionTypeLabel="Music class"
+      sessionTypeLabel="Clipboard Sessions"
+    />,
+    sessionAlertRoot
+  );
+}
+
+const loadStudentSessionAlertBeforeFormSubmit = () => {
+  const attendanceUrlData = getAttendanceModifyUrlData(window.location.pathname);
+  if (!attendanceUrlData) {
+    return;
+  }
+
+  const formSubmitElement = document.querySelector('#attendance-form-submit');
+  if (!formSubmitElement || !formSubmitElement.parentElement) {
+    return;
+  }
+
+  const sessionAlertRootId = 'mgg-clipboard-student-session-alert-before-submit-root';
+  let sessionAlertRoot = document.querySelector(`#${sessionAlertRootId}`) as HTMLElement | null;
+  
+  if (!sessionAlertRoot) {
+    sessionAlertRoot = document.createElement('div');
+    sessionAlertRoot.id = sessionAlertRootId;
+    sessionAlertRoot.style.marginBottom = '1rem';
+    formSubmitElement.parentElement.insertBefore(sessionAlertRoot, formSubmitElement);
+  }
+
+  if (!sessionAlertRoot) {
+    return;
+  }
+
+  ReactDOM.render(
+    <ClipboardStudentSessionAlert
+      classCode={attendanceUrlData.classCode}
+      currentDate={attendanceUrlData.currentDate}
+      periodNumber={attendanceUrlData.periodNumber}
+      sessionTypeLabel="Clipboard Sessions"
     />,
     sessionAlertRoot
   );
@@ -171,11 +207,13 @@ const loadAll = () => {
 
   loadStudentConussionAlertForAClassCode();
   loadStudentSessionAlertForAClassCode();
+  loadStudentSessionAlertBeforeFormSubmit();
 }
 
 const LoadComponents = {
   loadStudentConussionAlertForAClassCode,
   loadStudentSessionAlertForAClassCode,
+  loadStudentSessionAlertBeforeFormSubmit,
   loadAll,
 }
 
