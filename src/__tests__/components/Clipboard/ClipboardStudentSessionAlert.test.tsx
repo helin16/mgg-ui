@@ -6,6 +6,7 @@ import SynVStudentClassService from '../../../services/Synergetic/Student/SynVSt
 import SynTimetableDefinitionService from '../../../services/Synergetic/TimeTable/SynTimetableDefinitionService';
 import ClipboardSessionService from '../../../services/Clipboard/ClipboardSessionService';
 import Toaster from '../../../services/Toaster';
+import { MAX_PAGE_SIZE } from '../../../services/AppService';
 
 jest.mock('../../../services/Synergetic/Student/SynVStudentClassService', () => ({
   __esModule: true,
@@ -161,18 +162,7 @@ describe('ClipboardStudentSessionAlert', () => {
 
   test('renders alert when session overlaps with period', async () => {
     // Period 1: 08:45 - 09:35 on May 26
-    // Session: 08:50 - 09:20 UTC on May 26 = 18:50 - 19:20 Melbourne (after converting from UTC)
-    // Actually, let me think about this more carefully.
-    // Current date is 2026-05-26 (local)
-    // Period 1: 08:45 - 09:35 (local Melbourne time)
-    // Session is provided in UTC
-    // If session is at 08:50 UTC on May 26, that's May 26 18:50 in Melbourne (UTC+10, but could be +9.5 depending on DST)
-    // Wait, it's May, so Melbourne is UTC+10 (winter, no DST)
-    // So 08:50 UTC = 18:50 Melbourne. That doesn't overlap with 08:45-09:35 Melbourne.
-    // Let me use a session that's in Melbourne morning local time.
-    // If session is 22:45 UTC on May 25, that's 08:45 May 26 Melbourne (22:45+10:00-1=08:45)
-    // Actually let me be more careful: 22:45 UTC May 25 + 10 hours = 08:45 May 26 Melbourne
-    // So a session from 22:45 UTC May 25 to 23:35 UTC May 25 would be 08:45-09:35 May 26 Melbourne
+    // Session from 22:45 UTC May 25 to 23:35 UTC May 25 = 08:45-09:35 May 26 Melbourne
 
     mockedStudentClassService.getAll.mockResolvedValue({
       data: [
@@ -236,12 +226,24 @@ describe('ClipboardStudentSessionAlert', () => {
       <ClipboardStudentSessionAlert classCode="7A-ENG" currentDate={currentDate} periodNumber={1} />
     );
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Calnan, Gabriella is scheduled to have Math Tutoring at Room 101 now.'
-    );
+    expect(await screen.findByText('Calnan, Gabriella is scheduled to have Math Tutoring at Room 101 now.')).toBeInTheDocument();
 
     const link = screen.getByRole('link', { name: 'Calnan, Gabriella' });
     expect(link).toHaveAttribute('href', 'https://go.clipboard.app/schedule/session/12345');
+
+    // Verify session service was called with correct parameters including date filters and perPage
+    expect(mockedSessionService.getAll).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sisIds: ['54610'],
+        startDateTime: expect.any(String),
+        endDateTime: expect.any(String),
+        cancelled: false,
+        includeStatuses: ['confirmed'],
+        includeTeams: true,
+        includeStaff: true,
+        perPage: MAX_PAGE_SIZE,
+      })
+    );
   });
 
   test('does not render alert when session does not overlap with period', async () => {
@@ -392,7 +394,7 @@ describe('ClipboardStudentSessionAlert', () => {
       <ClipboardStudentSessionAlert classCode="7A-ENG" currentDate={currentDate} periodNumber={1} />
     );
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Calnan, Gabriella is scheduled to have Math Tutoring');
+    expect(await screen.findByText('Calnan, Gabriella is scheduled to have Math Tutoring')).toBeInTheDocument();
     expect(screen.getByText(/Smith, Jane/)).toBeInTheDocument();
   });
 
@@ -475,9 +477,8 @@ describe('ClipboardStudentSessionAlert', () => {
       <ClipboardStudentSessionAlert classCode="7A-ENG" currentDate={currentDate} periodNumber={1} />
     );
 
-    const alert = await screen.findByRole('alert');
-    expect(alert).toHaveTextContent('Calnan, Gabriella is scheduled to have Math Tutoring');
-    expect(alert).toHaveTextContent('Calnan, Gabriella is scheduled to have English Tutoring');
+    expect(await screen.findByText('Calnan, Gabriella is scheduled to have Math Tutoring')).toBeInTheDocument();
+    expect(screen.getByText('Calnan, Gabriella is scheduled to have English Tutoring')).toBeInTheDocument();
   });
 
   test('handles error from student service', async () => {
@@ -629,6 +630,13 @@ describe('ClipboardStudentSessionAlert', () => {
       expect(mockedSessionService.getAll).toHaveBeenCalledWith(
         expect.objectContaining({
           activityIds: [123, 456],
+          startDateTime: expect.any(String),
+          endDateTime: expect.any(String),
+          cancelled: false,
+          includeStatuses: ['confirmed'],
+          includeTeams: true,
+          includeStaff: true,
+          perPage: MAX_PAGE_SIZE,
         })
       );
     });
