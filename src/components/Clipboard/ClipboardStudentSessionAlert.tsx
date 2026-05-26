@@ -5,9 +5,11 @@ import moment, { Moment } from 'moment-timezone';
 import SynVStudentClassService from '../../services/Synergetic/Student/SynVStudentClassService';
 import SynTimetableDefinitionService from '../../services/Synergetic/TimeTable/SynTimetableDefinitionService';
 import ClipboardSessionService, { iClipboardSessionQueryParams } from '../../services/Clipboard/ClipboardSessionService';
+import ClipboardAttendanceService, { iClipboardAttendanceQueryParams } from '../../services/Clipboard/ClipboardAttendanceService';
 import Toaster from '../../services/Toaster';
 import iSynVStudentClass from '../../types/Synergetic/Student/iSynVStudentClass';
 import iClipboardSession from '../../types/Clipboard/iClipboardSession';
+import iClipboardAttendance from '../../types/Clipboard/iClipboardAttendance';
 import { HEADER_NAME_SELECTING_FIELDS, MAX_PAGE_SIZE } from '../../services/AppService';
 
 const Wrapper = styled.div`
@@ -160,7 +162,7 @@ const ClipboardStudentSessionAlert = ({
 }: iClipboardStudentSessionAlertProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [matchedStudents, setMatchedStudents] = useState<iSynVStudentClass[]>([]);
-  const studentActivitiesMapRef = React.useRef<Map<string, Array<{activity: string; location: string; sessionId: string; startDateTime: string; endDateTime: string}>>>(new Map());
+  const studentActivitiesMapRef = React.useRef<Map<string, Array<{activity: string; location: string; sessionId: string; startDateTime: string; endDateTime: string; isAttended: boolean}>>>(new Map());
   const studentNamesMapRef = React.useRef<Map<string, {firstName: string; lastName: string}>>(new Map());
 
   const currentMoment = useMemo(() => {
@@ -228,10 +230,10 @@ const ClipboardStudentSessionAlert = ({
           return;
         }
 
-        // Query sessions for today (full day in UTC)
+        // Query sessions and attendance records for today (full day in UTC)
         // Additional filtering will be done on the UI side to handle timezone conversion correctly
         const todayRange = getTodayDateRange(currentDate);
-        const queryParams: iClipboardSessionQueryParams = {
+        const sessionQueryParams: iClipboardSessionQueryParams = {
           sisIds: studentIds,
           ...(activityIds && activityIds.length > 0 ? { activityIds } : {}),
           startDateTime: todayRange.start.clone().utc().format('YYYY-MM-DD HH:mm:ss'),
@@ -243,15 +245,41 @@ const ClipboardStudentSessionAlert = ({
           perPage: MAX_PAGE_SIZE,
         };
 
-        const sessionResp = await ClipboardSessionService.getAll(queryParams);
+        const attendanceQueryParams: iClipboardAttendanceQueryParams = {
+          studentSisIds: studentIds,
+          startDateTime: todayRange.start.clone().utc().format('YYYY-MM-DD HH:mm:ss'),
+          endDateTime: todayRange.end.clone().utc().format('YYYY-MM-DD HH:mm:ss'),
+          absent: false, // Get records of students who attended
+          pageLength: 300, // Clipboard API max page length is 300
+        };
+
+        // Fetch sessions and attendance records in parallel
+        const [sessionResp, attendanceResp] = await Promise.all([
+          ClipboardSessionService.getAll(sessionQueryParams),
+          ClipboardAttendanceService.getAll(attendanceQueryParams),
+        ]);
 
         if (isCanceled) {
           return;
         }
 
+        // Create a map of sessionId -> set of student IDs who attended
+        const attendedSessionsMap = new Map<string, Set<string>>();
+        (attendanceResp.data || []).forEach((attendance: iClipboardAttendance) => {
+          const sessionId = String(attendance.session?.id || '');
+          const studentSisId = attendance.student?.smsId || '';
+          
+          if (sessionId && studentSisId) {
+            if (!attendedSessionsMap.has(sessionId)) {
+              attendedSessionsMap.set(sessionId, new Set());
+            }
+            attendedSessionsMap.get(sessionId)?.add(studentSisId);
+          }
+        });
+
         // Get unique students and their activities from matching sessions
         // Filter sessions that are happening today and overlapping with the period
-        const matchingSessionStudents = new Map<string, Array<{activity: string; location: string; sessionId: string; startDateTime: string; endDateTime: string}>>();
+        const matchingSessionStudents = new Map<string, Array<{activity: string; location: string; sessionId: string; startDateTime: string; endDateTime: string; isAttended: boolean}>>();
         (sessionResp.data || []).forEach((session: iClipboardSession) => {
           // Check if session is happening today (in Melbourne timezone) and overlaps with period time
           if (isSessionHappeningToday(session, currentDate) && isSessionOverlappingPeriod(session, periodTiming.start, periodTiming.end)) {
@@ -259,12 +287,21 @@ const ClipboardStudentSessionAlert = ({
             if ((session as any).students && (session as any).students.length > 0) {
               const activityName = (session as any).activity?.name || 'activity';
               const locationName = (session as any).location || (session as any).locationData?.name || 'UNKNOWN LOCATION';
+              const sessionIdStr = String(session.id || '');
               (session as any).students.forEach((student: any) => {
                 if (student.smsId) {
                   if (!matchingSessionStudents.has(student.smsId)) {
                     matchingSessionStudents.set(student.smsId, []);
                   }
-                  matchingSessionStudents.get(student.smsId)?.push({activity: activityName, location: locationName, sessionId: session.id, startDateTime: session.startDateTime, endDateTime: session.endDateTime});
+                  const isAttended = attendedSessionsMap.has(sessionIdStr) && attendedSessionsMap.get(sessionIdStr)?.has(student.smsId);
+                  matchingSessionStudents.get(student.smsId)?.push({
+                    activity: activityName,
+                    location: locationName,
+                    sessionId: sessionIdStr,
+                    startDateTime: session.startDateTime,
+                    endDateTime: session.endDateTime,
+                    isAttended: isAttended || false,
+                  });
                   
                   // Store student name for display
                   studentNamesMapRef.current.set(student.smsId, {
@@ -340,9 +377,10 @@ const ClipboardStudentSessionAlert = ({
             {sessions.map((session, sessionIndex) => {
               const startTime = moment.utc(session.startDateTime).tz('Australia/Melbourne').format('hh:mm a');
               const endTime = moment.utc(session.endDateTime).tz('Australia/Melbourne').format('hh:mm a');
+              const attendanceText = session.isAttended ? 'is attending' : 'is scheduled to have';
               return (
               <div key={`${studentId}-${sessionIndex}`}>
-                <a href={`https://go.clipboard.app/schedule/session/${session.sessionId}`} target="_blank" rel="noopener noreferrer">{displayName}</a> is scheduled to have <b>{session.activity}</b> at <b><u>{session.location}</u></b> from <b>{startTime}</b> to <b>{endTime}</b>.
+                <a href={`https://go.clipboard.app/schedule/session/${session.sessionId}`} target="_blank" rel="noopener noreferrer"><b>{displayName}</b></a> {attendanceText} <b>{session.activity}</b> at <b><u>{session.location}</u></b> from <b>{startTime}</b> to <b>{endTime}</b>.
               </div>
             );
             })}

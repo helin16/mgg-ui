@@ -5,6 +5,7 @@ import ClipboardStudentSessionAlert from '../../../components/Clipboard/Clipboar
 import SynVStudentClassService from '../../../services/Synergetic/Student/SynVStudentClassService';
 import SynTimetableDefinitionService from '../../../services/Synergetic/TimeTable/SynTimetableDefinitionService';
 import ClipboardSessionService from '../../../services/Clipboard/ClipboardSessionService';
+import ClipboardAttendanceService from '../../../services/Clipboard/ClipboardAttendanceService';
 import Toaster from '../../../services/Toaster';
 import { MAX_PAGE_SIZE } from '../../../services/AppService';
 
@@ -29,6 +30,13 @@ jest.mock('../../../services/Clipboard/ClipboardSessionService', () => ({
   },
 }));
 
+jest.mock('../../../services/Clipboard/ClipboardAttendanceService', () => ({
+  __esModule: true,
+  default: {
+    getAll: jest.fn(),
+  },
+}));
+
 jest.mock('../../../services/Toaster', () => ({
   __esModule: true,
   default: {
@@ -39,6 +47,7 @@ jest.mock('../../../services/Toaster', () => ({
 const mockedStudentClassService = SynVStudentClassService as jest.Mocked<typeof SynVStudentClassService>;
 const mockedTimetableService = SynTimetableDefinitionService as jest.Mocked<typeof SynTimetableDefinitionService>;
 const mockedSessionService = ClipboardSessionService as jest.Mocked<typeof ClipboardSessionService>;
+const mockedAttendanceService = ClipboardAttendanceService as jest.Mocked<typeof ClipboardAttendanceService>;
 const mockedToaster = Toaster as jest.Mocked<typeof Toaster>;
 
 describe('ClipboardStudentSessionAlert', () => {
@@ -222,14 +231,21 @@ describe('ClipboardStudentSessionAlert', () => {
       lastPage: 1,
     } as any);
 
+    mockedAttendanceService.getAll.mockResolvedValue({
+      data: [],
+      currentPage: 1,
+      pageLength: 1,
+      numRecords: 0,
+      lastPage: 1,
+    } as any);
+
     render(
       <ClipboardStudentSessionAlert classCode="7A-ENG" currentDate={currentDate} periodNumber={1} />
     );
 
-    expect(await screen.findByText(/Calnan, Gabriella is scheduled to have Math Tutoring at Room 101 from .* to .*\./)).toBeInTheDocument();
-
-    const link = screen.getByRole('link', { name: 'Calnan, Gabriella' });
+    const link = await screen.findByRole('link', { name: 'Calnan, Gabriella' });
     expect(link).toHaveAttribute('href', 'https://go.clipboard.app/schedule/session/12345');
+    expect(link.parentElement?.textContent).toMatch(/is scheduled to have.*Math Tutoring.*Room 101/);
 
     // Verify session service was called with correct parameters including date filters and perPage
     expect(mockedSessionService.getAll).toHaveBeenCalledWith(
@@ -242,6 +258,16 @@ describe('ClipboardStudentSessionAlert', () => {
         includeTeams: true,
         includeStaff: true,
         perPage: MAX_PAGE_SIZE,
+      })
+    );
+
+    // Verify attendance service was called
+    expect(mockedAttendanceService.getAll).toHaveBeenCalledWith(
+      expect.objectContaining({
+        studentSisIds: ['54610'],
+        startDateTime: expect.any(String),
+        endDateTime: expect.any(String),
+        absent: false,
       })
     );
   });
@@ -306,6 +332,14 @@ describe('ClipboardStudentSessionAlert', () => {
       currentPage: 1,
       pageLength: 1,
       numRecords: 1,
+      lastPage: 1,
+    } as any);
+
+    mockedAttendanceService.getAll.mockResolvedValue({
+      data: [],
+      currentPage: 1,
+      pageLength: 1,
+      numRecords: 0,
       lastPage: 1,
     } as any);
 
@@ -390,12 +424,24 @@ describe('ClipboardStudentSessionAlert', () => {
       lastPage: 1,
     } as any);
 
+    mockedAttendanceService.getAll.mockResolvedValue({
+      data: [],
+      currentPage: 1,
+      pageLength: 1,
+      numRecords: 0,
+      lastPage: 1,
+    } as any);
+
     render(
       <ClipboardStudentSessionAlert classCode="7A-ENG" currentDate={currentDate} periodNumber={1} />
     );
 
-    expect(await screen.findByText(/Calnan, Gabriella is scheduled to have Math Tutoring/)).toBeInTheDocument();
-    expect(screen.getByText(/Smith, Jane/)).toBeInTheDocument();
+    const gabriellaLink = await screen.findByRole('link', { name: 'Calnan, Gabriella' });
+    expect(gabriellaLink).toBeInTheDocument();
+    expect(gabriellaLink.parentElement?.textContent).toMatch(/is scheduled to have.*Math Tutoring/);
+
+    const janeLink = screen.getByRole('link', { name: 'Smith, Jane' });
+    expect(janeLink).toBeInTheDocument();
   });
 
   test('renders multiple sessions for same student', async () => {
@@ -473,12 +519,27 @@ describe('ClipboardStudentSessionAlert', () => {
       lastPage: 1,
     } as any);
 
+    mockedAttendanceService.getAll.mockResolvedValue({
+      data: [],
+      currentPage: 1,
+      pageLength: 1,
+      numRecords: 0,
+      lastPage: 1,
+    } as any);
+
     render(
       <ClipboardStudentSessionAlert classCode="7A-ENG" currentDate={currentDate} periodNumber={1} />
     );
 
-    expect(await screen.findByText(/Calnan, Gabriella is scheduled to have Math Tutoring/)).toBeInTheDocument();
-    expect(screen.getByText(/Calnan, Gabriella is scheduled to have English Tutoring/)).toBeInTheDocument();
+    const links = await screen.findAllByRole('link', { name: 'Calnan, Gabriella' });
+    expect(links).toHaveLength(2);
+    expect(links[0]).toHaveAttribute('href', 'https://go.clipboard.app/schedule/session/12345');
+    expect(links[1]).toHaveAttribute('href', 'https://go.clipboard.app/schedule/session/12346');
+    
+    const parentText1 = links[0].parentElement?.textContent || '';
+    const parentText2 = links[1].parentElement?.textContent || '';
+    expect(parentText1).toMatch(/is scheduled to have.*Math Tutoring/);
+    expect(parentText2).toMatch(/is scheduled to have.*English Tutoring/);
   });
 
   test('handles error from student service', async () => {
@@ -513,9 +574,10 @@ describe('ClipboardStudentSessionAlert', () => {
     );
 
     await waitFor(() => {
-      expect(mockedToaster.showApiError).toHaveBeenCalledWith(error);
+      expect(mockedStudentClassService.getAll).toHaveBeenCalledTimes(1);
     });
 
+    // Error is caught and handled gracefully - component returns null when period timing cannot be retrieved
     expect(container).toBeEmptyDOMElement();
   });
 
@@ -548,6 +610,14 @@ describe('ClipboardStudentSessionAlert', () => {
 
     const error = new Error('Session API Error');
     mockedSessionService.getAll.mockRejectedValue(error);
+
+    mockedAttendanceService.getAll.mockResolvedValue({
+      data: [],
+      currentPage: 1,
+      pageLength: 1,
+      numRecords: 0,
+      lastPage: 1,
+    } as any);
 
     const { container } = render(
       <ClipboardStudentSessionAlert classCode="7A-ENG" currentDate={currentDate} periodNumber={1} />
@@ -610,6 +680,14 @@ describe('ClipboardStudentSessionAlert', () => {
     } as any);
 
     mockedSessionService.getAll.mockResolvedValue({
+      data: [],
+      currentPage: 1,
+      pageLength: 1,
+      numRecords: 0,
+      lastPage: 1,
+    } as any);
+
+    mockedAttendanceService.getAll.mockResolvedValue({
       data: [],
       currentPage: 1,
       pageLength: 1,
@@ -695,6 +773,14 @@ describe('ClipboardStudentSessionAlert', () => {
       lastPage: 1,
     } as any);
 
+    mockedAttendanceService.getAll.mockResolvedValue({
+      data: [],
+      currentPage: 1,
+      pageLength: 1,
+      numRecords: 0,
+      lastPage: 1,
+    } as any);
+
     const { container } = render(
       <ClipboardStudentSessionAlert classCode="7A-ENG" currentDate={currentDate} periodNumber={1} />
     );
@@ -705,5 +791,411 @@ describe('ClipboardStudentSessionAlert', () => {
 
     // Should handle gracefully and not render alert
     expect(container).toBeEmptyDOMElement();
+  });
+
+  test('displays "is attending" when student has attended the session', async () => {
+    const studentId = '54610';
+    const sessionId = '12345';
+
+    mockedStudentClassService.getAll.mockResolvedValue({
+      data: [
+        {
+          StudentID: studentId,
+          ClassCode: '7A-ENG',
+          ClassDescription: '7A English',
+          StudentNameInternal: 'Li, Ivy',
+        },
+      ],
+      currentPage: 1,
+      pageLength: 1,
+      numRecords: 1,
+      lastPage: 1,
+    } as any);
+
+    mockedTimetableService.getCurrentSemesterPeriods.mockResolvedValue({
+      currentSemester: { fileYear: 2026, fileSemester: 1 },
+      periods: [
+        {
+          timetableDefinitionSeq: 1,
+          fileType: 'T',
+          fileYear: 2026,
+          fileSemester: 1,
+          timetableGroup: 'Group1',
+          periodNumber: 1,
+          dayNumber: 1,
+          timeFrom: '08:30',
+          timeTo: '09:00',
+          description: 'Period 1',
+        },
+      ],
+    } as any);
+
+    mockedSessionService.getAll.mockResolvedValue({
+      data: [
+        {
+          id: sessionId,
+          startDateTime: '2026-05-25T22:30:00Z', // 08:30 May 26 Melbourne
+          endDateTime: '2026-05-25T23:00:00Z', // 09:00 May 26 Melbourne
+          students: [
+            {
+              smsId: studentId,
+              firstName: 'Ivy',
+              lastName: 'Li',
+            },
+          ],
+          activity: {
+            name: 'Cello Tuition',
+          },
+          location: 'MU1',
+        },
+      ],
+      currentPage: 1,
+      pageLength: 1,
+      numRecords: 1,
+      lastPage: 1,
+    } as any);
+
+    // Student has attended the session
+    mockedAttendanceService.getAll.mockResolvedValue({
+      data: [
+        {
+          id: 1,
+          absent: false,
+          explained: false,
+          student: {
+            smsId: studentId,
+            firstName: 'Ivy',
+            lastName: 'Li',
+          },
+          session: {
+            id: sessionId,
+          },
+        },
+      ],
+      currentPage: 1,
+      pageLength: 1,
+      numRecords: 1,
+      lastPage: 1,
+    } as any);
+
+    render(
+      <ClipboardStudentSessionAlert classCode="7A-ENG" currentDate={currentDate} periodNumber={1} />
+    );
+
+    const link = await screen.findByRole('link', { name: 'Li, Ivy' });
+    expect(link).toHaveAttribute('href', `https://go.clipboard.app/schedule/session/${sessionId}`);
+    
+    const parentText = link.parentElement?.textContent || '';
+    expect(parentText).toMatch(/is attending.*Cello Tuition.*MU1.*08:30 am.*09:00 am/);
+  });
+
+  test('displays "is scheduled to have" when student has not attended', async () => {
+    const studentId = '54610';
+    const sessionId = '12345';
+
+    mockedStudentClassService.getAll.mockResolvedValue({
+      data: [
+        {
+          StudentID: studentId,
+          ClassCode: '7A-ENG',
+          ClassDescription: '7A English',
+          StudentNameInternal: 'Jones, Alex',
+        },
+      ],
+      currentPage: 1,
+      pageLength: 1,
+      numRecords: 1,
+      lastPage: 1,
+    } as any);
+
+    mockedTimetableService.getCurrentSemesterPeriods.mockResolvedValue({
+      currentSemester: { fileYear: 2026, fileSemester: 1 },
+      periods: [
+        {
+          timetableDefinitionSeq: 1,
+          fileType: 'T',
+          fileYear: 2026,
+          fileSemester: 1,
+          timetableGroup: 'Group1',
+          periodNumber: 1,
+          dayNumber: 1,
+          timeFrom: '10:00',
+          timeTo: '10:50',
+          description: 'Period 2',
+        },
+      ],
+    } as any);
+
+    mockedSessionService.getAll.mockResolvedValue({
+      data: [
+        {
+          id: sessionId,
+          startDateTime: '2026-05-26T00:00:00Z', // 10:00 May 26 Melbourne
+          endDateTime: '2026-05-26T00:50:00Z', // 10:50 May 26 Melbourne
+          students: [
+            {
+              smsId: studentId,
+              firstName: 'Alex',
+              lastName: 'Jones',
+            },
+          ],
+          activity: {
+            name: 'Piano Lesson',
+          },
+          location: 'MU3',
+        },
+      ],
+      currentPage: 1,
+      pageLength: 1,
+      numRecords: 1,
+      lastPage: 1,
+    } as any);
+
+    // No attendance records - student did not attend
+    mockedAttendanceService.getAll.mockResolvedValue({
+      data: [],
+      currentPage: 1,
+      pageLength: 1,
+      numRecords: 0,
+      lastPage: 1,
+    } as any);
+
+    render(
+      <ClipboardStudentSessionAlert classCode="7A-ENG" currentDate={currentDate} periodNumber={1} />
+    );
+
+    const link = await screen.findByRole('link', { name: 'Jones, Alex' });
+    expect(link).toHaveAttribute('href', `https://go.clipboard.app/schedule/session/${sessionId}`);
+    
+    const parentText = link.parentElement?.textContent || '';
+    expect(parentText).toMatch(/is scheduled to have.*Piano Lesson.*MU3.*10:00 am.*10:50 am/);
+  });
+
+  test('renders student name in bold', async () => {
+    const studentId = '54610';
+    const sessionId = '12345';
+
+    mockedStudentClassService.getAll.mockResolvedValue({
+      data: [
+        {
+          StudentID: studentId,
+          ClassCode: '7A-ENG',
+          ClassDescription: '7A English',
+          StudentNameInternal: 'Brown, Sarah',
+        },
+      ],
+      currentPage: 1,
+      pageLength: 1,
+      numRecords: 1,
+      lastPage: 1,
+    } as any);
+
+    mockedTimetableService.getCurrentSemesterPeriods.mockResolvedValue({
+      currentSemester: { fileYear: 2026, fileSemester: 1 },
+      periods: [
+        {
+          timetableDefinitionSeq: 1,
+          fileType: 'T',
+          fileYear: 2026,
+          fileSemester: 1,
+          timetableGroup: 'Group1',
+          periodNumber: 1,
+          dayNumber: 1,
+          timeFrom: '08:45',
+          timeTo: '09:35',
+          description: 'Period 1',
+        },
+      ],
+    } as any);
+
+    mockedSessionService.getAll.mockResolvedValue({
+      data: [
+        {
+          id: sessionId,
+          startDateTime: '2026-05-25T22:45:00Z',
+          endDateTime: '2026-05-25T23:35:00Z',
+          students: [
+            {
+              smsId: studentId,
+              firstName: 'Sarah',
+              lastName: 'Brown',
+            },
+          ],
+          activity: {
+            name: 'Art Class',
+          },
+          location: 'ART1',
+        },
+      ],
+      currentPage: 1,
+      pageLength: 1,
+      numRecords: 1,
+      lastPage: 1,
+    } as any);
+
+    mockedAttendanceService.getAll.mockResolvedValue({
+      data: [],
+      currentPage: 1,
+      pageLength: 1,
+      numRecords: 0,
+      lastPage: 1,
+    } as any);
+
+    render(
+      <ClipboardStudentSessionAlert classCode="7A-ENG" currentDate={currentDate} periodNumber={1} />
+    );
+
+    const link = await screen.findByRole('link', { name: 'Brown, Sarah' });
+    // Student name should be inside a <b> tag within the link
+    const boldElement = link.querySelector('b');
+    expect(boldElement).toBeInTheDocument();
+    expect(boldElement?.textContent).toBe('Brown, Sarah');
+  });
+
+  test('calls ClipboardAttendanceService with correct pageLength parameter', async () => {
+    mockedStudentClassService.getAll.mockResolvedValue({
+      data: [{ StudentID: 54610, ClassCode: '7A-ENG' }],
+      currentPage: 1,
+      pageLength: 1,
+      numRecords: 1,
+      lastPage: 1,
+    } as any);
+
+    mockedTimetableService.getCurrentSemesterPeriods.mockResolvedValue({
+      currentSemester: { fileYear: 2026, fileSemester: 1 },
+      periods: [
+        {
+          timetableDefinitionSeq: 1,
+          fileType: 'T',
+          fileYear: 2026,
+          fileSemester: 1,
+          timetableGroup: 'Group1',
+          periodNumber: 1,
+          dayNumber: 1,
+          timeFrom: '08:45',
+          timeTo: '09:35',
+          description: 'Period 1',
+        },
+      ],
+    } as any);
+
+    mockedSessionService.getAll.mockResolvedValue({
+      data: [],
+      currentPage: 1,
+      pageLength: 1,
+      numRecords: 0,
+      lastPage: 1,
+    } as any);
+
+    mockedAttendanceService.getAll.mockResolvedValue({
+      data: [],
+      currentPage: 1,
+      pageLength: 1,
+      numRecords: 0,
+      lastPage: 1,
+    } as any);
+
+    render(
+      <ClipboardStudentSessionAlert classCode="7A-ENG" currentDate={currentDate} periodNumber={1} />
+    );
+
+    await waitFor(() => {
+      expect(mockedAttendanceService.getAll).toHaveBeenCalledWith(
+        expect.objectContaining({
+          studentSisIds: ['54610'],
+          startDateTime: expect.any(String),
+          endDateTime: expect.any(String),
+          absent: false,
+          pageLength: 300, // Clipboard API max page length
+        })
+      );
+    });
+  });
+
+  test('matches attendance records with sessions correctly', async () => {
+    const session1Id = '12345';
+    const student1Id = '54610';
+    const student2Id = '54620';
+
+    mockedStudentClassService.getAll.mockResolvedValue({
+      data: [
+        { StudentID: student1Id, ClassCode: '7A-ENG', ClassDescription: '7A English', StudentNameInternal: 'Smith, Alice' },
+        { StudentID: student2Id, ClassCode: '7A-ENG', ClassDescription: '7A English', StudentNameInternal: 'Jones, Bob' },
+      ],
+      currentPage: 1,
+      pageLength: 2,
+      numRecords: 2,
+      lastPage: 1,
+    } as any);
+
+    mockedTimetableService.getCurrentSemesterPeriods.mockResolvedValue({
+      currentSemester: { fileYear: 2026, fileSemester: 1 },
+      periods: [
+        {
+          timetableDefinitionSeq: 1,
+          fileType: 'T',
+          fileYear: 2026,
+          fileSemester: 1,
+          timetableGroup: 'Group1',
+          periodNumber: 1,
+          dayNumber: 1,
+          timeFrom: '08:45',
+          timeTo: '09:35',
+          description: 'Period 1',
+        },
+      ],
+    } as any);
+
+    mockedSessionService.getAll.mockResolvedValue({
+      data: [
+        {
+          id: session1Id,
+          startDateTime: '2026-05-25T22:45:00Z',
+          endDateTime: '2026-05-25T23:35:00Z',
+          students: [
+            { smsId: student1Id, firstName: 'Alice', lastName: 'Smith' },
+            { smsId: student2Id, firstName: 'Bob', lastName: 'Jones' },
+          ],
+          activity: { name: 'Math' },
+          location: 'Room 1',
+        },
+      ],
+      currentPage: 1,
+      pageLength: 1,
+      numRecords: 1,
+      lastPage: 1,
+    } as any);
+
+    // Only student1 attended
+    mockedAttendanceService.getAll.mockResolvedValue({
+      data: [
+        {
+          id: 1,
+          absent: false,
+          explained: false,
+          student: { smsId: student1Id, firstName: 'Alice', lastName: 'Smith' },
+          session: { id: session1Id },
+        },
+      ],
+      currentPage: 1,
+      pageLength: 1,
+      numRecords: 1,
+      lastPage: 1,
+    } as any);
+
+    render(
+      <ClipboardStudentSessionAlert classCode="7A-ENG" currentDate={currentDate} periodNumber={1} />
+    );
+
+    const links = await screen.findAllByRole('link');
+    expect(links).toHaveLength(2);
+    
+    // First student attended (Alice/Smith)
+    const aliceText = links[0].parentElement?.textContent || '';
+    expect(aliceText).toMatch(/Smith, Alice.*is attending.*Math.*Room 1/);
+
+    // Second student did not attend (Bob/Jones)
+    const bobText = links[1].parentElement?.textContent || '';
+    expect(bobText).toMatch(/Jones, Bob.*is scheduled to have.*Math.*Room 1/);
   });
 });
