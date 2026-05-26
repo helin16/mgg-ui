@@ -226,7 +226,7 @@ describe('ClipboardStudentSessionAlert', () => {
       <ClipboardStudentSessionAlert classCode="7A-ENG" currentDate={currentDate} periodNumber={1} />
     );
 
-    expect(await screen.findByText('Calnan, Gabriella is scheduled to have Math Tutoring at Room 101 for current period.')).toBeInTheDocument();
+    expect(await screen.findByText(/Calnan, Gabriella is scheduled to have Math Tutoring at Room 101 from .* to .*\./)).toBeInTheDocument();
 
     const link = screen.getByRole('link', { name: 'Calnan, Gabriella' });
     expect(link).toHaveAttribute('href', 'https://go.clipboard.app/schedule/session/12345');
@@ -394,7 +394,7 @@ describe('ClipboardStudentSessionAlert', () => {
       <ClipboardStudentSessionAlert classCode="7A-ENG" currentDate={currentDate} periodNumber={1} />
     );
 
-    expect(await screen.findByText('Calnan, Gabriella is scheduled to have Math Tutoring')).toBeInTheDocument();
+    expect(await screen.findByText(/Calnan, Gabriella is scheduled to have Math Tutoring/)).toBeInTheDocument();
     expect(screen.getByText(/Smith, Jane/)).toBeInTheDocument();
   });
 
@@ -477,8 +477,8 @@ describe('ClipboardStudentSessionAlert', () => {
       <ClipboardStudentSessionAlert classCode="7A-ENG" currentDate={currentDate} periodNumber={1} />
     );
 
-    expect(await screen.findByText('Calnan, Gabriella is scheduled to have Math Tutoring')).toBeInTheDocument();
-    expect(screen.getByText('Calnan, Gabriella is scheduled to have English Tutoring')).toBeInTheDocument();
+    expect(await screen.findByText(/Calnan, Gabriella is scheduled to have Math Tutoring/)).toBeInTheDocument();
+    expect(screen.getByText(/Calnan, Gabriella is scheduled to have English Tutoring/)).toBeInTheDocument();
   });
 
   test('handles error from student service', async () => {
