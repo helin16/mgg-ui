@@ -121,7 +121,9 @@ describe('ClipboardConcussionAlert', () => {
           studentConcerned: { id: 54610, firstName: 'Gabriella', legalFirstName: null, lastName: 'Calnan', smsId: '54610' },
           staff: { id: 111, firstName: 'Charlotte', lastName: 'Ryan' },
           dateTime: '2026-05-11T10:00:00Z',
-          returnToPlayDate: '2026-05-28T00:00:00Z',
+          returnToPlay: {
+            date: '2026-05-28T00:00:00Z',
+          },
           concussionStatus: 'confirmed',
           archived: false,
           Diagnosis: 'Concussion',
@@ -175,7 +177,7 @@ describe('ClipboardConcussionAlert', () => {
     });
   });
 
-  test('renders alert without an until date when returnToPlayDate is missing', async () => {
+  test('renders alert without an until date when returnToPlay is missing', async () => {
     mockedStudentClassService.getAll.mockResolvedValue({
       data: [
         { StudentID: 54610, ClassCode: '7A-ENG' },
@@ -233,7 +235,7 @@ describe('ClipboardConcussionAlert', () => {
     });
   });
 
-  test('uses returnToPlayDate for the displayed until date', async () => {
+  test('uses returnToPlay.date for the displayed until date', async () => {
     mockedStudentClassService.getAll.mockResolvedValue({
       data: [
         { StudentID: 54610, ClassCode: '7A-ENG' },
@@ -251,7 +253,9 @@ describe('ClipboardConcussionAlert', () => {
           studentConcerned: { id: 54610, firstName: 'Brooke', legalFirstName: null, lastName: 'Beekman', smsId: '54610' },
           staffMember: { id: 222, firstName: 'Charlotte', lastName: 'Ryan' },
           dateTime: '2026-05-10T18:24:00Z',
-          returnToPlayDate: '2026-06-01T14:00:00Z',
+          returnToPlay: {
+            date: '2026-06-01T14:00:00Z',
+          },
           concussionStatus: 'confirmed',
           archived: false,
           Diagnosis: 'Concussion',
@@ -282,7 +286,7 @@ describe('ClipboardConcussionAlert', () => {
     );
   });
 
-  test('uses returnToPlayReason when provided', async () => {
+  test('appends returnToPlay.reason after the diagnosis when provided', async () => {
     mockedStudentClassService.getAll.mockResolvedValue({
       data: [
         { StudentID: 54610, ClassCode: '7A-ENG' },
@@ -299,8 +303,10 @@ describe('ClipboardConcussionAlert', () => {
           id: 45860,
           studentConcerned: { id: 54610, firstName: 'Brooke', legalFirstName: null, lastName: 'Beekman', smsId: '54610' },
           dateTime: '2026-05-10T18:24:00Z',
-          returnToPlayDate: '2026-06-01T14:00:00Z',
-          returnToPlayReason: 'Potential concussion',
+          returnToPlay: {
+            date: '2026-06-01T14:00:00Z',
+            reason: 'Potential concussion',
+          },
           concussionStatus: 'confirmed',
           archived: false,
           Diagnosis: 'Concussion',
@@ -327,11 +333,11 @@ describe('ClipboardConcussionAlert', () => {
 
     const studentLink = await screen.findByRole('link', {name: 'Brooke Beekman'});
     expect(studentLink.closest('div')).toHaveTextContent(
-      `Brooke Beekman should not return to play until ${expectedReturnToPlayDate} due to "Potential concussion".`
+      `Brooke Beekman should not return to play until ${expectedReturnToPlayDate} due to "Concussion": Potential concussion.`
     );
   });
 
-  test('does not render an alert after the local returnToPlayDate has passed', async () => {
+  test('does not render an alert after the local returnToPlay.date has passed', async () => {
     mockedStudentClassService.getAll.mockResolvedValue({
       data: [
         { StudentID: 54610, ClassCode: '7A-ENG' },
@@ -348,7 +354,9 @@ describe('ClipboardConcussionAlert', () => {
           id: 45861,
           studentConcerned: { id: 54610, firstName: 'Brooke', legalFirstName: null, lastName: 'Beekman', smsId: '54610' },
           dateTime: '2026-05-10T18:24:00Z',
-          returnToPlayDate: '2026-06-01T14:00:00Z',
+          returnToPlay: {
+            date: '2026-06-01T14:00:00Z',
+          },
           concussionStatus: 'confirmed',
           archived: false,
           location: null,

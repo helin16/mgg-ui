@@ -17,8 +17,7 @@ const endPoint = '/clipboard/incident';
 const INCIDENT_SELECT_FIELDS = [
   'id',
   'dateTime',
-  'returnToPlayDate',
-  'returnToPlayReason',
+  'returnToPlay',
   'RestrictedEndDate',
   'ReviewDate',
   'concussionStatus',

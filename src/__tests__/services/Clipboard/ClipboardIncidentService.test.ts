@@ -6,8 +6,7 @@ import {HEADER_NAME_SELECTING_FIELDS} from '../../../services/AppService';
 const INCIDENT_SELECT_FIELDS = [
   'id',
   'dateTime',
-  'returnToPlayDate',
-  'returnToPlayReason',
+  'returnToPlay',
   'RestrictedEndDate',
   'ReviewDate',
   'concussionStatus',

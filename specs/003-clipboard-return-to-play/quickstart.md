@@ -64,3 +64,9 @@ restrictions.
 1. Simulate or trigger a Clipboard incident request failure.
 2. Verify the page remains usable.
 3. Verify the existing visible error path is triggered and no stale alert remains visible.
+
+## Verification Evidence
+
+- `mgg-ui`: `npm test -- --runInBand --watch=false src/__tests__/services/Clipboard/ClipboardIncidentService.test.ts src/__tests__/components/Clipboard/ClipboardConcussionAlert.test.tsx` passed on 2026-05-29
+- `../mggs-api`: `npm test -- --runInBand tests/connectors/Clipboard/ClipboardConnector.test.ts tests/controllers/Clipboard/ClipboardIncidentController.test.ts` was attempted on 2026-05-29 but the Jest process failed before executing the target suites because `buffer-equal-constant-time` crashed during dependency initialization
+- Manual validation scenarios remain pending on the live attendance flow
