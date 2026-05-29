@@ -65,7 +65,7 @@ const getIncidentUrl = (incident: iClipboardIncident) => {
 };
 
 const getIncidentReturnDate = (incident: iClipboardIncident) => {
-  return incident.returnToPlayDate;
+  return incident.returnToPlay?.date;
 };
 
 const getIncidentReturnDateMoment = (incident: iClipboardIncident) => {
@@ -83,9 +83,14 @@ const getIncidentReturnDateText = (incident: iClipboardIncident) => {
   return returnDate ? returnDate.format('ddd Do MMMM YYYY') : '';
 };
 
-const getIncidentReasonText = (incident: iClipboardIncident) => {
-  const reason = `${incident.returnToPlayReason || ''}`.trim();
-  return reason === '' ? 'Concussion' : reason;
+const getIncidentDiagnosisText = (incident: iClipboardIncident) => {
+  const diagnosis = `${incident.Diagnosis || incident.IncidentTypeDescription || ''}`.trim();
+  return diagnosis === '' ? 'Concussion' : diagnosis;
+};
+
+const getIncidentReasonSuffixText = (incident: iClipboardIncident) => {
+  const reason = `${incident.returnToPlay?.reason || ''}`.trim();
+  return reason === '' ? '' : `: ${reason}`;
 };
 
 const ClipboardConcussionAlert = ({
@@ -198,7 +203,8 @@ const ClipboardConcussionAlert = ({
     <Wrapper className={className}>
       {incidents.map((incident, index) => {
         const studentName = getIncidentDisplayName(incident);
-        const reasonText = getIncidentReasonText(incident);
+        const diagnosisText = getIncidentDiagnosisText(incident);
+        const reasonSuffixText = getIncidentReasonSuffixText(incident);
         const returnDateText = getIncidentReturnDateText(incident);
         const incidentUrl = getIncidentUrl(incident);
 
@@ -210,7 +216,7 @@ const ClipboardConcussionAlert = ({
                 {studentName}
               </a>
             </strong>{' '}
-            should not return to play {returnDateText !== '' ? `until ${returnDateText} ` : ''}due to "{reasonText}".
+            should not return to play {returnDateText !== '' ? `until ${returnDateText} ` : ''}due to "{diagnosisText}"{reasonSuffixText}.
           </div>
         );
       })}

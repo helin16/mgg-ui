@@ -15,12 +15,16 @@ type iClipboardIncidentStaff = {
   lastName?: string | null;
 };
 
+type iClipboardIncidentReturnToPlay = {
+  date?: Date | string | null;
+  reason?: string | null;
+};
+
 type iClipboardIncident = iBaseType & {
   location: string | null;
   studentConcerned: iClipboardIncidentStudent | null;
   dateTime: string | null;
-  returnToPlayDate?: Date | string | null;
-  returnToPlayReason?: string | null;
+  returnToPlay?: iClipboardIncidentReturnToPlay | null;
   concussionStatus: 'none' | 'potential' | 'confirmed' | 'any' | string;
   archived: boolean;
   Diagnosis: string | null;
