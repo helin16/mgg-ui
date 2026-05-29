@@ -68,45 +68,24 @@ const getIncidentReturnDate = (incident: iClipboardIncident) => {
   return incident.returnToPlayDate;
 };
 
-const getIncidentReturnDateText = (incident: iClipboardIncident, currentMoment: moment.Moment) => {
+const getIncidentReturnDateMoment = (incident: iClipboardIncident) => {
   const returnDateRaw = getIncidentReturnDate(incident);
   if (`${returnDateRaw || ''}`.trim() === '') {
-    return 'No Return Date';
+    return null;
   }
 
   const returnDate = moment.utc(returnDateRaw).local();
-  if (!returnDate.isValid()) {
-    return 'No Return Date';
-  }
+  return returnDate.isValid() ? returnDate : null;
+};
 
-  const dateText = returnDate.format('Do MMMM YYYY');
-  const relativeText = returnDate.clone().startOf('day').from(currentMoment.clone().startOf('day'));
-
-  return `the ${dateText} (${relativeText})`;
+const getIncidentReturnDateText = (incident: iClipboardIncident) => {
+  const returnDate = getIncidentReturnDateMoment(incident);
+  return returnDate ? returnDate.format('ddd Do MMMM YYYY') : '';
 };
 
 const getIncidentReasonText = (incident: iClipboardIncident) => {
   const reason = `${incident.returnToPlayReason || ''}`.trim();
   return reason === '' ? 'Concussion' : reason;
-};
-
-const getIncidentDateTimeText = (incident: iClipboardIncident) => {
-  const incidentDate = incident.dateTime;
-  if (!incidentDate) {
-    return '';
-  }
-  const incidentMoment = moment.utc(incidentDate).local();
-  return incidentMoment.isValid() ? incidentMoment.format('Do MMMM YYYY') : '';
-};
-
-const getIncidentDaysAgo = (incident: iClipboardIncident) => {
-  const incidentDate = incident.dateTime;
-  if (!incidentDate) {
-    return 0;
-  }
-  const incidentMoment = moment.utc(incidentDate).local();
-  const today = moment();
-  return incidentMoment.isValid() ? today.diff(incidentMoment, 'days') : 0;
 };
 
 const ClipboardConcussionAlert = ({
@@ -178,12 +157,11 @@ const ClipboardConcussionAlert = ({
         }
 
         const activeIncidents = (incidentResp.data || []).filter((incident: iClipboardIncident) => {
-          const restrictionDate = getIncidentReturnDate(incident);
-          if (`${restrictionDate || ''}`.trim() === '') {
+          const restrictionMoment = getIncidentReturnDateMoment(incident);
+          if (!restrictionMoment) {
             return true;
           }
-          const restrictionMoment = moment(restrictionDate);
-          return restrictionMoment.isValid() ? restrictionMoment.isSameOrAfter(currentMoment, 'day') : true;
+          return restrictionMoment.isSameOrAfter(currentMoment, 'day');
         });
 
         setIncidents(activeIncidents);
@@ -221,8 +199,7 @@ const ClipboardConcussionAlert = ({
       {incidents.map((incident, index) => {
         const studentName = getIncidentDisplayName(incident);
         const reasonText = getIncidentReasonText(incident);
-        const dateTimeText = getIncidentDateTimeText(incident);
-        const daysAgo = getIncidentDaysAgo(incident);
+        const returnDateText = getIncidentReturnDateText(incident);
         const incidentUrl = getIncidentUrl(incident);
 
         return (
@@ -233,7 +210,7 @@ const ClipboardConcussionAlert = ({
                 {studentName}
               </a>
             </strong>{' '}
-            should not return to play due to "{reasonText}" on {dateTimeText} ({daysAgo} days ago).
+            should not return to play {returnDateText !== '' ? `until ${returnDateText} ` : ''}due to "{reasonText}".
           </div>
         );
       })}

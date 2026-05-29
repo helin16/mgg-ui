@@ -143,18 +143,17 @@ describe('ClipboardConcussionAlert', () => {
       <ClipboardConcussionAlert classCode={'7A-ENG'} currentDate={currentDate} periodNumber={1} />
     );
 
-    const incidentMoment = moment.utc('2026-05-11T10:00:00Z').local();
-    const expectedDate = incidentMoment.format('Do MMMM YYYY');
-    const today = moment('2026-05-25');
-    const daysAgo = today.diff(incidentMoment, 'days');
+    const returnToPlayMoment = moment.utc('2026-05-28T00:00:00Z').local();
+    const expectedReturnToPlayDate = returnToPlayMoment.format('ddd Do MMMM YYYY');
 
     const startDateTime = moment(currentDate).subtract(21, 'days').startOf('day').toISOString();
     const endDateTime = moment(currentDate).endOf('day').toISOString();
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(
-      `Gabriella Calnan should not return to play due to "Concussion" on ${expectedDate} (${daysAgo} days ago).`
+    const studentLink = await screen.findByRole('link', {name: 'Gabriella Calnan'});
+    expect(studentLink.closest('div')).toHaveTextContent(
+      `Gabriella Calnan should not return to play until ${expectedReturnToPlayDate} due to "Concussion".`
     );
-    expect(screen.getByRole('link', {name: 'Gabriella Calnan'})).toHaveAttribute(
+    expect(studentLink).toHaveAttribute(
       'href',
       'https://go.clipboard.app/incidents/45858'
     );
@@ -176,7 +175,7 @@ describe('ClipboardConcussionAlert', () => {
     });
   });
 
-  test('renders alert with incident date and days ago', async () => {
+  test('renders alert without an until date when returnToPlayDate is missing', async () => {
     mockedStudentClassService.getAll.mockResolvedValue({
       data: [
         { StudentID: 54610, ClassCode: '7A-ENG' },
@@ -215,18 +214,14 @@ describe('ClipboardConcussionAlert', () => {
       <ClipboardConcussionAlert classCode={'7A-ENG'} currentDate={'2026-05-25'} periodNumber={1} />
     );
 
-    const incidentMoment = moment.utc('2026-05-10T10:00:00Z').local();
-    const expectedDate = incidentMoment.format('Do MMMM YYYY');
-    const today = moment('2026-05-25');
-    const daysAgo = today.diff(incidentMoment, 'days');
-
     const startDateTime = moment('2026-05-25').subtract(21, 'days').startOf('day').toISOString();
     const endDateTime = moment('2026-05-25').endOf('day').toISOString();
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(
-      `Gabriella Calnan should not return to play due to "Concussion" on ${expectedDate} (${daysAgo} days ago).`
+    const studentLink = await screen.findByRole('link', {name: 'Gabriella Calnan'});
+    expect(studentLink.closest('div')).toHaveTextContent(
+      'Gabriella Calnan should not return to play due to "Concussion".'
     );
-    expect(screen.getByRole('link', {name: 'Gabriella Calnan'})).toHaveAttribute(
+    expect(studentLink).toHaveAttribute(
       'href',
       'https://go.clipboard.app/incidents/45859'
     );
@@ -238,7 +233,7 @@ describe('ClipboardConcussionAlert', () => {
     });
   });
 
-  test('uses incident dateTime for display, not returnToPlayDate', async () => {
+  test('uses returnToPlayDate for the displayed until date', async () => {
     mockedStudentClassService.getAll.mockResolvedValue({
       data: [
         { StudentID: 54610, ClassCode: '7A-ENG' },
@@ -278,13 +273,12 @@ describe('ClipboardConcussionAlert', () => {
       <ClipboardConcussionAlert classCode={'7A-ENG'} currentDate={'2026-06-01'} periodNumber={1} />
     );
 
-    const incidentMoment = moment.utc('2026-05-10T18:24:00Z').local();
-    const expectedDate = incidentMoment.format('Do MMMM YYYY');
-    const today = moment('2026-06-01');
-    const daysAgo = today.diff(incidentMoment, 'days');
+    const returnToPlayMoment = moment.utc('2026-06-01T14:00:00Z').local();
+    const expectedReturnToPlayDate = returnToPlayMoment.format('ddd Do MMMM YYYY');
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(
-      `Brooke Beekman should not return to play due to "Concussion" on ${expectedDate} (${daysAgo} days ago).`
+    const studentLink = await screen.findByRole('link', {name: 'Brooke Beekman'});
+    expect(studentLink.closest('div')).toHaveTextContent(
+      `Brooke Beekman should not return to play until ${expectedReturnToPlayDate} due to "Concussion".`
     );
   });
 
@@ -328,13 +322,53 @@ describe('ClipboardConcussionAlert', () => {
       <ClipboardConcussionAlert classCode={'7A-ENG'} currentDate={'2026-06-01'} periodNumber={1} />
     );
 
-    const incidentMoment = moment.utc('2026-05-10T18:24:00Z').local();
-    const expectedDate = incidentMoment.format('Do MMMM YYYY');
-    const today = moment('2026-06-01');
-    const daysAgo = today.diff(incidentMoment, 'days');
+    const returnToPlayMoment = moment.utc('2026-06-01T14:00:00Z').local();
+    const expectedReturnToPlayDate = returnToPlayMoment.format('ddd Do MMMM YYYY');
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(
-      `Brooke Beekman should not return to play due to "Potential concussion" on ${expectedDate} (${daysAgo} days ago).`
+    const studentLink = await screen.findByRole('link', {name: 'Brooke Beekman'});
+    expect(studentLink.closest('div')).toHaveTextContent(
+      `Brooke Beekman should not return to play until ${expectedReturnToPlayDate} due to "Potential concussion".`
     );
+  });
+
+  test('does not render an alert after the local returnToPlayDate has passed', async () => {
+    mockedStudentClassService.getAll.mockResolvedValue({
+      data: [
+        { StudentID: 54610, ClassCode: '7A-ENG' },
+      ],
+      currentPage: 1,
+      pageLength: 1,
+      numRecords: 1,
+      lastPage: 1,
+    } as any);
+
+    mockedClipboardIncidentService.getAll.mockResolvedValue({
+      data: [
+        {
+          id: 45861,
+          studentConcerned: { id: 54610, firstName: 'Brooke', legalFirstName: null, lastName: 'Beekman', smsId: '54610' },
+          dateTime: '2026-05-10T18:24:00Z',
+          returnToPlayDate: '2026-06-01T14:00:00Z',
+          concussionStatus: 'confirmed',
+          archived: false,
+          location: null,
+        },
+      ],
+      currentPage: 1,
+      pageLength: 1,
+      numRecords: 1,
+      lastPage: 1,
+    } as any);
+
+    const {container} = render(
+      <ClipboardConcussionAlert classCode={'7A-ENG'} currentDate={'2026-06-03'} periodNumber={1} />
+    );
+
+    await waitFor(() => {
+      expect(mockedClipboardIncidentService.getAll).toHaveBeenCalledTimes(1);
+    });
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(container).toBeEmptyDOMElement();
   });
 });
