@@ -3,6 +3,7 @@ import iVStudent, {
 } from "../../../../types/Synergetic/Student/iVStudent";
 import iFunnelLead from "../../../../types/Funnel/iFunnelLead";
 import {Button, ButtonProps, Spinner, Table as BTable} from "react-bootstrap";
+import * as Icons from "react-bootstrap-icons";
 import PopupModal from "../../../common/PopupModal";
 import moment from "moment-timezone";
 import {useEffect, useState} from "react";
@@ -19,7 +20,7 @@ import iSynLuYearLevel from '../../../../types/Synergetic/Lookup/iSynLuYearLevel
 import SynLuYearLevelService from '../../../../services/Synergetic/Lookup/SynLuYearLevelService';
 import {MGG_CAMPUS_CODES} from '../../../../types/Synergetic/Lookup/iSynLuCampus';
 import Toaster from '../../../../services/Toaster';
-import CSVExportFromHtmlTableBtn from '../../../form/CSVExportFromHtmlTableBtn';
+import * as XLSX from 'sheetjs-style';
 
 type iStudentNumberDetailsPopup = ButtonProps & {
   records: (iVStudent | iFunnelLead)[];
@@ -338,6 +339,21 @@ const StudentNumberDetailsPopupBtn = ({
     );
   };
 
+  const getConcessionsForRecord = (
+    record: iVStudent | iFunnelLead
+  ): iSynDebtorStudentConcession[] => {
+    if (showingFuture === true) {
+      // @ts-ignore
+      return "nextYearConcessions" in record
+        ? (record.nextYearConcessions || []) as iSynDebtorStudentConcession[]
+        : [];
+    }
+    // @ts-ignore
+    return "currentConcessions" in record
+      ? (record.currentConcessions || []) as iSynDebtorStudentConcession[]
+      : [];
+  };
+
   const getColumns = <T extends {}>() => [
     {
       key: "studentID",
@@ -610,6 +626,82 @@ const StudentNumberDetailsPopupBtn = ({
         ])
   ];
 
+  const exportTable = () => {
+    const data = document.getElementById(tableHtmlId);
+    if (!data) {
+      return;
+    }
+
+    const ws = XLSX.utils.table_to_sheet(data);
+    const rows = XLSX.utils.sheet_to_json(ws, {
+      header: 1,
+      raw: false,
+      defval: "",
+    }) as any[][];
+
+    if (showingFinanceFigures !== true || rows.length <= 1) {
+      const exportSheet = XLSX.utils.aoa_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, exportSheet, `${moment().format('DD_MMM_YYYY_HH_mm_ss')}`);
+      XLSX.writeFile(wb, `students_${nowString}.csv`);
+      return;
+    }
+
+    // Finance view: inject concession code/description columns before "Conessions"
+    // and expand to one row per concession
+    const headers = (rows[0] || []).map((h: any) => `${h || ""}`.trim());
+    const concessionsColIndex = headers.indexOf("Conessions");
+    const insertIndex = concessionsColIndex >= 0 ? concessionsColIndex : headers.length;
+    const exportHeaders = [
+      ...headers.slice(0, insertIndex),
+      "Concession Fee Code",
+      "Concession Fee Code Description",
+      ...headers.slice(insertIndex),
+    ];
+
+    // Build a map from StudentID to record for fast lookup
+    const recordByStudentId = records.reduce(
+      (map: { [key: string]: iVStudent | iFunnelLead }, record) => {
+        const id = `${(record as iVStudent).StudentID || ""}`.trim();
+        if (id !== "") {
+          map[id] = record;
+        }
+        return map;
+      },
+      {}
+    );
+
+    const expandedRows: any[][] = [exportHeaders];
+    rows.slice(1).forEach((row: any[]) => {
+      const studentId = `${row[0] || ""}`.trim();
+      const record = studentId in recordByStudentId ? recordByStudentId[studentId] : undefined;
+      const concessions = record ? getConcessionsForRecord(record) : [];
+      const buildRow = (feeCode: string, feeDesc: string) => [
+        ...row.slice(0, insertIndex),
+        feeCode,
+        feeDesc,
+        ...row.slice(insertIndex),
+      ];
+
+      if (concessions.length <= 1) {
+        const feeCode = concessions.length === 1 ? `${concessions[0].FeeCode || ""}`.trim() : "";
+        const feeDesc = concessions.length === 1 && feeCode in feeNameMap ? feeNameMap[feeCode] : "";
+        expandedRows.push(buildRow(feeCode, feeDesc));
+      } else {
+        concessions.forEach((concession) => {
+          const feeCode = `${concession.FeeCode || ""}`.trim();
+          const feeDesc = feeCode in feeNameMap ? feeNameMap[feeCode] : "";
+          expandedRows.push(buildRow(feeCode, feeDesc));
+        });
+      }
+    });
+
+    const exportSheet = XLSX.utils.aoa_to_sheet(expandedRows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, exportSheet, `${moment().format('DD_MMM_YYYY_HH_mm_ss')}`);
+    XLSX.writeFile(wb, `students_${nowString}.csv`);
+  };
+
   const sortStudents = (
     r1: iVStudent | iFunnelLead,
     r2: iVStudent | iFunnelLead
@@ -671,7 +763,10 @@ const StudentNumberDetailsPopupBtn = ({
         title={
           <FlexContainer className={"with-gap lg-gap"}>
             <div>{records.length} students:</div>
-            <CSVExportFromHtmlTableBtn tableHtmlId={tableHtmlId} fileName={`students_${nowString}.csv`} />
+            <Button size={"sm"} onClick={() => exportTable()}>
+              <Icons.Download />{' '}
+              Export
+            </Button>
           </FlexContainer>
         }
       >
