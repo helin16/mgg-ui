@@ -16,6 +16,7 @@ type iSynFormSelector = {
   isMulti?: boolean;
   classname?: string;
   limitCodes?: string[];
+  isDisabled?: boolean;
 };
 
 const getLabel = (LuForm: iSynLuForm) => {
@@ -32,6 +33,7 @@ const LuFormSelector = ({
   allowClear,
   classname,
   showIndicator = true,
+  isDisabled,
   isMulti = false
 }: iSynFormSelector) => {
   const [optionsMap, setOptionsMap] = useState<{
@@ -120,6 +122,7 @@ const LuFormSelector = ({
       onChange={onSelect}
       value={getSelectedValues()}
       isClearable={allowClear}
+      isDisabled={isDisabled}
       showDropdownIndicator={showIndicator}
     />
   );

@@ -9,8 +9,6 @@ import { useState } from "react";
 import SchoolManagementTable from "../../components/SchoolManagement/SchoolManagementTable";
 import { SMT_SCHOOL_ROL_CODE_HEAD_OF_YEAR } from "../../types/Synergetic/iSchoolManagementTeam";
 import StudentAbsenceModuleEditPanel from "./components/StudentAbsenceModuleEditPanel";
-import MessageListPanel from "../../components/common/Message/MessageListPanel";
-import { MESSAGE_TYPE_ABSENCE_SYNC_TO_SYNERGETIC } from "../../types/Message/iMessage";
 import { iTableColumn } from "../../components/common/Table";
 import ToggleBtn from "../../components/common/ToggleBtn";
 import UserService from "../../services/UserService";
@@ -18,6 +16,7 @@ import Toaster, { TOAST_TYPE_SUCCESS } from "../../services/Toaster";
 import MathHelper from "../../helper/MathHelper";
 import AdminPage from "../../layouts/AdminPage";
 import AdminPageTabs from "../../layouts/AdminPageTabs";
+import StudentAbsenceDailySummaryLogsPanel from "./components/StudentAbsenceDailySummaryLogsPanel";
 
 type iStudentAbsenceAdminPage = {
   onNavBack: () => void;
@@ -146,7 +145,7 @@ const StudentAbsenceAdminPage = ({ onNavBack }: iStudentAbsenceAdminPage) => {
             title: "Logs",
             component: (
               <SectionDiv>
-                <MessageListPanel type={MESSAGE_TYPE_ABSENCE_SYNC_TO_SYNERGETIC} />
+                <StudentAbsenceDailySummaryLogsPanel />
               </SectionDiv>
             )
           }
