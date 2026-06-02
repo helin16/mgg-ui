@@ -8,6 +8,9 @@ import {CAMPUS_CODE_ELC, CAMPUS_CODE_JUNIOR, CAMPUS_CODE_SENIOR} from '../../typ
 import UtilsService from '../../services/UtilsService';
 import Toaster from '../../services/Toaster';
 
+const DEFAULT_LIMIT_CODES: string[] = [];
+const DEFAULT_CAMPUS_CODES = [CAMPUS_CODE_JUNIOR, CAMPUS_CODE_ELC, CAMPUS_CODE_SENIOR];
+
 type iYearLevelSelector = {
   values?: iAutoCompleteSingle[] | string[];
   campusCodes?: string[];
@@ -17,6 +20,7 @@ type iYearLevelSelector = {
   isMulti?: boolean;
   classname?: string;
   limitCodes?: string[];
+  excludeCodes?: string[];
   isDisabled?: boolean;
 };
 
@@ -27,18 +31,28 @@ export const translateYearLevelToOption = (yearLevel: ISynLuYearLevel) => {
   return {value: yearLevel.Code, data: yearLevel, label: getLabel(yearLevel)}
 }
 
-const YearLevelSelector = ({isDisabled, values, onSelect, allowClear, limitCodes = [], campusCodes, classname, showIndicator = true, isMulti = false}: iYearLevelSelector) => {
+const YearLevelSelector = ({isDisabled, values, onSelect, allowClear, limitCodes = DEFAULT_LIMIT_CODES, excludeCodes = DEFAULT_LIMIT_CODES, campusCodes, classname, showIndicator = true, isMulti = false}: iYearLevelSelector) => {
   const [optionsMap, setOptionsMap] = useState<{[key: string]: iAutoCompleteSingle}>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
+  const normalizedCampusCodes = campusCodes || DEFAULT_CAMPUS_CODES;
+  const campusCodesKey = normalizedCampusCodes.join('|');
+  const limitCodesKey = limitCodes.join('|');
+  const excludeCodesKey = excludeCodes.join('|');
 
   useEffect(() => {
-    if (Object.keys(optionsMap).length > 0) { return }
+    setOptionsMap({});
+    setHasLoaded(false);
+  }, [campusCodesKey, limitCodesKey, excludeCodesKey]);
+
+  useEffect(() => {
+    if (hasLoaded === true) { return }
     let isCancelled = false;
     setIsLoading(true);
     // @ts-ignore
     SynLuYearLevelService.getAllYearLevels({
         where: JSON.stringify({
-          Campus: campusCodes || [CAMPUS_CODE_JUNIOR, CAMPUS_CODE_ELC, CAMPUS_CODE_SENIOR],
+          Campus: normalizedCampusCodes,
           ...(limitCodes?.length > 0 ? {Code: limitCodes} : {}),
         }),
         sort: 'YearLevelSort:ASC',
@@ -51,10 +65,12 @@ const YearLevelSelector = ({isDisabled, values, onSelect, allowClear, limitCodes
             [yearLevel.Code]: translateYearLevelToOption(yearLevel),
           };
         }, {}))
+        setHasLoaded(true);
       })
       .catch(err => {
         if (isCancelled === true) { return }
         Toaster.showApiError(err);
+        setHasLoaded(true);
       })
       .finally(() => {
         if (isCancelled === true) { return }
@@ -63,7 +79,7 @@ const YearLevelSelector = ({isDisabled, values, onSelect, allowClear, limitCodes
     return () => {
       isCancelled = true;
     }
-  }, [optionsMap, campusCodes, limitCodes]);
+  }, [hasLoaded, campusCodesKey, limitCodesKey, normalizedCampusCodes, limitCodes]);
 
   if (isLoading === true) {
     return <Spinner animation={'border'} size={'sm'}/>;
@@ -86,6 +102,7 @@ const YearLevelSelector = ({isDisabled, values, onSelect, allowClear, limitCodes
 
   const getOptions = () => {
     return Object.values(optionsMap)
+      .filter(option => excludeCodes.indexOf(`${option.value}`) < 0)
       .sort((opt1, opt2) => {
         if (!opt1.data || !opt2.data) {
           return 1;
