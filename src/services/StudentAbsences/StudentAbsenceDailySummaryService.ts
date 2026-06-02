@@ -37,12 +37,14 @@ const exportReport = (filters: iStudentAbsenceDailySummaryFilters = {}) => {
 
 const emailReport = (
   filters: iStudentAbsenceDailySummaryFilters = {},
-  recipientEmails: string
+  recipientEmails: string,
+  emailBody?: string
 ) => {
   return AppService.post(`${endPoint}/email`, {
     yearLevelCode: filters.yearLevelCode,
     formCode: filters.formCode,
     recipientEmails,
+    emailBody,
     ...getDateRangePayload(filters),
   }).then(({ data }) => data as iStudentAbsenceDailySummaryEmailResult);
 };
