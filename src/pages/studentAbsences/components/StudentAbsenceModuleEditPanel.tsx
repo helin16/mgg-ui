@@ -156,6 +156,14 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
     return () => { isCancelled = true; };
   }, [user]);
 
+  const getNextDailySummarySettings = (customDailySummarySettings?: any) => {
+    const nextSettings = customDailySummarySettings || dailySummarySettings || {};
+    return {
+      ...nextSettings,
+      from: `${nextSettings?.from || ""}`.trim(),
+    };
+  };
+
   const handleUpdate = (customDailySummarySettings?: any) => {
     onUpdate({
       ...(module?.settings || {}),
@@ -177,7 +185,7 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
         .map(code => `${code || ""}`.trim())
         .filter(code => `${code}`.trim() !== "")
         .join(","),
-      dailySummary: customDailySummarySettings || dailySummarySettings,
+      dailySummary: getNextDailySummarySettings(customDailySummarySettings),
     });
   };
 
@@ -324,22 +332,47 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
 
     return (
       <SectionDiv className={"lg"}>
-        <div className={"d-flex align-items-center mb-2 daily-notification-title-actions"}>
-          <h5 className={"mb-0"}>Daily Notification</h5>
-          <DailySummaryYearLevelEditPopupBtn
-            existingYearLevelCodes={existingCodes}
-            onSave={(code, rule) => upsertDailySummaryYearLevel(code, rule)}
-          >
-            <Icons.PlusLg />
-          </DailySummaryYearLevelEditPopupBtn>
-        </div>
-        <ExplanationPanel text={"Configure which year levels trigger the nightly email, and which tutors (by form) receive a scoped copy."} />
+        <SectionDiv>
+          <Form.Label>
+            Sender shown on manual and nightly daily notification emails.
+          </Form.Label>
+          <Form.Control
+            placeholder="Absence Notification<noreply@mentonegirls.vic.edu.au>"
+            value={`${dailySummarySettings?.from || ""}`}
+            onChange={event => {
+              setDailySummarySettings({
+                ...(dailySummarySettings || {}),
+                from: event.target.value,
+              });
+            }}
+            onBlur={event => {
+              const nextSettings = {
+                ...(dailySummarySettings || {}),
+                from: event.target.value,
+              };
+              setDailySummarySettings(nextSettings);
+              handleUpdate(nextSettings);
+            }}
+          />
+        </SectionDiv>
+        <SectionDiv>
+          <div className={"d-flex align-items-center mb-2 daily-notification-title-actions"}>
+            <h5 className={"mb-0"}>Daily Notification</h5>
+            <DailySummaryYearLevelEditPopupBtn
+              existingYearLevelCodes={existingCodes}
+              onSave={(code, rule) => upsertDailySummaryYearLevel(code, rule)}
+            >
+              <Icons.PlusLg />
+            </DailySummaryYearLevelEditPopupBtn>
+          </div>
+          <ExplanationPanel text={"Configure which year levels trigger the nightly email, and which tutors (by form) receive a scoped copy."} />
 
-        {configuredYearLevels.length === 0 ? (
-          <p className={"text-muted"}>No year levels configured yet.</p>
-        ) : (
-          <DataTable striped hover responsive columns={columns} rows={rows} />
-        )}
+          {configuredYearLevels.length === 0 ? (
+            <p className={"text-muted"}>No year levels configured yet.</p>
+          ) : (
+            <DataTable striped hover responsive columns={columns} rows={rows} />
+          )}
+        </SectionDiv>
       </SectionDiv>
     );
   };
