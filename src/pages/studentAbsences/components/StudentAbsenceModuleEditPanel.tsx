@@ -54,6 +54,33 @@ type iEditPanel = {
   onUpdate: (data: any) => void;
 };
 
+const normalizeStaffString = (value: string) => `${value || ""}`.trim().toLowerCase();
+
+export const pickPreferredTutor = (matchingTutors: iVStaff[], formStaffName: string) => {
+  const normalizedFormStaffName = normalizeStaffString(formStaffName);
+
+  return matchingTutors.reduce((bestTutor, currentTutor) => {
+    if (!bestTutor) {
+      return currentTutor;
+    }
+
+    const scoreTutor = (tutor: iVStaff) => {
+      const tutorEmail = `${tutor?.StaffOccupEmail || ""}`.trim();
+      const tutorNames = [
+        tutor?.StaffNameInternal,
+        tutor?.StaffNameExternal,
+        tutor?.StaffLegalFullName,
+      ].map(name => normalizeStaffString(`${name || ""}`));
+      const hasNameMatch =
+        normalizedFormStaffName !== "" && tutorNames.includes(normalizedFormStaffName);
+
+      return (hasNameMatch ? 10 : 0) + (tutorEmail !== "" ? 1 : 0);
+    };
+
+    return scoreTutor(currentTutor) > scoreTutor(bestTutor) ? currentTutor : bestTutor;
+  }, matchingTutors[0]);
+};
+
 const EditPanel = ({ module, onUpdate }: iEditPanel) => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [selectedSettingsTab, setSelectedSettingsTab] = useState("notifications");
@@ -78,7 +105,7 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
   const [yearLevelsMap, setYearLevelsMap] = useState<{ [code: string]: ISynLuYearLevel }>({});
   const [formsMap, setFormsMap] = useState<{ [code: string]: iSynLuForm }>({});
   const [headOfYearMap, setHeadOfYearMap] = useState<{ [code: string]: iSchoolManagementTeam }>({});
-  const [staffFormMap, setStaffFormMap] = useState<{ [code: string]: iVStaff }>({});
+  const [staffFormMap, setStaffFormMap] = useState<{ [code: string]: iVStaff[] }>({});
 
   useEffect(() => {
     let isCancelled = false;
@@ -141,12 +168,12 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
       .then((resp: iVStaff[]) => {
         if (isCancelled) return;
         setStaffFormMap(
-          (resp || []).reduce((acc: { [code: string]: iVStaff }, staff) => {
+          (resp || []).reduce((acc: { [code: string]: iVStaff[] }, staff) => {
             const formCode = `${staff.StaffForm || ""}`.trim();
-            if (formCode === "" || formCode in acc) {
+            if (formCode === "") {
               return acc;
             }
-            acc[formCode] = staff;
+            acc[formCode] = [...(acc[formCode] || []), staff];
             return acc;
           }, {})
         );
@@ -209,6 +236,10 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
     setDailySummarySettings(nextSettings);
     handleUpdate(nextSettings);
     return Promise.resolve();
+  };
+
+  const getPreferredTutor = (formCode: string, formStaffName: string) => {
+    return pickPreferredTutor(staffFormMap[formCode] || [], formStaffName);
   };
 
   const getDailySummarySettingsPanel = () => {
@@ -288,17 +319,20 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
             <td key={column.key}>
               {enabledFormCodes.map(fc => {
                 const form = formsMap[fc];
-                const tutor = staffFormMap[fc];
+                const tutor = getPreferredTutor(fc, `${form?.StaffName || ""}`);
                 const tutorName = `${tutor?.StaffNameInternal || form?.StaffName || ""}`.trim();
                 const tutorEmail = `${tutor?.StaffOccupEmail || ""}`.trim();
+                const tutorLabel = `${fc}${tutorName !== "" ? ` - ${tutorName}` : ""}`;
                 return (
                   <div key={fc}>
-                    <div>{`${fc}${tutorName !== "" ? ` - ${tutorName}` : ""}`}</div>
-                    {tutorEmail === "" ? null : (
-                      <div className={"text-muted daily-summary-contact-email"}>
-                        <a href={`mailto:${tutorEmail}`}>{tutorEmail}</a>
-                      </div>
-                    )}
+                    <div>
+                      {tutorLabel}
+                      {tutorEmail === "" ? null : (
+                        <span className={"text-muted daily-summary-contact-email"}>
+                          <a href={`mailto:${tutorEmail}`}>{`<${tutorEmail}>`}</a>
+                        </span>
+                      )}
+                    </div>
                   </div>
                 );
               })}
