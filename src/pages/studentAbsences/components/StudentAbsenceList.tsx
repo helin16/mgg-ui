@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Alert, Button } from "react-bootstrap";
+import { Alert } from "react-bootstrap";
+import LoadingBtn from "../../../components/common/LoadingBtn";
 import moment from "moment-timezone";
 import * as Icons from "react-bootstrap-icons";
 
@@ -84,7 +85,7 @@ const getSourceQueryParams = (
   return {
     currentPage,
     perPage,
-    sort: "AbsenceEventDateTime:ASC,AbsenceEventDate:ASC",
+    sort: "AbsenceEventDate:ASC,StudentYearLevelSort:ASC,StudentID:ASC",
     where: JSON.stringify({
       [OP_AND]: [
         {
@@ -114,6 +115,7 @@ const StudentAbsenceList = () => {
   const [isSending, setIsSending] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
+  const [searchTrigger, setSearchTrigger] = useState(0);
 
   const normalizedFilters = useMemo(
     () => ({
@@ -241,7 +243,7 @@ const StudentAbsenceList = () => {
     return () => {
       isCancelled = true;
     };
-  }, [currentPage, hasAppliedDateRange, requestFilters]);
+  }, [currentPage, hasAppliedDateRange, requestFilters, searchTrigger]);
 
   const viewerScope = result?.viewerScope;
   const canExport = (result?.rows || []).length > 0;
@@ -300,6 +302,7 @@ const StudentAbsenceList = () => {
   const handleSearch = () => {
     setCurrentPage(1);
     setSearchedFilters(normalizedFilters);
+    setSearchTrigger(prev => prev + 1);
   };
 
   const handleExport = async () => {
@@ -317,10 +320,10 @@ const StudentAbsenceList = () => {
     }
   };
 
-  const handleSend = async (recipientEmails: string) => {
+  const handleSend = async (recipientEmails: string, emailBody: string) => {
     setIsSending(true);
     try {
-      await StudentAbsenceDailySummaryService.emailReport(requestFilters, recipientEmails);
+      await StudentAbsenceDailySummaryService.emailReport(requestFilters, recipientEmails, emailBody);
       Toaster.showToast("Report queued", TOAST_TYPE_SUCCESS);
       setShowEmailModal(false);
     } catch (err) {
@@ -403,33 +406,36 @@ const StudentAbsenceList = () => {
           />
         </div>
 
-        <Button
+        <LoadingBtn
           variant={"primary"}
           size={"sm"}
-          disabled={isLoading}
+          isLoading={isLoading}
+          disabled={isLoading || isExporting || isSending}
           onClick={handleSearch}
         >
           <Icons.Search /> Search
-        </Button>
+        </LoadingBtn>
 
         {canExport ? (
           <>
-            <Button
+            <LoadingBtn
               variant={"secondary"}
               size={"sm"}
-              disabled={isExporting}
+              isLoading={isExporting || isLoading}
+              disabled={isLoading || isExporting || isSending}
               onClick={handleExport}
             >
               <Icons.Download /> Export
-            </Button>
-            <Button
+            </LoadingBtn>
+            <LoadingBtn
               variant={"primary"}
               size={"sm"}
-              disabled={isSending}
+              isLoading={isSending || isLoading}
+              disabled={isLoading || isExporting || isSending}
               onClick={() => setShowEmailModal(true)}
             >
               <Icons.Envelope /> Email Report
-            </Button>
+            </LoadingBtn>
           </>
         ) : null}
       </FlexContainer>

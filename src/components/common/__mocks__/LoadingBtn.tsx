@@ -13,7 +13,7 @@ const LoadingBtn = (props: any) => {
     <button
       data-testid={LoadingBtnTestId}
       type="button"
-      disabled={!!props?.isLoading}
+      disabled={!!props?.isLoading || !!props?.disabled}
       onClick={() => props?.onClick?.()}
     >
       {props?.children}
