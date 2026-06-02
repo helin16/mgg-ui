@@ -1,7 +1,9 @@
 import React from 'react';
 import {fireEvent, render, screen, waitFor, within} from '@testing-library/react';
 import mockComponentTestHelper from '../../../../__tests__/helper/ComponentTestHelper';
-import StudentAbsenceModuleEditPanel from '../../../../pages/studentAbsences/components/StudentAbsenceModuleEditPanel';
+import StudentAbsenceModuleEditPanel, {
+  pickPreferredTutor,
+} from '../../../../pages/studentAbsences/components/StudentAbsenceModuleEditPanel';
 import AppService from '../../../../services/AppService';
 import {SectionDivTestId} from '../../../../components/common/__mocks__/SectionDiv';
 
@@ -23,11 +25,11 @@ let latestSubmitData: any = {};
 
 jest.mock('../../../../components/module/ModuleEditPanel', () => ({
   __esModule: true,
-  default: ({getChildren, getSubmitData}: any) => {
+  default: ({getChildren, getSubmitData, module}: any) => {
     latestSubmitData = getSubmitData();
     return (
       <div>
-        {getChildren(fakeModule)}
+        {getChildren(module || fakeModule)}
         <button
           type="button"
           onClick={() => {
@@ -50,10 +52,24 @@ jest.mock('../../../../pages/studentAbsences/components/DailySummaryYearLevelEdi
   __esModule: true,
   default: ({children}: any) => <button type="button">{children || 'Add year level'}</button>,
 }));
+jest.mock('../../../../components/common/DeleteConfirm/DeleteConfirmPopupBtn', () => ({
+  __esModule: true,
+  default: ({children}: any) => <button type="button">{children || 'Remove'}</button>,
+}));
 jest.mock('../../../../components/common/SectionDiv');
 jest.mock('../../../../components/common/Table', () => ({
   __esModule: true,
-  default: () => <div data-testid="DailyNotificationTable" />,
+  default: ({columns, rows}: any) => (
+    <table data-testid="DailyNotificationTable">
+      <tbody>
+        {rows.map((row: any, rowIndex: number) => (
+          <tr key={row.yearLevelCode || rowIndex}>
+            {columns.map((column: any) => column.cell(column, row))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  ),
 }));
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
@@ -134,5 +150,27 @@ describe('StudentAbsenceModuleEditPanel', () => {
     expect(wrapper).toBeTruthy();
     expect(within(wrapper as HTMLElement).getByTestId('DailyNotificationTable')).toBeInTheDocument();
     expect(within(wrapper as HTMLElement).queryByText('Sender shown on manual and nightly daily notification emails.')).toBeNull();
+  });
+
+  test('prefers the staff record that matches the form tutor name and has an email', () => {
+    const tutor = pickPreferredTutor([
+      {
+        StaffForm: '7A',
+        StaffNameInternal: 'Another Staff',
+        StaffOccupEmail: '',
+        StaffNameExternal: 'Another Staff',
+        StaffLegalFullName: 'Another Staff',
+      },
+      {
+        StaffForm: '7A',
+        StaffNameInternal: 'Mr Michael Lawrence',
+        StaffOccupEmail: 'mlawrence@mentonegirls.vic.edu.au',
+        StaffNameExternal: 'Mr Michael Lawrence',
+        StaffLegalFullName: 'Mr Michael Lawrence',
+      },
+    ] as any, 'Mr Michael Lawrence');
+
+    expect(tutor?.StaffNameInternal).toBe('Mr Michael Lawrence');
+    expect(tutor?.StaffOccupEmail).toBe('mlawrence@mentonegirls.vic.edu.au');
   });
 });
