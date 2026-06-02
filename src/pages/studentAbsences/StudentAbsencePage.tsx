@@ -1,5 +1,6 @@
 import React from "react";
 
+import SectionDiv from "../../components/common/SectionDiv";
 import Page from "../../layouts/Page";
 import { MGGS_MODULE_ID_STUDENT_ABSENCES } from "../../types/modules/iModuleUser";
 import StudentAbsenceAdminPage from "./StudentAbsenceAdminPage";
@@ -12,7 +13,9 @@ const StudentAbsencePage = () => {
       moduleId={MGGS_MODULE_ID_STUDENT_ABSENCES}
       AdminPage={StudentAbsenceAdminPage}
     >
-      <StudentAbsenceList />
+      <SectionDiv className={"margin-top"}>
+        <StudentAbsenceList />
+      </SectionDiv>
     </Page>
   );
 };
