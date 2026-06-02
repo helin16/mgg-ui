@@ -1,6 +1,9 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Form, Tab, Tabs } from "react-bootstrap";
+import * as Icons from "react-bootstrap-icons";
+import { useSelector } from "react-redux";
+import moment from "moment-timezone";
 
 import ModuleEmailTemplateNameEditor from "../../../components/module/ModuleEmailTemplateNameEditor";
 import { MGGS_MODULE_ID_STUDENT_ABSENCES } from "../../../types/modules/iModuleUser";
@@ -9,11 +12,42 @@ import ModuleEditPanel from "../../../components/module/ModuleEditPanel";
 import iModule from "../../../types/modules/iModule";
 import SectionDiv from "../../../components/common/SectionDiv";
 import ExplanationPanel from "../../../components/ExplanationPanel";
-import YearLevelSelector from "../../../components/student/YearLevelSelector";
 import SynLuFormService from "../../../services/Synergetic/Lookup/SynLuFormService";
+import SynLuYearLevelService from "../../../services/Synergetic/Lookup/SynLuYearLevelService";
 import Toaster from "../../../services/Toaster";
+import DeleteConfirmPopupBtn from "../../../components/common/DeleteConfirm/DeleteConfirmPopupBtn";
+import DailySummaryYearLevelEditPopupBtn, {
+  iDailySummaryYearLevelRule,
+} from "./DailySummaryYearLevelEditPopupBtn";
+import ISynLuYearLevel from "../../../types/Synergetic/Lookup/iSynLuYearLevel";
+import iSynLuForm from "../../../types/Synergetic/Lookup/iSynLuForm";
+import SchoolManagementTeamService from "../../../services/Synergetic/SchoolManagementTeamService";
+import iSchoolManagementTeam, {
+  SMT_SCHOOL_ROL_CODE_HEAD_OF_YEAR,
+} from "../../../types/Synergetic/iSchoolManagementTeam";
+import SynVStaffService from "../../../services/Synergetic/SynVStaffService";
+import iVStaff from "../../../types/Synergetic/iVStaff";
+import { RootState } from "../../../redux/makeReduxStore";
+import DataTable, { iTableColumn } from "../../../components/common/Table";
 
-const Wrapper = styled.div``;
+const Wrapper = styled.div`
+  .daily-summary-title-actions {
+    gap: 8px;
+  }
+
+  .daily-summary-contact-email {
+    font-size: 0.85em;
+  }
+
+  .daily-notification-title-actions {
+    gap: 8px;
+  }
+`;
+
+type iDailyNotificationRow = {
+  yearLevelCode: string;
+  rule: iDailySummaryYearLevelRule;
+};
 
 type iEditPanel = {
   module: iModule;
@@ -21,6 +55,7 @@ type iEditPanel = {
 };
 
 const EditPanel = ({ module, onUpdate }: iEditPanel) => {
+  const { user } = useSelector((state: RootState) => state.auth);
   const [selectedSettingsTab, setSelectedSettingsTab] = useState("notifications");
   const [parentEmailTemplateName, setParentEmailTemplateName] = useState(
     module.settings?.parentSubmissionForm?.templateName || ""
@@ -40,8 +75,10 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
   const [dailySummarySettings, setDailySummarySettings] = useState<any>(
     module.settings?.dailySummary || { yearLevels: {} }
   );
-  const [selectedYearLevelCode, setSelectedYearLevelCode] = useState("");
-  const [forms, setForms] = useState<any[]>([]);
+  const [yearLevelsMap, setYearLevelsMap] = useState<{ [code: string]: ISynLuYearLevel }>({});
+  const [formsMap, setFormsMap] = useState<{ [code: string]: iSynLuForm }>({});
+  const [headOfYearMap, setHeadOfYearMap] = useState<{ [code: string]: iSchoolManagementTeam }>({});
+  const [staffFormMap, setStaffFormMap] = useState<{ [code: string]: iVStaff }>({});
 
   useEffect(() => {
     let isCancelled = false;
@@ -50,21 +87,74 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
       sort: "HomeRoom:ASC",
     })
       .then(resp => {
-        if (isCancelled) {
-          return;
-        }
-        setForms(resp || []);
+        if (isCancelled) return;
+        setFormsMap(
+          (resp || []).reduce((acc: any, f: iSynLuForm) => {
+            acc[`${f.Code || ""}`.trim()] = f;
+            return acc;
+          }, {})
+        );
       })
-      .catch(err => {
-        if (isCancelled) {
-          return;
-        }
-        Toaster.showApiError(err);
-      });
-    return () => {
-      isCancelled = true;
-    };
-  }, []);
+      .catch(err => { if (!isCancelled) Toaster.showApiError(err); });
+
+    // @ts-ignore
+    SynLuYearLevelService.getAllYearLevels({})
+      .then((resp: ISynLuYearLevel[]) => {
+        if (isCancelled) return;
+        setYearLevelsMap(
+          (resp || []).reduce((acc: any, yl: ISynLuYearLevel) => {
+            acc[`${yl.Code || ""}`.trim()] = yl;
+            return acc;
+          }, {})
+        );
+      })
+      .catch((err: any) => { if (!isCancelled) Toaster.showApiError(err); });
+
+    SchoolManagementTeamService.getSchoolManagementTeams({
+      where: JSON.stringify({
+        FileYear: user?.SynCurrentFileSemester?.FileYear || moment().year(),
+        FileSemester: user?.SynCurrentFileSemester?.FileSemester || 1,
+        SchoolRoleCode: SMT_SCHOOL_ROL_CODE_HEAD_OF_YEAR,
+      }),
+      include: "SynSSTStaff",
+    })
+      .then((resp: iSchoolManagementTeam[]) => {
+        if (isCancelled) return;
+        setHeadOfYearMap(
+          (resp || []).reduce((acc: { [code: string]: iSchoolManagementTeam }, team) => {
+            const yearLevelCode = `${team.YearLevelCode || ""}`.trim();
+            if (yearLevelCode === "") {
+              return acc;
+            }
+            acc[yearLevelCode] = team;
+            return acc;
+          }, {})
+        );
+      })
+      .catch((err: any) => { if (!isCancelled) Toaster.showApiError(err); });
+
+    SynVStaffService.getStaffList({
+      where: JSON.stringify({
+        ActiveFlag: true,
+      }),
+    })
+      .then((resp: iVStaff[]) => {
+        if (isCancelled) return;
+        setStaffFormMap(
+          (resp || []).reduce((acc: { [code: string]: iVStaff }, staff) => {
+            const formCode = `${staff.StaffForm || ""}`.trim();
+            if (formCode === "" || formCode in acc) {
+              return acc;
+            }
+            acc[formCode] = staff;
+            return acc;
+          }, {})
+        );
+      })
+      .catch((err: any) => { if (!isCancelled) Toaster.showApiError(err); });
+
+    return () => { isCancelled = true; };
+  }, [user]);
 
   const handleUpdate = (customDailySummarySettings?: any) => {
     onUpdate({
@@ -91,86 +181,164 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
     });
   };
 
-  const selectedYearLevelSettings = useMemo(() => {
-    if (`${selectedYearLevelCode || ""}`.trim() === "") {
-      return { sendToHoy: true, luForms: {} };
-    }
-    return dailySummarySettings?.yearLevels?.[selectedYearLevelCode] || {
-      sendToHoy: true,
-      luForms: {},
-    };
-  }, [dailySummarySettings, selectedYearLevelCode]);
-
-  const updateDailySummaryForYearLevel = (nextValue: any) => {
+  const upsertDailySummaryYearLevel = (yearLevelCode: string, rule: iDailySummaryYearLevelRule, customSettings?: any) => {
+    const base = customSettings || dailySummarySettings;
     const nextSettings = {
-      ...dailySummarySettings,
+      ...base,
       yearLevels: {
-        ...(dailySummarySettings?.yearLevels || {}),
-        [selectedYearLevelCode]: {
-          ...(dailySummarySettings?.yearLevels?.[selectedYearLevelCode] || {}),
-          ...nextValue,
-        },
+        ...(base?.yearLevels || {}),
+        [yearLevelCode]: rule,
       },
     };
     setDailySummarySettings(nextSettings);
     handleUpdate(nextSettings);
   };
 
+  const deleteDailySummaryYearLevel = (yearLevelCode: string) => {
+    const nextYearLevels = { ...(dailySummarySettings?.yearLevels || {}) };
+    delete nextYearLevels[yearLevelCode];
+    const nextSettings = { ...dailySummarySettings, yearLevels: nextYearLevels };
+    setDailySummarySettings(nextSettings);
+    handleUpdate(nextSettings);
+    return Promise.resolve();
+  };
+
   const getDailySummarySettingsPanel = () => {
-    return (
-      <SectionDiv className={"lg"}>
-        <h5>Daily Summary Notifications</h5>
-        <ExplanationPanel text={"Manage HOY delivery and tutor `luForm` delivery for each year level."} />
-        <SectionDiv>
-          <h6>Year Level</h6>
-          <YearLevelSelector
-            values={`${selectedYearLevelCode || ""}`.trim() === "" ? [] : [selectedYearLevelCode]}
-            onSelect={selected => {
-              const option = Array.isArray(selected) ? selected[0] : selected;
-              setSelectedYearLevelCode(`${option?.value || ""}`.trim());
-            }}
-            allowClear
-          />
-        </SectionDiv>
-        {`${selectedYearLevelCode || ""}`.trim() === "" ? null : (
-          <>
-            <Form.Check
-              type={"switch"}
-              label={"Send to HOY"}
-              checked={selectedYearLevelSettings.sendToHoy !== false}
-              onChange={event =>
-                updateDailySummaryForYearLevel({
-                  sendToHoy: event.target.checked,
-                })
-              }
-            />
-            <SectionDiv>
-              <h6>luForms</h6>
-              {forms.map(form => {
-                const formCode = `${form.Code || ""}`.trim();
-                if (formCode === "") {
-                  return null;
+    const configuredYearLevels = Object.entries(
+      dailySummarySettings?.yearLevels || {}
+    ) as [string, iDailySummaryYearLevelRule][];
+
+    const existingCodes = configuredYearLevels.map(([code]) => code);
+    const rows = configuredYearLevels
+      .sort(([a], [b]) => {
+        const sortA = yearLevelsMap[a]?.YearLevelSort ?? 9999;
+        const sortB = yearLevelsMap[b]?.YearLevelSort ?? 9999;
+        return sortA - sortB;
+      })
+      .map(([yearLevelCode, rule]) => ({
+        yearLevelCode,
+        rule,
+      }));
+
+    const columns: iTableColumn<iDailyNotificationRow>[] = [
+      {
+        key: "yearLevel",
+        header: "Year Level",
+        cell: (column, row) => {
+          const yl = yearLevelsMap[row.yearLevelCode];
+          const ylLabel = yl ? `${yl.Description}`.trim() : `${row.yearLevelCode}`;
+          return (
+            <td key={column.key}>
+              <DailySummaryYearLevelEditPopupBtn
+                yearLevelCode={row.yearLevelCode}
+                rule={row.rule}
+                existingYearLevelCodes={existingCodes.filter(code => code !== row.yearLevelCode)}
+                onSave={(updatedCode, updatedRule) =>
+                  upsertDailySummaryYearLevel(updatedCode, updatedRule)
                 }
-                const checked = selectedYearLevelSettings?.luForms?.[formCode] === true;
+              >
+                <Icons.PencilSquare className={"me-1"} />
+                {ylLabel}
+              </DailySummaryYearLevelEditPopupBtn>
+            </td>
+          );
+        },
+      },
+      {
+        key: "notificationTo",
+        header: "Notification To",
+        cell: (column, row) => {
+          const hoy = headOfYearMap[row.yearLevelCode];
+          const yl = yearLevelsMap[row.yearLevelCode];
+          const hoyName = `${hoy?.SynSSTStaff?.NameInternal || yl?.YearLevelCoordinator || ""}`.trim();
+          const hoyEmail = `${hoy?.SynSSTStaff?.OccupEmail || hoy?.SynSSTStaff?.Email || ""}`.trim();
+          return (
+            <td key={column.key}>
+              {row.rule?.sendToHoy === true || row.rule?.sendToHoy === undefined ? (
+                <>
+                  {hoyName === "" ? null : <div>{hoyName}</div>}
+                  {hoyEmail === "" ? null : (
+                    <div className={"text-muted daily-summary-contact-email"}>
+                      <a href={`mailto:${hoyEmail}`}>{hoyEmail}</a>
+                    </div>
+                  )}
+                </>
+              ) : null}
+            </td>
+          );
+        },
+      },
+      {
+        key: "tutors",
+        header: "Tutors",
+        cell: (column, row) => {
+          const enabledFormCodes = Object.entries(row.rule?.luForms || {})
+            .filter(([, enabled]) => enabled === true)
+            .map(([fc]) => fc);
+
+          return (
+            <td key={column.key}>
+              {enabledFormCodes.map(fc => {
+                const form = formsMap[fc];
+                const tutor = staffFormMap[fc];
+                const tutorName = `${tutor?.StaffNameInternal || form?.StaffName || ""}`.trim();
+                const tutorEmail = `${tutor?.StaffOccupEmail || ""}`.trim();
                 return (
-                  <Form.Check
-                    key={formCode}
-                    type={"checkbox"}
-                    label={`${form.Code} - ${form.StaffName}`}
-                    checked={checked}
-                    onChange={event =>
-                      updateDailySummaryForYearLevel({
-                        luForms: {
-                          ...(selectedYearLevelSettings?.luForms || {}),
-                          [formCode]: event.target.checked,
-                        },
-                      })
-                    }
-                  />
+                  <div key={fc}>
+                    <div>{`${fc}${tutorName !== "" ? ` - ${tutorName}` : ""}`}</div>
+                    {tutorEmail === "" ? null : (
+                      <div className={"text-muted daily-summary-contact-email"}>
+                        <a href={`mailto:${tutorEmail}`}>{tutorEmail}</a>
+                      </div>
+                    )}
+                  </div>
                 );
               })}
-            </SectionDiv>
-          </>
+            </td>
+          );
+        },
+      },
+      {
+        key: "btns",
+        header: "",
+        cell: (column, row) => {
+          const yl = yearLevelsMap[row.yearLevelCode];
+          const ylLabel = yl ? `${yl.Description}`.trim() : `${row.yearLevelCode}`;
+          return (
+            <td className={"text-end"} key={column.key}>
+              <DeleteConfirmPopupBtn
+                variant={"outline-danger"}
+                size={"sm"}
+                description={`Remove daily notification for ${ylLabel}? This cannot be undone.`}
+                confirmBtnString={"Remove"}
+                deletingFn={() => deleteDailySummaryYearLevel(row.yearLevelCode)}
+                deletedCallbackFn={() => {}}
+              >
+                <Icons.Trash />
+              </DeleteConfirmPopupBtn>
+            </td>
+          );
+        },
+      },
+    ];
+
+    return (
+      <SectionDiv className={"lg"}>
+        <div className={"d-flex align-items-center mb-2 daily-notification-title-actions"}>
+          <h5 className={"mb-0"}>Daily Notification</h5>
+          <DailySummaryYearLevelEditPopupBtn
+            existingYearLevelCodes={existingCodes}
+            onSave={(code, rule) => upsertDailySummaryYearLevel(code, rule)}
+          >
+            <Icons.PlusLg />
+          </DailySummaryYearLevelEditPopupBtn>
+        </div>
+        <ExplanationPanel text={"Configure which year levels trigger the nightly email, and which tutors (by form) receive a scoped copy."} />
+
+        {configuredYearLevels.length === 0 ? (
+          <p className={"text-muted"}>No year levels configured yet.</p>
+        ) : (
+          <DataTable striped hover responsive columns={columns} rows={rows} />
         )}
       </SectionDiv>
     );
@@ -263,7 +431,7 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
           </SectionDiv>
         </Tab>
 
-        <Tab eventKey={"dailySummary"} title={"Daily Summary"}>
+        <Tab eventKey={"dailySummary"} title={"Daily Notification"}>
           {getDailySummarySettingsPanel()}
         </Tab>
       </Tabs>

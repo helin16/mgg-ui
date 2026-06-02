@@ -85,7 +85,7 @@ const getSourceQueryParams = (
   return {
     currentPage,
     perPage,
-    sort: "AbsenceEventDate:ASC,StudentYearLevelSort:ASC,StudentID:ASC",
+    sort: "AbsenceEventDate:ASC,StudentYearLevelSort:ASC,StudentSurname:ASC,StudentPreferred:ASC",
     where: JSON.stringify({
       [OP_AND]: [
         {
