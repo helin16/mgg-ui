@@ -112,11 +112,11 @@ describe('StudentAbsenceList', () => {
     mockedEventsService.getAll.mockResolvedValue(fakeEventsResponse as any);
   });
 
-  test('fetches data with sort AbsenceEventDate:ASC,StudentYearLevelSort:ASC,StudentID:ASC', async () => {
+  test('fetches data with surname-first sort order', async () => {
     await setupWithDates();
     expect(mockedEventsService.getAll).toHaveBeenCalledWith(
       expect.objectContaining({
-        sort: 'AbsenceEventDate:ASC,StudentYearLevelSort:ASC,StudentID:ASC',
+        sort: 'AbsenceEventDate:ASC,StudentYearLevelSort:ASC,StudentSurname:ASC,StudentPreferred:ASC',
       })
     );
   });
