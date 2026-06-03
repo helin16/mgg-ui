@@ -133,6 +133,12 @@ describe('StudentAbsenceList', () => {
     );
   });
 
+  test('renders student names as SURNAME, Preferred (ID)', async () => {
+    await setupWithDates();
+
+    expect(screen.getByText('LOVELACE, Ada (101)')).toBeInTheDocument();
+  });
+
   test('Search button is in loading/disabled state while data is fetching', async () => {
     // Make getLiveReport hang so we can inspect mid-flight state
     let resolveLoad!: (v: any) => void;

@@ -37,15 +37,20 @@ const getUrlFilters = (): iStudentAbsenceDailySummaryFilters => {
 const getStudentDisplayName = (row: iSynVStudentAbsenceEvents) => {
   const preferred = `${row.StudentPreferred || ""}`.trim();
   const given1 = `${row.StudentGiven1 || ""}`.trim();
-  const given2 = `${row.StudentGiven2 || ""}`.trim();
   const surname = `${row.StudentSurname || ""}`.trim();
   const mailName = `${row.StudentMailName || ""}`.trim();
+  const studentId = `${row.StudentID || ""}`.trim();
+  const firstName = preferred || given1;
 
-  if (mailName !== "") {
-    return mailName;
+  if (surname !== "" && firstName !== "") {
+    return `${surname.toUpperCase()}, ${firstName}${studentId !== "" ? ` (${studentId})` : ""}`;
   }
 
-  return [preferred || given1, given2, surname].filter(Boolean).join(" ").trim();
+  if (mailName !== "") {
+    return `${mailName}${studentId !== "" ? ` (${studentId})` : ""}`;
+  }
+
+  return [firstName, surname].filter(Boolean).join(" ").trim();
 };
 
 const mapSourceRowToSummaryRow = (
