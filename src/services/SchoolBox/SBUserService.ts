@@ -1,15 +1,39 @@
 import AppService, {iConfigParams} from '../AppService';
-import iPaginatedResult from '../../types/iPaginatedResult';
 import iSBUser from '../../types/SchoolBox/iSBUser';
 
 const endPoint = `/sb/user`;
 
-const getAll = (params: iConfigParams = {}): Promise<iPaginatedResult<iSBUser>> => {
+export type iSBUserListResult = {
+  data: iSBUser[];
+  metadata?: {
+    count?: number;
+    cursor?: {
+      current?: string | null;
+      next?: string | null;
+    };
+  };
+};
+
+const getAll = (params: iConfigParams = {}): Promise<iSBUserListResult> => {
   return AppService.get(endPoint, params).then(resp => resp.data);
 };
 
+const getBySynergeticId = async (synergeticId: string | number): Promise<iSBUser | null> => {
+  const externalId = `${synergeticId || ''}`.trim();
+  if (externalId === '') {
+    return null;
+  }
+
+  const resp = await getAll({
+    filter: JSON.stringify({externalId}),
+    limit: 1,
+  });
+  return (resp.data || [])[0] || null;
+};
+
 const SBUserService = {
-  getAll
+  getAll,
+  getBySynergeticId,
 }
 
 export default SBUserService;

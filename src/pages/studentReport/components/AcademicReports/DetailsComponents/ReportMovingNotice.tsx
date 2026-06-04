@@ -17,17 +17,12 @@ const ReportMovingNotice = ({ student }: iReportMovingNotice) => {
     let isCanceled = false;
 
     setIsLoading(true);
-    SBUserService.getAll({
-      where: JSON.stringify({
-        synergy_id: student.StudentID
-      })
-    })
-      .then(resp => {
+    SBUserService.getBySynergeticId(student.StudentID)
+      .then(sbUser => {
         if (isCanceled) {
           return;
         }
-        const sbUsers = resp.data || [];
-        setSbStudent(sbUsers.length > 0 ? sbUsers[0] : null);
+        setSbStudent(sbUser);
       })
       .catch(err => {
         if (isCanceled) {
