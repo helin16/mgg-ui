@@ -89,11 +89,132 @@ class AppLoader {
   };
 }
 
+type iSchoolBoxAppLoaderConfig = {
+  bypassHosts?: string[];
+  apiBaseUrl?: string;
+  appToken?: string;
+  moduleId?: number | string;
+  settingsKey?: string;
+};
+
 // @ts-ignore
 class SchoolBoxAppLoader {
   #SCHOOL_BOX_APP_HTML_ID ='mgg-root'
+  #REMOTE_IFRAME_SELECTOR = 'iframe#remote'
+
+  #getRemoteIframe() {
+    return document.querySelector(this.#REMOTE_IFRAME_SELECTOR);
+  }
+
+  #getNormalizedHosts(config: iSchoolBoxAppLoaderConfig = {}) {
+    const hosts = Array.isArray(config?.bypassHosts) ? config.bypassHosts : [];
+    return hosts
+      .map(host => `${host || ''}`.trim().toLowerCase())
+      .filter(host => host !== '');
+  }
+
+  #fetchData(
+    url: string,
+    callback: (status: number, resp: any) => void,
+    headers: {[key: string]: string} = {}
+  ){
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", url, false);
+    Object.entries(headers).forEach(([key, value]) => {
+      xhr.setRequestHeader(key, value);
+    });
+    xhr.onload = function() {
+      const status = xhr.status;
+      callback(status, xhr.response);
+    };
+    xhr.send(null);
+  };
+
+  #getApiBypassHosts(config: iSchoolBoxAppLoaderConfig = {}) {
+    const apiBaseUrl = `${config?.apiBaseUrl || ''}`.trim().replace(/\/+$/, '');
+    const appToken = `${config?.appToken || ''}`.trim();
+    const moduleId = `${config?.moduleId || ''}`.trim();
+    const settingsKey = `${config?.settingsKey || 'bypassHosts'}`.trim();
+
+    if (apiBaseUrl === '' || appToken === '' || moduleId === '' || settingsKey === '') {
+      return [];
+    }
+
+    let hosts: string[] = [];
+    this.#fetchData(
+      `${apiBaseUrl}/syn/mggsModule/${moduleId}`,
+      (status: number, response: any) => {
+        if (status !== 200) {
+          return;
+        }
+        try {
+          const responseObj = JSON.parse(response);
+          const settings = responseObj?.settings || {};
+          const configHosts = settings?.[settingsKey];
+          if (Array.isArray(configHosts)) {
+            hosts = configHosts;
+          }
+        } catch (error) {
+          return;
+        }
+      },
+      {
+        'X-MGGS-TOKEN': appToken,
+      }
+    );
+    return hosts
+      .map(host => `${host || ''}`.trim().toLowerCase())
+      .filter(host => host !== '');
+  }
+
+  #getAllowedHosts(config: iSchoolBoxAppLoaderConfig = {}) {
+    const hosts = [
+      ...this.#getNormalizedHosts(config),
+      ...this.#getApiBypassHosts(config),
+    ];
+    return [...new Set(hosts)];
+  }
+
+  #getDecodedRemoteUrl() {
+    const iFrame = this.#getRemoteIframe();
+    // @ts-ignore
+    const remoteSrc = `${iFrame?.src || ''}`.trim();
+    if (remoteSrc === '') {
+      return null;
+    }
+    try {
+      const url = new URL(remoteSrc);
+      const matched = url.pathname.match(/^\/modules\/remote\/([^/?#]+)/);
+      if (!matched || !matched[1]) {
+        return null;
+      }
+      return atob(decodeURIComponent(matched[1]));
+    } catch (error) {
+      return null;
+    }
+  }
+
+  #shouldBypassLoader(config: iSchoolBoxAppLoaderConfig = {}) {
+    const allowedHosts = this.#getAllowedHosts(config);
+    if (allowedHosts.length <= 0) {
+      return false;
+    }
+
+    const decodedRemoteUrl = this.#getDecodedRemoteUrl();
+    if (!decodedRemoteUrl) {
+      return false;
+    }
+
+    try {
+      const decodedHost = `${new URL(decodedRemoteUrl).hostname || ''}`.trim().toLowerCase();
+      return allowedHosts.includes(decodedHost);
+    } catch (error) {
+      return false;
+    }
+  }
+
   #checkAndInitHtml() {
-    const iFrame = document.querySelector('iframe#remote');
+    const iFrame = this.#getRemoteIframe();
     if (iFrame) {
       // @ts-ignore
       iFrame.style.display = 'none';
@@ -113,7 +234,10 @@ class SchoolBoxAppLoader {
     return false;
   }
 
-  init(appScriptUrl: string){
+  init(appScriptUrl: string, config: iSchoolBoxAppLoaderConfig = {}){
+    if (this.#shouldBypassLoader(config)) {
+      return;
+    }
     const loadCss = this.#checkAndInitHtml();
     (new AppLoader()).init(appScriptUrl, loadCss, true);
   }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import StudentAbsenceList from '../../../../pages/studentAbsences/components/StudentAbsenceList';
 import StudentAbsenceDailySummaryService from '../../../../services/StudentAbsences/StudentAbsenceDailySummaryService';
 import SynVStudentAbsenceEventsService from '../../../../services/Synergetic/Attendance/SynVStudentAbsenceEventsService';
@@ -90,23 +90,40 @@ const fakeEventsResponse = {
   perPage: 30,
 };
 
-const setupWithDates = async () => {
-  render(<StudentAbsenceList />);
+const flushAsyncUpdates = async () => {
+  await act(async () => {
+    await Promise.resolve();
+    await Promise.resolve();
+  });
+};
 
-  // Trigger start + end date selection via the DateRangeSelector mock
-  fireEvent.click(screen.getByRole('button', { name: 'Pick Start' }));
-  fireEvent.click(screen.getByRole('button', { name: 'Pick End' }));
-  fireEvent.click(screen.getByRole('button', { name: /Search/i }));
+const setupWithDates = async () => {
+  await act(async () => {
+    render(<StudentAbsenceList />);
+  });
 
   await waitFor(() => expect(mockedEventsService.getAll).toHaveBeenCalledTimes(1));
-  // Wait for loading to fully clear so buttons are no longer disabled
+  await waitFor(() => expect(screen.getByRole('button', { name: /Search/i })).not.toBeDisabled());
+
+  mockedSummaryService.getLiveReport.mockClear();
+  mockedEventsService.getAll.mockClear();
+
+  await act(async () => {
+    fireEvent.click(screen.getByRole('button', { name: 'Pick Start' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Pick End' }));
+    fireEvent.click(screen.getByRole('button', { name: /Search/i }));
+  });
+
+  await flushAsyncUpdates();
+
+  await waitFor(() => expect(mockedEventsService.getAll).toHaveBeenCalledTimes(1));
   await waitFor(() => expect(screen.getByRole('button', { name: /Search/i })).not.toBeDisabled());
 };
 
 describe('StudentAbsenceList', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    window.history.replaceState({}, '', '/');
+    window.history.replaceState({}, '', '/?dateFrom=2026-02-03&dateTo=2026-02-10');
     // Safe default: getLiveReport resolves so the component doesn't crash on mount
     mockedSummaryService.getLiveReport.mockResolvedValue(fakeLiveResult as any);
     mockedEventsService.getAll.mockResolvedValue(fakeEventsResponse as any);
@@ -121,7 +138,9 @@ describe('StudentAbsenceList', () => {
     );
   });
 
-  test('renders search button', () => {
+  test('renders search button', async () => {
+    mockedSummaryService.getLiveReport.mockReturnValue(new Promise(() => {}) as any);
+
     render(<StudentAbsenceList />);
     expect(screen.getByRole('button', { name: /Search/i })).toBeInTheDocument();
   });
@@ -145,15 +164,18 @@ describe('StudentAbsenceList', () => {
     mockedSummaryService.getLiveReport.mockReturnValue(new Promise(res => { resolveLoad = res; }) as any);
 
     render(<StudentAbsenceList />);
-    fireEvent.click(screen.getByRole('button', { name: 'Pick Start' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Pick End' }));
-    fireEvent.click(screen.getByRole('button', { name: /Search/i }));
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Pick Start' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Pick End' }));
+      fireEvent.click(screen.getByRole('button', { name: /Search/i }));
+    });
 
-    // While still loading the Search button should be disabled
     expect(screen.getByRole('button', { name: /Search/i })).toBeDisabled();
 
-    // Unblock and wait for idle
-    resolveLoad(fakeLiveResult);
+    await act(async () => {
+      resolveLoad(fakeLiveResult);
+      await Promise.resolve();
+    });
     await waitFor(() => expect(screen.getByRole('button', { name: /Search/i })).not.toBeDisabled());
   });
 
@@ -169,7 +191,10 @@ describe('StudentAbsenceList', () => {
     expect(screen.getByRole('button', { name: /Export/i })).toBeDisabled();
     expect(screen.getByRole('button', { name: /Email Report/i })).toBeDisabled();
 
-    resolveExport({ downloadUrl: '' });
+    await act(async () => {
+      resolveExport({ downloadUrl: '' });
+      await Promise.resolve();
+    });
     await waitFor(() => expect(screen.getByRole('button', { name: /Export/i })).not.toBeDisabled());
   });
 
@@ -185,7 +210,10 @@ describe('StudentAbsenceList', () => {
     expect(screen.getByRole('button', { name: /Export/i })).toBeDisabled();
     expect(screen.getByRole('button', { name: /Email Report/i })).toBeDisabled();
 
-    resolveEmail({});
+    await act(async () => {
+      resolveEmail({});
+      await Promise.resolve();
+    });
     await waitFor(() => expect(screen.getByRole('button', { name: /Search/i })).not.toBeDisabled());
   });
 

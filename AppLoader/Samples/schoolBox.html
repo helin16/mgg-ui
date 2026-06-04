@@ -7,6 +7,11 @@
 <script>
   const BASE_URL = 'https://appdev.mentonegirls.vic.edu.au';
   window.onload = function() {
-    (new SchoolBoxAppLoader()).init(BASE_URL);
+    (new SchoolBoxAppLoader()).init(BASE_URL, {
+      apiBaseUrl: 'https://mconnectweb01.mentonegirls.vic.edu.au',
+      appToken: 'replace-with-app-token',
+      moduleId: 11,
+      settingsKey: 'bypassHosts'
+    });
   }
 </script>
