@@ -91,10 +91,6 @@ class AppLoader {
 
 type iSchoolBoxAppLoaderConfig = {
   bypassHosts?: string[];
-  apiBaseUrl?: string;
-  appToken?: string;
-  moduleId?: number | string;
-  settingsKey?: string;
 };
 
 // @ts-ignore
@@ -113,68 +109,6 @@ class SchoolBoxAppLoader {
       .filter(host => host !== '');
   }
 
-  #fetchData(
-    url: string,
-    callback: (status: number, resp: any) => void,
-    headers: {[key: string]: string} = {}
-  ){
-    const xhr = new XMLHttpRequest();
-    xhr.open("GET", url, false);
-    Object.entries(headers).forEach(([key, value]) => {
-      xhr.setRequestHeader(key, value);
-    });
-    xhr.onload = function() {
-      const status = xhr.status;
-      callback(status, xhr.response);
-    };
-    xhr.send(null);
-  };
-
-  #getApiBypassHosts(config: iSchoolBoxAppLoaderConfig = {}) {
-    const apiBaseUrl = `${config?.apiBaseUrl || ''}`.trim().replace(/\/+$/, '');
-    const appToken = `${config?.appToken || ''}`.trim();
-    const moduleId = `${config?.moduleId || ''}`.trim();
-    const settingsKey = `${config?.settingsKey || 'bypassHosts'}`.trim();
-
-    if (apiBaseUrl === '' || appToken === '' || moduleId === '' || settingsKey === '') {
-      return [];
-    }
-
-    let hosts: string[] = [];
-    this.#fetchData(
-      `${apiBaseUrl}/syn/mggsModule/${moduleId}`,
-      (status: number, response: any) => {
-        if (status !== 200) {
-          return;
-        }
-        try {
-          const responseObj = JSON.parse(response);
-          const settings = responseObj?.settings || {};
-          const configHosts = settings?.[settingsKey];
-          if (Array.isArray(configHosts)) {
-            hosts = configHosts;
-          }
-        } catch (error) {
-          return;
-        }
-      },
-      {
-        'X-MGGS-TOKEN': appToken,
-      }
-    );
-    return hosts
-      .map(host => `${host || ''}`.trim().toLowerCase())
-      .filter(host => host !== '');
-  }
-
-  #getAllowedHosts(config: iSchoolBoxAppLoaderConfig = {}) {
-    const hosts = [
-      ...this.#getNormalizedHosts(config),
-      ...this.#getApiBypassHosts(config),
-    ];
-    return [...new Set(hosts)];
-  }
-
   #getDecodedRemoteUrl() {
     const iFrame = this.#getRemoteIframe();
     // @ts-ignore
@@ -184,6 +118,7 @@ class SchoolBoxAppLoader {
     }
     try {
       const url = new URL(remoteSrc);
+      console.log('url', url);
       const matched = url.pathname.match(/^\/modules\/remote\/([^/?#]+)/);
       if (!matched || !matched[1]) {
         return null;
@@ -195,7 +130,7 @@ class SchoolBoxAppLoader {
   }
 
   #shouldBypassLoader(config: iSchoolBoxAppLoaderConfig = {}) {
-    const allowedHosts = this.#getAllowedHosts(config);
+    const allowedHosts = this.#getNormalizedHosts(config);
     if (allowedHosts.length <= 0) {
       return false;
     }
