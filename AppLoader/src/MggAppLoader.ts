@@ -102,6 +102,19 @@ class SchoolBoxAppLoader {
     return document.querySelector(this.#REMOTE_IFRAME_SELECTOR);
   }
 
+  #getRemoteUrlFromCurrentPage() {
+    try {
+      const currentUrl = new URL(window.location.href);
+      const matched = currentUrl.pathname.match(/^\/modules\/remote\/([^/?#]+)/);
+      if (!matched || !matched[1]) {
+        return null;
+      }
+      return atob(decodeURIComponent(matched[1]));
+    } catch (error) {
+      return null;
+    }
+  }
+
   #getNormalizedHosts(config: iSchoolBoxAppLoaderConfig = {}) {
     const hosts = Array.isArray(config?.bypassHosts) ? config.bypassHosts : [];
     return hosts
@@ -113,36 +126,37 @@ class SchoolBoxAppLoader {
     const iFrame = this.#getRemoteIframe();
     // @ts-ignore
     const remoteSrc = `${iFrame?.src || ''}`.trim();
-    if (remoteSrc === '') {
-      return null;
-    }
-    try {
-      const url = new URL(remoteSrc);
-      console.log('url', url);
-      const matched = url.pathname.match(/^\/modules\/remote\/([^/?#]+)/);
-      if (!matched || !matched[1]) {
+    if (remoteSrc !== '') {
+      try {
+        return new URL(remoteSrc);
+      } catch (error) {
         return null;
       }
-      return atob(decodeURIComponent(matched[1]));
-    } catch (error) {
-      return null;
     }
+    return this.#getRemoteUrlFromCurrentPage();
   }
 
   #shouldBypassLoader(config: iSchoolBoxAppLoaderConfig = {}) {
+    const currentPageParts = this.#getRemoteUrlFromCurrentPage();
+    if (!currentPageParts) {
+      return false;
+    }
     const allowedHosts = this.#getNormalizedHosts(config);
     if (allowedHosts.length <= 0) {
       return false;
     }
 
-    const decodedRemoteUrl = this.#getDecodedRemoteUrl();
-    if (!decodedRemoteUrl) {
+    const decodedRemoteUrlObj = this.#getDecodedRemoteUrl();
+    if (!decodedRemoteUrlObj) {
       return false;
     }
 
     try {
-      const decodedHost = `${new URL(decodedRemoteUrl).hostname || ''}`.trim().toLowerCase();
-      return allowedHosts.includes(decodedHost);
+      // @ts-expect-error
+      const decodedHostname = `${decodedRemoteUrlObj?.hostname || ''}`.trim().toLowerCase();
+      // @ts-expect-error
+      const decodedHost = `${decodedRemoteUrlObj?.host || ''}`.trim().toLowerCase();
+      return allowedHosts.includes(decodedHost) || allowedHosts.includes(decodedHostname);
     } catch (error) {
       return false;
     }

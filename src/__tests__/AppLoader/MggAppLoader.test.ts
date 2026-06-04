@@ -6,6 +6,7 @@ import ts from 'typescript';
 type iRunLoaderOptions = {
   config?: Record<string, any>;
   remoteSrc?: string;
+  currentPageUrl?: string;
 };
 
 type iRecordedRequest = {
@@ -35,6 +36,7 @@ const getRemoteUrl = (targetUrl = 'https://www.mcbschools.com/Integration/menton
 const runLoader = ({
   config = {},
   remoteSrc = getRemoteUrl(),
+  currentPageUrl = 'https://app.example.test/',
 }: iRunLoaderOptions = {}) => {
   const compiledSource = compileLoaderSource();
   const requests: iRecordedRequest[] = [];
@@ -63,6 +65,12 @@ const runLoader = ({
     atob: (value: string) => Buffer.from(value, 'base64').toString('binary'),
     decodeURIComponent,
     console,
+    window: {
+      location: {
+        href: currentPageUrl,
+        replace: jest.fn(),
+      },
+    },
     document: {
       body,
       getElementsByTagName: (tagName: string) => tagName === 'head' ? [header] : [],
@@ -122,6 +130,7 @@ const runLoader = ({
     headChildren,
     bodyChildren,
     createdElements,
+    locationReplace: context.window.location.replace,
   };
 };
 
@@ -156,6 +165,22 @@ describe('SchoolBoxAppLoader', () => {
     });
 
     expect(result.iframe.style.display).toBeUndefined();
+    expect(result.requests).toEqual([]);
+    expect(result.createdElements).toEqual([]);
+    expect(result.locationReplace).not.toHaveBeenCalled();
+  });
+
+  test('redirects the current /modules/remote page directly for bypass hosts without an iframe', () => {
+    const remoteUrl = 'https://www.mcbschools.com/Integration/mentonegirls/schoolboxstaff?time=1&id=2';
+    const result = runLoader({
+      config: {
+        bypassHosts: ['www.mcbschools.com'],
+      },
+      remoteSrc: '',
+      currentPageUrl: `https://mconnect.example.test/modules/remote/${Buffer.from(remoteUrl).toString('base64')}`,
+    });
+
+    expect(result.locationReplace).toHaveBeenCalledWith(remoteUrl);
     expect(result.requests).toEqual([]);
     expect(result.createdElements).toEqual([]);
   });
