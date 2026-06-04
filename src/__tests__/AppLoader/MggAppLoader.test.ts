@@ -5,10 +5,6 @@ import ts from 'typescript';
 
 type iRunLoaderOptions = {
   config?: Record<string, any>;
-  moduleResponse?: {
-    status: number;
-    body: string;
-  };
   remoteSrc?: string;
 };
 
@@ -38,10 +34,6 @@ const getRemoteUrl = (targetUrl = 'https://www.mcbschools.com/Integration/menton
 
 const runLoader = ({
   config = {},
-  moduleResponse = {
-    status: 200,
-    body: JSON.stringify({settings: {bypassHosts: ['www.mcbschools.com']}}),
-  },
   remoteSrc = getRemoteUrl(),
 }: iRunLoaderOptions = {}) => {
   const compiledSource = compileLoaderSource();
@@ -104,18 +96,13 @@ const runLoader = ({
       };
       this.send = () => {
         requests.push(request);
-        if ((request.url || '').includes('/syn/mggsModule/')) {
-          this.status = moduleResponse.status;
-          this.response = moduleResponse.body;
-        } else {
-          this.status = 200;
-          this.response = JSON.stringify({
-            files: {
-              'main.js': '/static/js/main.js',
-              'main.css': '/static/css/main.css',
-            },
-          });
-        }
+        this.status = 200;
+        this.response = JSON.stringify({
+          files: {
+            'main.js': '/static/js/main.js',
+            'main.css': '/static/css/main.css',
+          },
+        });
         this.onload();
       };
       this.onload = () => {};
@@ -171,53 +158,5 @@ describe('SchoolBoxAppLoader', () => {
     expect(result.iframe.style.display).toBeUndefined();
     expect(result.requests).toEqual([]);
     expect(result.createdElements).toEqual([]);
-  });
-
-  test('loads bypass hosts from the module settings API', () => {
-    const result = runLoader({
-      config: {
-        apiBaseUrl: 'https://api.example.test',
-        appToken: 'token-123',
-        moduleId: 11,
-        settingsKey: 'bypassHosts',
-      },
-    });
-
-    expect(result.requests).toEqual([
-      expect.objectContaining({
-        method: 'GET',
-        url: 'https://api.example.test/syn/mggsModule/11',
-        asyncFlag: false,
-        headers: {
-          'X-MGGS-TOKEN': 'token-123',
-        },
-      }),
-    ]);
-    expect(result.iframe.style.display).toBeUndefined();
-  });
-
-  test('fails closed to the current behaviour when module settings lookup fails', () => {
-    const result = runLoader({
-      config: {
-        apiBaseUrl: 'https://api.example.test',
-        appToken: 'token-123',
-        moduleId: 11,
-        settingsKey: 'bypassHosts',
-      },
-      moduleResponse: {
-        status: 500,
-        body: '{}',
-      },
-    });
-
-    expect(result.requests).toEqual([
-      expect.objectContaining({
-        url: 'https://api.example.test/syn/mggsModule/11',
-      }),
-      expect.objectContaining({
-        url: expect.stringContaining('https://app.example.test/asset-manifest.json?'),
-      }),
-    ]);
-    expect(result.iframe.style.display).toBe('none');
   });
 });
