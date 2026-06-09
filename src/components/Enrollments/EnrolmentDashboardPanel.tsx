@@ -339,6 +339,9 @@ const EnrolmentDashboardPanel = () => {
       const returningMoment = moment(returningDate);
       return returningMoment.isValid() && returningMoment.isAfter(moment()) && returningMoment.year() === currentYear;
     });
+    const leftStudentsNotReturning = leftStudents.filter(student => {
+      return !leftStudentWillComeBack.some(returningStudent => returningStudent.StudentID === student.StudentID);
+    });
     const currentDay1 = [...continuedStudentsFromLastYear, ...startBeginningOfYear];
     const studentsToday = getUniqStudents(getStudentsNotLeftYet([
       ...currentDay1,
@@ -428,7 +431,7 @@ const EnrolmentDashboardPanel = () => {
       'current-start-of-year': getStudents(startBeginningOfYear, yrLvls),
       'current-day-1': getStudents(currentDay1, yrLvls),
       'current-start-during': getStudents(startDuringYearStudents, yrLvls),
-      'current-left-during': getStudents(leftStudents, yrLvls),
+      'current-left-during': getStudents(leftStudentsNotReturning, yrLvls),
       'current-loa-during': getStudents(leftStudentWillComeBack, yrLvls),
       'current-total-today': getStudents(studentsToday, yrLvls),
       'current-future-loa': getStudents(normalStudentsThisYearLeavingWillComeBack, yrLvls),

@@ -238,6 +238,57 @@ describe('EnrolmentDashboardPanel', () => {
     expect(rowWithReturningLoa.values['current-total-year-end']).toBe(2);
   });
 
+  test('excludes returning L.O.A. students from left during year counts', async () => {
+    (SynVStudentService.getVPastAndCurrentStudentAll as jest.Mock).mockResolvedValue({
+      data: [
+        {
+          ID: 1,
+          StudentID: 100,
+          StudentYearLevel: '7',
+          StudentStatus: 'APP',
+          StudentEntryDate: '2025-01-01',
+          StudentLeavingDate: '2026-03-01',
+          StudentReturningDate: '',
+          StudentOverrideNextYearLevel: '',
+          FullFeeFlag: false,
+          FileYear: 2026,
+        },
+        {
+          ID: 2,
+          StudentID: 200,
+          StudentYearLevel: '7',
+          StudentStatus: 'LOA',
+          StudentEntryDate: '2025-01-01',
+          StudentLeavingDate: '2026-03-01',
+          StudentReturningDate: '2026-10-01',
+          StudentOverrideNextYearLevel: '',
+          FullFeeFlag: false,
+          FileYear: 2026,
+        },
+      ],
+    });
+
+    const toBlob = jest.fn().mockResolvedValue(new Blob(['pdf'], {type: 'application/pdf'}));
+    (pdf as jest.Mock).mockReturnValue({toBlob});
+    Object.defineProperty(URL, 'createObjectURL', {writable: true, value: jest.fn().mockReturnValue('blob:pdf')});
+    Object.defineProperty(URL, 'revokeObjectURL', {writable: true, value: jest.fn()});
+    jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
+
+    render(<EnrolmentDashboardPanel />);
+
+    await waitFor(() => expect(document.querySelector('.spinner-border')).toBeNull());
+
+    fireEvent.click(await screen.findByRole('button', {name: /export pdf/i}));
+
+    await waitFor(() => expect(toBlob).toHaveBeenCalled());
+    const exportElement = (pdf as jest.Mock).mock.calls[(pdf as jest.Mock).mock.calls.length - 1][0];
+    const row = exportElement.props.rows.find((candidate: any) => candidate.values['current-loa-during'] === 1);
+
+    expect(row).toBeTruthy();
+    expect(row.values['current-left-during']).toBe(1);
+    expect(row.values['current-loa-during']).toBe(1);
+  });
+
   test('suppresses next-year future status duplicates when the student already exists in current', async () => {
     (SynLuYearLevelService.getAllYearLevels as jest.Mock).mockResolvedValue([
       {Code: '6', Campus: 'Junior', Description: '6', YearLevelSort: 6},
