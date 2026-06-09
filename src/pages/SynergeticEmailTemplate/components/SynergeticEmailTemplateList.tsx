@@ -119,7 +119,7 @@ const SynergeticEmailTemplateList = () => {
       if (isCloneUsingNewStyle) {
         await EmailTemplateService.create({
           CommunicationTemplatesSeq: clonedTemplate.CommunicationTemplatesSeq,
-          templateObj: cloningTemplate.emailTemplate?.templateObj || null
+          templateObj: cloningTemplate.emailTemplate?.templateObj || {}
         });
       }
 

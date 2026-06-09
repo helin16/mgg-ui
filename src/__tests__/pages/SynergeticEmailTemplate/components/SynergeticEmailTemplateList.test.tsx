@@ -240,6 +240,30 @@ describe('SynergeticEmailTemplateList', () => {
     }));
   });
 
+  test('creates a new-style clone with an empty builder object when the source has no builder data', async () => {
+    (SynCommunicationTemplateService.create as jest.Mock).mockResolvedValue({
+      CommunicationTemplatesSeq: 88
+    });
+    (EmailTemplateService.create as jest.Mock).mockResolvedValue({
+      id: 'email-template-88'
+    });
+
+    await openCloneModal();
+    const newStyleCheckbox = screen.getByLabelText(/new style/i) as HTMLInputElement;
+    expect(newStyleCheckbox.checked).toBe(false);
+
+    fireEvent.click(newStyleCheckbox);
+    fireEvent.change(screen.getByLabelText(/new template name/i), {
+      target: { value: 'Fresh New Style Clone' }
+    });
+    fireEvent.click(screen.getByRole('button', { name: /confirm clone/i }));
+
+    await waitFor(() => expect(EmailTemplateService.create).toHaveBeenCalledWith({
+      CommunicationTemplatesSeq: 88,
+      templateObj: {}
+    }));
+  });
+
   test('blocks whitespace-only clone names and shows a validation message', async () => {
     await openCloneModal();
     fireEvent.change(screen.getByLabelText(/new template name/i), {
