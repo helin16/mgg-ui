@@ -13,12 +13,17 @@ import Toaster, { TOAST_TYPE_SUCCESS } from "../../../services/Toaster";
 import { OP_AND, OP_BETWEEN } from "../../../helper/ServiceHelper";
 import StudentAbsenceDailySummaryService from "../../../services/StudentAbsences/StudentAbsenceDailySummaryService";
 import SynVStudentAbsenceEventsService from "../../../services/Synergetic/Attendance/SynVStudentAbsenceEventsService";
+import SynLuYearLevelService from "../../../services/Synergetic/Lookup/SynLuYearLevelService";
+import SynTimetableDefinitionService, {
+  iTimetablePeriod,
+} from "../../../services/Synergetic/TimeTable/SynTimetableDefinitionService";
 import {
   iStudentAbsenceDailySummaryFilters,
   iStudentAbsenceDailySummaryLiveResult,
   iStudentAbsenceDailySummaryRow,
 } from "../../../types/StudentAbsence/iStudentAbsenceDailySummary";
 import iSynVStudentAbsenceEvents from "../../../types/Synergetic/Attendance/iSynVStudentAbsenceEvents";
+import iSynLuYearLevel from "../../../types/Synergetic/Lookup/iSynLuYearLevel";
 import StudentAbsenceDailySummaryEmailModal from "./StudentAbsenceDailySummaryEmailModal";
 
 const getUrlFilters = (): iStudentAbsenceDailySummaryFilters => {
@@ -54,14 +59,34 @@ const getStudentDisplayName = (row: iSynVStudentAbsenceEvents) => {
 };
 
 const mapSourceRowToSummaryRow = (
-  row: iSynVStudentAbsenceEvents
+  row: iSynVStudentAbsenceEvents,
+  timetableGroupByYearLevel: Map<string, string>,
+  timetableDescriptionByGroupAndPeriod: Map<string, string>
 ): iStudentAbsenceDailySummaryRow => {
   const absenceDate = `${row.AbsenceEventDate || ""}`.trim();
   const absenceDateTime = row.AbsenceEventDateTime || null;
+  const yearLevelCode = `${row.StudentYearLevel || ""}`.trim();
+  const timetableGroup = timetableGroupByYearLevel.get(yearLevelCode) || "";
+  const periodCode = `${row.AbsenceEventPeriodCode || ""}`.trim();
+  const periodDescription = `${row.AbsenceEventPeriodDescription || ""}`.trim();
+  const periodNumber = `${row.AbsenceEventPeriodNumber || ""}`.trim();
+  const resolvedPeriodDescription =
+    (timetableGroup !== "" && periodCode !== ""
+      ? timetableDescriptionByGroupAndPeriod.get(`${timetableGroup}:${periodCode}`)
+      : "") ||
+    (timetableGroup !== "" && periodNumber !== ""
+      ? timetableDescriptionByGroupAndPeriod.get(`${timetableGroup}:${periodNumber}`)
+      : "") ||
+    periodDescription;
+  const absenceReasonCode = `${row.AbsenceEventAbsenceReasonCode || ""}`.trim();
+  const absenceReason = absenceReasonCode === ""
+    ? ""
+    : `${row.AbsenceEventAbsenceReasonDescription || ""}`.trim();
   return {
     studentId: Number(row.StudentID || 0),
     studentName: getStudentDisplayName(row),
-    yearLevelCode: `${row.StudentYearLevel || ""}`.trim(),
+    yearLevelCode,
+    yearLevelDescription: `${row.StudentYearLevelDescription || yearLevelCode}`.trim(),
     formCode: `${row.StudentForm || ""}`.trim(),
     absenceDate,
     absenceDateTime: `${absenceDateTime || ""}`,
@@ -71,9 +96,9 @@ const mapSourceRowToSummaryRow = (
         : `${absenceDate || ""}`.trim() !== ""
           ? moment(absenceDate).format("D MMM YYYY")
           : "",
-    absencePeriod: `${row.AbsenceEventPeriodDescription || ""}`.trim(),
+    absencePeriod: resolvedPeriodDescription,
     absenceType: `${row.AbsenceEventAbsenceTypeDescription || ""}`.trim(),
-    absenceReason: `${row.AbsenceEventAbsenceReasonDescription || row.AbsenceEventAbsenceReasonCode || ""}`.trim(),
+    absenceReason,
     absenceComment: `${row.AbsenceEventComment || ""}`.trim(),
     studentCampus: `${row.StudentCampus || ""}`.trim(),
     subSchool: `${row.StudentSubSchool || row.SubSchool || ""}`.trim(),
@@ -202,15 +227,43 @@ const StudentAbsenceList = () => {
         if (isCancelled) {
           return;
         }
+        const [yearLevels, timetableDefinitions] = await Promise.all([
+          SynLuYearLevelService.getAllYearLevels({}),
+          SynTimetableDefinitionService.getCurrentSemesterPeriods(),
+        ]);
         const nextFilters = {
           yearLevelCode: resp.filters.yearLevelCode,
           formCode: resp.filters.formCode,
           dateRange: resp.filters.dateRange,
         };
+        const timetableGroupByYearLevel = new Map<string, string>();
+        (yearLevels || []).forEach((yearLevel: iSynLuYearLevel) => {
+          const code = `${yearLevel.Code || ""}`.trim();
+          const timetableGroup = `${yearLevel.TimetableGroup || ""}`.trim();
+          if (code !== "" && timetableGroup !== "") {
+            timetableGroupByYearLevel.set(code, timetableGroup);
+          }
+        });
+        const timetableDescriptionByGroupAndPeriod = new Map<string, string>();
+        (timetableDefinitions?.periods || []).forEach((period: iTimetablePeriod) => {
+          const timetableGroup = `${period.timetableGroup || ""}`.trim();
+          const description = `${period.description || ""}`.trim();
+          const periodNumber = `${period.periodNumber || ""}`.trim();
+          if (timetableGroup === "" || description === "" || periodNumber === "") {
+            return;
+          }
+          timetableDescriptionByGroupAndPeriod.set(`${timetableGroup}:${periodNumber}`, description);
+        });
         const sourceResp = await SynVStudentAbsenceEventsService.getAll(
           getSourceQueryParams(nextFilters, currentPage, 30)
         );
-        const mappedRows = (sourceResp.data || []).map(mapSourceRowToSummaryRow);
+        const mappedRows = (sourceResp.data || []).map(row =>
+          mapSourceRowToSummaryRow(
+            row,
+            timetableGroupByYearLevel,
+            timetableDescriptionByGroupAndPeriod
+          )
+        );
         setTotalPages(sourceResp.pages || 1);
         setAccessDenied(false);
         setResult({
@@ -272,8 +325,8 @@ const StudentAbsenceList = () => {
       },
       {
         key: "year",
-        header: "Year",
-        cell: (column, row) => <td key={column.key}>{row.yearLevelCode}</td>,
+        header: "Yr Lvl.",
+        cell: (column, row) => <td key={column.key}>{row.yearLevelDescription}</td>,
       },
       {
         key: "form",

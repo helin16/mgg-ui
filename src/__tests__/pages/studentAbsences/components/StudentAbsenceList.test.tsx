@@ -2,7 +2,9 @@ import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import StudentAbsenceList from '../../../../pages/studentAbsences/components/StudentAbsenceList';
 import StudentAbsenceDailySummaryService from '../../../../services/StudentAbsences/StudentAbsenceDailySummaryService';
+import SynLuYearLevelService from '../../../../services/Synergetic/Lookup/SynLuYearLevelService';
 import SynVStudentAbsenceEventsService from '../../../../services/Synergetic/Attendance/SynVStudentAbsenceEventsService';
+import SynTimetableDefinitionService from '../../../../services/Synergetic/TimeTable/SynTimetableDefinitionService';
 import Toaster, { TOAST_TYPE_SUCCESS } from '../../../../services/Toaster';
 import { DateRangeSelectorTestId } from '../../../../components/common/__mocks__/DateRangeSelector';
 
@@ -36,11 +38,15 @@ jest.mock('../../../../pages/studentAbsences/components/StudentAbsenceDailySumma
   },
 }));
 jest.mock('../../../../services/StudentAbsences/StudentAbsenceDailySummaryService');
+jest.mock('../../../../services/Synergetic/Lookup/SynLuYearLevelService');
 jest.mock('../../../../services/Synergetic/Attendance/SynVStudentAbsenceEventsService');
+jest.mock('../../../../services/Synergetic/TimeTable/SynTimetableDefinitionService');
 jest.mock('../../../../services/Toaster');
 
 const mockedSummaryService = StudentAbsenceDailySummaryService as jest.Mocked<typeof StudentAbsenceDailySummaryService>;
+const mockedYearLevelService = SynLuYearLevelService as jest.Mocked<typeof SynLuYearLevelService>;
 const mockedEventsService = SynVStudentAbsenceEventsService as jest.Mocked<typeof SynVStudentAbsenceEventsService>;
+const mockedTimetableService = SynTimetableDefinitionService as jest.Mocked<typeof SynTimetableDefinitionService>;
 const mockedToaster = Toaster as jest.Mocked<typeof Toaster>;
 
 const fakeLiveResult = {
@@ -73,9 +79,12 @@ const fakeEventsResponse = {
       StudentPreferred: 'Ada',
       StudentMailName: 'Ada Lovelace',
       StudentYearLevel: '10',
+      StudentYearLevelDescription: 'Year 10',
       StudentForm: '10A',
       AbsenceEventDate: '2026-02-03',
       AbsenceEventDateTime: '2026-02-03T09:00:00.000Z',
+      AbsenceEventPeriodCode: 'DAY',
+      AbsenceEventPeriodNumber: null,
       AbsenceEventPeriodDescription: 'All Day',
       AbsenceEventAbsenceTypeDescription: 'Absent',
       AbsenceEventAbsenceReasonDescription: 'Illness',
@@ -126,7 +135,30 @@ describe('StudentAbsenceList', () => {
     window.history.replaceState({}, '', '/?dateFrom=2026-02-03&dateTo=2026-02-10');
     // Safe default: getLiveReport resolves so the component doesn't crash on mount
     mockedSummaryService.getLiveReport.mockResolvedValue(fakeLiveResult as any);
+    mockedYearLevelService.getAllYearLevels.mockResolvedValue([
+      {
+        Code: '10',
+        TimetableGroup: 'S',
+      },
+    ] as any);
     mockedEventsService.getAll.mockResolvedValue(fakeEventsResponse as any);
+    mockedTimetableService.getCurrentSemesterPeriods.mockResolvedValue({
+      currentSemester: { fileYear: 2026, fileSemester: 1 },
+      periods: [
+        {
+          timetableDefinitionSeq: 1,
+          fileType: 'T',
+          fileYear: 2026,
+          fileSemester: 1,
+          timetableGroup: 'S',
+          periodNumber: 1,
+          dayNumber: 0,
+          timeFrom: '08:45',
+          timeTo: '09:40',
+          description: 'Period 1',
+        },
+      ],
+    } as any);
   });
 
   test('fetches data with surname-first sort order', async () => {
@@ -156,6 +188,49 @@ describe('StudentAbsenceList', () => {
     await setupWithDates();
 
     expect(screen.getByText('LOVELACE, Ada (101)')).toBeInTheDocument();
+  });
+
+  test('renders year level description in the year column', async () => {
+    await setupWithDates();
+
+    expect(screen.getByText('Year 10')).toBeInTheDocument();
+  });
+
+  test('maps numeric period values through timetable group and period code', async () => {
+    mockedEventsService.getAll.mockResolvedValue({
+      ...fakeEventsResponse,
+      data: [
+        {
+          ...fakeEventsResponse.data[0],
+          StudentYearLevel: '10',
+          AbsenceEventPeriodCode: '1',
+          AbsenceEventPeriodNumber: 1,
+          AbsenceEventPeriodDescription: '1',
+        } as any,
+      ],
+    } as any);
+
+    await setupWithDates();
+
+    expect(screen.getByText('Period 1')).toBeInTheDocument();
+    expect(screen.queryByText(/^1$/)).not.toBeInTheDocument();
+  });
+
+  test('leaves reason blank when the api reason code is blank', async () => {
+    mockedEventsService.getAll.mockResolvedValue({
+      ...fakeEventsResponse,
+      data: [
+        {
+          ...fakeEventsResponse.data[0],
+          AbsenceEventAbsenceReasonCode: '',
+          AbsenceEventAbsenceReasonDescription: 'Not Selected',
+        } as any,
+      ],
+    } as any);
+
+    await setupWithDates();
+
+    expect(screen.queryByText('Not Selected')).not.toBeInTheDocument();
   });
 
   test('Search button is in loading/disabled state while data is fetching', async () => {
