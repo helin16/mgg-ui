@@ -67,5 +67,7 @@ with the visible table.
 
 ## Verification Evidence
 
-- Automated test execution is pending implementation.
+- Automated verification completed on 2026-06-09:
+  - `npm test -- --runInBand --watch=false src/__tests__/components/Enrollments/EnrolmentDashboardPanel.test.tsx`
+  - `npm test -- --runInBand --watch=false src/__tests__/components/Enrollments/EnrolmentDashboardExportPdf.test.tsx`
 - Manual enrolment dashboard and PDF validation are pending implementation.
