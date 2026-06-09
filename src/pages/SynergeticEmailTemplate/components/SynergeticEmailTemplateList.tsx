@@ -158,7 +158,6 @@ const SynergeticEmailTemplateList = () => {
       );
       if (sequences.length <= 0) {
         setTemplateList(resp);
-        setEditingTemplate(null);
         return;
       }
 
@@ -187,7 +186,6 @@ const SynergeticEmailTemplateList = () => {
           };
         })
       });
-      setEditingTemplate(null);
     };
 
     setIsLoading(true);
@@ -412,9 +410,9 @@ const SynergeticEmailTemplateList = () => {
     return (
       <SynergeticEmailTemplateEditPanel
         template={editingTemplate}
-        onSaved={() => {
-          setCount(MathHelper.add(count, 1));
-          setEditingTemplate(null);
+        onSaved={(savedTemplate) => {
+          setCount(currentCount => MathHelper.add(currentCount, 1));
+          setEditingTemplate(savedTemplate);
         }}
         onCancel={() => setEditingTemplate(null)}
         showEditBtnsOnTop={true}
