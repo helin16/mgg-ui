@@ -43,6 +43,7 @@ type iSynVStudentAbsenceEvents = {
   AbsenceEventSortSeq?: number | null;
   AbsenceEventPeriodNumber?: number | null;
   AbsenceEventPeriodSynergyMeaning?: string | null;
+  AbsencePeriodDescription?: string | null;
   FileYear?: number | null;
   StudentID?: number | null;
   StudentSurname?: string | null;
