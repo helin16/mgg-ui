@@ -154,4 +154,87 @@ describe('EnrolmentDashboardPanel', () => {
 
     anchorClickSpy.mockRestore();
   });
+
+  test('adds same-year returning L.O.A. before future statuses and uniques current-year future counts by StudentID', async () => {
+    (SynVStudentService.getVPastAndCurrentStudentAll as jest.Mock).mockResolvedValue({
+      data: [
+        {
+          ID: 1,
+          StudentID: 100,
+          StudentYearLevel: '7',
+          StudentStatus: 'APP',
+          StudentEntryDate: '2025-01-01',
+          StudentLeavingDate: '',
+          StudentReturningDate: '',
+          StudentOverrideNextYearLevel: '',
+          FullFeeFlag: false,
+          FileYear: 2026,
+        },
+        {
+          ID: 3,
+          StudentID: 200,
+          StudentYearLevel: '7',
+          StudentStatus: 'LOA',
+          StudentEntryDate: '2025-01-01',
+          StudentLeavingDate: '2026-03-01',
+          StudentReturningDate: '2026-10-01',
+          StudentOverrideNextYearLevel: '',
+          FullFeeFlag: false,
+          FileYear: 2026,
+        },
+      ],
+    });
+    (SynVFutureStudentService.getAll as jest.Mock).mockResolvedValue({
+      data: [
+        {
+          FutureID: 2,
+          FutureEnrolYear: 2026,
+          StudentStatus: 'APP',
+        },
+      ],
+    });
+    (SynVFutureStudentService.mapFutureStudentToCurrent as jest.Mock).mockImplementation((student) => ({
+      ID: student.FutureID,
+      StudentID: 100,
+      FileYear: student.FutureEnrolYear,
+      StudentYearLevel: '7',
+      StudentEntryYearLevel: '7',
+      StudentStatus: 'APP',
+      StudentEntryDate: '2026-01-01',
+      StudentLeavingDate: '',
+      StudentReturningDate: '',
+      StudentOverrideNextYearLevel: '',
+      FullFeeFlag: false,
+    }));
+
+    const toBlob = jest.fn().mockResolvedValue(new Blob(['pdf'], {type: 'application/pdf'}));
+    (pdf as jest.Mock).mockReturnValue({toBlob});
+    Object.defineProperty(URL, 'createObjectURL', {writable: true, value: jest.fn().mockReturnValue('blob:pdf')});
+    Object.defineProperty(URL, 'revokeObjectURL', {writable: true, value: jest.fn()});
+    jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
+
+    const {container} = render(<EnrolmentDashboardPanel />);
+
+    await waitFor(() => expect(document.querySelector('.spinner-border')).toBeNull());
+
+    const countHeaderRow = container.querySelector('tr.count-header');
+    expect(countHeaderRow).not.toBeNull();
+    const headerTexts = Array.from(countHeaderRow?.querySelectorAll('th') || []).map(th =>
+      `${th.textContent || ''}`.replace(/\s+/g, '').trim()
+    );
+    expect(headerTexts.indexOf('NOTRETURNINGNEXTYEAR')).toBeGreaterThan(-1);
+    expect(headerTexts.indexOf('ReturningL.O.A.')).toBeGreaterThan(headerTexts.indexOf('NOTRETURNINGNEXTYEAR'));
+    expect(headerTexts.indexOf('ApplicationFinalised')).toBeGreaterThan(headerTexts.indexOf('ReturningL.O.A.'));
+
+    fireEvent.click(await screen.findByRole('button', {name: /export pdf/i}));
+
+    await waitFor(() => expect(toBlob).toHaveBeenCalled());
+    const exportElement = (pdf as jest.Mock).mock.calls[(pdf as jest.Mock).mock.calls.length - 1][0];
+    expect(exportElement.props.currentFutureExtraColumnCount).toBe(1);
+
+    const rowWithReturningLoa = exportElement.props.rows.find((row: any) => row.values['current-returning-loa'] === 1);
+    expect(rowWithReturningLoa).toBeTruthy();
+    expect(rowWithReturningLoa.values['current-status-APP']).toBe(1);
+    expect(rowWithReturningLoa.values['current-total-year-end']).toBe(2);
+  });
 });

@@ -216,7 +216,7 @@ const EnrolmentDashboardPanel = () => {
 
   const getStudents = (students: iVPastAndCurrentStudent[], yearLevels: iSynLuYearLevel[] = [], statuses: string[] = []) => {
     const yearLevelCodes = yearLevels.map(yl => `${yl.Code}`.trim());
-    return _.uniqBy(students, (student) => student.ID).filter(student => {
+    return _.uniqBy(students, (student) => student.StudentID || student.ID).filter(student => {
       const withinYearLevel = yearLevelCodes.indexOf(`${student.StudentYearLevel}`.trim()) >=0;
       const withinStatuses = statuses.indexOf(student.StudentStatus) >=0;
 
@@ -280,6 +280,7 @@ const EnrolmentDashboardPanel = () => {
       {key: 'current-total-today', label: 'Total Today', className: 'current total', dataCol: 'total-today', isTotal: true},
       {key: 'current-future-loa', label: 'Approved Future L.O.A.', className: 'current', dataCol: 'future-loa', isTotal: false},
       {key: 'current-not-returning', label: 'Not Returning Next Year', className: 'current', dataCol: 'not-returning', isTotal: false},
+      {key: 'current-returning-loa', label: 'Returning L.O.A.', className: 'current', dataCol: 'returning-loa', isTotal: false},
     );
 
     currentFutureStatuses.forEach((status, index) => {
@@ -329,6 +330,14 @@ const EnrolmentDashboardPanel = () => {
     const startDuringYearStudents = newStudentsCurrentYear.filter(student => moment(student.StudentEntryDate).month() > 0);
     const startDuringYearStudentsNotStarted = startDuringYearStudents.filter(student => moment(student.StudentEntryDate).isAfter(moment()));
     const leftStudentWillComeBack = leftStudents.filter(student => `${student.StudentReturningDate || ''}`.trim() !== '' &&  moment(`${student.StudentReturningDate || ''}`.trim()).isAfter(moment()));
+    const returningLoaCurrentYear = leftStudents.filter(student => {
+      const returningDate = `${student.StudentReturningDate || ''}`.trim();
+      if (returningDate === '') {
+        return false;
+      }
+      const returningMoment = moment(returningDate);
+      return returningMoment.isValid() && returningMoment.isAfter(moment()) && returningMoment.year() === currentYear;
+    });
     const currentDay1 = [...continuedStudentsFromLastYear, ...startBeginningOfYear];
     const studentsToday = getUniqStudents(getStudentsNotLeftYet([
       ...currentDay1,
@@ -339,6 +348,7 @@ const EnrolmentDashboardPanel = () => {
     const normalStudentsThisYearLeavingWillComeBack = normalStudentsThisYearLeaving.filter(student => `${student.StudentReturningDate || ''}`.trim() !== '' &&  moment(`${student.StudentReturningDate || ''}`.trim()).isAfter(moment()));
     const studentsEndOfCurrentYear = getUniqStudents([
       ...studentsToday,
+      ...returningLoaCurrentYear,
       ...(futureStudentsCurrentYear.filter(std => currentFutureStatusCodes.indexOf(std.StudentStatus) >=0 )),
     ]);
     const transitionedInStudents = transitionDate ? newStudentsCurrentYear.filter(st => moment(st.StudentEntryDate).isSameOrAfter(moment(transitionDate.TransitionStartAt))) : [];
@@ -421,6 +431,7 @@ const EnrolmentDashboardPanel = () => {
       'current-total-today': getStudents(studentsToday, yrLvls),
       'current-future-loa': getStudents(normalStudentsThisYearLeavingWillComeBack, yrLvls),
       'current-not-returning': getStudents(normalStudentsThisYearLeavingNotComeBack, yrLvls),
+      'current-returning-loa': getStudents(returningLoaCurrentYear, yrLvls),
       'current-total-year-end': getStudents(studentsEndOfCurrentYear, yrLvls),
       'future-continued-prev': getStudents(continuedFromCurrentYear),
       'future-loa': getStudents(loaStudents),
@@ -434,7 +445,7 @@ const EnrolmentDashboardPanel = () => {
 
     currentFutureStatuses.forEach((status) => {
       cells[`current-status-${status.Code || 'no-status'}`] = getStudents(
-        [...safeCurrentStudents, ...startDuringYearStudentsNotStarted],
+        [...safeCurrentStudents, ...startDuringYearStudentsNotStarted, ...futureStudentsCurrentYear],
         yrLvls,
         [status.Code]
       );
@@ -555,6 +566,7 @@ const EnrolmentDashboardPanel = () => {
           currentYear={currentYear}
           nextYear={nextYear}
           currentFutureStatusCount={currentFutureStatuses.length}
+          currentFutureExtraColumnCount={1}
           futureStatusCount={futureStatuses.length}
           showTransitColumns={showTransitColumns}
         />
@@ -587,7 +599,7 @@ const EnrolmentDashboardPanel = () => {
         <thead>
         <tr>
           <th className={'border-right'}></th>
-          <th colSpan={MathHelper.add(currentFutureStatuses.length, MathHelper.add(10, showTransitColumns ? 2 : 0))} className={'current border-right'}>{currentYear}</th>
+          <th colSpan={MathHelper.add(currentFutureStatuses.length, MathHelper.add(11, showTransitColumns ? 2 : 0))} className={'current border-right'}>{currentYear}</th>
           <th colSpan={MathHelper.add(futureStatuses.length, 3)} className={'future'}>{nextYear}</th>
         </tr>
         <tr>
@@ -598,7 +610,7 @@ const EnrolmentDashboardPanel = () => {
           <th className={`current`} data-col={'total-today'}></th>
           <th className={`current`} data-col={'total-today'}></th>
           <th className={`current`} data-col={'total-today'}></th>
-          {currentFutureStatuses.length > 0 && (<th colSpan={currentFutureStatuses.length} className={'current border-right sm'} data-col={'future'}>Future {currentYear}</th>)}
+          <th colSpan={MathHelper.add(currentFutureStatuses.length, 1)} className={'current border-right sm'} data-col={'future'}>Future {currentYear}</th>
           <th className={`current border-right`} data-col={'total-year-end'}></th>
           <th colSpan={MathHelper.add(futureStatuses.length, 3)} className={'future'}>Future {nextYear}</th>
         </tr>
@@ -628,6 +640,7 @@ const EnrolmentDashboardPanel = () => {
           <th className={`current total`} data-col={'total-today'}><div>TOTAL<br/>TODAY</div></th>
           <th className={`current`} data-col={'future-loa'}><div>APPROVED<br/><small>FUTURE L.O.A.</small></div></th>
           <th className={`current`} data-col={'not-returning'}><div>NOT RETURNING<br/><small>NEXT YEAR</small></div></th>
+          <th className={`current`} data-col={'returning-loa'}><div>Returning L.O.A.</div></th>
           {
             currentFutureStatuses.map((status, index) => (<th
               className={`current ${index < MathHelper.sub(currentFutureStatuses.length, 1) ? '' : 'border-right sm'}`}
