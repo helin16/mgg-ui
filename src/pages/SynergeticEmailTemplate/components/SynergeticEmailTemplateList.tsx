@@ -18,11 +18,12 @@ import { OP_OR } from "../../../helper/ServiceHelper";
 import styled from "styled-components";
 import UtilsService from "../../../services/UtilsService";
 import DeleteConfirmPopupBtn from "../../../components/common/DeleteConfirm/DeleteConfirmPopupBtn";
-import { Button } from "react-bootstrap";
+import { Alert, Button, FormCheck, FormControl } from "react-bootstrap";
 import SynergeticEmailTemplateEditPanel from "./SynergeticEmailTemplateEditPanel";
 import iEmailTemplate from "../../../types/Email/iEmailTemplate";
 import EmailTemplateService from "../../../services/Email/EmailTemplateService";
 import SynEmailSendPopupBtn from './SynEmailSendPopupBtn';
+import PopupModal from "../../../components/common/PopupModal";
 
 const Wrapper = styled.div`
   .templates-table {
@@ -59,7 +60,79 @@ const SynergeticEmailTemplateList = () => {
   const [editingTemplate, setEditingTemplate] = useState<
     iSynCommunicationTemplate | null | undefined
   >(null);
+  const [cloningTemplate, setCloningTemplate] = useState<iResult | null>(null);
+  const [cloneName, setCloneName] = useState("");
+  const [isCloneUsingNewStyle, setIsCloneUsingNewStyle] = useState(false);
+  const [showCloneNameError, setShowCloneNameError] = useState(false);
+  const [isCloning, setIsCloning] = useState(false);
   const { user } = useSelector((state: RootState) => state.auth);
+
+  const handleOpenCloneModal = (template: iResult) => {
+    setCloningTemplate(template);
+    setCloneName(`${template.Name || ""}`.trim());
+    setIsCloneUsingNewStyle(Boolean(template.emailTemplate));
+    setShowCloneNameError(false);
+  };
+
+  const handleCloseCloneModal = (forceClose = false) => {
+    if (isCloning && !forceClose) {
+      return;
+    }
+    setCloningTemplate(null);
+    setCloneName("");
+    setIsCloneUsingNewStyle(false);
+    setShowCloneNameError(false);
+  };
+
+  const getClonedTemplatePayload = (template: iResult, newName: string) => {
+    return {
+      Name: newName,
+      Description: template.Description,
+      MessageType: template.MessageType || SYN_COMMUNICATION_TEMPLATE_TYPE_HTML,
+      MessageSubject: template.MessageSubject,
+      MessageBody: template.MessageBody,
+      Owner: template.Owner,
+      PrivateFlag: template.PrivateFlag,
+      DocumentClassification: template.DocumentClassification,
+      SenderEmail: template.SenderEmail,
+      ProgramName: template.ProgramName
+    };
+  };
+
+  const handleCloneTemplate = async () => {
+    if (isCloning || !cloningTemplate) {
+      return;
+    }
+
+    const trimmedName = `${cloneName || ""}`.trim();
+    if (trimmedName === "") {
+      setShowCloneNameError(true);
+      return;
+    }
+
+    setIsCloning(true);
+    try {
+      const clonedTemplate = await SynCommunicationTemplateService.create(
+        getClonedTemplatePayload(cloningTemplate, trimmedName)
+      );
+
+      if (isCloneUsingNewStyle) {
+        await EmailTemplateService.create({
+          CommunicationTemplatesSeq: clonedTemplate.CommunicationTemplatesSeq,
+          templateObj: cloningTemplate.emailTemplate?.templateObj || null
+        });
+      }
+
+      Toaster.showToast(`Template Cloned Successfully`, TOAST_TYPE_SUCCESS);
+      handleCloseCloneModal(true);
+      setCurrentPage(1);
+      setCount(currentCount => MathHelper.add(currentCount, 1));
+    } catch (err) {
+      Toaster.showApiError(err);
+    } finally {
+      setIsCloning(false);
+    }
+  };
 
   useEffect(() => {
     let isCanceled = false;
@@ -293,6 +366,13 @@ const SynergeticEmailTemplateList = () => {
             >
               <Icons.Send /> Send
             </SynEmailSendPopupBtn>{" "}
+            <Button
+              variant={"outline-primary"}
+              size={"sm"}
+              onClick={() => handleOpenCloneModal(data)}
+            >
+              <Icons.Files /> Clone
+            </Button>{" "}
             <DeleteConfirmPopupBtn
               variant={"danger"}
               size={"sm"}
@@ -344,6 +424,66 @@ const SynergeticEmailTemplateList = () => {
 
   return (
     <Wrapper>
+      <PopupModal
+        title={`Clone Template`}
+        show={cloningTemplate !== null}
+        handleClose={() => handleCloseCloneModal()}
+        footer={
+          <FlexContainer className={"justify-content-end gap-2 full-width"}>
+            <Button
+              variant={"link"}
+              onClick={() => handleCloseCloneModal()}
+              disabled={isCloning}
+            >
+              <Icons.X /> Cancel
+            </Button>
+            <LoadingBtn
+              variant={"primary"}
+              isLoading={isCloning}
+              onClick={() => handleCloneTemplate()}
+              disabled={isCloning}
+            >
+              <Icons.Files /> Confirm Clone
+            </LoadingBtn>
+          </FlexContainer>
+        }
+      >
+        <>
+          <div className={"mb-3"}>
+            <label className={"form-label"} htmlFor={"clone-template-name"}>
+              New template name
+            </label>
+            <FormControl
+              id={"clone-template-name"}
+              aria-label={"New template name"}
+              value={cloneName}
+              onChange={event => {
+                setCloneName(event.target.value);
+                if (`${event.target.value || ""}`.trim() !== "") {
+                  setShowCloneNameError(false);
+                }
+              }}
+              placeholder={"Enter the new template name"}
+              disabled={isCloning}
+            />
+          </div>
+
+          <FormCheck
+            id={"clone-template-new-style"}
+            label={"New Style"}
+            checked={isCloneUsingNewStyle}
+            onChange={event => setIsCloneUsingNewStyle(event.target.checked)}
+            disabled={isCloning}
+          />
+
+          {showCloneNameError ? (
+            <Alert variant={"danger"} className={"mt-3 mb-0"}>
+              Template Name can NOT be empty.
+            </Alert>
+          ) : null}
+        </>
+      </PopupModal>
+
       <FlexContainer className={"gap-2 align-items-center"}>
         <b>{templateList?.total || 0} Template(s)</b>
         <div>
