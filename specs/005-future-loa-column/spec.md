@@ -109,31 +109,37 @@ qualifying 2026 returning leave students are counted.
 - **FR-005**: The system MUST exclude from this column students who have no returning date,
   whose returning date falls outside the current dashboard year’s future section, or who do
   not meet the leave criteria.
-- **FR-006**: The system MUST apply the new column consistently for year-level rows, campus
+- **FR-006**: The system MUST place qualifying `Returning L.O.A.` students into dashboard
+  rows using their current `StudentYearLevel` when their returning date falls within the
+  active current dashboard year.
+- **FR-007**: The system MUST apply the new column consistently for year-level rows, campus
   subtotal rows, and the grand total row.
-- **FR-007**: The system MUST include students counted in the current-year future columns,
+- **FR-008**: The system MUST include students counted in the current-year future columns,
   including `Returning L.O.A.`, in the `Total at Year End` value for the same row so that
   the year-end total increases when those columns contain students not already counted
   elsewhere in that total.
-- **FR-008**: The system MUST respect the existing campus and fee-type filters when
+- **FR-009**: The system MUST respect the existing campus and fee-type filters when
   calculating the new column.
-- **FR-009**: The system MUST preserve the existing access rules for the enrolments module
+- **FR-010**: The system MUST preserve the existing access rules for the enrolments module
   and MUST NOT broaden who can view enrolment counts.
-- **FR-010**: The specification identifies no required service-layer contract changes for
+- **FR-011**: The specification identifies no required service-layer contract changes for
   the existing `src/services/*` and `src/types/*` boundaries; the feature reuses data
   already available to the dashboard.
-- **FR-011**: The system MUST preserve the dashboard’s existing loading, success, empty,
+- **FR-012**: The system MUST preserve the dashboard’s existing loading, success, empty,
   and error behaviours while adding the new column.
-- **FR-012**: The system MUST include the new column in exported dashboard output wherever
+- **FR-013**: The system MUST include the new column in exported dashboard output wherever
   the visible `Future 2026` table structure is reproduced.
-- **FR-013**: The system MUST ensure the PDF export places `Returning L.O.A.` after `Not
+- **FR-014**: The system MUST ensure the PDF export places `Returning L.O.A.` after `Not
   Returning Next Year` and before `Place Offered`, matching the visible table layout.
-- **FR-014**: The system MUST ensure the `Returning L.O.A.` counts shown in the PDF export
+- **FR-015**: The system MUST ensure the `Returning L.O.A.` counts shown in the PDF export
   match the counts shown in the visible dashboard for the same filters and rows.
-- **FR-015**: The feature MUST ensure `Total at Year End` in the PDF export reflects the
+- **FR-016**: The feature MUST ensure `Total at Year End` in the PDF export reflects the
   same inclusion rules as the visible table, including students counted in the new
   current-year future columns.
-- **FR-016**: The feature MUST not require new environment variables, browser storage,
+- **FR-017**: The existing next-year `Returning L.O.A.` logic MUST remain unchanged, so
+  next-year row placement continues using `StudentOverrideNextYearLevel` when present and
+  otherwise falls back to the inferred next year level from the ordered year-level list.
+- **FR-018**: The feature MUST not require new environment variables, browser storage,
   third-party credentials, or new categories of student data beyond the existing enrolment
   dashboard inputs.
 
@@ -172,6 +178,9 @@ qualifying 2026 returning leave students are counted.
   to derive this count.
 - `Returning L.O.A.` in `Future 2026` is intended to represent students returning during
   the current dashboard year, not the next-year future section.
+- Students returning within the current dashboard year remain in their current
+  `StudentYearLevel` for this new column rather than being promoted to an inferred next
+  year level.
 - The existing dashboard export is expected to stay structurally aligned with the visible
   table whenever a new visible column is added.
 - Manual enrolment/UAT validation remains necessary because the final behavior is easiest

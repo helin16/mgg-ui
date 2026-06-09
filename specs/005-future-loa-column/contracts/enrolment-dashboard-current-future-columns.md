@@ -36,6 +36,7 @@ For each visible row:
 
 - Count students who meet the dashboard’s leave criteria and whose returning date falls in
   the active current dashboard year.
+- Place those students in year-level rows by their current `StudentYearLevel`.
 - Apply the existing row scope, including campus filtering, year-level grouping, and
   fee-type filtering.
 - Exclude students whose returning date is blank, invalid, or outside the active current

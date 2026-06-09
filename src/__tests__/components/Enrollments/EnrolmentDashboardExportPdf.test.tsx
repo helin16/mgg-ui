@@ -54,6 +54,8 @@ const defaultProps = {
     {key: 'current-continued-prev', label: 'Continued from 2025'},
     {key: 'current-day-1', label: 'Day 1 2026 Total', isTotal: true},
     {key: 'current-total-today', label: 'Total Today', isTotal: true},
+    {key: 'current-returning-loa', label: 'Returning L.O.A.'},
+    {key: 'current-status-APP', label: 'Application Finalised'},
     {key: 'current-total-year-end', label: 'Total at Year End', isTotal: true},
     {key: 'future-total-start', label: 'Total Start', isTotal: true},
   ],
@@ -64,6 +66,8 @@ const defaultProps = {
         'current-continued-prev': 0,
         'current-day-1': 11,
         'current-total-today': 12,
+        'current-returning-loa': 1,
+        'current-status-APP': 2,
         'current-total-year-end': 13,
         'future-total-start': 22,
       },
@@ -75,6 +79,8 @@ const defaultProps = {
         'current-continued-prev': 19,
         'current-day-1': 33,
         'current-total-today': 34,
+        'current-returning-loa': 3,
+        'current-status-APP': 4,
         'current-total-year-end': 35,
         'future-total-start': 35,
       },
@@ -84,7 +90,8 @@ const defaultProps = {
   selectedFullFeeStudentType: 'All',
   currentYear: 2026,
   nextYear: 2027,
-  currentFutureStatusCount: 2,
+  currentFutureStatusCount: 1,
+  currentFutureExtraColumnCount: 1,
   futureStatusCount: 3,
   showTransitColumns: true,
 };
@@ -152,10 +159,24 @@ describe('EnrolmentDashboardExportPdf', () => {
       <EnrolmentDashboardExportPdf
         {...defaultProps}
         currentFutureStatusCount={0}
+        currentFutureExtraColumnCount={0}
       />
     );
 
     expect(screen.queryByText('Future 2026')).toBeNull();
     expect(screen.getByText('Future 2027')).toBeInTheDocument();
+  });
+
+  test('keeps the current-year future group label when only the returning loa column is present', () => {
+    render(
+      <EnrolmentDashboardExportPdf
+        {...defaultProps}
+        currentFutureStatusCount={0}
+        currentFutureExtraColumnCount={1}
+      />
+    );
+
+    expect(screen.getByText('Future 2026')).toBeInTheDocument();
+    expect(screen.getByText('Returning L.O.A.')).toBeInTheDocument();
   });
 });

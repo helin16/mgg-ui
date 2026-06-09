@@ -22,6 +22,7 @@ type iEnrolmentDashboardExportPdf = {
   currentYear: number;
   nextYear: number;
   currentFutureStatusCount: number;
+  currentFutureExtraColumnCount?: number;
   futureStatusCount: number;
   showTransitColumns: boolean;
 };
@@ -109,13 +110,14 @@ const EnrolmentDashboardExportPdf = ({
   currentYear,
   nextYear,
   currentFutureStatusCount,
+  currentFutureExtraColumnCount = 0,
   futureStatusCount,
   showTransitColumns,
 }: iEnrolmentDashboardExportPdf) => {
   const rowLabelWidth = '10%';
   const dataColumnWidth = `${90 / Math.max(columns.length, 1)}%`;
   const getSpanWidth = (span: number) => `${(90 * span) / Math.max(columns.length, 1)}%`;
-  const currentYearColumnCount = 10 + (showTransitColumns ? 2 : 0) + currentFutureStatusCount;
+  const currentYearColumnCount = 10 + (showTransitColumns ? 2 : 0) + currentFutureExtraColumnCount + currentFutureStatusCount;
   const futureYearColumnCount = 3 + futureStatusCount;
 
   return (
@@ -143,8 +145,8 @@ const EnrolmentDashboardExportPdf = ({
             <Text style={[styles.headerCell, {width: getSpanWidth(1)}]} hyphenationCallback={disableHyphenation}></Text>
             <Text style={[styles.headerCell, {width: getSpanWidth(1)}]} hyphenationCallback={disableHyphenation}></Text>
             <Text style={[styles.headerCell, {width: getSpanWidth(1)}]} hyphenationCallback={disableHyphenation}></Text>
-            {currentFutureStatusCount > 0 && (
-              <Text style={[styles.headerCell, {width: getSpanWidth(currentFutureStatusCount)}]} hyphenationCallback={disableHyphenation}>{`Future ${currentYear}`}</Text>
+            {(currentFutureExtraColumnCount + currentFutureStatusCount) > 0 && (
+              <Text style={[styles.headerCell, {width: getSpanWidth(currentFutureExtraColumnCount + currentFutureStatusCount)}]} hyphenationCallback={disableHyphenation}>{`Future ${currentYear}`}</Text>
             )}
             <Text style={[styles.headerCell, {width: getSpanWidth(1)}]} hyphenationCallback={disableHyphenation}></Text>
             <Text style={[styles.headerCell, {width: getSpanWidth(futureYearColumnCount), borderRightWidth: 0}]} hyphenationCallback={disableHyphenation}>{`Future ${nextYear}`}</Text>

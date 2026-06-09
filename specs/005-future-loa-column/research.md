@@ -86,3 +86,23 @@ the generated PDF output.
   export structure, which are suited to automated regression checks.
 - Introduce Cypress coverage in this change. Rejected because the repo already has focused
   Jest coverage for this surface and the feature does not need a broader browser workflow.
+
+## Decision 6: Use current year level for same-year returning L.O.A. placement
+
+**Decision**: Place students counted in the new current-year `Returning L.O.A.` column by
+their current `StudentYearLevel`, and leave the existing next-year L.O.A. row-placement
+logic unchanged.
+
+**Rationale**: A student returning within the same dashboard year is not crossing into the
+next academic year for this view, so using the current year level is the clearest and most
+consistent placement rule. The existing next-year logic already handles year rollover
+through `StudentOverrideNextYearLevel` or inferred progression and should remain specific
+to the next-year column.
+
+**Alternatives considered**:
+
+- Reuse `StudentOverrideNextYearLevel` for same-year returning students. Rejected because
+  that field expresses next-year placement and would overreach for same-year returns.
+- Infer a promoted year level for same-year returning students. Rejected because the
+  current feature request does not introduce a transition-date-based promotion rule for
+  current-year returns.

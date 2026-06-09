@@ -79,6 +79,7 @@ current-year future column.
 
 - Must have a recorded returning date in the active current dashboard year.
 - Must satisfy the dashboard’s leave-related criteria.
+- Must be placed in year-level rows according to the student’s current `StudentYearLevel`.
 - Must be excluded when the returning date is blank, invalid, or outside the active
   current dashboard year.
 

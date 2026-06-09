@@ -9,6 +9,7 @@
 
 Update the enrolment numbers dashboard so the current-year future section gains a
 `Returning L.O.A.` column positioned between `Not Returning Next Year` and `Place Offered`,
+place same-year returning leave students in rows by their current `StudentYearLevel`,
 include qualifying current-year leave-return students in that column and in `Total at Year
 End`, fix the existing omission of current-year future students from the current-year
 future status columns, and keep the PDF export aligned with the visible table.
@@ -22,7 +23,7 @@ future status columns, and keep the PDF export aligned with the visible table.
 **Target Platform**: Browser-based SchoolBox/remote enrolments UI with PDF export  
 **Project Type**: Single React application  
 **Performance Goals**: Preserve current synchronous dashboard rendering expectations after data load and keep PDF export generation at the current user-visible speed  
-**Constraints**: Must preserve `MGGS_MODULE_ID_ENROLLMENTS` access, reuse existing service and type boundaries, avoid new API calls or contract changes, keep current filters working, and keep visible table and PDF export column layouts in sync  
+**Constraints**: Must preserve `MGGS_MODULE_ID_ENROLLMENTS` access, reuse existing service and type boundaries, avoid new API calls or contract changes, keep current filters working, place same-year returning leave students by current year level, preserve existing next-year L.O.A. year-level inference, and keep visible table and PDF export column layouts in sync  
 **Scale/Scope**: One dashboard panel, one PDF export component, one enrolments page surface, and focused Jest coverage for dashboard calculations and export structure
 
 ## Constitution Check
