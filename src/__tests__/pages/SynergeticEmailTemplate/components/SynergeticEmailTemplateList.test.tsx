@@ -80,7 +80,23 @@ jest.mock('../../../../pages/SynergeticEmailTemplate/components/SynEmailSendPopu
 
 jest.mock('../../../../pages/SynergeticEmailTemplate/components/SynergeticEmailTemplateEditPanel', () => ({
   __esModule: true,
-  default: () => <div>Editing Template</div>
+  default: ({ onSaved, onCancel, template }: any) => (
+    <div>
+      <div>Editing Template</div>
+      <div>Editing: {template?.Name || 'New Template'}</div>
+      <button
+        type="button"
+        onClick={() => onSaved({
+          ...template,
+          CommunicationTemplatesSeq: template?.CommunicationTemplatesSeq || 42,
+          Name: `${template?.Name || 'New Template'} Saved`
+        })}
+      >
+        Mock Save
+      </button>
+      <button type="button" onClick={onCancel}>Mock Cancel</button>
+    </div>
+  )
 }));
 
 jest.mock('../../../../components/common/Table', () => ({
@@ -305,5 +321,20 @@ describe('SynergeticEmailTemplateList', () => {
 
     await waitFor(() => expect(Toaster.showApiError).toHaveBeenCalled());
     expect(screen.getByText('Clone Template')).toBeInTheDocument();
+  });
+
+  test('stays on the edit page after save and keeps the saved template selected', async () => {
+    renderComponent();
+
+    await waitFor(() => expect(screen.queryByText('Loading...')).not.toBeInTheDocument());
+    fireEvent.click(await screen.findByRole('button', { name: 'Source Template' }));
+
+    expect(screen.getByText('Editing Template')).toBeInTheDocument();
+    expect(screen.getByText('Editing: Source Template')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Mock Save' }));
+
+    await waitFor(() => expect(screen.getByText('Editing Template')).toBeInTheDocument());
+    expect(screen.getByText('Editing: Source Template Saved')).toBeInTheDocument();
   });
 });
