@@ -321,6 +321,7 @@ const EnrolmentDashboardPanel = () => {
   const getDashboardRowCells = ({ yrLvls, currentStudents, futureStudents }: iGetRowCells) => {
     const safeCurrentStudents = currentStudents.filter(Boolean);
     const safeFutureStudents = futureStudents.filter(Boolean);
+    const currentStudentIds = safeCurrentStudents.map(student => student.StudentID);
     const currentFutureStatusCodes = currentFutureStatuses.map(status => status.Code);
     const leftStudents = safeCurrentStudents.filter(student => moment(student.StudentLeavingDate).isSameOrBefore(moment()));
     const continuedStudentsFromLastYear = safeCurrentStudents.filter(student => moment(student.StudentEntryDate).year() < currentYear);
@@ -377,6 +378,7 @@ const EnrolmentDashboardPanel = () => {
         .filter(student => yrLvlCodes.length <= 0 ? true : yrLvlCodes.indexOf(`${student.StudentEntryYearLevel}`.trim()) >= 0)
         .filter(student => futureStatusCodes.indexOf(`${student.StudentStatus}`.trim()) >=0 )
     );
+    const futureStudentsNextYearWithoutCurrent = futureStudentsNextYear.filter(student => currentStudentIds.indexOf(student.StudentID) < 0);
     const repeatingStudents = getUniqStudents(currentNotLeavingNextYearStudentsRepeating
       .filter(student => yrLvlCodes.length <= 0 ? true : yrLvlCodes.indexOf(`${student.StudentOverrideNextYearLevel}`.trim()) >= 0));
     const studentsFromLowerYearLevel = Object.keys(studentsFromLowerYearLevelMap)
@@ -418,7 +420,7 @@ const EnrolmentDashboardPanel = () => {
     const futureStudentsNextYearTotal = getUniqStudents([
       ...continuedFromCurrentYear,
       ...loaStudents,
-      ...futureStudentsNextYear,
+      ...futureStudentsNextYearWithoutCurrent,
     ]);
 
     const cells: {[key: string]: iVPastAndCurrentStudent[]} = {
@@ -452,7 +454,7 @@ const EnrolmentDashboardPanel = () => {
     });
 
     futureStatuses.forEach((status) => {
-      cells[`future-status-${status.Code || 'no-status'}`] = getStudents(futureStudentsNextYear, [], [status.Code]);
+      cells[`future-status-${status.Code || 'no-status'}`] = getStudents(futureStudentsNextYearWithoutCurrent, [], [status.Code]);
     });
 
     return cells;

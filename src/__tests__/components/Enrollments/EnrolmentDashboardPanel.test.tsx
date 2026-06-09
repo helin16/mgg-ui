@@ -237,4 +237,86 @@ describe('EnrolmentDashboardPanel', () => {
     expect(rowWithReturningLoa.values['current-status-APP']).toBe(1);
     expect(rowWithReturningLoa.values['current-total-year-end']).toBe(2);
   });
+
+  test('suppresses next-year future status duplicates when the student already exists in current', async () => {
+    (SynLuYearLevelService.getAllYearLevels as jest.Mock).mockResolvedValue([
+      {Code: '6', Campus: 'Junior', Description: '6', YearLevelSort: 6},
+      {Code: '7', Campus: 'Junior', Description: '7', YearLevelSort: 7},
+    ]);
+    (SynVStudentService.getVPastAndCurrentStudentAll as jest.Mock).mockResolvedValue({
+      data: [
+        {
+          ID: 1,
+          StudentID: 100,
+          StudentYearLevel: '6',
+          StudentStatus: 'APP',
+          StudentEntryDate: '2025-01-01',
+          StudentLeavingDate: '',
+          StudentReturningDate: '',
+          StudentOverrideNextYearLevel: '',
+          FullFeeFlag: false,
+          FileYear: 2026,
+        },
+      ],
+    });
+    (SynVFutureStudentService.getAll as jest.Mock).mockResolvedValue({
+      data: [
+        {
+          FutureID: 2,
+          FutureEnrolYear: 2027,
+          StudentStatus: 'APP',
+        },
+        {
+          FutureID: 3,
+          FutureEnrolYear: 2027,
+          StudentStatus: 'APP',
+        },
+      ],
+    });
+    (SynVFutureStudentService.mapFutureStudentToCurrent as jest.Mock)
+      .mockImplementationOnce((student) => ({
+        ID: student.FutureID,
+        StudentID: 100,
+        FileYear: student.FutureEnrolYear,
+        StudentYearLevel: '7',
+        StudentEntryYearLevel: '7',
+        StudentStatus: 'APP',
+        StudentEntryDate: '2027-01-01',
+        StudentLeavingDate: '',
+        StudentReturningDate: '',
+        StudentOverrideNextYearLevel: '',
+        FullFeeFlag: false,
+      }))
+      .mockImplementationOnce((student) => ({
+        ID: student.FutureID,
+        StudentID: 300,
+        FileYear: student.FutureEnrolYear,
+        StudentYearLevel: '7',
+        StudentEntryYearLevel: '7',
+        StudentStatus: 'APP',
+        StudentEntryDate: '2027-01-01',
+        StudentLeavingDate: '',
+        StudentReturningDate: '',
+        StudentOverrideNextYearLevel: '',
+        FullFeeFlag: false,
+      }));
+
+    const toBlob = jest.fn().mockResolvedValue(new Blob(['pdf'], {type: 'application/pdf'}));
+    (pdf as jest.Mock).mockReturnValue({toBlob});
+    Object.defineProperty(URL, 'createObjectURL', {writable: true, value: jest.fn().mockReturnValue('blob:pdf')});
+    Object.defineProperty(URL, 'revokeObjectURL', {writable: true, value: jest.fn()});
+    jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
+
+    render(<EnrolmentDashboardPanel />);
+
+    await waitFor(() => expect(document.querySelector('.spinner-border')).toBeNull());
+    fireEvent.click(await screen.findByRole('button', {name: /export pdf/i}));
+
+    await waitFor(() => expect(toBlob).toHaveBeenCalled());
+    const exportElement = (pdf as jest.Mock).mock.calls[(pdf as jest.Mock).mock.calls.length - 1][0];
+    const rowWithFutureStatus = exportElement.props.rows.find((row: any) => row.values['future-status-APP'] === 1);
+
+    expect(rowWithFutureStatus).toBeTruthy();
+    expect(rowWithFutureStatus.values['future-total-start']).toBe(2);
+  });
 });
