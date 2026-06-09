@@ -71,3 +71,21 @@ with the visible table.
   - `npm test -- --runInBand --watch=false src/__tests__/components/Enrollments/EnrolmentDashboardPanel.test.tsx`
   - `npm test -- --runInBand --watch=false src/__tests__/components/Enrollments/EnrolmentDashboardExportPdf.test.tsx`
 - Manual enrolment dashboard and PDF validation are pending implementation.
+
+## Manual Verification Record
+
+**Date**: __________  
+**Environment**: __________  
+**Reviewer**: __________
+
+| Scenario | Result | Notes |
+|----------|--------|-------|
+| Scenario 1: Qualifying leave-return student is shown | Pending | |
+| Scenario 2: Non-qualifying leave-return student is excluded | Pending | |
+| Scenario 3: Year-end totals increase correctly | Pending | |
+| Scenario 4: Existing current-year future statuses still show expected students | Pending | |
+| Scenario 5: PDF export matches the visible table | Pending | |
+
+**Follow-up actions**:
+
+- Pending
