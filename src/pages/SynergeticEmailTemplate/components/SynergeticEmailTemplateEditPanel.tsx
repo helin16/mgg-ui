@@ -15,6 +15,7 @@ import PageLoadingSpinner from "../../../components/common/PageLoadingSpinner";
 import EmailTemplateService from "../../../services/Email/EmailTemplateService";
 import EmailTemplateBuilder from "../../../components/Email/EmailTemplateBuilder";
 import ExplanationPanel from "../../../components/ExplanationPanel";
+import SynEmailSendPopupBtn from "./SynEmailSendPopupBtn";
 
 type iSynergeticEmailTemplateEditPanel = {
   template?: iSynCommunicationTemplate;
@@ -208,8 +209,20 @@ const SynergeticEmailTemplateEditPanel = ({
   };
 
   const getSavingBtns = () => {
+    const hasExistingTemplate =
+      `${editingTemplate?.CommunicationTemplatesSeq || ""}`.trim() !== "";
+
     return (
       <div>
+        {hasExistingTemplate ? (
+          <SynEmailSendPopupBtn
+            template={editingTemplate as iSynCommunicationTemplate}
+            variant={"outline-success"}
+            size={"sm"}
+          >
+            <Icons.Send /> Send
+          </SynEmailSendPopupBtn>
+        ) : null}
         <LoadingBtn
           isLoading={isSaving}
           variant={"link"}
