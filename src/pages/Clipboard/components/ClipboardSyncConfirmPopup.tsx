@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, Button, Spinner } from "react-bootstrap";
+import styled from "styled-components";
 import ClipboardMusicSyncService from "../../../services/Clipboard/ClipboardMusicSyncService";
 import Toaster, { TOAST_TYPE_SUCCESS } from "../../../services/Toaster";
 
@@ -10,6 +11,17 @@ interface ClipboardSyncConfirmPopupProps {
   onCancel?: () => void;
 }
 
+const ConfirmString = styled.div`
+  background-color: #f5f5f5;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin: 1rem 0;
+  font-family: monospace;
+  font-size: 0.9rem;
+  word-break: break-all;
+  border-left: 3px solid #0d6efd;
+`;
+
 const ClipboardSyncConfirmPopup: React.FC<ClipboardSyncConfirmPopupProps> = ({
   show,
   teamName,
@@ -17,6 +29,14 @@ const ClipboardSyncConfirmPopup: React.FC<ClipboardSyncConfirmPopupProps> = ({
   onCancel,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [currentUserSynId, setCurrentUserSynId] = useState<string>("");
+
+  useEffect(() => {
+    // Extract synID from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const synId = urlParams.get("synId") || urlParams.get("synid") || "";
+    setCurrentUserSynId(synId);
+  }, []);
 
   const handleConfirm = async () => {
     setIsLoading(true);
@@ -60,11 +80,17 @@ const ClipboardSyncConfirmPopup: React.FC<ClipboardSyncConfirmPopupProps> = ({
 
       <Modal.Body>
         <p>
-          Are you sure you want to trigger a music sync for <strong>{teamName}</strong>?
+          Are you sure you want to trigger a music sync for <strong>{teamName}</strong> that classCode start with 'X'?
         </p>
-        <p className="text-muted small mb-0">
+        <p className="text-muted small mb-2">
           This will synchronize student roster data. The operation may take a few moments.
         </p>
+        {currentUserSynId && (
+          <>
+            <p className="text-muted small mb-2">Your SynID:</p>
+            <ConfirmString>{currentUserSynId}</ConfirmString>
+          </>
+        )}
       </Modal.Body>
 
       <Modal.Footer className="border-top">
