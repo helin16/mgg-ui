@@ -151,7 +151,7 @@ const ClipboardSessionsListPanel: React.FC<iClipboardSessionsListPanelProps> = (
     const maxPageNo = sessions?.pages || 0;
 
     if (maxPageNo <= windowSize) {
-      return _.range(1, maxPageNo);
+      return _.range(1, maxPageNo + 1);
     }
 
     if (currentPage >= MathHelper.sub(maxPageNo, MathHelper.div(windowSize, 2))) {
