@@ -4,6 +4,7 @@ import ModuleAccessWrapper from "../../components/module/ModuleAccessWrapper";
 import {
   MGGS_MODULE_ID_ADMISSIONS,
   MGGS_MODULE_ID_CAMPUS_DISPLAY,
+  MGGS_MODULE_ID_CLIPBOARD,
   MGGS_MODULE_ID_ENROLLMENTS,
   MGGS_MODULE_ID_FINANCE,
   MGGS_MODULE_ID_HOUSE_AWARDS, MGGS_MODULE_ID_HOY_CHAT_EMAIL,
@@ -25,6 +26,7 @@ import StudentAbsenceParentSubmissionForm from "../../components/StudentAbsence/
 import StudentAbsencePage from "../../pages/studentAbsences/StudentAbsencePage";
 import MggDevicesPage from "../../pages/devices/MggDevicesPage";
 import FinancePage from "../../pages/Finance/FinancePage";
+import ClipboardMusicSyncPage from "../../pages/Clipboard/ClipboardMusicSyncPage";
 import StudentAttendanceRateReportPage from "../../pages/reports/StudentAttendanceReport/StudentAttendanceRateReportPage";
 import OnlineDonationMangerPage from "../../pages/OnlineDonation/OnlineDonationMangerPage";
 import StaffListPage from "../../pages/Staff/StaffListPage";
@@ -137,6 +139,14 @@ const SchoolBoxRouter = ({
       return (
         <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_FINANCE}>
           <FinancePage />
+        </ModuleAccessWrapper>
+      );
+    }
+    case SchoolBoxUrls.ClipboardMusicSync: {
+      removeSchoolBoxIframe();
+      return (
+        <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_CLIPBOARD}>
+          <ClipboardMusicSyncPage />
         </ModuleAccessWrapper>
       );
     }
