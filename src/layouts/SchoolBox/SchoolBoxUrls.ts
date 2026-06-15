@@ -2,7 +2,7 @@ enum SchoolBoxUrls {
   StudentBookList = '/studentSubjectList',
   MyClassList = '/my_student',
   Finance = '/finance',
-  ClipboardMusicSync = '/clipboard/music-sync',
+  Clipboard = '/clipboard',
   ModuleUrlHelper = '/helper/url/mconnect',
   DataSubmission = '/school_data_submission',
   MobileAppDevices = '/mobile_devices',

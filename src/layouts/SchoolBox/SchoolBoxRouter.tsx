@@ -142,7 +142,7 @@ const SchoolBoxRouter = ({
         </ModuleAccessWrapper>
       );
     }
-    case SchoolBoxUrls.ClipboardMusicSync: {
+    case SchoolBoxUrls.Clipboard: {
       removeSchoolBoxIframe();
       return (
         <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_CLIPBOARD}>
