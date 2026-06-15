@@ -45,12 +45,9 @@ const Wrapper = styled.div`
   }
 `;
 
-const getStatusBadge = (cancelled?: boolean, bye?: boolean, scored?: boolean) => {
+const getStatusBadge = (cancelled?: boolean, scored?: boolean) => {
   if (cancelled) {
     return <Badge bg="danger">Cancelled</Badge>;
-  }
-  if (bye) {
-    return <Badge bg="warning" text="dark">Bye</Badge>;
   }
   if (scored) {
     return <Badge bg="success">Scored</Badge>;
@@ -136,11 +133,11 @@ const ClipboardSessionsListPanel: React.FC<iClipboardSessionsListPanelProps> = (
               <th>ID</th>
               <th>Title</th>
               <th>Activity</th>
-              <th>Opponent</th>
+              <th>Department</th>
               <th>Status</th>
               <th>Start Date</th>
               <th>End Date</th>
-              <th>Location</th>
+              <th>Teams</th>
             </tr>
           </thead>
           <tbody>
@@ -151,10 +148,10 @@ const ClipboardSessionsListPanel: React.FC<iClipboardSessionsListPanelProps> = (
                 <td className="activity-name">
                   {session.activity?.name || '-'}
                 </td>
-                <td>{session.opponent || '-'}</td>
+                <td>{session.activity?.department?.name || '-'}</td>
                 <td>
                   <span className="status-badge">
-                    {getStatusBadge(session.cancelled, session.bye, session.scored)}
+                    {getStatusBadge(session.cancelled, session.scored)}
                   </span>
                 </td>
                 <td className="datetime">
@@ -163,7 +160,11 @@ const ClipboardSessionsListPanel: React.FC<iClipboardSessionsListPanelProps> = (
                 <td className="datetime">
                   {session.endDateTime ? new Date(session.endDateTime).toLocaleString() : '-'}
                 </td>
-                <td>{session.locationData?.name || '-'}</td>
+                <td>
+                  {session.teams && session.teams.length > 0
+                    ? session.teams.map(t => t.name).join(', ')
+                    : '-'}
+                </td>
               </tr>
             ))}
           </tbody>
