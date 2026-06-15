@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Badge, Spinner, Alert } from 'react-bootstrap';
+import { Badge, Spinner, Alert, ButtonToolbar, ButtonGroup, Button } from 'react-bootstrap';
 import styled from 'styled-components';
+import * as _ from 'lodash';
 import iClipboardSession from '../../../types/Clipboard/iClipboardSession';
 import ClipboardSessionService, { iClipboardSessionQueryParams } from '../../../services/Clipboard/ClipboardSessionService';
 import Toaster, { TOAST_TYPE_ERROR } from '../../../services/Toaster';
 import iPaginatedResult from '../../../types/iPaginatedResult';
 import Table, { iTableColumn } from '../../../components/common/Table';
+import MathHelper from '../../../helper/MathHelper';
 
 const Wrapper = styled.div`
   .status-badge {
@@ -144,6 +146,76 @@ const ClipboardSessionsListPanel: React.FC<iClipboardSessionsListPanelProps> = (
     },
   ];
 
+  const getPaginationBtns = () => {
+    const windowSize = 7;
+    const maxPageNo = sessions?.pages || 0;
+
+    if (maxPageNo <= windowSize) {
+      return _.range(1, maxPageNo);
+    }
+
+    if (currentPage >= MathHelper.sub(maxPageNo, MathHelper.div(windowSize, 2))) {
+      return _.range(
+        MathHelper.sub(MathHelper.add(maxPageNo, 1), windowSize),
+        MathHelper.add(maxPageNo, 1)
+      );
+    }
+
+    let start = MathHelper.sub(currentPage, 2) < 1 ? 1 : MathHelper.sub(currentPage, 2);
+    let end =
+      MathHelper.add(start, windowSize) > maxPageNo
+        ? MathHelper.add(maxPageNo, 1)
+        : MathHelper.add(start, windowSize);
+    return _.range(start, end);
+  };
+
+  const getPagination = () => {
+    if (!sessions || sessions.pages <= 1) {
+      return null;
+    }
+
+    return (
+      <ButtonToolbar className="pagination-wrapper mt-3 d-flex justify-content-center gap-2">
+        {currentPage <= 1 ? null : (
+          <ButtonGroup>
+            <Button variant="link" size="sm" onClick={() => setCurrentPage(1)}>
+              {'<<'}
+            </Button>
+            <Button variant="link" size="sm" onClick={() => setCurrentPage(currentPage - 1)}>
+              {'<'}
+            </Button>
+          </ButtonGroup>
+        )}
+
+        <ButtonGroup>
+          {getPaginationBtns().map(index => {
+            return (
+              <Button
+                key={index}
+                variant={index === currentPage ? 'primary' : 'outline-secondary'}
+                size="sm"
+                onClick={() => setCurrentPage(index)}
+              >
+                {index}
+              </Button>
+            );
+          })}
+        </ButtonGroup>
+
+        {currentPage >= sessions?.pages ? null : (
+          <ButtonGroup>
+            <Button variant="link" size="sm" onClick={() => setCurrentPage(currentPage + 1)}>
+              {'>'}
+            </Button>
+            <Button variant="link" size="sm" onClick={() => setCurrentPage(sessions?.pages)}>
+              {'>>'}
+            </Button>
+          </ButtonGroup>
+        )}
+      </ButtonToolbar>
+    );
+  };
+
   if (isLoading) {
     return (
       <Wrapper className="p-4 text-center">
@@ -180,17 +252,8 @@ const ClipboardSessionsListPanel: React.FC<iClipboardSessionsListPanelProps> = (
         responsive
         hover
         striped
-        pagination={
-          sessions.pages && sessions.pages > 1
-            ? {
-                totalPages: sessions.pages,
-                currentPage,
-                onSetCurrentPage: setCurrentPage,
-                perPage,
-              }
-            : undefined
-        }
       />
+      {getPagination()}
     </Wrapper>
   );
 };
