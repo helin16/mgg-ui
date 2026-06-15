@@ -7,18 +7,18 @@ import iClipboardTeam from "../../types/Clipboard/iClipboardTeam";
 import Toaster, { TOAST_TYPE_ERROR } from "../../services/Toaster";
 import PageLoadingSpinner from "../../components/common/PageLoadingSpinner";
 import ClipboardTeamsListPanel from "./components/ClipboardTeamsListPanel";
+import ClipboardSessionsListPanel from "./components/ClipboardSessionsListPanel";
 import ClipboardAdminPage from "./ClipboardAdminPage";
 
-const TAB_MUSIC_SYNC = "MUSIC_SYNC";
-const TAB_LOGS = "LOGS";
-const TAB_SETTINGS = "SETTINGS";
+const TAB_TEAMS = "TEAMS";
+const TAB_SESSIONS = "SESSIONS";
 
 interface ClipboardPageProps {
   // Optional props for testing or parent-level control
 }
 
 const ClipboardPage: React.FC<ClipboardPageProps> = () => {
-  const [selectedTab, setSelectedTab] = useState(TAB_MUSIC_SYNC);
+  const [selectedTab, setSelectedTab] = useState(TAB_TEAMS);
   const [teams, setTeams] = useState<iClipboardTeam[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -70,10 +70,10 @@ const ClipboardPage: React.FC<ClipboardPageProps> = () => {
       <Tabs
         activeKey={selectedTab}
         className="mb-3"
-        onSelect={(k) => setSelectedTab(k || TAB_MUSIC_SYNC)}
+        onSelect={(k) => setSelectedTab(k || TAB_TEAMS)}
         unmountOnExit
       >
-        <Tab eventKey={TAB_MUSIC_SYNC} title="Music Sync">
+        <Tab eventKey={TAB_TEAMS} title="Teams">
           {error ? (
             <div className="alert alert-danger" role="alert">
               <strong>Error:</strong> {error}
@@ -93,17 +93,8 @@ const ClipboardPage: React.FC<ClipboardPageProps> = () => {
           )}
         </Tab>
 
-        {/* Placeholder tabs for future features */}
-        <Tab eventKey={TAB_LOGS} title="Logs" disabled>
-          <div className="p-3 text-muted">
-            <p>Sync history and logs coming soon</p>
-          </div>
-        </Tab>
-
-        <Tab eventKey={TAB_SETTINGS} title="Settings" disabled>
-          <div className="p-3 text-muted">
-            <p>Configuration settings coming soon</p>
-          </div>
+        <Tab eventKey={TAB_SESSIONS} title="Sessions">
+          <ClipboardSessionsListPanel />
         </Tab>
       </Tabs>
     </Page>
