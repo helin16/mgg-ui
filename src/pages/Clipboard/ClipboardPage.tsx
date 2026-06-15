@@ -13,7 +13,17 @@ const PageHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  width: 100%;
+`;
+
+const PageTitle = styled.h3`
+  margin: 0;
+`;
+
+const PageActions = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
 `;
 
 interface ClipboardPageProps {
@@ -33,15 +43,17 @@ const ClipboardPage: React.FC<ClipboardPageProps> = () => {
       <Page 
         title={
           <PageHeader>
-            <h3>Clipboard Management</h3>
-            <Button 
-              variant="info" 
-              size="sm"
-              onClick={() => setShowSyncPopup(true)}
-              title="Manually trigger MusicSync"
-            >
-              Sync Now
-            </Button>
+            <PageTitle>Clipboard Management</PageTitle>
+            <PageActions>
+              <Button 
+                variant="info" 
+                size="sm"
+                onClick={() => setShowSyncPopup(true)}
+                title="Manually trigger MusicSync"
+              >
+                Sync Music Class
+              </Button>
+            </PageActions>
           </PageHeader>
         } 
         moduleId={MGGS_MODULE_ID_CLIPBOARD}
