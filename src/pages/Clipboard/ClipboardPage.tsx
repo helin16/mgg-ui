@@ -2,11 +2,9 @@ import React, { useState } from "react";
 import { Tab, Tabs } from "react-bootstrap";
 import Page from "../../layouts/Page";
 import { MGGS_MODULE_ID_CLIPBOARD } from "../../types/modules/iModuleUser";
-import ClipboardTeamsListPanel from "./components/ClipboardTeamsListPanel";
 import ClipboardSessionsListPanel from "./components/ClipboardSessionsListPanel";
 import ClipboardAdminPage from "./ClipboardAdminPage";
 
-const TAB_TEAMS = "TEAMS";
 const TAB_SESSIONS = "SESSIONS";
 
 interface ClipboardPageProps {
@@ -14,10 +12,10 @@ interface ClipboardPageProps {
 }
 
 const ClipboardPage: React.FC<ClipboardPageProps> = () => {
-  const [selectedTab, setSelectedTab] = useState(TAB_TEAMS);
+  const [selectedTab, setSelectedTab] = useState(TAB_SESSIONS);
 
   if (!selectedTab) {
-    setSelectedTab(TAB_TEAMS);
+    setSelectedTab(TAB_SESSIONS);
   }
 
   return (
@@ -29,13 +27,9 @@ const ClipboardPage: React.FC<ClipboardPageProps> = () => {
       <Tabs
         activeKey={selectedTab}
         className="mb-3"
-        onSelect={(k) => setSelectedTab(k || TAB_TEAMS)}
+        onSelect={(k) => setSelectedTab(k || TAB_SESSIONS)}
         unmountOnExit
       >
-        <Tab eventKey={TAB_TEAMS} title="Teams">
-          <ClipboardTeamsListPanel />
-        </Tab>
-
         <Tab eventKey={TAB_SESSIONS} title="Sessions">
           <ClipboardSessionsListPanel />
         </Tab>
