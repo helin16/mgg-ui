@@ -52,7 +52,7 @@ const ClipboardSessionsListPanel: React.FC<iClipboardSessionsListPanelProps> = (
     setError(null);
     try {
       const params: iClipboardSessionQueryParams = {
-        pageLength: perPage,
+        perPage,
         page: currentPage,
         includeTeams: true,
         includeStaff: true,
