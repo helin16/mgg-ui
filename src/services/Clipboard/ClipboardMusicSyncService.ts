@@ -1,6 +1,6 @@
 import AppService, { iConfigParams } from '../AppService';
 import iClipboardSyncMessage from '../../types/Clipboard/iClipboardSyncMessage';
-import Toaster from '../Toaster';
+import Toaster, { TOAST_TYPE_ERROR } from '../Toaster';
 
 const endPoint = '/clipboard/syncMusic';
 
@@ -30,7 +30,7 @@ const triggerSync = async (
     const errorMessage = error?.response?.data?.message || 
                          error?.message || 
                          'Failed to trigger music sync';
-    Toaster.error(errorMessage);
+    Toaster.showToast(errorMessage, TOAST_TYPE_ERROR);
     throw error;
   }
 };
@@ -60,7 +60,7 @@ const pollSyncStatus = async (
     const errorMessage = error?.response?.data?.message || 
                          error?.message || 
                          'Failed to get sync status';
-    Toaster.error(errorMessage);
+    Toaster.showToast(errorMessage, TOAST_TYPE_ERROR);
     throw error;
   }
 };
