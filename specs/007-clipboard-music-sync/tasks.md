@@ -14,11 +14,11 @@
 
 **Purpose**: Project initialization and verify route/module entry points
 
-- [ ] T001 Confirm Clipboard module route entry and `moduleId` (MGGS_MODULE_ID_CLIP_BOARD) usage in `src/types/modules/iModuleUser.ts`
-- [ ] T002 Confirm service layer file locations: `src/services/Clipboard/` exists for new ClipboardMusicSyncService
-- [ ] T003 [P] Confirm type definitions location: `src/types/Clipboard/` has iClipboardTeam.ts and iClipboardSession.ts
-- [ ] T004 Verify App.tsx route structure and SchoolBoxRouter.tsx module routing pattern for Clipboard feature integration
-- [ ] T005 Confirm Finance page pattern (Page component, Tabs, styled-components, common components) is available for reuse in `src/pages/Finance/FinancePage.tsx`
+- [x] T001 Confirm Clipboard module route entry and `moduleId` (MGGS_MODULE_ID_CLIP_BOARD) usage in `src/types/modules/iModuleUser.ts`
+- [x] T002 Confirm service layer file locations: `src/services/Clipboard/` exists for new ClipboardMusicSyncService
+- [x] T003 [P] Confirm type definitions location: `src/types/Clipboard/` has iClipboardTeam.ts and iClipboardSession.ts
+- [x] T004 Verify App.tsx route structure and SchoolBoxRouter.tsx module routing pattern for Clipboard feature integration
+- [x] T005 Confirm Finance page pattern (Page component, Tabs, styled-components, common components) is available for reuse in `src/pages/Finance/FinancePage.tsx`
 
 **Checkpoint**: Route, service, type, and UI patterns confirmed - ready for foundational work
 
@@ -32,20 +32,20 @@
 
 ### Services & Types (Shared by all stories)
 
-- [ ] T006 Create new type `iClipboardSyncMessage` in `src/types/Clipboard/iClipboardSyncMessage.ts` with fields: id, type, status (NEW|PROCESSING|WIP|SUCCESS|FAILED), createdAt, updatedAt, request, response, error
-- [ ] T007 Create new service `ClipboardMusicSyncService.ts` in `src/services/Clipboard/` with method `triggerSync(teamId?)` calling POST `/clipboard/syncMusic` and error handling via Toaster
+- [x] T006 Create new type `iClipboardSyncMessage` in `src/types/Clipboard/iClipboardSyncMessage.ts` with fields: id, type, status (NEW|PROCESSING|WIP|SUCCESS|FAILED), createdAt, updatedAt, request, response, error
+- [x] T007 Create new service `ClipboardMusicSyncService.ts` in `src/services/Clipboard/` with method `triggerSync(teamId?)` calling POST `/clipboard/syncMusic` and error handling via Toaster
 
 ### Page Wrapper & Module Access
 
-- [ ] T008 Create main page component `ClipboardMusicSyncPage.tsx` in `src/pages/Clipboard/` wrapping with Page component, moduleId (MGGS_MODULE_ID_CLIP_BOARD), title "Clipboard Management", and passing to ModuleAccessWrapper or module guard
-- [ ] T009 [P] Add route to `src/App.tsx`: `<Route path={URL_CLIPBOARD_MUSIC_SYNC} element={<ClipboardMusicSyncPage />} />`
-- [ ] T010 [P] Add route constant `URL_CLIPBOARD_MUSIC_SYNC` to `src/Url.ts` with path `/modules/remote/:code/clipboard/music-sync` (or appropriate Clipboard route)
+- [x] T008 Create main page component `ClipboardMusicSyncPage.tsx` in `src/pages/Clipboard/` wrapping with Page component, moduleId (MGGS_MODULE_ID_CLIP_BOARD), title "Clipboard Management", and passing to ModuleAccessWrapper or module guard
+- [x] T009 [P] Add route to `src/App.tsx`: `<Route path={URL_CLIPBOARD_MUSIC_SYNC} element={<ClipboardMusicSyncPage />} />`
+- [x] T010 [P] Add route constant `URL_CLIPBOARD_MUSIC_SYNC` to `src/Url.ts` with path `/modules/remote/:code/clipboard/music-sync` (or appropriate Clipboard route)
 - [ ] T011 [P] Update `src/layouts/SchoolBoxRouter.tsx` to add Clipboard music sync route handler under module routing (if required; verify with T004)
 
 ### Async State Handling
 
-- [ ] T012 Implement loading, success, empty, and error states for teams list fetch in ClipboardMusicSyncPage (use PageLoadingSpinner, Toaster, error boundaries per constitution)
-- [ ] T013 Implement loading and error handling for sync operation responses (show toast notifications via Toaster service)
+- [x] T012 Implement loading, success, empty, and error states for teams list fetch in ClipboardMusicSyncPage (use PageLoadingSpinner, Toaster, error boundaries per constitution)
+- [x] T013 Implement loading and error handling for sync operation responses (show toast notifications via Toaster service)
 
 **Checkpoint**: Foundation complete - all user story work can now proceed in parallel
 
@@ -59,16 +59,16 @@
 
 ### Implementation for User Story 1
 
-- [ ] T014 [P] [US1] Create component `ClipboardTeamsListPanel.tsx` in `src/pages/Clipboard/components/` displaying teams in a table with columns: Team Name, Session, Last Sync Time, Sync Button
-- [ ] T015 [P] [US1] In ClipboardMusicSyncPage.tsx, fetch teams on mount using `ClipboardTeamService.getAll({ perPage: 100 })` and pass to ClipboardTeamsListPanel with isLoading and error props
-- [ ] T016 [US1] Implement table rendering in ClipboardTeamsListPanel showing team name (from iClipboardTeam.name or fallback to classCode), sync status placeholder, and last sync timestamp placeholder (will be populated by future stories)
-- [ ] T017 [US1] Add pagination or scrolling support to handle 10+ teams without layout shift; display empty state message "No clipboard teams configured" when data.length === 0
-- [ ] T018 [US1] Handle missing/null team name gracefully: display fallback text "Unknown Team" or classCode if name is null
+- [x] T014 [P] [US1] Create component `ClipboardTeamsListPanel.tsx` in `src/pages/Clipboard/components/` displaying teams in a table with columns: Team Name, Session, Last Sync Time, Sync Button
+- [x] T015 [P] [US1] In ClipboardMusicSyncPage.tsx, fetch teams on mount using `ClipboardTeamService.getAll({ perPage: 100 })` and pass to ClipboardTeamsListPanel with isLoading and error props
+- [x] T016 [US1] Implement table rendering in ClipboardTeamsListPanel showing team name (from iClipboardTeam.name or fallback to classCode), sync status placeholder, and last sync timestamp placeholder (will be populated by future stories)
+- [x] T017 [US1] Add pagination or scrolling support to handle 10+ teams without layout shift; display empty state message "No clipboard teams configured" when data.length === 0
+- [x] T018 [US1] Handle missing/null team name gracefully: display fallback text "Unknown Team" or classCode if name is null
 
 ### Verification for User Story 1
 
-- [ ] T019 [P] [US1] Write unit test `ClipboardTeamsListPanel.test.tsx` in `src/__tests__/pages/Clipboard/components/` testing table renders, teams display correctly, empty state appears
-- [ ] T020 [P] [US1] Write unit test for ClipboardMusicSyncPage.tsx testing teams fetch on mount, loading spinner shown, error handling
+- [x] T019 [P] [US1] Write unit test `ClipboardTeamsListPanel.test.tsx` in `src/__tests__/pages/Clipboard/components/` testing table renders, teams display correctly, empty state appears
+- [x] T020 [P] [US1] Write unit test for ClipboardMusicSyncPage.tsx testing teams fetch on mount, loading spinner shown, error handling
 - [ ] T021 [US1] Create Cypress e2e test `cypress/e2e/Clipboard/ClipboardMusicSync.cy.ts` with scenario: navigate to page → verify teams list appears with correct data → verify all 10+ teams visible
 
 **Checkpoint**: User Story 1 complete and testable - teams list displays correctly
