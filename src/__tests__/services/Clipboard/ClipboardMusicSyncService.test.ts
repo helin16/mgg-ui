@@ -1,15 +1,15 @@
 import AppService from '../../../services/AppService';
 import ClipboardMusicSyncService from '../../../services/Clipboard/ClipboardMusicSyncService';
-import Toaster from '../../../components/notifications/Toaster';
+import Toaster from '../../../services/Toaster';
 import iClipboardSyncMessage from '../../../types/Clipboard/iClipboardSyncMessage';
 
 // Mock AppService
 jest.mock('../../../services/AppService');
 
 // Mock Toaster
-jest.mock('../../../components/notifications/Toaster', () => ({
-  error: jest.fn(),
-  success: jest.fn(),
+jest.mock('../../../services/Toaster', () => ({
+  showToast: jest.fn(),
+  showApiError: jest.fn(),
 }));
 
 describe('ClipboardMusicSyncService', () => {
@@ -92,7 +92,7 @@ describe('ClipboardMusicSyncService', () => {
       (AppService.post as jest.Mock).mockRejectedValue(apiError);
 
       await expect(ClipboardMusicSyncService.triggerSync()).rejects.toThrow('Network error');
-      expect(Toaster.error).toHaveBeenCalledWith('Network error');
+      expect(Toaster.showToast).toHaveBeenCalledWith('Network error', expect.any(String));
     });
 
     it('shows detailed error message from API response', async () => {
@@ -106,14 +106,14 @@ describe('ClipboardMusicSyncService', () => {
       (AppService.post as jest.Mock).mockRejectedValue(apiError);
 
       await expect(ClipboardMusicSyncService.triggerSync()).rejects.toThrow();
-      expect(Toaster.error).toHaveBeenCalledWith('Team not found');
+      expect(Toaster.showToast).toHaveBeenCalledWith('Team not found', expect.any(String));
     });
 
     it('shows generic error message when details are unavailable', async () => {
       (AppService.post as jest.Mock).mockRejectedValue({});
 
       await expect(ClipboardMusicSyncService.triggerSync()).rejects.toThrow();
-      expect(Toaster.error).toHaveBeenCalledWith('Failed to trigger music sync');
+      expect(Toaster.showToast).toHaveBeenCalledWith('Failed to trigger music sync', expect.any(String));
     });
 
     it('passes additional params to API request', async () => {

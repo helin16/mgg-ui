@@ -3,15 +3,15 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ClipboardSyncConfirmPopup from '../../../../pages/Clipboard/components/ClipboardSyncConfirmPopup';
 import ClipboardMusicSyncService from '../../../../services/Clipboard/ClipboardMusicSyncService';
-import Toaster from '../../../../components/notifications/Toaster';
+import Toaster, { TOAST_TYPE_SUCCESS } from '../../../../services/Toaster';
 
 // Mock the sync service
 jest.mock('../../../../services/Clipboard/ClipboardMusicSyncService');
 
 // Mock Toaster
-jest.mock('../../../../components/notifications/Toaster', () => ({
-  success: jest.fn(),
-  error: jest.fn(),
+jest.mock('../../../../services/Toaster', () => ({
+  showToast: jest.fn(),
+  TOAST_TYPE_SUCCESS: 'success',
 }));
 
 describe('ClipboardSyncConfirmPopup', () => {
@@ -182,8 +182,9 @@ describe('ClipboardSyncConfirmPopup', () => {
     fireEvent.click(confirmButton);
 
     await waitFor(() => {
-      expect(Toaster.success).toHaveBeenCalledWith(
-        expect.stringContaining(teamName)
+      expect(Toaster.showToast).toHaveBeenCalledWith(
+        expect.stringContaining(teamName),
+        expect.any(String)
       );
     });
   });
@@ -333,6 +334,113 @@ describe('ClipboardSyncConfirmPopup', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/syncing/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('SynID Display', () => {
+    beforeEach(() => {
+      delete (window as any).location;
+      (window as any).location = { search: '' };
+    });
+
+    it('extracts synID from URL query parameter', async () => {
+      (window as any).location = { search: '?synId=TEST123' };
+
+      render(
+        <ClipboardSyncConfirmPopup
+          show={true}
+          teamName={teamName}
+          onConfirm={mockOnConfirm}
+          onCancel={mockOnCancel}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('TEST123')).toBeInTheDocument();
+      });
+    });
+
+    it('displays Your SynID label when synID exists', async () => {
+      (window as any).location = { search: '?synId=USER123' };
+
+      render(
+        <ClipboardSyncConfirmPopup
+          show={true}
+          teamName={teamName}
+          onConfirm={mockOnConfirm}
+          onCancel={mockOnCancel}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('Your SynID:')).toBeInTheDocument();
+      });
+    });
+
+    it('handles missing synID gracefully', async () => {
+      (window as any).location = { search: '' };
+
+      render(
+        <ClipboardSyncConfirmPopup
+          show={true}
+          teamName={teamName}
+          onConfirm={mockOnConfirm}
+          onCancel={mockOnCancel}
+        />
+      );
+
+      // Should render without error but not show synID label
+      await waitFor(() => {
+        expect(screen.queryByText('Your SynID:')).not.toBeInTheDocument();
+      });
+    });
+
+    it('displays message mentioning classCode prefix', () => {
+      render(
+        <ClipboardSyncConfirmPopup
+          show={true}
+          teamName={teamName}
+          onConfirm={mockOnConfirm}
+          onCancel={mockOnCancel}
+        />
+      );
+
+      expect(screen.getByText(/classCode start with 'X'/i)).toBeInTheDocument();
+      expect(screen.getByText(new RegExp(teamName))).toBeInTheDocument();
+    });
+
+    it('handles synid in lowercase parameter', async () => {
+      (window as any).location = { search: '?synid=LOWER123' };
+
+      render(
+        <ClipboardSyncConfirmPopup
+          show={true}
+          teamName={teamName}
+          onConfirm={mockOnConfirm}
+          onCancel={mockOnCancel}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('LOWER123')).toBeInTheDocument();
+      });
+    });
+
+    it('trims whitespace from synID', async () => {
+      (window as any).location = { search: '?synId=  SPACED123  ' };
+
+      render(
+        <ClipboardSyncConfirmPopup
+          show={true}
+          teamName={teamName}
+          onConfirm={mockOnConfirm}
+          onCancel={mockOnCancel}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('SPACED123')).toBeInTheDocument();
+      });
     });
   });
 });
