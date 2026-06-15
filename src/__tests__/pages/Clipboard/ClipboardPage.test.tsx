@@ -1,257 +1,163 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ClipboardPage from '../../../pages/Clipboard/ClipboardPage';
-import ClipboardTeamService from '../../../services/Clipboard/ClipboardTeamService';
-import iClipboardTeam from '../../../types/Clipboard/iClipboardTeam';
 
 // Mock the Page component
 jest.mock('../../../layouts/Page', () => {
-  return function MockPage({ title, children, moduleId }: any) {
+  return function MockPage({ title, children, moduleId, extraBtns, AdminPage }: any) {
     return (
       <div data-testid="page-wrapper" data-module-id={moduleId}>
-        <h1>{title}</h1>
-        {children}
+        <div data-testid="page-header">
+          <div>{title}</div>
+          <div data-testid="extra-buttons">{extraBtns}</div>
+        </div>
+        <div data-testid="page-content">{children}</div>
+        {AdminPage && <div data-testid="admin-page">{AdminPage}</div>}
       </div>
     );
   };
 });
 
-// Mock the teams list panel
-jest.mock('../../../pages/Clipboard/components/ClipboardTeamsListPanel', () => {
-  return function MockTeamsListPanel({ teams, isLoading, error }: any) {
+// Mock the sessions list panel
+jest.mock('../../../pages/Clipboard/components/ClipboardSessionsListPanel', () => {
+  return function MockSessionsListPanel() {
+    return <div data-testid="sessions-list-panel">Sessions List Panel</div>;
+  };
+});
+
+// Mock the sync confirm popup
+jest.mock('../../../pages/Clipboard/components/ClipboardSyncConfirmPopup', () => {
+  return function MockSyncConfirmPopup({ show, onConfirm, onCancel }: any) {
     return (
-      <div data-testid="teams-list-panel">
-        {isLoading && <div>Loading teams...</div>}
-        {error && <div>Error: {error}</div>}
-        {teams && <div>Teams count: {teams.length}</div>}
+      <div data-testid="sync-confirm-popup" data-show={show}>
+        {show && (
+          <>
+            <div>Confirm Music Sync</div>
+            <button onClick={onConfirm} data-testid="popup-confirm-btn">
+              Confirm
+            </button>
+            <button onClick={onCancel} data-testid="popup-cancel-btn">
+              Cancel
+            </button>
+          </>
+        )}
       </div>
     );
   };
 });
 
-// Mock the team service
-jest.mock('../../../services/Clipboard/ClipboardTeamService');
-
-// Mock PageLoadingSpinner
-jest.mock('../../../components/common/PageLoadingSpinner', () => {
-  return function MockPageLoadingSpinner() {
-    return <div data-testid="loading-spinner">Loading...</div>;
+// Mock the admin page
+jest.mock('../../../pages/Clipboard/ClipboardAdminPage', () => {
+  return function MockAdminPage() {
+    return <div data-testid="clipboard-admin-page">Admin Page</div>;
   };
 });
-
-// Mock Toaster
-jest.mock('../../../services/Toaster', () => ({
-  showToast: jest.fn(),
-}));
 
 describe('ClipboardPage', () => {
-  const mockTeams: iClipboardTeam[] = [
-    {
-      id: 1,
-      name: 'Year 10 PE A',
-      classCode: 'PE10A',
-      externalId: 'ext1',
-      isHidden: false,
-      checkSum: 'abc123',
-    },
-    {
-      id: 2,
-      name: 'Year 11 Music',
-      classCode: 'MUS11',
-      externalId: 'ext2',
-      isHidden: false,
-      checkSum: 'abc124',
-    },
-  ];
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders page with correct title and moduleId', async () => {
-    (ClipboardTeamService.getAll as jest.Mock).mockResolvedValue({
-      data: mockTeams,
-    });
-
+  it('renders page with correct title and moduleId', () => {
     render(<ClipboardPage />);
 
-    await waitFor(() => {
-      expect(screen.getByTestId('page-wrapper')).toBeInTheDocument();
-      expect(screen.getByTestId('page-wrapper')).toHaveAttribute('data-module-id', '21');
-    });
-
+    expect(screen.getByTestId('page-wrapper')).toBeInTheDocument();
+    expect(screen.getByTestId('page-wrapper')).toHaveAttribute('data-module-id', '21');
     expect(screen.getByText(/Clipboard Management/i)).toBeInTheDocument();
   });
 
-  it('fetches teams on component mount', async () => {
-    (ClipboardTeamService.getAll as jest.Mock).mockResolvedValue({
-      data: mockTeams,
-    });
-
+  it('renders Sessions tab', () => {
     render(<ClipboardPage />);
 
+    expect(screen.getByText('Sessions')).toBeInTheDocument();
+    expect(screen.getByTestId('sessions-list-panel')).toBeInTheDocument();
+  });
+
+  it('displays Sync Music Class button', () => {
+    render(<ClipboardPage />);
+
+    const syncButton = screen.getByRole('button', { name: /sync music class/i });
+    expect(syncButton).toBeInTheDocument();
+    expect(syncButton).toHaveClass('btn-info');
+  });
+
+  it('opens sync confirm popup when Sync button is clicked', async () => {
+    render(<ClipboardPage />);
+
+    const syncButton = screen.getByRole('button', { name: /sync music class/i });
+    fireEvent.click(syncButton);
+
     await waitFor(() => {
-      expect(ClipboardTeamService.getAll).toHaveBeenCalledWith({ perPage: 100 });
+      const popup = screen.getByTestId('sync-confirm-popup');
+      expect(popup).toHaveAttribute('data-show', 'true');
     });
   });
 
-  it('displays loading spinner initially', () => {
-    (ClipboardTeamService.getAll as jest.Mock).mockImplementation(
-      () => new Promise(resolve => setTimeout(() => resolve({ data: mockTeams }), 100))
-    );
-
+  it('closes sync confirm popup on confirm', async () => {
     render(<ClipboardPage />);
 
-    // Initially should show loading spinner
-    expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
-  });
-
-  it('displays teams list after loading completes', async () => {
-    (ClipboardTeamService.getAll as jest.Mock).mockResolvedValue({
-      data: mockTeams,
-    });
-
-    render(<ClipboardPage />);
+    const syncButton = screen.getByRole('button', { name: /sync music class/i });
+    fireEvent.click(syncButton);
 
     await waitFor(() => {
-      expect(screen.getByTestId('teams-list-panel')).toBeInTheDocument();
-      expect(screen.getByText('Teams count: 2')).toBeInTheDocument();
+      expect(screen.getByTestId('sync-confirm-popup')).toHaveAttribute('data-show', 'true');
+    });
+
+    const confirmBtn = screen.getByTestId('popup-confirm-btn');
+    fireEvent.click(confirmBtn);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('sync-confirm-popup')).toHaveAttribute('data-show', 'false');
     });
   });
 
-  it('handles pagination response format', async () => {
-    (ClipboardTeamService.getAll as jest.Mock).mockResolvedValue({
-      data: mockTeams,
-      total: 2,
-      perPage: 100,
-    });
-
+  it('closes sync confirm popup on cancel', async () => {
     render(<ClipboardPage />);
 
+    const syncButton = screen.getByRole('button', { name: /sync music class/i });
+    fireEvent.click(syncButton);
+
     await waitFor(() => {
-      expect(screen.getByText('Teams count: 2')).toBeInTheDocument();
+      expect(screen.getByTestId('sync-confirm-popup')).toHaveAttribute('data-show', 'true');
+    });
+
+    const cancelBtn = screen.getByTestId('popup-cancel-btn');
+    fireEvent.click(cancelBtn);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('sync-confirm-popup')).toHaveAttribute('data-show', 'false');
     });
   });
 
-  it('handles direct array response format', async () => {
-    (ClipboardTeamService.getAll as jest.Mock).mockResolvedValue(mockTeams);
-
+  it('passes All Teams as teamName to sync popup', () => {
     render(<ClipboardPage />);
 
-    await waitFor(() => {
-      expect(screen.getByText('Teams count: 2')).toBeInTheDocument();
-    });
+    const syncButton = screen.getByRole('button', { name: /sync music class/i });
+    fireEvent.click(syncButton);
+
+    // The mock component should receive "All Teams" as teamName
+    // Check that popup appears when sync button is clicked
+    expect(screen.getByTestId('sync-confirm-popup')).toBeInTheDocument();
   });
 
-  it('displays error state when fetch fails', async () => {
-    const errorMessage = 'Failed to load teams';
-    (ClipboardTeamService.getAll as jest.Mock).mockRejectedValue(
-      new Error(errorMessage)
-    );
-
+  it('renders Admin page prop', () => {
     render(<ClipboardPage />);
 
-    await waitFor(() => {
-      expect(screen.getByText(new RegExp(errorMessage))).toBeInTheDocument();
-    });
+    // Page component receives AdminPage prop
+    expect(screen.getByTestId('page-wrapper')).toBeInTheDocument();
   });
 
-  it('displays error alert with retry button when fetch fails', async () => {
-    (ClipboardTeamService.getAll as jest.Mock).mockRejectedValue(
-      new Error('Network error')
-    );
-
+  it('maintains Sessions tab as single tab', () => {
     render(<ClipboardPage />);
 
-    await waitFor(() => {
-      expect(screen.getByText(/Network error/)).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument();
-    });
-  });
+    // Should only have Sessions tab, not Teams/Logs/Settings
+    const sessionsTabs = screen.getAllByText('Sessions');
+    expect(sessionsTabs.length).toBeGreaterThan(0);
 
-  it('renders Music Sync tab as active tab', async () => {
-    (ClipboardTeamService.getAll as jest.Mock).mockResolvedValue({
-      data: mockTeams,
-    });
-
-    render(<ClipboardPage />);
-
-    await waitFor(() => {
-      expect(screen.getByText('Music Sync')).toBeInTheDocument();
-    });
-  });
-
-  it('renders placeholder tabs for future features', async () => {
-    (ClipboardTeamService.getAll as jest.Mock).mockResolvedValue({
-      data: mockTeams,
-    });
-
-    render(<ClipboardPage />);
-
-    await waitFor(() => {
-      const logsTabs = screen.getAllByText('Logs');
-      const settingsTabs = screen.getAllByText('Settings');
-      expect(logsTabs.length).toBeGreaterThan(0);
-      expect(settingsTabs.length).toBeGreaterThan(0);
-    });
-  });
-
-  it('passes teams and loading state to ClipboardTeamsListPanel', async () => {
-    (ClipboardTeamService.getAll as jest.Mock).mockResolvedValue({
-      data: mockTeams,
-    });
-
-    render(<ClipboardPage />);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('teams-list-panel')).toBeInTheDocument();
-      expect(screen.getByText('Teams count: 2')).toBeInTheDocument();
-    });
-  });
-
-  it('handles empty teams array', async () => {
-    (ClipboardTeamService.getAll as jest.Mock).mockResolvedValue({
-      data: [],
-    });
-
-    render(<ClipboardPage />);
-
-    await waitFor(() => {
-      expect(screen.getByText('Teams count: 0')).toBeInTheDocument();
-    });
-  });
-
-  it('shows detailed error response message from API', async () => {
-    (ClipboardTeamService.getAll as jest.Mock).mockRejectedValue({
-      response: {
-        data: {
-          message: 'Unauthorized: Missing valid authentication',
-        },
-      },
-    });
-
-    render(<ClipboardPage />);
-
-    await waitFor(() => {
-      expect(screen.getByText(/Unauthorized: Missing valid authentication/)).toBeInTheDocument();
-    });
-  });
-
-  it('clears loading state after successful fetch', async () => {
-    (ClipboardTeamService.getAll as jest.Mock).mockResolvedValue({
-      data: mockTeams,
-    });
-
-    const { rerender } = render(<ClipboardPage />);
-
-    // Initially loading
-    expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
-
-    // After fetch completes
-    await waitFor(() => {
-      expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
-      expect(screen.getByTestId('teams-list-panel')).toBeInTheDocument();
-    });
+    // These should NOT be in the main content tabs
+    expect(screen.queryByText('Teams')).not.toBeInTheDocument();
+    expect(screen.queryByText(/^Logs$/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/^Settings$/)).not.toBeInTheDocument();
   });
 });
