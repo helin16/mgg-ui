@@ -58,7 +58,7 @@ const Router = () => {
           />
 
 
-          <Route path="/modules/remote/:code" element={<SchoolBoxLayout />} />
+          <Route path="/modules/remote/:code/*" element={<SchoolBoxLayout />} />
 
           <Route path="*" element={<PageNotFound />} />
         </Routes>
