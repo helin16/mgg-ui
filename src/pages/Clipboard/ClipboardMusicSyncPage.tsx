@@ -4,8 +4,8 @@ import Page from "../../layouts/Page";
 import { MGGS_MODULE_ID_CLIPBOARD } from "../../types/modules/iModuleUser";
 import ClipboardTeamService from "../../services/Clipboard/ClipboardTeamService";
 import iClipboardTeam from "../../types/Clipboard/iClipboardTeam";
-import Toaster from "../../components/notifications/Toaster";
-import PageLoadingSpinner from "../../components/PageLoadingSpinner";
+import Toaster from "../../services/Toaster";
+import PageLoadingSpinner from "../../components/common/PageLoadingSpinner";
 import ClipboardTeamsListPanel from "./components/ClipboardTeamsListPanel";
 
 const TAB_MUSIC_SYNC = "MUSIC_SYNC";

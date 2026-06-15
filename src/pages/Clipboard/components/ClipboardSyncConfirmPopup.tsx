@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Modal, Button, Spinner } from "react-bootstrap";
 import ClipboardMusicSyncService from "../../../services/Clipboard/ClipboardMusicSyncService";
-import Toaster from "../../../components/notifications/Toaster";
+import Toaster from "../../../services/Toaster";
 
 interface ClipboardSyncConfirmPopupProps {
   show: boolean;

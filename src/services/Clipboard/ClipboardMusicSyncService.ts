@@ -1,6 +1,6 @@
 import AppService, { iConfigParams } from '../AppService';
 import iClipboardSyncMessage from '../../types/Clipboard/iClipboardSyncMessage';
-import Toaster from '../../components/notifications/Toaster';
+import Toaster from '../Toaster';
 
 const endPoint = '/clipboard/syncMusic';
 
