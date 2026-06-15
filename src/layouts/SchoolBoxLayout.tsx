@@ -1,5 +1,5 @@
 import React from 'react';
-import {useParams, useLocation} from 'react-router-dom';
+import {useParams} from 'react-router-dom';
 import {Alert} from 'react-bootstrap';
 import SchoolBoxComponent from './SchoolBox/SchoolBoxComponent';
 
@@ -27,28 +27,14 @@ const SchoolBoxLayout = () => {
 
 
   const {code} = useParams();
-  const {pathname} = useLocation();
   const remoteUrl = document.getElementById("mgg-root")?.getAttribute('data-url') || atob(code || '');
   try {
-    // Extract the remaining path after /modules/remote/:code
-    // e.g., /modules/remote/ABC123/clipboard/music-sync -> /clipboard/music-sync
-    const modulesRemotePrefix = `/modules/remote/${code}`;
-    let finalPath = pathname.startsWith(modulesRemotePrefix)
-      ? pathname.substring(modulesRemotePrefix.length)
-      : '';
-    
-    // If no remaining path was found, fall back to decoding from the code/URL
-    if (!finalPath) {
-      // @ts-ignore
-      const url = new URL(remoteUrl);
-      const newPath = url.pathname.replace(`${THIRD_PARTY_AUTH_PATH}/`, '');
-      finalPath = atob(newPath || '');
-    }
-    
     // @ts-ignore
     const url = new URL(remoteUrl);
     const urlParams = url.searchParams;
 
+    const newPath = url.pathname.replace(`${THIRD_PARTY_AUTH_PATH}/`, '');
+    const finalPath = atob(newPath || '');
     return getWrapper(
       <SchoolBoxComponent
         path={finalPath}
