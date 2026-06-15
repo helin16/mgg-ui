@@ -9,7 +9,7 @@ import {CustomScriptUrlGenPageKey, CustomScriptUrlGenPageTestId} from '../../../
 import {HOYChatManagePageKey, HOYChatManagePageTestId} from '../../../pages/HOYChat/__mocks__/HOYChatManagePage';
 import {PowerBIReportViewingPageKey, PowerBIReportViewingPageTestId} from '../../../pages/PowerBI/__mocks__/PowerBIReportViewingPage';
 import {FinancePageKey, FinancePageTestId} from '../../../pages/Finance/__mocks__/FinancePage';
-import {ClipboardMusicSyncPageKey, ClipboardMusicSyncPageTestId} from '../../../pages/Clipboard/__mocks__/ClipboardMusicSyncPage';
+import {ClipboardPageKey, ClipboardPageTestId} from '../../../pages/Clipboard/__mocks__/ClipboardPage';
 import {StudentSubjectListKey, StudentSubjectListTestId} from '../../../components/timeTable/__mocks__/StudentSubjectList';
 import SchoolBoxUrls from '../../../layouts/SchoolBox/SchoolBoxUrls';
 import {MGGS_MODULE_ID_FINANCE, MGGS_MODULE_ID_HOY_CHAT_EMAIL, MGGS_MODULE_ID_CLIPBOARD} from '../../../types/modules/iModuleUser';
@@ -27,7 +27,7 @@ jest.mock('../../../components/StudentAbsence/StudentAbsenceParentSubmissionForm
 jest.mock('../../../pages/studentAbsences/StudentAbsencePage');
 jest.mock('../../../pages/devices/MggDevicesPage');
 jest.mock('../../../pages/Finance/FinancePage');
-jest.mock('../../../pages/Clipboard/ClipboardMusicSyncPage');
+jest.mock('../../../pages/Clipboard/ClipboardPage');
 jest.mock('../../../pages/reports/StudentAttendanceReport/StudentAttendanceRateReportPage');
 jest.mock('../../../pages/OnlineDonation/OnlineDonationMangerPage');
 jest.mock('../../../pages/Staff/StaffListPage');
@@ -103,11 +103,11 @@ describe('SchoolBoxRouter', () => {
     renderRouter(SchoolBoxUrls.Clipboard);
 
     expect(screen.getByTestId(ModuleAccessWrapperTestId)).toBeInTheDocument();
-    expect(screen.getByTestId(ClipboardMusicSyncPageTestId)).toBeInTheDocument();
+    expect(screen.getByTestId(ClipboardPageTestId)).toBeInTheDocument();
     expect(ComponentTestHelper.get(ModuleAccessWrapperKey)[0]).toMatchObject({
       moduleId: MGGS_MODULE_ID_CLIPBOARD,
     });
-    expect(ComponentTestHelper.get(ClipboardMusicSyncPageKey).length).toBeGreaterThan(0);
+    expect(ComponentTestHelper.get(ClipboardPageKey).length).toBeGreaterThan(0);
     expect(document.getElementById('remote')).toBeNull();
   });
 

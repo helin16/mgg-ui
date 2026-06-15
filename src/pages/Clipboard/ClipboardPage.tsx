@@ -7,16 +7,17 @@ import iClipboardTeam from "../../types/Clipboard/iClipboardTeam";
 import Toaster, { TOAST_TYPE_ERROR } from "../../services/Toaster";
 import PageLoadingSpinner from "../../components/common/PageLoadingSpinner";
 import ClipboardTeamsListPanel from "./components/ClipboardTeamsListPanel";
+import ClipboardAdminPage from "./ClipboardAdminPage";
 
 const TAB_MUSIC_SYNC = "MUSIC_SYNC";
 const TAB_LOGS = "LOGS";
 const TAB_SETTINGS = "SETTINGS";
 
-interface ClipboardMusicSyncPageProps {
+interface ClipboardPageProps {
   // Optional props for testing or parent-level control
 }
 
-const ClipboardMusicSyncPage: React.FC<ClipboardMusicSyncPageProps> = () => {
+const ClipboardPage: React.FC<ClipboardPageProps> = () => {
   const [selectedTab, setSelectedTab] = useState(TAB_MUSIC_SYNC);
   const [teams, setTeams] = useState<iClipboardTeam[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -53,6 +54,7 @@ const ClipboardMusicSyncPage: React.FC<ClipboardMusicSyncPageProps> = () => {
       <Page 
         title={<h3>Clipboard Management</h3>} 
         moduleId={MGGS_MODULE_ID_CLIPBOARD}
+        AdminPage={ClipboardAdminPage}
       >
         <PageLoadingSpinner />
       </Page>
@@ -63,6 +65,7 @@ const ClipboardMusicSyncPage: React.FC<ClipboardMusicSyncPageProps> = () => {
     <Page 
       title={<h3>Clipboard Management</h3>} 
       moduleId={MGGS_MODULE_ID_CLIPBOARD}
+      AdminPage={ClipboardAdminPage}
     >
       <Tabs
         activeKey={selectedTab}
@@ -107,4 +110,4 @@ const ClipboardMusicSyncPage: React.FC<ClipboardMusicSyncPageProps> = () => {
   );
 };
 
-export default ClipboardMusicSyncPage;
+export default ClipboardPage;

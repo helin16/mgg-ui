@@ -26,7 +26,7 @@ import StudentAbsenceParentSubmissionForm from "../../components/StudentAbsence/
 import StudentAbsencePage from "../../pages/studentAbsences/StudentAbsencePage";
 import MggDevicesPage from "../../pages/devices/MggDevicesPage";
 import FinancePage from "../../pages/Finance/FinancePage";
-import ClipboardMusicSyncPage from "../../pages/Clipboard/ClipboardMusicSyncPage";
+import ClipboardPage from "../../pages/Clipboard/ClipboardPage";
 import StudentAttendanceRateReportPage from "../../pages/reports/StudentAttendanceReport/StudentAttendanceRateReportPage";
 import OnlineDonationMangerPage from "../../pages/OnlineDonation/OnlineDonationMangerPage";
 import StaffListPage from "../../pages/Staff/StaffListPage";
@@ -146,7 +146,7 @@ const SchoolBoxRouter = ({
       removeSchoolBoxIframe();
       return (
         <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_CLIPBOARD}>
-          <ClipboardMusicSyncPage />
+          <ClipboardPage />
         </ModuleAccessWrapper>
       );
     }

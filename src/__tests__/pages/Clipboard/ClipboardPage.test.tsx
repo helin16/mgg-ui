@@ -1,12 +1,12 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import ClipboardMusicSyncPage from '../../../../pages/Clipboard/ClipboardMusicSyncPage';
-import ClipboardTeamService from '../../../../services/Clipboard/ClipboardTeamService';
-import iClipboardTeam from '../../../../types/Clipboard/iClipboardTeam';
+import ClipboardPage from '../../../pages/Clipboard/ClipboardPage';
+import ClipboardTeamService from '../../../services/Clipboard/ClipboardTeamService';
+import iClipboardTeam from '../../../types/Clipboard/iClipboardTeam';
 
 // Mock the Page component
-jest.mock('../../../../layouts/Page', () => {
+jest.mock('../../../layouts/Page', () => {
   return function MockPage({ title, children, moduleId }: any) {
     return (
       <div data-testid="page-wrapper" data-module-id={moduleId}>
@@ -18,7 +18,7 @@ jest.mock('../../../../layouts/Page', () => {
 });
 
 // Mock the teams list panel
-jest.mock('../../../../pages/Clipboard/components/ClipboardTeamsListPanel', () => {
+jest.mock('../../../pages/Clipboard/components/ClipboardTeamsListPanel', () => {
   return function MockTeamsListPanel({ teams, isLoading, error }: any) {
     return (
       <div data-testid="teams-list-panel">
@@ -31,21 +31,21 @@ jest.mock('../../../../pages/Clipboard/components/ClipboardTeamsListPanel', () =
 });
 
 // Mock the team service
-jest.mock('../../../../services/Clipboard/ClipboardTeamService');
+jest.mock('../../../services/Clipboard/ClipboardTeamService');
 
 // Mock PageLoadingSpinner
-jest.mock('../../../../components/PageLoadingSpinner', () => {
+jest.mock('../../../components/common/PageLoadingSpinner', () => {
   return function MockPageLoadingSpinner() {
     return <div data-testid="loading-spinner">Loading...</div>;
   };
 });
 
 // Mock Toaster
-jest.mock('../../../../components/notifications/Toaster', () => ({
-  error: jest.fn(),
+jest.mock('../../../services/Toaster', () => ({
+  showToast: jest.fn(),
 }));
 
-describe('ClipboardMusicSyncPage', () => {
+describe('ClipboardPage', () => {
   const mockTeams: iClipboardTeam[] = [
     {
       id: 1,
@@ -74,7 +74,7 @@ describe('ClipboardMusicSyncPage', () => {
       data: mockTeams,
     });
 
-    render(<ClipboardMusicSyncPage />);
+    render(<ClipboardPage />);
 
     await waitFor(() => {
       expect(screen.getByTestId('page-wrapper')).toBeInTheDocument();
@@ -89,7 +89,7 @@ describe('ClipboardMusicSyncPage', () => {
       data: mockTeams,
     });
 
-    render(<ClipboardMusicSyncPage />);
+    render(<ClipboardPage />);
 
     await waitFor(() => {
       expect(ClipboardTeamService.getAll).toHaveBeenCalledWith({ perPage: 100 });
@@ -101,7 +101,7 @@ describe('ClipboardMusicSyncPage', () => {
       () => new Promise(resolve => setTimeout(() => resolve({ data: mockTeams }), 100))
     );
 
-    render(<ClipboardMusicSyncPage />);
+    render(<ClipboardPage />);
 
     // Initially should show loading spinner
     expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
@@ -112,7 +112,7 @@ describe('ClipboardMusicSyncPage', () => {
       data: mockTeams,
     });
 
-    render(<ClipboardMusicSyncPage />);
+    render(<ClipboardPage />);
 
     await waitFor(() => {
       expect(screen.getByTestId('teams-list-panel')).toBeInTheDocument();
@@ -127,7 +127,7 @@ describe('ClipboardMusicSyncPage', () => {
       perPage: 100,
     });
 
-    render(<ClipboardMusicSyncPage />);
+    render(<ClipboardPage />);
 
     await waitFor(() => {
       expect(screen.getByText('Teams count: 2')).toBeInTheDocument();
@@ -137,7 +137,7 @@ describe('ClipboardMusicSyncPage', () => {
   it('handles direct array response format', async () => {
     (ClipboardTeamService.getAll as jest.Mock).mockResolvedValue(mockTeams);
 
-    render(<ClipboardMusicSyncPage />);
+    render(<ClipboardPage />);
 
     await waitFor(() => {
       expect(screen.getByText('Teams count: 2')).toBeInTheDocument();
@@ -150,7 +150,7 @@ describe('ClipboardMusicSyncPage', () => {
       new Error(errorMessage)
     );
 
-    render(<ClipboardMusicSyncPage />);
+    render(<ClipboardPage />);
 
     await waitFor(() => {
       expect(screen.getByText(new RegExp(errorMessage))).toBeInTheDocument();
@@ -162,7 +162,7 @@ describe('ClipboardMusicSyncPage', () => {
       new Error('Network error')
     );
 
-    render(<ClipboardMusicSyncPage />);
+    render(<ClipboardPage />);
 
     await waitFor(() => {
       expect(screen.getByText(/Network error/)).toBeInTheDocument();
@@ -175,7 +175,7 @@ describe('ClipboardMusicSyncPage', () => {
       data: mockTeams,
     });
 
-    render(<ClipboardMusicSyncPage />);
+    render(<ClipboardPage />);
 
     await waitFor(() => {
       expect(screen.getByText('Music Sync')).toBeInTheDocument();
@@ -187,7 +187,7 @@ describe('ClipboardMusicSyncPage', () => {
       data: mockTeams,
     });
 
-    render(<ClipboardMusicSyncPage />);
+    render(<ClipboardPage />);
 
     await waitFor(() => {
       const logsTabs = screen.getAllByText('Logs');
@@ -202,7 +202,7 @@ describe('ClipboardMusicSyncPage', () => {
       data: mockTeams,
     });
 
-    render(<ClipboardMusicSyncPage />);
+    render(<ClipboardPage />);
 
     await waitFor(() => {
       expect(screen.getByTestId('teams-list-panel')).toBeInTheDocument();
@@ -215,7 +215,7 @@ describe('ClipboardMusicSyncPage', () => {
       data: [],
     });
 
-    render(<ClipboardMusicSyncPage />);
+    render(<ClipboardPage />);
 
     await waitFor(() => {
       expect(screen.getByText('Teams count: 0')).toBeInTheDocument();
@@ -231,7 +231,7 @@ describe('ClipboardMusicSyncPage', () => {
       },
     });
 
-    render(<ClipboardMusicSyncPage />);
+    render(<ClipboardPage />);
 
     await waitFor(() => {
       expect(screen.getByText(/Unauthorized: Missing valid authentication/)).toBeInTheDocument();
@@ -243,7 +243,7 @@ describe('ClipboardMusicSyncPage', () => {
       data: mockTeams,
     });
 
-    const { rerender } = render(<ClipboardMusicSyncPage />);
+    const { rerender } = render(<ClipboardPage />);
 
     // Initially loading
     expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
