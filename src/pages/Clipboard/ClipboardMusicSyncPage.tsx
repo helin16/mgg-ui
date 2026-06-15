@@ -4,7 +4,7 @@ import Page from "../../layouts/Page";
 import { MGGS_MODULE_ID_CLIPBOARD } from "../../types/modules/iModuleUser";
 import ClipboardTeamService from "../../services/Clipboard/ClipboardTeamService";
 import iClipboardTeam from "../../types/Clipboard/iClipboardTeam";
-import Toaster from "../../services/Toaster";
+import Toaster, { TOAST_TYPE_ERROR } from "../../services/Toaster";
 import PageLoadingSpinner from "../../components/common/PageLoadingSpinner";
 import ClipboardTeamsListPanel from "./components/ClipboardTeamsListPanel";
 
@@ -39,7 +39,7 @@ const ClipboardMusicSyncPage: React.FC<ClipboardMusicSyncPageProps> = () => {
                             err?.message || 
                             'Failed to load clipboard teams';
         setError(errorMessage);
-        Toaster.error(errorMessage);
+        Toaster.showToast(errorMessage, TOAST_TYPE_ERROR);
       } finally {
         setIsLoading(false);
       }

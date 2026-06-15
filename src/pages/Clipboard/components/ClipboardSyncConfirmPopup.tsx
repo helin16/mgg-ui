@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Modal, Button, Spinner } from "react-bootstrap";
 import ClipboardMusicSyncService from "../../../services/Clipboard/ClipboardMusicSyncService";
-import Toaster from "../../../services/Toaster";
+import Toaster, { TOAST_TYPE_SUCCESS } from "../../../services/Toaster";
 
 interface ClipboardSyncConfirmPopupProps {
   show: boolean;
@@ -26,7 +26,7 @@ const ClipboardSyncConfirmPopup: React.FC<ClipboardSyncConfirmPopupProps> = ({
       
       // Show success message
       if (result.status === 'NEW' || result.status === 'PROCESSING') {
-        Toaster.success(`Music sync triggered for ${teamName}`);
+        Toaster.showToast(`Music sync triggered for ${teamName}`, TOAST_TYPE_SUCCESS);
       }
 
       // Call parent confirm handler
