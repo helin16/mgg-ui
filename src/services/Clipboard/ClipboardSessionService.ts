@@ -100,7 +100,24 @@ const buildQueryString = (params: iClipboardSessionQueryParams): iConfigParams =
 
 const getAll = (params?: iClipboardSessionQueryParams, config?: iConfigParams): Promise<iPaginatedResult<iClipboardSession>> => {
   const query = params ? buildQueryString(params) : {};
-  return AppService.get(endPoint, query, config).then(resp => resp.data);
+  return AppService.get(endPoint, query, config).then(resp => {
+    const data = resp.data;
+    
+    // Transform API response to match iPaginatedResult format
+    if (data.pagination) {
+      return {
+        data: data.data || [],
+        total: data.pagination.numRecords || 0,
+        pages: data.pagination.lastPage || 1,
+        currentPage: data.pagination.currentPage || 1,
+        perPage: data.pagination.pageLength || 10,
+        from: ((data.pagination.currentPage || 1) - 1) * (data.pagination.pageLength || 10) + 1,
+        to: (data.pagination.currentPage || 1) * (data.pagination.pageLength || 10),
+      } as iPaginatedResult<iClipboardSession>;
+    }
+    
+    return data;
+  });
 };
 
 const get = (id: string | number, params?: iClipboardSessionQueryParams, config?: iConfigParams): Promise<iClipboardSession> => {
