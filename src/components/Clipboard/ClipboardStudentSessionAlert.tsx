@@ -242,7 +242,7 @@ const ClipboardStudentSessionAlert = ({
           includeStatuses: ['confirmed'],
           includeTeams: true,
           includeStaff: true,
-          pageLength: MAX_PAGE_SIZE,
+          perPage: MAX_PAGE_SIZE,
         };
 
         const attendanceQueryParams: iClipboardAttendanceQueryParams = {
