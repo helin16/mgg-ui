@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Tab, Tabs, Button } from "react-bootstrap";
-import styled from "styled-components";
 import Page from "../../layouts/Page";
 import { MGGS_MODULE_ID_CLIPBOARD } from "../../types/modules/iModuleUser";
 import ClipboardSessionsListPanel from "./components/ClipboardSessionsListPanel";
@@ -8,23 +7,6 @@ import ClipboardSyncConfirmPopup from "./components/ClipboardSyncConfirmPopup";
 import ClipboardAdminPage from "./ClipboardAdminPage";
 
 const TAB_SESSIONS = "SESSIONS";
-
-const PageHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-`;
-
-const PageTitle = styled.h3`
-  margin: 0;
-`;
-
-const PageActions = styled.div`
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-`;
 
 interface ClipboardPageProps {
   // Optional props for testing or parent-level control
@@ -41,23 +23,20 @@ const ClipboardPage: React.FC<ClipboardPageProps> = () => {
   return (
     <>
       <Page 
-        title={
-          <PageHeader>
-            <PageTitle>Clipboard Management</PageTitle>
-            <PageActions>
-              <Button 
-                variant="info" 
-                size="sm"
-                onClick={() => setShowSyncPopup(true)}
-                title="Manually trigger MusicSync"
-              >
-                Sync Music Class
-              </Button>
-            </PageActions>
-          </PageHeader>
-        } 
+        title={<h3>Clipboard Management</h3>}
         moduleId={MGGS_MODULE_ID_CLIPBOARD}
         AdminPage={ClipboardAdminPage}
+        extraBtns={
+          <Button 
+            variant="info" 
+            size="sm"
+            onClick={() => setShowSyncPopup(true)}
+            title="Manually trigger MusicSync"
+            className="me-2"
+          >
+            Sync Music Class
+          </Button>
+        }
       >
         <Tabs
           activeKey={selectedTab}
