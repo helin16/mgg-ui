@@ -147,7 +147,7 @@ const ClipboardSessionsListPanel: React.FC<iClipboardSessionsListPanelProps> = (
   ];
 
   const getPaginationBtns = () => {
-    const totalPages = sessions?.pages ?? Math.ceil((sessions?.total ?? 0) / perPage) ?? 0;
+    const totalPages = sessions?.pages || 0;
     const windowSize = 7;
     
     if (totalPages <= windowSize) {
@@ -172,7 +172,7 @@ const ClipboardSessionsListPanel: React.FC<iClipboardSessionsListPanelProps> = (
   };
 
   const getPagination = () => {
-    const totalPages = sessions?.pages ?? Math.ceil((sessions?.total ?? 0) / perPage) ?? 0;
+    const totalPages = sessions?.pages || 0;
     if (!sessions || totalPages <= 1) {
       return null;
     }
