@@ -24,7 +24,7 @@ export type iClipboardSessionQueryParams = {
   excludeSessionsWithTeams?: boolean;
   updatedBefore?: string;
   updatedAfter?: string;
-  perPage?: number;
+  pageLength?: number;
   page?: number;
 };
 
@@ -88,8 +88,8 @@ const buildQueryString = (params: iClipboardSessionQueryParams): iConfigParams =
   if (params.updatedAfter) {
     query.updatedAfter = params.updatedAfter;
   }
-  if (params.perPage !== undefined) {
-    query.perPage = params.perPage;
+  if (params.pageLength !== undefined) {
+    query.pageLength = params.pageLength;
   }
   if (params.page !== undefined) {
     query.page = params.page;
