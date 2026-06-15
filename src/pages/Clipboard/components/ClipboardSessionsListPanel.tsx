@@ -148,7 +148,8 @@ const ClipboardSessionsListPanel: React.FC<iClipboardSessionsListPanelProps> = (
 
   const getPaginationBtns = () => {
     const windowSize = 7;
-    const maxPageNo = sessions?.pages || 0;
+    const totalPages = sessions?.pages ?? Math.ceil((sessions?.total ?? 0) / perPage) ?? 0;
+    const maxPageNo = totalPages;
 
     if (maxPageNo <= windowSize) {
       return _.range(1, maxPageNo + 1);
@@ -170,7 +171,8 @@ const ClipboardSessionsListPanel: React.FC<iClipboardSessionsListPanelProps> = (
   };
 
   const getPagination = () => {
-    if (!sessions || sessions.pages <= 1) {
+    const totalPages = sessions?.pages ?? Math.ceil((sessions?.total ?? 0) / perPage) ?? 0;
+    if (!sessions || totalPages <= 1) {
       return null;
     }
 
@@ -202,12 +204,12 @@ const ClipboardSessionsListPanel: React.FC<iClipboardSessionsListPanelProps> = (
           })}
         </ButtonGroup>
 
-        {currentPage >= sessions?.pages ? null : (
+        {currentPage >= totalPages ? null : (
           <ButtonGroup>
             <Button variant="link" size="sm" onClick={() => setCurrentPage(currentPage + 1)}>
               {'>'}
             </Button>
-            <Button variant="link" size="sm" onClick={() => setCurrentPage(sessions?.pages)}>
+            <Button variant="link" size="sm" onClick={() => setCurrentPage(totalPages)}>
               {'>>'}
             </Button>
           </ButtonGroup>
