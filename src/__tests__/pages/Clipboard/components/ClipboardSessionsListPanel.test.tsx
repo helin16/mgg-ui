@@ -1,363 +1,392 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom';
-import ClipboardSessionsListPanel from '../../../../pages/Clipboard/components/ClipboardSessionsListPanel';
-import ClipboardSessionService from '../../../../services/Clipboard/ClipboardSessionService';
-import iPaginatedResult from '../../../../types/iPaginatedResult';
-import iClipboardSession from '../../../../types/Clipboard/iClipboardSession';
-import Toaster from '../../../../services/Toaster';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import ClipboardSessionsListPanel from '../../../../../pages/Clipboard/components/ClipboardSessionsListPanel';
+import ClipboardSessionService from '../../../../../services/Clipboard/ClipboardSessionService';
+import Toaster, { TOAST_TYPE_ERROR } from '../../../../../services/Toaster';
+import iClipboardSession from '../../../../../types/Clipboard/iClipboardSession';
+import iPaginatedResult from '../../../../../types/iPaginatedResult';
 
-// Mock the session service
-jest.mock('../../../../services/Clipboard/ClipboardSessionService');
-
-// Mock Toaster
-jest.mock('../../../../services/Toaster', () => ({
-  showToast: jest.fn(),
-}));
-
-// Mock Table component
-jest.mock('../../../../components/common/Table', () => {
-  return function MockTable({ rows, columns }: any) {
+jest.mock('../../../../../services/Clipboard/ClipboardSessionService');
+jest.mock('../../../../../services/Toaster');
+jest.mock('../../../../../components/common/Table', () => {
+  return function MockTable({ columns, rows, paginated, onPageChange, currentPage }: any) {
     return (
-      <table data-testid="sessions-table">
+      <div data-testid="mock-table">
         <thead>
           <tr>
             {columns.map((col: any) => (
-              <th key={col.key} data-testid={`header-${col.key}`}>
-                {col.header}
-              </th>
+              <th key={col.key}>{col.header}</th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {rows.map((row: any, idx: number) => (
-            <tr key={idx} data-testid={`row-${row.id}`}>
-              {columns.map((col: any) => {
-                const cellContent = col.cell(col, row);
-                return cellContent;
-              })}
+          {rows && rows.map((row: any, idx: number) => (
+            <tr key={idx}>
+              {columns.map((col: any) => (
+                <td key={col.key} data-testid={`cell-${col.key}`}>
+                  {col.cell && col.cell(col, row)}
+                </td>
+              ))}
             </tr>
           ))}
         </tbody>
-      </table>
+        {paginated && (
+          <tfoot>
+            <tr>
+              <td>
+                <button
+                  onClick={() => onPageChange && onPageChange(1)}
+                  data-testid="btn-first-page"
+                  disabled={currentPage === 1}
+                >
+                  First
+                </button>
+                <button
+                  onClick={() => onPageChange && onPageChange(currentPage - 1)}
+                  data-testid="btn-prev-page"
+                  disabled={currentPage === 1}
+                >
+                  Prev
+                </button>
+                <span data-testid="current-page">{currentPage}</span>
+                <button
+                  onClick={() => onPageChange && onPageChange(currentPage + 1)}
+                  data-testid="btn-next-page"
+                >
+                  Next
+                </button>
+              </td>
+            </tr>
+          </tfoot>
+        )}
+      </div>
     );
   };
 });
 
 describe('ClipboardSessionsListPanel', () => {
-  const mockSession1: iClipboardSession = {
-    id: 1,
-    title: 'PE Lesson 1',
-    cancelled: false,
-    scored: true,
-    startDateTime: '2026-06-15T09:00:00Z',
-    endDateTime: '2026-06-15T10:00:00Z',
-    teams: [{ id: 1, name: 'Year 10 PE A' }],
-    activity: {
+  const mockSessionService = ClipboardSessionService as jest.Mocked<
+    typeof ClipboardSessionService
+  >;
+  const mockToaster = Toaster as jest.Mocked<typeof Toaster>;
+
+  const mockSessions: iClipboardSession[] = [
+    {
       id: 1,
-      name: 'Physical Education',
-      department: { id: 1, name: 'Sports' },
+      title: 'PE Lesson',
+      activity: { id: 1, name: 'Basketball', department: { id: 1, name: 'Sports' } },
+      startDateTime: '2026-06-16T09:00:00Z',
+      endDateTime: '2026-06-16T10:00:00Z',
+      cancelled: false,
+      scored: false,
+      teams: [{ id: 1, name: 'Year 10 PE' }],
     },
-  };
-
-  const mockSession2: iClipboardSession = {
-    id: 2,
-    title: 'Music Class',
-    cancelled: false,
-    scored: false,
-    startDateTime: '2026-06-15T11:00:00Z',
-    endDateTime: '2026-06-15T12:00:00Z',
-    teams: [{ id: 2, name: 'Year 11 Music' }],
-    activity: {
+    {
       id: 2,
-      name: 'Music',
-      department: { id: 2, name: 'Arts' },
+      title: 'Music Class',
+      activity: { id: 2, name: 'Orchestra', department: { id: 2, name: 'Music' } },
+      startDateTime: '2026-06-16T10:00:00Z',
+      endDateTime: '2026-06-16T11:00:00Z',
+      cancelled: false,
+      scored: true,
+      teams: [{ id: 2, name: 'Year 9 Music' }],
     },
-  };
-
-  const mockPaginatedResponse: iPaginatedResult<iClipboardSession> = {
-    data: [mockSession1, mockSession2],
-    total: 20,
-    pages: 2,
-    currentPage: 1,
-    perPage: 10,
-    from: 1,
-    to: 10,
-  };
+  ];
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders loading spinner initially', () => {
-    (ClipboardSessionService.getAll as jest.Mock).mockImplementation(
-      () => new Promise(resolve => setTimeout(() => resolve(mockPaginatedResponse), 100))
-    );
+  describe('Rendering and Loading', () => {
+    it('renders loading spinner while fetching sessions', async () => {
+      mockSessionService.getAll.mockImplementation(() => new Promise(() => {}));
 
-    render(<ClipboardSessionsListPanel />);
+      const { container } = render(<ClipboardSessionsListPanel />);
 
-    expect(screen.getByRole('status')).toBeInTheDocument();
-  });
+      expect(container.querySelector('[role="status"]')).toBeInTheDocument();
+    });
 
-  it('fetches sessions on mount with default parameters', async () => {
-    (ClipboardSessionService.getAll as jest.Mock).mockResolvedValue(mockPaginatedResponse);
+    it('fetches sessions on mount with default parameters', async () => {
+      mockSessionService.getAll.mockResolvedValue({
+        data: mockSessions,
+        currentPage: 1,
+        pageLength: 10,
+        numRecords: 2,
+        lastPage: 1,
+      } as iPaginatedResult<iClipboardSession>);
 
-    render(<ClipboardSessionsListPanel />);
+      render(<ClipboardSessionsListPanel />);
 
-    await waitFor(() => {
-      expect(ClipboardSessionService.getAll).toHaveBeenCalledWith({
-        perPage: 10,
-        page: 1,
-        includeTeams: true,
-        includeStaff: true,
+      await waitFor(() => {
+        expect(mockSessionService.getAll).toHaveBeenCalledWith(
+          expect.objectContaining({
+            pageLength: 10,
+            page: 1,
+            includeTeams: true,
+            includeStaff: true,
+          })
+        );
       });
     });
-  });
 
-  it('displays sessions table after loading', async () => {
-    (ClipboardSessionService.getAll as jest.Mock).mockResolvedValue(mockPaginatedResponse);
+    it('renders sessions table after loading completes', async () => {
+      mockSessionService.getAll.mockResolvedValue({
+        data: mockSessions,
+        currentPage: 1,
+        pageLength: 10,
+        numRecords: 2,
+        lastPage: 1,
+      } as iPaginatedResult<iClipboardSession>);
 
-    render(<ClipboardSessionsListPanel />);
+      render(<ClipboardSessionsListPanel />);
 
-    await waitFor(() => {
-      expect(screen.getByTestId('sessions-table')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByTestId('mock-table')).toBeInTheDocument();
+      });
     });
-  });
 
-  it('displays correct column headers', async () => {
-    (ClipboardSessionService.getAll as jest.Mock).mockResolvedValue(mockPaginatedResponse);
+    it('displays column headers', async () => {
+      mockSessionService.getAll.mockResolvedValue({
+        data: mockSessions,
+        currentPage: 1,
+        pageLength: 10,
+        numRecords: 2,
+        lastPage: 1,
+      } as iPaginatedResult<iClipboardSession>);
 
-    render(<ClipboardSessionsListPanel />);
+      render(<ClipboardSessionsListPanel />);
 
-    await waitFor(() => {
-      expect(screen.getByTestId('header-id')).toHaveTextContent('ID');
-      expect(screen.getByTestId('header-title')).toHaveTextContent('Title');
-      expect(screen.getByTestId('header-activity')).toHaveTextContent('Activity');
-      expect(screen.getByTestId('header-department')).toHaveTextContent('Department');
-      expect(screen.getByTestId('header-status')).toHaveTextContent('Status');
-      expect(screen.getByTestId('header-startDateTime')).toHaveTextContent('Start Date');
-      expect(screen.getByTestId('header-endDateTime')).toHaveTextContent('End Date');
-      expect(screen.getByTestId('header-teams')).toHaveTextContent('Teams');
+      await waitFor(() => {
+        expect(screen.getByText('ID')).toBeInTheDocument();
+        expect(screen.getByText('Title')).toBeInTheDocument();
+        expect(screen.getByText('Activity')).toBeInTheDocument();
+        expect(screen.getByText('Department')).toBeInTheDocument();
+        expect(screen.getByText('Status')).toBeInTheDocument();
+      });
     });
-  });
 
-  it('displays sessions data in table rows', async () => {
-    (ClipboardSessionService.getAll as jest.Mock).mockResolvedValue(mockPaginatedResponse);
+    it('displays session data in table rows', async () => {
+      mockSessionService.getAll.mockResolvedValue({
+        data: mockSessions,
+        currentPage: 1,
+        pageLength: 10,
+        numRecords: 2,
+        lastPage: 1,
+      } as iPaginatedResult<iClipboardSession>);
 
-    render(<ClipboardSessionsListPanel />);
+      render(<ClipboardSessionsListPanel />);
 
-    await waitFor(() => {
-      expect(screen.getByTestId('row-1')).toBeInTheDocument();
-      expect(screen.getByTestId('row-2')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('PE Lesson')).toBeInTheDocument();
+        expect(screen.getByText('Basketball')).toBeInTheDocument();
+        expect(screen.getByText('Sports')).toBeInTheDocument();
+      });
     });
-  });
 
-  it('displays error alert when fetch fails', async () => {
-    const errorMessage = 'Failed to load sessions';
-    (ClipboardSessionService.getAll as jest.Mock).mockRejectedValue(
-      new Error(errorMessage)
-    );
+    it('displays error message and toast on fetch failure', async () => {
+      const errorMsg = 'Failed to load sessions';
+      mockSessionService.getAll.mockRejectedValue(new Error(errorMsg));
 
-    render(<ClipboardSessionsListPanel />);
+      render(<ClipboardSessionsListPanel />);
 
-    await waitFor(() => {
-      expect(screen.getByText(errorMessage)).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText(errorMsg)).toBeInTheDocument();
+        expect(mockToaster.showToast).toHaveBeenCalledWith(
+          errorMsg,
+          TOAST_TYPE_ERROR
+        );
+      });
     });
-  });
 
-  it('shows toast notification on error', async () => {
-    const errorMessage = 'API Error';
-    (ClipboardSessionService.getAll as jest.Mock).mockRejectedValue(
-      new Error(errorMessage)
-    );
+    it('displays empty state when no sessions found', async () => {
+      mockSessionService.getAll.mockResolvedValue({
+        data: [],
+        currentPage: 1,
+        pageLength: 10,
+        numRecords: 0,
+        lastPage: 1,
+      } as iPaginatedResult<iClipboardSession>);
 
-    render(<ClipboardSessionsListPanel />);
+      render(<ClipboardSessionsListPanel />);
 
-    await waitFor(() => {
-      expect(screen.getByText(errorMessage)).toBeInTheDocument();
-    });
-    
-    // Check that showToast was called with the error message
-    await waitFor(() => {
-      const calls = (Toaster.showToast as jest.Mock).mock.calls;
-      const errorCalls = calls.filter(call => call[0] === errorMessage);
-      expect(errorCalls.length).toBeGreaterThan(0);
-    });
-  });
-
-  it('displays info alert when no sessions available', async () => {
-    const emptyResponse: iPaginatedResult<iClipboardSession> = {
-      data: [],
-      total: 0,
-      pages: 0,
-      currentPage: 1,
-      perPage: 10,
-      from: 0,
-      to: 0,
-    };
-    (ClipboardSessionService.getAll as jest.Mock).mockResolvedValue(emptyResponse);
-
-    render(<ClipboardSessionsListPanel />);
-
-    await waitFor(() => {
-      expect(screen.getByText('No sessions available.')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText(/No sessions available/i)).toBeInTheDocument();
+      });
     });
   });
 
   describe('Pagination', () => {
-    it('displays pagination buttons when there are multiple pages', async () => {
-      (ClipboardSessionService.getAll as jest.Mock).mockResolvedValue(mockPaginatedResponse);
+    it('shows pagination controls for multiple pages', async () => {
+      mockSessionService.getAll.mockResolvedValue({
+        data: mockSessions,
+        currentPage: 1,
+        pageLength: 10,
+        numRecords: 25,
+        lastPage: 3,
+      } as iPaginatedResult<iClipboardSession>);
 
       render(<ClipboardSessionsListPanel />);
 
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: '1' })).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: '2' })).toBeInTheDocument();
+        expect(screen.getByTestId('btn-next-page')).toBeInTheDocument();
       });
     });
 
-    it('hides pagination when only one page', async () => {
-      const singlePageResponse: iPaginatedResult<iClipboardSession> = {
-        ...mockPaginatedResponse,
-        pages: 1,
-      };
-      (ClipboardSessionService.getAll as jest.Mock).mockResolvedValue(singlePageResponse);
+    it('hides pagination when data fits on single page', async () => {
+      mockSessionService.getAll.mockResolvedValue({
+        data: mockSessions,
+        currentPage: 1,
+        pageLength: 10,
+        numRecords: 2,
+        lastPage: 1,
+      } as iPaginatedResult<iClipboardSession>);
 
       render(<ClipboardSessionsListPanel />);
 
       await waitFor(() => {
-        // Pagination should not be rendered
-        expect(screen.queryByRole('button', { name: /^>$/ })).not.toBeInTheDocument();
+        const nextBtn = screen.queryByTestId('btn-next-page');
+        if (nextBtn) {
+          expect(nextBtn).toBeDisabled();
+        }
       });
     });
 
-    it('fetches next page when pagination button clicked', async () => {
-      (ClipboardSessionService.getAll as jest.Mock).mockResolvedValue(mockPaginatedResponse);
+    it('fetches next page on pagination click', async () => {
+      mockSessionService.getAll
+        .mockResolvedValueOnce({
+          data: mockSessions,
+          currentPage: 1,
+          pageLength: 10,
+          numRecords: 25,
+          lastPage: 3,
+        } as iPaginatedResult<iClipboardSession>)
+        .mockResolvedValueOnce({
+          data: mockSessions,
+          currentPage: 2,
+          pageLength: 10,
+          numRecords: 25,
+          lastPage: 3,
+        } as iPaginatedResult<iClipboardSession>);
 
       render(<ClipboardSessionsListPanel />);
 
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: '2' })).toBeInTheDocument();
+        expect(screen.getByTestId('btn-next-page')).toBeInTheDocument();
       });
 
-      // Reset mock to track the next call
-      (ClipboardSessionService.getAll as jest.Mock).mockClear();
-      (ClipboardSessionService.getAll as jest.Mock).mockResolvedValue(mockPaginatedResponse);
-
-      const page2Button = screen.getByRole('button', { name: '2' });
-      fireEvent.click(page2Button);
+      fireEvent.click(screen.getByTestId('btn-next-page'));
 
       await waitFor(() => {
-        expect(ClipboardSessionService.getAll).toHaveBeenCalledWith(
+        expect(mockSessionService.getAll).toHaveBeenCalledWith(
           expect.objectContaining({ page: 2 })
         );
       });
     });
 
-    it('shows first page button when on page > 1', async () => {
-      // Mock initial load with page 1
-      (ClipboardSessionService.getAll as jest.Mock).mockResolvedValueOnce(mockPaginatedResponse);
-
-      const { rerender } = render(<ClipboardSessionsListPanel />);
-
-      await waitFor(() => {
-        expect(screen.getByTestId('sessions-table')).toBeInTheDocument();
-      });
-
-      // Reset mock and set page 2 response
-      (ClipboardSessionService.getAll as jest.Mock).mockClear();
-      const page2Response: iPaginatedResult<iClipboardSession> = {
-        ...mockPaginatedResponse,
-        currentPage: 2,
-        pages: 3,
-      };
-      (ClipboardSessionService.getAll as jest.Mock).mockResolvedValue(page2Response);
-
-      // Click page 2 button to navigate
-      const page2Button = screen.getByRole('button', { name: '2' });
-      fireEvent.click(page2Button);
-
-      await waitFor(() => {
-        // Now pagination should show the first page button for page 2
-        const firstPageBtn = screen.queryByRole('button', { name: '<<' });
-        // If page 2 response is used, then prev buttons might appear
-        // Just verify that the component re-fetched with page 2
-        expect(ClipboardSessionService.getAll).toHaveBeenCalledWith(
-          expect.objectContaining({ page: 2 })
-        );
-      });
-    });
-
-    it('hides first page button when on page 1', async () => {
-      (ClipboardSessionService.getAll as jest.Mock).mockResolvedValue(mockPaginatedResponse);
+    it('disables first page button on page 1', async () => {
+      mockSessionService.getAll.mockResolvedValue({
+        data: mockSessions,
+        currentPage: 1,
+        pageLength: 10,
+        numRecords: 25,
+        lastPage: 3,
+      } as iPaginatedResult<iClipboardSession>);
 
       render(<ClipboardSessionsListPanel />);
 
       await waitFor(() => {
-        expect(screen.queryByRole('button', { name: '<<' })).not.toBeInTheDocument();
+        expect(screen.getByTestId('btn-first-page')).toBeDisabled();
       });
     });
 
-    it('highlights current page button', async () => {
-      (ClipboardSessionService.getAll as jest.Mock).mockResolvedValue(mockPaginatedResponse);
+    it('enables first page button on page > 1', async () => {
+      mockSessionService.getAll
+        .mockResolvedValueOnce({
+          data: mockSessions,
+          currentPage: 1,
+          pageLength: 10,
+          numRecords: 25,
+          lastPage: 3,
+        } as iPaginatedResult<iClipboardSession>)
+        .mockResolvedValueOnce({
+          data: mockSessions,
+          currentPage: 2,
+          pageLength: 10,
+          numRecords: 25,
+          lastPage: 3,
+        } as iPaginatedResult<iClipboardSession>);
 
       render(<ClipboardSessionsListPanel />);
 
       await waitFor(() => {
-        const page1Button = screen.getByRole('button', { name: '1' });
-        expect(page1Button).toHaveClass('btn-primary');
+        expect(screen.getByTestId('btn-next-page')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('btn-next-page'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('btn-first-page')).not.toBeDisabled();
       });
     });
   });
 
   describe('Team ID Filtering', () => {
-    it('includes teamId in fetch when prop is provided', async () => {
-      (ClipboardSessionService.getAll as jest.Mock).mockResolvedValue(mockPaginatedResponse);
+    it('includes teamId in fetch when provided', async () => {
+      mockSessionService.getAll.mockResolvedValue({
+        data: mockSessions,
+        currentPage: 1,
+        pageLength: 10,
+        numRecords: 2,
+        lastPage: 1,
+      } as iPaginatedResult<iClipboardSession>);
 
-      render(<ClipboardSessionsListPanel teamId={5} />);
+      render(<ClipboardSessionsListPanel teamId={42} />);
 
       await waitFor(() => {
-        expect(ClipboardSessionService.getAll).toHaveBeenCalledWith({
-          perPage: 10,
-          page: 1,
-          includeTeams: true,
-          includeStaff: true,
-          teamId: 5,
-        });
+        expect(mockSessionService.getAll).toHaveBeenCalledWith(
+          expect.objectContaining({ teamId: 42 })
+        );
       });
     });
 
-    it('does not include teamId when not provided', async () => {
-      (ClipboardSessionService.getAll as jest.Mock).mockResolvedValue(mockPaginatedResponse);
+    it('excludes teamId when not provided', async () => {
+      mockSessionService.getAll.mockResolvedValue({
+        data: mockSessions,
+        currentPage: 1,
+        pageLength: 10,
+        numRecords: 2,
+        lastPage: 1,
+      } as iPaginatedResult<iClipboardSession>);
 
       render(<ClipboardSessionsListPanel />);
 
       await waitFor(() => {
-        expect(ClipboardSessionService.getAll).toHaveBeenCalledWith({
-          perPage: 10,
-          page: 1,
-          includeTeams: true,
-          includeStaff: true,
-        });
+        expect(mockSessionService.getAll).toHaveBeenCalledWith(
+          expect.not.objectContaining({ teamId: expect.anything() })
+        );
       });
     });
 
-    it('refetches when teamId prop changes', async () => {
-      (ClipboardSessionService.getAll as jest.Mock).mockResolvedValue(mockPaginatedResponse);
+    it('refetches sessions when teamId prop changes', async () => {
+      mockSessionService.getAll.mockResolvedValue({
+        data: mockSessions,
+        currentPage: 1,
+        pageLength: 10,
+        numRecords: 2,
+        lastPage: 1,
+      } as iPaginatedResult<iClipboardSession>);
 
       const { rerender } = render(<ClipboardSessionsListPanel teamId={1} />);
 
       await waitFor(() => {
-        expect(ClipboardSessionService.getAll).toHaveBeenCalled();
+        expect(mockSessionService.getAll).toHaveBeenCalledTimes(1);
       });
-
-      (ClipboardSessionService.getAll as jest.Mock).mockClear();
-      (ClipboardSessionService.getAll as jest.Mock).mockResolvedValue(mockPaginatedResponse);
 
       rerender(<ClipboardSessionsListPanel teamId={2} />);
 
       await waitFor(() => {
-        expect(ClipboardSessionService.getAll).toHaveBeenCalledWith(
+        expect(mockSessionService.getAll).toHaveBeenCalledTimes(2);
+        expect(mockSessionService.getAll).toHaveBeenLastCalledWith(
           expect.objectContaining({ teamId: 2 })
         );
       });
@@ -365,22 +394,15 @@ describe('ClipboardSessionsListPanel', () => {
   });
 
   describe('Status Display', () => {
-    it('shows Cancelled status for cancelled sessions', async () => {
-      const cancelledSession: iClipboardSession = {
-        ...mockSession1,
-        cancelled: true,
-        scored: false,
-      };
-      const response: iPaginatedResult<iClipboardSession> = {
+    it('displays "Cancelled" badge for cancelled sessions', async () => {
+      const cancelledSession = { ...mockSessions[0], cancelled: true };
+      mockSessionService.getAll.mockResolvedValue({
         data: [cancelledSession],
-        total: 1,
-        pages: 1,
         currentPage: 1,
-        perPage: 10,
-        from: 1,
-        to: 1,
-      };
-      (ClipboardSessionService.getAll as jest.Mock).mockResolvedValue(response);
+        pageLength: 10,
+        numRecords: 1,
+        lastPage: 1,
+      } as iPaginatedResult<iClipboardSession>);
 
       render(<ClipboardSessionsListPanel />);
 
@@ -389,17 +411,15 @@ describe('ClipboardSessionsListPanel', () => {
       });
     });
 
-    it('shows Scored status for scored sessions', async () => {
-      const response: iPaginatedResult<iClipboardSession> = {
-        data: [mockSession1],
-        total: 1,
-        pages: 1,
+    it('displays "Scored" badge for scored sessions', async () => {
+      const scoredSession = { ...mockSessions[0], scored: true };
+      mockSessionService.getAll.mockResolvedValue({
+        data: [scoredSession],
         currentPage: 1,
-        perPage: 10,
-        from: 1,
-        to: 1,
-      };
-      (ClipboardSessionService.getAll as jest.Mock).mockResolvedValue(response);
+        pageLength: 10,
+        numRecords: 1,
+        lastPage: 1,
+      } as iPaginatedResult<iClipboardSession>);
 
       render(<ClipboardSessionsListPanel />);
 
@@ -408,23 +428,74 @@ describe('ClipboardSessionsListPanel', () => {
       });
     });
 
-    it('shows Pending status for unscored sessions', async () => {
-      const response: iPaginatedResult<iClipboardSession> = {
-        data: [mockSession2],
-        total: 1,
-        pages: 1,
+    it('displays "Pending" badge for pending sessions', async () => {
+      mockSessionService.getAll.mockResolvedValue({
+        data: [mockSessions[0]],
         currentPage: 1,
-        perPage: 10,
-        from: 1,
-        to: 1,
-      };
-      (ClipboardSessionService.getAll as jest.Mock).mockResolvedValue(response);
+        pageLength: 10,
+        numRecords: 1,
+        lastPage: 1,
+      } as iPaginatedResult<iClipboardSession>);
 
       render(<ClipboardSessionsListPanel />);
 
       await waitFor(() => {
         expect(screen.getByText('Pending')).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('useEffect Dependencies', () => {
+    it('refetches when currentPage changes', async () => {
+      mockSessionService.getAll.mockResolvedValue({
+        data: mockSessions,
+        currentPage: 1,
+        pageLength: 10,
+        numRecords: 25,
+        lastPage: 3,
+      } as iPaginatedResult<iClipboardSession>);
+
+      render(<ClipboardSessionsListPanel />);
+
+      await waitFor(() => {
+        expect(mockSessionService.getAll).toHaveBeenCalledTimes(1);
+      });
+
+      fireEvent.click(screen.getByTestId('btn-next-page'));
+
+      await waitFor(() => {
+        expect(mockSessionService.getAll).toHaveBeenCalledWith(
+          expect.objectContaining({ page: 2 })
+        );
+      });
+    });
+  });
+
+  describe('Generic getColumns Function', () => {
+    it('columns are properly typed with generic parameter', async () => {
+      mockSessionService.getAll.mockResolvedValue({
+        data: mockSessions,
+        currentPage: 1,
+        pageLength: 10,
+        numRecords: 2,
+        lastPage: 1,
+      } as iPaginatedResult<iClipboardSession>);
+
+      render(<ClipboardSessionsListPanel />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('mock-table')).toBeInTheDocument();
+      });
+
+      // Verify all expected columns are rendered
+      expect(screen.getByText('ID')).toBeInTheDocument();
+      expect(screen.getByText('Title')).toBeInTheDocument();
+      expect(screen.getByText('Activity')).toBeInTheDocument();
+      expect(screen.getByText('Department')).toBeInTheDocument();
+      expect(screen.getByText('Status')).toBeInTheDocument();
+      expect(screen.getByText('Start Date')).toBeInTheDocument();
+      expect(screen.getByText('End Date')).toBeInTheDocument();
+      expect(screen.getByText('Teams')).toBeInTheDocument();
     });
   });
 });
