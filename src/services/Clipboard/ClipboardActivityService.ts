@@ -8,6 +8,7 @@ const MAX_PAGE_SIZE = 200; // Clipboard API maximum page length
 export type iClipboardActivityQueryParams = {
   pageLength?: number;
   page?: number;
+  departmentIds?: number[];
 };
 
 const buildQueryString = (params: iClipboardActivityQueryParams): iConfigParams => {
@@ -18,6 +19,9 @@ const buildQueryString = (params: iClipboardActivityQueryParams): iConfigParams 
   }
   if (params.page !== undefined) {
     query.page = params.page;
+  }
+  if (params.departmentIds !== undefined && params.departmentIds.length > 0) {
+    query.departmentIds = JSON.stringify(params.departmentIds);
   }
 
   return query;
