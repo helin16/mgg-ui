@@ -3,7 +3,6 @@ import { Spinner } from "react-bootstrap";
 import ClipboardSessionService from "../../../services/Clipboard/ClipboardSessionService";
 import iClipboardSession from "../../../types/Clipboard/iClipboardSession";
 import moment from 'moment-timezone';
-import Toaster from "../../../services/Toaster";
 
 interface ClipboardSessionDetailsPanelProps {
   teamId: string | number;

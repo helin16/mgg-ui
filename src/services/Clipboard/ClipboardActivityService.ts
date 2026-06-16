@@ -1,34 +1,18 @@
 import AppService, {iConfigParams} from '../AppService';
 import iPaginatedResult from '../../types/iPaginatedResult';
-import iClipboardTeam from '../../types/Clipboard/iClipboardTeam';
+import iClipboardActivity from '../../types/Clipboard/iClipboardActivity';
 
-const endPoint = '/clipboard/team';
+const endPoint = '/clipboard/activity';
 const MAX_PAGE_SIZE = 200; // Clipboard API maximum page length
 
-export type iClipboardTeamQueryParams = {
-  includeStudents?: boolean;
-  includeMembers?: boolean;
-  includeStudentDetails?: boolean;
-  includeLeaveDates?: boolean;
+export type iClipboardActivityQueryParams = {
   pageLength?: number;
   page?: number;
 };
 
-const buildQueryString = (params: iClipboardTeamQueryParams): iConfigParams => {
+const buildQueryString = (params: iClipboardActivityQueryParams): iConfigParams => {
   const query: iConfigParams = {};
 
-  if (params.includeStudents !== undefined) {
-    query.includeStudents = params.includeStudents;
-  }
-  if (params.includeMembers !== undefined) {
-    query.includeMembers = params.includeMembers;
-  }
-  if (params.includeStudentDetails !== undefined) {
-    query.includeStudentDetails = params.includeStudentDetails;
-  }
-  if (params.includeLeaveDates !== undefined) {
-    query.includeLeaveDates = params.includeLeaveDates;
-  }
   if (params.pageLength !== undefined) {
     query.pageLength = params.pageLength;
   }
@@ -40,9 +24,9 @@ const buildQueryString = (params: iClipboardTeamQueryParams): iConfigParams => {
 };
 
 const getAll = (
-  params?: iClipboardTeamQueryParams,
+  params?: iClipboardActivityQueryParams,
   config?: iConfigParams
-): Promise<iPaginatedResult<iClipboardTeam>> => {
+): Promise<iPaginatedResult<iClipboardActivity>> => {
   const query = params ? buildQueryString(params) : {};
   return AppService.get(endPoint, query, config).then(resp => {
     const data = resp.data;
@@ -57,7 +41,7 @@ const getAll = (
         perPage: data.pagination.pageLength || 10,
         from: ((data.pagination.currentPage || 1) - 1) * (data.pagination.pageLength || 10) + 1,
         to: (data.pagination.currentPage || 1) * (data.pagination.pageLength || 10),
-      } as iPaginatedResult<iClipboardTeam>;
+      } as iPaginatedResult<iClipboardActivity>;
     }
     
     return data;
@@ -65,44 +49,43 @@ const getAll = (
 };
 
 /**
- * Fetch all teams by paginating through all pages
+ * Fetch all activities by paginating through all pages
  * This bypasses the maximum page length limit by fetching in chunks of 200
  */
 const getAllRecords = async (
-  params?: Omit<iClipboardTeamQueryParams, 'pageLength' | 'page'>,
   config?: iConfigParams
-): Promise<iClipboardTeam[]> => {
-  const allTeams: iClipboardTeam[] = [];
+): Promise<iClipboardActivity[]> => {
+  const allActivities: iClipboardActivity[] = [];
   let currentPage = 1;
   let totalPages = 1;
 
   while (currentPage <= totalPages) {
-    const result = await getAll({ ...params, pageLength: MAX_PAGE_SIZE, page: currentPage }, config);
+    const result = await getAll({ pageLength: MAX_PAGE_SIZE, page: currentPage }, config);
     
     if (result.data && result.data.length > 0) {
-      allTeams.push(...result.data);
+      allActivities.push(...result.data);
     }
     
     totalPages = result.pages || 1;
     currentPage++;
   }
 
-  return allTeams;
+  return allActivities;
 };
 
 const get = (
   id: string | number,
-  params?: iClipboardTeamQueryParams,
+  params?: iClipboardActivityQueryParams,
   config?: iConfigParams
-): Promise<iClipboardTeam> => {
+): Promise<iClipboardActivity> => {
   const query = params ? buildQueryString(params) : {};
   return AppService.get(`${endPoint}/${id}`, query, config).then(resp => resp.data);
 };
 
-const ClipboardTeamService = {
+const ClipboardActivityService = {
   getAll,
   getAllRecords,
   get,
 };
 
-export default ClipboardTeamService;
+export default ClipboardActivityService;

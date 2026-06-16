@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Badge, Spinner, Alert, ButtonToolbar, ButtonGroup, Button } from 'react-bootstrap';
 import styled from 'styled-components';
 import * as _ from 'lodash';
@@ -7,7 +7,6 @@ import ClipboardSessionService, { iClipboardSessionQueryParams } from '../../../
 import Toaster, { TOAST_TYPE_ERROR } from '../../../services/Toaster';
 import iPaginatedResult from '../../../types/iPaginatedResult';
 import Table, { iTableColumn } from '../../../components/common/Table';
-import MathHelper from '../../../helper/MathHelper';
 
 const Wrapper = styled.div`
   .status-badge {
@@ -43,18 +42,14 @@ const ClipboardSessionsListPanel: React.FC<iClipboardSessionsListPanelProps> = (
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const perPage = 10;
+  const pageLength = 10;
 
-  useEffect(() => {
-    fetchSessions();
-  }, [currentPage, teamId]);
-
-  const fetchSessions = async () => {
+  const fetchSessions = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
       const params: iClipboardSessionQueryParams = {
-        perPage,
+        pageLength,
         page: currentPage,
         includeTeams: true,
         includeStaff: true,
@@ -73,9 +68,13 @@ const ClipboardSessionsListPanel: React.FC<iClipboardSessionsListPanelProps> = (
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentPage, teamId]);
 
-  const getColumns = <T extends {}>() => [
+  useEffect(() => {
+    fetchSessions();
+  }, [fetchSessions]);
+
+  const getColumns = useCallback(<T extends {}> () => [
     {
       key: 'id',
       header: 'ID',

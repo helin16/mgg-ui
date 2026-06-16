@@ -1,20 +1,6 @@
 import iBaseType from '../iBaseType';
-
-type iClipboardDepartment = {
-  id: number;
-  name: string;
-};
-
-type iClipboardActivity = {
-  id: number;
-  name: string;
-  department: iClipboardDepartment;
-};
-
-type iClipboardTeam = {
-  id: number;
-  name: string;
-};
+import iClipboardActivity from './iClipboardActivity';
+import iClipboardTeam from './iClipboardTeam';
 
 type iClipboardStaff = {
   id?: number;
@@ -28,7 +14,7 @@ type iClipboardSession = iBaseType & {
   endDateTime: string; // ISO string
   activity: iClipboardActivity;
   sisIds?: string[];
-  teams?: iClipboardTeam[];
+  teams?: Array<Pick<iClipboardTeam, 'id' | 'name'>>;
   assignedStaff?: iClipboardStaff[];
   cancelled?: boolean;
   scored?: boolean;

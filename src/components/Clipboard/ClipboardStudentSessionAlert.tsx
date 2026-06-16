@@ -6,6 +6,7 @@ import SynVStudentClassService from '../../services/Synergetic/Student/SynVStude
 import SynTimetableDefinitionService from '../../services/Synergetic/TimeTable/SynTimetableDefinitionService';
 import ClipboardSessionService, { iClipboardSessionQueryParams } from '../../services/Clipboard/ClipboardSessionService';
 import ClipboardAttendanceService, { iClipboardAttendanceQueryParams } from '../../services/Clipboard/ClipboardAttendanceService';
+import { getSessionUrl } from '../../services/Clipboard/ClipboardUrlBuilder';
 import Toaster from '../../services/Toaster';
 import iSynVStudentClass from '../../types/Synergetic/Student/iSynVStudentClass';
 import iClipboardSession from '../../types/Clipboard/iClipboardSession';
@@ -31,6 +32,9 @@ const Wrapper = styled.div`
     }
   }
 `;
+
+// Maximum page length for Clipboard API (must not exceed 200)
+const CLIPBOARD_MAX_PAGE_SIZE = 200;
 
 type iClipboardStudentSessionAlertProps = {
   classCode: string;
@@ -242,7 +246,7 @@ const ClipboardStudentSessionAlert = ({
           includeStatuses: ['confirmed'],
           includeTeams: true,
           includeStaff: true,
-          perPage: MAX_PAGE_SIZE,
+          pageLength: CLIPBOARD_MAX_PAGE_SIZE,
         };
 
         const attendanceQueryParams: iClipboardAttendanceQueryParams = {
@@ -250,7 +254,7 @@ const ClipboardStudentSessionAlert = ({
           startDateTime: todayRange.start.clone().utc().format('YYYY-MM-DD HH:mm:ss'),
           endDateTime: todayRange.end.clone().utc().format('YYYY-MM-DD HH:mm:ss'),
           absent: false, // Get records of students who attended
-          pageLength: 300, // Clipboard API max page length is 300
+          pageLength: CLIPBOARD_MAX_PAGE_SIZE,
         };
 
         // Fetch sessions and attendance records in parallel
@@ -380,7 +384,7 @@ const ClipboardStudentSessionAlert = ({
               const attendanceText = session.isAttended ? 'is attending' : 'is scheduled to have';
               return (
               <div key={`${studentId}-${sessionIndex}`}>
-                <a href={`https://go.clipboard.app/schedule/session/${session.sessionId}`} target="_blank" rel="noopener noreferrer"><b>{displayName}</b></a> {attendanceText} <b>{session.activity}</b> at <b><u>{session.location}</u></b> from <b>{startTime}</b> to <b>{endTime}</b>.
+                <a href={getSessionUrl(session.sessionId)} target="_blank" rel="noopener noreferrer"><b>{displayName}</b></a> {attendanceText} <b>{session.activity}</b> at <b><u>{session.location}</u></b> from <b>{startTime}</b> to <b>{endTime}</b>.
               </div>
             );
             })}

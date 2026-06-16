@@ -2,10 +2,16 @@ import React, { useState } from "react";
 import { Tab, Tabs, Button } from "react-bootstrap";
 import Page from "../../layouts/Page";
 import { MGGS_MODULE_ID_CLIPBOARD } from "../../types/modules/iModuleUser";
+import ClipboardDepartmentsListPanel from "./components/ClipboardDepartmentsListPanel";
+import ClipboardActivitiesListPanel from "./components/ClipboardActivitiesListPanel";
+import ClipboardTeamsListPanel from "./components/ClipboardTeamsListPanel";
 import ClipboardSessionsListPanel from "./components/ClipboardSessionsListPanel";
 import ClipboardSyncConfirmPopup from "./components/ClipboardSyncConfirmPopup";
 import ClipboardAdminPage from "./ClipboardAdminPage";
 
+const TAB_DEPARTMENTS = "DEPARTMENTS";
+const TAB_ACTIVITIES = "ACTIVITIES";
+const TAB_TEAMS = "TEAMS";
 const TAB_SESSIONS = "SESSIONS";
 
 interface ClipboardPageProps {
@@ -13,11 +19,11 @@ interface ClipboardPageProps {
 }
 
 const ClipboardPage: React.FC<ClipboardPageProps> = () => {
-  const [selectedTab, setSelectedTab] = useState(TAB_SESSIONS);
+  const [selectedTab, setSelectedTab] = useState(TAB_DEPARTMENTS);
   const [showSyncPopup, setShowSyncPopup] = useState(false);
 
   if (!selectedTab) {
-    setSelectedTab(TAB_SESSIONS);
+    setSelectedTab(TAB_DEPARTMENTS);
   }
 
   return (
@@ -41,9 +47,18 @@ const ClipboardPage: React.FC<ClipboardPageProps> = () => {
         <Tabs
           activeKey={selectedTab}
           className="mb-3"
-          onSelect={(k) => setSelectedTab(k || TAB_SESSIONS)}
+          onSelect={(k) => setSelectedTab(k || TAB_DEPARTMENTS)}
           unmountOnExit
         >
+          <Tab eventKey={TAB_DEPARTMENTS} title="Departments">
+            <ClipboardDepartmentsListPanel />
+          </Tab>
+          <Tab eventKey={TAB_ACTIVITIES} title="Activities">
+            <ClipboardActivitiesListPanel />
+          </Tab>
+          <Tab eventKey={TAB_TEAMS} title="Teams">
+            <ClipboardTeamsListPanel />
+          </Tab>
           <Tab eventKey={TAB_SESSIONS} title="Sessions">
             <ClipboardSessionsListPanel />
           </Tab>

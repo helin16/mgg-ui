@@ -26,6 +26,24 @@ jest.mock('../../../pages/Clipboard/components/ClipboardSessionsListPanel', () =
   };
 });
 
+jest.mock('../../../pages/Clipboard/components/ClipboardDepartmentsListPanel', () => {
+  return function MockDepartmentsListPanel() {
+    return <div data-testid="departments-list-panel">Departments List Panel</div>;
+  };
+});
+
+jest.mock('../../../pages/Clipboard/components/ClipboardActivitiesListPanel', () => {
+  return function MockActivitiesListPanel() {
+    return <div data-testid="activities-list-panel">Activities List Panel</div>;
+  };
+});
+
+jest.mock('../../../pages/Clipboard/components/ClipboardTeamsListPanel', () => {
+  return function MockTeamsListPanel() {
+    return <div data-testid="teams-list-panel">Teams List Panel</div>;
+  };
+});
+
 // Mock the sync confirm popup
 jest.mock('../../../pages/Clipboard/components/ClipboardSyncConfirmPopup', () => {
   return function MockSyncConfirmPopup({ show, onConfirm, onCancel }: any) {
@@ -67,11 +85,41 @@ describe('ClipboardPage', () => {
     expect(screen.getByText(/Clipboard Management/i)).toBeInTheDocument();
   });
 
-  it('renders Sessions tab', () => {
+  it('renders Departments, Activities, Teams, and Sessions tabs', () => {
     render(<ClipboardPage />);
 
+    expect(screen.getByText('Departments')).toBeInTheDocument();
+    expect(screen.getByText('Activities')).toBeInTheDocument();
+    expect(screen.getByText('Teams')).toBeInTheDocument();
     expect(screen.getByText('Sessions')).toBeInTheDocument();
-    expect(screen.getByTestId('sessions-list-panel')).toBeInTheDocument();
+  });
+
+  it('shows Departments tab content by default', () => {
+    render(<ClipboardPage />);
+
+    expect(screen.getByTestId('departments-list-panel')).toBeInTheDocument();
+    expect(screen.queryByTestId('activities-list-panel')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('teams-list-panel')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('sessions-list-panel')).not.toBeInTheDocument();
+  });
+
+  it('switches to Activities, Teams, and Sessions tabs', async () => {
+    render(<ClipboardPage />);
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Activities' }));
+    await waitFor(() => {
+      expect(screen.getByTestId('activities-list-panel')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Teams' }));
+    await waitFor(() => {
+      expect(screen.getByTestId('teams-list-panel')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Sessions' }));
+    await waitFor(() => {
+      expect(screen.getByTestId('sessions-list-panel')).toBeInTheDocument();
+    });
   });
 
   it('displays Sync Music Class button', () => {
@@ -148,16 +196,10 @@ describe('ClipboardPage', () => {
     expect(screen.getByTestId('page-wrapper')).toBeInTheDocument();
   });
 
-  it('maintains Sessions tab as single tab', () => {
+  it('renders tabs in the requested order', () => {
     render(<ClipboardPage />);
 
-    // Should only have Sessions tab, not Teams/Logs/Settings
-    const sessionsTabs = screen.getAllByText('Sessions');
-    expect(sessionsTabs.length).toBeGreaterThan(0);
-
-    // These should NOT be in the main content tabs
-    expect(screen.queryByText('Teams')).not.toBeInTheDocument();
-    expect(screen.queryByText(/^Logs$/)).not.toBeInTheDocument();
-    expect(screen.queryByText(/^Settings$/)).not.toBeInTheDocument();
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs.map(tab => tab.textContent)).toEqual(['Departments', 'Activities', 'Teams', 'Sessions']);
   });
 });

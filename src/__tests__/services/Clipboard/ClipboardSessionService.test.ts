@@ -191,10 +191,10 @@ describe('ClipboardSessionService', () => {
   });
 
   describe('Query Parameter Translation', () => {
-    it('translates perPage to pageLength for API', async () => {
+    it('passes pageLength to API', async () => {
       mockAppService.get.mockResolvedValue({ data: mockApiResponse });
 
-      await ClipboardSessionService.getAll({ perPage: 20, page: 1 });
+      await ClipboardSessionService.getAll({ pageLength: 20, page: 1 });
 
       expect(mockAppService.get).toHaveBeenCalledWith(
         '/clipboard/session',
@@ -203,10 +203,10 @@ describe('ClipboardSessionService', () => {
       );
     });
 
-    it('does not include perPage in final query string', async () => {
+    it('does not include extra props in final query string', async () => {
       mockAppService.get.mockResolvedValue({ data: mockApiResponse });
 
-      await ClipboardSessionService.getAll({ perPage: 15 });
+      await ClipboardSessionService.getAll({ pageLength: 15 });
 
       expect(mockAppService.get).toHaveBeenCalledWith(
         '/clipboard/session',
