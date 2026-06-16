@@ -3,6 +3,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ClipboardActivitiesListPanel from '../../../../../pages/Clipboard/components/ClipboardActivitiesListPanel';
 import Toaster from '../../../../../services/Toaster';
+import iClipboardActivity from '../../../../../types/Clipboard/iClipboardActivity';
 
 // Mock the services
 jest.mock('../../../../../services/Clipboard/ClipboardActivityService', () => ({
@@ -153,15 +154,15 @@ describe('ClipboardActivitiesListPanel', () => {
     });
   });
 
-  it('displays all activities sorted by name by default (non-archived)', async () => {
+  it('displays all activities sorted by department then name by default (non-archived)', async () => {
     render(<ClipboardActivitiesListPanel />);
 
     await waitFor(() => {
-      // Should display Basketball, Piano, Swimming (alphabetical order, excluding archived)
+      // Should display in order: Music (Piano), then Sports (Basketball, Swimming)
       const rows = screen.getAllByTestId(/^row-/);
       expect(rows.length).toBe(3); // 3 non-archived activities
 
-      // Check they are sorted by name
+      // Check they are sorted by department then name
       expect(screen.getByText('Basketball')).toBeInTheDocument();
       expect(screen.getByText('Piano')).toBeInTheDocument();
       expect(screen.getByText('Swimming')).toBeInTheDocument();
@@ -171,19 +172,22 @@ describe('ClipboardActivitiesListPanel', () => {
     });
   });
 
-  it('sorts activities by name in ascending order', async () => {
+  it('sorts activities by department name (asc), then by activity name (asc)', async () => {
     render(<ClipboardActivitiesListPanel />);
 
     await waitFor(() => {
       const rows = screen.getAllByTestId(/^row-/);
-      const activityNames = Array.from(rows)
-        .map((row) => row.textContent)
-        .filter((text) => text && (text.includes('Basketball') || text.includes('Piano') || text.includes('Swimming')));
+      const rowTexts = Array.from(rows).map((row) => row.textContent);
 
-      // Activities should be sorted: Basketball, Piano, Swimming
-      expect(activityNames[0]).toContain('Basketball');
-      expect(activityNames[1]).toContain('Piano');
-      expect(activityNames[2]).toContain('Swimming');
+      // Expected order: Music (Piano), then Sports (Basketball, Swimming)
+      // Because departments are sorted: Arts, Music, Sports
+      // And Activities are sorted within each department
+      expect(rowTexts[0]).toContain('Piano');
+      expect(rowTexts[0]).toContain('Music');
+      expect(rowTexts[1]).toContain('Basketball');
+      expect(rowTexts[1]).toContain('Sports');
+      expect(rowTexts[2]).toContain('Swimming');
+      expect(rowTexts[2]).toContain('Sports');
     });
   });
 
@@ -364,6 +368,109 @@ describe('ClipboardActivitiesListPanel', () => {
     await waitFor(() => {
       expect(screen.getByText(errorMessage)).toBeInTheDocument();
       expect(mockToaster.showToast).toHaveBeenCalled();
+    });
+  });
+
+  it('filters activities by SIS code', async () => {
+    render(<ClipboardActivitiesListPanel />);
+
+    // Find the SIS code select - it will be the second select after Department
+    const selects = screen.getAllByRole('combobox');
+    const sisCodeSelect = selects[1] as HTMLSelectElement;
+
+    await waitFor(() => {
+      expect(screen.getByText('Basketball')).toBeInTheDocument();
+    });
+
+    // Filter by SIS code "BAS"
+    fireEvent.change(sisCodeSelect, { target: { value: 'BAS' } });
+
+    await waitFor(() => {
+      // Only Basketball should be visible (SIS code BAS)
+      expect(screen.getByText('Basketball')).toBeInTheDocument();
+      expect(screen.queryByText('Swimming')).not.toBeInTheDocument();
+      expect(screen.queryByText('Piano')).not.toBeInTheDocument();
+    });
+  });
+
+  it('displays SIS code options in alphabetical order', async () => {
+    render(<ClipboardActivitiesListPanel />);
+
+    await waitFor(() => {
+      const selects = screen.getAllByRole('combobox');
+      const sisCodeSelect = selects[1] as HTMLSelectElement;
+      const options = Array.from(sisCodeSelect.options).map((opt) => opt.text);
+
+      // Check that SIS code options are in alphabetical order
+      expect(options).toEqual(['All SIS Codes', 'ARC', 'BAS', 'PIA', 'SWM']);
+    });
+  });
+
+  it('displays blank space for missing SIS code, Activity Type, and Payroll Code', async () => {
+    // Mock activities with some missing values
+    const activitiesWithBlanks = [
+      {
+        id: 1,
+        name: 'Activity with blanks',
+        code: undefined,
+        smsCode: undefined,
+        activityType: undefined,
+        archived: false,
+        department: { id: 101, name: 'Sports' },
+      } as iClipboardActivity,
+    ];
+
+    mockActivityService.getAllRecords.mockResolvedValue(activitiesWithBlanks);
+    mockDepartmentService.getAllRecords.mockResolvedValue(mockDepartments);
+
+    render(<ClipboardActivitiesListPanel />);
+
+    await waitFor(() => {
+      // Verify the activity with blanks is rendered
+      expect(screen.getByText('Activity with blanks')).toBeInTheDocument();
+      // The cells should be empty (showing blank space)
+      const rows = screen.getAllByTestId(/^row-/);
+      expect(rows.length).toBe(1);
+    });
+  });
+
+  it('renders all filter inputs on one line including SIS code', async () => {
+    render(<ClipboardActivitiesListPanel />);
+
+    await waitFor(() => {
+      // Department filter
+      expect(screen.getByLabelText('Filter by Department:')).toBeInTheDocument();
+      // SIS Code filter
+      expect(screen.getByLabelText('Filter by SIS Code:')).toBeInTheDocument();
+      // Search input
+      expect(screen.getByPlaceholderText('Enter activity name...')).toBeInTheDocument();
+      // Archived filter
+      expect(screen.getByLabelText('Archived Status:')).toBeInTheDocument();
+    });
+  });
+
+  it('combines SIS code filter with other filters', async () => {
+    render(<ClipboardActivitiesListPanel />);
+
+    const selects = screen.getAllByRole('combobox');
+    const departmentSelect = selects[0] as HTMLSelectElement;
+    const sisCodeSelect = selects[1] as HTMLSelectElement;
+
+    await waitFor(() => {
+      expect(screen.getByText('Basketball')).toBeInTheDocument();
+    });
+
+    // Filter by Sports department
+    fireEvent.change(departmentSelect, { target: { value: '101' } });
+
+    // Filter by SIS code "SWM"
+    fireEvent.change(sisCodeSelect, { target: { value: 'SWM' } });
+
+    await waitFor(() => {
+      // Only Swimming should be visible (Sports dept + SIS code SWM)
+      expect(screen.getByText('Swimming')).toBeInTheDocument();
+      expect(screen.queryByText('Basketball')).not.toBeInTheDocument();
+      expect(screen.queryByText('Piano')).not.toBeInTheDocument();
     });
   });
 
