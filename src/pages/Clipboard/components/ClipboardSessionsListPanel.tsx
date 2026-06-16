@@ -74,7 +74,7 @@ const ClipboardSessionsListPanel: React.FC<iClipboardSessionsListPanelProps> = (
     fetchSessions();
   }, [fetchSessions]);
 
-  const getColumns = useCallback(<T extends {}> () => [
+  const getColumns = <T extends {}>(): iTableColumn<T>[] => [
     {
       key: 'id',
       header: 'ID',
