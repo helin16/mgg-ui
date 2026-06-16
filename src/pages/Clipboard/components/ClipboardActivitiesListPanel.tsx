@@ -29,6 +29,7 @@ const ClipboardActivitiesListPanel: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedDepartmentId, setSelectedDepartmentId] = useState<number | null>(null);
+  const [selectedSISCode, setSelectedSISCode] = useState<string | null>(null);
   const [searchName, setSearchName] = useState<string>('');
   const [archivedFilter, setArchivedFilter] = useState<'non-archived' | 'archived' | 'all'>('non-archived');
   const pageLength = 200;
@@ -73,6 +74,11 @@ const ClipboardActivitiesListPanel: React.FC = () => {
       );
     }
 
+    // Filter by SIS code
+    if (selectedSISCode !== null) {
+      filtered = filtered.filter((activity) => activity.smsCode === selectedSISCode);
+    }
+
     // Filter by search name (case-insensitive)
     if (searchName.trim()) {
       const lowerSearchName = searchName.toLowerCase();
@@ -89,12 +95,18 @@ const ClipboardActivitiesListPanel: React.FC = () => {
     }
     // If 'all', don't filter by archived status
 
-    // Sort by name in ascending order
-    filtered.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    // Sort by department name (asc), then by activity name (asc)
+    filtered.sort((a, b) => {
+      const deptComparison = (a.department?.name || '').localeCompare(b.department?.name || '');
+      if (deptComparison !== 0) {
+        return deptComparison;
+      }
+      return (a.name || '').localeCompare(b.name || '');
+    });
 
     setFilteredActivities(filtered);
     setCurrentPage(1); // Reset to first page when filters change
-  }, [allActivities, selectedDepartmentId, searchName, archivedFilter]);
+  }, [allActivities, selectedDepartmentId, selectedSISCode, searchName, archivedFilter]);
 
   const getColumns = <T extends {}>(): iTableColumn<T>[] => [
     {
@@ -129,17 +141,17 @@ const ClipboardActivitiesListPanel: React.FC = () => {
     {
       key: 'smsCode',
       header: 'SIS code',
-      cell: (col: iTableColumn<T>, data: iClipboardActivity) => <td key={col.key}>{data.smsCode || '-'}</td>,
+      cell: (col: iTableColumn<T>, data: iClipboardActivity) => <td key={col.key}>{data.smsCode || ''}</td>,
     },
     {
       key: 'activityType',
       header: 'Activity Type',
-      cell: (col: iTableColumn<T>, data: iClipboardActivity) => <td key={col.key}>{data.activityType || '-'}</td>,
+      cell: (col: iTableColumn<T>, data: iClipboardActivity) => <td key={col.key}>{data.activityType || ''}</td>,
     },
     {
       key: 'code',
       header: 'Payroll Code',
-      cell: (col: iTableColumn<T>, data: iClipboardActivity) => <td key={col.key}>{data.code || '-'}</td>,
+      cell: (col: iTableColumn<T>, data: iClipboardActivity) => <td key={col.key}>{data.code || ''}</td>,
     },
     {
       key: 'archived',
@@ -185,6 +197,11 @@ const ClipboardActivitiesListPanel: React.FC = () => {
     currentPage * pageLength
   );
 
+  // Extract unique SIS codes and sort alphabetically
+  const uniqueSISCodes = Array.from(
+    new Set(allActivities.map((activity) => activity.smsCode).filter(Boolean))
+  ).sort((a, b) => (a || '').localeCompare(b || ''));
+
   return (
     <Wrapper className="p-3">
       {/* Filters on one line */}
@@ -208,6 +225,27 @@ const ClipboardActivitiesListPanel: React.FC = () => {
                     {dept.name}
                   </option>
                 ))}
+            </Form.Select>
+          </Form.Group>
+        </Col>
+
+        {/* SIS Code Filter */}
+        <Col className="filter-group">
+          <Form.Group className="mb-0">
+            <Form.Label>Filter by SIS Code:</Form.Label>
+            <Form.Select
+              value={selectedSISCode || ''}
+              onChange={(e) => {
+                setSelectedSISCode(e.target.value ? e.target.value : null);
+                setCurrentPage(1);
+              }}
+            >
+              <option value="">All SIS Codes</option>
+              {uniqueSISCodes.map((sisCode) => (
+                <option key={sisCode} value={sisCode}>
+                  {sisCode}
+                </option>
+              ))}
             </Form.Select>
           </Form.Group>
         </Col>
