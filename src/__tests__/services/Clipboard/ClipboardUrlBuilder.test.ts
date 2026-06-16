@@ -2,6 +2,7 @@ import ClipboardUrlBuilder, {
   getIncidentUrl,
   getSessionUrl,
   getActivityUrl,
+  getActivityDetailsUrl,
   getDepartmentUrl,
   getDepartmentDetailsUrl,
   getTeamUrl,
@@ -45,6 +46,28 @@ describe('ClipboardUrlBuilder', () => {
     it('generates correct URL for activity with string ID', () => {
       const url = getActivityUrl('MATH-101');
       expect(url).toBe(`${baseUrl}/activity/MATH-101`);
+    });
+  });
+
+  describe('getActivityDetailsUrl', () => {
+    it('generates correct details URL for activity with numeric ID', () => {
+      const url = getActivityDetailsUrl(30861);
+      expect(url).toBe(
+        `${baseUrl}/settings/environment/activities/30861/basic-details`
+      );
+    });
+
+    it('generates correct details URL for activity with string ID', () => {
+      const url = getActivityDetailsUrl('ACT-001');
+      expect(url).toBe(
+        `${baseUrl}/settings/environment/activities/ACT-001/basic-details`
+      );
+    });
+
+    it('includes full path to basic-details settings page', () => {
+      const url = getActivityDetailsUrl(1);
+      expect(url).toContain('/settings/environment/activities/');
+      expect(url).toContain('/basic-details');
     });
   });
 
@@ -133,6 +156,7 @@ describe('ClipboardUrlBuilder', () => {
       expect(ClipboardUrlBuilder).toHaveProperty('getIncidentUrl');
       expect(ClipboardUrlBuilder).toHaveProperty('getSessionUrl');
       expect(ClipboardUrlBuilder).toHaveProperty('getActivityUrl');
+      expect(ClipboardUrlBuilder).toHaveProperty('getActivityDetailsUrl');
       expect(ClipboardUrlBuilder).toHaveProperty('getDepartmentUrl');
       expect(ClipboardUrlBuilder).toHaveProperty('getDepartmentDetailsUrl');
       expect(ClipboardUrlBuilder).toHaveProperty('getTeamUrl');
@@ -147,6 +171,9 @@ describe('ClipboardUrlBuilder', () => {
       expect(ClipboardUrlBuilder.getSessionUrl(456)).toBe(
         `${baseUrl}/schedule/session/456`
       );
+      expect(ClipboardUrlBuilder.getActivityDetailsUrl(789)).toBe(
+        `${baseUrl}/settings/environment/activities/789/basic-details`
+      );
       expect(ClipboardUrlBuilder.getDepartmentDetailsUrl(789)).toBe(
         `${baseUrl}/settings/environment/departments/789/basic-details`
       );
@@ -158,6 +185,7 @@ describe('ClipboardUrlBuilder', () => {
       expect(getIncidentUrl(1)).toMatch(/^https:\/\//);
       expect(getSessionUrl(1)).toMatch(/^https:\/\//);
       expect(getActivityUrl(1)).toMatch(/^https:\/\//);
+      expect(getActivityDetailsUrl(1)).toMatch(/^https:\/\//);
       expect(getDepartmentUrl(1)).toMatch(/^https:\/\//);
       expect(getDepartmentDetailsUrl(1)).toMatch(/^https:\/\//);
       expect(getTeamUrl(1)).toMatch(/^https:\/\//);
@@ -169,6 +197,7 @@ describe('ClipboardUrlBuilder', () => {
       expect(getIncidentUrl(1)).toContain('go.clipboard.app');
       expect(getSessionUrl(1)).toContain('go.clipboard.app');
       expect(getActivityUrl(1)).toContain('go.clipboard.app');
+      expect(getActivityDetailsUrl(1)).toContain('go.clipboard.app');
       expect(getDepartmentUrl(1)).toContain('go.clipboard.app');
       expect(getDepartmentDetailsUrl(1)).toContain('go.clipboard.app');
       expect(getTeamUrl(1)).toContain('go.clipboard.app');
@@ -180,6 +209,7 @@ describe('ClipboardUrlBuilder', () => {
       expect(getIncidentUrl(1)).toMatch(new RegExp(`^${baseUrl}`));
       expect(getSessionUrl(1)).toMatch(new RegExp(`^${baseUrl}`));
       expect(getActivityUrl(1)).toMatch(new RegExp(`^${baseUrl}`));
+      expect(getActivityDetailsUrl(1)).toMatch(new RegExp(`^${baseUrl}`));
       expect(getDepartmentUrl(1)).toMatch(new RegExp(`^${baseUrl}`));
       expect(getDepartmentDetailsUrl(1)).toMatch(new RegExp(`^${baseUrl}`));
       expect(getTeamUrl(1)).toMatch(new RegExp(`^${baseUrl}`));
@@ -192,6 +222,7 @@ describe('ClipboardUrlBuilder', () => {
     it('handles zero IDs', () => {
       expect(getIncidentUrl(0)).toBe(`${baseUrl}/incidents/0`);
       expect(getDepartmentUrl(0)).toBe(`${baseUrl}/departments/0`);
+      expect(getActivityDetailsUrl(0)).toBe(`${baseUrl}/settings/environment/activities/0/basic-details`);
     });
 
     it('handles special characters in string IDs', () => {
@@ -200,6 +231,9 @@ describe('ClipboardUrlBuilder', () => {
       );
       expect(getSessionUrl('SESSION_001_V2')).toBe(
         `${baseUrl}/schedule/session/SESSION_001_V2`
+      );
+      expect(getActivityDetailsUrl('ACT-456-XYZ')).toBe(
+        `${baseUrl}/settings/environment/activities/ACT-456-XYZ/basic-details`
       );
     });
 
@@ -210,6 +244,9 @@ describe('ClipboardUrlBuilder', () => {
       );
       expect(getDepartmentUrl(largeId)).toBe(
         `${baseUrl}/departments/${largeId}`
+      );
+      expect(getActivityDetailsUrl(largeId)).toBe(
+        `${baseUrl}/settings/environment/activities/${largeId}/basic-details`
       );
     });
   });

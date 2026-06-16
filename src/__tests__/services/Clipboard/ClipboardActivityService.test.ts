@@ -52,6 +52,99 @@ describe('ClipboardActivityService', () => {
     );
   });
 
+  describe('departmentIds filter parameter', () => {
+    it('includes departmentIds as JSON string when provided', async () => {
+      mockAppService.get.mockResolvedValue({ data: { data: [] } });
+
+      await ClipboardActivityService.getAll({
+        pageLength: 200,
+        page: 1,
+        departmentIds: [101, 102],
+      });
+
+      expect(mockAppService.get).toHaveBeenCalledWith(
+        '/clipboard/activity',
+        {
+          pageLength: 200,
+          page: 1,
+          departmentIds: '[101,102]',
+        },
+        undefined
+      );
+    });
+
+    it('omits departmentIds when not provided', async () => {
+      mockAppService.get.mockResolvedValue({ data: { data: [] } });
+
+      await ClipboardActivityService.getAll({
+        pageLength: 200,
+        page: 1,
+      });
+
+      expect(mockAppService.get).toHaveBeenCalledWith(
+        '/clipboard/activity',
+        expect.not.objectContaining({ departmentIds: expect.any(String) }),
+        undefined
+      );
+    });
+
+    it('omits departmentIds when empty array is provided', async () => {
+      mockAppService.get.mockResolvedValue({ data: { data: [] } });
+
+      await ClipboardActivityService.getAll({
+        pageLength: 200,
+        page: 1,
+        departmentIds: [],
+      });
+
+      expect(mockAppService.get).toHaveBeenCalledWith(
+        '/clipboard/activity',
+        expect.not.objectContaining({ departmentIds: expect.any(String) }),
+        undefined
+      );
+    });
+
+    it('correctly handles single department ID', async () => {
+      mockAppService.get.mockResolvedValue({ data: { data: [] } });
+
+      await ClipboardActivityService.getAll({
+        pageLength: 200,
+        page: 1,
+        departmentIds: [103],
+      });
+
+      expect(mockAppService.get).toHaveBeenCalledWith(
+        '/clipboard/activity',
+        {
+          pageLength: 200,
+          page: 1,
+          departmentIds: '[103]',
+        },
+        undefined
+      );
+    });
+
+    it('correctly handles multiple department IDs', async () => {
+      mockAppService.get.mockResolvedValue({ data: { data: [] } });
+
+      await ClipboardActivityService.getAll({
+        pageLength: 200,
+        page: 1,
+        departmentIds: [101, 102, 103, 104],
+      });
+
+      expect(mockAppService.get).toHaveBeenCalledWith(
+        '/clipboard/activity',
+        {
+          pageLength: 200,
+          page: 1,
+          departmentIds: '[101,102,103,104]',
+        },
+        undefined
+      );
+    });
+  });
+
   describe('getAllRecords', () => {
     it('fetches all activities across multiple pages', async () => {
       const page1Response = {

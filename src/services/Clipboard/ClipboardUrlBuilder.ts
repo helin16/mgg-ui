@@ -35,6 +35,15 @@ export const getActivityUrl = (activityId: string | number): string => {
 };
 
 /**
+ * Generate URL for Clipboard activity details/settings page
+ * @param activityId - The activity ID
+ * @returns The full URL to the activity details settings page
+ */
+export const getActivityDetailsUrl = (activityId: string | number): string => {
+  return `${BASE_URL}/settings/environment/activities/${activityId}/basic-details`;
+};
+
+/**
  * Generate URL for a Clipboard department
  * @param departmentId - The department ID
  * @returns The full URL to the department
@@ -86,6 +95,7 @@ const ClipboardUrlBuilder = {
   getIncidentUrl,
   getSessionUrl,
   getActivityUrl,
+  getActivityDetailsUrl,
   getDepartmentUrl,
   getDepartmentDetailsUrl,
   getTeamUrl,
