@@ -13,18 +13,13 @@ jest.mock('../../../layouts/Page', () => {
           <div data-testid="extra-buttons">{extraBtns}</div>
         </div>
         <div data-testid="page-content">{children}</div>
-        {AdminPage && <div data-testid="admin-page">{AdminPage}</div>}
+        {AdminPage && typeof AdminPage === 'function' && <div data-testid="admin-page"><AdminPage /></div>}
       </div>
     );
   };
 });
 
-// Mock the sessions list panel
-jest.mock('../../../pages/Clipboard/components/ClipboardSessionsListPanel', () => {
-  return function MockSessionsListPanel() {
-    return <div data-testid="sessions-list-panel">Sessions List Panel</div>;
-  };
-});
+
 
 jest.mock('../../../pages/Clipboard/components/ClipboardDepartmentsListPanel', () => {
   return function MockDepartmentsListPanel() {
@@ -85,13 +80,13 @@ describe('ClipboardPage', () => {
     expect(screen.getByText(/Clipboard Management/i)).toBeInTheDocument();
   });
 
-  it('renders Departments, Activities, Teams, and Sessions tabs', () => {
+  it('renders Departments, Activities, and Teams tabs only (Sessions removed)', () => {
     render(<ClipboardPage />);
 
     expect(screen.getByText('Departments')).toBeInTheDocument();
     expect(screen.getByText('Activities')).toBeInTheDocument();
     expect(screen.getByText('Teams')).toBeInTheDocument();
-    expect(screen.getByText('Sessions')).toBeInTheDocument();
+    expect(screen.queryByText('Sessions')).not.toBeInTheDocument();
   });
 
   it('shows Departments tab content by default', () => {
@@ -100,10 +95,9 @@ describe('ClipboardPage', () => {
     expect(screen.getByTestId('departments-list-panel')).toBeInTheDocument();
     expect(screen.queryByTestId('activities-list-panel')).not.toBeInTheDocument();
     expect(screen.queryByTestId('teams-list-panel')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('sessions-list-panel')).not.toBeInTheDocument();
   });
 
-  it('switches to Activities, Teams, and Sessions tabs', async () => {
+  it('switches to Activities and Teams tabs', async () => {
     render(<ClipboardPage />);
 
     fireEvent.click(screen.getByRole('tab', { name: 'Activities' }));
@@ -115,11 +109,16 @@ describe('ClipboardPage', () => {
     await waitFor(() => {
       expect(screen.getByTestId('teams-list-panel')).toBeInTheDocument();
     });
+  });
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Sessions' }));
-    await waitFor(() => {
-      expect(screen.getByTestId('sessions-list-panel')).toBeInTheDocument();
-    });
+  it('does not have Sessions tab available', () => {
+    render(<ClipboardPage />);
+
+    const tabs = screen.getAllByRole('tab');
+    const tabNames = tabs.map(tab => tab.textContent);
+    
+    expect(tabNames).not.toContain('Sessions');
+    expect(tabNames).toHaveLength(3); // Only Departments, Activities, Teams
   });
 
   it('displays Sync Music Class button', () => {
@@ -196,10 +195,110 @@ describe('ClipboardPage', () => {
     expect(screen.getByTestId('page-wrapper')).toBeInTheDocument();
   });
 
-  it('renders tabs in the requested order', () => {
+  it('renders tabs in the requested order: Departments, Activities, Teams', () => {
     render(<ClipboardPage />);
 
     const tabs = screen.getAllByRole('tab');
-    expect(tabs.map(tab => tab.textContent)).toEqual(['Departments', 'Activities', 'Teams', 'Sessions']);
+    expect(tabs.map(tab => tab.textContent)).toEqual(['Departments', 'Activities', 'Teams']);
+  });
+
+  describe('Tab Persistence', () => {
+    it('maintains tab selection when switching between tabs', () => {
+      render(<ClipboardPage />);
+
+      fireEvent.click(screen.getByRole('tab', { name: 'Activities' }));
+      expect(screen.getByTestId('activities-list-panel')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('tab', { name: 'Teams' }));
+      expect(screen.getByTestId('teams-list-panel')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('tab', { name: 'Activities' }));
+      expect(screen.getByTestId('activities-list-panel')).toBeInTheDocument();
+    });
+  });
+
+  describe('Accessibility', () => {
+    it('has proper tab roles and attributes', () => {
+      render(<ClipboardPage />);
+
+      const tabs = screen.getAllByRole('tab');
+      expect(tabs.length).toBeGreaterThan(0);
+
+      tabs.forEach(tab => {
+        expect(tab).toHaveAttribute('role', 'tab');
+      });
+    });
+
+    it('sets aria-selected on active tab', async () => {
+      render(<ClipboardPage />);
+
+      const departmentsTab = screen.getByRole('tab', { name: 'Departments' });
+      const activitiesTab = screen.getByRole('tab', { name: 'Activities' });
+
+      expect(departmentsTab).toHaveAttribute('aria-selected', 'true');
+      expect(activitiesTab).toHaveAttribute('aria-selected', 'false');
+
+      fireEvent.click(activitiesTab);
+      await waitFor(() => {
+        expect(departmentsTab).toHaveAttribute('aria-selected', 'false');
+        expect(activitiesTab).toHaveAttribute('aria-selected', 'true');
+      });
+    });
+  });
+
+  describe('Component Integration', () => {
+    it('renders departments panel by default', () => {
+      render(<ClipboardPage />);
+
+      expect(screen.getByTestId('departments-list-panel')).toBeInTheDocument();
+      expect(screen.getByTestId('sync-confirm-popup')).toBeInTheDocument();
+    });
+
+    it('renders other panels when tabs are clicked', async () => {
+      render(<ClipboardPage />);
+
+      fireEvent.click(screen.getByRole('tab', { name: 'Activities' }));
+      await waitFor(() => {
+        expect(screen.getByTestId('activities-list-panel')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByRole('tab', { name: 'Teams' }));
+      await waitFor(() => {
+        expect(screen.getByTestId('teams-list-panel')).toBeInTheDocument();
+      });
+    });
+
+    it('renders sync popup component', () => {
+      render(<ClipboardPage />);
+
+      expect(screen.getByTestId('sync-confirm-popup')).toBeInTheDocument();
+    });
+  });
+
+  describe('Sessions Tab Removal Verification', () => {
+    it('Sessions tab should not exist anywhere in the DOM', () => {
+      const { container } = render(<ClipboardPage />);
+
+      // Check that no Sessions tab exists
+      const tabs = container.querySelectorAll('[role="tab"]');
+      const sessionTabExists = Array.from(tabs).some(tab => 
+        tab.textContent?.includes('Sessions')
+      );
+
+      expect(sessionTabExists).toBe(false);
+    });
+
+    it('Sessions panel component should not be rendered', () => {
+      render(<ClipboardPage />);
+
+      expect(screen.queryByTestId('sessions-list-panel')).not.toBeInTheDocument();
+    });
+
+    it('exactly 3 tabs should be present after Sessions removal', () => {
+      render(<ClipboardPage />);
+
+      const tabs = screen.getAllByRole('tab');
+      expect(tabs.length).toBe(3);
+    });
   });
 });

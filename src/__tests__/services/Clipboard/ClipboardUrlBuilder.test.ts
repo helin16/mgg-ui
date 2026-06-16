@@ -1,13 +1,9 @@
 import ClipboardUrlBuilder, {
   getIncidentUrl,
   getSessionUrl,
-  getActivityUrl,
   getActivityDetailsUrl,
-  getDepartmentUrl,
   getDepartmentDetailsUrl,
   getTeamUrl,
-  getStudentUrl,
-  getAttendanceUrl,
 } from '../../../services/Clipboard/ClipboardUrlBuilder';
 
 describe('ClipboardUrlBuilder', () => {
@@ -37,18 +33,6 @@ describe('ClipboardUrlBuilder', () => {
     });
   });
 
-  describe('getActivityUrl', () => {
-    it('generates correct URL for activity with numeric ID', () => {
-      const url = getActivityUrl(100);
-      expect(url).toBe(`${baseUrl}/activity/100`);
-    });
-
-    it('generates correct URL for activity with string ID', () => {
-      const url = getActivityUrl('MATH-101');
-      expect(url).toBe(`${baseUrl}/activity/MATH-101`);
-    });
-  });
-
   describe('getActivityDetailsUrl', () => {
     it('generates correct details URL for activity with numeric ID', () => {
       const url = getActivityDetailsUrl(30861);
@@ -68,18 +52,6 @@ describe('ClipboardUrlBuilder', () => {
       const url = getActivityDetailsUrl(1);
       expect(url).toContain('/settings/environment/activities/');
       expect(url).toContain('/basic-details');
-    });
-  });
-
-  describe('getDepartmentUrl', () => {
-    it('generates correct URL for department with numeric ID', () => {
-      const url = getDepartmentUrl(3033);
-      expect(url).toBe(`${baseUrl}/departments/3033`);
-    });
-
-    it('generates correct URL for department with string ID', () => {
-      const url = getDepartmentUrl('DEPT-001');
-      expect(url).toBe(`${baseUrl}/departments/DEPT-001`);
     });
   });
 
@@ -108,46 +80,12 @@ describe('ClipboardUrlBuilder', () => {
   describe('getTeamUrl', () => {
     it('generates correct URL for team with numeric ID', () => {
       const url = getTeamUrl(42);
-      expect(url).toBe(`${baseUrl}/teams/42`);
+      expect(url).toBe(`${baseUrl}/teams/team/42`);
     });
 
     it('generates correct URL for team with string ID', () => {
       const url = getTeamUrl('TEAM-A1');
-      expect(url).toBe(`${baseUrl}/teams/TEAM-A1`);
-    });
-  });
-
-  describe('getStudentUrl', () => {
-    it('generates correct URL for student with numeric SMS ID', () => {
-      const url = getStudentUrl(1001);
-      expect(url).toBe(`${baseUrl}/students/1001`);
-    });
-
-    it('generates correct URL for student with string SMS ID', () => {
-      const url = getStudentUrl('SMS-12345');
-      expect(url).toBe(`${baseUrl}/students/SMS-12345`);
-    });
-  });
-
-  describe('getAttendanceUrl', () => {
-    it('generates base attendance URL when no session ID provided', () => {
-      const url = getAttendanceUrl();
-      expect(url).toBe(`${baseUrl}/attendance`);
-    });
-
-    it('generates attendance URL without argument', () => {
-      const url = getAttendanceUrl(undefined);
-      expect(url).toBe(`${baseUrl}/attendance`);
-    });
-
-    it('generates session-specific attendance URL with numeric session ID', () => {
-      const url = getAttendanceUrl(98765);
-      expect(url).toBe(`${baseUrl}/attendance/session/98765`);
-    });
-
-    it('generates session-specific attendance URL with string session ID', () => {
-      const url = getAttendanceUrl('SESSION-001');
-      expect(url).toBe(`${baseUrl}/attendance/session/SESSION-001`);
+      expect(url).toBe(`${baseUrl}/teams/team/TEAM-A1`);
     });
   });
 
@@ -155,13 +93,9 @@ describe('ClipboardUrlBuilder', () => {
     it('exports all functions in default object', () => {
       expect(ClipboardUrlBuilder).toHaveProperty('getIncidentUrl');
       expect(ClipboardUrlBuilder).toHaveProperty('getSessionUrl');
-      expect(ClipboardUrlBuilder).toHaveProperty('getActivityUrl');
       expect(ClipboardUrlBuilder).toHaveProperty('getActivityDetailsUrl');
-      expect(ClipboardUrlBuilder).toHaveProperty('getDepartmentUrl');
       expect(ClipboardUrlBuilder).toHaveProperty('getDepartmentDetailsUrl');
       expect(ClipboardUrlBuilder).toHaveProperty('getTeamUrl');
-      expect(ClipboardUrlBuilder).toHaveProperty('getStudentUrl');
-      expect(ClipboardUrlBuilder).toHaveProperty('getAttendanceUrl');
     });
 
     it('exported functions return correct URLs', () => {
@@ -184,44 +118,31 @@ describe('ClipboardUrlBuilder', () => {
     it('all URLs use https protocol', () => {
       expect(getIncidentUrl(1)).toMatch(/^https:\/\//);
       expect(getSessionUrl(1)).toMatch(/^https:\/\//);
-      expect(getActivityUrl(1)).toMatch(/^https:\/\//);
-      expect(getActivityDetailsUrl(1)).toMatch(/^https:\/\//);
-      expect(getDepartmentUrl(1)).toMatch(/^https:\/\//);
-      expect(getDepartmentDetailsUrl(1)).toMatch(/^https:\/\//);
-      expect(getTeamUrl(1)).toMatch(/^https:\/\//);
-      expect(getStudentUrl(1)).toMatch(/^https:\/\//);
-      expect(getAttendanceUrl(1)).toMatch(/^https:\/\//);
+      expect(getActivityDetailsUrl(1)).toMatch(/^https:\/\//);;
+      expect(getDepartmentDetailsUrl(1)).toMatch(/^https:\/\//);;
+      expect(getTeamUrl(1)).toMatch(/^https:\/\//);;
     });
 
     it('all URLs use go.clipboard.app domain', () => {
       expect(getIncidentUrl(1)).toContain('go.clipboard.app');
       expect(getSessionUrl(1)).toContain('go.clipboard.app');
-      expect(getActivityUrl(1)).toContain('go.clipboard.app');
       expect(getActivityDetailsUrl(1)).toContain('go.clipboard.app');
-      expect(getDepartmentUrl(1)).toContain('go.clipboard.app');
       expect(getDepartmentDetailsUrl(1)).toContain('go.clipboard.app');
       expect(getTeamUrl(1)).toContain('go.clipboard.app');
-      expect(getStudentUrl(1)).toContain('go.clipboard.app');
-      expect(getAttendanceUrl(1)).toContain('go.clipboard.app');
     });
 
     it('all URLs start with base URL', () => {
       expect(getIncidentUrl(1)).toMatch(new RegExp(`^${baseUrl}`));
       expect(getSessionUrl(1)).toMatch(new RegExp(`^${baseUrl}`));
-      expect(getActivityUrl(1)).toMatch(new RegExp(`^${baseUrl}`));
       expect(getActivityDetailsUrl(1)).toMatch(new RegExp(`^${baseUrl}`));
-      expect(getDepartmentUrl(1)).toMatch(new RegExp(`^${baseUrl}`));
       expect(getDepartmentDetailsUrl(1)).toMatch(new RegExp(`^${baseUrl}`));
       expect(getTeamUrl(1)).toMatch(new RegExp(`^${baseUrl}`));
-      expect(getStudentUrl(1)).toMatch(new RegExp(`^${baseUrl}`));
-      expect(getAttendanceUrl(1)).toMatch(new RegExp(`^${baseUrl}`));
     });
   });
 
   describe('edge cases', () => {
     it('handles zero IDs', () => {
       expect(getIncidentUrl(0)).toBe(`${baseUrl}/incidents/0`);
-      expect(getDepartmentUrl(0)).toBe(`${baseUrl}/departments/0`);
       expect(getActivityDetailsUrl(0)).toBe(`${baseUrl}/settings/environment/activities/0/basic-details`);
     });
 
@@ -241,9 +162,6 @@ describe('ClipboardUrlBuilder', () => {
       const largeId = 999999999999;
       expect(getIncidentUrl(largeId)).toBe(
         `${baseUrl}/incidents/${largeId}`
-      );
-      expect(getDepartmentUrl(largeId)).toBe(
-        `${baseUrl}/departments/${largeId}`
       );
       expect(getActivityDetailsUrl(largeId)).toBe(
         `${baseUrl}/settings/environment/activities/${largeId}/basic-details`

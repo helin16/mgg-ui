@@ -11,13 +11,34 @@ type iClipboardTeam = iBaseType & {
   sisId?: string | null;
   hidden?: boolean;
   activity?: iClipboardActivity;
+  category?: {
+    id?: number;
+    name?: string;
+  };
+  subcategory?: {
+    id?: number;
+    name?: string;
+  };
   assignedStaff?: Array<{
     id?: number;
     firstName?: string | null;
     lastName?: string | null;
     name?: string | null;
   }>;
-  students?: any[];
+  students?: Array<{
+    smsId?: string;
+    studentId?: number;
+    firstName?: string;
+    lastName?: string;
+    yearGroup?: {
+      id?: number;
+      name?: string;
+    };
+    captain?: boolean;
+    boarder?: boolean;
+    positionId?: number | null;
+    jerseyNumber?: number | null;
+  }>;
   members?: any[];
   teamMembers?: any[];
 };
