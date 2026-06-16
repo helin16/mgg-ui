@@ -4,6 +4,7 @@ import moment from 'moment-timezone';
 
 import SynVStudentClassService from '../../services/Synergetic/Student/SynVStudentClassService';
 import ClipboardIncidentService from '../../services/Clipboard/ClipboardIncidentService';
+import { getIncidentUrl } from '../../services/Clipboard/ClipboardUrlBuilder';
 import Toaster from '../../services/Toaster';
 import iSynVStudentClass from '../../types/Synergetic/Student/iSynVStudentClass';
 import iClipboardIncident from '../../types/Clipboard/iClipboardIncident';
@@ -58,10 +59,6 @@ const getIncidentDisplayName = (incident: iClipboardIncident) => {
   const lastName = `${student.lastName || ''}`.trim();
   const fullName = `${firstName} ${lastName}`.trim();
   return fullName === '' ? 'Unknown student' : fullName;
-};
-
-const getIncidentUrl = (incident: iClipboardIncident) => {
-  return `https://go.clipboard.app/incidents/${incident.id}`;
 };
 
 const getIncidentReturnDate = (incident: iClipboardIncident) => {
@@ -206,7 +203,7 @@ const ClipboardConcussionAlert = ({
         const diagnosisText = getIncidentDiagnosisText(incident);
         const reasonSuffixText = getIncidentReasonSuffixText(incident);
         const returnDateText = getIncidentReturnDateText(incident);
-        const incidentUrl = getIncidentUrl(incident);
+        const incidentUrl = getIncidentUrl(incident.id);
 
         return (
           <div key={`${incident.id}-${index}`}>

@@ -7,6 +7,7 @@ import SynTimetableDefinitionService from '../../../services/Synergetic/TimeTabl
 import ClipboardSessionService from '../../../services/Clipboard/ClipboardSessionService';
 import ClipboardAttendanceService from '../../../services/Clipboard/ClipboardAttendanceService';
 import Toaster from '../../../services/Toaster';
+import * as ClipboardUrlBuilder from '../../../services/Clipboard/ClipboardUrlBuilder';
 import { MAX_PAGE_SIZE } from '../../../services/AppService';
 
 jest.mock('../../../services/Synergetic/Student/SynVStudentClassService', () => ({
@@ -42,6 +43,11 @@ jest.mock('../../../services/Toaster', () => ({
   default: {
     showApiError: jest.fn(),
   },
+}));
+
+jest.mock('../../../services/Clipboard/ClipboardUrlBuilder', () => ({
+  __esModule: true,
+  getSessionUrl: jest.fn((id) => `https://go.clipboard.app/schedule/session/${id}`),
 }));
 
 const mockedStudentClassService = SynVStudentClassService as jest.Mocked<typeof SynVStudentClassService>;
@@ -247,7 +253,7 @@ describe('ClipboardStudentSessionAlert', () => {
     expect(link).toHaveAttribute('href', 'https://go.clipboard.app/schedule/session/12345');
     expect(link.parentElement?.textContent).toMatch(/is scheduled to have.*Math Tutoring.*Room 101/);
 
-    // Verify session service was called with correct parameters including date filters and perPage
+    // Verify session service was called with correct parameters including date filters and pageLength
     expect(mockedSessionService.getAll).toHaveBeenCalledWith(
       expect.objectContaining({
         sisIds: ['54610'],
@@ -257,7 +263,7 @@ describe('ClipboardStudentSessionAlert', () => {
         includeStatuses: ['confirmed'],
         includeTeams: true,
         includeStaff: true,
-        perPage: MAX_PAGE_SIZE,
+        pageLength: 200,
       })
     );
 
