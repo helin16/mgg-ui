@@ -9,6 +9,10 @@ export type iClipboardActivityQueryParams = {
   pageLength?: number;
   page?: number;
   departmentIds?: number[];
+  search?: string;  // Search by activity name
+  sortBy?: string;  // Sort field (e.g., 'name', 'code', 'archived')
+  sortOrder?: 'asc' | 'desc';  // Sort order
+  archived?: boolean | null;  // Filter by archived status (null = all, true = archived only, false = non-archived only)
 };
 
 const buildQueryString = (params: iClipboardActivityQueryParams): iConfigParams => {
@@ -20,11 +24,47 @@ const buildQueryString = (params: iClipboardActivityQueryParams): iConfigParams 
   if (params.page !== undefined) {
     query.page = params.page;
   }
-  if (params.departmentIds !== undefined && params.departmentIds.length > 0) {
-    query.departmentIds = JSON.stringify(params.departmentIds);
+  // NOTE: departmentIds is NOT supported by the backend API
+  // We will filter client-side instead
+  if (params.search !== undefined && params.search.length > 0) {
+    query.search = params.search;
+  }
+  if (params.sortBy !== undefined) {
+    query.sortBy = params.sortBy;
+  }
+  if (params.sortOrder !== undefined) {
+    query.sortOrder = params.sortOrder;
+  }
+  if (params.archived !== undefined && params.archived !== null) {
+    query.archived = params.archived.toString();
   }
 
   return query;
+};
+
+/**
+ * Client-side filters data based on departmentIds and archived status
+ * Since the backend API doesn't support these filters
+ */
+const applyClientFilters = (
+  data: iClipboardActivity[],
+  params?: iClipboardActivityQueryParams
+): iClipboardActivity[] => {
+  let filtered = [...data];
+
+  // Filter by department IDs (client-side since backend doesn't support)
+  if (params?.departmentIds && params.departmentIds.length > 0) {
+    filtered = filtered.filter((activity) =>
+      params.departmentIds!.includes(activity.department?.id || -1)
+    );
+  }
+
+  // Filter by archived status
+  if (params?.archived !== undefined && params.archived !== null) {
+    filtered = filtered.filter((activity) => activity.archived === params.archived);
+  }
+
+  return filtered;
 };
 
 const getAll = (
@@ -35,20 +75,32 @@ const getAll = (
   return AppService.get(endPoint, query, config).then(resp => {
     const data = resp.data;
     
+    // Apply client-side filters for departmentIds and archived
+    const filteredData = applyClientFilters(data.data || [], params);
+    
     // Transform API response to match iPaginatedResult format
     if (data.pagination) {
       return {
-        data: data.data || [],
-        total: data.pagination.numRecords || 0,
-        pages: data.pagination.lastPage || 1,
+        data: filteredData,
+        total: filteredData.length,  // Adjust total based on filtered results
+        pages: data.pagination.lastPage || 1,  // Use actual lastPage from API
         currentPage: data.pagination.currentPage || 1,
-        perPage: data.pagination.pageLength || 10,
-        from: ((data.pagination.currentPage || 1) - 1) * (data.pagination.pageLength || 10) + 1,
-        to: (data.pagination.currentPage || 1) * (data.pagination.pageLength || 10),
+        perPage: data.pagination.pageLength || 200,
+        from: ((data.pagination.currentPage || 1) - 1) * (data.pagination.pageLength || 200) + 1,
+        to: Math.min((data.pagination.currentPage || 1) * (data.pagination.pageLength || 200), filteredData.length),
       } as iPaginatedResult<iClipboardActivity>;
     }
     
-    return data;
+    // Fallback for responses without pagination object
+    return {
+      data: filteredData,
+      total: filteredData.length,
+      pages: 1,
+      currentPage: 1,
+      perPage: params?.pageLength || 200,
+      from: 1,
+      to: filteredData.length,
+    } as iPaginatedResult<iClipboardActivity>;
   });
 };
 
@@ -57,6 +109,7 @@ const getAll = (
  * This bypasses the maximum page length limit by fetching in chunks of 200
  */
 const getAllRecords = async (
+  params?: iClipboardActivityQueryParams,
   config?: iConfigParams
 ): Promise<iClipboardActivity[]> => {
   const allActivities: iClipboardActivity[] = [];
@@ -64,7 +117,10 @@ const getAllRecords = async (
   let totalPages = 1;
 
   while (currentPage <= totalPages) {
-    const result = await getAll({ pageLength: MAX_PAGE_SIZE, page: currentPage }, config);
+    const result = await getAll(
+      { ...params, pageLength: MAX_PAGE_SIZE, page: currentPage },
+      config
+    );
     
     if (result.data && result.data.length > 0) {
       allActivities.push(...result.data);
@@ -79,10 +135,10 @@ const getAllRecords = async (
 
 const get = (
   id: string | number,
-  params?: iClipboardActivityQueryParams,
+  params?: Omit<iClipboardActivityQueryParams, 'departmentIds' | 'page' | 'pageLength'>,
   config?: iConfigParams
 ): Promise<iClipboardActivity> => {
-  const query = params ? buildQueryString(params) : {};
+  const query = params ? buildQueryString(params as iClipboardActivityQueryParams) : {};
   return AppService.get(`${endPoint}/${id}`, query, config).then(resp => resp.data);
 };
 
@@ -90,6 +146,7 @@ const ClipboardActivityService = {
   getAll,
   getAllRecords,
   get,
+  applyClientFilters,
 };
 
 export default ClipboardActivityService;
