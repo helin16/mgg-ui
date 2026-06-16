@@ -5,14 +5,12 @@ import { MGGS_MODULE_ID_CLIPBOARD } from "../../types/modules/iModuleUser";
 import ClipboardDepartmentsListPanel from "./components/ClipboardDepartmentsListPanel";
 import ClipboardActivitiesListPanel from "./components/ClipboardActivitiesListPanel";
 import ClipboardTeamsListPanel from "./components/ClipboardTeamsListPanel";
-import ClipboardSessionsListPanel from "./components/ClipboardSessionsListPanel";
 import ClipboardSyncConfirmPopup from "./components/ClipboardSyncConfirmPopup";
 import ClipboardAdminPage from "./ClipboardAdminPage";
 
 const TAB_DEPARTMENTS = "DEPARTMENTS";
 const TAB_ACTIVITIES = "ACTIVITIES";
 const TAB_TEAMS = "TEAMS";
-const TAB_SESSIONS = "SESSIONS";
 
 interface ClipboardPageProps {
   // Optional props for testing or parent-level control
@@ -58,9 +56,6 @@ const ClipboardPage: React.FC<ClipboardPageProps> = () => {
           </Tab>
           <Tab eventKey={TAB_TEAMS} title="Teams">
             <ClipboardTeamsListPanel />
-          </Tab>
-          <Tab eventKey={TAB_SESSIONS} title="Sessions">
-            <ClipboardSessionsListPanel />
           </Tab>
         </Tabs>
       </Page>

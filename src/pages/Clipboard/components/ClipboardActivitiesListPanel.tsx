@@ -3,7 +3,7 @@ import { Alert, Spinner, Form, Row, Col } from 'react-bootstrap';
 import styled from 'styled-components';
 import ClipboardActivityService from "../../../services/Clipboard/ClipboardActivityService";
 import ClipboardDepartmentService from "../../../services/Clipboard/ClipboardDepartmentService";
-import { getActivityDetailsUrl } from '../../../services/Clipboard/ClipboardUrlBuilder';
+import { getActivityDetailsUrl, getDepartmentDetailsUrl } from '../../../services/Clipboard/ClipboardUrlBuilder';
 import iClipboardActivity from "../../../types/Clipboard/iClipboardActivity";
 import iClipboardDepartment from "../../../types/Clipboard/iClipboardDepartment";
 import Toaster, { TOAST_TYPE_ERROR } from "../../../services/Toaster";
@@ -113,7 +113,26 @@ const ClipboardActivitiesListPanel: React.FC = () => {
       key: 'department',
       header: 'Department',
       cell: (col: iTableColumn<T>, data: iClipboardActivity) => (
-        <td key={col.key}>{data.department?.name || '-'}</td>
+        <td key={col.key}>
+          {data.department?.id ? (
+            <a
+              href={getDepartmentDetailsUrl(data.department.id)}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: '#0d6efd',
+                textDecoration: 'underline',
+                cursor: 'pointer',
+              }}
+              onMouseEnter={(e) => { (e.target as HTMLAnchorElement).style.color = '#0b5ed7'; }}
+              onMouseLeave={(e) => { (e.target as HTMLAnchorElement).style.color = '#0d6efd'; }}
+            >
+              {data.department.name || '-'}
+            </a>
+          ) : (
+            '-'
+          )}
+        </td>
       ),
     },
     {
