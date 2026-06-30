@@ -1,212 +1,161 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ClipboardTeamsListPanel from '../../../../pages/Clipboard/components/ClipboardTeamsListPanel';
-import iClipboardTeam from '../../../../types/Clipboard/iClipboardTeam';
+import ClipboardTeamService from '../../../../services/Clipboard/ClipboardTeamService';
+import ClipboardDepartmentService from '../../../../services/Clipboard/ClipboardDepartmentService';
+import ClipboardActivityService from '../../../../services/Clipboard/ClipboardActivityService';
+import Toaster from '../../../../services/Toaster';
 
-// Mock the session details panel to simplify tests
-jest.mock('../../../../pages/Clipboard/components/ClipboardSessionDetailsPanel', () => {
-  return function MockSessionDetailsPanel() {
-    return <div data-testid="session-details-panel">Session Details</div>;
-  };
-});
-
-// Mock the sync confirm popup
-jest.mock('../../../../pages/Clipboard/components/ClipboardSyncConfirmPopup', () => {
-  return function MockSyncPopup({ show, onConfirm, onCancel }: any) {
-    if (!show) return null;
-    return (
-      <div data-testid="sync-popup">
-        <button data-testid="sync-confirm-btn" onClick={onConfirm}>
-          Confirm
-        </button>
-        <button data-testid="sync-cancel-btn" onClick={onCancel}>
-          Cancel
-        </button>
-      </div>
-    );
-  };
-});
+jest.mock('../../../../services/Clipboard/ClipboardTeamService');
+jest.mock('../../../../services/Clipboard/ClipboardDepartmentService');
+jest.mock('../../../../services/Clipboard/ClipboardActivityService');
+jest.mock('../../../../services/Toaster');
 
 describe('ClipboardTeamsListPanel', () => {
-  const mockTeams: iClipboardTeam[] = [
+  const mockTeamService = ClipboardTeamService as jest.Mocked<typeof ClipboardTeamService>;
+  const mockDepartmentService = ClipboardDepartmentService as jest.Mocked<typeof ClipboardDepartmentService>;
+  const mockActivityService = ClipboardActivityService as jest.Mocked<typeof ClipboardActivityService>;
+  const mockToaster = Toaster as jest.Mocked<typeof Toaster>;
+
+  const mockDepartments = [
+    { id: 1, name: 'Sports' },
+    { id: 2, name: 'Music' },
+  ];
+
+  const mockActivities = [
+    { id: 10, name: 'Basketball', department: { id: 1, name: 'Sports' } },
+    { id: 20, name: 'Orchestra', department: { id: 2, name: 'Music' } },
+  ];
+
+  const mockTeams = [
     {
       id: 1,
       name: 'Year 10 PE A',
       classCode: 'PE10A',
-      externalId: 'ext1',
-      isHidden: false,
-      checkSum: 'abc123',
+      sisId: 'PE10A',
+      hidden: false,
+      activity: { id: 10, name: 'Basketball', department: { id: 1, name: 'Sports' } },
+      assignedStaff: [{ firstName: 'Alex', lastName: 'Coach' }],
+      students: [{ firstName: 'Jane', lastName: 'Doe', smsId: '54610', yearGroup: { name: 'Year 10' }, captain: true }],
     },
     {
       id: 2,
       name: 'Year 11 Music',
       classCode: 'MUS11',
-      externalId: 'ext2',
-      isHidden: false,
-      checkSum: 'abc124',
+      sisId: 'MUS11',
+      hidden: false,
+      activity: { id: 20, name: 'Orchestra', department: { id: 2, name: 'Music' } },
+      assignedStaff: [],
+      students: [],
     },
     {
       id: 3,
       name: null,
       classCode: 'SCI12',
-      externalId: 'ext3',
-      isHidden: false,
-      checkSum: 'abc125',
+      sisId: 'SCI12',
+      hidden: true,
+      activity: { id: 10, name: 'Basketball', department: { id: 1, name: 'Sports' } },
+      assignedStaff: [],
+      students: [],
     },
-  ];
+  ] as any[];
 
-  it('renders table with team names', () => {
-    render(
-      <ClipboardTeamsListPanel teams={mockTeams} isLoading={false} error={null} />
-    );
-
-    expect(screen.getByText('Year 10 PE A')).toBeInTheDocument();
-    expect(screen.getByText('Year 11 Music')).toBeInTheDocument();
-    expect(screen.getByText('SCI12')).toBeInTheDocument(); // Fallback to classCode
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockDepartmentService.getAllRecords.mockResolvedValue(mockDepartments as any);
+    mockActivityService.getAllRecords.mockResolvedValue(mockActivities as any);
+    mockTeamService.getAllRecords.mockResolvedValue(mockTeams as any);
   });
 
-  it('displays empty state when no teams', () => {
-    render(
-      <ClipboardTeamsListPanel teams={[]} isLoading={false} error={null} />
-    );
+  it('renders loading spinner initially', () => {
+    mockDepartmentService.getAllRecords.mockImplementation(() => new Promise(() => {}));
+    mockActivityService.getAllRecords.mockImplementation(() => new Promise(() => {}));
+    mockTeamService.getAllRecords.mockImplementation(() => new Promise(() => {}));
 
-    expect(screen.getByText('No Teams Configured')).toBeInTheDocument();
-    expect(screen.getByText(/no clipboard teams configured/i)).toBeInTheDocument();
-  });
-
-  it('displays loading spinner when isLoading is true', () => {
-    render(
-      <ClipboardTeamsListPanel teams={[]} isLoading={true} error={null} />
-    );
+    render(<ClipboardTeamsListPanel />);
 
     expect(screen.getByRole('status')).toBeInTheDocument();
-    expect(screen.getByText(/loading teams/i)).toBeInTheDocument();
   });
 
-  it('displays error message when error prop is set', () => {
-    const errorMsg = 'Failed to load teams';
-    render(
-      <ClipboardTeamsListPanel teams={[]} isLoading={false} error={errorMsg} />
-    );
-
-    expect(screen.getByText(/Error Loading Teams/i)).toBeInTheDocument();
-    expect(screen.getByText(errorMsg)).toBeInTheDocument();
-  });
-
-  it('renders Sync button for each team', () => {
-    render(
-      <ClipboardTeamsListPanel teams={mockTeams} isLoading={false} error={null} />
-    );
-
-    const syncButtons = screen.getAllByRole('button', { name: /sync/i });
-    expect(syncButtons).toHaveLength(mockTeams.length);
-  });
-
-  it('expands team details when team row is clicked', async () => {
-    render(
-      <ClipboardTeamsListPanel teams={mockTeams} isLoading={false} error={null} />
-    );
-
-    // Get first team row (the Year 10 PE A)
-    const rows = screen.getAllByRole('row');
-    const firstTeamRow = rows[1]; // Skip header row
-
-    fireEvent.click(firstTeamRow);
+  it('renders team rows after loading', async () => {
+    render(<ClipboardTeamsListPanel />);
 
     await waitFor(() => {
-      expect(screen.getByTestId('session-details-panel')).toBeInTheDocument();
+      expect(screen.getByText('Year 10 PE A')).toBeInTheDocument();
+      expect(screen.getByText('Year 11 Music')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByRole('link', { name: 'SCI12' })).not.toBeInTheDocument();
+  });
+
+  it('falls back to classCode when name is missing', async () => {
+    render(<ClipboardTeamsListPanel />);
+
+    const hiddenSelect = await screen.findByDisplayValue('Non-Hidden Only');
+    fireEvent.change(hiddenSelect, { target: { value: 'all' } });
+
+    await waitFor(() => {
+      expect(screen.getByRole('link', { name: 'SCI12' })).toBeInTheDocument();
     });
   });
 
-  it('closes expanded details when clicking team row again', async () => {
-    render(
-      <ClipboardTeamsListPanel teams={mockTeams} isLoading={false} error={null} />
-    );
+  it('shows empty-state alert when no teams are returned', async () => {
+    mockTeamService.getAllRecords.mockResolvedValue([]);
 
-    const rows = screen.getAllByRole('row');
-    const firstTeamRow = rows[1];
+    render(<ClipboardTeamsListPanel />);
 
-    // Expand
-    fireEvent.click(firstTeamRow);
     await waitFor(() => {
-      expect(screen.getByTestId('session-details-panel')).toBeInTheDocument();
-    });
-
-    // Collapse
-    fireEvent.click(firstTeamRow);
-    await waitFor(() => {
-      expect(screen.queryByTestId('session-details-panel')).not.toBeInTheDocument();
+      expect(screen.getByText('No teams available.')).toBeInTheDocument();
     });
   });
 
-  it('displays sync popup when Sync button is clicked', async () => {
-    render(
-      <ClipboardTeamsListPanel teams={mockTeams} isLoading={false} error={null} />
-    );
+  it('shows filter-empty alert when no teams match the filters', async () => {
+    render(<ClipboardTeamsListPanel />);
 
-    const syncButtons = screen.getAllByRole('button', { name: /sync/i });
-    fireEvent.click(syncButtons[0]);
+    const departmentSelect = await screen.findByDisplayValue('All Departments');
+    const sisIdSelect = await screen.findByDisplayValue('All SIS IDs');
+    fireEvent.change(departmentSelect, { target: { value: '2' } });
+    fireEvent.change(sisIdSelect, { target: { value: 'PE10A' } });
 
     await waitFor(() => {
-      expect(screen.getByTestId('sync-popup')).toBeInTheDocument();
+      expect(screen.getByText('No teams match your filters. Try adjusting your search criteria.')).toBeInTheDocument();
     });
   });
 
-  it('disables Sync button while syncing', async () => {
-    const { rerender } = render(
-      <ClipboardTeamsListPanel 
-        teams={mockTeams} 
-        isLoading={false} 
-        error={null}
-        onSyncClick={async () => {
-          // Simulate sync operation
-          await new Promise(resolve => setTimeout(resolve, 100));
-        }}
-      />
-    );
+  it('filters teams by department', async () => {
+    render(<ClipboardTeamsListPanel />);
 
-    const syncButtons = screen.getAllByRole('button', { name: /sync/i });
-    fireEvent.click(syncButtons[0]);
+    const departmentSelect = await screen.findByDisplayValue('All Departments');
+    fireEvent.change(departmentSelect, { target: { value: '2' } });
 
     await waitFor(() => {
-      expect(screen.getByTestId('sync-popup')).toBeInTheDocument();
+      expect(screen.getByText('Year 11 Music')).toBeInTheDocument();
+      expect(screen.queryByText('Year 10 PE A')).not.toBeInTheDocument();
     });
   });
 
-  it('handles missing team name with fallback to classCode', () => {
-    render(
-      <ClipboardTeamsListPanel teams={mockTeams} isLoading={false} error={null} />
-    );
+  it('opens the students modal from the students-count button', async () => {
+    render(<ClipboardTeamsListPanel />);
 
-    // Team 3 has null name, should display classCode
-    expect(screen.getByText('SCI12')).toBeInTheDocument();
-  });
-
-  it('renders table headers correctly', () => {
-    render(
-      <ClipboardTeamsListPanel teams={mockTeams} isLoading={false} error={null} />
-    );
-
-    expect(screen.getByText('Team Name')).toBeInTheDocument();
-    expect(screen.getByText('Session')).toBeInTheDocument();
-    expect(screen.getByText('Last Sync')).toBeInTheDocument();
-    expect(screen.getByText('Actions')).toBeInTheDocument();
-  });
-
-  it('supports keyboard navigation for expand/collapse', async () => {
-    render(
-      <ClipboardTeamsListPanel teams={mockTeams} isLoading={false} error={null} />
-    );
-
-    const rows = screen.getAllByRole('row');
-    const firstTeamRow = rows[1];
-
-    // Simulate Enter key press
-    fireEvent.keyDown(firstTeamRow, { key: 'Enter' });
+    const studentsButton = await screen.findByRole('button', { name: '1' });
+    fireEvent.click(studentsButton);
 
     await waitFor(() => {
-      expect(screen.getByTestId('session-details-panel')).toBeInTheDocument();
+      expect(screen.getByText('Students in Year 10 PE A')).toBeInTheDocument();
+      expect(screen.getByText('Jane Doe')).toBeInTheDocument();
+      expect(screen.getByText('54610')).toBeInTheDocument();
+    });
+  });
+
+  it('shows an error alert when loading fails', async () => {
+    mockTeamService.getAllRecords.mockRejectedValue(new Error('Failed to load teams'));
+
+    render(<ClipboardTeamsListPanel />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Failed to load teams')).toBeInTheDocument();
+      expect(mockToaster.showToast).toHaveBeenCalled();
     });
   });
 });

@@ -10,6 +10,7 @@ jest.mock('../../../services/AppService');
 jest.mock('../../../services/Toaster', () => ({
   showToast: jest.fn(),
   showApiError: jest.fn(),
+  TOAST_TYPE_ERROR: 'error',
 }));
 
 describe('ClipboardMusicSyncService', () => {
@@ -92,7 +93,7 @@ describe('ClipboardMusicSyncService', () => {
       (AppService.post as jest.Mock).mockRejectedValue(apiError);
 
       await expect(ClipboardMusicSyncService.triggerSync()).rejects.toThrow('Network error');
-      expect(Toaster.showToast).toHaveBeenCalledWith('Network error', expect.any(String));
+      expect(Toaster.showToast).toHaveBeenCalledWith('Network error', 'error');
     });
 
     it('shows detailed error message from API response', async () => {
@@ -105,15 +106,15 @@ describe('ClipboardMusicSyncService', () => {
       };
       (AppService.post as jest.Mock).mockRejectedValue(apiError);
 
-      await expect(ClipboardMusicSyncService.triggerSync()).rejects.toThrow();
-      expect(Toaster.showToast).toHaveBeenCalledWith('Team not found', expect.any(String));
+      await expect(ClipboardMusicSyncService.triggerSync()).rejects.toEqual(apiError);
+      expect(Toaster.showToast).toHaveBeenCalledWith('Team not found', 'error');
     });
 
     it('shows generic error message when details are unavailable', async () => {
       (AppService.post as jest.Mock).mockRejectedValue({});
 
-      await expect(ClipboardMusicSyncService.triggerSync()).rejects.toThrow();
-      expect(Toaster.showToast).toHaveBeenCalledWith('Failed to trigger music sync', expect.any(String));
+      await expect(ClipboardMusicSyncService.triggerSync()).rejects.toEqual({});
+      expect(Toaster.showToast).toHaveBeenCalledWith('Failed to trigger music sync', 'error');
     });
 
     it('passes additional params to API request', async () => {
@@ -233,7 +234,7 @@ describe('ClipboardMusicSyncService', () => {
       (AppService.get as jest.Mock).mockRejectedValue(apiError);
 
       await expect(ClipboardMusicSyncService.pollSyncStatus(1)).rejects.toThrow('Poll failed');
-      expect(Toaster.error).toHaveBeenCalledWith('Poll failed');
+      expect(Toaster.showToast).toHaveBeenCalledWith('Poll failed', 'error');
     });
 
     it('shows detailed error message from API', async () => {
@@ -246,8 +247,8 @@ describe('ClipboardMusicSyncService', () => {
       };
       (AppService.get as jest.Mock).mockRejectedValue(apiError);
 
-      await expect(ClipboardMusicSyncService.pollSyncStatus(1)).rejects.toThrow();
-      expect(Toaster.error).toHaveBeenCalledWith('Message not found');
+      await expect(ClipboardMusicSyncService.pollSyncStatus(1)).rejects.toEqual(apiError);
+      expect(Toaster.showToast).toHaveBeenCalledWith('Message not found', 'error');
     });
 
     it('passes additional params to API request', async () => {

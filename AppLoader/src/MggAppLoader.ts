@@ -105,6 +105,15 @@ class SchoolBoxAppLoader {
   #getRemoteUrlFromCurrentPage() {
     try {
       const currentUrl = new URL(window.location.href);
+      return this.#decodeRemoteUrlFromUrl(currentUrl);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  #decodeRemoteUrlFromUrl(url: URL) {
+    try {
+      const currentUrl = new URL(url.href);
       const matched = currentUrl.pathname.match(/^\/modules\/remote\/([^/?#]+)/);
       if (!matched || !matched[1]) {
         return null;
@@ -128,19 +137,28 @@ class SchoolBoxAppLoader {
     const remoteSrc = `${iFrame?.src || ''}`.trim();
     if (remoteSrc !== '') {
       try {
-        return new URL(remoteSrc);
+        const remoteSrcUrl = new URL(remoteSrc);
+        const decodedRemoteUrl = this.#decodeRemoteUrlFromUrl(remoteSrcUrl);
+        if (decodedRemoteUrl) {
+          return new URL(decodedRemoteUrl);
+        }
+        return remoteSrcUrl;
       } catch (error) {
         return null;
       }
     }
-    return this.#getRemoteUrlFromCurrentPage();
+    const currentPageRemoteUrl = this.#getRemoteUrlFromCurrentPage();
+    if (!currentPageRemoteUrl) {
+      return null;
+    }
+    try {
+      return new URL(currentPageRemoteUrl);
+    } catch (error) {
+      return null;
+    }
   }
 
   #shouldBypassLoader(config: iSchoolBoxAppLoaderConfig = {}) {
-    const currentPageParts = this.#getRemoteUrlFromCurrentPage();
-    if (!currentPageParts) {
-      return false;
-    }
     const allowedHosts = this.#getNormalizedHosts(config);
     if (allowedHosts.length <= 0) {
       return false;
@@ -185,6 +203,17 @@ class SchoolBoxAppLoader {
 
   init(appScriptUrl: string, config: iSchoolBoxAppLoaderConfig = {}){
     if (this.#shouldBypassLoader(config)) {
+      const remoteIframe = this.#getRemoteIframe();
+      // Some SchoolBox pages still render the remote iframe shell without a usable src.
+      // In that case, bypass should redirect the current page directly as well.
+      // @ts-ignore
+      const remoteIframeSrc = `${remoteIframe?.src || ''}`.trim();
+      if (!remoteIframe || remoteIframeSrc === '') {
+        const remoteUrl = this.#getRemoteUrlFromCurrentPage();
+        if (remoteUrl) {
+          window.location.replace(remoteUrl);
+        }
+      }
       return;
     }
     const loadCss = this.#checkAndInitHtml();

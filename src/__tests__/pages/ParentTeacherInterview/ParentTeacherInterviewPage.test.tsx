@@ -1,0 +1,264 @@
+import React from 'react';
+import {useSelector} from 'react-redux';
+import {fireEvent, render, screen, waitFor} from '@testing-library/react';
+import mockComponentTestHelper from '../../helper/ComponentTestHelper';
+import {PageNotFoundKey, PageNotFoundTestId} from '../../../components/__mocks__/PageNotFound';
+import {PageKey, PageTestId} from '../../../layouts/__mocks__/Page';
+import ParentTeacherInterviewPage from '../../../pages/ParentTeacherInterview/ParentTeacherInterviewPage';
+import SynVStaffService from '../../../services/Synergetic/SynVStaffService';
+import SynLuStaffCategoryService from '../../../services/Synergetic/Lookup/SynLuStaffCategoryService';
+import Toaster from '../../../services/Toaster';
+import MggsModuleService from '../../../services/Module/MggsModuleService';
+import AuthService from '../../../services/AuthService';
+import ParentTeacherInterviewCalendarService from '../../../services/ParentTeacherInterview/ParentTeacherInterviewCalendarService';
+
+const flattenNodeText = (node: any): string => {
+  if (node === null || node === undefined || typeof node === 'boolean') {
+    return '';
+  }
+  if (typeof node === 'string' || typeof node === 'number') {
+    return `${node}`;
+  }
+  if (Array.isArray(node)) {
+    return node.map(flattenNodeText).join('');
+  }
+  if (React.isValidElement(node)) {
+    return flattenNodeText(node.props.children);
+  }
+  return '';
+};
+
+jest.mock('../../../layouts/Page');
+jest.mock('../../../pages/ParentTeacherInterview/ParentTeacherInterviewAdminPage');
+jest.mock('../../../components/PageNotFound');
+jest.mock('../../../services/Synergetic/SynVStaffService', () => ({
+  __esModule: true,
+  default: {
+    getStaffList: jest.fn(),
+  },
+}));
+jest.mock('../../../services/Synergetic/Lookup/SynLuStaffCategoryService', () => ({
+  __esModule: true,
+  default: {
+    getAll: jest.fn(),
+  },
+}));
+jest.mock('../../../services/Toaster', () => ({
+  showApiError: jest.fn(),
+}));
+jest.mock('../../../services/Module/MggsModuleService', () => ({
+  __esModule: true,
+  default: {
+    getModule: jest.fn(),
+  },
+}));
+jest.mock('../../../services/AuthService', () => ({
+  __esModule: true,
+  default: {
+    isModuleRole: jest.fn(),
+  },
+}));
+jest.mock('../../../services/ParentTeacherInterview/ParentTeacherInterviewCalendarService', () => ({
+  __esModule: true,
+  default: {
+    getCalendarEvents: jest.fn(),
+    createCalendarEvent: jest.fn(),
+  },
+}));
+jest.mock('react-redux', () => ({
+  ...jest.requireActual('react-redux'),
+  useSelector: jest.fn(),
+}));
+
+describe('ParentTeacherInterviewPage', () => {
+  mockComponentTestHelper.prepare();
+  const mockedUseSelector = useSelector as jest.Mock;
+  const mockedStaffService = SynVStaffService as jest.Mocked<typeof SynVStaffService>;
+  const mockedCategoryService = SynLuStaffCategoryService as jest.Mocked<typeof SynLuStaffCategoryService>;
+  const mockedToaster = Toaster as jest.Mocked<typeof Toaster>;
+  const mockedModuleService = MggsModuleService as jest.Mocked<typeof MggsModuleService>;
+  const mockedAuthService = AuthService as jest.Mocked<typeof AuthService>;
+  const mockedCalendarService = ParentTeacherInterviewCalendarService as jest.Mocked<typeof ParentTeacherInterviewCalendarService>;
+
+  beforeEach(() => {
+    mockedUseSelector.mockImplementation((selector: any) => selector({
+      auth: {
+        user: {
+          synergyId: 12345,
+        },
+      },
+    }));
+    mockedStaffService.getStaffList.mockResolvedValue([
+      {
+        StaffID: 1001,
+        StaffNameInternal: 'Ada Lovelace',
+        StaffPreferredName: 'Ada',
+        SchoolStaffCode: 'AL',
+        StaffOccupEmail: 'ada@example.com',
+        StaffCategory: 'TEACH',
+        StaffCategoryDescription: 'Teaching Staff',
+      },
+      {
+        StaffID: 1002,
+        StaffNameInternal: 'Grace Hopper',
+        StaffPreferredName: 'Grace',
+        SchoolStaffCode: 'GH',
+        StaffOccupEmail: 'grace@example.com',
+        StaffCategory: 'LEAD',
+        StaffCategoryDescription: 'Leadership',
+      },
+    ] as any);
+    mockedCategoryService.getAll.mockResolvedValue([
+      {Code: 'TEACH', Description: 'Teaching Staff'},
+      {Code: 'LEAD', Description: 'Leadership'},
+    ] as any);
+    mockedModuleService.getModule.mockResolvedValue({
+      settings: {
+        parentTeacherInterviewCalendar: {
+          startDateTime: '2026-07-01T09:00',
+          endDateTime: '2026-07-01T10:00',
+          subject: 'PTI Subject',
+          bodyText: 'PTI Body',
+        },
+      },
+    } as any);
+    mockedAuthService.isModuleRole.mockResolvedValue(true as any);
+    mockedCalendarService.getCalendarEvents.mockResolvedValue({
+      events: [],
+    } as any);
+    mockedCalendarService.createCalendarEvent.mockResolvedValue({
+      outcome: 'CREATED',
+      message: 'Created successfully',
+      event: {
+        subject: 'PTI Subject',
+        startDateTime: '2026-07-01T09:00:00+10:00',
+        endDateTime: '2026-07-01T10:00:00+10:00',
+        teamsJoinUrl: 'https://teams.example.com/created',
+      },
+    } as any);
+  });
+
+  test('renders page composition', async () => {
+    const {container} = render(<ParentTeacherInterviewPage />);
+
+    expect(screen.getByTestId(PageTestId)).toBeInTheDocument();
+    expect(mockComponentTestHelper.get(PageKey).length).toBeGreaterThan(0);
+    await waitFor(() => expect(mockedStaffService.getStaffList).toHaveBeenCalled());
+    expect(container).not.toBeEmptyDOMElement();
+  });
+
+  test('loads active teaching staff and category options on mount', async () => {
+    render(<ParentTeacherInterviewPage />);
+
+    await waitFor(() => expect(mockedStaffService.getStaffList).toHaveBeenCalled());
+    expect(mockedStaffService.getStaffList).toHaveBeenCalledWith({
+      where: JSON.stringify({
+        ActiveFlag: true,
+        StaffDepartment: ['TS'],
+      }),
+    });
+    expect(mockedCategoryService.getAll).toHaveBeenCalled();
+    expect(mockedModuleService.getModule).toHaveBeenCalled();
+  });
+
+  test('filters by search/category and projects selected staff into step two', async () => {
+    render(<ParentTeacherInterviewPage />);
+
+    await waitFor(() => expect(screen.getByText('Ada Lovelace')).toBeInTheDocument());
+
+    fireEvent.change(screen.getByLabelText('Search staff'), {target: {value: 'Grace'}});
+    expect(screen.queryByText('Ada Lovelace')).not.toBeInTheDocument();
+    expect(screen.getByText('Grace Hopper')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByLabelText('Select Grace Hopper'));
+    fireEvent.click(screen.getByRole('button', {name: 'Next'}));
+
+    expect(screen.getByText('Schedule Parent Teacher Interview')).toBeInTheDocument();
+    expect(screen.getByLabelText('Starting datetime for Grace Hopper')).toHaveValue('2026-07-01T09:00');
+    expect(screen.getByLabelText('Ending datetime for Grace Hopper')).toHaveValue('2026-07-01T10:00');
+    await waitFor(() => expect(mockedCalendarService.getCalendarEvents).toHaveBeenCalled());
+  });
+
+  test('shows failure state and toasts when load fails', async () => {
+    mockedStaffService.getStaffList.mockRejectedValueOnce(new Error('load failed'));
+
+    render(<ParentTeacherInterviewPage />);
+
+    await waitFor(() => expect(screen.getByText('Unable to load teaching staff.')).toBeInTheDocument());
+    expect(mockedToaster.showApiError).toHaveBeenCalled();
+  });
+
+  test('retrieves existing events automatically and submits create for admins', async () => {
+    mockedCalendarService.getCalendarEvents.mockResolvedValueOnce({
+      events: [
+        {
+          id: 'evt-1',
+          subject: 'Existing meeting',
+          startDateTime: '2026-07-01T09:15:00+10:00',
+          endDateTime: '2026-07-01T09:45:00+10:00',
+          organizer: {name: 'Ada Lovelace', address: 'ada@example.com'},
+          isOnlineMeeting: true,
+          teamsJoinUrl: 'https://teams.example.com/existing',
+        },
+      ],
+    } as any);
+
+    render(<ParentTeacherInterviewPage />);
+
+    await waitFor(() => expect(screen.getByText('Ada Lovelace')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByLabelText('Select Ada Lovelace'));
+    fireEvent.click(screen.getByRole('button', {name: 'Next'}));
+
+    fireEvent.change(screen.getByLabelText('Starting datetime for Ada Lovelace'), {target: {value: '2026-07-01T09:00'}});
+    fireEvent.change(screen.getByLabelText('Ending datetime for Ada Lovelace'), {target: {value: '2026-07-01T10:00'}});
+
+    await waitFor(() => expect(mockedCalendarService.getCalendarEvents).toHaveBeenCalled());
+    await waitFor(() => expect(screen.getByText(/Existing meeting/)).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole('button', {name: 'Create link(s) for 1 staff'}));
+    fireEvent.change(screen.getByPlaceholderText('12345'), {target: {value: '12345'}});
+    fireEvent.click(screen.getByRole('button', {name: 'Create event links'}));
+
+    await waitFor(() => expect(mockedCalendarService.createCalendarEvent).toHaveBeenCalled());
+    expect(screen.getByText('Staff Email')).toBeInTheDocument();
+    expect(screen.getByText('ada@example.com')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText('Interview Meeting')).toBeInTheDocument());
+    expect(screen.queryByText('Interview Start Time')).not.toBeInTheDocument();
+    expect(screen.queryByText('Interview End Time')).not.toBeInTheDocument();
+    expect(screen.getByText('PTI Subject')).toBeInTheDocument();
+    expect(screen.getByText('01/07/2026 09:00 - 01/07/2026 10:00')).toBeInTheDocument();
+    expect(screen.queryByText('Created successfully')).not.toBeInTheDocument();
+    expect(screen.getByRole('link', {name: 'Link'})).toHaveAttribute(
+      'href',
+      'https://teams.example.com/created'
+    );
+  });
+
+  test('hides staff selection and shows empty state when required defaults are missing', async () => {
+    mockedAuthService.isModuleRole.mockResolvedValueOnce(false as any);
+    mockedModuleService.getModule.mockResolvedValueOnce({
+      settings: {
+        parentTeacherInterviewCalendar: {
+          bodyText: 'PTI Body',
+        },
+      },
+    } as any);
+
+    render(<ParentTeacherInterviewPage />);
+
+    await waitFor(() => expect(screen.getByTestId(PageNotFoundTestId)).toBeInTheDocument());
+    const pageNotFoundProps = mockComponentTestHelper.get(PageNotFoundKey)[0];
+    expect(pageNotFoundProps).toMatchObject({
+      title: 'Parent Teacher Interview defaults are incomplete',
+    });
+    const descriptionText = flattenNodeText(pageNotFoundProps.description);
+    expect(descriptionText).toContain('Missing fields: Subject');
+    expect(descriptionText).toContain('Default Interview Start Time');
+    expect(descriptionText).toContain('Default Interview End Time');
+    expect(descriptionText).not.toContain('Set these default values in module settings before selecting staff.');
+    expect(screen.queryByLabelText('Search staff')).not.toBeInTheDocument();
+    expect(screen.queryByText('Ada Lovelace')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', {name: 'Next'})).not.toBeInTheDocument();
+  });
+});

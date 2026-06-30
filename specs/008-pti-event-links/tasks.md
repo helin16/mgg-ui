@@ -12,9 +12,9 @@
 
 **Purpose**: Establish the feature file layout and test targets before blocking implementation begins.
 
-- [ ] T001 Create feature folders for `src/pages/ParentTeacherInterview/`, `src/pages/ParentTeacherInterview/components/`, `src/services/ParentTeacherInterview/`, `src/types/ParentTeacherInterview/`, and matching `src/__tests__/pages/ParentTeacherInterview/` + `src/__tests__/services/ParentTeacherInterview/`
-- [ ] T002 Create Cypress spec placeholder `cypress/e2e/ParentTeacherInterview/ParentTeacherInterviewEventLinks.cy.ts`
-- [ ] T003 [P] Capture the impacted routing, module, service, and verification files in `specs/008-pti-event-links/tasks.md` and align them with [plan.md](plan.md)
+- [X] T001 Create feature folders for `src/pages/ParentTeacherInterview/`, `src/pages/ParentTeacherInterview/components/`, `src/services/ParentTeacherInterview/`, `src/types/ParentTeacherInterview/`, and matching `src/__tests__/pages/ParentTeacherInterview/` + `src/__tests__/services/ParentTeacherInterview/`
+- [X] T002 Create Cypress spec placeholder `cypress/e2e/ParentTeacherInterview/ParentTeacherInterviewEventLinks.cy.ts`
+- [X] T003 [P] Capture the impacted routing, module, service, and verification files in `specs/008-pti-event-links/tasks.md` and align them with [plan.md](plan.md)
 
 ---
 
@@ -24,22 +24,22 @@
 
 **⚠️ CRITICAL**: No user story work should begin until this phase is complete.
 
-- [ ] T004 Add `MGGS_MODULE_ID_PARENT_TEACHER_INTERVIEW = 24` to `src/types/modules/iModuleUser.ts`
-- [ ] T005 Add `SchoolBoxUrls.ParentTeacherInterview = '/parentTeacherInterview'` to `src/layouts/SchoolBox/SchoolBoxUrls.ts`
-- [ ] T006 Update `src/layouts/SchoolBox/SchoolBoxRouter.tsx` to route `SchoolBoxUrls.ParentTeacherInterview` through `ModuleAccessWrapper` to `src/pages/ParentTeacherInterview/ParentTeacherInterviewPage.tsx`
-- [ ] T007 Create `src/types/Synergetic/Lookup/SynLuDepartmentCodes.ts` with `TS = 'TS'`
-- [ ] T008 [P] Create `src/types/ParentTeacherInterview/iParentTeacherInterviewCalendarEventSummary.ts`
-- [ ] T009 [P] Create `src/types/ParentTeacherInterview/iParentTeacherInterviewCalendarEventsResponse.ts`
-- [ ] T010 [P] Create `src/types/ParentTeacherInterview/iParentTeacherInterviewCreateCalendarEventRequest.ts`
-- [ ] T011 [P] Create `src/types/ParentTeacherInterview/iParentTeacherInterviewCreateCalendarEventResponse.ts`
-- [ ] T012 [P] Create `src/types/ParentTeacherInterview/iParentTeacherInterviewModuleSettings.ts`
-- [ ] T013 [P] Create `src/types/ParentTeacherInterview/iParentTeacherInterviewScheduleRow.ts`
-- [ ] T014 Create `src/services/ParentTeacherInterview/ParentTeacherInterviewCalendarService.ts` using `AppService.get`/`AppService.post` for `/parentTeacherInterview/calendarEvents`
-- [ ] T015 Create the page shell `src/pages/ParentTeacherInterview/ParentTeacherInterviewPage.tsx` using `Page` with `moduleId={MGGS_MODULE_ID_PARENT_TEACHER_INTERVIEW}`
-- [ ] T016 Create the admin shell `src/pages/ParentTeacherInterview/ParentTeacherInterviewAdminPage.tsx` using `AdminPage` with `moduleId={MGGS_MODULE_ID_PARENT_TEACHER_INTERVIEW}`
-- [ ] T017 [P] Add router coverage for the new SchoolBox URL and module wrapper in `src/__tests__/layouts/SchoolBox/SchoolBoxRouter.test.tsx`
-- [ ] T018 [P] Add constant coverage for the new SchoolBox URL in `src/__tests__/layouts/SchoolBox/SchoolBoxUrls.test.ts`
-- [ ] T019 [P] Add service coverage for `ParentTeacherInterviewCalendarService` in `src/__tests__/services/ParentTeacherInterview/ParentTeacherInterviewCalendarService.test.ts`
+- [X] T004 Add `MGGS_MODULE_ID_PARENT_TEACHER_INTERVIEW = 24` to `src/types/modules/iModuleUser.ts`
+- [X] T005 Add `SchoolBoxUrls.ParentTeacherInterview = '/parentTeacherInterview'` to `src/layouts/SchoolBox/SchoolBoxUrls.ts`
+- [X] T006 Update `src/layouts/SchoolBox/SchoolBoxRouter.tsx` to route `SchoolBoxUrls.ParentTeacherInterview` through `ModuleAccessWrapper` to `src/pages/ParentTeacherInterview/ParentTeacherInterviewPage.tsx`
+- [X] T007 Create `src/types/Synergetic/Lookup/SynLuDepartmentCodes.ts` with `TS = 'TS'`
+- [X] T008 [P] Create `src/types/ParentTeacherInterview/iParentTeacherInterviewCalendarEventSummary.ts`
+- [X] T009 [P] Create `src/types/ParentTeacherInterview/iParentTeacherInterviewCalendarEventsResponse.ts`
+- [X] T010 [P] Create `src/types/ParentTeacherInterview/iParentTeacherInterviewCreateCalendarEventRequest.ts`
+- [X] T011 [P] Create `src/types/ParentTeacherInterview/iParentTeacherInterviewCreateCalendarEventResponse.ts`
+- [X] T012 [P] Create `src/types/ParentTeacherInterview/iParentTeacherInterviewModuleSettings.ts`
+- [X] T013 [P] Create `src/types/ParentTeacherInterview/iParentTeacherInterviewScheduleRow.ts`
+- [X] T014 Create `src/services/ParentTeacherInterview/ParentTeacherInterviewCalendarService.ts` using `AppService.get`/`AppService.post` for `/parentTeacherInterview/calendarEvents`
+- [X] T015 Create the page shell `src/pages/ParentTeacherInterview/ParentTeacherInterviewPage.tsx` using `Page` with `moduleId={MGGS_MODULE_ID_PARENT_TEACHER_INTERVIEW}`
+- [X] T016 Create the admin shell `src/pages/ParentTeacherInterview/ParentTeacherInterviewAdminPage.tsx` using `AdminPage` with `moduleId={MGGS_MODULE_ID_PARENT_TEACHER_INTERVIEW}`
+- [X] T017 [P] Add router coverage for the new SchoolBox URL and module wrapper in `src/__tests__/layouts/SchoolBox/SchoolBoxRouter.test.tsx`
+- [X] T018 [P] Add constant coverage for the new SchoolBox URL in `src/__tests__/layouts/SchoolBox/SchoolBoxUrls.test.ts`
+- [X] T019 [P] Add service coverage for `ParentTeacherInterviewCalendarService` in `src/__tests__/services/ParentTeacherInterview/ParentTeacherInterviewCalendarService.test.ts`
 
 **Checkpoint**: Route, module, typed contracts, and calendar service are ready. User stories can now be implemented.
 
@@ -53,16 +53,16 @@
 
 ### Verification for User Story 1
 
-- [ ] T020 [P] [US1] Add page and component tests for staff list load, search, filters, and selection behavior in `src/__tests__/pages/ParentTeacherInterview/ParentTeacherInterviewPage.test.tsx` and `src/__tests__/pages/ParentTeacherInterview/components/ParentTeacherInterviewStaffSelectionPanel.test.tsx`
+- [X] T020 [P] [US1] Add page and component tests for staff list load, search, filters, and selection behavior in `src/__tests__/pages/ParentTeacherInterview/ParentTeacherInterviewPage.test.tsx` and `src/__tests__/pages/ParentTeacherInterview/components/ParentTeacherInterviewStaffSelectionPanel.test.tsx`
 - [ ] T021 [US1] Add Cypress coverage for authorized page access, search, category filtering, and header checkbox behavior in `cypress/e2e/ParentTeacherInterview/ParentTeacherInterviewEventLinks.cy.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T022 [US1] Create `src/pages/ParentTeacherInterview/components/ParentTeacherInterviewStaffSelectionPanel.tsx` with the shared `Table` component using hover, responsive, and striped rows
-- [ ] T023 [US1] Implement staff loading and search/category filtering in `src/pages/ParentTeacherInterview/ParentTeacherInterviewPage.tsx` using `SynVStaffService.getStaffList(...)`, `SynLuStaffCategoryService.getAll(...)`, and `SynLuDepartmentCodes.TS`
-- [ ] T024 [US1] Implement row selection, header checkbox selection, and visible-row selection semantics in `src/pages/ParentTeacherInterview/components/ParentTeacherInterviewStaffSelectionPanel.tsx`
-- [ ] T025 [US1] Add first-step loading, empty, and failure states with `Toaster` and inline UI handling in `src/pages/ParentTeacherInterview/ParentTeacherInterviewPage.tsx`
-- [ ] T026 [US1] Wire the `Next` action and selected-staff projection from `src/pages/ParentTeacherInterview/ParentTeacherInterviewPage.tsx` into schedule-row state defined by `src/types/ParentTeacherInterview/iParentTeacherInterviewScheduleRow.ts`
+- [X] T022 [US1] Create `src/pages/ParentTeacherInterview/components/ParentTeacherInterviewStaffSelectionPanel.tsx` with the shared `Table` component using hover, responsive, and striped rows
+- [X] T023 [US1] Implement staff loading and search/category filtering in `src/pages/ParentTeacherInterview/ParentTeacherInterviewPage.tsx` using `SynVStaffService.getStaffList(...)`, `SynLuStaffCategoryService.getAll(...)`, and `SynLuDepartmentCodes.TS`
+- [X] T024 [US1] Implement row selection, header checkbox selection, and visible-row selection semantics in `src/pages/ParentTeacherInterview/components/ParentTeacherInterviewStaffSelectionPanel.tsx`
+- [X] T025 [US1] Add first-step loading, empty, and failure states with `Toaster` and inline UI handling in `src/pages/ParentTeacherInterview/ParentTeacherInterviewPage.tsx`
+- [X] T026 [US1] Wire the `Next` action and selected-staff projection from `src/pages/ParentTeacherInterview/ParentTeacherInterviewPage.tsx` into schedule-row state defined by `src/types/ParentTeacherInterview/iParentTeacherInterviewScheduleRow.ts`
 
 **Checkpoint**: User Story 1 should now be fully functional and independently testable.
 
@@ -76,16 +76,16 @@
 
 ### Verification for User Story 2
 
-- [ ] T027 [P] [US2] Add component tests for datetime validation, retrieval-state transitions, and inline event rendering in `src/__tests__/pages/ParentTeacherInterview/components/ParentTeacherInterviewSchedulePanel.test.tsx`
+- [X] T027 [P] [US2] Add component tests for datetime validation, retrieval-state transitions, and inline event rendering in `src/__tests__/pages/ParentTeacherInterview/components/ParentTeacherInterviewSchedulePanel.test.tsx`
 - [ ] T028 [US2] Extend Cypress coverage for the step transition, local-time validation, automatic retrieval, empty retrieval, and retrieval retry behavior in `cypress/e2e/ParentTeacherInterview/ParentTeacherInterviewEventLinks.cy.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T029 [US2] Create `src/pages/ParentTeacherInterview/components/ParentTeacherInterviewSchedulePanel.tsx` to render the selected-staff schedule table with start/end datetime inputs
-- [ ] T030 [US2] Implement browser-local datetime parsing/validation and row-level create eligibility rules in `src/pages/ParentTeacherInterview/components/ParentTeacherInterviewSchedulePanel.tsx`
-- [ ] T031 [US2] Implement automatic retrieval-on-valid-datetime-change in `src/pages/ParentTeacherInterview/components/ParentTeacherInterviewSchedulePanel.tsx` using `ParentTeacherInterviewCalendarService.getCalendarEvents(...)`
-- [ ] T032 [US2] Render inline retrieval states and compact existing-event rows beneath each selected staff row in `src/pages/ParentTeacherInterview/components/ParentTeacherInterviewSchedulePanel.tsx`
-- [ ] T033 [US2] Update `src/pages/ParentTeacherInterview/ParentTeacherInterviewPage.tsx` to hold schedule-step state, stale-retrieval refresh behavior, and retry callbacks for failed retrieval rows
+- [X] T029 [US2] Create `src/pages/ParentTeacherInterview/components/ParentTeacherInterviewSchedulePanel.tsx` to render the selected-staff schedule table with start/end datetime inputs
+- [X] T030 [US2] Implement browser-local datetime parsing/validation and row-level create eligibility rules in `src/pages/ParentTeacherInterview/components/ParentTeacherInterviewSchedulePanel.tsx`
+- [X] T031 [US2] Implement automatic retrieval-on-valid-datetime-change in `src/pages/ParentTeacherInterview/components/ParentTeacherInterviewSchedulePanel.tsx` using `ParentTeacherInterviewCalendarService.getCalendarEvents(...)`
+- [X] T032 [US2] Render inline retrieval states and compact existing-event rows beneath each selected staff row in `src/pages/ParentTeacherInterview/components/ParentTeacherInterviewSchedulePanel.tsx`
+- [X] T033 [US2] Update `src/pages/ParentTeacherInterview/ParentTeacherInterviewPage.tsx` to hold schedule-step state, stale-retrieval refresh behavior, and retry callbacks for failed retrieval rows
 
 **Checkpoint**: User Story 2 should now be fully functional and independently testable.
 
@@ -99,16 +99,16 @@
 
 ### Verification for User Story 3
 
-- [ ] T034 [P] [US3] Add tests for create gating, missing-settings handling, non-admin explanation, duplicate-submit prevention, and mixed outcomes in `src/__tests__/pages/ParentTeacherInterview/ParentTeacherInterviewPage.test.tsx`
+- [X] T034 [P] [US3] Add tests for create gating, missing-settings handling, non-admin explanation, duplicate-submit prevention, and mixed outcomes in `src/__tests__/pages/ParentTeacherInterview/ParentTeacherInterviewPage.test.tsx`
 - [ ] T035 [US3] Extend Cypress coverage for admin create submission, mixed API outcomes, duplicate-submit prevention, and missing-settings blocking in `cypress/e2e/ParentTeacherInterview/ParentTeacherInterviewEventLinks.cy.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T036 [US3] Load `module.settings.parentTeacherInterviewCalendar.subject/bodyText` via `MggsModuleService.getModule(...)` in `src/pages/ParentTeacherInterview/ParentTeacherInterviewPage.tsx`
-- [ ] T037 [US3] Implement create-action gating and non-admin explanation state in `src/pages/ParentTeacherInterview/ParentTeacherInterviewPage.tsx`
-- [ ] T038 [US3] Implement bulk per-row create submission in `src/pages/ParentTeacherInterview/ParentTeacherInterviewPage.tsx` using `ParentTeacherInterviewCalendarService.createCalendarEvent(...)`
-- [ ] T039 [US3] Implement duplicate-submit prevention, submit loading state, and selected-count button label in `src/pages/ParentTeacherInterview/ParentTeacherInterviewPage.tsx`
-- [ ] T040 [US3] Render `CREATED`, `EXISTS`, and `FAILED` per-staff outcomes, meeting links, and failure categories/messages in `src/pages/ParentTeacherInterview/components/ParentTeacherInterviewSchedulePanel.tsx`
+- [X] T036 [US3] Load `module.settings.parentTeacherInterviewCalendar.subject/bodyText` via `MggsModuleService.getModule(...)` in `src/pages/ParentTeacherInterview/ParentTeacherInterviewPage.tsx`
+- [X] T037 [US3] Implement create-action gating and non-admin explanation state in `src/pages/ParentTeacherInterview/ParentTeacherInterviewPage.tsx`
+- [X] T038 [US3] Implement bulk per-row create submission in `src/pages/ParentTeacherInterview/ParentTeacherInterviewPage.tsx` using `ParentTeacherInterviewCalendarService.createCalendarEvent(...)`
+- [X] T039 [US3] Implement duplicate-submit prevention, submit loading state, and selected-count button label in `src/pages/ParentTeacherInterview/ParentTeacherInterviewPage.tsx`
+- [X] T040 [US3] Render `CREATED`, `EXISTS`, and `FAILED` per-staff outcomes, meeting links, and failure categories/messages in `src/pages/ParentTeacherInterview/components/ParentTeacherInterviewSchedulePanel.tsx`
 
 **Checkpoint**: User Story 3 should now be fully functional and independently testable.
 
@@ -122,14 +122,14 @@
 
 ### Verification for User Story 4
 
-- [ ] T041 [P] [US4] Add admin-page/settings tests for role restriction and required subject/body fields in `src/__tests__/pages/ParentTeacherInterview/ParentTeacherInterviewAdminPage.test.tsx` and `src/__tests__/pages/ParentTeacherInterview/components/ParentTeacherInterviewModuleSettingsPanel.test.tsx`
+- [X] T041 [P] [US4] Add admin-page/settings tests for role restriction and required subject/body fields in `src/__tests__/pages/ParentTeacherInterview/ParentTeacherInterviewAdminPage.test.tsx` and `src/__tests__/pages/ParentTeacherInterview/components/ParentTeacherInterviewModuleSettingsPanel.test.tsx`
 - [ ] T042 [US4] Add Cypress or documented manual verification for denied-access and admin-settings save flow in `cypress/e2e/ParentTeacherInterview/ParentTeacherInterviewEventLinks.cy.ts`
 
 ### Implementation for User Story 4
 
-- [ ] T043 [US4] Create `src/pages/ParentTeacherInterview/components/ParentTeacherInterviewModuleSettingsPanel.tsx` using `ModuleEditPanel` to edit `parentTeacherInterviewCalendar.subject` and `.bodyText`
-- [ ] T044 [US4] Complete `src/pages/ParentTeacherInterview/ParentTeacherInterviewAdminPage.tsx` by wiring in `ParentTeacherInterviewModuleSettingsPanel` and any admin tabs/sections required by the page shell
-- [ ] T045 [US4] Update `src/pages/ParentTeacherInterview/ParentTeacherInterviewPage.tsx` so the main page/admin page split mirrors the Enrolments/Staff List pattern and denied access follows existing wrappers
+- [X] T043 [US4] Create `src/pages/ParentTeacherInterview/components/ParentTeacherInterviewModuleSettingsPanel.tsx` using `ModuleEditPanel` to edit `parentTeacherInterviewCalendar.subject` and `.bodyText`
+- [X] T044 [US4] Complete `src/pages/ParentTeacherInterview/ParentTeacherInterviewAdminPage.tsx` by wiring in `ParentTeacherInterviewModuleSettingsPanel` and any admin tabs/sections required by the page shell
+- [X] T045 [US4] Update `src/pages/ParentTeacherInterview/ParentTeacherInterviewPage.tsx` so the main page/admin page split mirrors the Enrolments/Staff List pattern and denied access follows existing wrappers
 
 **Checkpoint**: User Story 4 should now be fully functional and independently testable.
 

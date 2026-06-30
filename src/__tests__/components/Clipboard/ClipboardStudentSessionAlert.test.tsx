@@ -7,8 +7,6 @@ import SynTimetableDefinitionService from '../../../services/Synergetic/TimeTabl
 import ClipboardSessionService from '../../../services/Clipboard/ClipboardSessionService';
 import ClipboardAttendanceService from '../../../services/Clipboard/ClipboardAttendanceService';
 import Toaster from '../../../services/Toaster';
-import * as ClipboardUrlBuilder from '../../../services/Clipboard/ClipboardUrlBuilder';
-import { MAX_PAGE_SIZE } from '../../../services/AppService';
 
 jest.mock('../../../services/Synergetic/Student/SynVStudentClassService', () => ({
   __esModule: true,
@@ -43,11 +41,6 @@ jest.mock('../../../services/Toaster', () => ({
   default: {
     showApiError: jest.fn(),
   },
-}));
-
-jest.mock('../../../services/Clipboard/ClipboardUrlBuilder', () => ({
-  __esModule: true,
-  getSessionUrl: jest.fn((id) => `https://go.clipboard.app/schedule/session/${id}`),
 }));
 
 const mockedStudentClassService = SynVStudentClassService as jest.Mocked<typeof SynVStudentClassService>;
@@ -720,7 +713,7 @@ describe('ClipboardStudentSessionAlert', () => {
           includeStatuses: ['confirmed'],
           includeTeams: true,
           includeStaff: true,
-          perPage: MAX_PAGE_SIZE,
+          pageLength: 200,
         })
       );
     });
@@ -1112,7 +1105,7 @@ describe('ClipboardStudentSessionAlert', () => {
           startDateTime: expect.any(String),
           endDateTime: expect.any(String),
           absent: false,
-          pageLength: 300, // Clipboard API max page length
+          pageLength: 200,
         })
       );
     });

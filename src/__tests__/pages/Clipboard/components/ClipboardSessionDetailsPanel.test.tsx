@@ -174,7 +174,7 @@ describe('ClipboardSessionDetailsPanel', () => {
     render(<ClipboardSessionDetailsPanel teamId={1} />);
 
     await waitFor(() => {
-      expect(screen.getByText(/No session details available/i)).toBeInTheDocument();
+      expect(screen.getByText(/Failed to load session/i)).toBeInTheDocument();
     });
   });
 

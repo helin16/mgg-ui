@@ -3,6 +3,7 @@ enum SchoolBoxUrls {
   MyClassList = '/my_student',
   Finance = '/finance',
   Clipboard = '/clipboard',
+  ParentTeacherInterview = '/parentTeacherInterview',
   ModuleUrlHelper = '/helper/url/mconnect',
   DataSubmission = '/school_data_submission',
   MobileAppDevices = '/mobile_devices',

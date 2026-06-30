@@ -5,6 +5,7 @@ describe('SchoolBoxUrls', () => {
 
     expect(SchoolBoxUrls.BudgetTracker).toBe('/bt');
     expect(SchoolBoxUrls.Finance).toBe('/finance');
+    expect(SchoolBoxUrls.ParentTeacherInterview).toBe('/parentTeacherInterview');
     expect(SchoolBoxUrls.DataSubmission).toBe('/school_data_submission');
     expect(SchoolBoxUrls.PowerBI).toBe('/powerbi/manager');
     expect(new Set(values).size).toBe(values.length);

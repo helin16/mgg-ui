@@ -4,7 +4,6 @@ import moment from 'moment-timezone';
 import ClipboardConcussionAlert from '../../../components/Clipboard/ClipboardConcussionAlert';
 import SynVStudentClassService from '../../../services/Synergetic/Student/SynVStudentClassService';
 import ClipboardIncidentService from '../../../services/Clipboard/ClipboardIncidentService';
-import * as ClipboardUrlBuilder from '../../../services/Clipboard/ClipboardUrlBuilder';
 
 jest.mock('../../../services/Synergetic/Student/SynVStudentClassService', () => ({
   __esModule: true,
@@ -25,11 +24,6 @@ jest.mock('../../../services/Toaster', () => ({
   default: {
     showApiError: jest.fn(),
   },
-}));
-
-jest.mock('../../../services/Clipboard/ClipboardUrlBuilder', () => ({
-  __esModule: true,
-  getIncidentUrl: jest.fn((id) => `https://go.clipboard.app/incidents/${id}`),
 }));
 
 const mockedStudentClassService = SynVStudentClassService as jest.Mocked<typeof SynVStudentClassService>;

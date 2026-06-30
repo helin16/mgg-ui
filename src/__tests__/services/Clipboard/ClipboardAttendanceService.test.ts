@@ -47,7 +47,10 @@ describe('ClipboardAttendanceService', () => {
 
       expect(mockAppService.get).toHaveBeenCalledWith(
         '/clipboard/attendance',
-        params,
+        {
+          ...params,
+          studentSisIds: JSON.stringify(params.studentSisIds),
+        },
         undefined
       );
     });

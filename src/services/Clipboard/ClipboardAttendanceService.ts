@@ -3,11 +3,14 @@ import iPaginatedResult from '../../types/iPaginatedResult';
 import iClipboardAttendance from '../../types/Clipboard/iClipboardAttendance';
 
 const endPoint = '/clipboard/attendance';
+const MAX_PAGE_SIZE = 200;
 
 export type iClipboardAttendanceQueryParams = {
   activityIds?: number[];
   departmentIds?: number[];
   studentSisIds?: string[];
+  includeSession?: boolean;
+  includeStudent?: boolean;
   timePeriod?: 'today' | 'yesterday' | 'last-week' | 'last-30-days' | 'last-90-days' | 'last-6-months' | 'this-year' | 'last-year' | 'custom';
   startDateTime?: string;
   endDateTime?: string;
@@ -30,6 +33,12 @@ const buildQueryString = (params: iClipboardAttendanceQueryParams): iConfigParam
   }
   if (params.studentSisIds && params.studentSisIds.length > 0) {
     query.studentSisIds = JSON.stringify(params.studentSisIds);
+  }
+  if (params.includeSession !== undefined) {
+    query.includeSession = params.includeSession;
+  }
+  if (params.includeStudent !== undefined) {
+    query.includeStudent = params.includeStudent;
   }
   if (params.timePeriod) {
     query.timePeriod = params.timePeriod;
@@ -72,9 +81,39 @@ const get = (id: string | number, params?: iClipboardAttendanceQueryParams, conf
   return AppService.get(`${endPoint}/${id}`, query, config).then(resp => resp.data);
 };
 
+const getAllRecords = async (
+  params?: Omit<iClipboardAttendanceQueryParams, 'pageLength' | 'page'>,
+  config?: iConfigParams
+): Promise<iClipboardAttendance[]> => {
+  const allRecords: iClipboardAttendance[] = [];
+  let currentPage = 1;
+  let totalPages = 1;
+
+  while (currentPage <= totalPages) {
+    const result = await getAll(
+      {
+        ...params,
+        pageLength: MAX_PAGE_SIZE,
+        page: currentPage,
+      },
+      config
+    );
+
+    if (result.data && result.data.length > 0) {
+      allRecords.push(...result.data);
+    }
+
+    totalPages = (result as any).pagination?.lastPage || (result as any).pages || 1;
+    currentPage++;
+  }
+
+  return allRecords;
+};
+
 const ClipboardAttendanceService = {
   getAll,
   get,
+  getAllRecords,
 };
 
 export default ClipboardAttendanceService;

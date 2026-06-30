@@ -18,6 +18,7 @@ describe('ClipboardSyncConfirmPopup', () => {
   const mockOnConfirm = jest.fn();
   const mockOnCancel = jest.fn();
   const teamName = 'Year 10 PE A';
+  let consoleErrorSpy: jest.SpyInstance;
 
   const mockSyncResponse = {
     id: 1,
@@ -29,6 +30,11 @@ describe('ClipboardSyncConfirmPopup', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    consoleErrorSpy.mockRestore();
   });
 
   it('does not render when show is false', () => {
