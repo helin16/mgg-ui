@@ -170,9 +170,7 @@ class SchoolBoxAppLoader {
     }
 
     try {
-      // @ts-expect-error
       const decodedHostname = `${decodedRemoteUrlObj?.hostname || ''}`.trim().toLowerCase();
-      // @ts-expect-error
       const decodedHost = `${decodedRemoteUrlObj?.host || ''}`.trim().toLowerCase();
       return allowedHosts.includes(decodedHost) || allowedHosts.includes(decodedHostname);
     } catch (error) {
