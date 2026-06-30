@@ -19,6 +19,7 @@ type iParentTeacherInterviewSchedulePanel = {
   missingSettingsMessage: string | null;
   rows: iParentTeacherInterviewScheduleRow[];
   onBack: () => void;
+  onAllDayChange: (staffId: number, checked: boolean) => void;
   onDateTimeChange: (staffId: number, fieldName: 'startDateTime' | 'endDateTime', value: string) => void;
   onRetryRetrieval: (staffId: number) => void;
   onRetryCreate: (staffId: number) => void;
@@ -32,7 +33,31 @@ const isValidLocalDateTime = (value: string | null) => {
   return moment(value, moment.HTML5_FMT.DATETIME_LOCAL, true).isValid();
 };
 
+const isValidLocalDate = (value: string | null) => {
+  if (!value) {
+    return false;
+  }
+  return moment(value, moment.HTML5_FMT.DATE, true).isValid();
+};
+
 const getRowValidationMessage = (row: iParentTeacherInterviewScheduleRow) => {
+  if (row.isAllDay) {
+    if (!isValidLocalDate(row.startDateTime)) {
+      return 'Start date is required.';
+    }
+    if (!isValidLocalDate(row.endDateTime)) {
+      return 'End date is required.';
+    }
+
+    const startMoment = moment(row.startDateTime, moment.HTML5_FMT.DATE, true);
+    const endMoment = moment(row.endDateTime, moment.HTML5_FMT.DATE, true);
+    if (endMoment.isBefore(startMoment)) {
+      return 'End date must be the same as or later than start date.';
+    }
+
+    return null;
+  }
+
   if (!isValidLocalDateTime(row.startDateTime)) {
     return 'Start datetime is required.';
   }
@@ -59,9 +84,18 @@ const isCreateEligible = (row: iParentTeacherInterviewScheduleRow) => {
     return false;
   }
 
-  const startMoment = moment(row.startDateTime);
-  const endMoment = moment(row.endDateTime);
+  if (row.isAllDay) {
+    const startMoment = moment(row.startDateTime, moment.HTML5_FMT.DATE, true).startOf('day');
+    const endMoment = moment(row.endDateTime, moment.HTML5_FMT.DATE, true).add(1, 'day').startOf('day');
+    if (!endMoment.isAfter(startMoment)) {
+      return false;
+    }
 
+    return !startMoment.isBefore(moment().startOf('day'));
+  }
+
+  const startMoment = moment(row.startDateTime, moment.HTML5_FMT.DATETIME_LOCAL, true);
+  const endMoment = moment(row.endDateTime, moment.HTML5_FMT.DATETIME_LOCAL, true);
   if (!endMoment.isAfter(startMoment)) {
     return false;
   }
@@ -75,6 +109,16 @@ type iExistingEventRow = {
   time: string;
 };
 
+const formatEventDateTimeRange = (event: iParentTeacherInterviewCalendarEventSummary) => {
+  if (event.isAllDay === true) {
+    const startDate = moment(event.startDateTime).format('DD/MM/YYYY');
+    const endDate = moment(event.endDateTime).subtract(1, 'day').format('DD/MM/YYYY');
+    return `${startDate} - ${endDate} All Day`;
+  }
+
+  return `${moment(event.startDateTime).format('DD/MM/YYYY HH:mm')} - ${moment(event.endDateTime).format('DD/MM/YYYY HH:mm')}`;
+};
+
 const isCanceledEvent = (event: iParentTeacherInterviewCalendarEventSummary) => {
   return /^(cancelled|canceled):/i.test(`${event.subject || ''}`.trim());
 };
@@ -85,6 +129,7 @@ const ParentTeacherInterviewSchedulePanel = ({
   missingSettingsMessage,
   rows,
   onBack,
+  onAllDayChange,
   onDateTimeChange,
   onRetryRetrieval,
   onRetryCreate,
@@ -155,14 +200,14 @@ const ParentTeacherInterviewSchedulePanel = ({
           rows={visibleEvents.map((event: iParentTeacherInterviewCalendarEventSummary) => ({
             id: event.id,
             title: event.subject,
-            time: `${moment(event.startDateTime).format('DD/MM/YYYY HH:mm')} - ${moment(event.endDateTime).format('DD/MM/YYYY HH:mm')}`,
+            time: formatEventDateTimeRange(event),
           }))}
         />
       </small>
     );
   };
 
-  const detailColumnCount = showMeetingColumns ? 6 : 7;
+  const detailColumnCount = 6;
   const copyLinkToClipboard = async (url: string) => {
     try {
       await navigator.clipboard.writeText(url);
@@ -188,12 +233,12 @@ const ParentTeacherInterviewSchedulePanel = ({
         const event = row.createResult?.event;
         return [
           row.staffId,
-          row.staffName,
           row.staffCode,
           row.staffEmail || '',
           event?.subject || '',
-          event?.startDateTime ? moment(event.startDateTime).format('DD/MM/YYYY HH:mm') : '',
-          event?.endDateTime ? moment(event.endDateTime).format('DD/MM/YYYY HH:mm') : '',
+          event?.isAllDay ? moment(event.startDateTime).format('DD/MM/YYYY') : event?.startDateTime ? moment(event.startDateTime).format('DD/MM/YYYY HH:mm') : '',
+          event?.isAllDay ? moment(event.endDateTime).subtract(1, 'day').format('DD/MM/YYYY') : event?.endDateTime ? moment(event.endDateTime).format('DD/MM/YYYY HH:mm') : '',
+          row.staffName,
           event?.teamsJoinUrl || '',
         ];
       });
@@ -210,12 +255,12 @@ const ParentTeacherInterviewSchedulePanel = ({
     const csvContent = [
       [
         'StaffID',
-        'Staff Name',
         'Staff Code',
         'Staff EMail',
         'Interview Meeting Title',
         'Interview Meeting Date Time Start',
         'Interview Meeting Date Time End',
+        'Staff Name',
         'Interview Meeting Url',
       ],
       ...exportRows,
@@ -242,7 +287,7 @@ const ParentTeacherInterviewSchedulePanel = ({
         <div>
           {createdEvent?.subject ? <div>{createdEvent.subject}</div> : null}
           {createdEvent?.startDateTime && createdEvent?.endDateTime ? (
-            <div>{`${moment(createdEvent.startDateTime).format('DD/MM/YYYY HH:mm')} - ${moment(createdEvent.endDateTime).format('DD/MM/YYYY HH:mm')}`}</div>
+            <div>{formatEventDateTimeRange(createdEvent)}</div>
           ) : null}
           <FlexContainer className={'with-gap lg-gap wrap align-items center'}>
             <a href={teamsJoinUrl} target={'_blank'} rel={'noreferrer'}>Link</a>
@@ -276,9 +321,10 @@ const ParentTeacherInterviewSchedulePanel = ({
     if (createdEvent?.subject || (createdEvent?.startDateTime && createdEvent?.endDateTime) || teamsJoinUrl) {
       return (
         <div>
+          {row.createStatus === 'EXISTS' && row.createMessage ? <div>{row.createMessage}</div> : null}
           {createdEvent?.subject ? <div>{createdEvent.subject}</div> : null}
           {createdEvent?.startDateTime && createdEvent?.endDateTime ? (
-            <div>{`${moment(createdEvent.startDateTime).format('DD/MM/YYYY HH:mm')} - ${moment(createdEvent.endDateTime).format('DD/MM/YYYY HH:mm')}`}</div>
+            <div>{formatEventDateTimeRange(createdEvent)}</div>
           ) : null}
           {teamsJoinUrl ? (
             <div>
@@ -296,7 +342,7 @@ const ParentTeacherInterviewSchedulePanel = ({
     <SectionDiv className={'no-top'}>
       <SectionDiv className={'no-top margin-bottom'}>
         <h5>Schedule Parent Teacher Interview</h5>
-        <p>Enter browser-local start and end datetimes for each selected staff member. Existing events load automatically once a valid range is entered.</p>
+        <p>Enter browser-local interview times for each selected staff member. Existing events load automatically once a valid range is entered.</p>
       </SectionDiv>
 
       {!isAdmin ? (
@@ -320,8 +366,7 @@ const ParentTeacherInterviewSchedulePanel = ({
             <th>Staff Email</th>
             {!showMeetingColumns ? (
               <>
-                <th>Interview Start Time</th>
-                <th>Interview End Time</th>
+                <th>Interview Time</th>
                 <th>Existing Events</th>
               </>
             ) : (
@@ -356,20 +401,32 @@ const ParentTeacherInterviewSchedulePanel = ({
                 {!showMeetingColumns ? (
                   <>
                     <td>
-                      <Form.Control
-                        aria-label={`Starting datetime for ${row.staffName}`}
-                        type={'datetime-local'}
-                        value={row.startDateTime || ''}
-                        onChange={event => onDateTimeChange(row.staffId, 'startDateTime', event.target.value)}
-                      />
-                    </td>
-                    <td>
-                      <Form.Control
-                        aria-label={`Ending datetime for ${row.staffName}`}
-                        type={'datetime-local'}
-                        value={row.endDateTime || ''}
-                        onChange={event => onDateTimeChange(row.staffId, 'endDateTime', event.target.value)}
-                      />
+                      <div className={'d-flex flex-column gap-2'}>
+                        <Form.Check
+                          id={`all-day-${row.staffId}`}
+                          type={'checkbox'}
+                          label={'All Day'}
+                          checked={row.isAllDay}
+                          onChange={event => onAllDayChange(row.staffId, event.target.checked)}
+                        />
+                        <Form.Control
+                          aria-label={row.isAllDay ? `Starting date for ${row.staffName}` : `Starting datetime for ${row.staffName}`}
+                          type={row.isAllDay ? 'date' : 'datetime-local'}
+                          value={row.startDateTime || ''}
+                          onChange={event => onDateTimeChange(row.staffId, 'startDateTime', event.target.value)}
+                        />
+                        <Form.Control
+                          aria-label={row.isAllDay ? `Ending date for ${row.staffName}` : `Ending datetime for ${row.staffName}`}
+                          type={row.isAllDay ? 'date' : 'datetime-local'}
+                          value={row.endDateTime || ''}
+                          onChange={event => onDateTimeChange(row.staffId, 'endDateTime', event.target.value)}
+                        />
+                        {getRowValidationMessage(row) ? (
+                          <Alert variant={'warning'} className={'mb-0'}>
+                            {getRowValidationMessage(row)}
+                          </Alert>
+                        ) : null}
+                      </div>
                     </td>
                     <td>{getRetrievalContent(row)}</td>
                   </>
@@ -380,30 +437,20 @@ const ParentTeacherInterviewSchedulePanel = ({
                   </>
                 )}
               </tr>
-              {getRowValidationMessage(row) || (row.createStatus && row.createStatus !== 'IDLE' && row.createStatus !== 'CREATED' && row.createStatus !== 'FAILED') ? (
+              {row.createStatus && row.createStatus !== 'IDLE' && row.createStatus !== 'CREATED' && row.createStatus !== 'FAILED' && row.createStatus !== 'EXISTS' ? (
                 <tr>
                   <td colSpan={detailColumnCount}>
-                    {getRowValidationMessage(row) ? (
-                      <Alert
-                        variant={'warning'}
-                        className={row.createStatus && row.createStatus !== 'IDLE' && row.createStatus !== 'CREATED' && row.createStatus !== 'FAILED' ? 'mb-2' : 'mb-0'}
-                      >
-                        {getRowValidationMessage(row)}
-                      </Alert>
-                    ) : null}
-                    {row.createStatus && row.createStatus !== 'IDLE' && row.createStatus !== 'CREATED' && row.createStatus !== 'FAILED' ? (
-                      <Alert
-                        variant={'info'}
-                        className={'mb-0'}
-                      >
-                        <div>{row.createMessage}</div>
-                        {row.createResult?.event?.teamsJoinUrl && !showMeetingColumns ? (
-                          <a href={row.createResult.event.teamsJoinUrl} target={'_blank'} rel={'noreferrer'}>
-                            Open meeting link
-                          </a>
-                        ) : null}
-                      </Alert>
-                    ) : null}
+                    <Alert
+                      variant={'info'}
+                      className={'mb-0'}
+                    >
+                      <div>{row.createMessage}</div>
+                      {row.createResult?.event?.teamsJoinUrl && !showMeetingColumns ? (
+                        <a href={row.createResult.event.teamsJoinUrl} target={'_blank'} rel={'noreferrer'}>
+                          Open meeting link
+                        </a>
+                      ) : null}
+                    </Alert>
                   </td>
                 </tr>
               ) : null}

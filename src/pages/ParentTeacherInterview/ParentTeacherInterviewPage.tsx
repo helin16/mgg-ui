@@ -21,6 +21,14 @@ import iParentTeacherInterviewModuleSettings from '../../types/ParentTeacherInte
 import ParentTeacherInterviewCalendarService from '../../services/ParentTeacherInterview/ParentTeacherInterviewCalendarService';
 import ParentTeacherInterviewSchedulePanel from './components/ParentTeacherInterviewSchedulePanel';
 
+const isValidLocalDateTime = (value?: string | null) => {
+  return moment(`${value || ''}`.trim(), moment.HTML5_FMT.DATETIME_LOCAL, true).isValid();
+};
+
+const isValidLocalDate = (value?: string | null) => {
+  return moment(`${value || ''}`.trim(), moment.HTML5_FMT.DATE, true).isValid();
+};
+
 const getDefaultScheduleDateTime = (value?: string) => {
   const normalizedValue = `${value || ''}`.trim();
   if (normalizedValue === '') {
@@ -32,11 +40,27 @@ const getDefaultScheduleDateTime = (value?: string) => {
     : null;
 };
 
+const getDefaultScheduleDate = (value?: string) => {
+  const normalizedValue = `${value || ''}`.trim();
+  if (normalizedValue === '') {
+    return null;
+  }
+
+  return moment(normalizedValue, moment.HTML5_FMT.DATE, true).isValid()
+    ? normalizedValue
+    : null;
+};
+
 const getMissingSelectionDefaults = (settings: iParentTeacherInterviewModuleSettings) => {
   const missingFields: string[] = [];
   const subject = `${settings?.parentTeacherInterviewCalendar?.subject || ''}`.trim();
-  const startDateTime = getDefaultScheduleDateTime(settings?.parentTeacherInterviewCalendar?.startDateTime);
-  const endDateTime = getDefaultScheduleDateTime(settings?.parentTeacherInterviewCalendar?.endDateTime);
+  const isAllDay = settings?.parentTeacherInterviewCalendar?.isAllDay === true;
+  const startDateTime = isAllDay
+    ? getDefaultScheduleDate(settings?.parentTeacherInterviewCalendar?.startDateTime)
+    : getDefaultScheduleDateTime(settings?.parentTeacherInterviewCalendar?.startDateTime);
+  const endDateTime = isAllDay
+    ? getDefaultScheduleDate(settings?.parentTeacherInterviewCalendar?.endDateTime)
+    : getDefaultScheduleDateTime(settings?.parentTeacherInterviewCalendar?.endDateTime);
 
   if (subject === '') {
     missingFields.push('Subject');
@@ -49,6 +73,94 @@ const getMissingSelectionDefaults = (settings: iParentTeacherInterviewModuleSett
   }
 
   return missingFields;
+};
+
+const getRetrievalWindow = (row: iParentTeacherInterviewScheduleRow) => {
+  if (row.isAllDay) {
+    if (!isValidLocalDate(row.startDateTime) || !isValidLocalDate(row.endDateTime)) {
+      return null;
+    }
+
+    const start = moment(row.startDateTime, moment.HTML5_FMT.DATE, true).startOf('day');
+    const end = moment(row.endDateTime, moment.HTML5_FMT.DATE, true).endOf('day');
+    if (end.isBefore(start)) {
+      return null;
+    }
+
+    return {
+      start,
+      end,
+      rangeKey: `allDay|${row.startDateTime}|${row.endDateTime}`,
+    };
+  }
+
+  if (!isValidLocalDateTime(row.startDateTime) || !isValidLocalDateTime(row.endDateTime)) {
+    return null;
+  }
+
+  const start = moment(row.startDateTime, moment.HTML5_FMT.DATETIME_LOCAL, true);
+  const end = moment(row.endDateTime, moment.HTML5_FMT.DATETIME_LOCAL, true);
+  if (end.isBefore(start)) {
+    return null;
+  }
+
+  return {
+    start,
+    end,
+    rangeKey: `timed|${row.startDateTime}|${row.endDateTime}`,
+  };
+};
+
+const getCreateWindow = (row: iParentTeacherInterviewScheduleRow) => {
+  if (row.isAllDay) {
+    if (!isValidLocalDate(row.startDateTime) || !isValidLocalDate(row.endDateTime)) {
+      return null;
+    }
+
+    const start = moment(row.startDateTime, moment.HTML5_FMT.DATE, true).startOf('day');
+    const end = moment(row.endDateTime, moment.HTML5_FMT.DATE, true).add(1, 'day').startOf('day');
+    if (!end.isAfter(start)) {
+      return null;
+    }
+
+    return {
+      startDateTime: start.format(),
+      endDateTime: end.format(),
+    };
+  }
+
+  if (!isValidLocalDateTime(row.startDateTime) || !isValidLocalDateTime(row.endDateTime)) {
+    return null;
+  }
+
+  const start = moment(row.startDateTime, moment.HTML5_FMT.DATETIME_LOCAL, true);
+  const end = moment(row.endDateTime, moment.HTML5_FMT.DATETIME_LOCAL, true);
+  if (!end.isAfter(start)) {
+    return null;
+  }
+
+  return {
+    startDateTime: start.format(),
+    endDateTime: end.format(),
+  };
+};
+
+const toAllDayDateValue = (value?: string | null) => {
+  if (isValidLocalDateTime(value)) {
+    return moment(value, moment.HTML5_FMT.DATETIME_LOCAL, true).format(moment.HTML5_FMT.DATE);
+  }
+  if (isValidLocalDate(value)) {
+    return `${value}`;
+  }
+  return null;
+};
+
+const fromAllDayDateValue = (value: string | null, defaultTime: '08:00' | '16:00') => {
+  if (!isValidLocalDate(value)) {
+    return null;
+  }
+
+  return `${value}T${defaultTime}`;
 };
 
 const ParentTeacherInterviewPage = () => {
@@ -64,6 +176,10 @@ const ParentTeacherInterviewPage = () => {
   const [moduleSettings, setModuleSettings] = useState<iParentTeacherInterviewModuleSettings>({});
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    setSelectedStaffIds([]);
+  }, [searchText, categoryCodes]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -138,17 +254,12 @@ const ParentTeacherInterviewPage = () => {
 
   useEffect(() => {
     scheduleRows.forEach(row => {
-      if (!row.startDateTime || !row.endDateTime) {
+      const retrievalWindow = getRetrievalWindow(row);
+      if (!retrievalWindow) {
         return;
       }
 
-      const startMoment = moment(row.startDateTime, moment.HTML5_FMT.DATETIME_LOCAL, true);
-      const endMoment = moment(row.endDateTime, moment.HTML5_FMT.DATETIME_LOCAL, true);
-      if (!startMoment.isValid() || !endMoment.isValid() || endMoment.isBefore(startMoment)) {
-        return;
-      }
-
-      const retrievalRangeKey = `${row.startDateTime}|${row.endDateTime}`;
+      const {start, end, rangeKey: retrievalRangeKey} = retrievalWindow;
       if (row.retrievalStatus === 'LOADING' || row.retrievalRangeKey === retrievalRangeKey) {
         return;
       }
@@ -163,8 +274,8 @@ const ParentTeacherInterviewPage = () => {
 
       ParentTeacherInterviewCalendarService.getCalendarEvents({
         staffId: row.staffId,
-        startDateTime: startMoment.format(),
-        endDateTime: endMoment.format(),
+        startDateTime: start.format(),
+        endDateTime: end.format(),
       })
         .then(response => {
           setScheduleRows(currentRows => currentRows.map(currentRow => {
@@ -215,6 +326,12 @@ const ParentTeacherInterviewPage = () => {
         .toLowerCase();
 
       return searchTargets.includes(normalizedSearchText);
+    }).sort((staffA, staffB) => {
+      const surnameComparison = `${staffA.StaffSurname || ''}`.localeCompare(`${staffB.StaffSurname || ''}`);
+      if (surnameComparison !== 0) {
+        return surnameComparison;
+      }
+      return `${staffA.StaffNameInternal || ''}`.localeCompare(`${staffB.StaffNameInternal || ''}`);
     });
   }, [categoryCodes, searchText, staffs]);
 
@@ -249,14 +366,20 @@ const ParentTeacherInterviewPage = () => {
   };
 
   const handleNext = () => {
-    const defaultStartDateTime = getDefaultScheduleDateTime(moduleSettings?.parentTeacherInterviewCalendar?.startDateTime);
-    const defaultEndDateTime = getDefaultScheduleDateTime(moduleSettings?.parentTeacherInterviewCalendar?.endDateTime);
+    const defaultIsAllDay = moduleSettings?.parentTeacherInterviewCalendar?.isAllDay === true;
+    const defaultStartDateTime = defaultIsAllDay
+      ? getDefaultScheduleDate(moduleSettings?.parentTeacherInterviewCalendar?.startDateTime)
+      : getDefaultScheduleDateTime(moduleSettings?.parentTeacherInterviewCalendar?.startDateTime);
+    const defaultEndDateTime = defaultIsAllDay
+      ? getDefaultScheduleDate(moduleSettings?.parentTeacherInterviewCalendar?.endDateTime)
+      : getDefaultScheduleDateTime(moduleSettings?.parentTeacherInterviewCalendar?.endDateTime);
 
     setScheduleRows(selectedStaffs.map(staff => ({
       staffId: staff.StaffID,
       staffName: staff.StaffNameInternal,
       staffCode: staff.SchoolStaffCode,
       staffEmail: `${staff.StaffOccupEmail || ''}`.trim() || null,
+      isAllDay: defaultIsAllDay,
       startDateTime: defaultStartDateTime,
       endDateTime: defaultEndDateTime,
       retrievalStatus: 'IDLE',
@@ -278,6 +401,28 @@ const ParentTeacherInterviewPage = () => {
       return {
         ...row,
         [fieldName]: value === '' ? null : value,
+        retrievalStatus: 'IDLE',
+        retrievalMessage: null,
+        retrievalRangeKey: null,
+        events: [],
+        createStatus: 'IDLE',
+        createMessage: null,
+        createResult: null,
+      };
+    }));
+  };
+
+  const handleScheduleAllDayChange = (staffId: number, checked: boolean) => {
+    setScheduleRows(currentRows => currentRows.map(row => {
+      if (row.staffId !== staffId) {
+        return row;
+      }
+
+      return {
+        ...row,
+        isAllDay: checked,
+        startDateTime: checked ? toAllDayDateValue(row.startDateTime) : fromAllDayDateValue(row.startDateTime, '08:00'),
+        endDateTime: checked ? toAllDayDateValue(row.endDateTime) : fromAllDayDateValue(row.endDateTime, '16:00'),
         retrievalStatus: 'IDLE',
         retrievalMessage: null,
         retrievalRangeKey: null,
@@ -333,13 +478,19 @@ const ParentTeacherInterviewPage = () => {
 
     try {
       await Promise.all(scheduleRows.map(async row => {
+        const createWindow = getCreateWindow(row);
+        if (!createWindow) {
+          return;
+        }
+
         try {
           const response = await ParentTeacherInterviewCalendarService.createCalendarEvent({
             staffId: row.staffId,
             subject,
             bodyText,
-            startDateTime: moment(row.startDateTime).format(),
-            endDateTime: moment(row.endDateTime).format(),
+            startDateTime: createWindow.startDateTime,
+            endDateTime: createWindow.endDateTime,
+            isAllDay: row.isAllDay,
           });
           setScheduleRows(currentRows => currentRows.map(currentRow => currentRow.staffId === row.staffId ? {
             ...currentRow,
@@ -366,7 +517,8 @@ const ParentTeacherInterviewPage = () => {
     const bodyText = `${moduleSettings?.parentTeacherInterviewCalendar?.bodyText || ''}`.trim();
     const targetRow = scheduleRows.find(row => row.staffId === staffId);
 
-    if (!targetRow || subject === '' || bodyText === '' || !targetRow.startDateTime || !targetRow.endDateTime) {
+    const createWindow = targetRow ? getCreateWindow(targetRow) : null;
+    if (!targetRow || !createWindow || subject === '' || bodyText === '') {
       return;
     }
 
@@ -382,8 +534,9 @@ const ParentTeacherInterviewPage = () => {
         staffId: targetRow.staffId,
         subject,
         bodyText,
-        startDateTime: moment(targetRow.startDateTime).format(),
-        endDateTime: moment(targetRow.endDateTime).format(),
+        startDateTime: createWindow.startDateTime,
+        endDateTime: createWindow.endDateTime,
+        isAllDay: targetRow.isAllDay,
       });
       setScheduleRows(currentRows => currentRows.map(currentRow => currentRow.staffId === staffId ? {
         ...currentRow,
@@ -466,6 +619,7 @@ const ParentTeacherInterviewPage = () => {
         missingSettingsMessage={missingSettingsMessage}
         rows={scheduleRows}
         onBack={() => setCurrentStep('select')}
+        onAllDayChange={handleScheduleAllDayChange}
         onDateTimeChange={handleScheduleDateTimeChange}
         onRetryRetrieval={handleRetryRetrieval}
         onRetryCreate={handleRetryCreateEventLink}

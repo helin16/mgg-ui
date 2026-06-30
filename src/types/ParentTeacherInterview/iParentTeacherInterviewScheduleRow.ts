@@ -13,6 +13,7 @@ type iParentTeacherInterviewScheduleRow = {
   staffName: string;
   staffCode: string;
   staffEmail: string | null;
+  isAllDay: boolean;
   startDateTime: string | null;
   endDateTime: string | null;
   retrievalStatus: ParentTeacherInterviewRetrievalStatus;

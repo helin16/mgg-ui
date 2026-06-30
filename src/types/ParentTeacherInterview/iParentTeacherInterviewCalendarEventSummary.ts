@@ -7,6 +7,7 @@ type iParentTeacherInterviewCalendarEventSummary = {
     name: string;
     address: string;
   };
+  isAllDay?: boolean | null;
   isOnlineMeeting: boolean | null;
   teamsJoinUrl: string | null;
 };

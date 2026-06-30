@@ -12,15 +12,31 @@ type iEditPanel = {
   onUpdate: (data: any) => void;
 };
 
+const isValidLocalDateTime = (value: string) => `${value || ''}`.trim() !== '' && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(`${value}`.trim());
+const isValidLocalDate = (value: string) => `${value || ''}`.trim() !== '' && /^\d{4}-\d{2}-\d{2}$/.test(`${value}`.trim());
+
+const toDateValue = (value: string) => {
+  const normalizedValue = `${value || ''}`.trim();
+  if (isValidLocalDateTime(normalizedValue)) {
+    return normalizedValue.split('T')[0];
+  }
+  if (isValidLocalDate(normalizedValue)) {
+    return normalizedValue;
+  }
+  return '';
+};
+
 const EditPanel = ({module, onUpdate}: iEditPanel) => {
   const [subject, setSubject] = useState(`${module.settings?.parentTeacherInterviewCalendar?.subject || ''}`.trim());
   const [bodyText, setBodyText] = useState(`${module.settings?.parentTeacherInterviewCalendar?.bodyText || ''}`.trim());
+  const [isAllDay, setIsAllDay] = useState(module.settings?.parentTeacherInterviewCalendar?.isAllDay === true);
   const [startDateTime, setStartDateTime] = useState(`${module.settings?.parentTeacherInterviewCalendar?.startDateTime || ''}`.trim());
   const [endDateTime, setEndDateTime] = useState(`${module.settings?.parentTeacherInterviewCalendar?.endDateTime || ''}`.trim());
 
   const handleUpdate = (
     nextSubject = subject,
     nextBodyText = bodyText,
+    nextIsAllDay = isAllDay,
     nextStartDateTime = startDateTime,
     nextEndDateTime = endDateTime
   ) => {
@@ -30,6 +46,7 @@ const EditPanel = ({module, onUpdate}: iEditPanel) => {
         ...(module?.settings?.parentTeacherInterviewCalendar || {}),
         subject: `${nextSubject || ''}`.trim(),
         bodyText: `${nextBodyText || ''}`.trim(),
+        isAllDay: nextIsAllDay === true,
         startDateTime: `${nextStartDateTime || ''}`.trim(),
         endDateTime: `${nextEndDateTime || ''}`.trim(),
       },
@@ -49,7 +66,24 @@ const EditPanel = ({module, onUpdate}: iEditPanel) => {
               onChange={event => {
                 const nextValue = event.target.value;
                 setSubject(nextValue);
-                handleUpdate(nextValue, bodyText, startDateTime, endDateTime);
+                handleUpdate(nextValue, bodyText, isAllDay, startDateTime, endDateTime);
+              }}
+            />
+          </div>
+          <div className={'full-width'} style={{flex: '1 1 260px'}}>
+            <Form.Check
+              id={'default-all-day'}
+              type={'checkbox'}
+              label={'Default All Day'}
+              checked={isAllDay}
+              onChange={event => {
+                const nextIsAllDay = event.target.checked;
+                const nextStartDateTime = nextIsAllDay ? toDateValue(startDateTime) : '';
+                const nextEndDateTime = nextIsAllDay ? toDateValue(endDateTime) : '';
+                setIsAllDay(nextIsAllDay);
+                setStartDateTime(nextStartDateTime);
+                setEndDateTime(nextEndDateTime);
+                handleUpdate(subject, bodyText, nextIsAllDay, nextStartDateTime, nextEndDateTime);
               }}
             />
           </div>
@@ -57,12 +91,12 @@ const EditPanel = ({module, onUpdate}: iEditPanel) => {
             <Form.Label>Default Interview Start Time</Form.Label>
             <Form.Control
               aria-label={'Default Interview Start Time'}
-              type={'datetime-local'}
+              type={isAllDay ? 'date' : 'datetime-local'}
               value={startDateTime}
               onChange={event => {
                 const nextValue = event.target.value;
                 setStartDateTime(nextValue);
-                handleUpdate(subject, bodyText, nextValue, endDateTime);
+                handleUpdate(subject, bodyText, isAllDay, nextValue, endDateTime);
               }}
             />
           </div>
@@ -70,12 +104,12 @@ const EditPanel = ({module, onUpdate}: iEditPanel) => {
             <Form.Label>Default Interview End Time</Form.Label>
             <Form.Control
               aria-label={'Default Interview End Time'}
-              type={'datetime-local'}
+              type={isAllDay ? 'date' : 'datetime-local'}
               value={endDateTime}
               onChange={event => {
                 const nextValue = event.target.value;
                 setEndDateTime(nextValue);
-                handleUpdate(subject, bodyText, startDateTime, nextValue);
+                handleUpdate(subject, bodyText, isAllDay, startDateTime, nextValue);
               }}
             />
           </div>
@@ -91,7 +125,7 @@ const EditPanel = ({module, onUpdate}: iEditPanel) => {
           onChange={event => {
             const nextValue = event.target.value;
             setBodyText(nextValue);
-            handleUpdate(subject, nextValue, startDateTime, endDateTime);
+            handleUpdate(subject, nextValue, isAllDay, startDateTime, endDateTime);
           }}
         />
       </SectionDiv>
