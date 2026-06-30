@@ -107,7 +107,7 @@ const ParentTeacherInterviewStaffSelectionPanel = ({
   return (
     <SectionDiv className={'no-top'}>
       <SectionDiv className={'no-top margin-bottom'}>
-        <div className={'row g-3 align-items-end'}>
+        <div className={'row g-3 align-items-start'}>
           <div className={'col-md-6'}>
             <Form.Group className={'h-100 d-flex flex-column justify-content-end'}>
               <Form.Label>Search staff</Form.Label>
