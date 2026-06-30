@@ -2,17 +2,18 @@ import React from 'react';
 import {Form} from 'react-bootstrap';
 import Table, {iTableColumn} from '../../../components/common/Table';
 import LoadingBtn from '../../../components/common/LoadingBtn';
+import SelectBox from '../../../components/common/SelectBox';
 import SectionDiv from '../../../components/common/SectionDiv';
 import iVStaff from '../../../types/Synergetic/iVStaff';
 import iSynLuStaffCategory from '../../../types/Synergetic/Lookup/iSynLuStaffCategory';
 
 type iParentTeacherInterviewStaffSelectionPanel = {
-  categoryCode: string;
+  categoryCodes: string[];
   categories: iSynLuStaffCategory[];
   searchText: string;
   selectedStaffIds: number[];
   staffs: iVStaff[];
-  onCategoryCodeChange: (value: string) => void;
+  onCategoryCodesChange: (value: string[]) => void;
   onSearchTextChange: (value: string) => void;
   onToggleAllVisible: (checked: boolean) => void;
   onToggleStaff: (staffId: number, checked: boolean) => void;
@@ -20,17 +21,22 @@ type iParentTeacherInterviewStaffSelectionPanel = {
 };
 
 const ParentTeacherInterviewStaffSelectionPanel = ({
-  categoryCode,
+  categoryCodes,
   categories,
   searchText,
   selectedStaffIds,
   staffs,
-  onCategoryCodeChange,
+  onCategoryCodesChange,
   onSearchTextChange,
   onToggleAllVisible,
   onToggleStaff,
   onNext,
 }: iParentTeacherInterviewStaffSelectionPanel) => {
+  const categoryOptions = categories.map(category => ({
+    value: category.Code,
+    label: `${category.Code} - ${category.Description}`,
+  }));
+  const selectedCategoryOptions = categoryOptions.filter(option => categoryCodes.includes(option.value));
   const selectedStaffIdMap = selectedStaffIds.reduce((map, staffId) => {
     return {
       ...map,
@@ -101,31 +107,33 @@ const ParentTeacherInterviewStaffSelectionPanel = ({
   return (
     <SectionDiv className={'no-top'}>
       <SectionDiv className={'no-top margin-bottom'}>
-        <h5>Select Teaching Staff</h5>
         <div className={'row g-3 align-items-end'}>
           <div className={'col-md-6'}>
-            <Form.Label>Search staff</Form.Label>
-            <Form.Control
-              aria-label={'Search staff'}
-              placeholder={'Search by Staff ID or Staff Name'}
-              value={searchText}
-              onChange={event => onSearchTextChange(event.target.value)}
-            />
+            <Form.Group className={'h-100 d-flex flex-column justify-content-end'}>
+              <Form.Label>Search staff</Form.Label>
+              <Form.Control
+                aria-label={'Search staff'}
+                placeholder={'Search by Staff ID or Staff Name'}
+                value={searchText}
+                onChange={event => onSearchTextChange(event.target.value)}
+              />
+            </Form.Group>
           </div>
           <div className={'col-md-4'}>
-            <Form.Label>Category</Form.Label>
-            <Form.Select
-              aria-label={'Filter by category'}
-              value={categoryCode}
-              onChange={event => onCategoryCodeChange(event.target.value)}
-            >
-              <option value={''}>All categories</option>
-              {categories.map(category => (
-                <option key={category.Code} value={category.Code}>
-                  {category.Code} - {category.Description}
-                </option>
-              ))}
-            </Form.Select>
+            <Form.Group className={'h-100 d-flex flex-column justify-content-end'}>
+              <Form.Label>Category</Form.Label>
+              <SelectBox
+                className={'pti-category-select'}
+                placeholder={'All categories'}
+                isMulti
+                isClearable
+                options={categoryOptions}
+                value={selectedCategoryOptions}
+                onChange={(options: Array<{value: string}> | null) =>
+                  onCategoryCodesChange((options || []).map(option => option.value))
+                }
+              />
+            </Form.Group>
           </div>
         </div>
       </SectionDiv>
