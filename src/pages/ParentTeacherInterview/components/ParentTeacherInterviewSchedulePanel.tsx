@@ -14,6 +14,8 @@ import iParentTeacherInterviewCalendarEventSummary from '../../../types/ParentTe
 import iParentTeacherInterviewScheduleRow from '../../../types/ParentTeacherInterview/iParentTeacherInterviewScheduleRow';
 
 type iParentTeacherInterviewSchedulePanel = {
+  allowUserChange?: boolean;
+  eventTitleFilter?: string | null;
   isAdmin: boolean;
   isSubmitting: boolean;
   missingSettingsMessage: string | null;
@@ -132,11 +134,95 @@ const formatEventDateTimeRange = (event: iParentTeacherInterviewCalendarEventSum
   return `${startMoment.format('DD/MM/YYYY HH:mm')} - ${endMoment.format('DD/MM/YYYY HH:mm')}`;
 };
 
+const formatScheduleRowDateTimeRange = (row: iParentTeacherInterviewScheduleRow) => {
+  if (row.isAllDay) {
+    const startMoment = moment(row.startDateTime, moment.HTML5_FMT.DATE, true);
+    const endMoment = moment(row.endDateTime, moment.HTML5_FMT.DATE, true);
+    if (!startMoment.isValid() || !endMoment.isValid()) {
+      return null;
+    }
+
+    if (startMoment.isSame(endMoment, 'day')) {
+      return `${startMoment.format('DD/MM/YYYY')} All Day`;
+    }
+
+    return `${startMoment.format('DD/MM/YYYY')} - ${endMoment.format('DD/MM/YYYY')} All Day`;
+  }
+
+  const startMoment = moment(row.startDateTime, moment.HTML5_FMT.DATETIME_LOCAL, true);
+  const endMoment = moment(row.endDateTime, moment.HTML5_FMT.DATETIME_LOCAL, true);
+  if (!startMoment.isValid() || !endMoment.isValid()) {
+    return null;
+  }
+
+  if (startMoment.isSame(endMoment, 'day')) {
+    return `${startMoment.format('DD/MM/YYYY HH:mm')} - ${endMoment.format('HH:mm')}`;
+  }
+
+  return `${startMoment.format('DD/MM/YYYY HH:mm')} - ${endMoment.format('DD/MM/YYYY HH:mm')}`;
+};
+
 const isCanceledEvent = (event: iParentTeacherInterviewCalendarEventSummary) => {
   return /^(cancelled|canceled):/i.test(`${event.subject || ''}`.trim());
 };
 
+const getEventWindowForRow = (row: iParentTeacherInterviewScheduleRow) => {
+  if (row.isAllDay) {
+    if (!isValidLocalDate(row.startDateTime) || !isValidLocalDate(row.endDateTime)) {
+      return null;
+    }
+
+    const start = moment(row.startDateTime, moment.HTML5_FMT.DATE, true).startOf('day');
+    const end = moment(row.endDateTime, moment.HTML5_FMT.DATE, true).add(1, 'day').startOf('day');
+    if (end.isBefore(start)) {
+      return null;
+    }
+
+    return {start, end};
+  }
+
+  if (!isValidLocalDateTime(row.startDateTime) || !isValidLocalDateTime(row.endDateTime)) {
+    return null;
+  }
+
+  const start = moment(row.startDateTime, moment.HTML5_FMT.DATETIME_LOCAL, true);
+  const end = moment(row.endDateTime, moment.HTML5_FMT.DATETIME_LOCAL, true);
+  if (end.isBefore(start)) {
+    return null;
+  }
+
+  return {start, end};
+};
+
+const getVisibleExistingEvents = (
+  row: iParentTeacherInterviewScheduleRow,
+  eventTitleFilter?: string | null
+) => {
+  const normalizedTitleFilter = `${eventTitleFilter || ''}`.trim();
+  const eventWindow = getEventWindowForRow(row);
+
+  return row.events.filter(event => {
+    if (isCanceledEvent(event)) {
+      return false;
+    }
+
+    if (normalizedTitleFilter !== '' && `${event.subject || ''}`.trim() !== normalizedTitleFilter) {
+      return false;
+    }
+
+    if (!eventWindow) {
+      return true;
+    }
+
+    const eventStart = moment(event.startDateTime);
+    const eventEnd = moment(event.endDateTime);
+    return !eventStart.isBefore(eventWindow.start) && !eventEnd.isAfter(eventWindow.end);
+  });
+};
+
 const ParentTeacherInterviewSchedulePanel = ({
+  allowUserChange = true,
+  eventTitleFilter,
   isAdmin,
   isSubmitting,
   missingSettingsMessage,
@@ -197,7 +283,7 @@ const ParentTeacherInterviewSchedulePanel = ({
       return null;
     }
 
-    const visibleEvents = row.events.filter(event => !isCanceledEvent(event));
+    const visibleEvents = getVisibleExistingEvents(row, eventTitleFilter);
     if (visibleEvents.length <= 0) {
       return null;
     }
@@ -415,25 +501,35 @@ const ParentTeacherInterviewSchedulePanel = ({
                   <>
                     <td>
                       <div className={'d-flex flex-column gap-2'}>
-                        <Form.Check
-                          id={`all-day-${row.staffId}`}
-                          type={'checkbox'}
-                          label={'All Day'}
-                          checked={row.isAllDay}
-                          onChange={event => onAllDayChange(row.staffId, event.target.checked)}
-                        />
-                        <Form.Control
-                          aria-label={row.isAllDay ? `Starting date for ${row.staffName}` : `Starting datetime for ${row.staffName}`}
-                          type={row.isAllDay ? 'date' : 'datetime-local'}
-                          value={row.startDateTime || ''}
-                          onChange={event => onDateTimeChange(row.staffId, 'startDateTime', event.target.value)}
-                        />
-                        <Form.Control
-                          aria-label={row.isAllDay ? `Ending date for ${row.staffName}` : `Ending datetime for ${row.staffName}`}
-                          type={row.isAllDay ? 'date' : 'datetime-local'}
-                          value={row.endDateTime || ''}
-                          onChange={event => onDateTimeChange(row.staffId, 'endDateTime', event.target.value)}
-                        />
+                        {allowUserChange ? (
+                          <FlexContainer className={'with-gap align-items center'}>
+                            <Form.Check
+                              id={`all-day-${row.staffId}`}
+                              type={'checkbox'}
+                              label={'All Day'}
+                              checked={row.isAllDay}
+                              style={{width: '80px'}}
+                              onChange={event => onAllDayChange(row.staffId, event.target.checked)}
+                            />
+                            <Form.Control
+                              aria-label={row.isAllDay ? `Starting date for ${row.staffName}` : `Starting datetime for ${row.staffName}`}
+                              type={row.isAllDay ? 'date' : 'datetime-local'}
+                              value={row.startDateTime || ''}
+                              style={{width: '200px'}}
+                              onChange={event => onDateTimeChange(row.staffId, 'startDateTime', event.target.value)}
+                            />
+                            <span>-</span>
+                            <Form.Control
+                              aria-label={row.isAllDay ? `Ending date for ${row.staffName}` : `Ending datetime for ${row.staffName}`}
+                              type={row.isAllDay ? 'date' : 'datetime-local'}
+                              value={row.endDateTime || ''}
+                              style={{width: '200px'}}
+                              onChange={event => onDateTimeChange(row.staffId, 'endDateTime', event.target.value)}
+                            />
+                          </FlexContainer>
+                        ) : (
+                          <div>{formatScheduleRowDateTimeRange(row) || '-'}</div>
+                        )}
                         {getRowValidationMessage(row) ? (
                           <Alert variant={'warning'} className={'mb-0'}>
                             {getRowValidationMessage(row)}

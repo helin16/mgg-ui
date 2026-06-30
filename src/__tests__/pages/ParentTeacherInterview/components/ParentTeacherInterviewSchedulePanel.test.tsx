@@ -28,17 +28,17 @@ const baseRows = [
     staffCode: 'AL',
     staffEmail: 'ada@example.com',
     isAllDay: false,
-    startDateTime: '2026-07-01T09:00',
-    endDateTime: '2026-07-01T10:00',
+    startDateTime: '2099-07-01T09:00',
+    endDateTime: '2099-07-01T10:00',
     retrievalStatus: 'READY',
     retrievalMessage: null,
-    retrievalRangeKey: 'timed|2026-07-01T09:00|2026-07-01T10:00',
+    retrievalRangeKey: 'timed|2099-07-01T09:00|2099-07-01T10:00',
     events: [
       {
         id: 'evt-1',
         subject: 'Existing meeting',
-        startDateTime: '2026-07-01T09:15:00+10:00',
-        endDateTime: '2026-07-01T09:45:00+10:00',
+        startDateTime: '2099-07-01T09:15:00+10:00',
+        endDateTime: '2099-07-01T09:45:00+10:00',
         organizer: {name: 'Ada Lovelace', address: 'ada@example.com'},
         isOnlineMeeting: true,
         isAllDay: false,
@@ -90,7 +90,7 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
         rows={[
           {
             ...baseRows[0],
-            endDateTime: '2026-07-01T08:00',
+            endDateTime: '2099-07-01T08:00',
             retrievalStatus: 'IDLE',
           },
         ]}
@@ -106,8 +106,8 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
     expect(screen.getByText('Interview Time')).toBeInTheDocument();
     expect(screen.getByText('End datetime must be later than or equal to start datetime.')).toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText('Starting datetime for Ada Lovelace'), {target: {value: '2026-07-01T09:30'}});
-    expect(onDateTimeChange).toHaveBeenCalledWith(1001, 'startDateTime', '2026-07-01T09:30');
+    fireEvent.change(screen.getByLabelText('Starting datetime for Ada Lovelace'), {target: {value: '2099-07-01T09:30'}});
+    expect(onDateTimeChange).toHaveBeenCalledWith(1001, 'startDateTime', '2099-07-01T09:30');
     fireEvent.click(screen.getByLabelText('All Day'));
     expect(onAllDayChange).toHaveBeenCalledWith(1001, true);
   });
@@ -132,7 +132,7 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
 
     expect(screen.getByText('Existing Events')).toBeInTheDocument();
     expect(screen.getByText('Existing meeting')).toBeInTheDocument();
-    expect(screen.getByText('01/07/2026 09:15 - 09:45')).toBeInTheDocument();
+    expect(screen.getByText('01/07/2099 09:15 - 09:45')).toBeInTheDocument();
     expect(screen.queryByRole('link', {name: 'Meeting link'})).not.toBeInTheDocument();
 
     rerender(
@@ -152,6 +152,66 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
 
     fireEvent.click(screen.getByRole('button', {name: 'Retry retrieval'}));
     expect(onRetryRetrieval).toHaveBeenCalledWith(1001);
+  });
+
+  test('only displays existing events that match the PTI title and selected time window', () => {
+    render(
+      <ParentTeacherInterviewSchedulePanel
+        eventTitleFilter={'Parent Teacher Interview test'}
+        isAdmin={true}
+        isSubmitting={false}
+        missingSettingsMessage={null}
+        rows={[
+          {
+            ...baseRows[0],
+            startDateTime: '2099-07-01T09:00',
+            endDateTime: '2099-07-01T10:00',
+            events: [
+              {
+                id: 'evt-match',
+                subject: 'Parent Teacher Interview test',
+                startDateTime: '2099-07-01T09:15:00+10:00',
+                endDateTime: '2099-07-01T09:45:00+10:00',
+                organizer: {name: 'Ada Lovelace', address: 'ada@example.com'},
+                isOnlineMeeting: true,
+                isAllDay: false,
+                teamsJoinUrl: 'https://teams.example.com/match',
+              },
+              {
+                id: 'evt-title-mismatch',
+                subject: 'Another Title',
+                startDateTime: '2099-07-01T09:20:00+10:00',
+                endDateTime: '2099-07-01T09:50:00+10:00',
+                organizer: {name: 'Ada Lovelace', address: 'ada@example.com'},
+                isOnlineMeeting: true,
+                isAllDay: false,
+                teamsJoinUrl: 'https://teams.example.com/other-title',
+              },
+              {
+                id: 'evt-time-mismatch',
+                subject: 'Parent Teacher Interview test',
+                startDateTime: '2099-07-01T10:15:00+10:00',
+                endDateTime: '2099-07-01T10:45:00+10:00',
+                organizer: {name: 'Ada Lovelace', address: 'ada@example.com'},
+                isOnlineMeeting: true,
+                isAllDay: false,
+                teamsJoinUrl: 'https://teams.example.com/outside-window',
+              },
+            ],
+          },
+        ]}
+        onBack={jest.fn()}
+        onAllDayChange={jest.fn()}
+        onDateTimeChange={jest.fn()}
+        onRetryRetrieval={jest.fn()}
+        onRetryCreate={jest.fn()}
+        onSubmit={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText('Parent Teacher Interview test')).toBeInTheDocument();
+    expect(screen.queryByText('Another Title')).not.toBeInTheDocument();
+    expect(screen.queryByText('01/07/2099 10:15 - 10:45')).not.toBeInTheDocument();
   });
 
   test('gates create for non-admin users and missing settings', () => {
@@ -174,6 +234,29 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
     expect(screen.getByRole('button', {name: 'Create link(s) for 1 staff'})).toBeDisabled();
   });
 
+  test('shows a read-only interview time value when user changes are not allowed', () => {
+    render(
+      <ParentTeacherInterviewSchedulePanel
+        allowUserChange={false}
+        isAdmin={true}
+        isSubmitting={false}
+        missingSettingsMessage={null}
+        rows={baseRows}
+        onBack={jest.fn()}
+        onAllDayChange={jest.fn()}
+        onDateTimeChange={jest.fn()}
+        onRetryRetrieval={jest.fn()}
+        onRetryCreate={jest.fn()}
+        onSubmit={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByLabelText('All Day')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Starting datetime for Ada Lovelace')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Ending datetime for Ada Lovelace')).not.toBeInTheDocument();
+    expect(screen.getByText('01/07/2099 09:00 - 10:00')).toBeInTheDocument();
+  });
+
   test('switches to meeting columns after a successful create', () => {
     render(
       <ParentTeacherInterviewSchedulePanel
@@ -188,8 +271,8 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
             createResult: {
               event: {
                 subject: 'PTI Subject',
-                startDateTime: '2026-07-01T09:00:00+10:00',
-                endDateTime: '2026-07-01T10:00:00+10:00',
+                startDateTime: '2099-07-01T09:00:00+10:00',
+                endDateTime: '2099-07-01T10:00:00+10:00',
                 teamsJoinUrl: 'https://teams.example.com/created',
               },
             },
@@ -210,7 +293,7 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
     expect(screen.getAllByText('Existing Events')[0]).toBeInTheDocument();
     expect(screen.getByText('Interview Meeting')).toBeInTheDocument();
     expect(screen.getByText('PTI Subject')).toBeInTheDocument();
-    expect(screen.getByText('01/07/2026 09:15 - 09:45')).toBeInTheDocument();
+    expect(screen.getByText('01/07/2099 09:15 - 09:45')).toBeInTheDocument();
     expect(screen.queryByText('Created successfully')).not.toBeInTheDocument();
     expect(screen.getByRole('link', {name: 'Link'})).toHaveAttribute(
       'href',
@@ -233,8 +316,8 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
             createResult: {
               event: {
                 subject: 'PTI Subject',
-                startDateTime: '2026-07-01T09:00:00+10:00',
-                endDateTime: '2026-07-01T10:00:00+10:00',
+                startDateTime: '2099-07-01T09:00:00+10:00',
+                endDateTime: '2099-07-01T10:00:00+10:00',
                 teamsJoinUrl: 'https://teams.example.com/created',
               },
             },
@@ -268,8 +351,8 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
             createResult: {
               event: {
                 subject: 'PTI Subject',
-                startDateTime: '2026-07-01T09:00:00+10:00',
-                endDateTime: '2026-07-01T10:00:00+10:00',
+                startDateTime: '2099-07-01T09:00:00+10:00',
+                endDateTime: '2099-07-01T10:00:00+10:00',
                 teamsJoinUrl: 'https://teams.example.com/created',
               },
             },
@@ -366,8 +449,8 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
             createResult: {
               event: {
                 subject: 'PTI Subject',
-                startDateTime: '2026-07-01T09:00:00+10:00',
-                endDateTime: '2026-07-01T10:00:00+10:00',
+                startDateTime: '2099-07-01T09:00:00+10:00',
+                endDateTime: '2099-07-01T10:00:00+10:00',
                 isAllDay: false,
                 teamsJoinUrl: 'https://teams.example.com/existing-created',
               },
@@ -398,15 +481,15 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
           {
             ...baseRows[0],
             isAllDay: true,
-            startDateTime: '2026-07-01',
-            endDateTime: '2026-07-01',
-            retrievalRangeKey: 'allDay|2026-07-01|2026-07-01',
+            startDateTime: '2099-07-01',
+            endDateTime: '2099-07-01',
+            retrievalRangeKey: 'allDay|2099-07-01|2099-07-01',
             events: [
               {
                 id: 'evt-2',
                 subject: 'Existing all day',
-                startDateTime: '2026-07-01T00:00:00+10:00',
-                endDateTime: '2026-07-02T00:00:00+10:00',
+                startDateTime: '2099-07-01T00:00:00+10:00',
+                endDateTime: '2099-07-02T00:00:00+10:00',
                 organizer: {name: 'Ada Lovelace', address: 'ada@example.com'},
                 isAllDay: true,
                 isOnlineMeeting: true,
@@ -417,8 +500,8 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
             createResult: {
               event: {
                 subject: 'PTI All Day',
-                startDateTime: '2026-07-01T00:00:00+10:00',
-                endDateTime: '2026-07-02T00:00:00+10:00',
+                startDateTime: '2099-07-01T00:00:00+10:00',
+                endDateTime: '2099-07-02T00:00:00+10:00',
                 isAllDay: true,
                 teamsJoinUrl: 'https://teams.example.com/allday-created',
               },
@@ -434,7 +517,7 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
       />
     );
 
-    expect(screen.getAllByText('01/07/2026 All Day')).toHaveLength(2);
+    expect(screen.getAllByText('01/07/2099 All Day')).toHaveLength(2);
     expect(screen.getByText('PTI All Day')).toBeInTheDocument();
   });
 
@@ -451,8 +534,8 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
             createResult: {
               event: {
                 subject: 'Overnight Event',
-                startDateTime: '2026-07-02T14:00:00+10:00',
-                endDateTime: '2026-07-03T14:30:00+10:00',
+                startDateTime: '2099-07-02T14:00:00+10:00',
+                endDateTime: '2099-07-03T14:30:00+10:00',
                 isAllDay: false,
                 teamsJoinUrl: 'https://teams.example.com/overnight',
               },
@@ -468,18 +551,18 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
       />
     );
 
-    expect(screen.getByText('02/07/2026 14:00 - 03/07/2026 14:30')).toBeInTheDocument();
+    expect(screen.getByText('02/07/2099 14:00 - 03/07/2099 14:30')).toBeInTheDocument();
   });
 
   test('exports validation helpers for create eligibility', () => {
-    expect(getRowValidationMessage({...baseRows[0], endDateTime: '2026-07-01T08:00'} as any)).toBe(
+    expect(getRowValidationMessage({...baseRows[0], endDateTime: '2099-07-01T08:00'} as any)).toBe(
       'End datetime must be later than or equal to start datetime.'
     );
     expect(getRowValidationMessage({
       ...baseRows[0],
       isAllDay: true,
-      startDateTime: '2026-07-01',
-      endDateTime: '2026-06-30',
+      startDateTime: '2099-07-01',
+      endDateTime: '2099-06-30',
     } as any)).toBe('End date must be the same as or later than start date.');
     expect(isCreateEligible(baseRows[0] as any)).toBe(true);
     expect(isCreateEligible({...baseRows[0], createStatus: 'CREATED'} as any)).toBe(false);

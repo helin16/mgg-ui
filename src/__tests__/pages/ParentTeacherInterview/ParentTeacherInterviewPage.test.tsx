@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {act} from 'react';
 import {useSelector} from 'react-redux';
 import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import mockComponentTestHelper from '../../helper/ComponentTestHelper';
@@ -118,8 +118,9 @@ describe('ParentTeacherInterviewPage', () => {
       settings: {
         parentTeacherInterviewCalendar: {
           isAllDay: false,
-          startDateTime: '2026-07-01T09:00',
-          endDateTime: '2026-07-01T10:00',
+          allowUserChange: true,
+          startDateTime: '2099-07-01T09:00',
+          endDateTime: '2099-07-01T10:00',
           subject: 'PTI Subject',
           bodyText: 'PTI Body',
         },
@@ -134,8 +135,8 @@ describe('ParentTeacherInterviewPage', () => {
       message: 'Created successfully',
       event: {
         subject: 'PTI Subject',
-        startDateTime: '2026-07-01T09:00:00+10:00',
-        endDateTime: '2026-07-01T10:00:00+10:00',
+        startDateTime: '2099-07-01T09:00:00+10:00',
+        endDateTime: '2099-07-01T10:00:00+10:00',
         teamsJoinUrl: 'https://teams.example.com/created',
       },
     } as any);
@@ -177,8 +178,8 @@ describe('ParentTeacherInterviewPage', () => {
     fireEvent.click(screen.getByRole('button', {name: 'Next'}));
 
     expect(screen.getByText('Schedule Parent Teacher Interview')).toBeInTheDocument();
-    expect(screen.getByLabelText('Starting datetime for Grace Hopper')).toHaveValue('2026-07-01T09:00');
-    expect(screen.getByLabelText('Ending datetime for Grace Hopper')).toHaveValue('2026-07-01T10:00');
+    expect(screen.getByLabelText('Starting datetime for Grace Hopper')).toHaveValue('2099-07-01T09:00');
+    expect(screen.getByLabelText('Ending datetime for Grace Hopper')).toHaveValue('2099-07-01T10:00');
     await waitFor(() => expect(mockedCalendarService.getCalendarEvents).toHaveBeenCalled());
   });
 
@@ -210,9 +211,9 @@ describe('ParentTeacherInterviewPage', () => {
       events: [
         {
           id: 'evt-1',
-          subject: 'Existing meeting',
-          startDateTime: '2026-07-01T09:15:00+10:00',
-          endDateTime: '2026-07-01T09:45:00+10:00',
+          subject: 'PTI Subject',
+          startDateTime: '2099-07-01T09:15:00+10:00',
+          endDateTime: '2099-07-01T09:45:00+10:00',
           organizer: {name: 'Ada Lovelace', address: 'ada@example.com'},
           isAllDay: false,
           isOnlineMeeting: true,
@@ -228,12 +229,13 @@ describe('ParentTeacherInterviewPage', () => {
     fireEvent.click(screen.getByLabelText('Select Ada Lovelace'));
     fireEvent.click(screen.getByRole('button', {name: 'Next'}));
 
-    fireEvent.change(screen.getByLabelText('Starting datetime for Ada Lovelace'), {target: {value: '2026-07-01T09:00'}});
-    fireEvent.change(screen.getByLabelText('Ending datetime for Ada Lovelace'), {target: {value: '2026-07-01T10:00'}});
+    fireEvent.change(screen.getByLabelText('Starting datetime for Ada Lovelace'), {target: {value: '2099-07-01T09:00'}});
+    fireEvent.change(screen.getByLabelText('Ending datetime for Ada Lovelace'), {target: {value: '2099-07-01T10:00'}});
 
     await waitFor(() => expect(mockedCalendarService.getCalendarEvents).toHaveBeenCalled());
-    await waitFor(() => expect(screen.getByText(/Existing meeting/)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('PTI Subject')).toBeInTheDocument());
 
+    await waitFor(() => expect(screen.getByRole('button', {name: 'Create link(s) for 1 staff'})).not.toBeDisabled());
     fireEvent.click(screen.getByRole('button', {name: 'Create link(s) for 1 staff'}));
     fireEvent.change(screen.getByPlaceholderText('12345'), {target: {value: '12345'}});
     fireEvent.click(screen.getByRole('button', {name: 'Create event links'}));
@@ -246,8 +248,8 @@ describe('ParentTeacherInterviewPage', () => {
     expect(screen.getByText('ada@example.com')).toBeInTheDocument();
     await waitFor(() => expect(screen.getByText('Interview Meeting')).toBeInTheDocument());
     expect(screen.queryByText('Interview Time')).not.toBeInTheDocument();
-    expect(screen.getByText('PTI Subject')).toBeInTheDocument();
-    expect(screen.getByText('01/07/2026 09:00 - 10:00')).toBeInTheDocument();
+    expect(screen.getAllByText('PTI Subject').length).toBeGreaterThan(0);
+    expect(screen.getByText('01/07/2099 09:00 - 10:00')).toBeInTheDocument();
     expect(screen.queryByText('Created successfully')).not.toBeInTheDocument();
     expect(screen.getByRole('link', {name: 'Link'})).toHaveAttribute(
       'href',
@@ -317,6 +319,7 @@ describe('ParentTeacherInterviewPage', () => {
       settings: {
         parentTeacherInterviewCalendar: {
           isAllDay: true,
+          allowUserChange: true,
           startDateTime: '2026-07-07',
           endDateTime: '2026-07-08',
           subject: 'PTI Subject',
@@ -335,6 +338,44 @@ describe('ParentTeacherInterviewPage', () => {
     expect(screen.getByLabelText('All Day')).toBeChecked();
     expect(screen.getByLabelText('Starting date for Ada Lovelace')).toHaveValue('2026-07-07');
     expect(screen.getByLabelText('Ending date for Ada Lovelace')).toHaveValue('2026-07-08');
+  });
+
+  test('locks interview time to default settings when user changes are disabled', async () => {
+    mockedModuleService.getModule.mockResolvedValueOnce({
+      settings: {
+        parentTeacherInterviewCalendar: {
+          isAllDay: false,
+          allowUserChange: false,
+          startDateTime: '2099-07-09T11:00',
+          endDateTime: '2099-07-09T12:00',
+          subject: 'PTI Subject',
+          bodyText: 'PTI Body',
+        },
+      },
+    } as any);
+
+    render(<ParentTeacherInterviewPage />);
+
+    await waitFor(() => expect(screen.getByText('Ada Lovelace')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByLabelText('Select Ada Lovelace'));
+    fireEvent.click(screen.getByRole('button', {name: 'Next'}));
+
+    expect(screen.queryByLabelText('All Day')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Starting datetime for Ada Lovelace')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Ending datetime for Ada Lovelace')).not.toBeInTheDocument();
+    expect(screen.getByText('09/07/2099 11:00 - 12:00')).toBeInTheDocument();
+
+    await waitFor(() => expect(screen.getByRole('button', {name: 'Create link(s) for 1 staff'})).not.toBeDisabled());
+    fireEvent.click(screen.getByRole('button', {name: 'Create link(s) for 1 staff'}));
+    fireEvent.change(screen.getByPlaceholderText('12345'), {target: {value: '12345'}});
+    fireEvent.click(screen.getByRole('button', {name: 'Create event links'}));
+
+    await waitFor(() => expect(mockedCalendarService.createCalendarEvent).toHaveBeenCalledWith(expect.objectContaining({
+      isAllDay: false,
+      startDateTime: expect.stringContaining('2099-07-09T11:00:00'),
+      endDateTime: expect.stringContaining('2099-07-09T12:00:00'),
+    })));
   });
 
   test('hides staff selection and shows empty state when required defaults are missing', async () => {
@@ -363,5 +404,55 @@ describe('ParentTeacherInterviewPage', () => {
     expect(screen.queryByLabelText('Search staff')).not.toBeInTheDocument();
     expect(screen.queryByText('Ada Lovelace')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', {name: 'Next'})).not.toBeInTheDocument();
+  });
+
+  test('resets back to the initial staff-selection state and reloads settings when admin closes', async () => {
+    mockedModuleService.getModule
+      .mockResolvedValueOnce({
+        settings: {
+          parentTeacherInterviewCalendar: {
+            isAllDay: false,
+            allowUserChange: true,
+            startDateTime: '2099-07-01T09:00',
+            endDateTime: '2099-07-01T10:00',
+            subject: 'PTI Subject',
+            bodyText: 'PTI Body',
+          },
+        },
+      } as any)
+      .mockResolvedValueOnce({
+        settings: {
+          parentTeacherInterviewCalendar: {
+            isAllDay: false,
+            allowUserChange: false,
+            startDateTime: '2099-07-10T11:00',
+            endDateTime: '2099-07-10T12:00',
+            subject: 'Updated PTI Subject',
+            bodyText: 'Updated PTI Body',
+          },
+        },
+      } as any);
+
+    render(<ParentTeacherInterviewPage />);
+
+    await waitFor(() => expect(screen.getByText('Ada Lovelace')).toBeInTheDocument());
+
+    fireEvent.change(screen.getByLabelText('Search staff'), {target: {value: 'Grace'}});
+    fireEvent.click(screen.getByLabelText('Select Grace Hopper'));
+    fireEvent.click(screen.getByRole('button', {name: 'Next'}));
+    expect(screen.getByText('Schedule Parent Teacher Interview')).toBeInTheDocument();
+
+    const pageProps = mockComponentTestHelper.get(PageKey)[0];
+
+    await act(async () => {
+      await pageProps.onAdminPageClose();
+    });
+
+    await waitFor(() => expect(screen.getByLabelText('Search staff')).toHaveValue(''));
+    expect(screen.getByText('Ada Lovelace')).toBeInTheDocument();
+    expect(screen.getByText('Grace Hopper')).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: 'Next'})).toBeDisabled();
+    expect(screen.queryByText('Schedule Parent Teacher Interview')).not.toBeInTheDocument();
+    expect(mockedModuleService.getModule).toHaveBeenCalledTimes(2);
   });
 });

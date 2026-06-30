@@ -1,6 +1,8 @@
 import React from 'react';
 import AdminPage from '../../layouts/AdminPage';
 import AdminPageTabs from '../../layouts/AdminPageTabs';
+import MessageListPanel from '../../components/common/Message/MessageListPanel';
+import {MESSAGE_TYPE_PARENT_TEACHER_INTERVIEW} from '../../types/Message/iMessage';
 import {MGGS_MODULE_ID_PARENT_TEACHER_INTERVIEW} from '../../types/modules/iModuleUser';
 import ParentTeacherInterviewModuleSettingsPanel from './components/ParentTeacherInterviewModuleSettingsPanel';
 
@@ -22,6 +24,11 @@ const ParentTeacherInterviewAdminPage = ({onNavBack}: iParentTeacherInterviewAdm
             key: 'settings',
             title: 'Settings',
             component: <ParentTeacherInterviewModuleSettingsPanel />,
+          },
+          {
+            key: 'logs',
+            title: 'Logs',
+            component: <MessageListPanel type={MESSAGE_TYPE_PARENT_TEACHER_INTERVIEW} />,
           },
         ]}
       />

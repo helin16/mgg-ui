@@ -8,6 +8,7 @@ import ParentTeacherInterviewAdminPage from '../../../pages/ParentTeacherIntervi
 jest.mock('../../../layouts/AdminPage');
 jest.mock('../../../layouts/AdminPageTabs');
 jest.mock('../../../pages/ParentTeacherInterview/components/ParentTeacherInterviewModuleSettingsPanel');
+jest.mock('../../../components/common/Message/MessageListPanel');
 
 describe('ParentTeacherInterviewAdminPage', () => {
   mockComponentTestHelper.prepare();
@@ -26,6 +27,10 @@ describe('ParentTeacherInterviewAdminPage', () => {
           expect.objectContaining({
             key: 'settings',
             title: 'Settings',
+          }),
+          expect.objectContaining({
+            key: 'logs',
+            title: 'Logs',
           }),
         ],
       }),

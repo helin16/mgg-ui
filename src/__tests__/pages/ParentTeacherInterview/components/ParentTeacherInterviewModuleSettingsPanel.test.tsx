@@ -8,6 +8,7 @@ const fakeModule = {
   settings: {
     parentTeacherInterviewCalendar: {
       isAllDay: false,
+      allowUserChange: true,
       startDateTime: '2026-07-01T09:00',
       endDateTime: '2026-07-01T10:00',
       subject: 'Existing subject',
@@ -90,6 +91,7 @@ describe('ParentTeacherInterviewModuleSettingsPanel', () => {
         expect.objectContaining({
           parentTeacherInterviewCalendar: {
             isAllDay: false,
+            allowUserChange: true,
             startDateTime: '2026-07-02T11:00',
             endDateTime: '2026-07-02T12:00',
             subject: 'Updated subject',
@@ -103,7 +105,7 @@ describe('ParentTeacherInterviewModuleSettingsPanel', () => {
   test('supports default all-day settings and converts current values to dates', async () => {
     render(<ParentTeacherInterviewModuleSettingsPanel />);
 
-    fireEvent.click(screen.getByLabelText('Default All Day'));
+    fireEvent.click(screen.getByLabelText('All Day'));
 
     expect(screen.getByLabelText('Default Interview Start Time')).toHaveAttribute('type', 'date');
     expect(screen.getByLabelText('Default Interview End Time')).toHaveAttribute('type', 'date');
@@ -127,11 +129,29 @@ describe('ParentTeacherInterviewModuleSettingsPanel', () => {
         expect.objectContaining({
           parentTeacherInterviewCalendar: {
             isAllDay: true,
+            allowUserChange: true,
             startDateTime: '2026-07-03',
             endDateTime: '2026-07-04',
             subject: 'Existing subject',
             bodyText: 'Existing body',
           },
+        })
+      )
+    );
+  });
+
+  test('saves allow-user-change when toggled off', async () => {
+    render(<ParentTeacherInterviewModuleSettingsPanel />);
+
+    fireEvent.click(screen.getByLabelText('Allow user change'));
+    fireEvent.click(screen.getByRole('button', {name: 'Capture Submit Data'}));
+
+    await waitFor(() =>
+      expect(latestSubmitData).toEqual(
+        expect.objectContaining({
+          parentTeacherInterviewCalendar: expect.objectContaining({
+            allowUserChange: false,
+          }),
         })
       )
     );

@@ -177,6 +177,19 @@ const ParentTeacherInterviewPage = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const loadModuleContext = React.useCallback(async () => {
+    try {
+      const [module, canCreate] = await Promise.all([
+        MggsModuleService.getModule(MGGS_MODULE_ID_PARENT_TEACHER_INTERVIEW),
+        AuthService.isModuleRole(MGGS_MODULE_ID_PARENT_TEACHER_INTERVIEW, ROLE_ID_ADMIN),
+      ]);
+      setModuleSettings(module?.settings || {});
+      setIsAdmin(canCreate === true);
+    } catch (error) {
+      Toaster.showApiError(error);
+    }
+  }, []);
+
   useEffect(() => {
     setSelectedStaffIds([]);
   }, [searchText, categoryCodes]);
@@ -227,30 +240,8 @@ const ParentTeacherInterviewPage = () => {
   }, []);
 
   useEffect(() => {
-    let isCancelled = false;
-
-    Promise.all([
-      MggsModuleService.getModule(MGGS_MODULE_ID_PARENT_TEACHER_INTERVIEW),
-      AuthService.isModuleRole(MGGS_MODULE_ID_PARENT_TEACHER_INTERVIEW, ROLE_ID_ADMIN),
-    ])
-      .then(([module, canCreate]) => {
-        if (isCancelled) {
-          return;
-        }
-        setModuleSettings(module?.settings || {});
-        setIsAdmin(canCreate === true);
-      })
-      .catch(error => {
-        if (isCancelled) {
-          return;
-        }
-        Toaster.showApiError(error);
-      });
-
-    return () => {
-      isCancelled = true;
-    };
-  }, []);
+    loadModuleContext();
+  }, [loadModuleContext]);
 
   useEffect(() => {
     scheduleRows.forEach(row => {
@@ -612,8 +603,13 @@ const ParentTeacherInterviewPage = () => {
   };
 
   const getSchedulePreview = () => {
+    const eventTitleFilter = `${moduleSettings?.parentTeacherInterviewCalendar?.subject || ''}`.trim() || null;
+    const allowUserChange = moduleSettings?.parentTeacherInterviewCalendar?.allowUserChange !== false;
+
     return (
       <ParentTeacherInterviewSchedulePanel
+        allowUserChange={allowUserChange}
+        eventTitleFilter={eventTitleFilter}
         isAdmin={isAdmin}
         isSubmitting={isSubmitting}
         missingSettingsMessage={missingSettingsMessage}
@@ -628,11 +624,21 @@ const ParentTeacherInterviewPage = () => {
     );
   };
 
+  const handleAdminPageClose = async () => {
+    setSearchText('');
+    setCategoryCodes([]);
+    setSelectedStaffIds([]);
+    setScheduleRows([]);
+    setCurrentStep('select');
+    await loadModuleContext();
+  };
+
   return (
     <Page
       title={<h3>Parent Teacher Interview</h3>}
       moduleId={MGGS_MODULE_ID_PARENT_TEACHER_INTERVIEW}
       AdminPage={ParentTeacherInterviewAdminPage}
+      onAdminPageClose={handleAdminPageClose}
     >
       {currentStep === 'select' ? getSelectionContent() : getSchedulePreview()}
     </Page>
