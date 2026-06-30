@@ -27,11 +27,12 @@ const baseRows = [
     staffName: 'Ada Lovelace',
     staffCode: 'AL',
     staffEmail: 'ada@example.com',
+    isAllDay: false,
     startDateTime: '2026-07-01T09:00',
     endDateTime: '2026-07-01T10:00',
     retrievalStatus: 'READY',
     retrievalMessage: null,
-    retrievalRangeKey: '2026-07-01T09:00|2026-07-01T10:00',
+    retrievalRangeKey: 'timed|2026-07-01T09:00|2026-07-01T10:00',
     events: [
       {
         id: 'evt-1',
@@ -40,6 +41,7 @@ const baseRows = [
         endDateTime: '2026-07-01T09:45:00+10:00',
         organizer: {name: 'Ada Lovelace', address: 'ada@example.com'},
         isOnlineMeeting: true,
+        isAllDay: false,
         teamsJoinUrl: 'https://teams.example.com/1',
       },
     ],
@@ -78,8 +80,9 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
 
   test('shows validation state and row editing handlers', () => {
     const onDateTimeChange = jest.fn();
+    const onAllDayChange = jest.fn();
 
-    const {rerender} = render(
+    render(
       <ParentTeacherInterviewSchedulePanel
         isAdmin={true}
         isSubmitting={false}
@@ -92,6 +95,7 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
           },
         ]}
         onBack={jest.fn()}
+        onAllDayChange={onAllDayChange}
         onDateTimeChange={onDateTimeChange}
         onRetryRetrieval={jest.fn()}
         onRetryCreate={jest.fn()}
@@ -99,12 +103,13 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
       />
     );
 
-    expect(screen.getByText('Interview Start Time')).toBeInTheDocument();
-    expect(screen.getByText('Interview End Time')).toBeInTheDocument();
+    expect(screen.getByText('Interview Time')).toBeInTheDocument();
     expect(screen.getByText('End datetime must be later than or equal to start datetime.')).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText('Starting datetime for Ada Lovelace'), {target: {value: '2026-07-01T09:30'}});
     expect(onDateTimeChange).toHaveBeenCalledWith(1001, 'startDateTime', '2026-07-01T09:30');
+    fireEvent.click(screen.getByLabelText('All Day'));
+    expect(onAllDayChange).toHaveBeenCalledWith(1001, true);
   });
 
   test('renders existing events and supports retrieval retry', () => {
@@ -117,6 +122,7 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
         missingSettingsMessage={null}
         rows={baseRows}
         onBack={jest.fn()}
+        onAllDayChange={jest.fn()}
         onDateTimeChange={jest.fn()}
         onRetryRetrieval={onRetryRetrieval}
         onRetryCreate={jest.fn()}
@@ -136,6 +142,7 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
         missingSettingsMessage={null}
         rows={[{...baseRows[0], retrievalStatus: 'FAILED', retrievalMessage: 'Boom', events: []}]}
         onBack={jest.fn()}
+        onAllDayChange={jest.fn()}
         onDateTimeChange={jest.fn()}
         onRetryRetrieval={onRetryRetrieval}
         onRetryCreate={jest.fn()}
@@ -155,6 +162,7 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
         missingSettingsMessage={'Missing settings'}
         rows={baseRows}
         onBack={jest.fn()}
+        onAllDayChange={jest.fn()}
         onDateTimeChange={jest.fn()}
         onRetryRetrieval={jest.fn()}
         onRetryCreate={jest.fn()}
@@ -188,6 +196,7 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
           },
         ]}
         onBack={jest.fn()}
+        onAllDayChange={jest.fn()}
         onDateTimeChange={jest.fn()}
         onRetryRetrieval={jest.fn()}
         onRetryCreate={jest.fn()}
@@ -195,8 +204,7 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
       />
     );
 
-    expect(screen.queryByText('Interview Start Time')).not.toBeInTheDocument();
-    expect(screen.queryByText('Interview End Time')).not.toBeInTheDocument();
+    expect(screen.queryByText('Interview Time')).not.toBeInTheDocument();
     expect(screen.getByText('Staff Email')).toBeInTheDocument();
     expect(screen.getByText('ada@example.com')).toBeInTheDocument();
     expect(screen.getAllByText('Existing Events')[0]).toBeInTheDocument();
@@ -233,6 +241,7 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
           },
         ]}
         onBack={jest.fn()}
+        onAllDayChange={jest.fn()}
         onDateTimeChange={jest.fn()}
         onRetryRetrieval={jest.fn()}
         onRetryCreate={jest.fn()}
@@ -267,6 +276,7 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
           },
         ]}
         onBack={jest.fn()}
+        onAllDayChange={jest.fn()}
         onDateTimeChange={jest.fn()}
         onRetryRetrieval={jest.fn()}
         onRetryCreate={jest.fn()}
@@ -297,6 +307,7 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
         missingSettingsMessage={null}
         rows={baseRows}
         onBack={jest.fn()}
+        onAllDayChange={jest.fn()}
         onDateTimeChange={jest.fn()}
         onRetryRetrieval={jest.fn()}
         onRetryCreate={jest.fn()}
@@ -327,6 +338,7 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
           },
         ]}
         onBack={jest.fn()}
+        onAllDayChange={jest.fn()}
         onDateTimeChange={jest.fn()}
         onRetryRetrieval={jest.fn()}
         onRetryCreate={onRetryCreate}
@@ -340,10 +352,102 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
     expect(onRetryCreate).toHaveBeenCalledWith(1001);
   });
 
+  test('shows existing-event create message at the top of the interview meeting cell', () => {
+    render(
+      <ParentTeacherInterviewSchedulePanel
+        isAdmin={true}
+        isSubmitting={false}
+        missingSettingsMessage={null}
+        rows={[
+          {
+            ...baseRows[0],
+            createStatus: 'EXISTS',
+            createMessage: 'Matching event already exists.',
+            createResult: {
+              event: {
+                subject: 'PTI Subject',
+                startDateTime: '2026-07-01T09:00:00+10:00',
+                endDateTime: '2026-07-01T10:00:00+10:00',
+                isAllDay: false,
+                teamsJoinUrl: 'https://teams.example.com/existing-created',
+              },
+            },
+          },
+        ]}
+        onBack={jest.fn()}
+        onAllDayChange={jest.fn()}
+        onDateTimeChange={jest.fn()}
+        onRetryRetrieval={jest.fn()}
+        onRetryCreate={jest.fn()}
+        onSubmit={jest.fn()}
+      />
+    );
+
+    const meetingCellText = screen.getByText('Matching event already exists.').closest('td')?.textContent || '';
+    expect(meetingCellText).toMatch(/^Matching event already exists\./);
+    expect(screen.getAllByText('Matching event already exists.')).toHaveLength(1);
+  });
+
+  test('formats all-day events in existing events and interview meeting', () => {
+    render(
+      <ParentTeacherInterviewSchedulePanel
+        isAdmin={true}
+        isSubmitting={false}
+        missingSettingsMessage={null}
+        rows={[
+          {
+            ...baseRows[0],
+            isAllDay: true,
+            startDateTime: '2026-07-01',
+            endDateTime: '2026-07-01',
+            retrievalRangeKey: 'allDay|2026-07-01|2026-07-01',
+            events: [
+              {
+                id: 'evt-2',
+                subject: 'Existing all day',
+                startDateTime: '2026-07-01T00:00:00+10:00',
+                endDateTime: '2026-07-02T00:00:00+10:00',
+                organizer: {name: 'Ada Lovelace', address: 'ada@example.com'},
+                isAllDay: true,
+                isOnlineMeeting: true,
+                teamsJoinUrl: 'https://teams.example.com/allday-existing',
+              },
+            ],
+            createStatus: 'CREATED',
+            createResult: {
+              event: {
+                subject: 'PTI All Day',
+                startDateTime: '2026-07-01T00:00:00+10:00',
+                endDateTime: '2026-07-02T00:00:00+10:00',
+                isAllDay: true,
+                teamsJoinUrl: 'https://teams.example.com/allday-created',
+              },
+            },
+          },
+        ]}
+        onBack={jest.fn()}
+        onAllDayChange={jest.fn()}
+        onDateTimeChange={jest.fn()}
+        onRetryRetrieval={jest.fn()}
+        onRetryCreate={jest.fn()}
+        onSubmit={jest.fn()}
+      />
+    );
+
+    expect(screen.getAllByText('01/07/2026 - 01/07/2026 All Day')).toHaveLength(2);
+    expect(screen.getByText('PTI All Day')).toBeInTheDocument();
+  });
+
   test('exports validation helpers for create eligibility', () => {
     expect(getRowValidationMessage({...baseRows[0], endDateTime: '2026-07-01T08:00'} as any)).toBe(
       'End datetime must be later than or equal to start datetime.'
     );
+    expect(getRowValidationMessage({
+      ...baseRows[0],
+      isAllDay: true,
+      startDateTime: '2026-07-01',
+      endDateTime: '2026-06-30',
+    } as any)).toBe('End date must be the same as or later than start date.');
     expect(isCreateEligible(baseRows[0] as any)).toBe(true);
   });
 });

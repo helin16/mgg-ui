@@ -7,6 +7,7 @@ import {ROLE_ID_ADMIN} from '../../../../types/modules/iRole';
 const fakeModule = {
   settings: {
     parentTeacherInterviewCalendar: {
+      isAllDay: false,
       startDateTime: '2026-07-01T09:00',
       endDateTime: '2026-07-01T10:00',
       subject: 'Existing subject',
@@ -88,10 +89,48 @@ describe('ParentTeacherInterviewModuleSettingsPanel', () => {
       expect(latestSubmitData).toEqual(
         expect.objectContaining({
           parentTeacherInterviewCalendar: {
+            isAllDay: false,
             startDateTime: '2026-07-02T11:00',
             endDateTime: '2026-07-02T12:00',
             subject: 'Updated subject',
             bodyText: 'Updated body',
+          },
+        })
+      )
+    );
+  });
+
+  test('supports default all-day settings and converts current values to dates', async () => {
+    render(<ParentTeacherInterviewModuleSettingsPanel />);
+
+    fireEvent.click(screen.getByLabelText('Default All Day'));
+
+    expect(screen.getByLabelText('Default Interview Start Time')).toHaveAttribute('type', 'date');
+    expect(screen.getByLabelText('Default Interview End Time')).toHaveAttribute('type', 'date');
+    expect(screen.getByLabelText('Default Interview Start Time')).toHaveValue('2026-07-01');
+    expect(screen.getByLabelText('Default Interview End Time')).toHaveValue('2026-07-01');
+
+    fireEvent.change(screen.getByLabelText('Default Interview Start Time'), {
+      target: {
+        value: '2026-07-03',
+      },
+    });
+    fireEvent.change(screen.getByLabelText('Default Interview End Time'), {
+      target: {
+        value: '2026-07-04',
+      },
+    });
+    fireEvent.click(screen.getByRole('button', {name: 'Capture Submit Data'}));
+
+    await waitFor(() =>
+      expect(latestSubmitData).toEqual(
+        expect.objectContaining({
+          parentTeacherInterviewCalendar: {
+            isAllDay: true,
+            startDateTime: '2026-07-03',
+            endDateTime: '2026-07-04',
+            subject: 'Existing subject',
+            bodyText: 'Existing body',
           },
         })
       )

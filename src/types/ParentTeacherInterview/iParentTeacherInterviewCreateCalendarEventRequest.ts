@@ -4,6 +4,7 @@ type iParentTeacherInterviewCreateCalendarEventRequest = {
   bodyText: string;
   startDateTime: string;
   endDateTime: string;
+  isAllDay?: boolean;
 };
 
 export default iParentTeacherInterviewCreateCalendarEventRequest;

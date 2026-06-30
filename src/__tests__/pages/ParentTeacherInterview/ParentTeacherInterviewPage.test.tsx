@@ -92,6 +92,7 @@ describe('ParentTeacherInterviewPage', () => {
       {
         StaffID: 1001,
         StaffNameInternal: 'Ada Lovelace',
+        StaffSurname: 'Lovelace',
         StaffPreferredName: 'Ada',
         SchoolStaffCode: 'AL',
         StaffOccupEmail: 'ada@example.com',
@@ -101,6 +102,7 @@ describe('ParentTeacherInterviewPage', () => {
       {
         StaffID: 1002,
         StaffNameInternal: 'Grace Hopper',
+        StaffSurname: 'Hopper',
         StaffPreferredName: 'Grace',
         SchoolStaffCode: 'GH',
         StaffOccupEmail: 'grace@example.com',
@@ -115,6 +117,7 @@ describe('ParentTeacherInterviewPage', () => {
     mockedModuleService.getModule.mockResolvedValue({
       settings: {
         parentTeacherInterviewCalendar: {
+          isAllDay: false,
           startDateTime: '2026-07-01T09:00',
           endDateTime: '2026-07-01T10:00',
           subject: 'PTI Subject',
@@ -179,6 +182,20 @@ describe('ParentTeacherInterviewPage', () => {
     await waitFor(() => expect(mockedCalendarService.getCalendarEvents).toHaveBeenCalled());
   });
 
+  test('clears selected staff after filter changes', async () => {
+    render(<ParentTeacherInterviewPage />);
+
+    await waitFor(() => expect(screen.getByText('Ada Lovelace')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByLabelText('Select Ada Lovelace'));
+    expect(screen.getByRole('button', {name: 'Next'})).not.toBeDisabled();
+
+    fireEvent.change(screen.getByLabelText('Search staff'), {target: {value: 'Grace'}});
+
+    await waitFor(() => expect(screen.getByText('Grace Hopper')).toBeInTheDocument());
+    expect(screen.getByRole('button', {name: 'Next'})).toBeDisabled();
+  });
+
   test('shows failure state and toasts when load fails', async () => {
     mockedStaffService.getStaffList.mockRejectedValueOnce(new Error('load failed'));
 
@@ -197,6 +214,7 @@ describe('ParentTeacherInterviewPage', () => {
           startDateTime: '2026-07-01T09:15:00+10:00',
           endDateTime: '2026-07-01T09:45:00+10:00',
           organizer: {name: 'Ada Lovelace', address: 'ada@example.com'},
+          isAllDay: false,
           isOnlineMeeting: true,
           teamsJoinUrl: 'https://teams.example.com/existing',
         },
@@ -221,11 +239,13 @@ describe('ParentTeacherInterviewPage', () => {
     fireEvent.click(screen.getByRole('button', {name: 'Create event links'}));
 
     await waitFor(() => expect(mockedCalendarService.createCalendarEvent).toHaveBeenCalled());
+    expect(mockedCalendarService.createCalendarEvent).toHaveBeenCalledWith(expect.objectContaining({
+      isAllDay: false,
+    }));
     expect(screen.getByText('Staff Email')).toBeInTheDocument();
     expect(screen.getByText('ada@example.com')).toBeInTheDocument();
     await waitFor(() => expect(screen.getByText('Interview Meeting')).toBeInTheDocument());
-    expect(screen.queryByText('Interview Start Time')).not.toBeInTheDocument();
-    expect(screen.queryByText('Interview End Time')).not.toBeInTheDocument();
+    expect(screen.queryByText('Interview Time')).not.toBeInTheDocument();
     expect(screen.getByText('PTI Subject')).toBeInTheDocument();
     expect(screen.getByText('01/07/2026 09:00 - 01/07/2026 10:00')).toBeInTheDocument();
     expect(screen.queryByText('Created successfully')).not.toBeInTheDocument();
@@ -235,11 +255,93 @@ describe('ParentTeacherInterviewPage', () => {
     );
   });
 
+  test('supports all-day schedule rows and submits an all-day create payload', async () => {
+    mockedModuleService.getModule.mockResolvedValueOnce({
+      settings: {
+        parentTeacherInterviewCalendar: {
+          isAllDay: true,
+          startDateTime: '2026-07-03',
+          endDateTime: '2026-07-03',
+          subject: 'PTI Subject',
+          bodyText: 'PTI Body',
+        },
+      },
+    } as any);
+
+    render(<ParentTeacherInterviewPage />);
+
+    await waitFor(() => expect(screen.getByText('Ada Lovelace')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByLabelText('Select Ada Lovelace'));
+    fireEvent.click(screen.getByRole('button', {name: 'Next'}));
+    expect(screen.getByLabelText('All Day')).toBeChecked();
+    fireEvent.change(screen.getByLabelText('Starting date for Ada Lovelace'), {target: {value: '2026-07-03'}});
+    fireEvent.change(screen.getByLabelText('Ending date for Ada Lovelace'), {target: {value: '2026-07-03'}});
+
+    await waitFor(() => expect(mockedCalendarService.getCalendarEvents).toHaveBeenCalledWith(expect.objectContaining({
+      startDateTime: expect.stringContaining('2026-07-03T00:00:00'),
+      endDateTime: expect.stringContaining('2026-07-03T23:59:59'),
+    })));
+
+    fireEvent.click(screen.getByRole('button', {name: 'Create link(s) for 1 staff'}));
+    fireEvent.change(screen.getByPlaceholderText('12345'), {target: {value: '12345'}});
+    fireEvent.click(screen.getByRole('button', {name: 'Create event links'}));
+
+    await waitFor(() => expect(mockedCalendarService.createCalendarEvent).toHaveBeenCalledWith(expect.objectContaining({
+      isAllDay: true,
+      startDateTime: expect.stringContaining('2026-07-03T00:00:00'),
+      endDateTime: expect.stringContaining('2026-07-04T00:00:00'),
+    })));
+  });
+
+  test('restores timed defaults from selected all-day dates when all-day is unchecked', async () => {
+    render(<ParentTeacherInterviewPage />);
+
+    await waitFor(() => expect(screen.getByText('Ada Lovelace')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByLabelText('Select Ada Lovelace'));
+    fireEvent.click(screen.getByRole('button', {name: 'Next'}));
+
+    fireEvent.click(screen.getByLabelText('All Day'));
+    fireEvent.change(screen.getByLabelText('Starting date for Ada Lovelace'), {target: {value: '2026-07-05'}});
+    fireEvent.change(screen.getByLabelText('Ending date for Ada Lovelace'), {target: {value: '2026-07-06'}});
+    fireEvent.click(screen.getByLabelText('All Day'));
+
+    expect(screen.getByLabelText('Starting datetime for Ada Lovelace')).toHaveValue('2026-07-05T08:00');
+    expect(screen.getByLabelText('Ending datetime for Ada Lovelace')).toHaveValue('2026-07-06T16:00');
+  });
+
+  test('uses default all-day settings to prepopulate schedule rows', async () => {
+    mockedModuleService.getModule.mockResolvedValueOnce({
+      settings: {
+        parentTeacherInterviewCalendar: {
+          isAllDay: true,
+          startDateTime: '2026-07-07',
+          endDateTime: '2026-07-08',
+          subject: 'PTI Subject',
+          bodyText: 'PTI Body',
+        },
+      },
+    } as any);
+
+    render(<ParentTeacherInterviewPage />);
+
+    await waitFor(() => expect(screen.getByText('Ada Lovelace')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByLabelText('Select Ada Lovelace'));
+    fireEvent.click(screen.getByRole('button', {name: 'Next'}));
+
+    expect(screen.getByLabelText('All Day')).toBeChecked();
+    expect(screen.getByLabelText('Starting date for Ada Lovelace')).toHaveValue('2026-07-07');
+    expect(screen.getByLabelText('Ending date for Ada Lovelace')).toHaveValue('2026-07-08');
+  });
+
   test('hides staff selection and shows empty state when required defaults are missing', async () => {
     mockedAuthService.isModuleRole.mockResolvedValueOnce(false as any);
     mockedModuleService.getModule.mockResolvedValueOnce({
       settings: {
         parentTeacherInterviewCalendar: {
+          isAllDay: false,
           bodyText: 'PTI Body',
         },
       },
