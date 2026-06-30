@@ -26,6 +26,7 @@ export const MGGS_MODULE_ID_MY_CLASS_LIST = 20;
 export const MGGS_MODULE_ID_CLIPBOARD = 21;
 export const MGGS_MODULE_ID_ADMISSIONS = 22;
 export const MGGS_MODULE_ID_HOY_CHAT_EMAIL = 23;
+export const MGGS_MODULE_ID_PARENT_TEACHER_INTERVIEW = 24;
 
 
 type iModuleUser = {

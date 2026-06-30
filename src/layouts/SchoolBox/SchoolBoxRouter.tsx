@@ -10,6 +10,7 @@ import {
   MGGS_MODULE_ID_HOUSE_AWARDS, MGGS_MODULE_ID_HOY_CHAT_EMAIL,
   MGGS_MODULE_ID_MGG_APP_DEVICES,
   MGGS_MODULE_ID_ONLINE_DONATION,
+  MGGS_MODULE_ID_PARENT_TEACHER_INTERVIEW,
   MGGS_MODULE_ID_POWER_BI_REPORT,
   MGGS_MODULE_ID_SCHOOL_DATA_SUBMISSION,
   MGGS_MODULE_ID_STAFF_LIST,
@@ -44,6 +45,7 @@ import HOYChatForm from '../../pages/HOYChat/components/HOYChatForm';
 import StudentSubjectList from '../../components/timeTable/StudentSubjectList';
 import {useSearchParams} from 'react-router-dom';
 import SchoolBoxUrls from './SchoolBoxUrls';
+import ParentTeacherInterviewPage from '../../pages/ParentTeacherInterview/ParentTeacherInterviewPage';
 
 const schoolBoxIframeElementId = "remote";
 const SchoolBoxRouter = ({
@@ -147,6 +149,14 @@ const SchoolBoxRouter = ({
       return (
         <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_CLIPBOARD}>
           <ClipboardPage />
+        </ModuleAccessWrapper>
+      );
+    }
+    case SchoolBoxUrls.ParentTeacherInterview: {
+      removeSchoolBoxIframe();
+      return (
+        <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_PARENT_TEACHER_INTERVIEW}>
+          <ParentTeacherInterviewPage />
         </ModuleAccessWrapper>
       );
     }

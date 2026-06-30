@@ -295,7 +295,7 @@ describe('ClipboardSessionService', () => {
       mockAppService.get.mockResolvedValue({ data: mockApiResponse });
 
       const params: iClipboardSessionQueryParams = {
-        perPage: 25,
+        pageLength: 25,
         page: 3,
         teamId: 5,
         includeTeams: true,

@@ -1,15 +1,15 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import ClipboardDepartmentsListPanel from '../../../../../pages/Clipboard/components/ClipboardDepartmentsListPanel';
-import ClipboardDepartmentService from '../../../../../services/Clipboard/ClipboardDepartmentService';
-import ClipboardActivityService from '../../../../../services/Clipboard/ClipboardActivityService';
-import Toaster from '../../../../../services/Toaster';
-import iClipboardDepartment from '../../../../../types/Clipboard/iClipboardDepartment';
-import iClipboardActivity from '../../../../../types/Clipboard/iClipboardActivity';
+import ClipboardDepartmentsListPanel from '../../../../pages/Clipboard/components/ClipboardDepartmentsListPanel';
+import ClipboardDepartmentService from '../../../../services/Clipboard/ClipboardDepartmentService';
+import ClipboardActivityService from '../../../../services/Clipboard/ClipboardActivityService';
+import Toaster from '../../../../services/Toaster';
+import iClipboardDepartment from '../../../../types/Clipboard/iClipboardDepartment';
+import iClipboardActivity from '../../../../types/Clipboard/iClipboardActivity';
 
-jest.mock('../../../../../services/Clipboard/ClipboardDepartmentService');
-jest.mock('../../../../../services/Clipboard/ClipboardActivityService');
-jest.mock('../../../../../services/Toaster');
+jest.mock('../../../../services/Clipboard/ClipboardDepartmentService');
+jest.mock('../../../../services/Clipboard/ClipboardActivityService');
+jest.mock('../../../../services/Toaster');
 
 describe('ClipboardDepartmentsListPanel', () => {
   const mockDepartmentService = ClipboardDepartmentService as jest.Mocked<typeof ClipboardDepartmentService>;

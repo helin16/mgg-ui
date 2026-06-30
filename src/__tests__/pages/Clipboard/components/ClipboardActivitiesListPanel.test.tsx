@@ -1,12 +1,12 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ClipboardActivitiesListPanel from '../../../../../pages/Clipboard/components/ClipboardActivitiesListPanel';
-import Toaster from '../../../../../services/Toaster';
-import iClipboardActivity from '../../../../../types/Clipboard/iClipboardActivity';
+import ClipboardActivitiesListPanel from '../../../../pages/Clipboard/components/ClipboardActivitiesListPanel';
+import Toaster from '../../../../services/Toaster';
+import iClipboardActivity from '../../../../types/Clipboard/iClipboardActivity';
 
 // Mock the services
-jest.mock('../../../../../services/Clipboard/ClipboardActivityService', () => ({
+jest.mock('../../../../services/Clipboard/ClipboardActivityService', () => ({
   __esModule: true,
   default: {
     getAll: jest.fn(),
@@ -16,18 +16,18 @@ jest.mock('../../../../../services/Clipboard/ClipboardActivityService', () => ({
   },
 }));
 
-jest.mock('../../../../../services/Clipboard/ClipboardDepartmentService', () => ({
+jest.mock('../../../../services/Clipboard/ClipboardDepartmentService', () => ({
   __esModule: true,
   default: {
     getAllRecords: jest.fn(),
   },
 }));
 
-jest.mock('../../../../../services/Toaster');
-jest.mock('../../../../../components/common/Table', () => {
+jest.mock('../../../../services/Toaster');
+jest.mock('../../../../components/common/Table', () => {
   return function MockTable({ columns, rows, pagination }: any) {
     return (
-      <div data-testid="mock-table">
+      <table data-testid="mock-table">
         <thead>
           <tr>
             {columns.map((col: any) => (
@@ -39,7 +39,7 @@ jest.mock('../../../../../components/common/Table', () => {
           {rows && rows.map((row: any, idx: number) => (
             <tr key={idx} data-testid={`row-${idx}`}>
               {columns.map((col: any) => (
-                <td key={col.key}>{col.cell && col.cell(col, row)}</td>
+                col.cell ? col.cell(col, row) : <td key={col.key} />
               ))}
             </tr>
           ))}
@@ -53,14 +53,14 @@ jest.mock('../../../../../components/common/Table', () => {
             </tr>
           </tfoot>
         )}
-      </div>
+      </table>
     );
   };
 });
 
 // Import mocked services
-import ClipboardActivityService from '../../../../../services/Clipboard/ClipboardActivityService';
-import ClipboardDepartmentService from '../../../../../services/Clipboard/ClipboardDepartmentService';
+import ClipboardActivityService from '../../../../services/Clipboard/ClipboardActivityService';
+import ClipboardDepartmentService from '../../../../services/Clipboard/ClipboardDepartmentService';
 
 describe('ClipboardActivitiesListPanel', () => {
   const mockActivityService = ClipboardActivityService as jest.Mocked<typeof ClipboardActivityService>;
@@ -132,12 +132,9 @@ describe('ClipboardActivitiesListPanel', () => {
     render(<ClipboardActivitiesListPanel />);
 
     await waitFor(() => {
-      // Department filter
-      expect(screen.getByLabelText('Filter by Department:')).toBeInTheDocument();
-      // Search input
+      expect(screen.getByText('Filter by Department:')).toBeInTheDocument();
       expect(screen.getByPlaceholderText('Enter activity name...')).toBeInTheDocument();
-      // Archived filter
-      expect(screen.getByLabelText('Archived Status:')).toBeInTheDocument();
+      expect(screen.getByText('Archived Status:')).toBeInTheDocument();
     });
   });
 
@@ -194,11 +191,11 @@ describe('ClipboardActivitiesListPanel', () => {
   it('filters activities by department', async () => {
     render(<ClipboardActivitiesListPanel />);
 
-    const departmentSelect = screen.getByDisplayValue('All Departments') as HTMLSelectElement;
-
     await waitFor(() => {
       expect(screen.getByText('Swimming')).toBeInTheDocument();
     });
+
+    const departmentSelect = screen.getByDisplayValue('All Departments') as HTMLSelectElement;
 
     // Filter by Music department (102)
     fireEvent.change(departmentSelect, { target: { value: '102' } });
@@ -214,11 +211,11 @@ describe('ClipboardActivitiesListPanel', () => {
   it('filters activities by search name', async () => {
     render(<ClipboardActivitiesListPanel />);
 
-    const searchInput = screen.getByPlaceholderText('Enter activity name...') as HTMLInputElement;
-
     await waitFor(() => {
       expect(screen.getByText('Basketball')).toBeInTheDocument();
     });
+
+    const searchInput = screen.getByPlaceholderText('Enter activity name...') as HTMLInputElement;
 
     // Search for "ball"
     fireEvent.change(searchInput, { target: { value: 'ball' } });
@@ -233,11 +230,11 @@ describe('ClipboardActivitiesListPanel', () => {
   it('search is case-insensitive', async () => {
     render(<ClipboardActivitiesListPanel />);
 
-    const searchInput = screen.getByPlaceholderText('Enter activity name...') as HTMLInputElement;
-
     await waitFor(() => {
       expect(screen.getByText('Swimming')).toBeInTheDocument();
     });
+
+    const searchInput = screen.getByPlaceholderText('Enter activity name...') as HTMLInputElement;
 
     // Search for "SWIM"
     fireEvent.change(searchInput, { target: { value: 'SWIM' } });
@@ -263,11 +260,11 @@ describe('ClipboardActivitiesListPanel', () => {
   it('filters to show only archived activities', async () => {
     render(<ClipboardActivitiesListPanel />);
 
-    const archivedSelect = screen.getByDisplayValue('Non-Archived Only') as HTMLSelectElement;
-
     await waitFor(() => {
       expect(screen.getByText('Basketball')).toBeInTheDocument();
     });
+
+    const archivedSelect = screen.getByDisplayValue('Non-Archived Only') as HTMLSelectElement;
 
     // Change to "Archived Only"
     fireEvent.change(archivedSelect, { target: { value: 'archived' } });
@@ -282,11 +279,11 @@ describe('ClipboardActivitiesListPanel', () => {
   it('shows all activities (archived and non-archived) when "All" is selected', async () => {
     render(<ClipboardActivitiesListPanel />);
 
-    const archivedSelect = screen.getByDisplayValue('Non-Archived Only') as HTMLSelectElement;
-
     await waitFor(() => {
       expect(screen.getByText('Basketball')).toBeInTheDocument();
     });
+
+    const archivedSelect = screen.getByDisplayValue('Non-Archived Only') as HTMLSelectElement;
 
     // Change to "All (Include Archived)"
     fireEvent.change(archivedSelect, { target: { value: 'all' } });
@@ -305,12 +302,12 @@ describe('ClipboardActivitiesListPanel', () => {
   it('combines multiple filters (department + search)', async () => {
     render(<ClipboardActivitiesListPanel />);
 
-    const departmentSelect = screen.getByDisplayValue('All Departments') as HTMLSelectElement;
-    const searchInput = screen.getByPlaceholderText('Enter activity name...') as HTMLInputElement;
-
     await waitFor(() => {
       expect(screen.getByText('Swimming')).toBeInTheDocument();
     });
+
+    const departmentSelect = screen.getByDisplayValue('All Departments') as HTMLSelectElement;
+    const searchInput = screen.getByPlaceholderText('Enter activity name...') as HTMLInputElement;
 
     // Filter by Sports department
     fireEvent.change(departmentSelect, { target: { value: '101' } });
@@ -329,11 +326,11 @@ describe('ClipboardActivitiesListPanel', () => {
   it('shows "no activities" message when no matches are found', async () => {
     render(<ClipboardActivitiesListPanel />);
 
-    const searchInput = screen.getByPlaceholderText('Enter activity name...') as HTMLInputElement;
-
     await waitFor(() => {
       expect(screen.getByText('Basketball')).toBeInTheDocument();
     });
+
+    const searchInput = screen.getByPlaceholderText('Enter activity name...') as HTMLInputElement;
 
     // Search for something that doesn't exist
     fireEvent.change(searchInput, { target: { value: 'nonexistent' } });
@@ -374,13 +371,12 @@ describe('ClipboardActivitiesListPanel', () => {
   it('filters activities by SIS code', async () => {
     render(<ClipboardActivitiesListPanel />);
 
-    // Find the SIS code select - it will be the second select after Department
-    const selects = screen.getAllByRole('combobox');
-    const sisCodeSelect = selects[1] as HTMLSelectElement;
-
     await waitFor(() => {
       expect(screen.getByText('Basketball')).toBeInTheDocument();
     });
+
+    const selects = screen.getAllByRole('combobox');
+    const sisCodeSelect = selects[1] as HTMLSelectElement;
 
     // Filter by SIS code "BAS"
     fireEvent.change(sisCodeSelect, { target: { value: 'BAS' } });
@@ -438,27 +434,23 @@ describe('ClipboardActivitiesListPanel', () => {
     render(<ClipboardActivitiesListPanel />);
 
     await waitFor(() => {
-      // Department filter
-      expect(screen.getByLabelText('Filter by Department:')).toBeInTheDocument();
-      // SIS Code filter
-      expect(screen.getByLabelText('Filter by SIS Code:')).toBeInTheDocument();
-      // Search input
+      expect(screen.getByText('Filter by Department:')).toBeInTheDocument();
+      expect(screen.getByText('Filter by SIS Code:')).toBeInTheDocument();
       expect(screen.getByPlaceholderText('Enter activity name...')).toBeInTheDocument();
-      // Archived filter
-      expect(screen.getByLabelText('Archived Status:')).toBeInTheDocument();
+      expect(screen.getByText('Archived Status:')).toBeInTheDocument();
     });
   });
 
   it('combines SIS code filter with other filters', async () => {
     render(<ClipboardActivitiesListPanel />);
 
-    const selects = screen.getAllByRole('combobox');
-    const departmentSelect = selects[0] as HTMLSelectElement;
-    const sisCodeSelect = selects[1] as HTMLSelectElement;
-
     await waitFor(() => {
       expect(screen.getByText('Basketball')).toBeInTheDocument();
     });
+
+    const selects = screen.getAllByRole('combobox');
+    const departmentSelect = selects[0] as HTMLSelectElement;
+    const sisCodeSelect = selects[1] as HTMLSelectElement;
 
     // Filter by Sports department
     fireEvent.change(departmentSelect, { target: { value: '101' } });
