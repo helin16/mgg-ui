@@ -9,6 +9,7 @@ type iPage = {
   title?: any;
   AdminPage?: any;
   adminPageProps?: any;
+  onAdminPageClose?: () => void;
   moduleId?: number;
   extraBtns?: any;
 };
@@ -21,9 +22,15 @@ const Page = ({
   title,
   AdminPage,
   adminPageProps,
+  onAdminPageClose,
   extraBtns,
 }: iPage) => {
   const [showingAdminPage, setShowingAdminPage] = useState(false);
+
+  const handleAdminPageClose = () => {
+    setShowingAdminPage(false);
+    onAdminPageClose && onAdminPageClose();
+  };
 
   const getAdminBtn = () => {
     if (!moduleId || !AdminPage) {
@@ -57,7 +64,7 @@ const Page = ({
       return (
         <AdminPage
           {...adminPageProps}
-          onNavBack={() => setShowingAdminPage(false)}
+          onNavBack={handleAdminPageClose}
         />
       );
     }

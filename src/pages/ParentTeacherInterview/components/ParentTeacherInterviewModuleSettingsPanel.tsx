@@ -30,6 +30,7 @@ const EditPanel = ({module, onUpdate}: iEditPanel) => {
   const [subject, setSubject] = useState(`${module.settings?.parentTeacherInterviewCalendar?.subject || ''}`.trim());
   const [bodyText, setBodyText] = useState(`${module.settings?.parentTeacherInterviewCalendar?.bodyText || ''}`.trim());
   const [isAllDay, setIsAllDay] = useState(module.settings?.parentTeacherInterviewCalendar?.isAllDay === true);
+  const [allowUserChange, setAllowUserChange] = useState(module.settings?.parentTeacherInterviewCalendar?.allowUserChange !== false);
   const [startDateTime, setStartDateTime] = useState(`${module.settings?.parentTeacherInterviewCalendar?.startDateTime || ''}`.trim());
   const [endDateTime, setEndDateTime] = useState(`${module.settings?.parentTeacherInterviewCalendar?.endDateTime || ''}`.trim());
 
@@ -37,6 +38,7 @@ const EditPanel = ({module, onUpdate}: iEditPanel) => {
     nextSubject = subject,
     nextBodyText = bodyText,
     nextIsAllDay = isAllDay,
+    nextAllowUserChange = allowUserChange,
     nextStartDateTime = startDateTime,
     nextEndDateTime = endDateTime
   ) => {
@@ -47,6 +49,7 @@ const EditPanel = ({module, onUpdate}: iEditPanel) => {
         subject: `${nextSubject || ''}`.trim(),
         bodyText: `${nextBodyText || ''}`.trim(),
         isAllDay: nextIsAllDay === true,
+        allowUserChange: nextAllowUserChange !== false,
         startDateTime: `${nextStartDateTime || ''}`.trim(),
         endDateTime: `${nextEndDateTime || ''}`.trim(),
       },
@@ -57,8 +60,8 @@ const EditPanel = ({module, onUpdate}: iEditPanel) => {
     <SectionDiv>
       <SectionDiv className={'margin-bottom'}>
         <h5>Parent Teacher Interview</h5>
-        <FlexContainer className={'with-gap lg-gap wrap align-items-end'}>
-          <div className={'full-width'} style={{flex: '1 1 260px'}}>
+        <div className={'row g-3 align-items-end'}>
+          <div className={'col-lg-6'}>
             <Form.Label>Subject</Form.Label>
             <Form.Control
               aria-label={'Subject'}
@@ -66,54 +69,67 @@ const EditPanel = ({module, onUpdate}: iEditPanel) => {
               onChange={event => {
                 const nextValue = event.target.value;
                 setSubject(nextValue);
-                handleUpdate(nextValue, bodyText, isAllDay, startDateTime, endDateTime);
+                handleUpdate(nextValue, bodyText, isAllDay, allowUserChange, startDateTime, endDateTime);
               }}
             />
           </div>
-          <div className={'full-width'} style={{flex: '1 1 260px'}}>
-            <Form.Check
-              id={'default-all-day'}
-              type={'checkbox'}
-              label={'Default All Day'}
-              checked={isAllDay}
-              onChange={event => {
-                const nextIsAllDay = event.target.checked;
-                const nextStartDateTime = nextIsAllDay ? toDateValue(startDateTime) : '';
-                const nextEndDateTime = nextIsAllDay ? toDateValue(endDateTime) : '';
-                setIsAllDay(nextIsAllDay);
-                setStartDateTime(nextStartDateTime);
-                setEndDateTime(nextEndDateTime);
-                handleUpdate(subject, bodyText, nextIsAllDay, nextStartDateTime, nextEndDateTime);
-              }}
-            />
+          <div className={'col-lg-6'}>
+            <Form.Label>Default Interview Time</Form.Label>
+            <FlexContainer className={'with-gap align-items center'}>
+              <Form.Check
+                id={'default-all-day'}
+                type={'checkbox'}
+                label={'All Day'}
+                checked={isAllDay}
+                style={{width: '80px'}}
+                onChange={event => {
+                  const nextIsAllDay = event.target.checked;
+                  const nextStartDateTime = nextIsAllDay ? toDateValue(startDateTime) : '';
+                  const nextEndDateTime = nextIsAllDay ? toDateValue(endDateTime) : '';
+                  setIsAllDay(nextIsAllDay);
+                  setStartDateTime(nextStartDateTime);
+                  setEndDateTime(nextEndDateTime);
+                  handleUpdate(subject, bodyText, nextIsAllDay, allowUserChange, nextStartDateTime, nextEndDateTime);
+                }}
+              />
+              <Form.Control
+                aria-label={'Default Interview Start Time'}
+                type={isAllDay ? 'date' : 'datetime-local'}
+                value={startDateTime}
+                style={{width: '200px'}}
+                onChange={event => {
+                  const nextValue = event.target.value;
+                  setStartDateTime(nextValue);
+                  handleUpdate(subject, bodyText, isAllDay, allowUserChange, nextValue, endDateTime);
+                }}
+              />
+              <span>-</span>
+              <Form.Control
+                aria-label={'Default Interview End Time'}
+                type={isAllDay ? 'date' : 'datetime-local'}
+                value={endDateTime}
+                style={{width: '200px'}}
+                onChange={event => {
+                  const nextValue = event.target.value;
+                  setEndDateTime(nextValue);
+                  handleUpdate(subject, bodyText, isAllDay, allowUserChange, startDateTime, nextValue);
+                }}
+              />
+              <Form.Check
+                id={'default-allow-user-change'}
+                type={'checkbox'}
+                label={'Allow user change'}
+                checked={allowUserChange}
+                style={{marginLeft: '32px'}}
+                onChange={event => {
+                  const nextValue = event.target.checked;
+                  setAllowUserChange(nextValue);
+                  handleUpdate(subject, bodyText, isAllDay, nextValue, startDateTime, endDateTime);
+                }}
+              />
+            </FlexContainer>
           </div>
-          <div className={'full-width'} style={{flex: '1 1 260px'}}>
-            <Form.Label>Default Interview Start Time</Form.Label>
-            <Form.Control
-              aria-label={'Default Interview Start Time'}
-              type={isAllDay ? 'date' : 'datetime-local'}
-              value={startDateTime}
-              onChange={event => {
-                const nextValue = event.target.value;
-                setStartDateTime(nextValue);
-                handleUpdate(subject, bodyText, isAllDay, nextValue, endDateTime);
-              }}
-            />
-          </div>
-          <div className={'full-width'} style={{flex: '1 1 260px'}}>
-            <Form.Label>Default Interview End Time</Form.Label>
-            <Form.Control
-              aria-label={'Default Interview End Time'}
-              type={isAllDay ? 'date' : 'datetime-local'}
-              value={endDateTime}
-              onChange={event => {
-                const nextValue = event.target.value;
-                setEndDateTime(nextValue);
-                handleUpdate(subject, bodyText, isAllDay, startDateTime, nextValue);
-              }}
-            />
-          </div>
-        </FlexContainer>
+        </div>
       </SectionDiv>
       <SectionDiv>
         <Form.Label>Body Text</Form.Label>
@@ -125,7 +141,7 @@ const EditPanel = ({module, onUpdate}: iEditPanel) => {
           onChange={event => {
             const nextValue = event.target.value;
             setBodyText(nextValue);
-            handleUpdate(subject, nextValue, isAllDay, startDateTime, endDateTime);
+            handleUpdate(subject, nextValue, isAllDay, allowUserChange, startDateTime, endDateTime);
           }}
         />
       </SectionDiv>
