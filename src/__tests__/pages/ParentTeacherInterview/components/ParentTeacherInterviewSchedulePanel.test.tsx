@@ -132,7 +132,7 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
 
     expect(screen.getByText('Existing Events')).toBeInTheDocument();
     expect(screen.getByText('Existing meeting')).toBeInTheDocument();
-    expect(screen.getByText('01/07/2026 09:15 - 01/07/2026 09:45')).toBeInTheDocument();
+    expect(screen.getByText('01/07/2026 09:15 - 09:45')).toBeInTheDocument();
     expect(screen.queryByRole('link', {name: 'Meeting link'})).not.toBeInTheDocument();
 
     rerender(
@@ -210,7 +210,7 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
     expect(screen.getAllByText('Existing Events')[0]).toBeInTheDocument();
     expect(screen.getByText('Interview Meeting')).toBeInTheDocument();
     expect(screen.getByText('PTI Subject')).toBeInTheDocument();
-    expect(screen.getByText('01/07/2026 09:15 - 01/07/2026 09:45')).toBeInTheDocument();
+    expect(screen.getByText('01/07/2026 09:15 - 09:45')).toBeInTheDocument();
     expect(screen.queryByText('Created successfully')).not.toBeInTheDocument();
     expect(screen.getByRole('link', {name: 'Link'})).toHaveAttribute(
       'href',
@@ -434,8 +434,41 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
       />
     );
 
-    expect(screen.getAllByText('01/07/2026 - 01/07/2026 All Day')).toHaveLength(2);
+    expect(screen.getAllByText('01/07/2026 All Day')).toHaveLength(2);
     expect(screen.getByText('PTI All Day')).toBeInTheDocument();
+  });
+
+  test('formats cross-day timed events with both dates', () => {
+    render(
+      <ParentTeacherInterviewSchedulePanel
+        isAdmin={true}
+        isSubmitting={false}
+        missingSettingsMessage={null}
+        rows={[
+          {
+            ...baseRows[0],
+            createStatus: 'CREATED',
+            createResult: {
+              event: {
+                subject: 'Overnight Event',
+                startDateTime: '2026-07-02T14:00:00+10:00',
+                endDateTime: '2026-07-03T14:30:00+10:00',
+                isAllDay: false,
+                teamsJoinUrl: 'https://teams.example.com/overnight',
+              },
+            },
+          },
+        ]}
+        onBack={jest.fn()}
+        onAllDayChange={jest.fn()}
+        onDateTimeChange={jest.fn()}
+        onRetryRetrieval={jest.fn()}
+        onRetryCreate={jest.fn()}
+        onSubmit={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText('02/07/2026 14:00 - 03/07/2026 14:30')).toBeInTheDocument();
   });
 
   test('exports validation helpers for create eligibility', () => {
@@ -449,5 +482,6 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
       endDateTime: '2026-06-30',
     } as any)).toBe('End date must be the same as or later than start date.');
     expect(isCreateEligible(baseRows[0] as any)).toBe(true);
+    expect(isCreateEligible({...baseRows[0], createStatus: 'CREATED'} as any)).toBe(false);
   });
 });

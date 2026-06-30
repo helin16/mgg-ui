@@ -80,6 +80,10 @@ const isCreateEligible = (row: iParentTeacherInterviewScheduleRow) => {
     return false;
   }
 
+  if (row.createStatus === 'CREATED' || row.createStatus === 'EXISTS') {
+    return false;
+  }
+
   if (row.retrievalStatus !== 'READY' && row.retrievalStatus !== 'EMPTY') {
     return false;
   }
@@ -110,13 +114,22 @@ type iExistingEventRow = {
 };
 
 const formatEventDateTimeRange = (event: iParentTeacherInterviewCalendarEventSummary) => {
-  if (event.isAllDay === true) {
-    const startDate = moment(event.startDateTime).format('DD/MM/YYYY');
-    const endDate = moment(event.endDateTime).subtract(1, 'day').format('DD/MM/YYYY');
-    return `${startDate} - ${endDate} All Day`;
+  const startMoment = moment(event.startDateTime);
+  const endMoment = moment(event.endDateTime);
+  const isMidnightBoundAllDay = startMoment.format('HH:mm') === '00:00'
+    && endMoment.format('HH:mm') === '00:00'
+    && endMoment.isAfter(startMoment)
+    && endMoment.diff(startMoment, 'days', true) >= 1;
+
+  if (event.isAllDay === true || isMidnightBoundAllDay) {
+    return `${startMoment.format('DD/MM/YYYY')} All Day`;
   }
 
-  return `${moment(event.startDateTime).format('DD/MM/YYYY HH:mm')} - ${moment(event.endDateTime).format('DD/MM/YYYY HH:mm')}`;
+  if (startMoment.isSame(endMoment, 'day')) {
+    return `${startMoment.format('DD/MM/YYYY HH:mm')} - ${endMoment.format('HH:mm')}`;
+  }
+
+  return `${startMoment.format('DD/MM/YYYY HH:mm')} - ${endMoment.format('DD/MM/YYYY HH:mm')}`;
 };
 
 const isCanceledEvent = (event: iParentTeacherInterviewCalendarEventSummary) => {
