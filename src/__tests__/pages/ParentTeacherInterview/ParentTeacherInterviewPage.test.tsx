@@ -247,12 +247,13 @@ describe('ParentTeacherInterviewPage', () => {
     await waitFor(() => expect(screen.getByText('Interview Meeting')).toBeInTheDocument());
     expect(screen.queryByText('Interview Time')).not.toBeInTheDocument();
     expect(screen.getByText('PTI Subject')).toBeInTheDocument();
-    expect(screen.getByText('01/07/2026 09:00 - 01/07/2026 10:00')).toBeInTheDocument();
+    expect(screen.getByText('01/07/2026 09:00 - 10:00')).toBeInTheDocument();
     expect(screen.queryByText('Created successfully')).not.toBeInTheDocument();
     expect(screen.getByRole('link', {name: 'Link'})).toHaveAttribute(
       'href',
       'https://teams.example.com/created'
     );
+    expect(screen.getByRole('button', {name: 'Create link(s) for 1 staff'})).toBeDisabled();
   });
 
   test('supports all-day schedule rows and submits an all-day create payload', async () => {
