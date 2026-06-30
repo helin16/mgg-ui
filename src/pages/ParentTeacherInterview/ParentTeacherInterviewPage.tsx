@@ -57,7 +57,7 @@ const ParentTeacherInterviewPage = () => {
   const [staffs, setStaffs] = useState<iVStaff[]>([]);
   const [categories, setCategories] = useState<iSynLuStaffCategory[]>([]);
   const [searchText, setSearchText] = useState('');
-  const [categoryCode, setCategoryCode] = useState('');
+  const [categoryCodes, setCategoryCodes] = useState<string[]>([]);
   const [selectedStaffIds, setSelectedStaffIds] = useState<number[]>([]);
   const [scheduleRows, setScheduleRows] = useState<iParentTeacherInterviewScheduleRow[]>([]);
   const [currentStep, setCurrentStep] = useState<'select' | 'schedule'>('select');
@@ -198,7 +198,7 @@ const ParentTeacherInterviewPage = () => {
   const filteredStaffs = useMemo(() => {
     const normalizedSearchText = `${searchText}`.trim().toLowerCase();
     return staffs.filter(staff => {
-      if (categoryCode !== '' && `${staff.StaffCategory || ''}` !== categoryCode) {
+      if (categoryCodes.length > 0 && !categoryCodes.includes(`${staff.StaffCategory || ''}`)) {
         return false;
       }
 
@@ -216,7 +216,7 @@ const ParentTeacherInterviewPage = () => {
 
       return searchTargets.includes(normalizedSearchText);
     });
-  }, [categoryCode, searchText, staffs]);
+  }, [categoryCodes, searchText, staffs]);
 
   const selectedStaffs = useMemo(() => {
     const selectedStaffIdMap = selectedStaffIds.reduce((map, staffId) => {
@@ -443,16 +443,16 @@ const ParentTeacherInterviewPage = () => {
     }
 
     return (
-      <ParentTeacherInterviewStaffSelectionPanel
-        categoryCode={categoryCode}
-        categories={categories}
-        searchText={searchText}
-        selectedStaffIds={selectedStaffIds}
-        staffs={filteredStaffs}
-        onCategoryCodeChange={setCategoryCode}
-        onSearchTextChange={setSearchText}
-        onToggleAllVisible={handleToggleAllVisible}
-        onToggleStaff={updateSelectedStaffId}
+        <ParentTeacherInterviewStaffSelectionPanel
+          categoryCodes={categoryCodes}
+          categories={categories}
+          searchText={searchText}
+          selectedStaffIds={selectedStaffIds}
+          staffs={filteredStaffs}
+          onCategoryCodesChange={setCategoryCodes}
+          onSearchTextChange={setSearchText}
+          onToggleAllVisible={handleToggleAllVisible}
+          onToggleStaff={updateSelectedStaffId}
         onNext={handleNext}
       />
     );

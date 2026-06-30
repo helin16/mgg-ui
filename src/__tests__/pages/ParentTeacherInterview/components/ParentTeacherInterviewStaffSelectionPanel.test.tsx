@@ -2,6 +2,30 @@ import React from 'react';
 import {fireEvent, render, screen} from '@testing-library/react';
 import ParentTeacherInterviewStaffSelectionPanel from '../../../../pages/ParentTeacherInterview/components/ParentTeacherInterviewStaffSelectionPanel';
 
+jest.mock('../../../../components/common/SelectBox', () => {
+  return function MockSelectBox({options = [], value = [], onChange, placeholder}: any) {
+    return (
+      <select
+        aria-label={'Filter by category'}
+        multiple
+        data-placeholder={placeholder}
+        value={value.map((option: any) => option.value)}
+        onChange={(event) => {
+          const selectedValues = Array.from(event.currentTarget.selectedOptions).map((option: any) => option.value);
+          const selectedOptions = options.filter((option: any) => selectedValues.includes(option.value));
+          onChange(selectedOptions);
+        }}
+      >
+        {options.map((option: any) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    );
+  };
+});
+
 const staffRows = [
   {
     StaffID: 1001,
@@ -29,16 +53,16 @@ const categoryRows = [
 describe('ParentTeacherInterviewStaffSelectionPanel', () => {
   test('renders rows and forwards search/category changes', () => {
     const onSearchTextChange = jest.fn();
-    const onCategoryCodeChange = jest.fn();
+    const onCategoryCodesChange = jest.fn();
 
     render(
       <ParentTeacherInterviewStaffSelectionPanel
-        categoryCode={''}
+        categoryCodes={[]}
         categories={categoryRows}
         searchText={''}
         selectedStaffIds={[]}
         staffs={staffRows}
-        onCategoryCodeChange={onCategoryCodeChange}
+        onCategoryCodesChange={onCategoryCodesChange}
         onSearchTextChange={onSearchTextChange}
         onToggleAllVisible={jest.fn()}
         onToggleStaff={jest.fn()}
@@ -54,8 +78,12 @@ describe('ParentTeacherInterviewStaffSelectionPanel', () => {
     fireEvent.change(screen.getByLabelText('Search staff'), {target: {value: 'Ada'}});
     expect(onSearchTextChange).toHaveBeenCalledWith('Ada');
 
-    fireEvent.change(screen.getByLabelText('Filter by category'), {target: {value: 'LEAD'}});
-    expect(onCategoryCodeChange).toHaveBeenCalledWith('LEAD');
+    const categorySelect = screen.getByLabelText('Filter by category') as HTMLSelectElement;
+    Array.from(categorySelect.options).forEach(option => {
+      option.selected = option.value === 'TEACH' || option.value === 'LEAD';
+    });
+    fireEvent.change(categorySelect);
+    expect(onCategoryCodesChange).toHaveBeenCalledWith(['TEACH', 'LEAD']);
   });
 
   test('supports row selection, header selection, and next gating', () => {
@@ -65,12 +93,12 @@ describe('ParentTeacherInterviewStaffSelectionPanel', () => {
 
     render(
       <ParentTeacherInterviewStaffSelectionPanel
-        categoryCode={''}
+        categoryCodes={[]}
         categories={categoryRows}
         searchText={''}
         selectedStaffIds={[1001]}
         staffs={staffRows}
-        onCategoryCodeChange={jest.fn()}
+        onCategoryCodesChange={jest.fn()}
         onSearchTextChange={jest.fn()}
         onToggleAllVisible={onToggleAllVisible}
         onToggleStaff={onToggleStaff}
@@ -91,12 +119,12 @@ describe('ParentTeacherInterviewStaffSelectionPanel', () => {
   test('disables next when no rows are selected', () => {
     render(
       <ParentTeacherInterviewStaffSelectionPanel
-        categoryCode={''}
+        categoryCodes={[]}
         categories={categoryRows}
         searchText={''}
         selectedStaffIds={[]}
         staffs={staffRows}
-        onCategoryCodeChange={jest.fn()}
+        onCategoryCodesChange={jest.fn()}
         onSearchTextChange={jest.fn()}
         onToggleAllVisible={jest.fn()}
         onToggleStaff={jest.fn()}
