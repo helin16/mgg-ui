@@ -104,12 +104,15 @@ describe('SynVDebtorService', () => {
         }),
       ]);
       expect(result.data[0]).toEqual(expect.objectContaining({
-        debitorId: 501,
-        debitorName: 'Ada Parent',
-        debitorSpouseEmail: 'spouse@example.com',
-        debitorSpouseDefaultEmail: 'spouse-default@example.com',
-        debitorSpouseOccupEmail: 'spouse-work@example.com',
-        students: [{studentId: 301, studentName: 'Student One'}],
+        DebtorID: 501,
+        DebtorNameExternal: 'Ada Parent',
+        DebitorSpouseEmail: 'spouse@example.com',
+        DebitorSpouseOccupEmail: 'spouse-work@example.com',
+        students: [expect.objectContaining({
+          StudentID: 301,
+          StudentGiven1: 'Student',
+          StudentSurname: 'One',
+        })],
       }));
     });
 

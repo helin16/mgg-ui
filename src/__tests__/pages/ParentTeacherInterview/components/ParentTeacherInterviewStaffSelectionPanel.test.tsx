@@ -72,12 +72,25 @@ describe('ParentTeacherInterviewStaffSelectionPanel', () => {
         searchText={''}
         selectedStaffIds={[]}
         staffs={staffRows}
+        eligibilityRuleText={'Only eligible academic staff are shown.'}
+        staffClassesByStaffId={{
+          1001: [
+            {ClassCode: 'ENG7A', ClassDescription: '7A English', StudentCount: 22},
+            {ClassCode: 'ENG8A', ClassDescription: '8A English', StudentCount: 20},
+          ],
+          1002: [
+            {ClassCode: 'SCI9A', ClassDescription: '9A Science', StudentCount: 18},
+          ],
+        }}
+        activeStaffClassesStaffId={null}
         onCategoryCodesChange={onCategoryCodesChange}
         onDepartmentCodesChange={onDepartmentCodesChange}
         onSearchTextChange={onSearchTextChange}
         onToggleAllVisible={jest.fn()}
         onToggleStaff={jest.fn()}
         onNext={jest.fn()}
+        onOpenStaffClasses={jest.fn()}
+        onCloseStaffClasses={jest.fn()}
       />
     );
 
@@ -85,7 +98,11 @@ describe('ParentTeacherInterviewStaffSelectionPanel', () => {
     expect(screen.getByText('Grace Hopper')).toBeInTheDocument();
     expect(screen.getByText('ada@example.com')).toBeInTheDocument();
     expect(screen.getByText('grace@example.com')).toBeInTheDocument();
+    expect(screen.getByText('Only eligible academic staff are shown.')).toBeInTheDocument();
     expect(screen.getByRole('columnheader', {name: 'Department'})).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', {name: 'Classes'})).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: '2'})).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: '1'})).toBeInTheDocument();
     expect(screen.getAllByText('Teaching Staff').length).toBeGreaterThan(0);
     expect(screen.getByText('Science')).toBeInTheDocument();
 
@@ -121,12 +138,22 @@ describe('ParentTeacherInterviewStaffSelectionPanel', () => {
         searchText={''}
         selectedStaffIds={[1001]}
         staffs={staffRows}
+        eligibilityRuleText={'Only eligible academic staff are shown.'}
+        staffClassesByStaffId={{
+          1001: [
+            {ClassCode: 'ENG7A', ClassDescription: '7A English', StudentCount: 22},
+          ],
+          1002: [],
+        }}
+        activeStaffClassesStaffId={null}
         onCategoryCodesChange={jest.fn()}
         onDepartmentCodesChange={jest.fn()}
         onSearchTextChange={jest.fn()}
         onToggleAllVisible={onToggleAllVisible}
         onToggleStaff={onToggleStaff}
         onNext={onNext}
+        onOpenStaffClasses={jest.fn()}
+        onCloseStaffClasses={jest.fn()}
       />
     );
 
@@ -150,15 +177,71 @@ describe('ParentTeacherInterviewStaffSelectionPanel', () => {
         searchText={''}
         selectedStaffIds={[]}
         staffs={staffRows}
+        eligibilityRuleText={'Only eligible academic staff are shown.'}
+        staffClassesByStaffId={{
+          1001: [],
+          1002: [],
+        }}
+        activeStaffClassesStaffId={null}
         onCategoryCodesChange={jest.fn()}
         onDepartmentCodesChange={jest.fn()}
         onSearchTextChange={jest.fn()}
         onToggleAllVisible={jest.fn()}
         onToggleStaff={jest.fn()}
         onNext={jest.fn()}
+        onOpenStaffClasses={jest.fn()}
+        onCloseStaffClasses={jest.fn()}
       />
     );
 
     expect(screen.getByRole('button', {name: 'Next'})).toBeDisabled();
+  });
+
+  test('opens a popup with class list for the selected staff', () => {
+    const onOpenStaffClasses = jest.fn();
+    const onCloseStaffClasses = jest.fn();
+
+    render(
+      <ParentTeacherInterviewStaffSelectionPanel
+        categoryCodes={[]}
+        categories={categoryRows}
+        departmentCodes={[]}
+        departments={departmentRows}
+        searchText={''}
+        selectedStaffIds={[]}
+        staffs={staffRows}
+        eligibilityRuleText={'Only eligible academic staff are shown.'}
+        staffClassesByStaffId={{
+          1001: [
+            {ClassCode: 'ENG7A', ClassDescription: '7A English', StudentCount: 22},
+            {ClassCode: 'ENG8A', ClassDescription: '8A English', StudentCount: 20},
+          ],
+          1002: [
+            {ClassCode: 'SCI9A', ClassDescription: '9A Science', StudentCount: 18},
+          ],
+        }}
+        activeStaffClassesStaffId={1001}
+        onCategoryCodesChange={jest.fn()}
+        onDepartmentCodesChange={jest.fn()}
+        onSearchTextChange={jest.fn()}
+        onToggleAllVisible={jest.fn()}
+        onToggleStaff={jest.fn()}
+        onNext={jest.fn()}
+        onOpenStaffClasses={onOpenStaffClasses}
+        onCloseStaffClasses={onCloseStaffClasses}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', {name: '2'}));
+    expect(onOpenStaffClasses).toHaveBeenCalledWith(1001);
+
+    expect(screen.getByText('Ada Lovelace Classes')).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', {name: 'ClassCode'})).toBeInTheDocument();
+    expect(screen.getByText('ENG7A')).toBeInTheDocument();
+    expect(screen.getByText('7A English')).toBeInTheDocument();
+    expect(screen.getByText('22')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByLabelText('Close'));
+    expect(onCloseStaffClasses).toHaveBeenCalled();
   });
 });

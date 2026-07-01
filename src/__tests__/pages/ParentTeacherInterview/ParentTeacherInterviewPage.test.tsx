@@ -1,6 +1,6 @@
 import React, {act} from 'react';
 import {useSelector} from 'react-redux';
-import {fireEvent, render, screen, waitFor} from '@testing-library/react';
+import {fireEvent, render, screen, waitFor, within} from '@testing-library/react';
 import mockComponentTestHelper from '../../helper/ComponentTestHelper';
 import {PageNotFoundKey, PageNotFoundTestId} from '../../../components/__mocks__/PageNotFound';
 import {PageKey, PageTestId} from '../../../layouts/__mocks__/Page';
@@ -8,10 +8,12 @@ import ParentTeacherInterviewPage from '../../../pages/ParentTeacherInterview/Pa
 import SynVStaffService from '../../../services/Synergetic/SynVStaffService';
 import SynLuStaffCategoryService from '../../../services/Synergetic/Lookup/SynLuStaffCategoryService';
 import SynLuDepartmentService from '../../../services/Synergetic/Lookup/SynLuDepartmentService';
+import SynVStudentClassService from '../../../services/Synergetic/Student/SynVStudentClassService';
 import Toaster from '../../../services/Toaster';
 import MggsModuleService from '../../../services/Module/MggsModuleService';
 import AuthService from '../../../services/AuthService';
 import ParentTeacherInterviewCalendarService from '../../../services/ParentTeacherInterview/ParentTeacherInterviewCalendarService';
+import {HEADER_NAME_SELECTING_FIELDS, MAX_PAGE_SIZE} from '../../../services/AppService';
 
 const flattenNodeText = (node: any): string => {
   if (node === null || node === undefined || typeof node === 'boolean') {
@@ -50,6 +52,12 @@ jest.mock('../../../services/Synergetic/Lookup/SynLuDepartmentService', () => ({
     getAll: jest.fn(),
   },
 }));
+jest.mock('../../../services/Synergetic/Student/SynVStudentClassService', () => ({
+  __esModule: true,
+  default: {
+    getAll: jest.fn(),
+  },
+}));
 jest.mock('../../../services/Toaster', () => ({
   showApiError: jest.fn(),
 }));
@@ -83,6 +91,7 @@ describe('ParentTeacherInterviewPage', () => {
   const mockedStaffService = SynVStaffService as jest.Mocked<typeof SynVStaffService>;
   const mockedCategoryService = SynLuStaffCategoryService as jest.Mocked<typeof SynLuStaffCategoryService>;
   const mockedDepartmentService = SynLuDepartmentService as jest.Mocked<typeof SynLuDepartmentService>;
+  const mockedStudentClassService = SynVStudentClassService as jest.Mocked<typeof SynVStudentClassService>;
   const mockedToaster = Toaster as jest.Mocked<typeof Toaster>;
   const mockedModuleService = MggsModuleService as jest.Mocked<typeof MggsModuleService>;
   const mockedAuthService = AuthService as jest.Mocked<typeof AuthService>;
@@ -161,10 +170,43 @@ describe('ParentTeacherInterviewPage', () => {
           endDateTime: '2099-07-01T10:00',
           subject: 'PTI Subject',
           bodyText: 'PTI Body',
+          excludedClassDescriptionKeywords: [],
         },
       },
     } as any);
     mockedAuthService.isModuleRole.mockResolvedValue(true as any);
+    mockedStudentClassService.getAll.mockResolvedValue({
+      data: [
+        {
+          StaffID: 1001,
+          ClassCode: 'ENG7A',
+          FileType: 'A',
+          CurrentSemesterOnlyFlag: true,
+          ClassDescription: '7A English',
+        },
+        {
+          StaffID: 1002,
+          ClassCode: 'MAT10A',
+          FileType: 'A',
+          CurrentSemesterOnlyFlag: true,
+          ClassDescription: '10A Mathematics',
+        },
+        {
+          StaffID: 1003,
+          ClassCode: 'SCI11A',
+          FileType: 'A',
+          CurrentSemesterOnlyFlag: true,
+          ClassDescription: '11A Science',
+        },
+        {
+          StaffID: 1004,
+          ClassCode: 'LEAD12A',
+          FileType: 'A',
+          CurrentSemesterOnlyFlag: true,
+          ClassDescription: '12A Leadership',
+        },
+      ],
+    } as any);
     mockedCalendarService.getCalendarEvents.mockResolvedValue({
       events: [],
     } as any);
@@ -205,6 +247,23 @@ describe('ParentTeacherInterviewPage', () => {
       }),
       sort: 'Code:ASC',
     });
+    expect(mockedStudentClassService.getAll).toHaveBeenCalledWith({
+      where: JSON.stringify({
+        FileType: 'A',
+        CurrentSemesterOnlyFlag: true,
+      }),
+      perPage: MAX_PAGE_SIZE,
+    }, {
+      headers: {
+        [HEADER_NAME_SELECTING_FIELDS]: JSON.stringify([
+          'StaffID',
+          'ClassCode',
+          'FileType',
+          'CurrentSemesterOnlyFlag',
+          'ClassDescription',
+        ]),
+      },
+    });
     expect(mockedModuleService.getModule).toHaveBeenCalled();
   });
 
@@ -212,9 +271,77 @@ describe('ParentTeacherInterviewPage', () => {
     render(<ParentTeacherInterviewPage />);
 
     await waitFor(() => expect(screen.getByText('Ada Lovelace')).toBeInTheDocument());
+    expect(screen.getByText('Only staff with at least one current-semester academic class (FileType = A, CurrentSemesterOnlyFlag = 1) are shown.')).toBeInTheDocument();
     expect(screen.getByText('Grace Hopper')).toBeInTheDocument();
+    expect(screen.getAllByRole('button', {name: '1'}).length).toBeGreaterThan(0);
     expect(screen.queryByText('Katherine Johnson')).not.toBeInTheDocument();
     expect(screen.queryByText('Marie Curie')).not.toBeInTheDocument();
+  });
+
+  test('shows the selected staff classes in a popup with student counts', async () => {
+    mockedStudentClassService.getAll.mockResolvedValue({
+      data: [
+        {
+          StaffID: 1001,
+          ClassCode: 'ENG7A',
+          FileType: 'A',
+          CurrentSemesterOnlyFlag: true,
+          ClassDescription: '7A English',
+          StudentID: 1,
+        },
+        {
+          StaffID: 1001,
+          ClassCode: 'ENG7A',
+          FileType: 'A',
+          CurrentSemesterOnlyFlag: true,
+          ClassDescription: '7A English',
+          StudentID: 2,
+        },
+        {
+          StaffID: 1001,
+          ClassCode: 'ENG8A',
+          FileType: 'A',
+          CurrentSemesterOnlyFlag: true,
+          ClassDescription: '8A English',
+          StudentID: 3,
+        },
+      ],
+    } as any);
+
+    render(<ParentTeacherInterviewPage />);
+
+    await waitFor(() => expect(screen.getByText('Ada Lovelace')).toBeInTheDocument());
+
+    fireEvent.click(screen.getAllByRole('button', {name: '2'})[0]);
+
+    expect(screen.getByText('Ada Lovelace Classes')).toBeInTheDocument();
+    const dialog = screen.getByRole('dialog');
+    expect(within(dialog).getByText('ENG7A')).toBeInTheDocument();
+    expect(within(dialog).getByText('8A English')).toBeInTheDocument();
+    expect(within(dialog).getByText('2')).toBeInTheDocument();
+    expect(within(dialog).getByText('1')).toBeInTheDocument();
+  });
+
+  test('excludes staff whose current-semester academic classes all match configured keywords', async () => {
+    mockedModuleService.getModule.mockResolvedValueOnce({
+      settings: {
+        parentTeacherInterviewCalendar: {
+          isAllDay: false,
+          allowUserChange: true,
+          startDateTime: '2099-07-01T09:00',
+          endDateTime: '2099-07-01T10:00',
+          subject: 'PTI Subject',
+          bodyText: 'PTI Body',
+          excludedClassDescriptionKeywords: ['Mathematics'],
+        },
+      },
+    } as any);
+
+    render(<ParentTeacherInterviewPage />);
+
+    await waitFor(() => expect(screen.getByText('Ada Lovelace')).toBeInTheDocument());
+    expect(screen.queryByText('Grace Hopper')).not.toBeInTheDocument();
+    expect(screen.getByText(/Classes with descriptions containing any excluded keyword are ignored: Mathematics\./)).toBeInTheDocument();
   });
 
   test('filters by search/category and projects selected staff into step two', async () => {
@@ -264,7 +391,7 @@ describe('ParentTeacherInterviewPage', () => {
   });
 
   test('shows failure state and toasts when load fails', async () => {
-    mockedStaffService.getStaffList.mockRejectedValueOnce(new Error('load failed'));
+    mockedStaffService.getStaffList.mockRejectedValue(new Error('load failed'));
 
     render(<ParentTeacherInterviewPage />);
 

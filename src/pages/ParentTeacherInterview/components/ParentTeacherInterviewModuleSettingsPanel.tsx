@@ -26,6 +26,15 @@ const toDateValue = (value: string) => {
   return '';
 };
 
+const normalizeKeywordList = (value: string) => {
+  return Array.from(new Set(
+    `${value || ''}`
+      .split(/\r?\n|,/)
+      .map(keyword => keyword.trim())
+      .filter(keyword => keyword !== '')
+  ));
+};
+
 const EditPanel = ({module, onUpdate}: iEditPanel) => {
   const [subject, setSubject] = useState(`${module.settings?.parentTeacherInterviewCalendar?.subject || ''}`.trim());
   const [bodyText, setBodyText] = useState(`${module.settings?.parentTeacherInterviewCalendar?.bodyText || ''}`.trim());
@@ -33,6 +42,9 @@ const EditPanel = ({module, onUpdate}: iEditPanel) => {
   const [allowUserChange, setAllowUserChange] = useState(module.settings?.parentTeacherInterviewCalendar?.allowUserChange !== false);
   const [startDateTime, setStartDateTime] = useState(`${module.settings?.parentTeacherInterviewCalendar?.startDateTime || ''}`.trim());
   const [endDateTime, setEndDateTime] = useState(`${module.settings?.parentTeacherInterviewCalendar?.endDateTime || ''}`.trim());
+  const [excludedClassDescriptionKeywordsText, setExcludedClassDescriptionKeywordsText] = useState(
+    (module.settings?.parentTeacherInterviewCalendar?.excludedClassDescriptionKeywords || []).join('\n')
+  );
 
   const handleUpdate = (
     nextSubject = subject,
@@ -40,7 +52,8 @@ const EditPanel = ({module, onUpdate}: iEditPanel) => {
     nextIsAllDay = isAllDay,
     nextAllowUserChange = allowUserChange,
     nextStartDateTime = startDateTime,
-    nextEndDateTime = endDateTime
+    nextEndDateTime = endDateTime,
+    nextExcludedClassDescriptionKeywordsText = excludedClassDescriptionKeywordsText
   ) => {
     onUpdate({
       ...(module?.settings || {}),
@@ -52,6 +65,7 @@ const EditPanel = ({module, onUpdate}: iEditPanel) => {
         allowUserChange: nextAllowUserChange !== false,
         startDateTime: `${nextStartDateTime || ''}`.trim(),
         endDateTime: `${nextEndDateTime || ''}`.trim(),
+        excludedClassDescriptionKeywords: normalizeKeywordList(nextExcludedClassDescriptionKeywordsText),
       },
     });
   };
@@ -144,6 +158,25 @@ const EditPanel = ({module, onUpdate}: iEditPanel) => {
             handleUpdate(subject, nextValue, isAllDay, allowUserChange, startDateTime, endDateTime);
           }}
         />
+      </SectionDiv>
+      <SectionDiv>
+        <div className={'row g-3'}>
+          <div className={'col-lg-6'}>
+            <Form.Label>Excluded Class Description Keywords</Form.Label>
+            <Form.Control
+              aria-label={'Excluded Class Description Keywords'}
+              as={'textarea'}
+              rows={4}
+              placeholder={'One keyword per line or comma-separated'}
+              value={excludedClassDescriptionKeywordsText}
+              onChange={event => {
+                const nextValue = event.target.value;
+                setExcludedClassDescriptionKeywordsText(nextValue);
+                handleUpdate(subject, bodyText, isAllDay, allowUserChange, startDateTime, endDateTime, nextValue);
+              }}
+            />
+          </div>
+        </div>
       </SectionDiv>
     </SectionDiv>
   );
