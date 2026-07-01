@@ -9,11 +9,13 @@ import MathHelper from '../../helper/MathHelper';
 import BudgetForecastPanel from '../../components/reports/BudgetForecast/BudgetForecastPanel';
 import MonthlyBillingReportPanel from './components/MonthlyBilling/MonthlyBillingReportPanel';
 import CreditorBPayPanel from '../../components/BPay/CreditorBPayPanel';
+import DebitorsListPanel from './components/DebitorsListPanel';
 
 const TAB_EXPIRING_CREDIT_CARDS = "EXPIRING_CREDIT_CARDS";
 const TAB_MONTHLY_BILLING_REPORT = "MONTHLY_BILLING_REPORT";
 const TAB_EXPIRING_FORECAST = "FORECAST_NEXT_YEAR";
 const TAB_CREDITOR_BPAY_BATCH = "CREDITOR_BPAY_BATCH";
+const TAB_DEBITORS = 'DEBITORS';
 const FinancePage = () => {
   const [selectedTab, setSelectedTab] = useState(TAB_EXPIRING_CREDIT_CARDS);
 
@@ -40,6 +42,10 @@ const FinancePage = () => {
 
         <Tab eventKey={TAB_CREDITOR_BPAY_BATCH} title={`BPay Batching`}>
           <CreditorBPayPanel />
+        </Tab>
+
+        <Tab eventKey={TAB_DEBITORS} title={'Debitors'}>
+          <DebitorsListPanel />
         </Tab>
 
       </Tabs>

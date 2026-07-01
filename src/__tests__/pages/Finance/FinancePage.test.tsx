@@ -16,6 +16,8 @@ jest.mock('../../../components/reports/BudgetForecast/BudgetForecastPanel');
 
 jest.mock('../../../components/BPay/CreditorBPayPanel');
 
+jest.mock('../../../pages/Finance/components/DebitorsListPanel');
+
 describe('FinancePage', () => {
   mockComponentTestHelper.prepare();
 
@@ -23,6 +25,7 @@ describe('FinancePage', () => {
     render(<FinancePage />);
 
     expect(screen.getByTestId(PageTestId)).toBeInTheDocument();
+    expect(screen.getByText('Debitors')).toBeInTheDocument();
 
     expect(mockComponentTestHelper.get(PageKey)).toEqual([
       expect.objectContaining({

@@ -25,9 +25,9 @@ verification.
 
 **Purpose**: Confirm the affected Finance surface, shared contracts, and verification targets before implementation
 
-- [ ] T001 Review the existing Finance tab shell in `src/pages/Finance/FinancePage.tsx` and current Finance page coverage in `src/__tests__/pages/Finance/FinancePage.test.tsx`
-- [ ] T002 Review the existing debtor, student, and student-contact service boundaries in `src/services/Synergetic/Finance/SynVDebtorService.ts`, `src/services/Synergetic/Student/SynVStudentService.ts`, and `src/services/Synergetic/Student/SynVStudentContactAllAddressService.ts`
-- [ ] T003 [P] Review the existing debtor and student contracts in `src/types/Synergetic/Finance/iSynVDebtor.ts`, `src/types/Synergetic/Student/iVStudent.ts`, and `src/types/Synergetic/Student/iSynVStudentContactAllAddress.ts`
+- [X] T001 Review the existing Finance tab shell in `src/pages/Finance/FinancePage.tsx` and current Finance page coverage in `src/__tests__/pages/Finance/FinancePage.test.tsx`
+- [X] T002 Review the existing debtor, student, and student-contact service boundaries in `src/services/Synergetic/Finance/SynVDebtorService.ts`, `src/services/Synergetic/Student/SynVStudentService.ts`, and `src/services/Synergetic/Student/SynVStudentContactAllAddressService.ts`
+- [X] T003 [P] Review the existing debtor and student contracts in `src/types/Synergetic/Finance/iSynVDebtor.ts`, `src/types/Synergetic/Student/iVStudent.ts`, and `src/types/Synergetic/Student/iSynVStudentContactAllAddress.ts`
 
 ---
 
@@ -37,10 +37,10 @@ verification.
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 Create Finance-specific debtor search criteria and row contracts in `src/types/Synergetic/Finance/iFinanceDebitorSearchCriteria.ts`, `src/types/Synergetic/Finance/iFinanceDebitorLinkedStudent.ts`, and `src/types/Synergetic/Finance/iFinanceDebitorListRow.ts`
-- [ ] T005 Extend the debtor service contract for paginated debtor retrieval and debtor-name sorting in `src/services/Synergetic/Finance/SynVDebtorService.ts`
-- [ ] T006 Implement service-layer enrichment for linked students and spouse email using debtor, student, and student-contact data in `src/services/Synergetic/Finance/SynVDebtorService.ts`
-- [ ] T007 [P] Add or update service-layer test coverage for the debtor and student-contact wrappers in `src/__tests__/services/Synergetic/Finance/SynVDebtorService.test.ts` and `src/__tests__/services/Synergetic/Student/SynVStudentContactAllAddressService.test.ts`
+- [X] T004 Create Finance-specific debtor search criteria and row contracts in `src/types/Synergetic/Finance/iFinanceDebitorSearchCriteria.ts`, `src/types/Synergetic/Finance/iFinanceDebitorLinkedStudent.ts`, and `src/types/Synergetic/Finance/iFinanceDebitorListRow.ts`
+- [X] T005 Extend the debtor service contract for paginated debtor retrieval and debtor-name sorting in `src/services/Synergetic/Finance/SynVDebtorService.ts`
+- [X] T006 Implement service-layer enrichment for linked students and spouse email using debtor, student, and student-contact data in `src/services/Synergetic/Finance/SynVDebtorService.ts`
+- [X] T007 [P] Add or update service-layer test coverage for the debtor and student-contact wrappers in `src/__tests__/services/Synergetic/Finance/SynVDebtorService.test.ts` and `src/__tests__/services/Synergetic/Student/SynVStudentContactAllAddressService.test.ts`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
@@ -54,16 +54,16 @@ verification.
 
 ### Verification for User Story 1 ⚠️
 
-- [ ] T008 [P] [US1] Add Finance page tab coverage for the new Debitors tab in `src/__tests__/pages/Finance/FinancePage.test.tsx`
-- [ ] T009 [P] [US1] Add panel coverage for default load, table rendering, and pagination in `src/__tests__/pages/Finance/components/DebitorsListPanel.test.tsx`
+- [X] T008 [P] [US1] Add Finance page tab coverage for the new Debitors tab in `src/__tests__/pages/Finance/FinancePage.test.tsx`
+- [X] T009 [P] [US1] Add panel coverage for default load, table rendering, and pagination in `src/__tests__/pages/Finance/components/DebitorsListPanel.test.tsx`
 - [ ] T010 [US1] Run the default-load manual validation checklist from `specs/009-debitors-tab/quickstart.md`
 
 ### Implementation for User Story 1
 
-- [ ] T011 [US1] Create the Debitors list panel component shell in `src/pages/Finance/components/DebitorsListPanel.tsx`
-- [ ] T012 [US1] Add the Debitors tab and wire `DebitorsListPanel` into `src/pages/Finance/FinancePage.tsx`
-- [ ] T013 [US1] Implement the default debtor fetch, shared `Table` rendering, nested Students table, loading state, empty state, and failure state in `src/pages/Finance/components/DebitorsListPanel.tsx`
-- [ ] T014 [US1] Wire 10-row pagination with default debtor-name ordering and filter-preserving page changes in `src/pages/Finance/components/DebitorsListPanel.tsx`
+- [X] T011 [US1] Create the Debitors list panel component shell in `src/pages/Finance/components/DebitorsListPanel.tsx`
+- [X] T012 [US1] Add the Debitors tab and wire `DebitorsListPanel` into `src/pages/Finance/FinancePage.tsx`
+- [X] T013 [US1] Implement the default debtor fetch, shared `Table` rendering, nested Students table, loading state, empty state, and failure state in `src/pages/Finance/components/DebitorsListPanel.tsx`
+- [X] T014 [US1] Wire 10-row pagination with default debtor-name ordering and filter-preserving page changes in `src/pages/Finance/components/DebitorsListPanel.tsx`
 
 **Checkpoint**: User Story 1 should now be fully functional and testable on its own
 
@@ -77,15 +77,15 @@ verification.
 
 ### Verification for User Story 2 ⚠️
 
-- [ ] T015 [P] [US2] Add panel coverage for debtor/spouse text search, explicit search submission, and reset behaviour in `src/__tests__/pages/Finance/components/DebitorsListPanel.test.tsx`
-- [ ] T016 [P] [US2] Add service coverage for combined debtor/spouse query composition and spouse-email enrichment in `src/__tests__/services/Synergetic/Finance/SynVDebtorService.test.ts`
+- [X] T015 [P] [US2] Add panel coverage for debtor/spouse text search, explicit search submission, and reset behaviour in `src/__tests__/pages/Finance/components/DebitorsListPanel.test.tsx`
+- [X] T016 [P] [US2] Add service coverage for combined debtor/spouse query composition and spouse-email enrichment in `src/__tests__/services/Synergetic/Finance/SynVDebtorService.test.ts`
 - [ ] T017 [US2] Run the debtor/spouse search and reset manual validation checklist from `specs/009-debitors-tab/quickstart.md`
 
 ### Implementation for User Story 2
 
-- [ ] T018 [US2] Implement the text search input plus `Search` and `Reset Filters` controls in `src/pages/Finance/components/DebitorsListPanel.tsx`
-- [ ] T019 [US2] Implement debtor/spouse free-text query composition and spouse-email enrichment in `src/services/Synergetic/Finance/SynVDebtorService.ts`
-- [ ] T020 [US2] Wire search submission, reset behaviour, preserved page size, and page-number reset to 1 in `src/pages/Finance/components/DebitorsListPanel.tsx`
+- [X] T018 [US2] Implement the text search input plus `Search` and `Reset Filters` controls in `src/pages/Finance/components/DebitorsListPanel.tsx`
+- [X] T019 [US2] Implement debtor/spouse free-text query composition and spouse-email enrichment in `src/services/Synergetic/Finance/SynVDebtorService.ts`
+- [X] T020 [US2] Wire search submission, reset behaviour, preserved page size, and page-number reset to 1 in `src/pages/Finance/components/DebitorsListPanel.tsx`
 
 **Checkpoint**: User Stories 1 and 2 should both work independently
 
@@ -99,15 +99,15 @@ verification.
 
 ### Verification for User Story 3 ⚠️
 
-- [ ] T021 [P] [US3] Add panel coverage for current-student selection, combined search, and no-results handling in `src/__tests__/pages/Finance/components/DebitorsListPanel.test.tsx`
-- [ ] T022 [P] [US3] Add service coverage for student-linked debtor enrichment and `DebtorID` matching in `src/__tests__/services/Synergetic/Finance/SynVDebtorService.test.ts`
+- [X] T021 [P] [US3] Add panel coverage for current-student selection, combined search, and no-results handling in `src/__tests__/pages/Finance/components/DebitorsListPanel.test.tsx`
+- [X] T022 [P] [US3] Add service coverage for student-linked debtor enrichment and `DebtorID` matching in `src/__tests__/services/Synergetic/Finance/SynVDebtorService.test.ts`
 - [ ] T023 [US3] Run the current-student filter manual validation checklist from `specs/009-debitors-tab/quickstart.md`
 
 ### Implementation for User Story 3
 
-- [ ] T024 [US3] Integrate the async current-student selector and selected-student state into `src/pages/Finance/components/DebitorsListPanel.tsx`
-- [ ] T025 [US3] Implement student-based debtor filtering with `SynVStudentService.getVPastAndCurrentStudentAll(...)` and linked-student row mapping in `src/services/Synergetic/Finance/SynVDebtorService.ts`
-- [ ] T026 [US3] Wire the student filter into search submission, empty-state messaging, and reset behaviour in `src/pages/Finance/components/DebitorsListPanel.tsx`
+- [X] T024 [US3] Integrate the async current-student selector and selected-student state into `src/pages/Finance/components/DebitorsListPanel.tsx`
+- [X] T025 [US3] Implement student-based debtor filtering with `SynVStudentService.getVPastAndCurrentStudentAll(...)` and linked-student row mapping in `src/services/Synergetic/Finance/SynVDebtorService.ts`
+- [X] T026 [US3] Wire the student filter into search submission, empty-state messaging, and reset behaviour in `src/pages/Finance/components/DebitorsListPanel.tsx`
 
 **Checkpoint**: All user stories should now be independently functional
 
@@ -117,7 +117,7 @@ verification.
 
 **Purpose**: Final consistency, regression coverage, and verification capture across the full Finance Debitors workflow
 
-- [ ] T027 [P] Reconcile final debtor row labels, nested Students rendering, and financial display formatting in `src/pages/Finance/components/DebitorsListPanel.tsx`
+- [X] T027 [P] Reconcile final debtor row labels, nested Students rendering, and financial display formatting in `src/pages/Finance/components/DebitorsListPanel.tsx`
 - [ ] T028 [P] Add any final shared-contract adjustments discovered during integration to `src/types/Synergetic/Finance/iFinanceDebitorListRow.ts` and `src/types/Synergetic/Finance/iSynVDebtor.ts`
 - [ ] T029 Execute the full feature verification pass described in `specs/009-debitors-tab/quickstart.md`
 
