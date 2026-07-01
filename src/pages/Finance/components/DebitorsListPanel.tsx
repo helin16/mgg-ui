@@ -33,6 +33,14 @@ const getInfoValue = (label: string, value: string | number) => {
   );
 };
 
+const getDebitorDisplayName = (row: iFinanceDebitorListRow) => {
+  return row.DebtorLegalFullName || row.DebtorNameExternal || row.DebtorNameInternal;
+};
+
+const getDebitorSpouseDisplayName = (row: iFinanceDebitorListRow) => {
+  return row.DebtorSpouseLegalFullName || row.DebtorSpouseNameExternal || row.DebtorSpouseNameInternal;
+};
+
 const DebitorsListPanel = () => {
   const [draftCriteria, setDraftCriteria] = useState<iFinanceDebitorSearchCriteria>(getInitialCriteria());
   const [activeCriteria, setActiveCriteria] = useState<iFinanceDebitorSearchCriteria>(getInitialCriteria());
@@ -76,7 +84,7 @@ const DebitorsListPanel = () => {
         <td key={column.key}>
           {[
             getInfoValue('ID', row.DebtorID),
-            getInfoValue('Name', row.DebtorLegalFullName),
+            getInfoValue('Name', getDebitorDisplayName(row)),
             getInfoValue('Home Email', row.DebtorHomeEmail),
             getInfoValue('Home Phone', row.DebtorHomePhone),
             getInfoValue('Mobile Phone', row.DebtorMobilePhone),
@@ -93,7 +101,7 @@ const DebitorsListPanel = () => {
       cell: (column, row: iFinanceDebitorListRow) => (
         <td key={column.key}>
           {[
-            getInfoValue('Name', row.DebtorSpouseLegalFullName),
+            getInfoValue('Name', getDebitorSpouseDisplayName(row)),
             getInfoValue('Email', row.DebitorSpouseEmail),
             getInfoValue('Mobile Phone', row.DebitorSpouseMobilePhone),
             getInfoValue('Occup Email', row.DebitorSpouseOccupEmail),

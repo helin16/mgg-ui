@@ -1,12 +1,19 @@
-import React from 'react';
-import {Form} from 'react-bootstrap';
+import React, {useEffect, useState} from 'react';
+import {Alert, Button, Form} from 'react-bootstrap';
 import Table, {iTableColumn} from '../../../components/common/Table';
 import LoadingBtn from '../../../components/common/LoadingBtn';
 import SelectBox from '../../../components/common/SelectBox';
 import SectionDiv from '../../../components/common/SectionDiv';
+import PopupModal from '../../../components/common/PopupModal';
 import iSynLuDepartment from '../../../types/Synergetic/Lookup/iSynLuDepartment';
 import iVStaff from '../../../types/Synergetic/iVStaff';
 import iSynLuStaffCategory from '../../../types/Synergetic/Lookup/iSynLuStaffCategory';
+
+type iStaffClassSummary = {
+  ClassCode: string;
+  ClassDescription: string;
+  StudentCount: number;
+};
 
 type iParentTeacherInterviewStaffSelectionPanel = {
   categoryCodes: string[];
@@ -16,12 +23,17 @@ type iParentTeacherInterviewStaffSelectionPanel = {
   searchText: string;
   selectedStaffIds: number[];
   staffs: iVStaff[];
+  eligibilityRuleText: string;
+  staffClassesByStaffId: {[key: number]: iStaffClassSummary[]};
+  activeStaffClassesStaffId: number | null;
   onCategoryCodesChange: (value: string[]) => void;
   onDepartmentCodesChange: (value: string[]) => void;
   onSearchTextChange: (value: string) => void;
   onToggleAllVisible: (checked: boolean) => void;
   onToggleStaff: (staffId: number, checked: boolean) => void;
   onNext: () => void;
+  onOpenStaffClasses: (staffId: number) => void;
+  onCloseStaffClasses: () => void;
 };
 
 const ParentTeacherInterviewStaffSelectionPanel = ({
@@ -32,13 +44,24 @@ const ParentTeacherInterviewStaffSelectionPanel = ({
   searchText,
   selectedStaffIds,
   staffs,
+  eligibilityRuleText,
+  staffClassesByStaffId,
+  activeStaffClassesStaffId,
   onCategoryCodesChange,
   onDepartmentCodesChange,
   onSearchTextChange,
   onToggleAllVisible,
   onToggleStaff,
   onNext,
+  onOpenStaffClasses,
+  onCloseStaffClasses,
 }: iParentTeacherInterviewStaffSelectionPanel) => {
+  const [showEligibilityRule, setShowEligibilityRule] = useState(true);
+
+  useEffect(() => {
+    setShowEligibilityRule(true);
+  }, [eligibilityRuleText]);
+
   const categoryOptions = categories.map(category => ({
     value: category.Code,
     label: `${category.Code} - ${category.Description}`,
@@ -62,6 +85,10 @@ const ParentTeacherInterviewStaffSelectionPanel = ({
     };
   }, {} as {[key: number]: boolean});
   const allVisibleSelected = staffs.length > 0 && staffs.every(staff => selectedStaffIdMap[staff.StaffID] === true);
+  const activeStaffClasses = activeStaffClassesStaffId === null ? [] : (staffClassesByStaffId[activeStaffClassesStaffId] || []);
+  const activeStaff = activeStaffClassesStaffId === null
+    ? null
+    : staffs.find(staff => staff.StaffID === activeStaffClassesStaffId) || null;
 
   const columns: iTableColumn<iVStaff>[] = [
     {
@@ -130,10 +157,59 @@ const ParentTeacherInterviewStaffSelectionPanel = ({
         </td>
       ),
     },
+    {
+      key: 'Classes',
+      sort: 8,
+      header: 'Classes',
+      cell: (_, staff) => {
+        const staffClasses = staffClassesByStaffId[staff.StaffID] || [];
+        return (
+          <td key={`Classes-${staff.StaffID}`}>
+            <Button
+              variant={'link'}
+              className={'p-0 align-baseline'}
+              onClick={() => onOpenStaffClasses(staff.StaffID)}
+            >
+              {staffClasses.length}
+            </Button>
+          </td>
+        );
+      },
+    },
+  ];
+
+  const classColumns: iTableColumn<iStaffClassSummary>[] = [
+    {
+      key: 'ClassCode',
+      sort: 1,
+      header: 'ClassCode',
+      cell: (_, row) => <td key={`ClassCode-${row.ClassCode}`}>{row.ClassCode}</td>,
+    },
+    {
+      key: 'ClassDescription',
+      sort: 2,
+      header: 'ClassDescription',
+      cell: (_, row) => <td key={`ClassDescription-${row.ClassCode}`}>{row.ClassDescription}</td>,
+    },
+    {
+      key: 'StudentCount',
+      sort: 3,
+      header: 'No of students',
+      cell: (_, row) => <td key={`StudentCount-${row.ClassCode}`}>{row.StudentCount}</td>,
+    },
   ];
 
   return (
     <SectionDiv className={'no-top'}>
+      {showEligibilityRule ? (
+        <Alert
+          variant={'warning'}
+          dismissible
+          onClose={() => setShowEligibilityRule(false)}
+        >
+          {eligibilityRuleText}
+        </Alert>
+      ) : null}
       <SectionDiv className={'no-top margin-bottom'}>
         <div className={'row g-3 align-items-start'}>
           <div className={'col-lg-4 col-md-6'}>
@@ -201,6 +277,20 @@ const ParentTeacherInterviewStaffSelectionPanel = ({
           Next
         </LoadingBtn>
       </div>
+
+      <PopupModal
+        show={activeStaffClassesStaffId !== null}
+        handleClose={onCloseStaffClasses}
+        title={activeStaff ? `${activeStaff.StaffNameInternal} Classes` : 'Classes'}
+      >
+        <Table
+          columns={classColumns}
+          hover
+          responsive
+          striped
+          rows={activeStaffClasses}
+        />
+      </PopupModal>
     </SectionDiv>
   );
 };

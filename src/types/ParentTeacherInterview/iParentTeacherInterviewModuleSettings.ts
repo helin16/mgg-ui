@@ -6,6 +6,7 @@ type iParentTeacherInterviewModuleSettings = {
     allowUserChange?: boolean;
     startDateTime?: string;
     endDateTime?: string;
+    excludedClassDescriptionKeywords?: string[];
   };
 };
 

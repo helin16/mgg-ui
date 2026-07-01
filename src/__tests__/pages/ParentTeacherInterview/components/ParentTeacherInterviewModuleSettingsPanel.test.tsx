@@ -13,6 +13,7 @@ const fakeModule = {
       endDateTime: '2026-07-01T10:00',
       subject: 'Existing subject',
       bodyText: 'Existing body',
+      excludedClassDescriptionKeywords: ['Music', 'Drama'],
     },
   },
 } as any;
@@ -96,6 +97,7 @@ describe('ParentTeacherInterviewModuleSettingsPanel', () => {
             endDateTime: '2026-07-02T12:00',
             subject: 'Updated subject',
             bodyText: 'Updated body',
+            excludedClassDescriptionKeywords: ['Music', 'Drama'],
           },
         })
       )
@@ -134,6 +136,7 @@ describe('ParentTeacherInterviewModuleSettingsPanel', () => {
             endDateTime: '2026-07-04',
             subject: 'Existing subject',
             bodyText: 'Existing body',
+            excludedClassDescriptionKeywords: ['Music', 'Drama'],
           },
         })
       )
@@ -151,6 +154,27 @@ describe('ParentTeacherInterviewModuleSettingsPanel', () => {
         expect.objectContaining({
           parentTeacherInterviewCalendar: expect.objectContaining({
             allowUserChange: false,
+          }),
+        })
+      )
+    );
+  });
+
+  test('saves excluded class description keywords as an array', async () => {
+    render(<ParentTeacherInterviewModuleSettingsPanel />);
+
+    fireEvent.change(screen.getByLabelText('Excluded Class Description Keywords'), {
+      target: {
+        value: 'Robotics\nMusic, Drama\nMusic',
+      },
+    });
+    fireEvent.click(screen.getByRole('button', {name: 'Capture Submit Data'}));
+
+    await waitFor(() =>
+      expect(latestSubmitData).toEqual(
+        expect.objectContaining({
+          parentTeacherInterviewCalendar: expect.objectContaining({
+            excludedClassDescriptionKeywords: ['Robotics', 'Music', 'Drama'],
           }),
         })
       )

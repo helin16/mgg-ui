@@ -23,6 +23,9 @@ import iParentTeacherInterviewModuleSettings from '../../types/ParentTeacherInte
 import ParentTeacherInterviewCalendarService from '../../services/ParentTeacherInterview/ParentTeacherInterviewCalendarService';
 import ParentTeacherInterviewSchedulePanel from './components/ParentTeacherInterviewSchedulePanel';
 import SynLuDepartmentService from '../../services/Synergetic/Lookup/SynLuDepartmentService';
+import SynVStudentClassService from '../../services/Synergetic/Student/SynVStudentClassService';
+import iSynVStudentClass from '../../types/Synergetic/Student/iSynVStudentClass';
+import {HEADER_NAME_SELECTING_FIELDS, MAX_PAGE_SIZE} from '../../services/AppService';
 
 const isValidLocalDateTime = (value?: string | null) => {
   return moment(`${value || ''}`.trim(), moment.HTML5_FMT.DATETIME_LOCAL, true).isValid();
@@ -166,6 +169,102 @@ const fromAllDayDateValue = (value: string | null, defaultTime: '08:00' | '16:00
   return `${value}T${defaultTime}`;
 };
 
+const normalizeExcludedClassDescriptionKeywords = (keywords?: string[]) => {
+  return Array.from(new Set(
+    (keywords || [])
+      .map(keyword => `${keyword || ''}`.trim())
+      .filter(keyword => keyword !== '')
+  ));
+};
+
+const hasExcludedClassDescriptionKeyword = (classDescription: string, excludedKeywords: string[]) => {
+  const normalizedDescription = `${classDescription || ''}`.trim().toLowerCase();
+  if (normalizedDescription === '') {
+    return false;
+  }
+
+  return excludedKeywords.some(keyword => normalizedDescription.includes(keyword.toLowerCase()));
+};
+
+const getEligibleStaffIdMap = (studentClasses: iSynVStudentClass[], excludedKeywords: string[]) => {
+  return studentClasses.reduce((map, studentClass) => {
+    if (studentClass.FileType !== 'A' || studentClass.CurrentSemesterOnlyFlag !== true) {
+      return map;
+    }
+
+    if (hasExcludedClassDescriptionKeyword(studentClass.ClassDescription, excludedKeywords)) {
+      return map;
+    }
+
+    if (!studentClass.StaffID) {
+      return map;
+    }
+
+    return {
+      ...map,
+      [studentClass.StaffID]: true,
+    };
+  }, {} as {[key: number]: boolean});
+};
+
+const getEligibilityRuleText = (excludedKeywords: string[]) => {
+  const baseRuleText = 'Only staff with at least one current-semester academic class (FileType = A, CurrentSemesterOnlyFlag = 1) are shown.';
+  if (excludedKeywords.length <= 0) {
+    return baseRuleText;
+  }
+
+  return `${baseRuleText} Classes with descriptions containing any excluded keyword are ignored: ${excludedKeywords.join(', ')}.`;
+};
+
+const sortStaffClasses = <T extends {ClassCode: string}>(rows: T[]) => {
+  return [...rows].sort((classA, classB) => {
+    return `${classA.ClassCode || ''}`.localeCompare(`${classB.ClassCode || ''}`, undefined, {
+      numeric: true,
+      sensitivity: 'base',
+    });
+  });
+};
+
+const getStaffClassesByStaffId = (studentClasses: iSynVStudentClass[], excludedKeywords: string[]) => {
+  return studentClasses.reduce((map, studentClass) => {
+    if (studentClass.FileType !== 'A' || studentClass.CurrentSemesterOnlyFlag !== true) {
+      return map;
+    }
+
+    if (hasExcludedClassDescriptionKeyword(studentClass.ClassDescription, excludedKeywords)) {
+      return map;
+    }
+
+    if (!studentClass.StaffID) {
+      return map;
+    }
+
+    const staffId = studentClass.StaffID;
+    const classCode = `${studentClass.ClassCode || ''}`.trim();
+    if (classCode === '') {
+      return map;
+    }
+
+    const currentStaffClasses = map[staffId] || {};
+    const currentClass = currentStaffClasses[classCode] || {
+      ClassCode: classCode,
+      ClassDescription: `${studentClass.ClassDescription || ''}`.trim(),
+      StudentCount: 0,
+    };
+
+    return {
+      ...map,
+      [staffId]: {
+        ...currentStaffClasses,
+        [classCode]: {
+          ...currentClass,
+          StudentCount: currentClass.StudentCount + 1,
+        },
+      },
+    };
+  }, {} as {[key: number]: {[key: string]: {ClassCode: string; ClassDescription: string; StudentCount: number}}});
+};
+
 const ParentTeacherInterviewPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadFailed, setLoadFailed] = useState(false);
@@ -184,6 +283,10 @@ const ParentTeacherInterviewPage = () => {
   const [moduleSettings, setModuleSettings] = useState<iParentTeacherInterviewModuleSettings>({});
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [staffClassesByStaffId, setStaffClassesByStaffId] = useState<
+    {[key: number]: {ClassCode: string; ClassDescription: string; StudentCount: number}[]}
+  >({});
+  const [activeStaffClassesStaffId, setActiveStaffClassesStaffId] = useState<number | null>(null);
 
   const loadModuleContext = React.useCallback(async () => {
     try {
@@ -225,12 +328,45 @@ const ParentTeacherInterviewPage = () => {
         }),
         sort: 'Code:ASC',
       }),
+      SynVStudentClassService.getAll(
+        {
+          where: JSON.stringify({
+            FileType: 'A',
+            CurrentSemesterOnlyFlag: true,
+          }),
+          perPage: MAX_PAGE_SIZE,
+        },
+        {
+          headers: {
+            [HEADER_NAME_SELECTING_FIELDS]: JSON.stringify([
+              'StaffID',
+              'ClassCode',
+              'FileType',
+              'CurrentSemesterOnlyFlag',
+              'ClassDescription',
+            ]),
+          },
+        }
+      ),
     ])
-      .then(([staffList, categoryList, departmentList]) => {
+      .then(([staffList, categoryList, departmentList, studentClassResult]) => {
         if (isCancelled) {
           return;
         }
-        setStaffs(staffList);
+        const excludedKeywords = normalizeExcludedClassDescriptionKeywords(
+          moduleSettings?.parentTeacherInterviewCalendar?.excludedClassDescriptionKeywords
+        );
+        const eligibleStaffIdMap = getEligibleStaffIdMap(studentClassResult?.data || [], excludedKeywords);
+        const nextStaffClassesByStaffId = getStaffClassesByStaffId(studentClassResult?.data || [], excludedKeywords);
+
+        setStaffs(staffList.filter(staff => eligibleStaffIdMap[staff.StaffID] === true));
+        setStaffClassesByStaffId(Object.keys(nextStaffClassesByStaffId).reduce((map, staffId) => {
+          const classMap = nextStaffClassesByStaffId[Number(staffId)] || {};
+          return {
+            ...map,
+            [Number(staffId)]: sortStaffClasses(Object.values(classMap)),
+          };
+        }, {} as {[key: number]: {ClassCode: string; ClassDescription: string; StudentCount: number}[]}));
         setCategories(categoryList.filter(category => `${category.Code || ''}`.trim() !== ''));
         setDepartments(departmentList.filter(department => `${department.Code || ''}`.trim() !== ''));
       })
@@ -239,6 +375,7 @@ const ParentTeacherInterviewPage = () => {
           return;
         }
         setLoadFailed(true);
+        setStaffClassesByStaffId({});
         Toaster.showApiError(error);
       })
       .finally(() => {
@@ -251,7 +388,7 @@ const ParentTeacherInterviewPage = () => {
     return () => {
       isCancelled = true;
     };
-  }, []);
+  }, [moduleSettings]);
 
   useEffect(() => {
     loadModuleContext();
@@ -343,6 +480,18 @@ const ParentTeacherInterviewPage = () => {
       return `${staffA.StaffNameInternal || ''}`.localeCompare(`${staffB.StaffNameInternal || ''}`);
     });
   }, [categoryCodes, departmentCodes, searchText, staffs]);
+
+  const eligibilityRuleText = useMemo(() => {
+    return getEligibilityRuleText(normalizeExcludedClassDescriptionKeywords(
+      moduleSettings?.parentTeacherInterviewCalendar?.excludedClassDescriptionKeywords
+    ));
+  }, [moduleSettings]);
+
+  useEffect(() => {
+    if (activeStaffClassesStaffId !== null && !staffs.some(staff => staff.StaffID === activeStaffClassesStaffId)) {
+      setActiveStaffClassesStaffId(null);
+    }
+  }, [activeStaffClassesStaffId, staffs]);
 
   const selectedStaffs = useMemo(() => {
     const selectedStaffIdMap = selectedStaffIds.reduce((map, staffId) => {
@@ -599,7 +748,7 @@ const ParentTeacherInterviewPage = () => {
     if (staffs.length <= 0) {
       return (
         <SectionDiv>
-          <h5>No active teaching staff found.</h5>
+          <h5>No eligible teaching staff found.</h5>
         </SectionDiv>
       );
     }
@@ -613,12 +762,17 @@ const ParentTeacherInterviewPage = () => {
         searchText={searchText}
         selectedStaffIds={selectedStaffIds}
         staffs={filteredStaffs}
+        eligibilityRuleText={eligibilityRuleText}
+        staffClassesByStaffId={staffClassesByStaffId}
+        activeStaffClassesStaffId={activeStaffClassesStaffId}
         onCategoryCodesChange={setCategoryCodes}
         onDepartmentCodesChange={setDepartmentCodes}
         onSearchTextChange={setSearchText}
         onToggleAllVisible={handleToggleAllVisible}
         onToggleStaff={updateSelectedStaffId}
         onNext={handleNext}
+        onOpenStaffClasses={setActiveStaffClassesStaffId}
+        onCloseStaffClasses={() => setActiveStaffClassesStaffId(null)}
       />
     );
   };
