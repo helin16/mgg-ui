@@ -11,6 +11,7 @@ const sampleStudent = {
   StudentID: 'S101',
   StudentGiven1: 'Ada',
   StudentSurname: 'Lovelace',
+  DebtorID: 201,
 };
 
 const SynStudentProfileSelector = (props: any) => {
