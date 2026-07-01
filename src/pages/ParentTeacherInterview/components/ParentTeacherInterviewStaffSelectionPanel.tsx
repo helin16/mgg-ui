@@ -4,16 +4,20 @@ import Table, {iTableColumn} from '../../../components/common/Table';
 import LoadingBtn from '../../../components/common/LoadingBtn';
 import SelectBox from '../../../components/common/SelectBox';
 import SectionDiv from '../../../components/common/SectionDiv';
+import iSynLuDepartment from '../../../types/Synergetic/Lookup/iSynLuDepartment';
 import iVStaff from '../../../types/Synergetic/iVStaff';
 import iSynLuStaffCategory from '../../../types/Synergetic/Lookup/iSynLuStaffCategory';
 
 type iParentTeacherInterviewStaffSelectionPanel = {
   categoryCodes: string[];
   categories: iSynLuStaffCategory[];
+  departmentCodes: string[];
+  departments: iSynLuDepartment[];
   searchText: string;
   selectedStaffIds: number[];
   staffs: iVStaff[];
   onCategoryCodesChange: (value: string[]) => void;
+  onDepartmentCodesChange: (value: string[]) => void;
   onSearchTextChange: (value: string) => void;
   onToggleAllVisible: (checked: boolean) => void;
   onToggleStaff: (staffId: number, checked: boolean) => void;
@@ -23,10 +27,13 @@ type iParentTeacherInterviewStaffSelectionPanel = {
 const ParentTeacherInterviewStaffSelectionPanel = ({
   categoryCodes,
   categories,
+  departmentCodes,
+  departments,
   searchText,
   selectedStaffIds,
   staffs,
   onCategoryCodesChange,
+  onDepartmentCodesChange,
   onSearchTextChange,
   onToggleAllVisible,
   onToggleStaff,
@@ -36,7 +43,18 @@ const ParentTeacherInterviewStaffSelectionPanel = ({
     value: category.Code,
     label: `${category.Code} - ${category.Description}`,
   }));
+  const departmentOptions = departments.map(department => ({
+    value: department.Code,
+    label: `${department.Code} - ${department.Description}`,
+  }));
+  const departmentDescriptionByCode = departments.reduce((map, department) => {
+    return {
+      ...map,
+      [department.Code]: department.Description,
+    };
+  }, {} as {[key: string]: string});
   const selectedCategoryOptions = categoryOptions.filter(option => categoryCodes.includes(option.value));
+  const selectedDepartmentOptions = departmentOptions.filter(option => departmentCodes.includes(option.value));
   const selectedStaffIdMap = selectedStaffIds.reduce((map, staffId) => {
     return {
       ...map,
@@ -102,13 +120,23 @@ const ParentTeacherInterviewStaffSelectionPanel = ({
         </td>
       ),
     },
+    {
+      key: 'StaffDepartment',
+      sort: 7,
+      header: 'Department',
+      cell: (_, staff) => (
+        <td key={`StaffDepartment-${staff.StaffID}`}>
+          {departmentDescriptionByCode[`${staff.StaffDepartment || ''}`] || staff.StaffDepartment || null}
+        </td>
+      ),
+    },
   ];
 
   return (
     <SectionDiv className={'no-top'}>
       <SectionDiv className={'no-top margin-bottom'}>
         <div className={'row g-3 align-items-start'}>
-          <div className={'col-md-6'}>
+          <div className={'col-lg-4 col-md-6'}>
             <Form.Group className={'h-100 d-flex flex-column justify-content-end'}>
               <Form.Label>Search staff</Form.Label>
               <Form.Control
@@ -119,7 +147,7 @@ const ParentTeacherInterviewStaffSelectionPanel = ({
               />
             </Form.Group>
           </div>
-          <div className={'col-md-4'}>
+          <div className={'col-lg-4 col-md-6'}>
             <Form.Group className={'h-100 d-flex flex-column justify-content-end'}>
               <Form.Label>Category</Form.Label>
               <SelectBox
@@ -131,6 +159,22 @@ const ParentTeacherInterviewStaffSelectionPanel = ({
                 value={selectedCategoryOptions}
                 onChange={(options: Array<{value: string}> | null) =>
                   onCategoryCodesChange((options || []).map(option => option.value))
+                }
+              />
+            </Form.Group>
+          </div>
+          <div className={'col-lg-4 col-md-6'}>
+            <Form.Group className={'h-100 d-flex flex-column justify-content-end'}>
+              <Form.Label>Department</Form.Label>
+              <SelectBox
+                className={'pti-department-select'}
+                placeholder={'All departments'}
+                isMulti
+                isClearable
+                options={departmentOptions}
+                value={selectedDepartmentOptions}
+                onChange={(options: Array<{value: string}> | null) =>
+                  onDepartmentCodesChange((options || []).map(option => option.value))
                 }
               />
             </Form.Group>

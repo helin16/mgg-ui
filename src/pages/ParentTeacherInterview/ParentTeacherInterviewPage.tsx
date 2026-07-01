@@ -13,6 +13,8 @@ import ParentTeacherInterviewStaffSelectionPanel from './components/ParentTeache
 import SynLuDepartmentCodes from '../../types/Synergetic/Lookup/SynLuDepartmentCodes';
 import iVStaff from '../../types/Synergetic/iVStaff';
 import iSynLuStaffCategory from '../../types/Synergetic/Lookup/iSynLuStaffCategory';
+import iSynLuDepartment from '../../types/Synergetic/Lookup/iSynLuDepartment';
+import SynLuStaffCategoryCodes from '../../types/Synergetic/Lookup/SynLuStaffCategoryCodes';
 import iParentTeacherInterviewScheduleRow from '../../types/ParentTeacherInterview/iParentTeacherInterviewScheduleRow';
 import MggsModuleService from '../../services/Module/MggsModuleService';
 import AuthService from '../../services/AuthService';
@@ -20,6 +22,7 @@ import {ROLE_ID_ADMIN} from '../../types/modules/iRole';
 import iParentTeacherInterviewModuleSettings from '../../types/ParentTeacherInterview/iParentTeacherInterviewModuleSettings';
 import ParentTeacherInterviewCalendarService from '../../services/ParentTeacherInterview/ParentTeacherInterviewCalendarService';
 import ParentTeacherInterviewSchedulePanel from './components/ParentTeacherInterviewSchedulePanel';
+import SynLuDepartmentService from '../../services/Synergetic/Lookup/SynLuDepartmentService';
 
 const isValidLocalDateTime = (value?: string | null) => {
   return moment(`${value || ''}`.trim(), moment.HTML5_FMT.DATETIME_LOCAL, true).isValid();
@@ -168,8 +171,13 @@ const ParentTeacherInterviewPage = () => {
   const [loadFailed, setLoadFailed] = useState(false);
   const [staffs, setStaffs] = useState<iVStaff[]>([]);
   const [categories, setCategories] = useState<iSynLuStaffCategory[]>([]);
+  const [departments, setDepartments] = useState<iSynLuDepartment[]>([]);
   const [searchText, setSearchText] = useState('');
-  const [categoryCodes, setCategoryCodes] = useState<string[]>([]);
+  const [categoryCodes, setCategoryCodes] = useState<string[]>([SynLuStaffCategoryCodes.TCHO]);
+  const [departmentCodes, setDepartmentCodes] = useState<string[]>([
+    SynLuDepartmentCodes.TS,
+    SynLuDepartmentCodes.ELCS,
+  ]);
   const [selectedStaffIds, setSelectedStaffIds] = useState<number[]>([]);
   const [scheduleRows, setScheduleRows] = useState<iParentTeacherInterviewScheduleRow[]>([]);
   const [currentStep, setCurrentStep] = useState<'select' | 'schedule'>('select');
@@ -192,7 +200,7 @@ const ParentTeacherInterviewPage = () => {
 
   useEffect(() => {
     setSelectedStaffIds([]);
-  }, [searchText, categoryCodes]);
+  }, [searchText, categoryCodes, departmentCodes]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -203,7 +211,6 @@ const ParentTeacherInterviewPage = () => {
       SynVStaffService.getStaffList({
         where: JSON.stringify({
           ActiveFlag: true,
-          StaffDepartment: [SynLuDepartmentCodes.TS],
         }),
       }),
       SynLuStaffCategoryService.getAll({
@@ -212,13 +219,20 @@ const ParentTeacherInterviewPage = () => {
         }),
         sort: 'Code:ASC',
       }),
+      SynLuDepartmentService.getAll({
+        where: JSON.stringify({
+          ActiveFlag: true,
+        }),
+        sort: 'Code:ASC',
+      }),
     ])
-      .then(([staffList, categoryList]) => {
+      .then(([staffList, categoryList, departmentList]) => {
         if (isCancelled) {
           return;
         }
         setStaffs(staffList);
         setCategories(categoryList.filter(category => `${category.Code || ''}`.trim() !== ''));
+        setDepartments(departmentList.filter(department => `${department.Code || ''}`.trim() !== ''));
       })
       .catch(error => {
         if (isCancelled) {
@@ -304,6 +318,10 @@ const ParentTeacherInterviewPage = () => {
         return false;
       }
 
+      if (departmentCodes.length > 0 && !departmentCodes.includes(`${staff.StaffDepartment || ''}`)) {
+        return false;
+      }
+
       if (normalizedSearchText === '') {
         return true;
       }
@@ -324,7 +342,7 @@ const ParentTeacherInterviewPage = () => {
       }
       return `${staffA.StaffNameInternal || ''}`.localeCompare(`${staffB.StaffNameInternal || ''}`);
     });
-  }, [categoryCodes, searchText, staffs]);
+  }, [categoryCodes, departmentCodes, searchText, staffs]);
 
   const selectedStaffs = useMemo(() => {
     const selectedStaffIdMap = selectedStaffIds.reduce((map, staffId) => {
@@ -587,16 +605,19 @@ const ParentTeacherInterviewPage = () => {
     }
 
     return (
-        <ParentTeacherInterviewStaffSelectionPanel
-          categoryCodes={categoryCodes}
-          categories={categories}
-          searchText={searchText}
-          selectedStaffIds={selectedStaffIds}
-          staffs={filteredStaffs}
-          onCategoryCodesChange={setCategoryCodes}
-          onSearchTextChange={setSearchText}
-          onToggleAllVisible={handleToggleAllVisible}
-          onToggleStaff={updateSelectedStaffId}
+      <ParentTeacherInterviewStaffSelectionPanel
+        categoryCodes={categoryCodes}
+        categories={categories}
+        departmentCodes={departmentCodes}
+        departments={departments}
+        searchText={searchText}
+        selectedStaffIds={selectedStaffIds}
+        staffs={filteredStaffs}
+        onCategoryCodesChange={setCategoryCodes}
+        onDepartmentCodesChange={setDepartmentCodes}
+        onSearchTextChange={setSearchText}
+        onToggleAllVisible={handleToggleAllVisible}
+        onToggleStaff={updateSelectedStaffId}
         onNext={handleNext}
       />
     );
@@ -626,7 +647,8 @@ const ParentTeacherInterviewPage = () => {
 
   const handleAdminPageClose = async () => {
     setSearchText('');
-    setCategoryCodes([]);
+    setCategoryCodes([SynLuStaffCategoryCodes.TCHO]);
+    setDepartmentCodes([SynLuDepartmentCodes.TS, SynLuDepartmentCodes.ELCS]);
     setSelectedStaffIds([]);
     setScheduleRows([]);
     setCurrentStep('select');

@@ -7,6 +7,7 @@ import {PageKey, PageTestId} from '../../../layouts/__mocks__/Page';
 import ParentTeacherInterviewPage from '../../../pages/ParentTeacherInterview/ParentTeacherInterviewPage';
 import SynVStaffService from '../../../services/Synergetic/SynVStaffService';
 import SynLuStaffCategoryService from '../../../services/Synergetic/Lookup/SynLuStaffCategoryService';
+import SynLuDepartmentService from '../../../services/Synergetic/Lookup/SynLuDepartmentService';
 import Toaster from '../../../services/Toaster';
 import MggsModuleService from '../../../services/Module/MggsModuleService';
 import AuthService from '../../../services/AuthService';
@@ -38,6 +39,12 @@ jest.mock('../../../services/Synergetic/SynVStaffService', () => ({
   },
 }));
 jest.mock('../../../services/Synergetic/Lookup/SynLuStaffCategoryService', () => ({
+  __esModule: true,
+  default: {
+    getAll: jest.fn(),
+  },
+}));
+jest.mock('../../../services/Synergetic/Lookup/SynLuDepartmentService', () => ({
   __esModule: true,
   default: {
     getAll: jest.fn(),
@@ -75,6 +82,7 @@ describe('ParentTeacherInterviewPage', () => {
   const mockedUseSelector = useSelector as jest.Mock;
   const mockedStaffService = SynVStaffService as jest.Mocked<typeof SynVStaffService>;
   const mockedCategoryService = SynLuStaffCategoryService as jest.Mocked<typeof SynLuStaffCategoryService>;
+  const mockedDepartmentService = SynLuDepartmentService as jest.Mocked<typeof SynLuDepartmentService>;
   const mockedToaster = Toaster as jest.Mocked<typeof Toaster>;
   const mockedModuleService = MggsModuleService as jest.Mocked<typeof MggsModuleService>;
   const mockedAuthService = AuthService as jest.Mocked<typeof AuthService>;
@@ -96,7 +104,8 @@ describe('ParentTeacherInterviewPage', () => {
         StaffPreferredName: 'Ada',
         SchoolStaffCode: 'AL',
         StaffOccupEmail: 'ada@example.com',
-        StaffCategory: 'TEACH',
+        StaffDepartment: 'TS',
+        StaffCategory: 'TCHO',
         StaffCategoryDescription: 'Teaching Staff',
       },
       {
@@ -106,13 +115,42 @@ describe('ParentTeacherInterviewPage', () => {
         StaffPreferredName: 'Grace',
         SchoolStaffCode: 'GH',
         StaffOccupEmail: 'grace@example.com',
+        StaffDepartment: 'ELCS',
+        StaffCategory: 'TCHO',
+        StaffCategoryDescription: 'Teaching Staff',
+      },
+      {
+        StaffID: 1003,
+        StaffNameInternal: 'Katherine Johnson',
+        StaffSurname: 'Johnson',
+        StaffPreferredName: 'Katherine',
+        SchoolStaffCode: 'KJ',
+        StaffOccupEmail: 'katherine@example.com',
+        StaffDepartment: 'SCI',
+        StaffCategory: 'TCHO',
+        StaffCategoryDescription: 'Teaching Staff',
+      },
+      {
+        StaffID: 1004,
+        StaffNameInternal: 'Marie Curie',
+        StaffSurname: 'Curie',
+        StaffPreferredName: 'Marie',
+        SchoolStaffCode: 'MC',
+        StaffOccupEmail: 'marie@example.com',
+        StaffDepartment: 'ART',
         StaffCategory: 'LEAD',
         StaffCategoryDescription: 'Leadership',
       },
     ] as any);
     mockedCategoryService.getAll.mockResolvedValue([
-      {Code: 'TEACH', Description: 'Teaching Staff'},
+      {Code: 'TCHO', Description: 'Teaching Staff'},
       {Code: 'LEAD', Description: 'Leadership'},
+    ] as any);
+    mockedDepartmentService.getAll.mockResolvedValue([
+      {Code: 'ART', Description: 'Arts', ActiveFlag: true},
+      {Code: 'ELCS', Description: 'Early Learning Centre Staff', ActiveFlag: true},
+      {Code: 'SCI', Description: 'Science', ActiveFlag: true},
+      {Code: 'TS', Description: 'Teaching Staff', ActiveFlag: true},
     ] as any);
     mockedModuleService.getModule.mockResolvedValue({
       settings: {
@@ -158,11 +196,25 @@ describe('ParentTeacherInterviewPage', () => {
     expect(mockedStaffService.getStaffList).toHaveBeenCalledWith({
       where: JSON.stringify({
         ActiveFlag: true,
-        StaffDepartment: ['TS'],
       }),
     });
     expect(mockedCategoryService.getAll).toHaveBeenCalled();
+    expect(mockedDepartmentService.getAll).toHaveBeenCalledWith({
+      where: JSON.stringify({
+        ActiveFlag: true,
+      }),
+      sort: 'Code:ASC',
+    });
     expect(mockedModuleService.getModule).toHaveBeenCalled();
+  });
+
+  test('defaults the category filter to TCHO teaching staff', async () => {
+    render(<ParentTeacherInterviewPage />);
+
+    await waitFor(() => expect(screen.getByText('Ada Lovelace')).toBeInTheDocument());
+    expect(screen.getByText('Grace Hopper')).toBeInTheDocument();
+    expect(screen.queryByText('Katherine Johnson')).not.toBeInTheDocument();
+    expect(screen.queryByText('Marie Curie')).not.toBeInTheDocument();
   });
 
   test('filters by search/category and projects selected staff into step two', async () => {
@@ -181,6 +233,20 @@ describe('ParentTeacherInterviewPage', () => {
     expect(screen.getByLabelText('Starting datetime for Grace Hopper')).toHaveValue('2099-07-01T09:00');
     expect(screen.getByLabelText('Ending datetime for Grace Hopper')).toHaveValue('2099-07-01T10:00');
     await waitFor(() => expect(mockedCalendarService.getCalendarEvents).toHaveBeenCalled());
+  });
+
+  test('filters by department after category', async () => {
+    render(<ParentTeacherInterviewPage />);
+
+    await waitFor(() => expect(screen.getByText('Ada Lovelace')).toBeInTheDocument());
+
+    const departmentSelect = screen.getAllByRole('combobox')[1];
+    fireEvent.keyDown(departmentSelect, {key: 'ArrowDown'});
+    fireEvent.click(screen.getByText('SCI - Science'));
+
+    expect(screen.getByText('Ada Lovelace')).toBeInTheDocument();
+    expect(screen.getByText('Grace Hopper')).toBeInTheDocument();
+    expect(screen.getByText('Katherine Johnson')).toBeInTheDocument();
   });
 
   test('clears selected staff after filter changes', async () => {
