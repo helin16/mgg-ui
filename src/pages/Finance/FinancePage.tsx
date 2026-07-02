@@ -44,7 +44,7 @@ const FinancePage = () => {
           <CreditorBPayPanel />
         </Tab>
 
-        <Tab eventKey={TAB_DEBITORS} title={'Debitors'}>
+        <Tab eventKey={TAB_DEBITORS} title={'Debtors'}>
           <DebitorsListPanel />
         </Tab>
 

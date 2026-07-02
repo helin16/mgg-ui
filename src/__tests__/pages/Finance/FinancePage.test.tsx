@@ -25,7 +25,7 @@ describe('FinancePage', () => {
     render(<FinancePage />);
 
     expect(screen.getByTestId(PageTestId)).toBeInTheDocument();
-    expect(screen.getByText('Debitors')).toBeInTheDocument();
+    expect(screen.getByText('Debtors')).toBeInTheDocument();
 
     expect(mockComponentTestHelper.get(PageKey)).toEqual([
       expect.objectContaining({

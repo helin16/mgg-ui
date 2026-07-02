@@ -44,6 +44,7 @@ const getDebitorSpouseDisplayName = (row: iFinanceDebitorListRow) => {
 const DebitorsListPanel = () => {
   const [draftCriteria, setDraftCriteria] = useState<iFinanceDebitorSearchCriteria>(getInitialCriteria());
   const [activeCriteria, setActiveCriteria] = useState<iFinanceDebitorSearchCriteria>(getInitialCriteria());
+  const [selectedStudent, setSelectedStudent] = useState<iVPastAndCurrentStudent | null>(null);
   const [rows, setRows] = useState<iFinanceDebitorListRow[]>([]);
   const [totalPages, setTotalPages] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
@@ -79,7 +80,7 @@ const DebitorsListPanel = () => {
   const columns = useMemo((): iTableColumn<iFinanceDebitorListRow>[] => [
     {
       key: 'debitorInformation',
-      header: 'Debitor Information',
+      header: 'Debtor Information',
       cell: (column, row: iFinanceDebitorListRow) => (
         <td key={column.key}>
           {[
@@ -97,7 +98,7 @@ const DebitorsListPanel = () => {
     },
     {
       key: 'debitorSpouseInformation',
-      header: 'Debitor Spouse Information',
+      header: 'Debtor Spouse Information',
       cell: (column, row: iFinanceDebitorListRow) => (
         <td key={column.key}>
           {[
@@ -113,7 +114,7 @@ const DebitorsListPanel = () => {
     },
     {
       key: 'debitorAddress',
-      header: 'Debitor Address',
+      header: 'Debtor Address',
       cell: (column, row: iFinanceDebitorListRow) => <td key={column.key}>{row.DebtorAddressFull}</td>,
     },
     {
@@ -158,17 +159,19 @@ const DebitorsListPanel = () => {
 
   const handleReset = () => {
     const criteria = getInitialCriteria(activeCriteria.perPage || DEFAULT_PER_PAGE);
+    setSelectedStudent(null);
     setDraftCriteria(criteria);
     loadData(criteria, 'reset');
   };
 
   const handleStudentChanged = (student: iVPastAndCurrentStudent[] | iVPastAndCurrentStudent | null) => {
     const selectedStudent = Array.isArray(student) ? student[0] || null : student;
-    setDraftCriteria({
-      ...draftCriteria,
+    setSelectedStudent(selectedStudent);
+    setDraftCriteria(previous => ({
+      ...previous,
       selectedStudentId: selectedStudent?.StudentID || null,
       selectedStudentDebtorId: selectedStudent?.DebtorID || null,
-    });
+    }));
   };
 
   return (
@@ -189,10 +192,11 @@ const DebitorsListPanel = () => {
         </Col>
         <Col md={4}>
           <Form.Group controlId={'finance-debitors-student'}>
-            <Form.Label>Current Student</Form.Label>
+            <Form.Label>Current / Past Student</Form.Label>
             <SynStudentProfileSelector
-              key={`student-${draftCriteria.selectedStudentId || 'none'}`}
               className={'finance-debitors-student-selector'}
+              isClearable
+              value={selectedStudent}
               onChange={handleStudentChanged as any}
             />
           </Form.Group>

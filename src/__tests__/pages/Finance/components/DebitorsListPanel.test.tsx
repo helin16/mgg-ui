@@ -2,7 +2,10 @@ import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import DebitorsListPanel from '../../../../pages/Finance/components/DebitorsListPanel';
 import SynVDebtorService from '../../../../services/Synergetic/Finance/SynVDebtorService';
 import ComponentTestHelper from '../../../helper/ComponentTestHelper';
-import {SynStudentProfileSelectorTestId} from '../../../../components/student/__mocks__/SynStudentProfileSelector';
+import {
+  SynStudentProfileSelectorKey,
+  SynStudentProfileSelectorTestId
+} from '../../../../components/student/__mocks__/SynStudentProfileSelector';
 
 jest.mock('../../../../services/Synergetic/Finance/SynVDebtorService');
 jest.mock('../../../../components/student/SynStudentProfileSelector');
@@ -129,6 +132,14 @@ describe('DebitorsListPanel', () => {
       perPage: 10,
     }));
     await waitFor(() => expect(screen.queryByText('Loading...')).not.toBeInTheDocument());
+
+    const selectorCalls = ComponentTestHelper.get(SynStudentProfileSelectorKey);
+    expect(selectorCalls[selectorCalls.length - 1]).toEqual(expect.objectContaining({
+      value: expect.objectContaining({
+        StudentID: 'S101',
+        DebtorID: 201,
+      }),
+    }));
 
     expect(screen.getByText('No debtors found for the current filters.')).toBeInTheDocument();
   });
