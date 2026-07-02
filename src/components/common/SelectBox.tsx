@@ -2,7 +2,7 @@ import Select from "react-select";
 import styled from "styled-components";
 
 
-export type iSelectOptionProps = {value: string, label: any, data?: any}
+export type iSelectOptionProps = {value: string | number, label: any, data?: any}
 export type iSelectBox = {
   placeholder?: string;
   isMulti?: boolean;

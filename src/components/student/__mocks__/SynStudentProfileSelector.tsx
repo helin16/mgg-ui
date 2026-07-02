@@ -12,6 +12,7 @@ const sampleStudent = {
   StudentGiven1: 'Ada',
   StudentSurname: 'Lovelace',
   DebtorID: 201,
+  StudentIsPastFlag: false,
 };
 
 const SynStudentProfileSelector = (props: any) => {

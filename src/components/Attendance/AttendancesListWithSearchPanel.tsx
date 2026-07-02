@@ -127,11 +127,7 @@ const SearchPanel = ({ onSearch, isSearching }: iSearchPanel) => {
           isClearable
           className={"students-autocomplete"}
           placeholder={"Search student by given name, surname or ID..."}
-          value={students.map(student => ({
-            value: student.ID,
-            label: `[${student.StudentID}] ${student.StudentGiven1} ${student.StudentSurname}`,
-            data: student
-          }))}
+          value={students}
           onChange={selected => {
             setStudents(!selected ? null : selected || []);
           }}

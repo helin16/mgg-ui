@@ -7,13 +7,35 @@ import { OP_LIKE, OP_OR } from "../../helper/ServiceHelper";
 import SynVStudentService from "../../services/Synergetic/Student/SynVStudentService";
 import Toaster from "../../services/Toaster";
 import { iVPastAndCurrentStudent } from "../../types/Synergetic/Student/iVStudent";
+
+type iStudentOption = iSelectOptionProps & {
+  data: iVPastAndCurrentStudent;
+};
+
 type iSynStudentSelector = iSelectBox & {
   onChange?: (
     selected: iVPastAndCurrentStudent[] | iVPastAndCurrentStudent | null
   ) => void;
+  value?:
+    | iVPastAndCurrentStudent[]
+    | iVPastAndCurrentStudent
+    | iStudentOption[]
+    | iStudentOption
+    | null;
+};
+
+export const getStudentOption = (student: iVPastAndCurrentStudent): iSelectOptionProps => ({
+  value: `${student.StudentID}`,
+  label: `${student.StudentIsPastFlag ? '[Past] ' : ''}[${student.StudentID}] ${student.StudentGiven1} ${student.StudentSurname}`,
+  data: student
+});
+
+const isStudentOption = (value: unknown): value is iStudentOption => {
+  return Boolean(value && typeof value === 'object' && 'data' in (value as iStudentOption));
 };
 
 const SynStudentProfileSelector = ({onChange, ...props}: iSynStudentSelector) => {
+  const selectedValue = props.value;
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const searchStudent = useCallback(
@@ -41,11 +63,7 @@ const SynStudentProfileSelector = ({onChange, ...props}: iSynStudentSelector) =>
         .then(resp => {
           callback(
             uniqBy(resp.data || [], data => data.StudentID).map(
-              (data: iVPastAndCurrentStudent) => ({
-                value: data.StudentID,
-                label: `[${data.StudentID}] ${data.StudentGiven1} ${data.StudentSurname}`,
-                data: data
-              })
+              (data: iVPastAndCurrentStudent) => getStudentOption(data)
             )
           );
         })
@@ -60,13 +78,32 @@ const SynStudentProfileSelector = ({onChange, ...props}: iSynStudentSelector) =>
     <AsyncSelectBox
       {...props}
       className={`student-selector ${props.className || ""}`}
+      value={
+        selectedValue === null || selectedValue === undefined
+          ? null
+          : props.isMulti === true
+            ? (selectedValue as Array<iVPastAndCurrentStudent | iStudentOption>).map(student => (
+              isStudentOption(student) ? student : getStudentOption(student)
+            ))
+            : isStudentOption(selectedValue)
+              ? selectedValue
+              : getStudentOption(selectedValue as iVPastAndCurrentStudent)
+      }
       onChange={value => {
-        onChange &&
+        if (!onChange) {
+          return;
+        }
+
+        if (value === null) {
+          onChange(null);
+          return;
+        }
+
         onChange(
-          value !== null && props.isMulti === true
+          props.isMulti === true
             ? value.map((val: iSelectOptionProps) => val.data)
             : value.data
-        )
+        );
       }}
       loadOptions={searchStudent}
     />
