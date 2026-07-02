@@ -76,6 +76,11 @@ describe('DebitorsListPanel', () => {
       currentPage: 2,
       perPage: 10,
     }));
+
+    const selectorCalls = ComponentTestHelper.get(SynStudentProfileSelectorKey);
+    expect(selectorCalls[selectorCalls.length - 1]).toEqual(expect.objectContaining({
+      isClearable: true,
+    }));
   });
 
   test('submits search text and resets filters back to page 1', async () => {
@@ -142,5 +147,42 @@ describe('DebitorsListPanel', () => {
     }));
 
     expect(screen.getByText('No debtors found for the current filters.')).toBeInTheDocument();
+  });
+
+  test('clears the selected student and searches without student filters', async () => {
+    render(<DebitorsListPanel />);
+
+    await waitFor(() => expect(mockedSynVDebtorService.getFinanceDebitors).toHaveBeenCalledTimes(1));
+
+    const selector = screen.getByTestId(SynStudentProfileSelectorTestId);
+    const [pickStudentButton, clearStudentButton] = selector.querySelectorAll('button');
+
+    fireEvent.click(pickStudentButton);
+
+    await waitFor(() => {
+      const selectorCalls = ComponentTestHelper.get(SynStudentProfileSelectorKey);
+      expect(selectorCalls[selectorCalls.length - 1]).toEqual(expect.objectContaining({
+        value: expect.objectContaining({
+          StudentID: 'S101',
+          DebtorID: 201,
+        }),
+      }));
+    });
+
+    fireEvent.click(clearStudentButton);
+    fireEvent.click(screen.getByRole('button', {name: 'Search'}));
+
+    await waitFor(() => expect(mockedSynVDebtorService.getFinanceDebitors).toHaveBeenLastCalledWith({
+      searchText: '',
+      selectedStudentId: null,
+      selectedStudentDebtorId: null,
+      currentPage: 1,
+      perPage: 10,
+    }));
+
+    const selectorCalls = ComponentTestHelper.get(SynStudentProfileSelectorKey);
+    expect(selectorCalls[selectorCalls.length - 1]).toEqual(expect.objectContaining({
+      value: null,
+    }));
   });
 });
