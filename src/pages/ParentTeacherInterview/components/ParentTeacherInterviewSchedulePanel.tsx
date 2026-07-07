@@ -325,6 +325,10 @@ const ParentTeacherInterviewSchedulePanel = ({
     setConfirmString(`${currentUser?.synergyId || Math.ceil(Math.random() * 100000)}`);
   }, [currentUser]);
 
+  const getPreferredMeetingUrl = (event?: {teamsShortJoinUrl?: string | null; teamsJoinUrl?: string | null} | null) => {
+    return `${event?.teamsShortJoinUrl || event?.teamsJoinUrl || ''}`.trim();
+  };
+
   const exportMeetingRows = () => {
     const exportRows = rows
       .filter(row => row.createResult?.event !== null && row.createResult?.event !== undefined)
@@ -338,7 +342,7 @@ const ParentTeacherInterviewSchedulePanel = ({
           event?.isAllDay ? moment(event.startDateTime).format('DD/MM/YYYY') : event?.startDateTime ? moment(event.startDateTime).format('DD/MM/YYYY HH:mm') : '',
           event?.isAllDay ? moment(event.endDateTime).subtract(1, 'day').format('DD/MM/YYYY') : event?.endDateTime ? moment(event.endDateTime).format('DD/MM/YYYY HH:mm') : '',
           row.staffName,
-          event?.teamsJoinUrl || '',
+          getPreferredMeetingUrl(event),
         ];
       });
 
@@ -380,7 +384,7 @@ const ParentTeacherInterviewSchedulePanel = ({
 
   const getMeetingContent = (row: iParentTeacherInterviewScheduleRow) => {
     const createdEvent = row.createResult?.event;
-    const teamsJoinUrl = row.createResult?.event?.teamsJoinUrl;
+    const teamsJoinUrl = getPreferredMeetingUrl(createdEvent);
     if (row.createStatus === 'CREATED' && teamsJoinUrl) {
       return (
         <div>
@@ -554,8 +558,8 @@ const ParentTeacherInterviewSchedulePanel = ({
                       className={'mb-0'}
                     >
                       <div>{row.createMessage}</div>
-                      {row.createResult?.event?.teamsJoinUrl && !showMeetingColumns ? (
-                        <a href={row.createResult.event.teamsJoinUrl} target={'_blank'} rel={'noreferrer'}>
+                      {getPreferredMeetingUrl(row.createResult?.event) && !showMeetingColumns ? (
+                        <a href={getPreferredMeetingUrl(row.createResult?.event)} target={'_blank'} rel={'noreferrer'}>
                           Open meeting link
                         </a>
                       ) : null}

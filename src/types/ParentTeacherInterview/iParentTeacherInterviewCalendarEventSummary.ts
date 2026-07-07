@@ -10,6 +10,9 @@ type iParentTeacherInterviewCalendarEventSummary = {
   isAllDay?: boolean | null;
   isOnlineMeeting: boolean | null;
   teamsJoinUrl: string | null;
+  teamsShortJoinUrl?: string | null;
+  teamsJoinMeetingId?: string | null;
+  teamsJoinPasscode?: string | null;
 };
 
 export default iParentTeacherInterviewCalendarEventSummary;
