@@ -23,6 +23,9 @@ describe('ParentTeacherInterviewCalendarService', () => {
         },
         isOnlineMeeting: true,
         teamsJoinUrl: 'https://teams.example.com/join',
+        teamsShortJoinUrl: 'https://teams.example.com/meet/123?p=abc',
+        teamsJoinMeetingId: '123',
+        teamsJoinPasscode: 'abc',
       },
     ],
   };

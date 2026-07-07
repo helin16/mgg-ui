@@ -274,6 +274,7 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
                 startDateTime: '2099-07-01T09:00:00+10:00',
                 endDateTime: '2099-07-01T10:00:00+10:00',
                 teamsJoinUrl: 'https://teams.example.com/created',
+                teamsShortJoinUrl: 'https://teams.example.com/meet/created?p=short',
               },
             },
           },
@@ -297,7 +298,7 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
     expect(screen.queryByText('Created successfully')).not.toBeInTheDocument();
     expect(screen.getByRole('link', {name: 'Link'})).toHaveAttribute(
       'href',
-      'https://teams.example.com/created'
+      'https://teams.example.com/meet/created?p=short'
     );
     expect(screen.getByRole('button', {name: 'Export interview meetings'})).toBeInTheDocument();
   });
@@ -319,6 +320,7 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
                 startDateTime: '2099-07-01T09:00:00+10:00',
                 endDateTime: '2099-07-01T10:00:00+10:00',
                 teamsJoinUrl: 'https://teams.example.com/created',
+                teamsShortJoinUrl: 'https://teams.example.com/meet/created?p=short',
               },
             },
           },
@@ -334,11 +336,11 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
 
     fireEvent.click(screen.getByRole('button', {name: 'Copy link'}));
 
-    await waitFor(() => expect(navigator.clipboard.writeText).toHaveBeenCalledWith('https://teams.example.com/created'));
+    await waitFor(() => expect(navigator.clipboard.writeText).toHaveBeenCalledWith('https://teams.example.com/meet/created?p=short'));
     expect(mockedToaster.showToast).toHaveBeenCalledWith('Link copied successfully', TOAST_TYPE_SUCCESS);
   });
 
-  test('exports created meeting rows to csv from the interview meeting header', () => {
+  test('exports created meeting rows to csv from the interview meeting header', async () => {
     render(
       <ParentTeacherInterviewSchedulePanel
         isAdmin={true}
@@ -354,6 +356,7 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
                 startDateTime: '2099-07-01T09:00:00+10:00',
                 endDateTime: '2099-07-01T10:00:00+10:00',
                 teamsJoinUrl: 'https://teams.example.com/created',
+                teamsShortJoinUrl: 'https://teams.example.com/meet/created?p=short',
               },
             },
           },
@@ -374,6 +377,7 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
     expect(createObjectURL).toHaveBeenCalled();
     const blobArg = createObjectURL.mock.calls[0][0] as Blob;
     expect(blobArg).toBeInstanceOf(Blob);
+    await expect(new Response(blobArg).text()).resolves.toContain('https://teams.example.com/meet/created?p=short');
     expect(click).toHaveBeenCalled();
     expect(revokeObjectURL).toHaveBeenCalled();
 
@@ -453,6 +457,7 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
                 endDateTime: '2099-07-01T10:00:00+10:00',
                 isAllDay: false,
                 teamsJoinUrl: 'https://teams.example.com/existing-created',
+                teamsShortJoinUrl: 'https://teams.example.com/meet/existing-created?p=short',
               },
             },
           },
@@ -504,6 +509,7 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
                 endDateTime: '2099-07-02T00:00:00+10:00',
                 isAllDay: true,
                 teamsJoinUrl: 'https://teams.example.com/allday-created',
+                teamsShortJoinUrl: 'https://teams.example.com/meet/allday-created?p=short',
               },
             },
           },
@@ -538,6 +544,7 @@ describe('ParentTeacherInterviewSchedulePanel', () => {
                 endDateTime: '2099-07-03T14:30:00+10:00',
                 isAllDay: false,
                 teamsJoinUrl: 'https://teams.example.com/overnight',
+                teamsShortJoinUrl: 'https://teams.example.com/meet/overnight?p=short',
               },
             },
           },
