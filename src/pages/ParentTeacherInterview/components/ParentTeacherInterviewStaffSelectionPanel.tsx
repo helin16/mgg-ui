@@ -8,6 +8,7 @@ import PopupModal from '../../../components/common/PopupModal';
 import iSynLuDepartment from '../../../types/Synergetic/Lookup/iSynLuDepartment';
 import iVStaff from '../../../types/Synergetic/iVStaff';
 import iSynLuStaffCategory from '../../../types/Synergetic/Lookup/iSynLuStaffCategory';
+import getParentTeacherInterviewStaffDisplayName from '../parentTeacherInterviewStaffName';
 
 type iStaffClassSummary = {
   ClassCode: string;
@@ -106,7 +107,7 @@ const ParentTeacherInterviewStaffSelectionPanel = ({
       cell: (_, staff) => (
         <td key={`selected-${staff.StaffID}`}>
           <Form.Check
-            aria-label={`Select ${staff.StaffNameInternal}`}
+            aria-label={`Select ${getParentTeacherInterviewStaffDisplayName(staff)}`}
             checked={selectedStaffIdMap[staff.StaffID] === true}
             onChange={event => onToggleStaff(staff.StaffID, event.target.checked)}
           />
@@ -123,7 +124,7 @@ const ParentTeacherInterviewStaffSelectionPanel = ({
       key: 'StaffNameInternal',
       sort: 3,
       header: 'Staff Name',
-      cell: (_, staff) => <td key={`StaffNameInternal-${staff.StaffID}`}>{staff.StaffNameInternal}</td>,
+      cell: (_, staff) => <td key={`StaffNameInternal-${staff.StaffID}`}>{getParentTeacherInterviewStaffDisplayName(staff)}</td>,
     },
     {
       key: 'SchoolStaffCode',
@@ -281,7 +282,7 @@ const ParentTeacherInterviewStaffSelectionPanel = ({
       <PopupModal
         show={activeStaffClassesStaffId !== null}
         handleClose={onCloseStaffClasses}
-        title={activeStaff ? `${activeStaff.StaffNameInternal} Classes` : 'Classes'}
+        title={activeStaff ? `${getParentTeacherInterviewStaffDisplayName(activeStaff)} Classes` : 'Classes'}
       >
         <Table
           columns={classColumns}

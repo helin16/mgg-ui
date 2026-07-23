@@ -26,6 +26,7 @@ import SynLuDepartmentService from '../../services/Synergetic/Lookup/SynLuDepart
 import SynVStudentClassService from '../../services/Synergetic/Student/SynVStudentClassService';
 import iSynVStudentClass from '../../types/Synergetic/Student/iSynVStudentClass';
 import {HEADER_NAME_SELECTING_FIELDS, MAX_PAGE_SIZE} from '../../services/AppService';
+import getParentTeacherInterviewStaffDisplayName from './parentTeacherInterviewStaffName';
 
 const isValidLocalDateTime = (value?: string | null) => {
   return moment(`${value || ''}`.trim(), moment.HTML5_FMT.DATETIME_LOCAL, true).isValid();
@@ -534,7 +535,7 @@ const ParentTeacherInterviewPage = () => {
 
     setScheduleRows(selectedStaffs.map(staff => ({
       staffId: staff.StaffID,
-      staffName: staff.StaffNameInternal,
+      staffName: getParentTeacherInterviewStaffDisplayName(staff),
       staffCode: staff.SchoolStaffCode,
       staffEmail: `${staff.StaffOccupEmail || ''}`.trim() || null,
       isAllDay: defaultIsAllDay,

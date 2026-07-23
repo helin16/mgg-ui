@@ -30,6 +30,9 @@ const staffRows = [
   {
     StaffID: 1001,
     StaffNameInternal: 'Ada Lovelace',
+    StaffTitle: 'Ms',
+    StaffPreferred: 'Ada',
+    StaffSurname: 'Lovelace',
     SchoolStaffCode: 'AL',
     StaffOccupEmail: 'ada@example.com',
     StaffCategory: 'TCHO',
@@ -39,6 +42,9 @@ const staffRows = [
   {
     StaffID: 1002,
     StaffNameInternal: 'Grace Hopper',
+    StaffTitle: 'Dr',
+    StaffPreferred: 'Grace',
+    StaffSurname: 'Hopper',
     SchoolStaffCode: 'GH',
     StaffOccupEmail: 'grace@example.com',
     StaffCategory: 'LEAD',
@@ -94,8 +100,8 @@ describe('ParentTeacherInterviewStaffSelectionPanel', () => {
       />
     );
 
-    expect(screen.getByText('Ada Lovelace')).toBeInTheDocument();
-    expect(screen.getByText('Grace Hopper')).toBeInTheDocument();
+    expect(screen.getByText('Ms Ada Lovelace')).toBeInTheDocument();
+    expect(screen.getByText('Dr Grace Hopper')).toBeInTheDocument();
     expect(screen.getByText('ada@example.com')).toBeInTheDocument();
     expect(screen.getByText('grace@example.com')).toBeInTheDocument();
     expect(screen.getByText('Only eligible academic staff are shown.')).toBeInTheDocument();
@@ -157,7 +163,7 @@ describe('ParentTeacherInterviewStaffSelectionPanel', () => {
       />
     );
 
-    fireEvent.click(screen.getByLabelText('Select Ada Lovelace'));
+    fireEvent.click(screen.getByLabelText('Select Ms Ada Lovelace'));
     expect(onToggleStaff).toHaveBeenCalledWith(1001, false);
 
     fireEvent.click(screen.getByLabelText('Select all visible staff'));
@@ -235,7 +241,7 @@ describe('ParentTeacherInterviewStaffSelectionPanel', () => {
     fireEvent.click(screen.getByRole('button', {name: '2'}));
     expect(onOpenStaffClasses).toHaveBeenCalledWith(1001);
 
-    expect(screen.getByText('Ada Lovelace Classes')).toBeInTheDocument();
+    expect(screen.getByText('Ms Ada Lovelace Classes')).toBeInTheDocument();
     expect(screen.getByRole('columnheader', {name: 'ClassCode'})).toBeInTheDocument();
     expect(screen.getByText('ENG7A')).toBeInTheDocument();
     expect(screen.getByText('7A English')).toBeInTheDocument();
