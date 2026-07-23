@@ -31,6 +31,11 @@ const flattenNodeText = (node: any): string => {
   return '';
 };
 
+const waitForCalendarRetrievalToSettle = async () => {
+  await waitFor(() => expect(ParentTeacherInterviewCalendarService.getCalendarEvents).toHaveBeenCalled());
+  await waitFor(() => expect(screen.queryByText('Loading existing events...')).not.toBeInTheDocument());
+};
+
 jest.mock('../../../layouts/Page');
 jest.mock('../../../pages/ParentTeacherInterview/ParentTeacherInterviewAdminPage');
 jest.mock('../../../components/PageNotFound');
@@ -368,7 +373,7 @@ describe('ParentTeacherInterviewPage', () => {
     expect(screen.getByText('Schedule Parent Teacher Interview')).toBeInTheDocument();
     expect(screen.getByLabelText('Starting datetime for Dr Grace Hopper')).toHaveValue('2099-07-01T09:00');
     expect(screen.getByLabelText('Ending datetime for Dr Grace Hopper')).toHaveValue('2099-07-01T10:00');
-    await waitFor(() => expect(mockedCalendarService.getCalendarEvents).toHaveBeenCalled());
+    await waitForCalendarRetrievalToSettle();
   });
 
   test('filters by department after category', async () => {
@@ -515,6 +520,7 @@ describe('ParentTeacherInterviewPage', () => {
 
     expect(screen.getByLabelText('Starting datetime for Ms Ada Lovelace')).toHaveValue('2026-07-05T08:00');
     expect(screen.getByLabelText('Ending datetime for Ms Ada Lovelace')).toHaveValue('2026-07-06T16:00');
+    await waitForCalendarRetrievalToSettle();
   });
 
   test('uses default all-day settings to prepopulate schedule rows', async () => {
@@ -541,6 +547,7 @@ describe('ParentTeacherInterviewPage', () => {
     expect(screen.getByLabelText('All Day')).toBeChecked();
     expect(screen.getByLabelText('Starting date for Ms Ada Lovelace')).toHaveValue('2026-07-07');
     expect(screen.getByLabelText('Ending date for Ms Ada Lovelace')).toHaveValue('2026-07-08');
+    await waitForCalendarRetrievalToSettle();
   });
 
   test('locks interview time to default settings when user changes are disabled', async () => {
@@ -644,6 +651,7 @@ describe('ParentTeacherInterviewPage', () => {
     fireEvent.click(screen.getByLabelText('Select Dr Grace Hopper'));
     fireEvent.click(screen.getByRole('button', {name: 'Next'}));
     expect(screen.getByText('Schedule Parent Teacher Interview')).toBeInTheDocument();
+    await waitForCalendarRetrievalToSettle();
 
     const pageProps = mockComponentTestHelper.get(PageKey)[0];
 
