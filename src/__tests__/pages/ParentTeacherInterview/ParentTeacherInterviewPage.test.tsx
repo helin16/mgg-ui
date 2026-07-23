@@ -109,6 +109,8 @@ describe('ParentTeacherInterviewPage', () => {
       {
         StaffID: 1001,
         StaffNameInternal: 'Ada Lovelace',
+        StaffTitle: 'Ms',
+        StaffPreferred: 'Ada',
         StaffSurname: 'Lovelace',
         StaffPreferredName: 'Ada',
         SchoolStaffCode: 'AL',
@@ -120,6 +122,8 @@ describe('ParentTeacherInterviewPage', () => {
       {
         StaffID: 1002,
         StaffNameInternal: 'Grace Hopper',
+        StaffTitle: 'Dr',
+        StaffPreferred: 'Grace',
         StaffSurname: 'Hopper',
         StaffPreferredName: 'Grace',
         SchoolStaffCode: 'GH',
@@ -131,6 +135,8 @@ describe('ParentTeacherInterviewPage', () => {
       {
         StaffID: 1003,
         StaffNameInternal: 'Katherine Johnson',
+        StaffTitle: 'Ms',
+        StaffPreferred: 'Katherine',
         StaffSurname: 'Johnson',
         StaffPreferredName: 'Katherine',
         SchoolStaffCode: 'KJ',
@@ -142,6 +148,8 @@ describe('ParentTeacherInterviewPage', () => {
       {
         StaffID: 1004,
         StaffNameInternal: 'Marie Curie',
+        StaffTitle: 'Prof',
+        StaffPreferred: 'Marie',
         StaffSurname: 'Curie',
         StaffPreferredName: 'Marie',
         SchoolStaffCode: 'MC',
@@ -218,6 +226,7 @@ describe('ParentTeacherInterviewPage', () => {
         startDateTime: '2099-07-01T09:00:00+10:00',
         endDateTime: '2099-07-01T10:00:00+10:00',
         teamsJoinUrl: 'https://teams.example.com/created',
+        teamsShortJoinUrl: 'https://teams.example.com/meet/created?p=short',
       },
     } as any);
   });
@@ -270,12 +279,12 @@ describe('ParentTeacherInterviewPage', () => {
   test('defaults the category filter to TCHO teaching staff', async () => {
     render(<ParentTeacherInterviewPage />);
 
-    await waitFor(() => expect(screen.getByText('Ada Lovelace')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Ms Ada Lovelace')).toBeInTheDocument());
     expect(screen.getByText('Only staff with at least one current-semester academic class (FileType = A, CurrentSemesterOnlyFlag = 1) are shown.')).toBeInTheDocument();
-    expect(screen.getByText('Grace Hopper')).toBeInTheDocument();
+    expect(screen.getByText('Dr Grace Hopper')).toBeInTheDocument();
     expect(screen.getAllByRole('button', {name: '1'}).length).toBeGreaterThan(0);
-    expect(screen.queryByText('Katherine Johnson')).not.toBeInTheDocument();
-    expect(screen.queryByText('Marie Curie')).not.toBeInTheDocument();
+    expect(screen.queryByText('Ms Katherine Johnson')).not.toBeInTheDocument();
+    expect(screen.queryByText('Prof Marie Curie')).not.toBeInTheDocument();
   });
 
   test('shows the selected staff classes in a popup with student counts', async () => {
@@ -310,11 +319,11 @@ describe('ParentTeacherInterviewPage', () => {
 
     render(<ParentTeacherInterviewPage />);
 
-    await waitFor(() => expect(screen.getByText('Ada Lovelace')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Ms Ada Lovelace')).toBeInTheDocument());
 
     fireEvent.click(screen.getAllByRole('button', {name: '2'})[0]);
 
-    expect(screen.getByText('Ada Lovelace Classes')).toBeInTheDocument();
+    expect(screen.getByText('Ms Ada Lovelace Classes')).toBeInTheDocument();
     const dialog = screen.getByRole('dialog');
     expect(within(dialog).getByText('ENG7A')).toBeInTheDocument();
     expect(within(dialog).getByText('8A English')).toBeInTheDocument();
@@ -339,54 +348,54 @@ describe('ParentTeacherInterviewPage', () => {
 
     render(<ParentTeacherInterviewPage />);
 
-    await waitFor(() => expect(screen.getByText('Ada Lovelace')).toBeInTheDocument());
-    expect(screen.queryByText('Grace Hopper')).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText('Ms Ada Lovelace')).toBeInTheDocument());
+    expect(screen.queryByText('Dr Grace Hopper')).not.toBeInTheDocument();
     expect(screen.getByText(/Classes with descriptions containing any excluded keyword are ignored: Mathematics\./)).toBeInTheDocument();
   });
 
   test('filters by search/category and projects selected staff into step two', async () => {
     render(<ParentTeacherInterviewPage />);
 
-    await waitFor(() => expect(screen.getByText('Ada Lovelace')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Ms Ada Lovelace')).toBeInTheDocument());
 
     fireEvent.change(screen.getByLabelText('Search staff'), {target: {value: 'Grace'}});
-    expect(screen.queryByText('Ada Lovelace')).not.toBeInTheDocument();
-    expect(screen.getByText('Grace Hopper')).toBeInTheDocument();
+    expect(screen.queryByText('Ms Ada Lovelace')).not.toBeInTheDocument();
+    expect(screen.getByText('Dr Grace Hopper')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByLabelText('Select Grace Hopper'));
+    fireEvent.click(screen.getByLabelText('Select Dr Grace Hopper'));
     fireEvent.click(screen.getByRole('button', {name: 'Next'}));
 
     expect(screen.getByText('Schedule Parent Teacher Interview')).toBeInTheDocument();
-    expect(screen.getByLabelText('Starting datetime for Grace Hopper')).toHaveValue('2099-07-01T09:00');
-    expect(screen.getByLabelText('Ending datetime for Grace Hopper')).toHaveValue('2099-07-01T10:00');
+    expect(screen.getByLabelText('Starting datetime for Dr Grace Hopper')).toHaveValue('2099-07-01T09:00');
+    expect(screen.getByLabelText('Ending datetime for Dr Grace Hopper')).toHaveValue('2099-07-01T10:00');
     await waitFor(() => expect(mockedCalendarService.getCalendarEvents).toHaveBeenCalled());
   });
 
   test('filters by department after category', async () => {
     render(<ParentTeacherInterviewPage />);
 
-    await waitFor(() => expect(screen.getByText('Ada Lovelace')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Ms Ada Lovelace')).toBeInTheDocument());
 
     const departmentSelect = screen.getAllByRole('combobox')[1];
     fireEvent.keyDown(departmentSelect, {key: 'ArrowDown'});
     fireEvent.click(screen.getByText('SCI - Science'));
 
-    expect(screen.getByText('Ada Lovelace')).toBeInTheDocument();
-    expect(screen.getByText('Grace Hopper')).toBeInTheDocument();
-    expect(screen.getByText('Katherine Johnson')).toBeInTheDocument();
+    expect(screen.getByText('Ms Ada Lovelace')).toBeInTheDocument();
+    expect(screen.getByText('Dr Grace Hopper')).toBeInTheDocument();
+    expect(screen.getByText('Ms Katherine Johnson')).toBeInTheDocument();
   });
 
   test('clears selected staff after filter changes', async () => {
     render(<ParentTeacherInterviewPage />);
 
-    await waitFor(() => expect(screen.getByText('Ada Lovelace')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Ms Ada Lovelace')).toBeInTheDocument());
 
-    fireEvent.click(screen.getByLabelText('Select Ada Lovelace'));
+    fireEvent.click(screen.getByLabelText('Select Ms Ada Lovelace'));
     expect(screen.getByRole('button', {name: 'Next'})).not.toBeDisabled();
 
     fireEvent.change(screen.getByLabelText('Search staff'), {target: {value: 'Grace'}});
 
-    await waitFor(() => expect(screen.getByText('Grace Hopper')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Dr Grace Hopper')).toBeInTheDocument());
     expect(screen.getByRole('button', {name: 'Next'})).toBeDisabled();
   });
 
@@ -417,13 +426,13 @@ describe('ParentTeacherInterviewPage', () => {
 
     render(<ParentTeacherInterviewPage />);
 
-    await waitFor(() => expect(screen.getByText('Ada Lovelace')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Ms Ada Lovelace')).toBeInTheDocument());
 
-    fireEvent.click(screen.getByLabelText('Select Ada Lovelace'));
+    fireEvent.click(screen.getByLabelText('Select Ms Ada Lovelace'));
     fireEvent.click(screen.getByRole('button', {name: 'Next'}));
 
-    fireEvent.change(screen.getByLabelText('Starting datetime for Ada Lovelace'), {target: {value: '2099-07-01T09:00'}});
-    fireEvent.change(screen.getByLabelText('Ending datetime for Ada Lovelace'), {target: {value: '2099-07-01T10:00'}});
+    fireEvent.change(screen.getByLabelText('Starting datetime for Ms Ada Lovelace'), {target: {value: '2099-07-01T09:00'}});
+    fireEvent.change(screen.getByLabelText('Ending datetime for Ms Ada Lovelace'), {target: {value: '2099-07-01T10:00'}});
 
     await waitFor(() => expect(mockedCalendarService.getCalendarEvents).toHaveBeenCalled());
     await waitFor(() => expect(screen.getByText('PTI Subject')).toBeInTheDocument());
@@ -446,7 +455,7 @@ describe('ParentTeacherInterviewPage', () => {
     expect(screen.queryByText('Created successfully')).not.toBeInTheDocument();
     expect(screen.getByRole('link', {name: 'Link'})).toHaveAttribute(
       'href',
-      'https://teams.example.com/created'
+      'https://teams.example.com/meet/created?p=short'
     );
     expect(screen.getByRole('button', {name: 'Create link(s) for 1 staff'})).toBeDisabled();
   });
@@ -456,8 +465,8 @@ describe('ParentTeacherInterviewPage', () => {
       settings: {
         parentTeacherInterviewCalendar: {
           isAllDay: true,
-          startDateTime: '2026-07-03',
-          endDateTime: '2026-07-03',
+          startDateTime: '2099-07-03',
+          endDateTime: '2099-07-03',
           subject: 'PTI Subject',
           bodyText: 'PTI Body',
         },
@@ -466,45 +475,46 @@ describe('ParentTeacherInterviewPage', () => {
 
     render(<ParentTeacherInterviewPage />);
 
-    await waitFor(() => expect(screen.getByText('Ada Lovelace')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Ms Ada Lovelace')).toBeInTheDocument());
 
-    fireEvent.click(screen.getByLabelText('Select Ada Lovelace'));
+    fireEvent.click(screen.getByLabelText('Select Ms Ada Lovelace'));
     fireEvent.click(screen.getByRole('button', {name: 'Next'}));
     expect(screen.getByLabelText('All Day')).toBeChecked();
-    fireEvent.change(screen.getByLabelText('Starting date for Ada Lovelace'), {target: {value: '2026-07-03'}});
-    fireEvent.change(screen.getByLabelText('Ending date for Ada Lovelace'), {target: {value: '2026-07-03'}});
+    fireEvent.change(screen.getByLabelText('Starting date for Ms Ada Lovelace'), {target: {value: '2099-07-03'}});
+    fireEvent.change(screen.getByLabelText('Ending date for Ms Ada Lovelace'), {target: {value: '2099-07-04'}});
 
     await waitFor(() => expect(mockedCalendarService.getCalendarEvents).toHaveBeenCalledWith(expect.objectContaining({
-      startDateTime: expect.stringContaining('2026-07-03T00:00:00'),
-      endDateTime: expect.stringContaining('2026-07-03T23:59:59'),
+      startDateTime: expect.stringContaining('2099-07-03T00:00:00'),
+      endDateTime: expect.stringContaining('2099-07-04T23:59:59'),
     })));
 
+    await waitFor(() => expect(screen.getByRole('button', {name: 'Create link(s) for 1 staff'})).not.toBeDisabled());
     fireEvent.click(screen.getByRole('button', {name: 'Create link(s) for 1 staff'}));
     fireEvent.change(screen.getByPlaceholderText('12345'), {target: {value: '12345'}});
     fireEvent.click(screen.getByRole('button', {name: 'Create event links'}));
 
     await waitFor(() => expect(mockedCalendarService.createCalendarEvent).toHaveBeenCalledWith(expect.objectContaining({
       isAllDay: true,
-      startDateTime: expect.stringContaining('2026-07-03T00:00:00'),
-      endDateTime: expect.stringContaining('2026-07-04T00:00:00'),
+      startDateTime: expect.stringContaining('2099-07-03T00:00:00'),
+      endDateTime: expect.stringContaining('2099-07-05T00:00:00'),
     })));
   });
 
   test('restores timed defaults from selected all-day dates when all-day is unchecked', async () => {
     render(<ParentTeacherInterviewPage />);
 
-    await waitFor(() => expect(screen.getByText('Ada Lovelace')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Ms Ada Lovelace')).toBeInTheDocument());
 
-    fireEvent.click(screen.getByLabelText('Select Ada Lovelace'));
+    fireEvent.click(screen.getByLabelText('Select Ms Ada Lovelace'));
     fireEvent.click(screen.getByRole('button', {name: 'Next'}));
 
     fireEvent.click(screen.getByLabelText('All Day'));
-    fireEvent.change(screen.getByLabelText('Starting date for Ada Lovelace'), {target: {value: '2026-07-05'}});
-    fireEvent.change(screen.getByLabelText('Ending date for Ada Lovelace'), {target: {value: '2026-07-06'}});
+    fireEvent.change(screen.getByLabelText('Starting date for Ms Ada Lovelace'), {target: {value: '2026-07-05'}});
+    fireEvent.change(screen.getByLabelText('Ending date for Ms Ada Lovelace'), {target: {value: '2026-07-06'}});
     fireEvent.click(screen.getByLabelText('All Day'));
 
-    expect(screen.getByLabelText('Starting datetime for Ada Lovelace')).toHaveValue('2026-07-05T08:00');
-    expect(screen.getByLabelText('Ending datetime for Ada Lovelace')).toHaveValue('2026-07-06T16:00');
+    expect(screen.getByLabelText('Starting datetime for Ms Ada Lovelace')).toHaveValue('2026-07-05T08:00');
+    expect(screen.getByLabelText('Ending datetime for Ms Ada Lovelace')).toHaveValue('2026-07-06T16:00');
   });
 
   test('uses default all-day settings to prepopulate schedule rows', async () => {
@@ -523,14 +533,14 @@ describe('ParentTeacherInterviewPage', () => {
 
     render(<ParentTeacherInterviewPage />);
 
-    await waitFor(() => expect(screen.getByText('Ada Lovelace')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Ms Ada Lovelace')).toBeInTheDocument());
 
-    fireEvent.click(screen.getByLabelText('Select Ada Lovelace'));
+    fireEvent.click(screen.getByLabelText('Select Ms Ada Lovelace'));
     fireEvent.click(screen.getByRole('button', {name: 'Next'}));
 
     expect(screen.getByLabelText('All Day')).toBeChecked();
-    expect(screen.getByLabelText('Starting date for Ada Lovelace')).toHaveValue('2026-07-07');
-    expect(screen.getByLabelText('Ending date for Ada Lovelace')).toHaveValue('2026-07-08');
+    expect(screen.getByLabelText('Starting date for Ms Ada Lovelace')).toHaveValue('2026-07-07');
+    expect(screen.getByLabelText('Ending date for Ms Ada Lovelace')).toHaveValue('2026-07-08');
   });
 
   test('locks interview time to default settings when user changes are disabled', async () => {
@@ -549,14 +559,14 @@ describe('ParentTeacherInterviewPage', () => {
 
     render(<ParentTeacherInterviewPage />);
 
-    await waitFor(() => expect(screen.getByText('Ada Lovelace')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Ms Ada Lovelace')).toBeInTheDocument());
 
-    fireEvent.click(screen.getByLabelText('Select Ada Lovelace'));
+    fireEvent.click(screen.getByLabelText('Select Ms Ada Lovelace'));
     fireEvent.click(screen.getByRole('button', {name: 'Next'}));
 
     expect(screen.queryByLabelText('All Day')).not.toBeInTheDocument();
-    expect(screen.queryByLabelText('Starting datetime for Ada Lovelace')).not.toBeInTheDocument();
-    expect(screen.queryByLabelText('Ending datetime for Ada Lovelace')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Starting datetime for Ms Ada Lovelace')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Ending datetime for Ms Ada Lovelace')).not.toBeInTheDocument();
     expect(screen.getByText('09/07/2099 11:00 - 12:00')).toBeInTheDocument();
 
     await waitFor(() => expect(screen.getByRole('button', {name: 'Create link(s) for 1 staff'})).not.toBeDisabled());
@@ -595,7 +605,7 @@ describe('ParentTeacherInterviewPage', () => {
     expect(descriptionText).toContain('Default Interview End Time');
     expect(descriptionText).not.toContain('Set these default values in module settings before selecting staff.');
     expect(screen.queryByLabelText('Search staff')).not.toBeInTheDocument();
-    expect(screen.queryByText('Ada Lovelace')).not.toBeInTheDocument();
+    expect(screen.queryByText('Ms Ada Lovelace')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', {name: 'Next'})).not.toBeInTheDocument();
   });
 
@@ -628,10 +638,10 @@ describe('ParentTeacherInterviewPage', () => {
 
     render(<ParentTeacherInterviewPage />);
 
-    await waitFor(() => expect(screen.getByText('Ada Lovelace')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Ms Ada Lovelace')).toBeInTheDocument());
 
     fireEvent.change(screen.getByLabelText('Search staff'), {target: {value: 'Grace'}});
-    fireEvent.click(screen.getByLabelText('Select Grace Hopper'));
+    fireEvent.click(screen.getByLabelText('Select Dr Grace Hopper'));
     fireEvent.click(screen.getByRole('button', {name: 'Next'}));
     expect(screen.getByText('Schedule Parent Teacher Interview')).toBeInTheDocument();
 
@@ -642,8 +652,8 @@ describe('ParentTeacherInterviewPage', () => {
     });
 
     await waitFor(() => expect(screen.getByLabelText('Search staff')).toHaveValue(''));
-    expect(screen.getByText('Ada Lovelace')).toBeInTheDocument();
-    expect(screen.getByText('Grace Hopper')).toBeInTheDocument();
+    expect(screen.getByText('Ms Ada Lovelace')).toBeInTheDocument();
+    expect(screen.getByText('Dr Grace Hopper')).toBeInTheDocument();
     expect(screen.getByRole('button', {name: 'Next'})).toBeDisabled();
     expect(screen.queryByText('Schedule Parent Teacher Interview')).not.toBeInTheDocument();
     expect(mockedModuleService.getModule).toHaveBeenCalledTimes(2);
