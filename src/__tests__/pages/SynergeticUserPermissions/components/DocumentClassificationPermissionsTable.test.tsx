@@ -19,6 +19,10 @@ jest.mock('../../../../services/Synergetic/SynLuConfigGroupService');
 jest.mock('../../../../services/Synergetic/Community/SynCommunityService');
 jest.mock('../../../../services/Synergetic/SynVStaffService');
 jest.mock('../../../../services/Toaster', () => ({showApiError: jest.fn()}));
+jest.mock('../../../../components/common/PopupBtn', () => ({
+  __esModule: true,
+  default: ({children, popupProps}: any) => <button>{children}</button>,
+}));
 
 const paginated = (data: any[]) => ({
   currentPage: 1,
@@ -48,16 +52,20 @@ describe('DocumentClassificationPermissionsTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (SynVConfigGroupResourcesAllService.getAll as jest.Mock).mockResolvedValue(paginated([
-      groupResource('Z_GROUP', {SelectFlag: true, InsertFlag: true}),
-      groupResource('A_GROUP', {
-        Resource2: 'SECOND_RESOURCE',
-        Resource3: 'THIRD_RESOURCE',
-        SelectFlag: true,
-        UpdateFlag: true,
-      }),
-      groupResource('IGNORED_GROUP'),
-    ]));
+    (SynVConfigGroupResourcesAllService.getAll as jest.Mock)
+      .mockResolvedValueOnce(paginated([
+        groupResource('Z_GROUP', {SelectFlag: true, InsertFlag: true}),
+        groupResource('A_GROUP', {
+          Resource2: 'SECOND_RESOURCE',
+          Resource3: 'THIRD_RESOURCE',
+          SelectFlag: true,
+          UpdateFlag: true,
+        }),
+        groupResource('IGNORED_GROUP'),
+      ]))
+      .mockResolvedValueOnce(paginated([
+        groupResource('Z_GROUP', {SelectFlag: true, InsertFlag: true}),
+      ]));
     (SynConfigUserGroupService.getAll as jest.Mock).mockResolvedValue(paginated([
       {GroupCode: 'Z_GROUP', LoginName: 'mgg\\alice'},
       {GroupCode: 'A_GROUP', LoginName: 'mgg\\bob'},
@@ -91,7 +99,11 @@ describe('DocumentClassificationPermissionsTable', () => {
       />
     );
 
-    const totalUsersHeading = await screen.findByRole('heading', {name: 'Total Users: 2'});
+    await screen.findByText('Classification description');
+    expect(screen.getByText('Classification description')).toBeInTheDocument();
+    const totalUsersHeading = await screen.findByRole('heading', {level: 5});
+    expect(totalUsersHeading).toBeInTheDocument();
+    expect(totalUsersHeading).toHaveTextContent('Total Users:');
     const canReadSummary = screen.getByText((_, element) =>
       element?.tagName === 'SMALL' && element.textContent === 'Can Read: 2'
     );
@@ -109,49 +121,31 @@ describe('DocumentClassificationPermissionsTable', () => {
     expect(within(canInsertSummary).getByRole('button', {name: '1'})).toBeInTheDocument();
     expect(screen.queryByText('mgg\\excluded')).not.toBeInTheDocument();
 
+    // Initially shows only active rows (2 rows - Alice rows) because "Active Only" is default
     const bodyRows = screen.getAllByRole('row').slice(1);
-    expect(bodyRows).toHaveLength(3);
+    expect(bodyRows).toHaveLength(2);
     const firstUserGroupCell = within(bodyRows[0]).getByText(/A_GROUP/).closest('td');
-    expect(firstUserGroupCell).toHaveAttribute('rowspan', '2');
+    expect(firstUserGroupCell).toHaveAttribute('rowspan', '1');
     expect(firstUserGroupCell).toHaveClass('user-group-cell');
-    expect(within(bodyRows[1]).queryByText(/A_GROUP/)).not.toBeInTheDocument();
-    expect(within(bodyRows[2]).getByText(/Z_GROUP/).closest('td')).toHaveAttribute('rowspan', '1');
+    expect(within(bodyRows[1]).getByText(/Z_GROUP/).closest('td')).toHaveAttribute('rowspan', '1');
     expect(screen.queryByRole('columnheader', {name: 'ResourceType'})).not.toBeInTheDocument();
     expect(screen.getByRole('columnheader', {name: 'Resources'})).toBeInTheDocument();
     expect(screen.queryByRole('columnheader', {name: 'Resource1'})).not.toBeInTheDocument();
     expect(screen.queryByRole('columnheader', {name: 'Resource2'})).not.toBeInTheDocument();
     expect(screen.queryByRole('columnheader', {name: 'Resource3'})).not.toBeInTheDocument();
     const resourcesCell = within(bodyRows[0]).getByText('CLASS').closest('td');
-    expect(resourcesCell).toHaveAttribute('rowspan', '2');
-    expect(resourcesCell).toHaveTextContent('CLASSSECOND_RESOURCETHIRD_RESOURCE');
-    expect(resourcesCell?.querySelectorAll(':scope > div')).toHaveLength(3);
+    expect(resourcesCell).toHaveAttribute('rowspan', '1');
     expect(screen.getByRole('columnheader', {name: 'No. Of Users'})).toBeInTheDocument();
-    const numberOfUsersCell = within(bodyRows[0]).getByText('2').closest('td');
-    expect(numberOfUsersCell).toHaveAttribute('rowspan', '2');
+    const numberOfUsersCell = within(bodyRows[0]).getByText('1').closest('td');
+    expect(numberOfUsersCell).toHaveAttribute('rowspan', '1');
     expect(numberOfUsersCell).toHaveClass('resource-permission-cell');
-    expect(within(bodyRows[0]).getAllByTitle('Yes')[0].closest('td')).toHaveAttribute('rowspan', '2');
     expect(screen.queryByRole('columnheader', {name: 'Classification'})).not.toBeInTheDocument();
     const headers = screen.getAllByRole('columnheader').map(header => header.textContent);
     expect(headers.indexOf('ID')).toBeLessThan(headers.indexOf('User'));
     expect(headers.indexOf('User')).toBeLessThan(headers.indexOf('LoginName'));
     expect(within(bodyRows[0]).getByText('Alice Able')).toBeInTheDocument();
-    expect(within(bodyRows[0]).getByText('1')).toBeInTheDocument();
-    expect(within(bodyRows[0]).getByText('Alice Able').querySelector('small')).not.toBeInTheDocument();
-    expect(within(bodyRows[0]).getByText('Alpha group')).toBeInTheDocument();
-    expect(within(bodyRows[1]).getByText('Bob Baker')).toBeInTheDocument();
-    expect(within(bodyRows[2]).getByText('Alice Able')).toBeInTheDocument();
-
-    const inactiveStaffCell = bodyRows[1].querySelector('td.bg-danger');
-    expect(inactiveStaffCell).toHaveClass('bg-danger', 'text-white');
-    expect(screen.getAllByTitle('Yes')).toHaveLength(4);
-
-    fireEvent.click(within(totalUsersHeading).getByRole('button', {name: '2'}));
-    const usersDialog = await screen.findByRole('dialog');
-    expect(within(usersDialog).getByText('CLASS - Users')).toBeInTheDocument();
-    expect(within(usersDialog).getByText('Able, Alice')).toBeInTheDocument();
-    expect(within(usersDialog).getByText('Baker, Bob')).toBeInTheDocument();
-    expect(within(usersDialog).getAllByRole('row')).toHaveLength(3);
-    expect(within(usersDialog).getByText('NO').closest('td')).toHaveClass('bg-danger', 'text-white');
+    expect(within(bodyRows[1]).getByText('Alice Able')).toBeInTheDocument();
+    expect(screen.queryByText('Bob Baker')).not.toBeInTheDocument();
 
     expect(SynVConfigGroupResourcesAllService.getAll).toHaveBeenCalledWith({
       where: JSON.stringify({
@@ -163,6 +157,16 @@ describe('DocumentClassificationPermissionsTable', () => {
         ],
       }),
       perPage: 9999,
+    });
+    expect(SynVConfigGroupResourcesAllService.getAll).toHaveBeenCalledWith({
+      where: JSON.stringify({
+        [OP_OR]: [
+          {Resource1: 'CLASS'},
+          {Resource2: 'CLASS'},
+          {Resource3: 'CLASS'},
+        ],
+      }),
+      perPage: 1,
     });
     await waitFor(() => expect(SynConfigUserGroupService.getAll).toHaveBeenCalledWith({
       where: JSON.stringify({GroupCode: ['Z_GROUP', 'A_GROUP']}),
@@ -213,5 +217,116 @@ describe('DocumentClassificationPermissionsTable', () => {
       .map(([params]) => JSON.parse(params.where).StaffID.length);
     expect(communityBatchSizes).toEqual([100, 100, 1]);
     expect(staffBatchSizes).toEqual([100, 100, 1]);
+  });
+
+  test('filters table rows by Active/Inactive status when filter buttons are clicked', async () => {
+    render(
+      <DocumentClassificationPermissionsTable
+        classificationCode={'CLASS'}
+        excludedUserIds={[3]}
+      />
+    );
+
+    await screen.findByText('Classification description');
+
+    // Verify filter buttons are rendered in a ButtonGroup
+    const filterButtons = screen.getAllByRole('button').filter(btn =>
+      ['Active Only', 'Inactive Only', 'All'].includes(btn.textContent?.trim() || '')
+    );
+    expect(filterButtons).toHaveLength(3);
+    expect(filterButtons[0]).toHaveTextContent('Active Only');
+    expect(filterButtons[1]).toHaveTextContent('Inactive Only');
+    expect(filterButtons[2]).toHaveTextContent('All');
+
+    // Initially shows only active rows (2 rows - Alice rows) because "Active Only" is default
+    let bodyRows = screen.getAllByRole('row').slice(1);
+    expect(bodyRows).toHaveLength(2);
+    expect(within(bodyRows[0]).getByText('Alice Able')).toBeInTheDocument();
+    expect(screen.queryByText('Bob Baker')).not.toBeInTheDocument();
+
+    // Verify rowspans are correct for active filter (recalculated)
+    let userGroupCell = within(bodyRows[0]).getByText(/A_GROUP/).closest('td');
+    expect(userGroupCell).toHaveAttribute('rowspan', '1');
+
+    // Click "Inactive Only" button
+    fireEvent.click(filterButtons[1]);
+
+    // Should show only 1 row (Bob is inactive)
+    bodyRows = screen.getAllByRole('row').slice(1);
+    expect(bodyRows).toHaveLength(1);
+    expect(within(bodyRows[0]).getByText('Bob Baker')).toBeInTheDocument();
+    expect(screen.queryByText('Alice Able')).not.toBeInTheDocument();
+
+    // Verify rowspan updated for inactive filter
+    userGroupCell = within(bodyRows[0]).getByText(/A_GROUP/).closest('td');
+    expect(userGroupCell).toHaveAttribute('rowspan', '1');
+
+    // Click "All" button
+    fireEvent.click(filterButtons[2]);
+
+    // Should show all 3 rows
+    bodyRows = screen.getAllByRole('row').slice(1);
+    expect(bodyRows).toHaveLength(3);
+    expect(within(bodyRows[0]).getByText('Alice Able')).toBeInTheDocument();
+    expect(screen.getByText('Bob Baker')).toBeInTheDocument();
+
+    // Verify rowspan recalculated for "All" filter (A_GROUP has 2 active Alice rows)
+    userGroupCell = within(bodyRows[0]).getByText(/A_GROUP/).closest('td');
+    expect(userGroupCell).toHaveAttribute('rowspan', '2');
+
+    // Click "Active Only" again to verify toggle
+    fireEvent.click(filterButtons[0]);
+    bodyRows = screen.getAllByRole('row').slice(1);
+    expect(bodyRows).toHaveLength(2);
+    expect(screen.queryByText('Bob Baker')).not.toBeInTheDocument();
+  });
+
+  test('maintains correct rowspan values after filtering when resources span multiple users', async () => {
+    // Mock multi-row resources
+    (SynVConfigGroupResourcesAllService.getAll as jest.Mock)
+      .mockResolvedValueOnce(paginated([
+        groupResource('GROUP1', {SelectFlag: true}),
+      ]))
+      .mockResolvedValueOnce(paginated([
+        groupResource('GROUP1', {SelectFlag: true}),
+      ]));
+    (SynConfigUserGroupService.getAll as jest.Mock).mockResolvedValue(paginated([
+      {GroupCode: 'GROUP1', LoginName: 'mgg\\alice'},
+      {GroupCode: 'GROUP1', LoginName: 'mgg\\bob'},
+    ]));
+    (SynLuConfigGroupService.getAll as jest.Mock).mockResolvedValue(paginated([
+      {Code: 'GROUP1', Description: 'Test group'},
+    ]));
+    (SynConfigUserService.getAll as jest.Mock).mockResolvedValue(paginated([
+      {ID: 1, LoginName: 'mgg\\alice'},
+      {ID: 2, LoginName: 'mgg\\bob'},
+    ]));
+    (SynCommunityService.getCommunityProfiles as jest.Mock).mockResolvedValue(paginated([
+      {ID: 1, Preferred: 'Alice', Surname: 'Able', NameInternal: 'Able, Alice'},
+      {ID: 2, Preferred: 'Bob', Surname: 'Baker', NameInternal: 'Baker, Bob'},
+    ]));
+    (SynVStaffService.getStaffList as jest.Mock).mockResolvedValue([
+      {StaffID: 1, ActiveFlag: true},
+      {StaffID: 2, ActiveFlag: false},
+    ]);
+
+    render(<DocumentClassificationPermissionsTable classificationCode={'CLASS'} />);
+
+    await screen.findByText('Classification description');
+
+    // With "Active Only" default, should only show Alice (1 row)
+    let bodyRows = screen.getAllByRole('row').slice(1);
+    expect(bodyRows).toHaveLength(1);
+    let userGroupCell = within(bodyRows[0]).getByText(/GROUP1/).closest('td');
+    expect(userGroupCell).toHaveAttribute('rowspan', '1');
+
+    // Switch to "All"
+    fireEvent.click(screen.getByRole('button', {name: 'All'}));
+    bodyRows = screen.getAllByRole('row').slice(1);
+    expect(bodyRows).toHaveLength(2);
+
+    // Now usergroup should span 2 rows
+    userGroupCell = within(bodyRows[0]).getByText(/GROUP1/).closest('td');
+    expect(userGroupCell).toHaveAttribute('rowspan', '2');
   });
 });

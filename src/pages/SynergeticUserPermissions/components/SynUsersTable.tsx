@@ -26,7 +26,11 @@ const chunk = <T,>(values: T[], size = 100): T[][] => values.reduce<T[][]>(
   []
 );
 
-const SynUsersTable = () => {
+type iSynUsersTable = {
+  excludedUserIds?: number[];
+};
+
+const SynUsersTable = ({excludedUserIds = []}: iSynUsersTable) => {
   const [rows, setRows] = useState<iSynUserRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<UserFilter>('inactive');
@@ -92,6 +96,7 @@ const SynUsersTable = () => {
         const activeStaffIds = new Set(
           staffResults.flat().filter(staff => staff.ActiveFlag).map(staff => staff.StaffID)
         );
+        const excludedUserIdSet = new Set(excludedUserIds);
         const groupsByLogin = (membershipResult.data || []).reduce<{
           [loginName: string]: string[];
         }>((map, membership) => {
@@ -100,7 +105,9 @@ const SynUsersTable = () => {
           return map;
         }, {});
 
-        const userRows = users.map(user => {
+        const userRows = users
+          .filter(user => !excludedUserIdSet.has(user.ID))
+          .map(user => {
           const community = communitiesById[user.ID];
           const networkLogin = user.LoginName;
           return {

@@ -1,5 +1,6 @@
 import {useEffect, useMemo, useState} from 'react';
 import * as Icons from 'react-bootstrap-icons';
+import {Button, ButtonGroup} from 'react-bootstrap';
 import styled from 'styled-components';
 import PopupBtn from '../../../components/common/PopupBtn';
 import Table, {iTableColumn} from '../../../components/common/Table';
@@ -91,6 +92,8 @@ const DocumentClassificationPermissionsTable = ({
 }: iDocumentClassificationPermissionsTable) => {
   const [rows, setRows] = useState<iSynDocumentClassificationPermissionRow[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [description, setDescription] = useState<string>('');
+  const [activeFilter, setActiveFilter] = useState<'all' | 'active' | 'inactive'>('active');
 
   const columns = useMemo<iTableColumn<iSynDocumentClassificationPermissionRow>[]>(() => [
     {
@@ -364,7 +367,34 @@ const DocumentClassificationPermissionsTable = ({
     };
   }, [classificationCode, excludedUserIds]);
 
-  const users = Array.from(rows.reduce<Map<number, iClassificationUser>>((map, row) => {
+  useEffect(() => {
+    let isCancelled = false;
+    
+    SynVConfigGroupResourcesAllService.getAll({
+      where: JSON.stringify({
+        [OP_OR]: [
+          {Resource1: classificationCode},
+          {Resource2: classificationCode},
+          {Resource3: classificationCode},
+        ],
+      }),
+      perPage: 1,
+    })
+      .then(resourceResult => {
+        if (isCancelled) return;
+        const resource = resourceResult.data && resourceResult.data.length > 0 ? resourceResult.data[0] : null;
+        setDescription(resource?.Description || '');
+      })
+      .catch(err => {
+        if (!isCancelled) Toaster.showApiError(err);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [classificationCode]);
+
+  const allUsers = Array.from(rows.reduce<Map<number, iClassificationUser>>((map, row) => {
     if (!map.has(row.ID)) {
       map.set(row.ID, {
         ID: row.ID,
@@ -377,6 +407,49 @@ const DocumentClassificationPermissionsTable = ({
   }, new Map()).values()).sort((userA, userB) =>
     userA.NameInternal.localeCompare(userB.NameInternal) || userA.ID - userB.ID
   );
+
+  const filteredUsers = useMemo(() => {
+    if (activeFilter === 'all') return allUsers;
+    if (activeFilter === 'active') return allUsers.filter(user => user.ActiveFlag);
+    return allUsers.filter(user => !user.ActiveFlag);
+  }, [allUsers, activeFilter]);
+
+  const displayRows = useMemo(() => {
+    // First filter rows by active status
+    const filtered = rows.filter(row => {
+      if (activeFilter === 'active') return row.ActiveStaff;
+      if (activeFilter === 'inactive') return !row.ActiveStaff;
+      return true;
+    });
+
+    // Recalculate rowspans for the filtered rows
+    return filtered.map((row, index) => {
+      const isFirstUserGroupRow = index === 0 ||
+        filtered[index - 1].ClassificationCode !== row.ClassificationCode ||
+        filtered[index - 1].UserGroupCode !== row.UserGroupCode;
+      const isFirstResourceRow = isFirstUserGroupRow ||
+        getResourceKey(filtered[index - 1]) !== getResourceKey(row);
+
+      return {
+        ...row,
+        UserGroupRowSpan: isFirstUserGroupRow
+          ? filtered.filter(candidate =>
+            candidate.ClassificationCode === row.ClassificationCode &&
+            candidate.UserGroupCode === row.UserGroupCode
+          ).length
+          : undefined,
+        ResourceRowSpan: isFirstResourceRow
+          ? filtered.filter(candidate =>
+            candidate.ClassificationCode === row.ClassificationCode &&
+            candidate.UserGroupCode === row.UserGroupCode &&
+            getResourceKey(candidate) === getResourceKey(row)
+          ).length
+          : undefined,
+      };
+    });
+  }, [rows, activeFilter]);
+
+  const users = filteredUsers;
   const permissionUsers = (permission: keyof Pick<
     iSynDocumentClassificationPermissionRow,
     'CanRead' | 'CanUpdate' | 'CanInsert' | 'CanDelete'
@@ -413,26 +486,53 @@ const DocumentClassificationPermissionsTable = ({
 
   return (
     <Wrapper>
-      <FlexContainer className={'mt-3 with-gap lg-gap wrap align-items center'}>
-        <h5 className={'mb-0'}>
-          Total Users:{' '}
-          {usersPopup(users, `${classificationCode} - Users`)}
-        </h5>
-        <small>
-          Can Read: {usersPopup(canReadUsers, `${classificationCode} - Can Read Users`)}
-        </small>
-        <small>
-          Can Update: {usersPopup(canUpdateUsers, `${classificationCode} - Can Update Users`)}
-        </small>
-        <small>
-          Can Insert: {usersPopup(canInsertUsers, `${classificationCode} - Can Insert Users`)}
-        </small>
-        <small>
-          Can Delete: {usersPopup(canDeleteUsers, `${classificationCode} - Can Delete Users`)}
-        </small>
+      {description && (
+        <div className={'mt-3 mb-2'}>
+          <small className={'text-muted'}>{description}</small>
+        </div>
+      )}
+      <FlexContainer className={'mt-3 with-gap lg-gap wrap align-items center justify-content-between'}>
+        <div className={'d-flex gap-3 align-items-center'}>
+          <h5 className={'mb-0'}>
+            Total Users:{' '}
+            {usersPopup(users, `${classificationCode} - Users`)}
+          </h5>
+          <small>
+            Can Read: {usersPopup(canReadUsers, `${classificationCode} - Can Read Users`)}
+          </small>
+          <small>
+            Can Update: {usersPopup(canUpdateUsers, `${classificationCode} - Can Update Users`)}
+          </small>
+          <small>
+            Can Insert: {usersPopup(canInsertUsers, `${classificationCode} - Can Insert Users`)}
+          </small>
+          <small>
+            Can Delete: {usersPopup(canDeleteUsers, `${classificationCode} - Can Delete Users`)}
+          </small>
+        </div>
+        <ButtonGroup size='sm'>
+          <Button
+            variant={activeFilter === 'active' ? 'primary' : 'outline-secondary'}
+            onClick={() => setActiveFilter('active')}
+          >
+            Active Only
+          </Button>
+          <Button
+            variant={activeFilter === 'inactive' ? 'primary' : 'outline-secondary'}
+            onClick={() => setActiveFilter('inactive')}
+          >
+            Inactive Only
+          </Button>
+          <Button
+            variant={activeFilter === 'all' ? 'primary' : 'outline-secondary'}
+            onClick={() => setActiveFilter('all')}
+          >
+            All
+          </Button>
+        </ButtonGroup>
       </FlexContainer>
       <Table
-        rows={rows}
+        rows={displayRows}
         columns={columns}
         isLoading={isLoading}
         responsive

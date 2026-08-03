@@ -14,16 +14,24 @@ jest.mock(
   () => (props: any) => <div data-testid={`permissions-table-${props.classificationCode}`} />
 );
 jest.mock(
+  '../../../../pages/SynergeticUserPermissions/components/DocumentClassificationSearchPanel',
+  () => () => <div data-testid={'docman-search-panel'} />
+);
+jest.mock(
   '../../../../pages/SynergeticUserPermissions/components/SynUserGroupsTable',
   () => () => <div data-testid={'empty-user-groups-table'} />
 );
 jest.mock(
   '../../../../pages/SynergeticUserPermissions/components/SynUsersTable',
-  () => () => <div data-testid={'inactive-staff-table'} />
+  () => (props: any) => <div data-testid={'inactive-staff-table'} data-excluded-ids={props.excludedUserIds?.join(',')} />
 );
 jest.mock(
   '../../../../pages/SynergeticUserPermissions/components/SynReportsPermissionTable',
   () => (props: any) => <div data-testid={`report-permissions-${props.reportCode}`} />
+);
+jest.mock(
+  '../../../../pages/SynergeticUserPermissions/components/SynReportsSearchPanel',
+  () => () => <div data-testid={'report-search-panel'} />
 );
 
 const mockedModuleService = MggsModuleService as jest.Mocked<typeof MggsModuleService>;
@@ -68,40 +76,64 @@ describe('SynergeticUserPermissionsPanel', () => {
         reportCodes: ['REPORT_A', 'REPORT_B'],
       },
     });
-    mockedClassificationService.getAll.mockResolvedValue({
-      currentPage: 1,
-      perPage: 1000,
-      from: 1,
-      to: 2,
-      total: 2,
-      pages: 1,
-      data: [
-        classification('REPORTS', 'Student Reports'),
-        classification('MEDICAL', 'Medical Documents'),
-      ],
-    });
+    
+    // First call returns all classifications for the dropdown
+    // Second call returns only configured classifications for individual tabs
+    mockedClassificationService.getAll
+      .mockResolvedValueOnce({
+        currentPage: 1,
+        perPage: 1000,
+        from: 1,
+        to: 6,
+        total: 6,
+        pages: 1,
+        data: [
+          classification('ADMISSIONCONF', 'Admission Confidential'),
+          classification('CHILDSAFE', 'Child Safety'),
+          classification('MANRPT', 'Mandatory Reports'),
+          classification('REPORTS', 'Student Reports'),
+          classification('MEDICAL', 'Medical Information'),
+          classification('LEGAL', 'Legal Documentation'),
+        ],
+      })
+      .mockResolvedValueOnce({
+        currentPage: 1,
+        perPage: 1000,
+        from: 1,
+        to: 2,
+        total: 2,
+        pages: 1,
+        data: [
+          classification('REPORTS', 'Student Reports'),
+          classification('MEDICAL', 'Medical Documents'),
+        ],
+      });
 
     render(<SynergeticUserPermissionsPanel />);
 
     await waitFor(() => {
       expect(screen.getByRole('tab', {name: 'DocMan - Documents'})).toBeInTheDocument();
-      expect(screen.getByRole('tab', {name: 'Reports'})).toBeInTheDocument();
+      expect(screen.getByRole('tab', {name: 'Crystal Reports'})).toBeInTheDocument();
       expect(screen.getByRole('tab', {name: 'User Groups'})).toBeInTheDocument();
       expect(screen.getByRole('tab', {name: 'Users'})).toBeInTheDocument();
+      expect(screen.getByRole('tab', {name: 'Search'})).toBeInTheDocument();
       expect(screen.getByRole('tab', {name: 'MEDICAL - Medical Documents'})).toBeInTheDocument();
       expect(screen.getByRole('tab', {name: 'REPORTS - Student Reports'})).toBeInTheDocument();
-      expect(screen.getByTestId('permissions-table-MEDICAL')).toBeInTheDocument();
-      expect(screen.getByRole('alert')).toHaveTextContent(
+      expect(screen.getByTestId('docman-search-panel')).toBeInTheDocument();
+      const alerts = screen.getAllByRole('alert');
+      expect(alerts[0]).toHaveTextContent(
         'This view supports the review of user permissions for DocMan access'
       );
-      expect(screen.getByRole('alert')).toHaveTextContent('Admin → Settings');
+      expect(alerts[0]).toHaveTextContent('exclude specific users');
+      expect(alerts[0]).toHaveTextContent('Admin → Settings');
       expect(screen.getByRole('button', {name: 'Close alert'})).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole('tab', {name: 'Reports'}));
+    fireEvent.click(screen.getByRole('tab', {name: 'Crystal Reports'}));
+    expect(screen.getByRole('tab', {name: 'Search'})).toBeInTheDocument();
     expect(screen.getByRole('tab', {name: 'REPORT_A'})).toBeInTheDocument();
     expect(screen.getByRole('tab', {name: 'REPORT_B'})).toBeInTheDocument();
-    expect(screen.getByTestId('report-permissions-REPORT_A')).toBeInTheDocument();
+    expect(screen.getByTestId('report-search-panel')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('tab', {name: 'User Groups'}));
 
@@ -118,10 +150,13 @@ describe('SynergeticUserPermissionsPanel', () => {
 
     fireEvent.click(screen.getByRole('tab', {name: 'Users'}));
     const usersMessage = screen.getByText(
-      /This view lists all Synergetic users, their active staff status, and assigned user groups\./
+      /This view lists all Synergetic users/
     );
     expect(usersMessage.closest('[role="alert"]')).toBeInTheDocument();
-    expect(screen.getByTestId('inactive-staff-table')).toBeInTheDocument();
+    expect(usersMessage.closest('[role="alert"]')).toHaveTextContent('excluding those configured in');
+    expect(usersMessage.closest('[role="alert"]')).toHaveTextContent('Admin → Settings');
+    const usersTable = screen.getByTestId('inactive-staff-table');
+    expect(usersTable).toBeInTheDocument();
   });
 
   test('shows an empty state when no classifications are configured', async () => {
@@ -136,10 +171,83 @@ describe('SynergeticUserPermissionsPanel', () => {
       UpdatedById: 1,
       settings: {},
     });
+    
+    // Mock the single call to getAll (no configured classifications)
+    mockedClassificationService.getAll.mockResolvedValue({
+      currentPage: 1,
+      perPage: 1000,
+      from: 1,
+      to: 0,
+      total: 0,
+      pages: 0,
+      data: [],
+    });
 
     render(<SynergeticUserPermissionsPanel />);
 
     expect(await screen.findByText('No document classifications have been configured.')).toBeInTheDocument();
-    expect(mockedClassificationService.getAll).not.toHaveBeenCalled();
+  });
+
+  test('defaults to first configured classification tab in DocMan and first report code in Crystal Reports', async () => {
+    mockedModuleService.getModule.mockResolvedValue({
+      ModuleID: 25,
+      Name: 'Synergetic User Permissions',
+      Description: '',
+      Active: true,
+      CreatedAt: new Date(),
+      CreatedById: 1,
+      UpdatedAt: new Date(),
+      UpdatedById: 1,
+      settings: {
+        documentClassificationCodes: ['MEDICAL', 'REPORTS'],
+        reportCodes: ['REPORT_A', 'REPORT_B'],
+      },
+    });
+    
+    // First call returns all classifications for the dropdown
+    // Second call returns only configured classifications for individual tabs
+    mockedClassificationService.getAll
+      .mockResolvedValueOnce({
+        currentPage: 1,
+        perPage: 1000,
+        from: 1,
+        to: 6,
+        total: 6,
+        pages: 1,
+        data: [
+          classification('ADMISSIONCONF', 'Admission Confidential'),
+          classification('CHILDSAFE', 'Child Safety'),
+          classification('MANRPT', 'Mandatory Reports'),
+          classification('REPORTS', 'Student Reports'),
+          classification('MEDICAL', 'Medical Information'),
+          classification('LEGAL', 'Legal Documentation'),
+        ],
+      })
+      .mockResolvedValueOnce({
+        currentPage: 1,
+        perPage: 1000,
+        from: 1,
+        to: 2,
+        total: 2,
+        pages: 1,
+        data: [
+          classification('MEDICAL', 'Medical Documents'),
+          classification('REPORTS', 'Student Reports'),
+        ],
+      });
+
+    render(<SynergeticUserPermissionsPanel />);
+
+    // Verify first DocMan classification (MEDICAL) is shown by default
+    await waitFor(() => {
+      expect(screen.getByTestId('permissions-table-MEDICAL')).toBeInTheDocument();
+    });
+
+    // Click to Crystal Reports tab and verify first report code is shown by default
+    fireEvent.click(screen.getByRole('tab', {name: 'Crystal Reports'}));
+    
+    await waitFor(() => {
+      expect(screen.getByTestId('report-permissions-REPORT_A')).toBeInTheDocument();
+    });
   });
 });

@@ -3,6 +3,7 @@ type iSynReportPermissionRow = {
   UserGroupDescription: string;
   Module: string;
   ModuleDescription: string;
+  ResourceType: string;
   Resource1: string;
   Resource2: string;
   Resource3: string;

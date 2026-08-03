@@ -9,16 +9,19 @@ import iSynLuDocumentClassification
   from '../../../types/Synergetic/Lookup/iSynLuDocumentClassification';
 import {MGGS_MODULE_ID_SYNERGETIC_USER_PERMISSIONS} from '../../../types/modules/iModuleUser';
 import DocumentClassificationPermissionsTable from './DocumentClassificationPermissionsTable';
+import DocumentClassificationSearchPanel from './DocumentClassificationSearchPanel';
 import SynUsersTable from './SynUsersTable';
 import SynReportsPermissionTable from './SynReportsPermissionTable';
+import SynReportsSearchPanel from './SynReportsSearchPanel';
 import SynUserGroupsTable from './SynUserGroupsTable';
 
 const SynergeticUserPermissionsPanel = () => {
   const [classifications, setClassifications] = useState<iSynLuDocumentClassification[]>([]);
-  const [selectedTab, setSelectedTab] = useState<string>('');
+  const [allClassifications, setAllClassifications] = useState<iSynLuDocumentClassification[]>([]);
+  const [selectedTab, setSelectedTab] = useState<string>('Search');
   const [excludedUserIds, setExcludedUserIds] = useState<number[]>([]);
   const [reportCodes, setReportCodes] = useState<string[]>([]);
-  const [selectedReportTab, setSelectedReportTab] = useState<string>('');
+  const [selectedReportTab, setSelectedReportTab] = useState<string>('Search');
   const [isLoading, setIsLoading] = useState(true);
   const [showDocManAlert, setShowDocManAlert] = useState(true);
   const [showEmptyGroupsAlert, setShowEmptyGroupsAlert] = useState(true);
@@ -33,30 +36,58 @@ const SynergeticUserPermissionsPanel = () => {
         const codes: string[] = module.settings?.documentClassificationCodes || [];
         const configuredReportCodes: string[] = module.settings?.reportCodes || [];
         setReportCodes(configuredReportCodes);
-        setSelectedReportTab(configuredReportCodes[0] || '');
+        setSelectedReportTab(configuredReportCodes[0] || 'Search');
+        setSelectedTab(codes[0] || 'Search');
         setExcludedUserIds(module.settings?.excludedUserIds || []);
-        if (codes.length <= 0) return [];
 
-        return SynLuDocumentClassificationService.getAll({
-          where: JSON.stringify({Code: codes}),
-          perPage: 999999,
-        }).then(resp => {
-          const classificationMap = (resp.data || []).reduce<{
+        // Fetch all classifications for the dropdown
+        const configuredPromise = codes.length > 0 
+          ? SynLuDocumentClassificationService.getAll({
+              where: JSON.stringify({Code: codes}),
+              perPage: 999999,
+            })
+          : Promise.resolve({
+              currentPage: 1,
+              perPage: 999999,
+              from: 0,
+              to: 0,
+              total: 0,
+              pages: 0,
+              data: [] as iSynLuDocumentClassification[],
+            });
+
+        return Promise.all([
+          SynLuDocumentClassificationService.getAll({
+            perPage: 999999,
+          }),
+          configuredPromise,
+        ]).then(([allResp, configuredResp]) => {
+          const configurationMap = (configuredResp.data || []).reduce<{
             [key: string]: iSynLuDocumentClassification;
-          }>((map, classification) => ({
+          }>((map: {[key: string]: iSynLuDocumentClassification}, classification: iSynLuDocumentClassification) => ({
             ...map,
             [classification.Code]: classification,
           }), {});
 
-          return codes
-            .map(code => classificationMap[code])
-            .filter((classification): classification is iSynLuDocumentClassification => !!classification);
+          return {
+            allClassifications: allResp.data || [],
+            configuredCodes: codes,
+            configuredClassifications: configurationMap,
+          };
         });
       })
-      .then(configuredClassifications => {
+      .then(result => {
         if (isCancelled) return;
+        
+        // Set all classifications for dropdown
+        setAllClassifications(result.allClassifications);
+        
+        // Set only configured classifications for individual tabs
+        const configuredClassifications = result.configuredCodes
+          .map(code => result.configuredClassifications[code])
+          .filter((classification): classification is iSynLuDocumentClassification => !!classification);
+        
         setClassifications(configuredClassifications);
-        setSelectedTab(configuredClassifications[0]?.Code || '');
       })
       .catch(err => {
         if (isCancelled) return;
@@ -89,15 +120,16 @@ const SynergeticUserPermissionsPanel = () => {
           >
             This view supports the review of user permissions for DocMan access across the
             document classifications listed below. Administrators can add or remove the
-            classifications shown here through <strong>Admin → Settings</strong> for this module.
+            classifications shown here, and exclude specific users, through <strong>Admin → Settings</strong> for this module.
           </Alert>
           {classifications.length <= 0 ? (
             <p className={'mt-3 mb-0'}>No document classifications have been configured.</p>
           ) : <Tabs
             activeKey={selectedTab}
-            onSelect={key => setSelectedTab(key || classifications[0].Code)}
+            onSelect={key => setSelectedTab(key || 'Search')}
             variant={'pills'}
             className={'mt-3'}
+            style={{marginLeft: 0}}
             unmountOnExit
           >
             {classifications.map(classification => (
@@ -112,9 +144,15 @@ const SynergeticUserPermissionsPanel = () => {
                 />
               </Tab>
             ))}
+            <Tab eventKey={'Search'} title={'Search'}>
+              <DocumentClassificationSearchPanel
+                classifications={allClassifications}
+                excludedUserIds={excludedUserIds}
+              />
+            </Tab>
           </Tabs>}
         </Tab>
-        <Tab eventKey={'reports'} title={'Reports'}>
+        <Tab eventKey={'reports'} title={'Crystal Reports'}>
           <Alert
             variant={'info'}
             className={'mt-3 mb-0'}
@@ -123,16 +161,17 @@ const SynergeticUserPermissionsPanel = () => {
             dismissible
           >
             This view supports the review of user access to the Synergetic reports configured
-            below. Administrators can add or remove report codes through <strong>Admin → Settings</strong>.
+            below. Administrators can add or remove report codes, and exclude specific users, through <strong>Admin → Settings</strong>.
           </Alert>
           {reportCodes.length <= 0 ? (
             <p className={'mt-3 mb-0'}>No reports have been configured.</p>
           ) : (
             <Tabs
               activeKey={selectedReportTab}
-              onSelect={key => setSelectedReportTab(key || reportCodes[0])}
+              onSelect={key => setSelectedReportTab(key || 'Search')}
               variant={'pills'}
               className={'mt-3'}
+              style={{marginLeft: 0}}
               unmountOnExit
             >
               {reportCodes.map(reportCode => (
@@ -143,6 +182,9 @@ const SynergeticUserPermissionsPanel = () => {
                   />
                 </Tab>
               ))}
+              <Tab eventKey={'Search'} title={'Search'}>
+                <SynReportsSearchPanel excludedUserIds={excludedUserIds} />
+              </Tab>
             </Tabs>
           )}
         </Tab>
@@ -167,10 +209,10 @@ const SynergeticUserPermissionsPanel = () => {
             onClose={() => setShowUsersAlert(false)}
             dismissible
           >
-            This view lists all Synergetic users, their active staff status, and assigned user
+            This view lists all Synergetic users (excluding those configured in <strong>Admin → Settings</strong>), their active staff status, and assigned user
             groups. Review these accounts regularly to confirm that access remains appropriate.
           </Alert>
-          <SynUsersTable />
+          <SynUsersTable excludedUserIds={excludedUserIds} />
         </Tab>
       </Tabs>
     );
