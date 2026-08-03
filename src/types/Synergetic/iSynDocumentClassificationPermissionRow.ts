@@ -6,6 +6,7 @@ type iSynDocumentClassificationPermissionRow = {
   LoginName: string;
   Preferred: string;
   Surname: string;
+  NameInternal: string;
   ID: number;
   ActiveStaff: boolean;
   ResourceType: string;

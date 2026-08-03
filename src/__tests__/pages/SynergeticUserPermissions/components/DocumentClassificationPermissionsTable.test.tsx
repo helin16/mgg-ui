@@ -1,5 +1,5 @@
 import React from 'react';
-import {render, screen, waitFor, within} from '@testing-library/react';
+import {fireEvent, render, screen, waitFor, within} from '@testing-library/react';
 import DocumentClassificationPermissionsTable
   from '../../../../pages/SynergeticUserPermissions/components/DocumentClassificationPermissionsTable';
 import SynVConfigGroupResourcesAllService
@@ -74,8 +74,8 @@ describe('DocumentClassificationPermissionsTable', () => {
       {ID: 3, LoginName: 'mgg\\excluded'},
     ]));
     (SynCommunityService.getCommunityProfiles as jest.Mock).mockResolvedValue(paginated([
-      {ID: 1, Preferred: 'Alice', Given1: 'Alicia', Surname: 'Able'},
-      {ID: 2, Preferred: 'Bob', Given1: 'Robert', Surname: 'Baker'},
+      {ID: 1, Preferred: 'Alice', Given1: 'Alicia', Surname: 'Able', NameInternal: 'Able, Alice'},
+      {ID: 2, Preferred: 'Bob', Given1: 'Robert', Surname: 'Baker', NameInternal: 'Baker, Bob'},
     ]));
     (SynVStaffService.getStaffList as jest.Mock).mockResolvedValue([
       {StaffID: 1, ActiveFlag: true},
@@ -91,7 +91,22 @@ describe('DocumentClassificationPermissionsTable', () => {
       />
     );
 
-    expect(await screen.findByText('Total Users: 2')).toBeInTheDocument();
+    const totalUsersHeading = await screen.findByRole('heading', {name: 'Total Users: 2'});
+    const canReadSummary = screen.getByText((_, element) =>
+      element?.tagName === 'SMALL' && element.textContent === 'Can Read: 2'
+    );
+    const canUpdateSummary = screen.getByText((_, element) =>
+      element?.tagName === 'SMALL' && element.textContent === 'Can Update: 2'
+    );
+    const canInsertSummary = screen.getByText((_, element) =>
+      element?.tagName === 'SMALL' && element.textContent === 'Can Insert: 1'
+    );
+    expect(screen.getByText((_, element) =>
+      element?.tagName === 'SMALL' && element.textContent === 'Can Delete: 0'
+    )).toBeInTheDocument();
+    expect(within(canReadSummary).getByRole('button', {name: '2'})).toBeInTheDocument();
+    expect(within(canUpdateSummary).getByRole('button', {name: '2'})).toBeInTheDocument();
+    expect(within(canInsertSummary).getByRole('button', {name: '1'})).toBeInTheDocument();
     expect(screen.queryByText('mgg\\excluded')).not.toBeInTheDocument();
 
     const bodyRows = screen.getAllByRole('row').slice(1);
@@ -125,6 +140,14 @@ describe('DocumentClassificationPermissionsTable', () => {
     const inactiveStaffCell = bodyRows[1].querySelector('td.bg-danger');
     expect(inactiveStaffCell).toHaveClass('bg-danger', 'text-white');
     expect(screen.getAllByTitle('Yes')).toHaveLength(4);
+
+    fireEvent.click(within(totalUsersHeading).getByRole('button', {name: '2'}));
+    const usersDialog = await screen.findByRole('dialog');
+    expect(within(usersDialog).getByText('CLASS - Users')).toBeInTheDocument();
+    expect(within(usersDialog).getByText('Able, Alice')).toBeInTheDocument();
+    expect(within(usersDialog).getByText('Baker, Bob')).toBeInTheDocument();
+    expect(within(usersDialog).getAllByRole('row')).toHaveLength(3);
+    expect(within(usersDialog).getByText('NO').closest('td')).toHaveClass('bg-danger', 'text-white');
 
     expect(SynVConfigGroupResourcesAllService.getAll).toHaveBeenCalledWith({
       where: JSON.stringify({
@@ -174,7 +197,7 @@ describe('DocumentClassificationPermissionsTable', () => {
 
     render(<DocumentClassificationPermissionsTable classificationCode={'MEDICAL'} />);
 
-    expect(await screen.findByText('Total Users: 201')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', {name: 'Total Users: 201'})).toBeInTheDocument();
     expect(SynConfigUserService.getAll).toHaveBeenCalledTimes(1);
     expect(SynConfigUserService.getAll).toHaveBeenCalledWith({perPage: 9999});
     expect(SynCommunityService.getCommunityProfiles).toHaveBeenCalledTimes(3);

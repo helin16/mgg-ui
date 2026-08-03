@@ -1,6 +1,7 @@
 import {useEffect, useMemo, useState} from 'react';
 import * as Icons from 'react-bootstrap-icons';
 import styled from 'styled-components';
+import PopupBtn from '../../../components/common/PopupBtn';
 import Table, {iTableColumn} from '../../../components/common/Table';
 import SynCommunityService from '../../../services/Synergetic/Community/SynCommunityService';
 import SynConfigUserService from '../../../services/Synergetic/SynConfigUserService';
@@ -14,10 +15,18 @@ import iSynDocumentClassificationPermissionRow
   from '../../../types/Synergetic/iSynDocumentClassificationPermissionRow';
 import {OP_OR} from '../../../helper/ServiceHelper';
 import SynConfigResourceTypes from '../../../types/Synergetic/SynConfigResourceTypes';
+import {FlexContainer} from '../../../styles';
 
 type iDocumentClassificationPermissionsTable = {
   classificationCode: string;
   excludedUserIds?: number[];
+};
+
+type iClassificationUser = {
+  ID: number;
+  NameInternal: string;
+  NetworkLogin: string;
+  ActiveFlag: boolean;
 };
 
 const EMPTY_EXCLUDED_USER_IDS: number[] = [];
@@ -48,6 +57,21 @@ const getResourceKey = (row: iSynDocumentClassificationPermissionRow) => [
   row.CanInsert,
   row.CanDelete,
 ].join('|');
+
+const classificationUserColumns: iTableColumn<iClassificationUser>[] = [
+  {key: 'ID', header: 'ID', cell: (_, user) => `${user.ID}`},
+  {key: 'NameInternal', header: 'Name', cell: (_, user) => user.NameInternal},
+  {key: 'NetworkLogin', header: 'NetworkLogin', cell: (_, user) => user.NetworkLogin},
+  {
+    key: 'ActiveFlag',
+    header: 'ActiveFlag',
+    cell: (column, user) => (
+      <td key={column.key} className={user.ActiveFlag ? '' : 'bg-danger text-white'}>
+        {user.ActiveFlag ? 'YES' : 'NO'}
+      </td>
+    ),
+  },
+];
 
 const Wrapper = styled.div`
   .table-striped > tbody > tr > td.user-group-cell,
@@ -257,6 +281,7 @@ const DocumentClassificationPermissionsTable = ({
             LoginName: membership.LoginName,
             Preferred: community?.Preferred || community?.Given1 || '',
             Surname: community?.Surname || '',
+            NameInternal: community?.NameInternal || '',
             ID: user.ID,
             ActiveStaff: activeStaffIds.has(user.ID),
             ResourceType: resource.ResourceType,
@@ -339,11 +364,73 @@ const DocumentClassificationPermissionsTable = ({
     };
   }, [classificationCode, excludedUserIds]);
 
-  const totalUsers = new Set(rows.map(row => row.ID)).size;
+  const users = Array.from(rows.reduce<Map<number, iClassificationUser>>((map, row) => {
+    if (!map.has(row.ID)) {
+      map.set(row.ID, {
+        ID: row.ID,
+        NameInternal: row.NameInternal || [row.Surname, row.Preferred].filter(Boolean).join(', '),
+        NetworkLogin: row.LoginName,
+        ActiveFlag: row.ActiveStaff,
+      });
+    }
+    return map;
+  }, new Map()).values()).sort((userA, userB) =>
+    userA.NameInternal.localeCompare(userB.NameInternal) || userA.ID - userB.ID
+  );
+  const permissionUsers = (permission: keyof Pick<
+    iSynDocumentClassificationPermissionRow,
+    'CanRead' | 'CanUpdate' | 'CanInsert' | 'CanDelete'
+  >) => {
+    const permittedUserIds = new Set(rows.filter(row => row[permission]).map(row => row.ID));
+    return users.filter(user => permittedUserIds.has(user.ID));
+  };
+  const usersPopup = (popupUsers: iClassificationUser[], title: string) => popupUsers.length === 0
+    ? 0
+    : (
+      <PopupBtn
+        variant={'link'}
+        className={'p-0 align-baseline'}
+        popupProps={{
+          title,
+          children: (
+            <Table
+              columns={classificationUserColumns}
+              rows={popupUsers}
+              striped
+              hover
+              responsive
+            />
+          ),
+        }}
+      >
+        {popupUsers.length}
+      </PopupBtn>
+    );
+  const canReadUsers = permissionUsers('CanRead');
+  const canUpdateUsers = permissionUsers('CanUpdate');
+  const canInsertUsers = permissionUsers('CanInsert');
+  const canDeleteUsers = permissionUsers('CanDelete');
 
   return (
     <Wrapper>
-      <h5 className={'mt-3'}>Total Users: {totalUsers}</h5>
+      <FlexContainer className={'mt-3 with-gap lg-gap wrap align-items center'}>
+        <h5 className={'mb-0'}>
+          Total Users:{' '}
+          {usersPopup(users, `${classificationCode} - Users`)}
+        </h5>
+        <small>
+          Can Read: {usersPopup(canReadUsers, `${classificationCode} - Can Read Users`)}
+        </small>
+        <small>
+          Can Update: {usersPopup(canUpdateUsers, `${classificationCode} - Can Update Users`)}
+        </small>
+        <small>
+          Can Insert: {usersPopup(canInsertUsers, `${classificationCode} - Can Insert Users`)}
+        </small>
+        <small>
+          Can Delete: {usersPopup(canDeleteUsers, `${classificationCode} - Can Delete Users`)}
+        </small>
+      </FlexContainer>
       <Table
         rows={rows}
         columns={columns}
