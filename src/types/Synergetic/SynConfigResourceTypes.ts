@@ -1,8 +1,8 @@
 enum SynConfigResourceTypes {
   DocumentClassification = 'DC',
-  StandaloneReport = 'RS',
+  Reports_Site = 'RS', // Reports Site
+  Reports_CDA = 'RZ', // Reports CDA
   AssessmentReport = 'RY',
-  Report = 'RZ',
 }
 
 export default SynConfigResourceTypes;

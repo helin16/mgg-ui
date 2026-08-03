@@ -82,4 +82,14 @@ describe('SynUsersTable', () => {
 
     expect(await screen.findByText('No Synergetic users were found.')).toBeInTheDocument();
   });
-});
+
+  test('excludes users by ID when excludedUserIds prop is provided', async () => {
+    render(<SynUsersTable excludedUserIds={[1]} />);
+
+    await waitFor(() => expect(screen.getByText('Zulu, Zoe')).toBeInTheDocument());
+    
+    // Alpha should be excluded because ID=1 is in excludedUserIds
+    expect(screen.queryByText('Alpha, Anne')).not.toBeInTheDocument();
+    // Zulu should be shown because ID=2 is not in excludedUserIds
+    expect(screen.getByText('Zulu, Zoe')).toBeInTheDocument();
+  });

@@ -1,7 +1,10 @@
 import {useEffect, useMemo, useState} from 'react';
+import {Button, ButtonGroup} from 'react-bootstrap';
 import styled from 'styled-components';
+import PopupBtn from '../../../components/common/PopupBtn';
 import Table, {iTableColumn} from '../../../components/common/Table';
 import {OP_OR} from '../../../helper/ServiceHelper';
+import {FlexContainer} from '../../../styles';
 import SynCommunityService from '../../../services/Synergetic/Community/SynCommunityService';
 import SynConfigUserGroupService from '../../../services/Synergetic/SynConfigUserGroupService';
 import SynConfigUserService from '../../../services/Synergetic/SynConfigUserService';
@@ -18,11 +21,17 @@ type iSynReportsPermissionTable = {
   excludedUserIds?: number[];
 };
 
+type iReportUser = {
+  ID: number;
+  User: string;
+  LoginName: string;
+  ActiveStaff: boolean;
+};
+
 const EMPTY_EXCLUDED_USER_IDS: number[] = [];
 const REPORT_RESOURCE_TYPES = [
-  SynConfigResourceTypes.StandaloneReport,
-  SynConfigResourceTypes.AssessmentReport,
-  SynConfigResourceTypes.Report,
+  SynConfigResourceTypes.Reports_Site,
+  SynConfigResourceTypes.Reports_CDA,
 ];
 
 const chunk = <T,>(values: T[], size = 100): T[][] => values.reduce<T[][]>(
@@ -36,8 +45,8 @@ const chunk = <T,>(values: T[], size = 100): T[][] => values.reduce<T[][]>(
 
 const resourceKey = (row: Pick<
   iSynReportPermissionRow,
-  'Module' | 'Resource1' | 'Resource2' | 'Resource3'
->) => [row.Module, row.Resource1, row.Resource2, row.Resource3].join('|');
+  'Module' | 'ResourceType' | 'Resource1' | 'Resource2' | 'Resource3'
+>) => [row.Module, row.ResourceType, row.Resource1, row.Resource2, row.Resource3].join('|');
 
 const Wrapper = styled.div`
   .table-striped > tbody > tr > td.grouped-cell {
@@ -55,6 +64,8 @@ const SynReportsPermissionTable = ({
 }: iSynReportsPermissionTable) => {
   const [rows, setRows] = useState<iSynReportPermissionRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [description, setDescription] = useState<string>('');
+  const [activeFilter, setActiveFilter] = useState<'all' | 'active' | 'inactive'>('active');
 
   const columns = useMemo<iTableColumn<iSynReportPermissionRow>[]>(() => [
     {
@@ -74,6 +85,17 @@ const SynReportsPermissionTable = ({
         <td key={column.key} rowSpan={row.ResourceRowSpan} className={'grouped-cell'}>
           {row.Module}
           <div><small>{row.ModuleDescription}</small></div>
+        </td>
+      ),
+    },
+    {
+      key: 'ResourceType',
+      header: 'Type',
+      cell: (column, row) => !row.ResourceRowSpan ? null : (
+        <td key={column.key} rowSpan={row.ResourceRowSpan} className={'grouped-cell'}>
+          {row.ResourceType === SynConfigResourceTypes.Reports_Site ? 'Reports Site' :
+           row.ResourceType === SynConfigResourceTypes.Reports_CDA ? 'Reports CDA' :
+           row.ResourceType}
         </td>
       ),
     },
@@ -194,6 +216,7 @@ const SynReportsPermissionTable = ({
             UserGroupDescription: groupsByCode[membership.GroupCode] || '',
             Module: resource.Module,
             ModuleDescription: resource.ModuleDescription,
+            ResourceType: resource.ResourceType,
             Resource1: resource.Resource1,
             Resource2: resource.Resource2,
             Resource3: resource.Resource3,
@@ -244,14 +267,155 @@ const SynReportsPermissionTable = ({
     };
   }, [excludedUserIds, reportCode]);
 
-  const totalUsers = new Set(rows.map(row => row.ID)).size;
+  useEffect(() => {
+    let isCancelled = false;
+    
+    SynVConfigGroupResourcesAllService.getAll({
+      where: JSON.stringify({
+        [OP_OR]: [
+          {Resource1: reportCode},
+          {Resource2: reportCode},
+          {Resource3: reportCode},
+        ],
+      }),
+      perPage: 1,
+    })
+      .then(resourceResult => {
+        if (isCancelled) return;
+        const resource = resourceResult.data && resourceResult.data.length > 0 ? resourceResult.data[0] : null;
+        setDescription(resource?.Description || '');
+      })
+      .catch(err => {
+        if (!isCancelled) Toaster.showApiError(err);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [reportCode]);
+
+  const allUsers = Array.from(rows.reduce<Map<number, iReportUser>>((map, row) => {
+    if (!map.has(row.ID)) {
+      map.set(row.ID, {
+        ID: row.ID,
+        User: row.User,
+        LoginName: row.LoginName,
+        ActiveStaff: row.ActiveStaff,
+      });
+    }
+    return map;
+  }, new Map()).values()).sort((userA, userB) =>
+    userA.User.localeCompare(userB.User) || userA.ID - userB.ID
+  );
+
+  const filteredUsers = useMemo(() => {
+    if (activeFilter === 'all') return allUsers;
+    if (activeFilter === 'active') return allUsers.filter(user => user.ActiveStaff);
+    return allUsers.filter(user => !user.ActiveStaff);
+  }, [allUsers, activeFilter]);
+
+  const displayRows = useMemo(() => {
+    // First filter rows by active status
+    const filtered = rows.filter(row => {
+      if (activeFilter === 'active') return row.ActiveStaff;
+      if (activeFilter === 'inactive') return !row.ActiveStaff;
+      return true;
+    });
+
+    // Recalculate rowspans for the filtered rows
+    return filtered.map((row, index) => {
+      const firstGroupRow = index === 0 ||
+        filtered[index - 1].UserGroupCode !== row.UserGroupCode;
+      const firstResourceRow = firstGroupRow ||
+        resourceKey(filtered[index - 1]) !== resourceKey(row);
+      return {
+        ...row,
+        UserGroupRowSpan: firstGroupRow
+          ? filtered.filter(candidate => candidate.UserGroupCode === row.UserGroupCode).length
+          : undefined,
+        ResourceRowSpan: firstResourceRow
+          ? filtered.filter(candidate =>
+            candidate.UserGroupCode === row.UserGroupCode &&
+            resourceKey(candidate) === resourceKey(row)
+          ).length
+          : undefined,
+      };
+    });
+  }, [rows, activeFilter]);
+
+  const users = filteredUsers;
+
+  const userColumns = useMemo<iTableColumn<iReportUser>[]>(() => [
+    {key: 'ID', header: 'ID', cell: (_, user) => `${user.ID}`},
+    {key: 'User', header: 'User', cell: (_, user) => user.User},
+    {key: 'LoginName', header: 'LoginName', cell: (_, user) => user.LoginName},
+    {
+      key: 'ActiveStaff',
+      header: 'ActiveStaff',
+      cell: (column, user) => (
+        <td key={column.key} className={user.ActiveStaff ? '' : 'bg-danger text-white'}>
+          {user.ActiveStaff ? 'YES' : ''}
+        </td>
+      ),
+    },
+  ], []);
+
+  const usersPopup = (popupUsers: iReportUser[], title: string) => popupUsers.length === 0
+    ? 0
+    : (
+      <PopupBtn
+        variant={'link'}
+        className={'p-0 align-baseline'}
+        popupProps={{
+          title,
+          children: (
+            <Table
+              columns={userColumns}
+              rows={popupUsers}
+              striped
+              hover
+              responsive
+            />
+          ),
+        }}
+      >
+        {popupUsers.length}
+      </PopupBtn>
+    );
 
   return (
     <Wrapper>
-      <h5 className={'mt-3'}>Total User: {totalUsers}</h5>
+      {description && (
+        <div className={'mt-3 mb-2'}>
+          <small className={'text-muted'}>{description}</small>
+        </div>
+      )}
+      <FlexContainer className={'mt-3 with-gap lg-gap wrap align-items center justify-content-between'}>
+        <h5 className={'mb-0'}>Total User: {usersPopup(users, `${reportCode} - Users`)}</h5>
+        <ButtonGroup size='sm'>
+          <Button
+            variant={activeFilter === 'active' ? 'primary' : 'outline-secondary'}
+            onClick={() => setActiveFilter('active')}
+          >
+            Active Only
+          </Button>
+          <Button
+            variant={activeFilter === 'inactive' ? 'primary' : 'outline-secondary'}
+            onClick={() => setActiveFilter('inactive')}
+          >
+            Inactive Only
+          </Button>
+          <Button
+            variant={activeFilter === 'all' ? 'primary' : 'outline-secondary'}
+            onClick={() => setActiveFilter('all')}
+          >
+            All
+          </Button>
+        </ButtonGroup>
+      </FlexContainer>
       <Table
         columns={columns}
-        rows={rows}
+        rows={displayRows}
         isLoading={isLoading}
         responsive
         striped
