@@ -80,29 +80,13 @@ const DocumentClassificationPermissionsTable = ({
       ),
     },
     {
-      key: 'Resource1',
-      header: 'Resource1',
+      key: 'Resources',
+      header: 'Resources',
       cell: (column, row) => !row.ResourceRowSpan ? null : (
         <td key={column.key} rowSpan={row.ResourceRowSpan} className={'resource-permission-cell'}>
-          {row.Resource1}
-        </td>
-      ),
-    },
-    {
-      key: 'Resource2',
-      header: 'Resource2',
-      cell: (column, row) => !row.ResourceRowSpan ? null : (
-        <td key={column.key} rowSpan={row.ResourceRowSpan} className={'resource-permission-cell'}>
-          {row.Resource2}
-        </td>
-      ),
-    },
-    {
-      key: 'Resource3',
-      header: 'Resource3',
-      cell: (column, row) => !row.ResourceRowSpan ? null : (
-        <td key={column.key} rowSpan={row.ResourceRowSpan} className={'resource-permission-cell'}>
-          {row.Resource3}
+          {[row.Resource1, row.Resource2, row.Resource3]
+            .filter(Boolean)
+            .map((resource, index) => <div key={`${resource}-${index}`}>{resource}</div>)}
         </td>
       ),
     },
