@@ -131,8 +131,12 @@ describe('DocumentClassificationPermissionsTable', () => {
     expect(numberOfUsersCell).toHaveClass('resource-permission-cell');
     expect(within(bodyRows[0]).getAllByTitle('Yes')[0].closest('td')).toHaveAttribute('rowspan', '2');
     expect(screen.queryByRole('columnheader', {name: 'Classification'})).not.toBeInTheDocument();
+    const headers = screen.getAllByRole('columnheader').map(header => header.textContent);
+    expect(headers.indexOf('ID')).toBeLessThan(headers.indexOf('User'));
+    expect(headers.indexOf('User')).toBeLessThan(headers.indexOf('LoginName'));
     expect(within(bodyRows[0]).getByText('Alice Able')).toBeInTheDocument();
     expect(within(bodyRows[0]).getByText('1')).toBeInTheDocument();
+    expect(within(bodyRows[0]).getByText('Alice Able').querySelector('small')).not.toBeInTheDocument();
     expect(within(bodyRows[0]).getByText('Alpha group')).toBeInTheDocument();
     expect(within(bodyRows[1]).getByText('Bob Baker')).toBeInTheDocument();
     expect(within(bodyRows[2]).getByText('Alice Able')).toBeInTheDocument();

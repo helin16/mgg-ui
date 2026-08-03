@@ -159,17 +159,17 @@ const DocumentClassificationPermissionsTable = ({
         </td>
       ),
     },
-    {key: 'LoginName', header: 'LoginName', cell: (_, row) => row.LoginName},
+    {key: 'ID', header: 'ID', cell: (_, row) => `${row.ID}`},
     {
       key: 'User',
       header: 'User',
       cell: (column, row) => (
         <td key={column.key}>
           {[row.Preferred, row.Surname].filter(Boolean).join(' ')}
-          <div><small>{row.ID}</small></div>
         </td>
       ),
     },
+    {key: 'LoginName', header: 'LoginName', cell: (_, row) => row.LoginName},
     {
       key: 'ActiveStaff',
       header: 'ActiveStaff',
