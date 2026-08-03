@@ -1,9 +1,13 @@
 import AppService, {iConfigParams} from '../../AppService';
 import iSynLuDocumentClassification from '../../../types/Synergetic/Lookup/iSynLuDocumentClassification';
+import iPaginatedResult from '../../../types/iPaginatedResult';
 
 const endPoint = '/syn/luDocumentClassification';
 
-const getAll = (params: iConfigParams = {}, config?: iConfigParams): Promise<iSynLuDocumentClassification[]> => {
+const getAll = (
+  params: iConfigParams = {},
+  config?: iConfigParams
+): Promise<iPaginatedResult<iSynLuDocumentClassification>> => {
   return AppService.get(endPoint, params, config).then(resp => resp.data);
 };
 
