@@ -21,6 +21,10 @@ jest.mock(
   '../../../../pages/SynergeticUserPermissions/components/SynUsersTable',
   () => () => <div data-testid={'inactive-staff-table'} />
 );
+jest.mock(
+  '../../../../pages/SynergeticUserPermissions/components/SynReportsPermissionTable',
+  () => (props: any) => <div data-testid={`report-permissions-${props.reportCode}`} />
+);
 
 const mockedModuleService = MggsModuleService as jest.Mocked<typeof MggsModuleService>;
 const mockedClassificationService = SynLuDocumentClassificationService as jest.Mocked<
@@ -59,7 +63,10 @@ describe('SynergeticUserPermissionsPanel', () => {
       CreatedById: 1,
       UpdatedAt: new Date(),
       UpdatedById: 1,
-      settings: {documentClassificationCodes: ['MEDICAL', 'REPORTS']},
+      settings: {
+        documentClassificationCodes: ['MEDICAL', 'REPORTS'],
+        reportCodes: ['REPORT_A', 'REPORT_B'],
+      },
     });
     mockedClassificationService.getAll.mockResolvedValue({
       currentPage: 1,
@@ -77,7 +84,8 @@ describe('SynergeticUserPermissionsPanel', () => {
     render(<SynergeticUserPermissionsPanel />);
 
     await waitFor(() => {
-      expect(screen.getByRole('tab', {name: 'DocMan'})).toBeInTheDocument();
+      expect(screen.getByRole('tab', {name: 'DocMan - Documents'})).toBeInTheDocument();
+      expect(screen.getByRole('tab', {name: 'Reports'})).toBeInTheDocument();
       expect(screen.getByRole('tab', {name: 'User Groups'})).toBeInTheDocument();
       expect(screen.getByRole('tab', {name: 'Users'})).toBeInTheDocument();
       expect(screen.getByRole('tab', {name: 'MEDICAL - Medical Documents'})).toBeInTheDocument();
@@ -89,6 +97,11 @@ describe('SynergeticUserPermissionsPanel', () => {
       expect(screen.getByRole('alert')).toHaveTextContent('Admin → Settings');
       expect(screen.getByRole('button', {name: 'Close alert'})).toBeInTheDocument();
     });
+
+    fireEvent.click(screen.getByRole('tab', {name: 'Reports'}));
+    expect(screen.getByRole('tab', {name: 'REPORT_A'})).toBeInTheDocument();
+    expect(screen.getByRole('tab', {name: 'REPORT_B'})).toBeInTheDocument();
+    expect(screen.getByTestId('report-permissions-REPORT_A')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('tab', {name: 'User Groups'}));
 
