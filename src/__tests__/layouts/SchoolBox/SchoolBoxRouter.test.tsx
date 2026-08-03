@@ -11,9 +11,19 @@ import {PowerBIReportViewingPageKey, PowerBIReportViewingPageTestId} from '../..
 import {FinancePageKey, FinancePageTestId} from '../../../pages/Finance/__mocks__/FinancePage';
 import {ClipboardPageKey, ClipboardPageTestId} from '../../../pages/Clipboard/__mocks__/ClipboardPage';
 import {ParentTeacherInterviewPageKey, ParentTeacherInterviewPageTestId} from '../../../pages/ParentTeacherInterview/__mocks__/ParentTeacherInterviewPage';
+import {
+  SynergeticUserPermissionsPageKey,
+  SynergeticUserPermissionsPageTestId
+} from '../../../pages/SynergeticUserPermissions/__mocks__/SynergeticUserPermissionsPage';
 import {StudentSubjectListKey, StudentSubjectListTestId} from '../../../components/timeTable/__mocks__/StudentSubjectList';
 import SchoolBoxUrls from '../../../layouts/SchoolBox/SchoolBoxUrls';
-import {MGGS_MODULE_ID_FINANCE, MGGS_MODULE_ID_HOY_CHAT_EMAIL, MGGS_MODULE_ID_CLIPBOARD, MGGS_MODULE_ID_PARENT_TEACHER_INTERVIEW} from '../../../types/modules/iModuleUser';
+import {
+  MGGS_MODULE_ID_CLIPBOARD,
+  MGGS_MODULE_ID_FINANCE,
+  MGGS_MODULE_ID_HOY_CHAT_EMAIL,
+  MGGS_MODULE_ID_PARENT_TEACHER_INTERVIEW,
+  MGGS_MODULE_ID_SYNERGETIC_USER_PERMISSIONS
+} from '../../../types/modules/iModuleUser';
 
 jest.mock('../../../pages/studentReport/StudentReport');
 jest.mock('../../../components/module/ModuleAccessWrapper');
@@ -30,6 +40,7 @@ jest.mock('../../../pages/devices/MggDevicesPage');
 jest.mock('../../../pages/Finance/FinancePage');
 jest.mock('../../../pages/Clipboard/ClipboardPage');
 jest.mock('../../../pages/ParentTeacherInterview/ParentTeacherInterviewPage');
+jest.mock('../../../pages/SynergeticUserPermissions/SynergeticUserPermissionsPage');
 jest.mock('../../../pages/reports/StudentAttendanceReport/StudentAttendanceRateReportPage');
 jest.mock('../../../pages/OnlineDonation/OnlineDonationMangerPage');
 jest.mock('../../../pages/Staff/StaffListPage');
@@ -124,6 +135,20 @@ describe('SchoolBoxRouter', () => {
       moduleId: MGGS_MODULE_ID_PARENT_TEACHER_INTERVIEW,
     });
     expect(ComponentTestHelper.get(ParentTeacherInterviewPageKey).length).toBeGreaterThan(0);
+    expect(document.getElementById('remote')).toBeNull();
+  });
+
+  test('wraps the Synergetic user permissions page with module access', () => {
+    appendIframe();
+
+    renderRouter(SchoolBoxUrls.SynergeticUserPermissions);
+
+    expect(screen.getByTestId(ModuleAccessWrapperTestId)).toBeInTheDocument();
+    expect(screen.getByTestId(SynergeticUserPermissionsPageTestId)).toBeInTheDocument();
+    expect(ComponentTestHelper.get(ModuleAccessWrapperKey)[0]).toMatchObject({
+      moduleId: MGGS_MODULE_ID_SYNERGETIC_USER_PERMISSIONS,
+    });
+    expect(ComponentTestHelper.get(SynergeticUserPermissionsPageKey).length).toBeGreaterThan(0);
     expect(document.getElementById('remote')).toBeNull();
   });
 

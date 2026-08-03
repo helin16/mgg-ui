@@ -57,4 +57,22 @@ describe('Toaster', () => {
       type: TOAST_TYPE_ERROR,
     });
   });
+
+  test('showApiError handles a network error without a response', () => {
+    expect(() => Toaster.showApiError({message: 'Network Error'})).not.toThrow();
+
+    expect(mockedToast).toHaveBeenCalledWith('Network Error', {
+      theme: 'colored',
+      type: TOAST_TYPE_ERROR,
+    });
+  });
+
+  test('showApiError uses a safe message for an unknown error', () => {
+    expect(() => Toaster.showApiError(undefined)).not.toThrow();
+
+    expect(mockedToast).toHaveBeenCalledWith('An unexpected error occurred.', {
+      theme: 'colored',
+      type: TOAST_TYPE_ERROR,
+    });
+  });
 });

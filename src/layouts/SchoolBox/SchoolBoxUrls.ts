@@ -13,6 +13,7 @@ enum SchoolBoxUrls {
   MedicalActionPlans = '/medial/action_plan',
   Enrolments = '/enrolments_admin',
   Admissions = '/admissions',
+  SynergeticUserPermissions = '/syn/userPermissions',
   PowerBI = '/powerbi/manager',
 
   HOYChatAdmin = '/hoyChat',

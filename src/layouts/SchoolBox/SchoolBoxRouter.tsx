@@ -14,7 +14,8 @@ import {
   MGGS_MODULE_ID_POWER_BI_REPORT,
   MGGS_MODULE_ID_SCHOOL_DATA_SUBMISSION,
   MGGS_MODULE_ID_STAFF_LIST,
-  MGGS_MODULE_ID_SYN_EMAIL_TEMPLATE
+  MGGS_MODULE_ID_SYN_EMAIL_TEMPLATE,
+  MGGS_MODULE_ID_SYNERGETIC_USER_PERMISSIONS
 } from "../../types/modules/iModuleUser";
 import HouseAwardsPage from "../../pages/houseAwards/HouseAwardsPage";
 import MedicalReportPage from "../../pages/medicalReports/MedicalReportPage";
@@ -46,6 +47,7 @@ import StudentSubjectList from '../../components/timeTable/StudentSubjectList';
 import {useSearchParams} from 'react-router-dom';
 import SchoolBoxUrls from './SchoolBoxUrls';
 import ParentTeacherInterviewPage from '../../pages/ParentTeacherInterview/ParentTeacherInterviewPage';
+import SynergeticUserPermissionsPage from '../../pages/SynergeticUserPermissions/SynergeticUserPermissionsPage';
 
 const schoolBoxIframeElementId = "remote";
 const SchoolBoxRouter = ({
@@ -217,6 +219,14 @@ const SchoolBoxRouter = ({
       return (
         <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_ADMISSIONS}>
           <AdmissionsPage />
+        </ModuleAccessWrapper>
+      );
+    }
+    case SchoolBoxUrls.SynergeticUserPermissions: {
+      removeSchoolBoxIframe();
+      return (
+        <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_SYNERGETIC_USER_PERMISSIONS}>
+          <SynergeticUserPermissionsPage />
         </ModuleAccessWrapper>
       );
     }

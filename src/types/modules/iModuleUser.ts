@@ -27,6 +27,7 @@ export const MGGS_MODULE_ID_CLIPBOARD = 21;
 export const MGGS_MODULE_ID_ADMISSIONS = 22;
 export const MGGS_MODULE_ID_HOY_CHAT_EMAIL = 23;
 export const MGGS_MODULE_ID_PARENT_TEACHER_INTERVIEW = 24;
+export const MGGS_MODULE_ID_SYNERGETIC_USER_PERMISSIONS = 25;
 
 
 type iModuleUser = {
@@ -42,7 +43,11 @@ type iModuleUser = {
   Module?: iModule;
   Role?: iRole;
   SynCommunity?: iSynCommunity;
-  settings: any | null;
+  settings: {
+    documentClassificationCodes?: string[];
+    excludedUserIds?: number[];
+    [key: string]: any;
+  } | null;
 };
 
 export default iModuleUser;
