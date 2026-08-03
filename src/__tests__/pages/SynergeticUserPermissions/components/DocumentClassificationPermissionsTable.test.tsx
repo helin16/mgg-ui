@@ -50,7 +50,12 @@ describe('DocumentClassificationPermissionsTable', () => {
 
     (SynVConfigGroupResourcesAllService.getAll as jest.Mock).mockResolvedValue(paginated([
       groupResource('Z_GROUP', {SelectFlag: true, InsertFlag: true}),
-      groupResource('A_GROUP', {SelectFlag: true, UpdateFlag: true}),
+      groupResource('A_GROUP', {
+        Resource2: 'SECOND_RESOURCE',
+        Resource3: 'THIRD_RESOURCE',
+        SelectFlag: true,
+        UpdateFlag: true,
+      }),
       groupResource('IGNORED_GROUP'),
     ]));
     (SynConfigUserGroupService.getAll as jest.Mock).mockResolvedValue(paginated([
@@ -97,6 +102,14 @@ describe('DocumentClassificationPermissionsTable', () => {
     expect(within(bodyRows[1]).queryByText(/A_GROUP/)).not.toBeInTheDocument();
     expect(within(bodyRows[2]).getByText(/Z_GROUP/).closest('td')).toHaveAttribute('rowspan', '1');
     expect(screen.queryByRole('columnheader', {name: 'ResourceType'})).not.toBeInTheDocument();
+    expect(screen.getByRole('columnheader', {name: 'Resources'})).toBeInTheDocument();
+    expect(screen.queryByRole('columnheader', {name: 'Resource1'})).not.toBeInTheDocument();
+    expect(screen.queryByRole('columnheader', {name: 'Resource2'})).not.toBeInTheDocument();
+    expect(screen.queryByRole('columnheader', {name: 'Resource3'})).not.toBeInTheDocument();
+    const resourcesCell = within(bodyRows[0]).getByText('CLASS').closest('td');
+    expect(resourcesCell).toHaveAttribute('rowspan', '2');
+    expect(resourcesCell).toHaveTextContent('CLASSSECOND_RESOURCETHIRD_RESOURCE');
+    expect(resourcesCell?.querySelectorAll(':scope > div')).toHaveLength(3);
     expect(screen.getByRole('columnheader', {name: 'No. Of Users'})).toBeInTheDocument();
     const numberOfUsersCell = within(bodyRows[0]).getByText('2').closest('td');
     expect(numberOfUsersCell).toHaveAttribute('rowspan', '2');

@@ -9,12 +9,17 @@ import iSynLuDocumentClassification
   from '../../../types/Synergetic/Lookup/iSynLuDocumentClassification';
 import {MGGS_MODULE_ID_SYNERGETIC_USER_PERMISSIONS} from '../../../types/modules/iModuleUser';
 import DocumentClassificationPermissionsTable from './DocumentClassificationPermissionsTable';
+import SynUsersTable from './SynUsersTable';
+import SynUserGroupsTable from './SynUserGroupsTable';
 
 const SynergeticUserPermissionsPanel = () => {
   const [classifications, setClassifications] = useState<iSynLuDocumentClassification[]>([]);
   const [selectedTab, setSelectedTab] = useState<string>('');
   const [excludedUserIds, setExcludedUserIds] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showDocManAlert, setShowDocManAlert] = useState(true);
+  const [showEmptyGroupsAlert, setShowEmptyGroupsAlert] = useState(true);
+  const [showUsersAlert, setShowUsersAlert] = useState(true);
 
   useEffect(() => {
     let isCancelled = false;
@@ -27,7 +32,7 @@ const SynergeticUserPermissionsPanel = () => {
 
         return SynLuDocumentClassificationService.getAll({
           where: JSON.stringify({Code: codes}),
-          perPage: 1000,
+          perPage: 999999,
         }).then(resp => {
           const classificationMap = (resp.data || []).reduce<{
             [key: string]: iSynLuDocumentClassification;
@@ -71,8 +76,14 @@ const SynergeticUserPermissionsPanel = () => {
 
     return (
       <Tabs defaultActiveKey={'docMan'} unmountOnExit>
-        <Tab eventKey={'docMan'} title={'DocMan'}>
-          <Alert variant={'info'} className={'mt-3 mb-0'} dismissible>
+        <Tab eventKey={'docMan'} title={'DocMan - Documents'}>
+          <Alert
+            variant={'info'}
+            className={'mt-3 mb-0'}
+            show={showDocManAlert}
+            onClose={() => setShowDocManAlert(false)}
+            dismissible
+          >
             This view supports the review of user permissions for DocMan access across the
             document classifications listed below. Administrators can add or remove the
             classifications shown here through <strong>Admin → Settings</strong> for this module.
@@ -97,6 +108,32 @@ const SynergeticUserPermissionsPanel = () => {
               </Tab>
             ))}
           </Tabs>
+        </Tab>
+        <Tab eventKey={'userGroups'} title={'User Groups'}>
+          <Alert
+            variant={'info'}
+            className={'mt-3'}
+            show={showEmptyGroupsAlert}
+            onClose={() => setShowEmptyGroupsAlert(false)}
+            dismissible
+          >
+            This view lists all Synergetic user groups and their assigned users. Groups with no
+            assigned users are retained in the list to support a complete permissions review.
+          </Alert>
+          <SynUserGroupsTable />
+        </Tab>
+        <Tab eventKey={'users'} title={'Users'}>
+          <Alert
+            variant={'info'}
+            className={'mt-3'}
+            show={showUsersAlert}
+            onClose={() => setShowUsersAlert(false)}
+            dismissible
+          >
+            This view lists all Synergetic users, their active staff status, and assigned user
+            groups. Review these accounts regularly to confirm that access remains appropriate.
+          </Alert>
+          <SynUsersTable />
         </Tab>
       </Tabs>
     );

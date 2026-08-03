@@ -1,5 +1,5 @@
 import React from 'react';
-import {render, screen, waitFor} from '@testing-library/react';
+import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import SynergeticUserPermissionsPanel
   from '../../../../pages/SynergeticUserPermissions/components/SynergeticUserPermissionsPanel';
 import MggsModuleService from '../../../../services/Module/MggsModuleService';
@@ -12,6 +12,14 @@ jest.mock('../../../../services/Synergetic/Lookup/SynLuDocumentClassificationSer
 jest.mock(
   '../../../../pages/SynergeticUserPermissions/components/DocumentClassificationPermissionsTable',
   () => (props: any) => <div data-testid={`permissions-table-${props.classificationCode}`} />
+);
+jest.mock(
+  '../../../../pages/SynergeticUserPermissions/components/SynUserGroupsTable',
+  () => () => <div data-testid={'empty-user-groups-table'} />
+);
+jest.mock(
+  '../../../../pages/SynergeticUserPermissions/components/SynUsersTable',
+  () => () => <div data-testid={'inactive-staff-table'} />
 );
 
 const mockedModuleService = MggsModuleService as jest.Mocked<typeof MggsModuleService>;
@@ -70,6 +78,8 @@ describe('SynergeticUserPermissionsPanel', () => {
 
     await waitFor(() => {
       expect(screen.getByRole('tab', {name: 'DocMan'})).toBeInTheDocument();
+      expect(screen.getByRole('tab', {name: 'User Groups'})).toBeInTheDocument();
+      expect(screen.getByRole('tab', {name: 'Users'})).toBeInTheDocument();
       expect(screen.getByRole('tab', {name: 'MEDICAL - Medical Documents'})).toBeInTheDocument();
       expect(screen.getByRole('tab', {name: 'REPORTS - Student Reports'})).toBeInTheDocument();
       expect(screen.getByTestId('permissions-table-MEDICAL')).toBeInTheDocument();
@@ -79,6 +89,26 @@ describe('SynergeticUserPermissionsPanel', () => {
       expect(screen.getByRole('alert')).toHaveTextContent('Admin → Settings');
       expect(screen.getByRole('button', {name: 'Close alert'})).toBeInTheDocument();
     });
+
+    fireEvent.click(screen.getByRole('tab', {name: 'User Groups'}));
+
+    const emptyGroupsMessage = screen.getByText(
+      /This view lists all Synergetic user groups and their assigned users\./
+    );
+    const emptyGroupsAlert = emptyGroupsMessage.closest('[role="alert"]');
+    expect(emptyGroupsAlert).toBeInTheDocument();
+
+    const closeButtons = screen.getAllByRole('button', {name: 'Close alert'});
+    fireEvent.click(closeButtons[closeButtons.length - 1]);
+    await waitFor(() => expect(emptyGroupsMessage).not.toBeInTheDocument());
+    expect(screen.getByTestId('empty-user-groups-table')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('tab', {name: 'Users'}));
+    const usersMessage = screen.getByText(
+      /This view lists all Synergetic users, their active staff status, and assigned user groups\./
+    );
+    expect(usersMessage.closest('[role="alert"]')).toBeInTheDocument();
+    expect(screen.getByTestId('inactive-staff-table')).toBeInTheDocument();
   });
 
   test('shows an empty state when no classifications are configured', async () => {
