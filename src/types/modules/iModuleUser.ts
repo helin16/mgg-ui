@@ -45,6 +45,7 @@ type iModuleUser = {
   SynCommunity?: iSynCommunity;
   settings: {
     documentClassificationCodes?: string[];
+    reportCodes?: string[];
     excludedUserIds?: number[];
     [key: string]: any;
   } | null;

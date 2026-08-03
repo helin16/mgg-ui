@@ -10,16 +10,20 @@ import iSynLuDocumentClassification
 import {MGGS_MODULE_ID_SYNERGETIC_USER_PERMISSIONS} from '../../../types/modules/iModuleUser';
 import DocumentClassificationPermissionsTable from './DocumentClassificationPermissionsTable';
 import SynUsersTable from './SynUsersTable';
+import SynReportsPermissionTable from './SynReportsPermissionTable';
 import SynUserGroupsTable from './SynUserGroupsTable';
 
 const SynergeticUserPermissionsPanel = () => {
   const [classifications, setClassifications] = useState<iSynLuDocumentClassification[]>([]);
   const [selectedTab, setSelectedTab] = useState<string>('');
   const [excludedUserIds, setExcludedUserIds] = useState<number[]>([]);
+  const [reportCodes, setReportCodes] = useState<string[]>([]);
+  const [selectedReportTab, setSelectedReportTab] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [showDocManAlert, setShowDocManAlert] = useState(true);
   const [showEmptyGroupsAlert, setShowEmptyGroupsAlert] = useState(true);
   const [showUsersAlert, setShowUsersAlert] = useState(true);
+  const [showReportsAlert, setShowReportsAlert] = useState(true);
 
   useEffect(() => {
     let isCancelled = false;
@@ -27,6 +31,9 @@ const SynergeticUserPermissionsPanel = () => {
     MggsModuleService.getModule(MGGS_MODULE_ID_SYNERGETIC_USER_PERMISSIONS)
       .then(module => {
         const codes: string[] = module.settings?.documentClassificationCodes || [];
+        const configuredReportCodes: string[] = module.settings?.reportCodes || [];
+        setReportCodes(configuredReportCodes);
+        setSelectedReportTab(configuredReportCodes[0] || '');
         setExcludedUserIds(module.settings?.excludedUserIds || []);
         if (codes.length <= 0) return [];
 
@@ -70,10 +77,6 @@ const SynergeticUserPermissionsPanel = () => {
       return <Spinner animation={'border'} size={'sm'} />;
     }
 
-    if (classifications.length <= 0) {
-      return <p className={'mb-0'}>No document classifications have been configured.</p>;
-    }
-
     return (
       <Tabs defaultActiveKey={'docMan'} unmountOnExit>
         <Tab eventKey={'docMan'} title={'DocMan - Documents'}>
@@ -88,7 +91,9 @@ const SynergeticUserPermissionsPanel = () => {
             document classifications listed below. Administrators can add or remove the
             classifications shown here through <strong>Admin → Settings</strong> for this module.
           </Alert>
-          <Tabs
+          {classifications.length <= 0 ? (
+            <p className={'mt-3 mb-0'}>No document classifications have been configured.</p>
+          ) : <Tabs
             activeKey={selectedTab}
             onSelect={key => setSelectedTab(key || classifications[0].Code)}
             variant={'pills'}
@@ -107,7 +112,39 @@ const SynergeticUserPermissionsPanel = () => {
                 />
               </Tab>
             ))}
-          </Tabs>
+          </Tabs>}
+        </Tab>
+        <Tab eventKey={'reports'} title={'Reports'}>
+          <Alert
+            variant={'info'}
+            className={'mt-3 mb-0'}
+            show={showReportsAlert}
+            onClose={() => setShowReportsAlert(false)}
+            dismissible
+          >
+            This view supports the review of user access to the Synergetic reports configured
+            below. Administrators can add or remove report codes through <strong>Admin → Settings</strong>.
+          </Alert>
+          {reportCodes.length <= 0 ? (
+            <p className={'mt-3 mb-0'}>No reports have been configured.</p>
+          ) : (
+            <Tabs
+              activeKey={selectedReportTab}
+              onSelect={key => setSelectedReportTab(key || reportCodes[0])}
+              variant={'pills'}
+              className={'mt-3'}
+              unmountOnExit
+            >
+              {reportCodes.map(reportCode => (
+                <Tab key={reportCode} eventKey={reportCode} title={reportCode}>
+                  <SynReportsPermissionTable
+                    reportCode={reportCode}
+                    excludedUserIds={excludedUserIds}
+                  />
+                </Tab>
+              ))}
+            </Tabs>
+          )}
         </Tab>
         <Tab eventKey={'userGroups'} title={'User Groups'}>
           <Alert
