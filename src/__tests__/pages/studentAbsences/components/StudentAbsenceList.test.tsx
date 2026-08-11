@@ -165,9 +165,41 @@ describe('StudentAbsenceList', () => {
     await setupWithDates();
     expect(mockedEventsService.getAll).toHaveBeenCalledWith(
       expect.objectContaining({
-        sort: 'AbsenceEventDate:ASC,StudentYearLevelSort:ASC,StudentForm:ASC,StudentSurname:ASC,StudentPreferred:ASC,AbsenceEventPeriodNumber:ASC',
+        sort: 'AbsenceEventDate:ASC,StudentYearLevelSort:ASC,StudentForm:ASC,StudentSurname:ASC,StudentPreferred:ASC,AbsenceEventPeriodNumber:ASC,AbsenceEventDateTime:ASC',
       })
     );
+  });
+
+  test('filters Count as Absent with YES, NO, and ALL buttons', async () => {
+    await setupWithDates();
+
+    expect(screen.getByRole('button', { name: 'ALL' })).toHaveAttribute('aria-pressed', 'true');
+    mockedEventsService.getAll.mockClear();
+    mockedSummaryService.getLiveReport.mockClear();
+    // A stale API may omit this newly added response field. The applied client
+    // filter must remain authoritative and must not create a refetch loop.
+    mockedSummaryService.getLiveReport.mockResolvedValue(fakeLiveResult as any);
+    fireEvent.click(screen.getByRole('button', { name: 'YES' }));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'YES' })).toHaveAttribute('aria-pressed', 'true'));
+    fireEvent.click(screen.getByRole('button', { name: /Search/i }));
+
+    await waitFor(() => expect(mockedEventsService.getAll).toHaveBeenCalledTimes(1));
+    const lastEventsCall = mockedEventsService.getAll.mock.calls[mockedEventsService.getAll.mock.calls.length - 1];
+    const yesWhere = JSON.parse(lastEventsCall[0]?.where as string);
+    expect(JSON.stringify(yesWhere)).toContain('"AbsenceEventAbsenceTypeCountAsAbsenceFlag":true');
+    expect(mockedSummaryService.getLiveReport).toHaveBeenLastCalledWith(
+      expect.objectContaining({ countAsAbsent: 'YES' })
+    );
+    mockedSummaryService.exportReport.mockResolvedValue({ downloadUrl: '' } as any);
+    fireEvent.click(screen.getByRole('button', { name: /Export/i }));
+    await waitFor(() => expect(mockedSummaryService.exportReport).toHaveBeenCalledWith(
+      expect.objectContaining({ countAsAbsent: 'YES' })
+    ));
+
+    fireEvent.click(screen.getByRole('button', { name: 'NO' }));
+    expect(screen.getByRole('button', { name: 'NO' })).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(screen.getByRole('button', { name: 'ALL' }));
+    expect(screen.getByRole('button', { name: 'ALL' })).toHaveAttribute('aria-pressed', 'true');
   });
 
   test('renders class columns after luForm and before Period', async () => {
