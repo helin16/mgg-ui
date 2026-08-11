@@ -29,12 +29,13 @@ import StudentAbsenceDailySummaryEmailModal from "./StudentAbsenceDailySummaryEm
 const getUrlFilters = (): iStudentAbsenceDailySummaryFilters => {
   const params = new URLSearchParams(window.location.search);
   const today = moment().format("YYYY-MM-DD");
+  const countAsAbsent = `${params.get("countAsAbsent") || ""}`.trim().toUpperCase();
   return {
     yearLevelCode: `${params.get("yearLevelCode") || ""}`.trim(),
     formCode: `${params.get("formCode") || ""}`.trim(),
-    countAsAbsent: (["YES", "NO"] as const).includes(params.get("countAsAbsent")?.toUpperCase() as any)
-      ? params.get("countAsAbsent")?.toUpperCase() as "YES" | "NO"
-      : "ALL",
+    countAsAbsent: (["YES", "NO", "ALL"] as const).includes(countAsAbsent as any)
+      ? countAsAbsent as "YES" | "NO" | "ALL"
+      : "YES",
     dateRange: {
       from: `${params.get("dateFrom") || today}`.trim(),
       to: `${params.get("dateTo") || today}`.trim(),
@@ -172,7 +173,7 @@ const StudentAbsenceList = () => {
     () => ({
       yearLevelCode: `${filters.yearLevelCode || ""}`.trim(),
       formCode: `${filters.formCode || ""}`.trim(),
-      countAsAbsent: filters.countAsAbsent || "ALL",
+      countAsAbsent: filters.countAsAbsent || "YES",
       ...(filters.dateRange
         ? {
             dateRange: {
@@ -188,7 +189,7 @@ const StudentAbsenceList = () => {
     () => ({
       yearLevelCode: `${searchedFilters.yearLevelCode || ""}`.trim(),
       formCode: `${searchedFilters.formCode || ""}`.trim(),
-      countAsAbsent: searchedFilters.countAsAbsent || "ALL",
+      countAsAbsent: searchedFilters.countAsAbsent || "YES",
       ...(searchedFilters.dateRange
         ? {
             dateRange: {
@@ -225,8 +226,8 @@ const StudentAbsenceList = () => {
     if (`${nextFilters.formCode || ""}`.trim() !== "") {
       params.set("formCode", `${nextFilters.formCode}`.trim());
     }
-    if ((nextFilters.countAsAbsent || "ALL") !== "ALL") {
-      params.set("countAsAbsent", nextFilters.countAsAbsent || "ALL");
+    if ((nextFilters.countAsAbsent || "YES") !== "YES") {
+      params.set("countAsAbsent", nextFilters.countAsAbsent || "YES");
     }
     if (`${nextFilters.dateRange?.from || ""}`.trim() !== "") {
       params.set("dateFrom", `${nextFilters.dateRange?.from}`.trim());
@@ -262,7 +263,7 @@ const StudentAbsenceList = () => {
         const nextFilters = {
           yearLevelCode: resp.filters.yearLevelCode,
           formCode: resp.filters.formCode,
-          countAsAbsent: requestFilters.countAsAbsent || "ALL",
+          countAsAbsent: requestFilters.countAsAbsent || "YES",
           dateRange: resp.filters.dateRange,
         };
         const timetableGroupByYearLevel = new Map<string, string>();
@@ -521,8 +522,8 @@ const StudentAbsenceList = () => {
             {(["YES", "NO", "ALL"] as const).map(value => (
               <Button
                 key={value}
-                variant={(filters.countAsAbsent || "ALL") === value ? "primary" : "outline-primary"}
-                aria-pressed={(filters.countAsAbsent || "ALL") === value}
+                variant={(filters.countAsAbsent || "YES") === value ? "primary" : "outline-primary"}
+                aria-pressed={(filters.countAsAbsent || "YES") === value}
                 onClick={() => setFilters({ ...filters, countAsAbsent: value })}
               >
                 {value}

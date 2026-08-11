@@ -173,7 +173,7 @@ describe('StudentAbsenceList', () => {
   test('filters Count as Absent with YES, NO, and ALL buttons', async () => {
     await setupWithDates();
 
-    expect(screen.getByRole('button', { name: 'ALL' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'YES' })).toHaveAttribute('aria-pressed', 'true');
     mockedEventsService.getAll.mockClear();
     mockedSummaryService.getLiveReport.mockClear();
     // A stale API may omit this newly added response field. The applied client

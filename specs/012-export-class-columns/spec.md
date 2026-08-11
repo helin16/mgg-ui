@@ -76,7 +76,7 @@ As a report reader, I want all existing information to remain legible after the 
 - **FR-017**: Email subjects, bodies, attachments, report layout, and report rows MUST remain unchanged.
 - **FR-018**: The on-screen Student Absence list MUST display `ClassCode` and `Class Description` after `luForm` and before `Period`, using the same safe class-resolution rules as direct export.
 - **FR-019**: The on-screen list MUST sort by date, year level, `luForm`, student, period, then absence event date/time ascending, with Tutor/Home Group followed by Period 1 through Period 7.
-- **FR-020**: The screen MUST provide a `Count as Absent` button-group filter with `YES`, `NO`, and `ALL`; `ALL` is the compatibility-preserving default, and the selected scope applies to the on-screen result list.
+- **FR-020**: The screen MUST provide a `Count as Absent` button-group filter with `YES`, `NO`, and `ALL`; `YES` is the default, and the selected scope applies to the on-screen result list.
 - **FR-021**: Manual email, scheduled Head of Year email, and scheduled tutor email PDFs MUST include only rows where `AbsenceEventAbsenceTypeCountAsAbsenceFlag` is true. Direct exports MUST follow the user's on-screen `YES`, `NO`, or `ALL` selection.
 
 ### Key Entities
