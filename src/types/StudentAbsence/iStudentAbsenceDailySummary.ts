@@ -8,6 +8,7 @@ export type iStudentAbsenceDailySummaryDateRange = {
 export type iStudentAbsenceDailySummaryFilters = {
   yearLevelCode?: string;
   formCode?: string;
+  countAsAbsent?: "YES" | "NO" | "ALL";
   dateRange?: iStudentAbsenceDailySummaryDateRange;
 };
 
@@ -48,6 +49,7 @@ export type iStudentAbsenceDailySummaryLiveResult = {
   filters: {
     yearLevelCode: string;
     formCode: string;
+    countAsAbsent: "YES" | "NO" | "ALL";
     dateRange: iStudentAbsenceDailySummaryDateRange;
   };
   viewerScope: iStudentAbsenceDailySummaryViewerScope;

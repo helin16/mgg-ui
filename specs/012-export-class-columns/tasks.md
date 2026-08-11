@@ -178,6 +178,10 @@ Task T022: Synchronize feature documentation in specs/012-export-class-columns/
 - [X] T027 Add `ClassCode` and `Class Description` columns after `luForm` and before `Period` in `src/pages/studentAbsences/components/StudentAbsenceList.tsx`
 - [X] T028 Update the paginated screen query order to date, year level, form, student, then numeric period and add regression coverage
 - [X] T029 Run focused API/UI tests and production builds
+- [X] T030 Append absence event date/time ascending as the final screen and backend sort tie-breaker, with regression coverage
+- [X] T031 Add the Count as Absent YES/NO/ALL button-group filter across URL and live screen scope, with regression coverage
+- [X] T032 Make direct exports follow the on-screen Count as Absent selection while enforcing YES for manual-email, Head of Year, and tutor PDFs, with regression coverage
+- [X] T033 Expand API and UI boundary tests for Count as Absent live/export propagation, email omission/YES enforcement, and stale-response loop prevention
 
 - `[P]` means the task is safe to parallelize based on file/dependency boundaries.
 - `[US1]` and `[US2]` map directly to the two prioritized user stories in `spec.md`.

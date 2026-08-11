@@ -23,6 +23,7 @@ const getLiveReport = (filters: iStudentAbsenceDailySummaryFilters = {}) => {
   return AppService.get(`${endPoint}/live`, {
     yearLevelCode: filters.yearLevelCode,
     formCode: filters.formCode,
+    countAsAbsent: filters.countAsAbsent,
     ...getDateRangePayload(filters),
   }).then(({ data }) => data as iStudentAbsenceDailySummaryLiveResult);
 };
@@ -31,6 +32,7 @@ const exportReport = (filters: iStudentAbsenceDailySummaryFilters = {}) => {
   return AppService.post(`${endPoint}/export`, {
     yearLevelCode: filters.yearLevelCode,
     formCode: filters.formCode,
+    countAsAbsent: filters.countAsAbsent,
     ...getDateRangePayload(filters),
   }).then(({ data }) => data as iAsset);
 };

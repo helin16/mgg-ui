@@ -90,3 +90,11 @@ Final diff review found no changes to routes, middleware, service payloads, emai
 Screen follow-up verification: the live API now resolves class values under the same unique-match rules, and the UI displays `ClassCode` and `Class Description` after `luForm` and before `Period`. The paginated source request sorts by date, year level, form, student, and numeric period. API live/helper tests and builds pass; the focused UI suite passes 16 tests and the production UI build succeeds.
 
 Date-query correction — 11 August 2026: the attendance candidate lookup now uses a parameterized raw query with `CONVERT(date, AttendanceDate)` rather than Sequelize timestamp conversion. Four affected API suites pass (35 tests), `tsc` passes, and a read-only Synergetic verification for 10 August Year 11 populated all 18 numeric/Tutor Group rows with their expected class values.
+
+Event-time ordering follow-up: `AbsenceEventDateTime ASC` is the final tie-breaker after date, year level, form, student, and period in both the screen query and backend comparator. This keeps an earlier Sign In event before a later Sign Out event for the same student/date/period. API ordering/controller coverage passes 26 tests; the UI list suite passes 16 tests; both production builds pass.
+
+Count-as-absent follow-up: a `YES` / `NO` / `ALL` button group defaults to `ALL`, persists non-default values in the URL, and filters the live on-screen results by `AbsenceEventAbsenceTypeCountAsAbsenceFlag`. The focused UI suite passes 17 tests; API helper coverage includes explicit YES/NO cases; API and UI builds pass.
+
+PDF count-as-absent behavior: direct exports follow the user's on-screen `YES` / `NO` / `ALL` selection. Manual and scheduled Head of Year/tutor email PDFs enforce `Count as Absent: YES` in the backend. Five affected API suites pass (37 tests) and `tsc` passes.
+
+Expanded cross-project regression coverage: API helper/controller/worker suites verify live/export forwarding and email-PDF YES enforcement (5 suites, 42 tests). UI component and new service-boundary suites verify button behavior, loop prevention, live/export propagation, and email omission (2 suites, 19 tests). Both builds pass.

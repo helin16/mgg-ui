@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Alert } from "react-bootstrap";
+import { Alert, Button, ButtonGroup } from "react-bootstrap";
 import LoadingBtn from "../../../components/common/LoadingBtn";
 import moment from "moment-timezone";
 import * as Icons from "react-bootstrap-icons";
@@ -32,6 +32,9 @@ const getUrlFilters = (): iStudentAbsenceDailySummaryFilters => {
   return {
     yearLevelCode: `${params.get("yearLevelCode") || ""}`.trim(),
     formCode: `${params.get("formCode") || ""}`.trim(),
+    countAsAbsent: (["YES", "NO"] as const).includes(params.get("countAsAbsent")?.toUpperCase() as any)
+      ? params.get("countAsAbsent")?.toUpperCase() as "YES" | "NO"
+      : "ALL",
     dateRange: {
       from: `${params.get("dateFrom") || today}`.trim(),
       to: `${params.get("dateTo") || today}`.trim(),
@@ -128,7 +131,7 @@ const getSourceQueryParams = (
   return {
     currentPage,
     perPage,
-    sort: "AbsenceEventDate:ASC,StudentYearLevelSort:ASC,StudentForm:ASC,StudentSurname:ASC,StudentPreferred:ASC,AbsenceEventPeriodNumber:ASC",
+    sort: "AbsenceEventDate:ASC,StudentYearLevelSort:ASC,StudentForm:ASC,StudentSurname:ASC,StudentPreferred:ASC,AbsenceEventPeriodNumber:ASC,AbsenceEventDateTime:ASC",
     where: JSON.stringify({
       [OP_AND]: [
         {
@@ -142,6 +145,11 @@ const getSourceQueryParams = (
         ...(`${filters.formCode || ""}`.trim() !== ""
           ? [{ StudentForm: `${filters.formCode}`.trim() }]
           : []),
+        ...(filters.countAsAbsent === "YES"
+          ? [{ AbsenceEventAbsenceTypeCountAsAbsenceFlag: true }]
+          : filters.countAsAbsent === "NO"
+            ? [{ AbsenceEventAbsenceTypeCountAsAbsenceFlag: false }]
+            : []),
       ],
     }),
   };
@@ -164,6 +172,7 @@ const StudentAbsenceList = () => {
     () => ({
       yearLevelCode: `${filters.yearLevelCode || ""}`.trim(),
       formCode: `${filters.formCode || ""}`.trim(),
+      countAsAbsent: filters.countAsAbsent || "ALL",
       ...(filters.dateRange
         ? {
             dateRange: {
@@ -173,12 +182,13 @@ const StudentAbsenceList = () => {
           }
         : {}),
     }),
-    [filters.yearLevelCode, filters.formCode, filters.dateRange]
+    [filters.yearLevelCode, filters.formCode, filters.countAsAbsent, filters.dateRange]
   );
   const requestFilters = useMemo(
     () => ({
       yearLevelCode: `${searchedFilters.yearLevelCode || ""}`.trim(),
       formCode: `${searchedFilters.formCode || ""}`.trim(),
+      countAsAbsent: searchedFilters.countAsAbsent || "ALL",
       ...(searchedFilters.dateRange
         ? {
             dateRange: {
@@ -191,6 +201,7 @@ const StudentAbsenceList = () => {
     [
       searchedFilters.yearLevelCode,
       searchedFilters.formCode,
+      searchedFilters.countAsAbsent,
       searchedFilters.dateRange,
     ]
   );
@@ -207,11 +218,15 @@ const StudentAbsenceList = () => {
     params.delete("formCode");
     params.delete("dateFrom");
     params.delete("dateTo");
+    params.delete("countAsAbsent");
     if (`${nextFilters.yearLevelCode || ""}`.trim() !== "") {
       params.set("yearLevelCode", `${nextFilters.yearLevelCode}`.trim());
     }
     if (`${nextFilters.formCode || ""}`.trim() !== "") {
       params.set("formCode", `${nextFilters.formCode}`.trim());
+    }
+    if ((nextFilters.countAsAbsent || "ALL") !== "ALL") {
+      params.set("countAsAbsent", nextFilters.countAsAbsent || "ALL");
     }
     if (`${nextFilters.dateRange?.from || ""}`.trim() !== "") {
       params.set("dateFrom", `${nextFilters.dateRange?.from}`.trim());
@@ -247,6 +262,7 @@ const StudentAbsenceList = () => {
         const nextFilters = {
           yearLevelCode: resp.filters.yearLevelCode,
           formCode: resp.filters.formCode,
+          countAsAbsent: requestFilters.countAsAbsent || "ALL",
           dateRange: resp.filters.dateRange,
         };
         const timetableGroupByYearLevel = new Map<string, string>();
@@ -298,6 +314,7 @@ const StudentAbsenceList = () => {
         if (
           nextFilters.yearLevelCode !== requestFilters.yearLevelCode ||
           nextFilters.formCode !== requestFilters.formCode ||
+          nextFilters.countAsAbsent !== requestFilters.countAsAbsent ||
           nextFilters.dateRange.from !== `${requestFilters.dateRange?.from || ""}`.trim() ||
           nextFilters.dateRange.to !== `${requestFilters.dateRange?.to || ""}`.trim()
         ) {
@@ -496,6 +513,22 @@ const StudentAbsenceList = () => {
             limitCodes={viewerScope?.isModuleUser ? [] : viewerScope?.allowedFormCodes || []}
             isDisabled={viewerScope?.formSelectorDisabled}
           />
+        </div>
+
+        <div>
+          <div>Count as Absent</div>
+          <ButtonGroup aria-label={"Filter by count as absent"}>
+            {(["YES", "NO", "ALL"] as const).map(value => (
+              <Button
+                key={value}
+                variant={(filters.countAsAbsent || "ALL") === value ? "primary" : "outline-primary"}
+                aria-pressed={(filters.countAsAbsent || "ALL") === value}
+                onClick={() => setFilters({ ...filters, countAsAbsent: value })}
+              >
+                {value}
+              </Button>
+            ))}
+          </ButtonGroup>
         </div>
 
         <LoadingBtn
