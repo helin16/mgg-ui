@@ -48,7 +48,7 @@ describe('SynUsersTable', () => {
   test('filters users by staff status with inactive selected by default', async () => {
     render(<SynUsersTable />);
 
-    await waitFor(() => expect(screen.getByText('Alpha, Anne')).toBeInTheDocument());
+    expect(await screen.findByText('Alpha, Anne')).toBeInTheDocument();
     expect(SynConfigUserService.getAll).toHaveBeenCalledWith({perPage: 9999});
     expect(SynVStaffService.getStaffList).toHaveBeenCalledWith({
       where: JSON.stringify({StaffID: [1, 2]}),
@@ -86,7 +86,8 @@ describe('SynUsersTable', () => {
   test('excludes users by ID when excludedUserIds prop is provided', async () => {
     render(<SynUsersTable excludedUserIds={[1]} />);
 
-    await waitFor(() => expect(screen.getByText('Zulu, Zoe')).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', {name: 'All'}));
+    expect(await screen.findByText('Zulu, Zoe')).toBeInTheDocument();
     
     // Alpha should be excluded because ID=1 is in excludedUserIds
     expect(screen.queryByText('Alpha, Anne')).not.toBeInTheDocument();
@@ -96,7 +97,8 @@ describe('SynUsersTable', () => {
 
   test('reloads users when excludedUserIds changes', async () => {
     const {rerender} = render(<SynUsersTable excludedUserIds={[1]} />);
-    await waitFor(() => expect(screen.getByText('Zulu, Zoe')).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', {name: 'All'}));
+    expect(await screen.findByText('Zulu, Zoe')).toBeInTheDocument();
 
     rerender(<SynUsersTable excludedUserIds={[2]} />);
 
@@ -104,3 +106,4 @@ describe('SynUsersTable', () => {
     expect(await screen.findByText('Alpha, Anne')).toBeInTheDocument();
     expect(screen.queryByText('Zulu, Zoe')).not.toBeInTheDocument();
   });
+});
