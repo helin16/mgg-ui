@@ -93,3 +93,14 @@ describe('SynUsersTable', () => {
     // Zulu should be shown because ID=2 is not in excludedUserIds
     expect(screen.getByText('Zulu, Zoe')).toBeInTheDocument();
   });
+
+  test('reloads users when excludedUserIds changes', async () => {
+    const {rerender} = render(<SynUsersTable excludedUserIds={[1]} />);
+    await waitFor(() => expect(screen.getByText('Zulu, Zoe')).toBeInTheDocument());
+
+    rerender(<SynUsersTable excludedUserIds={[2]} />);
+
+    await waitFor(() => expect(SynConfigUserService.getAll).toHaveBeenCalledTimes(2));
+    expect(await screen.findByText('Alpha, Anne')).toBeInTheDocument();
+    expect(screen.queryByText('Zulu, Zoe')).not.toBeInTheDocument();
+  });
