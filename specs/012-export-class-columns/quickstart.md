@@ -93,7 +93,7 @@ Date-query correction — 11 August 2026: the attendance candidate lookup now us
 
 Event-time ordering follow-up: `AbsenceEventDateTime ASC` is the final tie-breaker after date, year level, form, student, and period in both the screen query and backend comparator. This keeps an earlier Sign In event before a later Sign Out event for the same student/date/period. API ordering/controller coverage passes 26 tests; the UI list suite passes 16 tests; both production builds pass.
 
-Count-as-absent follow-up: a `YES` / `NO` / `ALL` button group defaults to `ALL`, persists non-default values in the URL, and filters the live on-screen results by `AbsenceEventAbsenceTypeCountAsAbsenceFlag`. The focused UI suite passes 17 tests; API helper coverage includes explicit YES/NO cases; API and UI builds pass.
+Count-as-absent follow-up: a `YES` / `NO` / `ALL` button group defaults to `YES`, persists non-default values in the URL, and filters the live on-screen results by `AbsenceEventAbsenceTypeCountAsAbsenceFlag`. The focused UI suite passes 17 tests; API helper coverage includes explicit YES/NO cases; API and UI builds pass.
 
 PDF count-as-absent behavior: direct exports follow the user's on-screen `YES` / `NO` / `ALL` selection. Manual and scheduled Head of Year/tutor email PDFs enforce `Count as Absent: YES` in the backend. Five affected API suites pass (37 tests) and `tsc` passes.
 
