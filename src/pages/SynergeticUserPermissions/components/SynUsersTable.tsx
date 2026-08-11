@@ -30,7 +30,9 @@ type iSynUsersTable = {
   excludedUserIds?: number[];
 };
 
-const SynUsersTable = ({excludedUserIds = []}: iSynUsersTable) => {
+const EMPTY_EXCLUDED_USER_IDS: number[] = [];
+
+const SynUsersTable = ({excludedUserIds = EMPTY_EXCLUDED_USER_IDS}: iSynUsersTable) => {
   const [rows, setRows] = useState<iSynUserRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<UserFilter>('inactive');
@@ -134,7 +136,7 @@ const SynUsersTable = ({excludedUserIds = []}: iSynUsersTable) => {
     return () => {
       isCancelled = true;
     };
-  }, []);
+  }, [excludedUserIds]);
 
   return (
     <>
