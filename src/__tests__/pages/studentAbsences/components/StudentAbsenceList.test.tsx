@@ -165,9 +165,40 @@ describe('StudentAbsenceList', () => {
     await setupWithDates();
     expect(mockedEventsService.getAll).toHaveBeenCalledWith(
       expect.objectContaining({
-        sort: 'AbsenceEventDate:ASC,StudentYearLevelSort:ASC,StudentSurname:ASC,StudentPreferred:ASC',
+        sort: 'AbsenceEventDate:ASC,StudentYearLevelSort:ASC,StudentForm:ASC,StudentSurname:ASC,StudentPreferred:ASC,AbsenceEventPeriodNumber:ASC',
       })
     );
+  });
+
+  test('renders class columns after luForm and before Period', async () => {
+    mockedEventsService.getAll.mockResolvedValue({
+      ...fakeEventsResponse,
+      data: [{
+        ...fakeEventsResponse.data[0],
+        AbsenceEventPeriodCode: '1',
+        AbsenceEventPeriodNumber: 1,
+        AbsenceEventPeriodDescription: '1',
+      } as any],
+    } as any);
+    mockedSummaryService.getLiveReport.mockResolvedValue({
+      ...fakeLiveResult,
+      rows: [{
+        studentId: 101,
+        absenceDate: '2026-02-03T00:00:00.000Z',
+        absencePeriod: 'Period 1',
+        classCode: 'ENG10A',
+        classDescription: 'English 10A',
+      }],
+    } as any);
+
+    await setupWithDates();
+
+    const cells = screen.getAllByRole('cell').map(cell => cell.textContent);
+    expect(cells.indexOf('10A')).toBeLessThan(cells.indexOf('ENG10A'));
+    expect(cells.indexOf('ENG10A')).toBeLessThan(cells.indexOf('English 10A'));
+    expect(cells.indexOf('English 10A')).toBeLessThan(cells.indexOf('Period 1'));
+    expect(screen.getByText('ENG10A')).toBeInTheDocument();
+    expect(screen.getByText('English 10A')).toBeInTheDocument();
   });
 
   test('renders search button', async () => {

@@ -1,4 +1,4 @@
-# Specification Quality Checklist: Export and Email Class Columns
+# Specification Quality Checklist: Export Class Columns
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning  
 **Created**: 2026-08-10  
@@ -32,4 +32,4 @@
 ## Notes
 
 - Validation completed in one pass on 2026-08-10; all checklist items pass.
-- Read-only API review confirms a shared export/email document path and identifies class association as a planning decision, not a product clarification.
+- Read-only API review confirms a shared export/email document path; the revised plan isolates class association and expanded layout to direct export while preserving emailed PDFs.

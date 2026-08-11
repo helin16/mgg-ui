@@ -31,6 +31,8 @@ export type iStudentAbsenceDailySummaryRow = {
   yearLevelCode: string;
   yearLevelDescription: string;
   formCode: string;
+  classCode: string;
+  classDescription: string;
   absenceDate: string;
   absenceDateTime: string;
   absenceDateTimeLabel: string;

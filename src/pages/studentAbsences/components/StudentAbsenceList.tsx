@@ -58,10 +58,18 @@ const getStudentDisplayName = (row: iSynVStudentAbsenceEvents) => {
   return [firstName, surname].filter(Boolean).join(" ").trim();
 };
 
+const getClassAssociationKey = (studentId: number | string, date: any, period: any) => {
+  const normalizedDate = `${date || ""}`.trim() === ""
+    ? ""
+    : moment.utc(date).format("YYYY-MM-DD");
+  return `${studentId}|${normalizedDate}|${`${period || ""}`.trim()}`.toUpperCase();
+};
+
 const mapSourceRowToSummaryRow = (
   row: iSynVStudentAbsenceEvents,
   timetableGroupByYearLevel: Map<string, string>,
-  timetableDescriptionByGroupAndPeriod: Map<string, string>
+  timetableDescriptionByGroupAndPeriod: Map<string, string>,
+  classByStudentDateAndPeriod: Map<string, { classCode: string; classDescription: string }>
 ): iStudentAbsenceDailySummaryRow => {
   const absenceDate = `${row.AbsenceEventDate || ""}`.trim();
   const absenceDateTime = row.AbsenceEventDateTime || null;
@@ -82,12 +90,17 @@ const mapSourceRowToSummaryRow = (
   const absenceReason = absenceReasonCode === ""
     ? ""
     : `${row.AbsenceEventAbsenceReasonDescription || ""}`.trim();
+  const classAssociation = classByStudentDateAndPeriod.get(
+    getClassAssociationKey(row.StudentID || 0, absenceDate, resolvedPeriodDescription)
+  );
   return {
     studentId: Number(row.StudentID || 0),
     studentName: getStudentDisplayName(row),
     yearLevelCode,
     yearLevelDescription: `${row.StudentYearLevelDescription || yearLevelCode}`.trim(),
     formCode: `${row.StudentForm || ""}`.trim(),
+    classCode: classAssociation?.classCode || "",
+    classDescription: classAssociation?.classDescription || "",
     absenceDate,
     absenceDateTime: `${absenceDateTime || ""}`,
     absenceDateTimeLabel:
@@ -115,7 +128,7 @@ const getSourceQueryParams = (
   return {
     currentPage,
     perPage,
-    sort: "AbsenceEventDate:ASC,StudentYearLevelSort:ASC,StudentSurname:ASC,StudentPreferred:ASC",
+    sort: "AbsenceEventDate:ASC,StudentYearLevelSort:ASC,StudentForm:ASC,StudentSurname:ASC,StudentPreferred:ASC,AbsenceEventPeriodNumber:ASC",
     where: JSON.stringify({
       [OP_AND]: [
         {
@@ -254,6 +267,16 @@ const StudentAbsenceList = () => {
           }
           timetableDescriptionByGroupAndPeriod.set(`${timetableGroup}:${periodNumber}`, description);
         });
+        const classByStudentDateAndPeriod = new Map<string, { classCode: string; classDescription: string }>();
+        (resp.rows || []).forEach(row => {
+          classByStudentDateAndPeriod.set(
+            getClassAssociationKey(row.studentId, row.absenceDate, row.absencePeriod),
+            {
+              classCode: `${row.classCode || ""}`.trim(),
+              classDescription: `${row.classDescription || ""}`.trim(),
+            }
+          );
+        });
         const sourceResp = await SynVStudentAbsenceEventsService.getAll(
           getSourceQueryParams(nextFilters, currentPage, 30)
         );
@@ -261,7 +284,8 @@ const StudentAbsenceList = () => {
           mapSourceRowToSummaryRow(
             row,
             timetableGroupByYearLevel,
-            timetableDescriptionByGroupAndPeriod
+            timetableDescriptionByGroupAndPeriod,
+            classByStudentDateAndPeriod
           )
         );
         setTotalPages(sourceResp.pages || 1);
@@ -332,6 +356,16 @@ const StudentAbsenceList = () => {
         key: "form",
         header: "luForm",
         cell: (column, row) => <td key={column.key}>{row.formCode}</td>,
+      },
+      {
+        key: "classCode",
+        header: "ClassCode",
+        cell: (column, row) => <td key={column.key}>{row.classCode}</td>,
+      },
+      {
+        key: "classDescription",
+        header: "Class Description",
+        cell: (column, row) => <td key={column.key}>{row.classDescription}</td>,
       },
       {
         key: "period",
