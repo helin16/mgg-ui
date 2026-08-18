@@ -89,46 +89,61 @@ const sendEmail = (params: iPDFParams & {to: string}): Promise<iMessage> => {
 
 ---
 
-## Implementation Details (✅ VERIFIED)
+## Implementation Details (✅ VERIFIED — Updated 2026-08-19 after DB verification)
 
-### Detail 1: Bulk Skill Expiration Updates (✅ VERIFIED)
+### Detail 1: Bulk Skill Expiration Updates (⚠️ REVISED — direct Sequelize update is NOT possible)
 
-**Solution**: Use single resource endpoint `PUT /syn/communitySkill/:seq`
+**Original assumption (INCORRECT)**: Use `PUT /syn/communitySkill/:seq` via `CRUDHelper.updateModel`.
 
-**Backend**:
-- CRUDHelper.updateModel already supports single resource updates by ID field (SkillSeq)
-- No new bulk endpoint needed
-- Endpoint: `PUT /syn/communitySkill/{SkillSeq}` with body `{"ExpiryDate": "2027-08-19"}`
+**Why it's wrong**:
+- `SynCommunitySkill.ts` (the Sequelize model) calls `SynergeticDB.blockUpsert(SynCommunitySkill)`, which attaches a `beforeSave` hook that unconditionally **rejects** any create/update with `Any upsert to 'CommunitySkills' is blocked!` for any non-sqlite dialect (i.e. every real environment).
+- No PUT/POST route was ever registered on `SynCommunitySkillController.ts` in the first place (only GET).
+- The Synergetic database only accepts writes through its own stored procedures via raw `EXEC`, the same pattern used by `StudentAbsenceHelper.syncToSynergetic()` (`EXEC [dbo].[spiAbsenceEvents] ...`).
 
-**Frontend Pattern**:
-- UI loops through selected skills using Promise.all
-- Proven pattern in project (reduces backend load, frontend controls concurrency)
-- Example:
-  ```typescript
-  Promise.all(selectedSkillSeqs.map(seq =>
-    axios.put(`/syn/communitySkill/${seq}`, {ExpiryDate: newDate})
-  ));
-  ```
+**Verified via live query** against `Synergetic_AUVIC_MENTONEGG_PRD.INFORMATION_SCHEMA.ROUTINES`/`.PARAMETERS`:
 
-**Status**: ✅ Ready to implement (no new endpoint needed)
+| Procedure | Purpose | Key Parameters |
+|-----------|---------|-----------------|
+| `spiCommunitySkills` | Insert | `@ID, @SkillCode, @SkillLevel, @Comment, @AttainedDate, @ExpiryDate, @SkillSeq (INOUT)` |
+| `spuCommunitySkills` | Update | `@SkillSeq, @SkillCode, @SkillLevel, @Comment, @AttainedDate, @ExpiryDate` (all fields required) |
+| `spdCommunitySkills` | Delete | `@Skillseq` |
 
-### Detail 2: Scheduled Notification System (✅ VERIFIED)
+**Revised Solution** (per user decision): New endpoint `PUT /syn/communitySkill/:staffID/:skillCode`
+- Backend looks up existing record by `(ID=staffID, SkillCode=skillCode)` to get current field values (proc requires all fields, not partial)
+- Calls `spuCommunitySkills` via raw `EXEC` (same pattern as absence sync) with existing values + new `ExpiryDate`
+- If no existing record: create via `spiCommunitySkills` (upsert semantics — recommended, needs final confirmation)
+- See `contracts/API-BulkUpdate.md` for full implementation
 
-**Infrastructure**: Already exists - CronJobsQueue + Redis + SMTPConnector
+**Frontend Pattern** (unchanged concept, now keyed by staffID/skillCode instead of raw SkillSeq):
+```typescript
+Promise.allSettled(selectedStaffIds.map(staffId =>
+  axios.put(`/syn/communitySkill/${staffId}/${skillCode}`, {ExpiryDate: newDate})
+));
+```
+
+**Access Control** (confirmed): Bulk update must be gated as an admin-only action using `AuthService.isModuleRole(MGGS_MODULE_ID_STAFF_LIST, ROLE_ID_ADMIN)` — the same pattern already used in `BTGLDetailsPanel.tsx` and `ParentTeacherInterviewPage.tsx` — not just general module view access.
+
+**Status**: ⚠️ Requires a genuinely NEW backend endpoint + stored-procedure integration (moderate effort, ~1-2 days), not a zero-cost reuse as originally assumed.
+
+### Detail 2: Scheduled Notification System (✅ VERIFIED, cron schedule confirmed)
+
+**Infrastructure**: Already exists - CronJobsQueue + Redis + SMTPConnector + `node-cron` registration in `src/worker.ts`
 
 **Evidence**:
 - `/src/queue/CronJobsQueue.ts` — Bull queue integration
-- `/src/workers/ExpiringCreditCards.ts` — Example: Finance module checks for expiring credit cards daily
-- `/src/workers/ExpiringPassportsAndVisas.ts` — Example: Enrollments module checks expiry daily
-- Both send emails via queue system
+- `/src/worker.ts` — `loadCronJobs()` registers nightly jobs via `node-cron`, e.g. `cron.schedule('0 23 * * *', ...)` for Student Absence daily summary (11pm) and Clipboard sync (11pm)
+- `/src/workers/ExpiringCreditCards.ts` — Example: Finance module checks for expiring credit cards weekly
+- `/src/workers/ExpiringPassportsAndVisas.ts` — Example: Enrollments module checks expiry weekly
 
-**For Skill Expiration**:
+**For Skill Expiration** (confirmed requirements):
 1. Create new worker: `/src/workers/ExpiringSkillsWorker.ts` (follows existing pattern)
 2. Add message type: `MESSAGE_TYPE_SKILL_EXPIRATION_NOTIFICATION`
-3. Register in CronJobsQueue.ts processJob map
-4. Uses SMTPConnector.send() for email delivery
+3. Register in `CronJobsQueue.ts` processJob map
+4. Register nightly trigger in `src/worker.ts` at `59 23 * * *` (11:59pm, matching FR-008/FR-009)
+5. Worker queries **all Active staff** and **all their skills** matching `monitoredSkillCodes` (confirmed scope), then applies day-interval math (see `contracts/ExpiringSkillsWorker.md`) to decide who is notified that night — no persistent "last sent" log exists, so this must be derived mathematically from `ExpiryDate` + settings each run
+6. Uses SMTPConnector.send() for email delivery
 
-**Status**: ✅ Ready - just add new worker following proven pattern
+**Status**: ✅ Ready - add new worker + cron registration following proven pattern
 
 ### Detail 3: Email Service (✅ VERIFIED)
 
@@ -153,7 +168,7 @@ const sendEmail = (params: iPDFParams & {to: string}): Promise<iMessage> => {
 
 **Status**: ✅ Ready - no abstraction needed, reuse directly
 
-### Detail 4: CSV Export Highlighting (✅ VERIFIED)
+### Detail 4: CSV Export Highlighting (✅ VERIFIED, scope confirmed)
 
 **Current Setup**:
 - Component: `CSVExportFromHtmlTableBtn` (`/src/components/form/CSVExportFromHtmlTableBtn.tsx`)
@@ -166,13 +181,13 @@ const ws = XLSX.utils.table_to_sheet(tableElement);
 // Creates sheet from HTML table, preserves inline styles
 ```
 
-**For Skill Expiration Highlighting**:
-- Enhance CSVExportFromHtmlTableBtn to apply conditional formatting:
-  - When generating sheet, check each ExpiryDate cell
+**For Skill Expiration Highlighting** (confirmed: only Skill expiry cells, not any date-looking cell):
+- Enhance CSVExportFromHtmlTableBtn to apply conditional formatting **only to Skill expiry date columns** (identified via `COLUMN_GROUP_SKILL_EXPIRY_DATE` from `StaffListHelper.tsx`), not other date columns like DOB or leaving date
+  - When generating sheet, check each Skill-expiry cell specifically (by known column position/header)
   - If date < today: apply background color (red/yellow)
   - Use sheetjs-style's cell styling: `{fill: {fgColor: {rgb: "FFFF0000"}}}`
 
-**Status**: ✅ Ready - sheetjs-style already supports cell formatting
+**Status**: ✅ Ready - sheetjs-style already supports cell formatting; scope narrowed to Skill columns only
 
 **Examples in Project**:
 - `/src/components/reports/StudentNumberForecast/components/StudentNumberForecastExportHelper.ts`
@@ -185,28 +200,31 @@ const ws = XLSX.utils.table_to_sheet(tableElement);
 
 
 ### Gap 2: Scheduled Notification System (✅ RESOLVED)
-**Status**: Already verified above - CronJobsQueue exists, use new ExpiringSkillsWorker
+**Status**: Already verified above - CronJobsQueue + `src/worker.ts` nightly cron registration confirmed (11:59pm)
 
 ### Gap 3: CSV Export Skill Expiration Highlighting (✅ RESOLVED)
-**Status**: Already verified above - sheetjs-style supports cell formatting
+**Status**: Already verified above - sheetjs-style supports cell formatting, scoped to Skill columns only
 
 ---
 
-## Summary: Implementation Approach (✅ VERIFIED & READY)
+## Summary: Implementation Approach (✅ VERIFIED & READY, revised after DB check)
 
 | Component | Status | Approach |
 |-----------|--------|----------|
 | **Skill Expiration Data** | ✅ Ready | Existing CommunitySkills.ExpiryDate field |
-| **Bulk Update** | ✅ Ready | Single `PUT /syn/communitySkill/:seq` + Promise.all |
-| **Notifications** | ✅ Ready | New ExpiringSkillsWorker + CronJobsQueue |
+| **Bulk Update** | ⚠️ New endpoint needed | New `PUT /syn/communitySkill/:staffID/:skillCode` calling `spuCommunitySkills`/`spiCommunitySkills` stored procs (Sequelize writes are blocked) + Promise.all |
+| **Notifications** | ✅ Ready | New ExpiringSkillsWorker + CronJobsQueue + nightly cron in `src/worker.ts` (11:59pm) |
 | **Email** | ✅ Ready | Existing SMTPConnector.send() |
 | **Settings** | ✅ Ready | Existing `uMGGSModules.settings` JSON |
-| **CSV Export** | ✅ Ready | Enhance CSVExportFromHtmlTableBtn with sheetjs-style |
+| **CSV Export** | ✅ Ready | Enhance CSVExportFromHtmlTableBtn with sheetjs-style, scoped to Skill columns only |
+| **Access Control (write actions)** | ✅ Confirmed | `AuthService.isModuleRole(MGGS_MODULE_ID_STAFF_LIST, ROLE_ID_ADMIN)` (frontend) + equivalent backend check, matching BudgetTracker/PTI pattern |
 
-**Backend Changes Required**: 
-- Add `ExpiringSkillsWorker.ts` (~150-200 lines, follows proven pattern)
+**Backend Changes Required** (revised): 
+- Add `SynCommunitySkillController` update method calling `spuCommunitySkills`/`spiCommunitySkills` via raw EXEC (~80-120 lines, new endpoint)
+- Add `ExpiringSkillsWorker.ts` (~150-200 lines, follows proven pattern, includes day-interval math)
 - Update `CronJobsQueue.ts` to register worker (~10 lines)
-- Total: ~200-250 lines of new code (LOW RISK, proven patterns)
+- Update `src/worker.ts` to register nightly cron trigger (~10 lines)
+- Total: ~350-400 lines of new code (MEDIUM risk on bulk update due to stored-procedure integration; LOW risk elsewhere)
 
 4. **Scheduled Jobs**
    - [ ] Notification scheduler already running in mggs-api?

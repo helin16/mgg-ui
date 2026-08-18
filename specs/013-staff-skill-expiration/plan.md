@@ -11,11 +11,11 @@ Enhance the Staff List Admin interface to provide comprehensive management of st
 3. **Settings Configuration**: Dedicated Settings tab with 8 configuration fields for notification timing, skill filtering, and email templates
 4. **Notification System**: Backend worker to send daily individual and batched bulk notifications to staff and administrators
 
-**Technical Approach** (verified against codebase):
-- Frontend: React 18 + TypeScript, reuse existing module settings pattern, extend StaffListPanel with checkbox column and Settings tab
-- Backend: Add ExpiringSkillsWorker (follows ExpiringCreditCards pattern), register in CronJobsQueue, use existing SMTPConnector
-- Database: No schema changes; use existing `uMGGSModules.settings` JSON column for configuration, existing `CommunitySkills.ExpiryDate` field
-- Testing: Cypress E2E for UI flows, Jest for notification deduplication logic
+**Technical Approach** (verified against codebase, revised 2026-08-19 after live DB check):
+- Frontend: React 18 + TypeScript, reuse existing module settings pattern, extend StaffListPanel with checkbox column and Settings tab; gate Bulk Update + Settings via `AuthService.isModuleRole(moduleId, ROLE_ID_ADMIN)`
+- Backend: **New** bulk-update endpoint `PUT /syn/communitySkill/:staffID/:skillCode` calling Synergetic stored procedures (`spuCommunitySkills`/`spiCommunitySkills`) via raw EXEC — direct Sequelize writes are blocked at the model level; Add ExpiringSkillsWorker (follows ExpiringCreditCards pattern) triggered nightly at 11:59pm via `node-cron` in `src/worker.ts`, registered in CronJobsQueue; use existing SMTPConnector
+- Database: No schema changes; use existing `uMGGSModules.settings` JSON column for configuration, existing `CommunitySkills.ExpiryDate` field; writes go through verified stored procedures, not direct table access
+- Testing: Cypress E2E for UI flows, Jest for notification day-interval math and deduplication logic
 
 ## Technical Context
 
@@ -33,8 +33,10 @@ Enhance the Staff List Admin interface to provide comprehensive management of st
 **Constraints**:
   - No automatic retry on email failures (lossy delivery); admin validates recipients
   - Notification batching: all expiring skills for same staff in ONE email per day
-  - Module access: protected by ModuleAccessWrapper with MGGS_MODULE_ID_STAFF_LIST (15)
+  - No persistent "last notified" log (FR-030) — follow-up cadence must be derived mathematically from ExpiryDate + settings each nightly run (day-interval modulo check), not tracked state
+  - Module access: protected by ModuleAccessWrapper with MGGS_MODULE_ID_STAFF_LIST (15); Bulk Update + Settings save additionally admin-gated via `AuthService.isModuleRole(moduleId, ROLE_ID_ADMIN)`
   - No persistent notification log DB table; use app logs only
+  - **Skill data writes must go through Synergetic stored procedures** (`spuCommunitySkills`, `spiCommunitySkills`) via raw EXEC — the Sequelize model has a `blockUpsert()` hook that rejects all direct saves/updates
 **Scale/Scope**:
   - ~50-200 staff per school
   - 5-10 monitored skill codes per school
@@ -48,15 +50,15 @@ Enhance the Staff List Admin interface to provide comprehensive management of st
 ✅ **I. Module-Gated Delivery**: 
 - Route: `/modules/remote/staff-list-admin` (existing)
 - Module ID: `MGGS_MODULE_ID_STAFF_LIST = 15` (existing, already defined)
-- Access Control: Wrapped in `ModuleAccessWrapper(moduleId=15)` with admin role validation
+- Access Control: Wrapped in `ModuleAccessWrapper(moduleId=15)` for view access; Bulk Update and Settings write actions additionally gated via `AuthService.isModuleRole(15, ROLE_ID_ADMIN)` (frontend, matching `BTGLDetailsPanel.tsx`/`ParentTeacherInterviewPage.tsx` pattern) plus an equivalent backend admin check before executing writes
 - No new one-off entry mechanisms
 
 ✅ **II. Typed Service Boundaries**: 
 - Settings: Use existing `MggsModuleService.getModule()` / `updateModule()` (proven pattern)
 - Skill data: Use existing `SynCommunitySkillService` with typed response `iSynCommunitySkill[]`
-- Bulk update: Use `PUT /syn/communitySkill/:seq` endpoint (CRUDHelper.updateModel), typed request/response
+- Bulk update: **New** `PUT /syn/communitySkill/:staffID/:skillCode` endpoint (Synergetic stored-procedure backed, not a direct Sequelize update), typed request/response
 - No direct axios calls in components; all via service layer
-- Notification service: New `src/services/Synergetic/Community/ExpiringSkillsService.ts` wraps worker queries
+- Notification service: New `src/services/Synergetic/Community/ExpiringSkillsService.ts` wraps bulk update calls
 
 ✅ **III. Explicit Async UX States**: 
 - **Export CSV**: Loading → Success (file download) + Error (toast)
@@ -150,7 +152,8 @@ src/
 │   └── Settings/
 │       └── Message.ts                  # (MODIFY) Add MESSAGE_TYPE_SKILL_EXPIRATION_NOTIFICATION
 ├── workers/
-│   └── ExpiringSkillsWorker.ts         # (NEW) Query & notify expiring skills daily
+│   └── ExpiringSkillsWorker.ts         # (NEW) Query & notify expiring skills nightly, incl. day-interval math
+├── worker.ts                            # (MODIFY) Register nightly 11:59pm cron trigger in loadCronJobs()
 ├── queue/
 │   ├── CronJobsQueue.ts                # (MODIFY) Register new worker
 │   └── helper/
@@ -158,7 +161,7 @@ src/
 ├── controllers/
 │   └── Synergetic/
 │       └── Community/
-│           └── SynCommunitySkillController.ts  # (MODIFY) Already has PUT/:seq; no bulk endpoint needed
+│           └── SynCommunitySkillController.ts  # (MODIFY) Add NEW PUT /:staffID/:skillCode method
 └── __tests__/
     ├── workers/ExpiringSkillsWorker.test.ts  # (NEW)
     └── queue/NotificationDeduplication.test.ts  # (NEW)
@@ -180,29 +183,28 @@ src/
 
 ### Research Summary
 
-All 4 implementation clarifications from the user have been verified against the actual codebase:
+All 4 implementation clarifications from the user have been verified against the actual codebase. **One assumption was found to be incorrect and has been corrected** after live database verification on 2026-08-19:
 
-1. **Bulk Skill Updates**: ✅ Verified
-   - Existing CRUDHelper.updateModel supports single resource PUT by ID
-   - Use `PUT /syn/communitySkill/:seq`, UI loops with Promise.all
-   - No new bulk endpoint needed
+1. **Bulk Skill Updates**: ⚠️ REVISED
+   - Original assumption (direct Sequelize update via `CRUDHelper.updateModel`) is **incorrect** — `SynCommunitySkill.ts` calls `SynergeticDB.blockUpsert()`, which rejects all direct saves/updates
+   - Verified live against `Synergetic_AUVIC_MENTONEGG_PRD`: stored procedures `spuCommunitySkills` (update), `spiCommunitySkills` (insert), `spdCommunitySkills` (delete) exist and are the only valid write path, matching the same raw-EXEC pattern already used by `StudentAbsenceHelper.syncToSynergetic()`
+   - **Confirmed direction**: New endpoint `PUT /syn/communitySkill/:staffID/:skillCode`, backend resolves existing record and calls `spuCommunitySkills` (or `spiCommunitySkills` if no record exists)
 
 2. **Notification Scheduler**: ✅ Verified
-   - CronJobsQueue exists with Redis backing
-   - Pattern proven by ExpiringCreditCards and ExpiringPassportsAndVisas workers
-   - Can add new ExpiringSkillsWorker following same pattern
+   - CronJobsQueue exists with Redis backing; `src/worker.ts` already registers nightly `node-cron` jobs (e.g. `cron.schedule('0 23 * * *', ...)`)
+   - **Confirmed**: New worker runs nightly at 11:59pm (`59 23 * * *`), checking all Active staff and their Active skills
 
 3. **Email Service**: ✅ Verified
    - SMTPConnector.send() is generic (supports to/cc/bcc/subject/html/text)
    - Used across multiple modules already
    - No abstraction layer needed
 
-4. **CSV Export Highlighting**: ✅ Verified
+4. **CSV Export Highlighting**: ✅ Verified, scope confirmed
    - CSVExportFromHtmlTableBtn already uses sheetjs-style library
    - Supports cell formatting (background color, etc.)
-   - Can enhance component to apply formatting for expired dates
+   - **Confirmed**: Highlighting applies only to Skill expiry date cells, not other date-looking columns (DOB, leaving date, etc.)
 
-**Key Finding**: No new backend endpoints needed beyond the existing single resource update. Implementation is **low-risk** due to proven patterns.
+**Key Finding**: Bulk update requires a genuinely **new** backend endpoint with stored-procedure integration (moderate effort). Notification worker, email, and CSV highlighting remain low-risk and follow proven patterns.
 
 ### Verified Assumptions
 
@@ -211,8 +213,10 @@ All 4 implementation clarifications from the user have been verified against the
 - ✅ Module ID 15 (Staff List) already defined
 - ✅ Excel export library available with formatting support
 - ✅ Email queue infrastructure ready
-- ✅ Notification scheduler infrastructure ready
+- ✅ Notification scheduler infrastructure ready (node-cron in `src/worker.ts`)
 - ✅ No database schema changes required
+- ✅ Synergetic stored procedures exist for skill writes (`spuCommunitySkills`, `spiCommunitySkills`, `spdCommunitySkills`)
+- ⚠️ Direct Sequelize writes to `CommunitySkills` are blocked — must use stored procedures instead
 
 ### Clarifications Addressed (Session 2026-08-19)
 
@@ -278,8 +282,8 @@ getModule(moduleId: number): Promise<{settings: Record<string, any>}>
 updateModule(moduleId: number, data: {settings: Record<string, any>}): Promise<{id, settings}>
 
 // src/services/Synergetic/Community/ExpiringSkillsService.ts (NEW)
-bulkUpdateSkillExpiryDate(skillSeqs: number[], newExpiryDate: string): Promise<iUpdateResult[]>
-  // Uses Promise.all to loop single updates: PUT /syn/communitySkill/:seq
+bulkUpdateSkillExpiryDate(staffIds: number[], skillCode: string, newExpiryDate: string): Promise<PromiseSettledResult<any>[]>
+  // Uses Promise.allSettled to loop: PUT /syn/communitySkill/:staffID/:skillCode
 
 getSkillsForStaff(staffId: number): Promise<iSynCommunitySkill[]>
   // Uses existing SynCommunitySkillService.getSkills()
@@ -287,6 +291,11 @@ getSkillsForStaff(staffId: number): Promise<iSynCommunitySkill[]>
 
 **Backend Services** (mggs-api):
 ```typescript
+// src/controllers/Synergetic/Community/SynCommunitySkillController.ts (MODIFY - new method)
+updateSkillExpiryByStaffAndCode(req, res): Promise<void>
+  // Resolves existing record by (ID=staffID, SkillCode=skillCode)
+  // Calls spuCommunitySkills (update) or spiCommunitySkills (insert) via raw EXEC
+
 // src/workers/ExpiringSkillsWorker.ts (NEW)
 run(request: iNotificationRequest): Promise<{
   notificationsSent: number;
@@ -301,11 +310,13 @@ sendBulkNotification(expiredStaffSummary, recipients, templates, settings): Prom
 
 ### 3. API Endpoint Contracts
 
-**Existing Endpoints (No New Endpoints)**:
+**Existing Endpoints (Reused)**:
 - `GET /syn/mggsModule/15` — Fetch settings
 - `PUT /syn/mggsModule/15` — Update settings
 - `GET /syn/communitySkill` — Fetch skills (paginated)
-- `PUT /syn/communitySkill/:seq` — Update single skill (via CRUDHelper)
+
+**New Endpoint (Required)**:
+- `PUT /syn/communitySkill/:staffID/:skillCode` — Update (or create) a staff member's skill expiry date via `spuCommunitySkills`/`spiCommunitySkills` stored procedures (raw EXEC, not Sequelize `.update()`). See `contracts/API-BulkUpdate.md` for full implementation.
 
 ### 4. UI Component Contracts
 
@@ -318,11 +329,13 @@ sendBulkNotification(expiredStaffSummary, recipients, templates, settings): Prom
 - Dropdown: Skill selection (populated from luSkill)
 - Date picker: New expiration date
 - Submit/Cancel buttons
+- Only rendered/enabled when `AuthService.isModuleRole(15, ROLE_ID_ADMIN)` resolves true
 
 **SkillExpirationSettings (New)**:
 - 8 configuration fields (numeric inputs, multi-select, text areas for templates)
 - Save button with loading state
 - Success/error toast messaging
+- Only rendered/enabled when `AuthService.isModuleRole(15, ROLE_ID_ADMIN)` resolves true
 
 ### 5. Notification Message Format
 
@@ -342,8 +355,14 @@ Subject: {bulkNotificationEmailSubject} (HTML-escaped variables)
 Body: {bulkNotificationEmailBody} (HTML-escaped variables)
 
 Variables: {expiringStaffTable}
-Deduplication: Track (staffId, skillCode, expirationDate, notificationDate); batch same-staff skills into 1 email/day
 ```
+
+**Deduplication Rule** (no persistent log — derived mathematically):
+```
+notifyDay = true if today == expiryDate - initialNotificationDays
+            OR (followUpNotificationDays > 0 AND daysSince(initialNotifyDate) % followUpNotificationDays == 0)
+```
+Batch same-staff skills into 1 email/day. See `contracts/ExpiringSkillsWorker.md` "Day-Interval Math" for full algorithm.
 
 ### 6. Testing Strategy
 
@@ -356,17 +375,20 @@ Deduplication: Track (staffId, skillCode, expirationDate, notificationDate); bat
 
 ## Summary & Next Steps
 
-✅ **All Infrastructure Verified**  
-- Research phase complete (verified against mggs-api codebase)
+✅ **All Infrastructure Verified (including live DB check)**  
+- Research phase complete (verified against mggs-api codebase + live query against Synergetic DB)
 - Constitution Check passed (all 5 principles satisfied)
-- No new database schemas or backend endpoints needed
-- Low implementation risk due to proven patterns
+- No database schema changes needed
+- **One new backend endpoint required**: bulk skill update via Synergetic stored procedures (`spuCommunitySkills`/`spiCommunitySkills`) — direct Sequelize writes are blocked
+- Notification worker, email, and CSV highlighting remain low-risk, proven patterns
+- Admin-only write actions (Bulk Update, Settings save) confirmed to use existing `isModuleRole`/`ROLE_ID_ADMIN` gating pattern
 
 📋 **Phase 1 Design Complete**  
-- Service layer contracts defined (existing + new services)
-- Data models specified (no DB changes)
-- UI component structure planned
+- Service layer contracts defined (existing + new services), including corrected bulk-update contract
+- Data models specified (no DB schema changes; write path via stored procedures)
+- UI component structure planned, with admin role gating
+- Day-interval notification math designed (no persistent log required)
 - Testing strategy mapped
 
 🚀 **Ready for Task Generation**  
-Run `/speckit.tasks` to generate dependency-ordered implementation tasks
+Run `/speckit.tasks` to generate dependency-ordered implementation tasks. One open decision remains (see `contracts/API-BulkUpdate.md` "Open Decision") regarding auto-create behavior for staff without an existing skill record — recommend resolving before/during task breakdown.

@@ -300,18 +300,19 @@ PUT /syn/mggsModule/15
    └─> uMGGSModules.settings.skillExpiration
 
 3. UI: Bulk Update Modal (React)
-   └─> Promise.all([PUT /syn/communitySkill/:seq, ...])
-       ✅ Uses existing single resource endpoint, UI loops
+   └─> Promise.allSettled([PUT /syn/communitySkill/:staffID/:skillCode, ...])
+       ⚠️ NEW endpoint required — calls spuCommunitySkills/spiCommunitySkills stored procs
+       (direct Sequelize update is blocked; see section 7 below)
 
-4. Cron Scheduler (already running)
-   └─> Check module settings, if enabled for skill expiration:
-       └─> CronJobsQueue.addJob({type: MESSAGE_TYPE_SKILL_EXPIRATION})
+4. Cron Scheduler (already running, node-cron in src/worker.ts)
+   └─> Nightly at 11:59pm: CronJobsQueue.addJobWithoutDuplicate({type: MESSAGE_TYPE_SKILL_EXPIRATION_NOTIFICATION})
 
 5. Worker Process (NEW: ExpiringSkillsWorker)
-   ├─ Query CommunitySkills with expiryDate < today or < (today + initialNotificationDays)
-   ├─ Filter by: monitoredSkillCodes, Active staff
+   ├─ Query ALL Active staff + their skills matching monitoredSkillCodes
+   ├─ Apply day-interval math per skill (no persistent log; derived from ExpiryDate + settings)
+   ├─ Batch qualifying skills by staff (1 email/staff/day max)
    ├─ Load email templates from module settings
-   ├─ For each staff: send individual email
+   ├─ For each staff: send individual batched email
    └─> For bulk recipients: send summary table
 
 6. MailGun Queue
@@ -348,33 +349,51 @@ export const MESSAGE_TYPE_SKILL_EXPIRATION_NOTIFICATION = 'SKILL_EXPIRATION_NOTI
   ExpiringSkillsWorker.run(message.request),
 ```
 
-#### 4. **Single Skill Update Endpoint** (Already Exists ✅)
+#### 4. **Bulk Skill Update Endpoint** (⚠️ NEW — revised after DB verification)
 **File**: `/src/controllers/Synergetic/Community/SynCommunitySkillController.ts`
-- Use existing `PUT /syn/communitySkill/:seq` endpoint (via CRUDHelper.updateModel)
-- No new endpoint needed
-- UI loops through selected staff with Promise.all for bulk updates
+
+**Critical finding**: Direct Sequelize update is impossible — `SynCommunitySkill.ts` calls `SynergeticDB.blockUpsert(SynCommunitySkill)`, which rejects any save/update at the model level. The only write path is a raw `EXEC` call to Synergetic's own stored procedures (verified live against the DB):
+
+| Procedure | Purpose | Parameters |
+|-----------|---------|------------|
+| `spiCommunitySkills` | Insert | `@ID, @SkillCode, @SkillLevel, @Comment, @AttainedDate, @ExpiryDate, @SkillSeq (INOUT)` |
+| `spuCommunitySkills` | Update | `@SkillSeq, @SkillCode, @SkillLevel, @Comment, @AttainedDate, @ExpiryDate` (all required) |
+| `spdCommunitySkills` | Delete | `@Skillseq` |
+
+**New Endpoint**: `PUT /syn/communitySkill/:staffID/:skillCode`
+- Look up existing record by `(ID=staffID, SkillCode=skillCode)` to preserve other fields
+- Call `spuCommunitySkills` via raw EXEC (same pattern as `StudentAbsenceHelper.syncToSynergetic()`)
+- If no existing record: create via `spiCommunitySkills` (upsert semantics, recommended)
+- Must be gated as admin-only write action (see section 7a)
 
 **Endpoint Usage**:
 ```typescript
-PUT /syn/communitySkill/:seq
+PUT /syn/communitySkill/45/CPR
 {
   "ExpiryDate": "2027-08-19"
 }
 Response: Updated SynCommunitySkillModel
 ```
 
-**UI Implementation** (Promise.all pattern):
+**UI Implementation** (Promise.allSettled pattern, keyed by staffID/skillCode):
 ```typescript
-const updateMultiple = (selectedSkillSeqs: number[], newExpiryDate: string) => {
-  return Promise.all(
-    selectedSkillSeqs.map(seq =>
-      axios.put(`/syn/communitySkill/${seq}`, {
+const updateMultiple = (selectedStaffIds: number[], skillCode: string, newExpiryDate: string) => {
+  return Promise.allSettled(
+    selectedStaffIds.map(staffId =>
+      axios.put(`/syn/communitySkill/${staffId}/${skillCode}`, {
         ExpiryDate: newExpiryDate
       })
     )
   );
 };
 ```
+
+See `contracts/API-BulkUpdate.md` for full server-side implementation and the raw EXEC query template.
+
+#### 4a. **Access Control for Write Actions** (Confirmed)
+Bulk update and Settings save must be gated as admin-only actions, not just general module view access:
+- **Frontend**: `AuthService.isModuleRole(MGGS_MODULE_ID_STAFF_LIST, ROLE_ID_ADMIN)` — same pattern as `BTGLDetailsPanel.tsx` / `ParentTeacherInterviewPage.tsx`
+- **Backend**: Equivalent admin role check before executing the stored procedure or saving settings
 
 #### 5. **Email Template Helpers** (Minor)
 **File**: `/src/queue/helper/ExpiringSkillsMailerHelper.ts` (NEW)
@@ -387,12 +406,12 @@ const updateMultiple = (selectedSkillSeqs: number[], newExpiryDate: string) => {
 
 ## 8. Frontend / UI Implementation
 
-### No Backend Data Model Changes
+### No Backend Data Model Changes (Schema)
 
 Frontend can use:
 - Existing `MggsModuleService.getModule(MGGS_MODULE_ID_STAFF_LIST)` for reading settings
 - Existing `MggsModuleService.updateModule(15, {settings: ...})` for saving settings
-- New `PUT /syn/communitySkill/bulk` endpoint (to be created) for bulk updates
+- New `PUT /syn/communitySkill/:staffID/:skillCode` endpoint (to be created, stored-procedure backed) for bulk updates
 
 ### Data Flow in UI
 
@@ -447,12 +466,14 @@ const handleBulkUpdate = (selectedSkillSeqs: number[], expiryDate: string) => {
 | **Module Settings Storage** | ✅ Ready | `uMGGSModules.settings` (TEXT/JSON) |
 | **Skill Data with Expiry** | ✅ Ready | `CommunitySkills.ExpiryDate` exists |
 | **Skill Lookup Table** | ✅ Ready | `luSkill` table available |
-| **Queue/Job Scheduler** | ✅ Ready | Redis + Bull, CronJobsQueue pattern |
+| **Queue/Job Scheduler** | ✅ Ready | Redis + Bull, CronJobsQueue + `src/worker.ts` node-cron pattern |
 | **Email Infrastructure** | ✅ Ready | MailGun + SMTP configured |
 | **Module Settings Endpoint** | ✅ Ready | `GET/PUT /syn/mggsModule/{id}` |
 | **Skill Retrieval Endpoint** | ✅ Ready | `GET /syn/communitySkill` |
-| **Single Skill Update Endpoint** | ✅ Ready | Use existing `PUT /syn/communitySkill/:seq` (CRUDHelper.updateModel) |
-| **Skill Expiration Worker** | ❌ Missing | Need to create `ExpiringSkillsWorker.ts` |
+| **Skill Update Mechanism** | ⚠️ Blocked at model level | Sequelize `blockUpsert()` rejects all writes; must use `spuCommunitySkills`/`spiCommunitySkills` stored procs via raw EXEC |
+| **Bulk Update Endpoint** | ❌ Missing (NEW) | Need to create `PUT /syn/communitySkill/:staffID/:skillCode` |
+| **Skill Expiration Worker** | ❌ Missing | Need to create `ExpiringSkillsWorker.ts` (incl. day-interval math) |
+| **Admin Role Gating** | ✅ Pattern exists | `AuthService.isModuleRole(moduleId, ROLE_ID_ADMIN)`, reuse from BudgetTracker/PTI |
 
 ---
 
@@ -461,12 +482,14 @@ const handleBulkUpdate = (selectedSkillSeqs: number[], expiryDate: string) => {
 - [x] Module settings table has JSON column — ✅ `uMGGSModules.settings`
 - [x] Community skills have expiration dates — ✅ `CommunitySkills.ExpiryDate`
 - [x] Module ID 15 (Staff List) is defined — ✅ `MGGS_MODULE_ID_STAFF_LIST = 15`
-- [x] Queue infrastructure exists — ✅ Redis + CronJobsQueue
+- [x] Queue infrastructure exists — ✅ Redis + CronJobsQueue + node-cron in `src/worker.ts`
 - [x] Email service configured — ✅ MailGun + SMTP
 - [x] Module settings endpoint works — ✅ `GET/PUT /syn/mggsModule/{id}`
 - [x] Skill lookup available — ✅ `luSkill` table
-- [x] Single skill update endpoint exists — ✅ Via CRUDHelper.updateModel
+- [x] Skill update stored procedures exist — ✅ Verified live: `spuCommunitySkills`, `spiCommunitySkills`, `spdCommunitySkills`
+- [ ] Bulk update endpoint exists — ❌ Need to create (`PUT /syn/communitySkill/:staffID/:skillCode`)
 - [ ] Skill expiration worker exists — ❌ Need to create
+- [x] Admin role gating pattern confirmed — ✅ `AuthService.isModuleRole` + `ROLE_ID_ADMIN`
 
 ---
 
@@ -475,34 +498,42 @@ const handleBulkUpdate = (selectedSkillSeqs: number[], expiryDate: string) => {
 ### Database Risk: **LOW** ✅
 - No schema changes needed
 - All data structures already exist
-- Read-only access to Synergetic DB (safe)
+- Writes to Synergetic go through verified stored procedures (standard, safe pattern already used by absence sync)
 
-### ✅ Backend Risk: **LOW** ✅
-- Add new worker: `ExpiringSkillsWorker` (follows proven ExpiringCreditCards pattern)
-- Register in CronJobsQueue (minimal change)
+### ⚠️ Backend Risk: **MEDIUM** (revised from LOW)
+- Bulk update requires a genuinely new endpoint + raw EXEC stored-procedure integration (~80-120 lines, needs careful transaction/error handling, ~1-2 days)
+- Add new worker: `ExpiringSkillsWorker` (follows proven ExpiringCreditCards pattern, plus new day-interval math since no persistent notification log exists)
+- Register in CronJobsQueue + `src/worker.ts` nightly cron (minimal change)
 - Use existing SMTPConnector for email (no new infrastructure)
-- ~200-250 lines of new code total
+- ~350-400 lines of new code total
 
 ### Frontend Risk: **LOW** ✅
 - Uses existing module settings pattern
 - Reuses existing CRUD services
+- Reuses existing `isModuleRole` admin-gating pattern
 - No database changes required
 
 ---
 
 ## Recommendations
 
-1. **Before Planning**: Confirm with mggs-api team:
-   - ✅ Existing patterns are acceptable for bulk updates
-   - ✅ New worker can follow ExpiringCreditCards pattern
-   - ✅ MailGun email service can handle skill expiration templates
+1. **Confirmed decisions** (per user, 2026-08-19):
+   - ✅ Bulk update endpoint: `PUT /syn/communitySkill/:staffID/:skillCode`, backed by `spuCommunitySkills`/`spiCommunitySkills` stored procedures
+   - ✅ Notification worker runs nightly at 11:59pm, checking all Active staff + their Active skills
+   - ✅ CSV highlighting applies only to Skill expiry cells, not other date columns
+   - ✅ Bulk update and Settings save are admin-gated via `AuthService.isModuleRole(moduleId, ROLE_ID_ADMIN)`
 
-2. **Implementation Order**:
-   1. Create `ExpiringSkillsWorker.ts` in mggs-api (follows ExpiringCreditCards pattern)
-   2. Register worker in `CronJobsQueue.ts` (add MESSAGE_TYPE_SKILL_EXPIRATION_NOTIFICATION)
-   3. Frontend Settings panel (React)
-   4. Frontend Bulk update modal (React) — use Promise.all + single PUT endpoint
-   5. CSV export highlighting (React) — enhance CSVExportFromHtmlTableBtn with sheetjs-style
+2. **Open decision requiring final confirmation before coding**:
+   - Bulk update on a staff member with no existing skill record: auto-create (recommended, upsert semantics) vs. skip/error — see `contracts/API-BulkUpdate.md` "Open Decision"
 
-3. **No Database Migrations Required** — No new backend endpoint needed (use existing single resource endpoint). Proceed directly to worker + frontend implementation.
+3. **Implementation Order**:
+   1. Add bulk-update controller method in mggs-api (`spuCommunitySkills`/`spiCommunitySkills` via raw EXEC) — see `contracts/API-BulkUpdate.md`
+   2. Create `ExpiringSkillsWorker.ts` in mggs-api (follows ExpiringCreditCards pattern, includes day-interval math) — see `contracts/ExpiringSkillsWorker.md`
+   3. Register worker in `CronJobsQueue.ts` + nightly trigger in `src/worker.ts` (11:59pm)
+   4. Frontend Settings panel (React), admin-gated
+   5. Frontend Bulk update modal (React) — use Promise.allSettled + new staffID/skillCode-keyed endpoint, admin-gated
+   6. CSV export highlighting (React) — enhance CSVExportFromHtmlTableBtn with sheetjs-style, scoped to Skill columns only
+
+4. **No Database Schema Migrations Required** — but a new backend endpoint (bulk update) and new stored-procedure integration ARE required; this is not a zero-backend-change feature as originally assumed.
+
 

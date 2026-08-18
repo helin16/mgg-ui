@@ -96,6 +96,24 @@ export interface iSkillExpirationSettings {
 export const MESSAGE_TYPE_SKILL_EXPIRATION_NOTIFICATION = 'SKILL_EXPIRATION_NOTIFICATION';
 ```
 
+### 2.2b Bulk Skill Update Endpoint (NEW — revised after DB verification)
+
+**⚠️ Important**: Direct Sequelize `.update()` on `CommunitySkills` is blocked (`SynergeticDB.blockUpsert()`). Writes must go through Synergetic stored procedures via raw `EXEC`, same pattern as `StudentAbsenceHelper.syncToSynergetic()`.
+
+**Verified stored procedures** (confirmed via live query): `spuCommunitySkills` (update, requires all fields), `spiCommunitySkills` (insert), `spdCommunitySkills` (delete).
+
+**File**: `src/controllers/Synergetic/Community/SynCommunitySkillController.ts` (MODIFY)
+
+Checklist:
+- [ ] Add new route: `PUT /syn/communitySkill/:staffID/:skillCode`
+- [ ] Add backend admin-role check before allowing write (mirror `SynMggsModuleController`'s settings PUT validation)
+- [ ] Look up existing record by `(ID=staffID, SkillCode=skillCode)`
+- [ ] If exists: call `spuCommunitySkills` via raw EXEC with existing field values + new `ExpiryDate`
+- [ ] If not exists: call `spiCommunitySkills` via raw EXEC to create new record (upsert semantics — confirm this is desired before implementing)
+- [ ] Wrap EXEC in `BEGIN TRANSACTION` / `COMMIT` / `ROLLBACK` (see `contracts/API-BulkUpdate.md` for exact query template, modeled on `StudentAbsenceHelper.syncToSynergetic()`)
+- [ ] Re-fetch and return the updated/created record
+- [ ] Write Jest tests (mock DB query, verify correct proc + params called for update vs. insert paths)
+
 ### 2.3 Create Mailer Helper
 
 **File**: `src/queue/helper/ExpiringSkillsMailerHelper.ts`  
@@ -116,22 +134,26 @@ Checklist:
 Checklist:
 - [ ] Implement `ExpiringSkillsWorker.run()` following ExpiringCreditCards pattern
 - [ ] Load module settings from uMGGSModules
-- [ ] Query expiring skills (ExpiryDate <= today + initialNotificationDays)
-- [ ] Filter by Active staff only
-- [ ] Batch skills by staff (one email per staff/day max)
+- [ ] Query ALL Active staff + ALL their skills matching `monitoredSkillCodes` (confirmed scope — not pre-filtered by date at the DB level)
+- [ ] Apply day-interval math per skill to decide if TODAY is a notify day (see "Day-Interval Math" in `contracts/ExpiringSkillsWorker.md` — no persistent log exists, so this must be derived from `ExpiryDate` + settings each run)
+- [ ] Batch qualifying skills by staff (one email per staff/day max)
 - [ ] Call ExpiringSkillsMailerHelper for sending
 - [ ] Log at INFO level (success) and WARN level (failures)
 - [ ] Return stats: notificationsSent, emailsSent, failures array
-- [ ] Write Jest tests (mock DB queries, verify deduplication)
+- [ ] Write Jest tests (mock DB queries, verify day-interval math incl. `followUpNotificationDays = 0` edge case)
 
-### 2.5 Register Worker in Queue
+### 2.5 Register Worker in Queue + Nightly Cron
 
 **File**: `src/queue/CronJobsQueue.ts`
 
 Checklist:
 - [ ] Import ExpiringSkillsWorker
 - [ ] Add MESSAGE_TYPE_SKILL_EXPIRATION_NOTIFICATION to processJob map
-- [ ] Configure cron trigger time (e.g., daily at 11:59 PM)
+
+**File**: `src/worker.ts` (confirmed registration point — same file as existing `Student absence daily summary at 11pm` / `Clipboard StudentClasses sync at 11pm` jobs)
+
+Checklist:
+- [ ] Add new `cron.schedule('59 23 * * *', ...)` block inside `loadCronJobs()`, calling `CronJobsQueue.addJobWithoutDuplicate({}, MESSAGE_TYPE_SKILL_EXPIRATION_NOTIFICATION, AuthHelper.getDefaultSystemUserId(), CronJobsQueue)`
 - [ ] Test locally: manually trigger via Bull admin UI or test script
 
 ### 2.6 Backend Testing
@@ -156,18 +178,18 @@ npm run dev
 
 ## Phase 3: Frontend UI (Days 6-10)
 
-### 3.1 CSV Export Highlighting
+### 3.1 CSV Export Highlighting (scope confirmed: Skill cells only)
 
 **File**: `src/components/form/CSVExportFromHtmlTableBtn.tsx`
 
 Checklist:
-- [ ] Parse table cells to detect expiration dates (ExpiryDate column)
-- [ ] For each expired date (date < today):
+- [ ] Identify Skill expiry date columns specifically via `COLUMN_GROUP_SKILL_EXPIRY_DATE` (from `StaffListHelper.tsx`) — do NOT apply formatting to other date-looking columns (DOB, leaving date, etc.)
+- [ ] For each expired Skill-expiry cell (date < today):
   - Apply background color styling (red/yellow)
   - Use sheetjs-style API: `cell.fill = {fgColor: {rgb: "FFFF0000"}}`  (red)
 - [ ] Keep existing functionality: table_to_sheet() + book_new() + writeFile()
-- [ ] Test with sample staff list (mixed expired/current dates)
-- [ ] Cypress E2E: Export → open file → verify highlighting visible
+- [ ] Test with sample staff list (mixed expired/current dates, plus unrelated date columns to confirm no false positives)
+- [ ] Cypress E2E: Export → open file → verify only Skill cells highlighted
 
 **Example Enhancement**:
 ```typescript
@@ -205,11 +227,13 @@ Checklist:
   - Date picker: new expiration date
   - Submit/Cancel buttons
   - Loading state during submission
+- [ ] Gate rendering behind `AuthService.isModuleRole(MGGS_MODULE_ID_STAFF_LIST, ROLE_ID_ADMIN)` (matching `BTGLDetailsPanel.tsx`/`ParentTeacherInterviewPage.tsx` pattern)
 - [ ] On submit:
   - Validate skill code + date not empty
-  - Call ExpiringSkillsService.bulkUpdateSkillExpiryDate()
+  - Call ExpiringSkillsService.bulkUpdateSkillExpiryDate(selectedStaffIds, skillCode, newExpiryDate) — keyed by staffID/skillCode, not SkillSeq
   - Show loading spinner
   - On success: Show toast + close modal + emit onSuccess callback
+  - On partial failure (`Promise.allSettled`): Show toast listing which staff failed
   - On error: Show error toast with retry option
 - [ ] Write Jest tests (mock API, verify form validation)
 - [ ] Cypress E2E: Select 2+ staff → Open modal → Choose skill → Submit → Verify list refreshed
@@ -217,7 +241,7 @@ Checklist:
 **Component Contract**:
 ```typescript
 interface IBulkUpdateModalProps {
-  selectedSkillSeqs: number[];
+  selectedStaffIds: number[];
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
@@ -229,9 +253,9 @@ interface IBulkUpdateModalProps {
 **File**: `src/components/staff/StaffListPanel.tsx` (MODIFY)
 
 Checklist:
-- [ ] Add checkbox column state: `const [selectedSkillSeqs, setSelectedSkillSeqs] = useState<number[]>([])`
+- [ ] Add checkbox column state: `const [selectedStaffIds, setSelectedStaffIds] = useState<number[]>([])`
 - [ ] Add checkbox input to table header + each row
-- [ ] Show "Bulk Update" button when selectedSkillSeqs.length > 1
+- [ ] Show "Bulk Update" button when `selectedStaffIds.length > 1` AND `isModuleRole(MGGS_MODULE_ID_STAFF_LIST, ROLE_ID_ADMIN)` resolves true
 - [ ] Button calls: `setBulkUpdateModalOpen(true)`
 - [ ] On bulk update modal success:
   - Clear selections
@@ -283,12 +307,12 @@ interface iSkillExpirationSettings {
 **File**: `src/services/Synergetic/Community/ExpiringSkillsService.ts` (NEW)
 
 Checklist:
-- [ ] Implement `bulkUpdateSkillExpiryDate(skillSeqs: number[], newExpiryDate: string)`
-  - Loop through skillSeqs with Promise.all
-  - Call `PUT /syn/communitySkill/:seq` for each
-  - Return array of results (success/error per skill)
-- [ ] Implement type: `iUpdateResult[]`
-- [ ] Write Jest tests (mock axios, verify Promise.all logic)
+- [ ] Implement `bulkUpdateSkillExpiryDate(staffIds: number[], skillCode: string, newExpiryDate: string)`
+  - Loop through staffIds with `Promise.allSettled`
+  - Call `PUT /syn/communitySkill/:staffID/:skillCode` for each
+  - Return array of settled results (fulfilled/rejected per staff)
+- [ ] Implement type: `PromiseSettledResult<iSynCommunitySkill>[]`
+- [ ] Write Jest tests (mock axios, verify Promise.allSettled logic incl. partial failure)
 
 ### 3.6 Frontend Testing
 

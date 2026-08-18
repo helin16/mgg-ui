@@ -3,7 +3,29 @@
 **File**: `src/workers/ExpiringSkillsWorker.ts` (NEW in mggs-api)  
 **Pattern**: Follows `src/workers/ExpiringCreditCards.ts`  
 **Queue**: CronJobsQueue (Bull Queue, Redis-backed)  
-**Trigger**: Scheduled daily cron job (configuration in CronJobsQueue.ts)
+**Trigger**: Nightly cron job at 11:59 PM, registered in `src/worker.ts` (confirmed pattern below)
+
+## Confirmed Cron Registration
+
+`src/worker.ts` already registers several nightly jobs via `node-cron` with a shared `defaultCronSettings` (uses `AppHelper.getDefaultTimeZone()`, so server-timezone DST is handled consistently with existing jobs):
+
+```typescript
+// Existing patterns for reference:
+cron.schedule('0 23 * * *', async () => { /* Student absence daily summary at 11pm */ });
+cron.schedule('0 23 * * *', async () => { /* Clipboard StudentClasses sync at 11pm */ });
+
+// NEW: add to loadCronJobs() in src/worker.ts
+console.log(`Checking Expiring Staff Skills every night at 11:59pm`);
+cron.schedule('59 23 * * *', async () => {
+  await CronJobsQueue.addJobWithoutDuplicate({},
+    MESSAGE_TYPE_SKILL_EXPIRATION_NOTIFICATION,
+    AuthHelper.getDefaultSystemUserId(),
+    CronJobsQueue
+  );
+}, defaultCronSettings);
+```
+
+**Query Scope (confirmed)**: Each nightly run checks **all Active staff** and **all of their skill records** (not just those matching monitored codes at the DB query level — filter by `monitoredSkillCodes` from settings, and `ActiveFlag = true` staff only), then applies the day-interval math (below) to decide who actually gets notified tonight.
 
 ## Worker Signature
 
@@ -61,6 +83,8 @@ export default ExpiringSkillsWorker;
     ExpiringSkillsWorker.run(message.request),
   ```
 
+- [ ] Update `src/worker.ts` — add nightly 11:59pm trigger inside `loadCronJobs()` (see "Confirmed Cron Registration" above for exact snippet), following the same pattern as the existing `Student absence daily summary at 11pm` and `Clipboard StudentClasses sync at 11pm` jobs
+
 ### Phase 2: Worker Core Logic
 
 - [ ] Implement `ExpiringSkillsWorker.run()`:
@@ -84,31 +108,36 @@ export default ExpiringSkillsWorker;
         return { notificationsSent: 0, emailsSent: 0, failures: [] };
       }
       
-      // Step 2: Query expiring skills
-      const today = new Date();
-      const initialThresholdDate = new Date(today);
-      initialThresholdDate.setDate(today.getDate() + settings.initialNotificationDays);
-      
-      const expiringSkills = await CommunitySkill.findAll({
+      // Step 2: Query ALL active staff + their skills matching monitored codes
+      // (confirmed scope: all Active staff, all their Active skills — not pre-filtered by date at DB level)
+      const allExpiringSkills = await CommunitySkill.findAll({
         where: {
           SkillCode: { [Op.in]: settings.monitoredSkillCodes },
-          ExpiryDate: { [Op.lte]: initialThresholdDate }
+          ExpiryDate: { [Op.ne]: null }
         },
         include: [
           { model: VStaff, where: { ActiveFlag: true }, required: true }
         ]
       });
       
-      // Step 3: Batch skills by staff
+      // Step 3: For each skill, compute whether TODAY is a legitimate notify day
+      // No persistent "last notified" log exists (FR-030), so this must be derived
+      // purely from ExpiryDate + settings — see "Day-Interval Math" section below.
+      const today = new Date();
+      const skillsToNotifyToday = allExpiringSkills.filter(skill =>
+        isNotifyDay(skill.ExpiryDate, today, settings.initialNotificationDays, settings.followUpNotificationDays)
+      );
+      
+      // Step 4: Batch qualifying skills by staff
       const staffSkillMap = new Map<number, iSynCommunitySkill[]>();
-      for (const skill of expiringSkills) {
+      for (const skill of skillsToNotifyToday) {
         if (!staffSkillMap.has(skill.ID)) {
           staffSkillMap.set(skill.ID, []);
         }
         staffSkillMap.get(skill.ID)!.push(skill);
       }
       
-      // Step 4: Send individual notifications
+      // Step 5: Send individual notifications (one batched email per staff)
       for (const [staffId, skills] of staffSkillMap.entries()) {
         try {
           const staff = await VStaff.findOne({ where: { StaffID: staffId } });
@@ -127,7 +156,7 @@ export default ExpiringSkillsWorker;
         }
       }
       
-      // Step 5: Send bulk notification to admins
+      // Step 6: Send bulk notification to admins
       if (staffSkillMap.size > 0 && settings.skillExpirationNotificationEmails) {
         try {
           await ExpiringSkillsMailerHelper.sendBulkNotification(
@@ -154,6 +183,42 @@ export default ExpiringSkillsWorker;
     }
   }
   ```
+
+### Phase 2b: Day-Interval Math (Follow-Up Notification Logic)
+
+**Problem**: With no persistent notification log (FR-030), the worker must derive "is today a legitimate notify day for this skill?" purely from `ExpiryDate` + settings, each night, independently.
+
+**Algorithm**:
+```typescript
+function isNotifyDay(
+  expiryDate: Date,
+  today: Date,
+  initialNotificationDays: number,
+  followUpNotificationDays: number
+): boolean {
+  const initialNotifyDate = new Date(expiryDate);
+  initialNotifyDate.setDate(expiryDate.getDate() - initialNotificationDays);
+
+  // Before the initial notification window even opens
+  if (today < initialNotifyDate) {
+    return false;
+  }
+
+  // followUpNotificationDays = 0 means "initial notification only, no follow-ups"
+  if (followUpNotificationDays <= 0) {
+    return isSameDay(today, initialNotifyDate);
+  }
+
+  // Days elapsed since the initial notification date (can be negative-safe due to guard above)
+  const daysSinceInitial = diffInDays(today, initialNotifyDate);
+
+  // Notify on day 0 (initial) and every followUpNotificationDays after that, indefinitely
+  // (continues past expiry per Q3 clarification, until ExpiryDate itself changes)
+  return daysSinceInitial % followUpNotificationDays === 0;
+}
+```
+
+**Why this works without persistent storage**: `initialNotifyDate` is fully derived from `ExpiryDate` (fixed until changed) and `initialNotificationDays` (a fixed setting). Changing `ExpiryDate` automatically shifts `initialNotifyDate`, which naturally satisfies FR-014 (cycle reset on ExpiryDate change) with zero extra bookkeeping.
 
 ### Phase 3: Mailer Helper
 
