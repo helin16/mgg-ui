@@ -126,16 +126,11 @@ const updateSkillExpiryByStaffAndCode = async (req: Request, res: Response) => {
 };
 ```
 
-## Open Decision (Needs Confirmation Before Implementation)
+## Decision: Auto-Create on Missing Skill Record (Confirmed)
 
 **What happens when a selected staff member doesn't already have a record for the chosen skill code?**
 
-| Option | Behavior |
-|--------|----------|
-| **A (Recommended)** | Auto-create via `spiCommunitySkills` (upsert semantics) — bulk update becomes "set or create" |
-| B | Return 404/skip that staff member; only pre-existing skill records can be bulk-updated |
-
-Recommend **Option A** since bulk update UX (per spec) doesn't require the admin to know in advance which staff already have the skill recorded — treating it as upsert is more robust and matches natural admin intent ("ensure these staff have this skill valid until X").
+Confirmed: auto-create via `spiCommunitySkills` (upsert semantics) — bulk update behaves as "set or create". This matches natural admin intent ("ensure these staff have this skill valid until X") and doesn't require the admin to know in advance which staff already have the skill recorded.
 
 ## Frontend Usage Pattern (Promise.all, staffID/skillCode keyed)
 

@@ -232,7 +232,7 @@ All 4 implementation clarifications from the user have been verified against the
 
 ## Phase 1: Design & Service Contracts
 
-**Status**: IN PROGRESS — Contracts & data model being defined below
+**Status**: ✅ **COMPLETE** — Contracts & data model defined below
 
 ### 1. Data Model & Schema (No DB Changes)
 
@@ -391,4 +391,4 @@ Batch same-staff skills into 1 email/day. See `contracts/ExpiringSkillsWorker.md
 - Testing strategy mapped
 
 🚀 **Ready for Task Generation**  
-Run `/speckit.tasks` to generate dependency-ordered implementation tasks. One open decision remains (see `contracts/API-BulkUpdate.md` "Open Decision") regarding auto-create behavior for staff without an existing skill record — recommend resolving before/during task breakdown.
+Run `/speckit.tasks` to generate dependency-ordered implementation tasks. All design decisions are resolved, including bulk-update auto-create behavior for staff without an existing skill record (see `contracts/API-BulkUpdate.md`).
