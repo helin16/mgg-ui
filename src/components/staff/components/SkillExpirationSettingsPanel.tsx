@@ -131,156 +131,154 @@ const EditPanel = ({module, isSaving, onUpdate}: iEditPanel) => {
   };
 
   return (
-    <>
-      <FlexContainer className={'justify-content-between align-items-center'}>
-        <Tabs
-          variant={'pills'}
-          activeKey={selectedTab}
-          className={'mt-3 mb-3'}
-          onSelect={k => setSelectedTab(k || TAB_TIMING)}
-        >
-          <Tab eventKey={TAB_TIMING} title={'Notification Timing'}>
-            <SectionDiv>
-              <div className={'row g-3'}>
-                <div className={'col-lg-6'}>
-                  <Form.Check
-                    id={'initial-notification-enabled'}
-                    type={'checkbox'}
-                    label={'Initial notification'}
-                    checked={form.initialNotificationEnabled}
-                    onChange={event => commit({initialNotificationEnabled: event.target.checked})}
-                  />
-                  <Form.Label>Days before expiration</Form.Label>
-                  <Form.Control
-                    aria-label={'Initial notification (days before expiration)'}
-                    type={'number'}
-                    min={1}
-                    disabled={!form.initialNotificationEnabled}
-                    isInvalid={'initialNotificationDays' in errMap}
-                    value={form.initialNotificationDays}
-                    onChange={event => updateLocal({initialNotificationDays: event.target.value})}
-                    onBlur={() => commit()}
-                  />
-                  <FormErrorDisplay errorsMap={errMap} fieldName={'initialNotificationDays'} />
-                </div>
-                <div className={'col-lg-6'}>
-                  <Form.Check
-                    id={'follow-up-notification-enabled'}
-                    type={'checkbox'}
-                    label={'Follow-up notifications'}
-                    checked={form.followUpNotificationEnabled}
-                    onChange={event => commit({followUpNotificationEnabled: event.target.checked})}
-                  />
-                  <Form.Label>Days between reminders</Form.Label>
-                  <Form.Control
-                    aria-label={'Follow-up notifications (days between reminders)'}
-                    type={'number'}
-                    min={0}
-                    disabled={!form.followUpNotificationEnabled}
-                    isInvalid={'followUpNotificationDays' in errMap}
-                    value={form.followUpNotificationDays}
-                    onChange={event => updateLocal({followUpNotificationDays: event.target.value})}
-                    onBlur={() => commit()}
-                  />
-                  <small>Set to 0 to send only the initial notification.</small>
-                  <FormErrorDisplay errorsMap={errMap} fieldName={'followUpNotificationDays'} />
-                </div>
+    <SectionDiv>
+      {isSaving ? (
+        <FlexContainer className={'justify-content-end'}>
+          <Spinner animation={'border'} size={'sm'} />{' '}Saving...
+        </FlexContainer>
+      ) : null}
+      <Tabs
+        variant={'pills'}
+        activeKey={selectedTab}
+        className={'mt-3 mb-3'}
+        onSelect={k => setSelectedTab(k || TAB_TIMING)}
+      >
+        <Tab eventKey={TAB_TIMING} title={'Notification Timing'}>
+          <SectionDiv>
+            <div className={'row g-3'}>
+              <div className={'col-lg-6'}>
+                <Form.Check
+                  id={'initial-notification-enabled'}
+                  type={'checkbox'}
+                  label={'Initial notification'}
+                  checked={form.initialNotificationEnabled}
+                  onChange={event => commit({initialNotificationEnabled: event.target.checked})}
+                />
+                <Form.Label>Days before expiration</Form.Label>
+                <Form.Control
+                  aria-label={'Initial notification (days before expiration)'}
+                  type={'number'}
+                  min={1}
+                  disabled={!form.initialNotificationEnabled}
+                  isInvalid={'initialNotificationDays' in errMap}
+                  value={form.initialNotificationDays}
+                  onChange={event => updateLocal({initialNotificationDays: event.target.value})}
+                  onBlur={() => commit()}
+                />
+                <FormErrorDisplay errorsMap={errMap} fieldName={'initialNotificationDays'} />
               </div>
-            </SectionDiv>
-          </Tab>
+              <div className={'col-lg-6'}>
+                <Form.Check
+                  id={'follow-up-notification-enabled'}
+                  type={'checkbox'}
+                  label={'Follow-up notifications'}
+                  checked={form.followUpNotificationEnabled}
+                  onChange={event => commit({followUpNotificationEnabled: event.target.checked})}
+                />
+                <Form.Label>Days between reminders</Form.Label>
+                <Form.Control
+                  aria-label={'Follow-up notifications (days between reminders)'}
+                  type={'number'}
+                  min={0}
+                  disabled={!form.followUpNotificationEnabled}
+                  isInvalid={'followUpNotificationDays' in errMap}
+                  value={form.followUpNotificationDays}
+                  onChange={event => updateLocal({followUpNotificationDays: event.target.value})}
+                  onBlur={() => commit()}
+                />
+                <small>Set to 0 to send only the initial notification.</small>
+                <FormErrorDisplay errorsMap={errMap} fieldName={'followUpNotificationDays'} />
+              </div>
+            </div>
+          </SectionDiv>
+        </Tab>
 
-          <Tab eventKey={TAB_SKILLS} title={'Skill Filter'}>
-            <SectionDiv>
-              <Form.Label>Skill codes to monitor for expiration notifications</Form.Label>
-              <SynLuSkillSelector
-                isMulti
-                allowClear
-                values={form.monitoredSkillCodes}
-                onSelect={option => {
-                  const options = (Array.isArray(option) ? option : option ? [option] : []) as iAutoCompleteSingle[];
-                  commit({monitoredSkillCodes: options.map(opt => `${opt.value}`)});
-                }}
-              />
-            </SectionDiv>
-          </Tab>
+        <Tab eventKey={TAB_SKILLS} title={'Skill Filter'}>
+          <SectionDiv>
+            <Form.Label>Skill codes to monitor for expiration notifications</Form.Label>
+            <SynLuSkillSelector
+              isMulti
+              allowClear
+              values={form.monitoredSkillCodes}
+              onSelect={option => {
+                const options = (Array.isArray(option) ? option : option ? [option] : []) as iAutoCompleteSingle[];
+                commit({monitoredSkillCodes: options.map(opt => `${opt.value}`)});
+              }}
+            />
+          </SectionDiv>
+        </Tab>
 
-          <Tab eventKey={TAB_RECIPIENTS} title={'Recipients'}>
-            <SectionDiv>
-              <Form.Label>Nominated emails for the bulk summary (separated by ";")</Form.Label>
-              <Form.Control
-                aria-label={'Nominated emails for the bulk summary'}
-                as={'textarea'}
-                rows={2}
-                isInvalid={'skillExpirationNotificationEmails' in errMap}
-                value={form.skillExpirationNotificationEmails}
-                onChange={event => updateLocal({skillExpirationNotificationEmails: event.target.value})}
-                onBlur={() => commit()}
-              />
-              <FormErrorDisplay errorsMap={errMap} fieldName={'skillExpirationNotificationEmails'} />
-            </SectionDiv>
-          </Tab>
+        <Tab eventKey={TAB_RECIPIENTS} title={'Recipients'}>
+          <SectionDiv>
+            <Form.Label>Nominated emails for the bulk summary (separated by ";")</Form.Label>
+            <Form.Control
+              aria-label={'Nominated emails for the bulk summary'}
+              as={'textarea'}
+              rows={2}
+              isInvalid={'skillExpirationNotificationEmails' in errMap}
+              value={form.skillExpirationNotificationEmails}
+              onChange={event => updateLocal({skillExpirationNotificationEmails: event.target.value})}
+              onBlur={() => commit()}
+            />
+            <FormErrorDisplay errorsMap={errMap} fieldName={'skillExpirationNotificationEmails'} />
+          </SectionDiv>
+        </Tab>
 
-          <Tab eventKey={TAB_INDIVIDUAL_EMAIL} title={'Individual Notification Email'}>
-            <SectionDiv>
-              <Form.Label>Subject</Form.Label>
-              <Form.Control
-                aria-label={'Individual notification email subject'}
-                value={form.individualNotificationEmailSubject}
-                onChange={event => updateLocal({individualNotificationEmailSubject: event.target.value})}
-                onBlur={() => commit()}
-              />
-              <Form.Label className={'space-top'}>Body</Form.Label>
-              <small>
-                Available variables: {'{staffName}'}, {'{skillCode}'}, {'{expirationDate}'}, {'{staffOccupEmail}'}
-              </small>
-              <EmailTemplateBuilder
-                designData={form.individualNotificationEmailBody.design || {}}
-                editorRef={() => null}
-                onUpdated={editor => {
-                  editor.exportHtml(data => {
-                    const {design, html} = data;
-                    commit({individualNotificationEmailBody: {design, html}});
-                  });
-                }}
-              />
-            </SectionDiv>
-          </Tab>
+        <Tab eventKey={TAB_INDIVIDUAL_EMAIL} title={'Individual Notification Email'}>
+          <SectionDiv>
+            <Form.Label>Subject</Form.Label>
+            <Form.Control
+              aria-label={'Individual notification email subject'}
+              value={form.individualNotificationEmailSubject}
+              onChange={event => updateLocal({individualNotificationEmailSubject: event.target.value})}
+              onBlur={() => commit()}
+            />
+            <Form.Label className={'space-top'}>Body</Form.Label>
+            <small>
+              Available variables: {'{staffName}'}, {'{skillCode}'}, {'{expirationDate}'}, {'{staffOccupEmail}'}
+            </small>
+            <EmailTemplateBuilder
+              designData={form.individualNotificationEmailBody.design || {}}
+              editorRef={() => null}
+              onUpdated={editor => {
+                editor.exportHtml(data => {
+                  const {design, html} = data;
+                  commit({individualNotificationEmailBody: {design, html}});
+                });
+              }}
+            />
+          </SectionDiv>
+        </Tab>
 
-          <Tab eventKey={TAB_BULK_EMAIL} title={'Bulk Notification Email'}>
-            <SectionDiv>
-              <Form.Label>Subject</Form.Label>
-              <Form.Control
-                aria-label={'Bulk notification email subject'}
-                value={form.bulkNotificationEmailSubject}
-                onChange={event => updateLocal({bulkNotificationEmailSubject: event.target.value})}
-                onBlur={() => commit()}
-              />
-              <Form.Label className={'space-top'}>Body</Form.Label>
-              <small>Available variable: {'{expiringStaffTable}'}</small>
-              <EmailTemplateBuilder
-                designData={form.bulkNotificationEmailBody.design || {}}
-                editorRef={() => null}
-                onUpdated={editor => {
-                  editor.exportHtml(data => {
-                    const {design, html} = data;
-                    commit({bulkNotificationEmailBody: {design, html}});
-                  });
-                }}
-              />
-            </SectionDiv>
-          </Tab>
+        <Tab eventKey={TAB_BULK_EMAIL} title={'Bulk Notification Email'}>
+          <SectionDiv>
+            <Form.Label>Subject</Form.Label>
+            <Form.Control
+              aria-label={'Bulk notification email subject'}
+              value={form.bulkNotificationEmailSubject}
+              onChange={event => updateLocal({bulkNotificationEmailSubject: event.target.value})}
+              onBlur={() => commit()}
+            />
+            <Form.Label className={'space-top'}>Body</Form.Label>
+            <small>Available variable: {'{expiringStaffTable}'}</small>
+            <EmailTemplateBuilder
+              designData={form.bulkNotificationEmailBody.design || {}}
+              editorRef={() => null}
+              onUpdated={editor => {
+                editor.exportHtml(data => {
+                  const {design, html} = data;
+                  commit({bulkNotificationEmailBody: {design, html}});
+                });
+              }}
+            />
+          </SectionDiv>
+        </Tab>
 
-          <Tab eventKey={TAB_LOGS} title={'Logs'}>
-            <SkillExpirationLogsPanel />
-          </Tab>
-        </Tabs>
-        {isSaving ? (
-          <div>
-            <Spinner animation={'border'} size={'sm'} />{' '}Saving...
-          </div>
-        ) : null}
-      </FlexContainer>
-    </>
+        <Tab eventKey={TAB_LOGS} title={'Logs'}>
+          <SkillExpirationLogsPanel />
+        </Tab>
+      </Tabs>
+    </SectionDiv>
   );
 };
 
