@@ -8,23 +8,12 @@ jest.mock('sheetjs-style', () => {
   const actual = jest.requireActual('sheetjs-style');
   return {
     ...actual,
-    utils: {
-      ...actual.utils,
-      book_new: jest.fn(() => ({})),
-      book_append_sheet: jest.fn(),
-    },
     writeFile: jest.fn(),
   };
 });
 
 describe('CSVExportFromHtmlTableBtn', () => {
   const mockedXlsx = XLSX as jest.Mocked<typeof XLSX>;
-
-  beforeEach(() => {
-    // react-scripts' jest config resets mock implementations before every test,
-    // so the jest.fn() defaults set in the jest.mock() factory above don't survive - reset them here.
-    (mockedXlsx.utils.book_new as jest.Mock).mockReturnValue({});
-  });
 
   const renderTableAndBtn = () => {
     render(
@@ -59,11 +48,36 @@ describe('CSVExportFromHtmlTableBtn', () => {
     );
   };
 
-  const getExportedWorksheet = () => {
-    return mockedXlsx.utils.book_append_sheet.mock.calls[0][1];
+  const getExportedWorkbook = () => {
+    return mockedXlsx.writeFile.mock.calls[0][0];
   };
 
-  it('highlights only the expired skill-expiry cell, not other date columns or non-expired skills', async () => {
+  const getExportedWorksheet = () => {
+    const wb: any = getExportedWorkbook();
+    return wb.Sheets[wb.SheetNames[0]];
+  };
+
+  it('highlights only the expired skill-expiry cell in red/white, not other date columns or non-expired skills', async () => {
+    renderTableAndBtn();
+
+    await userEvent.click(screen.getByRole('button', {name: /export/i}));
+
+    const ws: any = getExportedWorksheet();
+    const expiredSkillCellRef = XLSX.utils.encode_cell({r: 1, c: 2});
+    const dobCellRef = XLSX.utils.encode_cell({r: 1, c: 1});
+
+    expect(ws[expiredSkillCellRef].s).toEqual({
+      fill: {
+        patternType: 'solid',
+        fgColor: {rgb: 'FFDC3545'},
+        bgColor: {rgb: 'FFDC3545'},
+      },
+      font: {bold: true, color: {rgb: 'FFFFFFFF'}},
+    });
+    expect(ws[dobCellRef].s).toBeUndefined();
+  });
+
+  it('sets a dd-mmm-yyyy number format on every skill-expiry cell (expired or not)', async () => {
     renderTableAndBtn();
 
     await userEvent.click(screen.getByRole('button', {name: /export/i}));
@@ -71,18 +85,23 @@ describe('CSVExportFromHtmlTableBtn', () => {
     const ws: any = getExportedWorksheet();
     const expiredSkillCellRef = XLSX.utils.encode_cell({r: 1, c: 2});
     const currentSkillCellRef = XLSX.utils.encode_cell({r: 2, c: 2});
-    const dobCellRef = XLSX.utils.encode_cell({r: 1, c: 1});
 
-    expect(ws[expiredSkillCellRef].s).toEqual({
-      fill: {
-        patternType: 'solid',
-        fgColor: {rgb: 'FFFFFF00'},
-        bgColor: {rgb: 'FFFFFF00'},
-      },
-      font: {bold: true, color: {rgb: 'FFFF0000'}},
-    });
-    expect(ws[currentSkillCellRef].s).toBeUndefined();
-    expect(ws[dobCellRef].s).toBeUndefined();
+    expect(ws[expiredSkillCellRef].z).toBe('dd mmm yyyy');
+    expect(ws[currentSkillCellRef].z).toBe('dd mmm yyyy');
+  });
+
+  it('renders skill-expiry dates as "DD MMM YYYY" (not US m/d/yy) once written and re-read as a real xlsx file', async () => {
+    renderTableAndBtn();
+
+    await userEvent.click(screen.getByRole('button', {name: /export/i}));
+
+    const wb = getExportedWorkbook();
+    const buffer = XLSX.write(wb, {type: 'buffer', bookType: 'xlsx'});
+    const reReadWorkbook = XLSX.read(buffer, {type: 'buffer', cellText: true});
+    const reReadSheet = reReadWorkbook.Sheets[reReadWorkbook.SheetNames[0]];
+
+    expect(reReadSheet[XLSX.utils.encode_cell({r: 1, c: 2})].w).toBe('01 Jan 2020');
+    expect(reReadSheet[XLSX.utils.encode_cell({r: 2, c: 2})].w).toBe('01 Jan 2030');
   });
 
   it('writes the file with the provided fileName', async () => {
