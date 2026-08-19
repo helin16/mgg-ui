@@ -104,6 +104,54 @@ describe('CSVExportFromHtmlTableBtn', () => {
     expect(reReadSheet[XLSX.utils.encode_cell({r: 2, c: 2})].w).toBe('01 Jan 2030');
   });
 
+  it('excludes .csv-export-exclude-column columns (e.g. selection checkboxes) from the export', async () => {
+    render(
+      <div>
+        <table id="staff-table-with-selection">
+          <thead>
+            <tr>
+              <th>
+                <span className="csv-export-exclude-column">
+                  <input type="checkbox" aria-label="Select all staff" readOnly />
+                </span>
+              </th>
+              <th>Staff ID</th>
+              <th>CPR</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span className="csv-export-exclude-column">
+                  <input type="checkbox" aria-label="Select staff 109" readOnly />
+                </span>
+              </td>
+              <td>109</td>
+              <td>
+                <div className="skill-expiry-date bg-danger text-white">01 Jan 2020</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <CSVExportFromHtmlTableBtn tableHtmlId="staff-table-with-selection" fileName="staff.xlsx" />
+      </div>
+    );
+
+    await userEvent.click(screen.getByRole('button', {name: /export/i}));
+
+    const ws: any = getExportedWorksheet();
+    expect(ws['A1'].v).toBe('Staff ID');
+    expect(ws['B1'].v).toBe('CPR');
+    expect(ws[XLSX.utils.encode_cell({r: 1, c: 1})].s).toEqual({
+      fill: {
+        patternType: 'solid',
+        fgColor: {rgb: 'FFDC3545'},
+        bgColor: {rgb: 'FFDC3545'},
+      },
+      font: {bold: true, color: {rgb: 'FFFFFFFF'}},
+    });
+  });
+
   it('writes the file with the provided fileName', async () => {
     renderTableAndBtn();
 

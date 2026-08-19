@@ -344,7 +344,7 @@ const StaffListPanel = ({ showSearchPanel = true }: iStaffListPanel) => {
                 variant={"link"}
                 onClick={() => setIsBulkUpdateModalOpen(true)}
               >
-                Bulk Update
+                Bulk Update {selectedStaffIds.length} Staff(s)
               </Button>
             ) : null}
             <CSVExportFromHtmlTableBtn

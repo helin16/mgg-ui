@@ -236,12 +236,14 @@ const StaffListTable = ({
       sticky: "left",
       width: 40,
       Header: () => (
-        <input
-          type={"checkbox"}
-          aria-label={"Select all staff"}
-          checked={allSelected}
-          onChange={event => onSelectionChange?.(event.target.checked ? allStaffIds : [])}
-        />
+        <span className={"csv-export-exclude-column"}>
+          <input
+            type={"checkbox"}
+            aria-label={"Select all staff"}
+            checked={allSelected}
+            onChange={event => onSelectionChange?.(event.target.checked ? allStaffIds : [])}
+          />
+        </span>
       ),
       getCellProps: (cell: any) => {
         if (!cell.row.original.noOfMergingRows && cell.row.original.noOfMergingRows <= 0) {
@@ -254,17 +256,19 @@ const StaffListTable = ({
       Cell: (cell: any) => {
         const staffId = cell.cell.row.original.StaffID;
         return (
-          <input
-            type={"checkbox"}
-            aria-label={`Select staff ${staffId}`}
-            checked={selectedStaffIds.includes(staffId)}
-            onChange={event => {
-              const next = event.target.checked
-                ? [...selectedStaffIds, staffId]
-                : selectedStaffIds.filter(id => id !== staffId);
-              onSelectionChange?.(next);
-            }}
-          />
+          <span className={"csv-export-exclude-column"}>
+            <input
+              type={"checkbox"}
+              aria-label={`Select staff ${staffId}`}
+              checked={selectedStaffIds.includes(staffId)}
+              onChange={event => {
+                const next = event.target.checked
+                  ? [...selectedStaffIds, staffId]
+                  : selectedStaffIds.filter(id => id !== staffId);
+                onSelectionChange?.(next);
+              }}
+            />
+          </span>
         );
       }
     };

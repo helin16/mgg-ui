@@ -23,6 +23,30 @@ type iCSVExportFromHtmlTableBtn = ButtonProps & {
   btnTxt?: string
 }
 const CSVExportFromHtmlTableBtn = ({tableHtmlId, fileName, btnTxt = 'Export', ...props}: iCSVExportFromHtmlTableBtn) => {
+  // Interactive-only columns (e.g. the staff-selection checkboxes) are marked with
+  // `.csv-export-exclude-column` and dropped from the export - they have no meaningful export value.
+  const removeExcludedColumns = (table: HTMLElement) => {
+    const headerRow = table.querySelector('thead tr');
+    if (!headerRow) {
+      return;
+    }
+    const excludedColIndexes = Array.from(headerRow.children)
+      .map((cell, index) => (cell.querySelector('.csv-export-exclude-column') ? index : -1))
+      .filter(index => index !== -1)
+      .sort((a, b) => b - a);
+    if (excludedColIndexes.length === 0) {
+      return;
+    }
+    Array.from(table.querySelectorAll('tr')).forEach(tr => {
+      excludedColIndexes.forEach(index => {
+        const cell = tr.children[index];
+        if (cell) {
+          tr.removeChild(cell);
+        }
+      });
+    });
+  };
+
   // Skill-expiry cells are marked on-screen with `.skill-expiry-date` (expired ones additionally get
   // `.bg-danger.text-white`, see StaffListTable.tsx) - table_to_sheet only carries inline styles, not
   // Bootstrap classes or the on-screen date format, so both are re-derived here from the live DOM.
@@ -40,7 +64,9 @@ const CSVExportFromHtmlTableBtn = ({tableHtmlId, fileName, btnTxt = 'Export', ..
         }
         ws[cellRef].z = SKILL_EXPIRY_DATE_NUM_FMT;
         if (skillExpiryCell.classList.contains('bg-danger')) {
-          ws[cellRef].s = EXPIRED_SKILL_CELL_STYLE;
+          // Clone rather than reuse the shared constant - sheetjs-style's writer mutates `.s` in place
+          // (merging `.z` into it as `numFmt`), which would otherwise permanently pollute the constant.
+          ws[cellRef].s = {...EXPIRED_SKILL_CELL_STYLE};
         }
       });
     });
@@ -48,9 +74,14 @@ const CSVExportFromHtmlTableBtn = ({tableHtmlId, fileName, btnTxt = 'Export', ..
 
   const doExport = () => {
     const data = document.getElementById(tableHtmlId);
-    const ws = XLSX.utils.table_to_sheet(data)
-    if (data) {
-      formatSkillExpiryCells(data, ws);
+    // Clone so excluded columns can be stripped without mutating the live, React-managed table.
+    const exportTable = data ? (data.cloneNode(true) as HTMLElement) : null;
+    if (exportTable) {
+      removeExcludedColumns(exportTable);
+    }
+    const ws = XLSX.utils.table_to_sheet(exportTable || data)
+    if (exportTable) {
+      formatSkillExpiryCells(exportTable, ws);
     }
 
     const wb = XLSX.utils.book_new();
