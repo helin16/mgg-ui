@@ -112,9 +112,9 @@
 ### Implementation for User Story 3
 
 - [x] T029 [US3] Modify `src/pages/Staff/StaffListAdminPage.tsx`: pass `extraTabs={[{key: 'settings', title: 'Settings', component: <SkillExpirationSettingsPanel />}]}` to `AdminPageTabs`, following the exact pattern in `src/pages/ParentTeacherInterview/ParentTeacherInterviewAdminPage.tsx`
-- [x] T030 [US3] Create `src/components/staff/components/SkillExpirationSettingsPanel.tsx` built on the shared `src/components/module/ModuleEditPanel.tsx` (handles load/save/loading/error/toast and admin gating) — reuse this rather than hand-rolling fetch/save logic, matching `ParentTeacherInterviewModuleSettingsPanel.tsx`
+- [x] T030 [US3] Create `src/components/staff/components/SkillExpirationSettingsPanel.tsx`. Originally built on the shared `ModuleEditPanel.tsx`, matching `ParentTeacherInterviewModuleSettingsPanel.tsx`; later moved off it (see the Settings UI Redesign addendum below) once auto-save-without-a-button was requested, since `ModuleEditPanel` is inherently button-driven. Now wraps `ModuleAccessWrapper` directly and calls `MggsModuleService.getModule`/`updateModule` itself
 - [x] T031 [US3] Implement the 4 recipient/template fields in that panel: `skillExpirationNotificationEmails` (semicolon-separated textarea), `individualNotificationEmailSubject`/`individualNotificationEmailBody`, `bulkNotificationEmailSubject`/`bulkNotificationEmailBody` (FR-024). All 8 fields (including US4/US5's timing fields and US6's skill-filter field, T036/T041/T044 below) were built together in this same pass, since splitting one cohesive settings form across 4 separate edits of the same file added no real value
-- [x] T032 [US3] Add client-side validation: each semicolon-separated email individually validated; required-field checks per `contracts/API-Settings.md` validation table. Validation is shown inline (via `FormErrorDisplay`) but does not hard-block Save, matching the existing convention in `ParentTeacherInterviewModuleSettingsPanel.tsx` (there is no built-in "block save until valid" hook in the shared `ModuleEditPanel`)
+- [x] T032 [US3] Add client-side validation: each semicolon-separated email individually validated; required-field checks per `contracts/API-Settings.md` validation table. Validation is shown inline (via `FormErrorDisplay`) and, since the redesign to auto-save (see addendum below), now also blocks the actual save call while invalid — a field with an error keeps editing locally but nothing is persisted until it's corrected
 - [ ] T033 [US3] Manual verification: settings save calls `PUT /syn/mggsModule/15` and a reload restores the saved values (FR-010, SC-003) — not yet performed (no running app/browser in this session)
 
 **Checkpoint**: US1–US3 independently functional; Settings tab exists with all 8 fields (recipient/template fields plus the US4/US5/US6 fields folded in early — see those phases below for their remaining backend-only tasks).
@@ -311,7 +311,7 @@ Because US2, US4–US7 touch both `mgg-ui` and `mggs-api`, land the backend endp
 
 ---
 
-## Addendum: Settings UI Redesign & Logs Tab (post-implementation user request)
+## Addendum 1: Settings UI Redesign & Logs Tab (post-implementation user request)
 
 Requested after US3–US7 were already built and demoed against a running app; not part of the original task
 breakdown above, so tracked here rather than renumbering T001–T060. FR-006/007/008/024/030 and the "Module
@@ -354,3 +354,26 @@ Settings" Key Entity in `spec.md` were updated to match. All items below are don
   connector-config suites (mggs-api) — both confirmed unrelated in the earlier task log).
 - [ ] Not done: Cypress E2E for the redesigned Settings UI, and manual verification against a live SMTP/email
   target — same "needs a live environment" gap as the rest of this feature's Cypress/manual tasks above.
+
+## Addendum 2: Auto-Save, Checkbox Toggles, Tab Spacing (post-demo user feedback)
+
+Requested after seeing the redesigned Settings tab running live (a screenshot showed the toggles rendering
+as bare radio-styled circles rather than switches, and asked for auto-save instead of a manual button). All
+done and tested.
+
+- [x] Switched the notification toggles from `Form.Check type="switch"` to `type="checkbox"` — the `switch`
+  variant was rendering as an unstyled circle rather than an actual pill-shaped toggle in this app's current
+  Bootstrap theme/version.
+- [x] Removed the "Update" button. `SkillExpirationSettingsPanel` no longer uses the shared `ModuleEditPanel`
+  (see the T030/T032 notes above) — it now wraps `ModuleAccessWrapper` directly and calls
+  `MggsModuleService.getModule`/`updateModule` itself. Discrete controls (checkboxes, the skill selector,
+  `EmailTemplateBuilder`) save immediately on change; free-text/number fields update local state on
+  `onChange` (for live validation feedback) and only actually save `onBlur`, so typing doesn't fire an API
+  call per keystroke. A save is skipped entirely while the current form value is invalid.
+- [x] Added top margin above the pill sub-tabs (`mt-3`), which previously sat flush against the outer
+  Settings tab's border.
+- [x] Tests: `SkillExpirationSettingsPanel.test.tsx` fully rewritten (12 tests) to mock
+  `MggsModuleService`/`Toaster`/`ModuleAccessWrapper` directly instead of `ModuleEditPanel`, covering
+  onBlur-vs-immediate save timing, the invalid-value save-skip, checkbox type, and the absence of an
+  Update/Save button. Full suites in both repos re-run clean (same pre-existing unrelated failures as
+  logged in Addendum 1).
