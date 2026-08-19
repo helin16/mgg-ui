@@ -49,7 +49,7 @@ const BulkUpdateModal = ({selectedStaffIds, isShowing, handleClose, onSuccess}: 
     try {
       const results = await SynCommunitySkillService.bulkUpdateSkillExpiryDate(
         selectedStaffIds,
-        skillOption.value,
+        String(skillOption.value),
         expiryDate
       );
       const failureCount = results.filter(result => result.status === 'rejected').length;
