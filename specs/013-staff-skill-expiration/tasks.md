@@ -377,3 +377,13 @@ done and tested.
   onBlur-vs-immediate save timing, the invalid-value save-skip, checkbox type, and the absence of an
   Update/Save button. Full suites in both repos re-run clean (same pre-existing unrelated failures as
   logged in Addendum 1).
+- [x] Also fixed a layout bug found alongside the above: `<Tabs>` had been nested directly inside a
+  `display:flex` `FlexContainer` (originally added to place the "Saving..." indicator beside the tabs) —
+  react-bootstrap's `Tabs` renders its Nav and TabContent as siblings with no wrapping element of its own,
+  so the flex row laid the pills nav and the active tab's content out side by side instead of stacked.
+  Fixed by wrapping `<Tabs>` in a plain `SectionDiv` (block layout) and moving the "Saving..." indicator
+  above the tabs instead of beside them.
+- [x] Moved "Logs" out of the Settings pill sub-tabs and into a top-level tab on Staff List - Admin
+  (`StaffListAdminPage.tsx`'s `extraTabs`, alongside "Settings"), so the tab bar reads Users / Admins /
+  Settings / Logs rather than nesting Logs under Settings. `SkillExpirationSettingsPanel.tsx` no longer
+  renders or imports `SkillExpirationLogsPanel`.
