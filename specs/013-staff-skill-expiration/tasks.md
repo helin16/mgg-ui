@@ -38,10 +38,10 @@
 
 **⚠️ CRITICAL**: Complete before starting US3–US7. US1 and US2 do not depend on this phase and may start immediately after Phase 1.
 
-- [ ] T004 [P] Create `iSkillExpirationSettings` type (8 fields per `data-model.md` §1) in `src/types/modules/iSkillExpirationSettings.ts`
+- [x] T004 [P] Create `iSkillExpirationSettings` type (8 fields per `data-model.md` §1) in `src/types/modules/iSkillExpirationSettings.ts`
 - [ ] T005 [P] (mggs-api repo) Create `iSkillExpirationSettings` and `iSkillExpirationRequest` types in `src/types/Workers/iSkillExpirationSettings.ts` and `src/types/Workers/iSkillExpirationRequest.ts`, per `contracts/ExpiringSkillsWorker.md` Phase 1
 - [ ] T006 (mggs-api repo) Add `MESSAGE_TYPE_SKILL_EXPIRATION_NOTIFICATION` constant to `src/models/Settings/Message.ts`
-- [ ] T007 Confirm `AuthService.isModuleRole(MGGS_MODULE_ID_STAFF_LIST, ROLE_ID_ADMIN)` (`src/services/AuthService.ts`, `src/types/modules/iRole.ts`) is the gating call to reuse for the Bulk Update button and Settings tab — this is the existing pattern already used by `src/pages/ParentTeacherInterview/components/ParentTeacherInterviewModuleSettingsPanel.tsx`; no new access-control mechanism needed
+- [x] T007 Confirm `AuthService.isModuleRole(MGGS_MODULE_ID_STAFF_LIST, ROLE_ID_ADMIN)` (`src/services/AuthService.ts`, `src/types/modules/iRole.ts`) is the gating call to reuse for the Bulk Update button and Settings tab — this is the existing pattern already used by `src/pages/ParentTeacherInterview/components/ParentTeacherInterviewModuleSettingsPanel.tsx`; no new access-control mechanism needed
 
 **Checkpoint**: Shared types exist; access-control pattern confirmed. US1–US7 implementation can now begin.
 
@@ -105,19 +105,19 @@
 
 ### Verification for User Story 3
 
-- [ ] T026 [P] [US3] Jest tests for the new settings panel (renders all fields, validates required fields, save submits a merged settings object without clobbering other module settings keys) in `src/__tests__/components/staff/SkillExpirationSettingsPanel.test.tsx`
-- [ ] T027 [US3] Cypress E2E: open Settings tab → fill fields → Save → reload → verify persisted, in `cypress/e2e/StaffListSkillExpiration.cy.ts`
-- [ ] T028 [US3] Cypress E2E: a non-admin cannot see/edit Settings tab content
+- [x] T026 [P] [US3] Jest tests for the new settings panel (renders all fields, validates required fields, save submits a merged settings object without clobbering other module settings keys) in `src/__tests__/components/staff/SkillExpirationSettingsPanel.test.tsx`
+- [ ] T027 [US3] Cypress E2E: open Settings tab → fill fields → Save → reload → verify persisted, in `cypress/e2e/StaffListSkillExpiration.cy.ts` — not yet performed
+- [ ] T028 [US3] Cypress E2E: a non-admin cannot see/edit Settings tab content — not yet performed
 
 ### Implementation for User Story 3
 
-- [ ] T029 [US3] Modify `src/pages/Staff/StaffListAdminPage.tsx`: pass `extraTabs={[{key: 'settings', title: 'Settings', component: <SkillExpirationSettingsPanel />}]}` to `AdminPageTabs`, following the exact pattern in `src/pages/ParentTeacherInterview/ParentTeacherInterviewAdminPage.tsx`
-- [ ] T030 [US3] Create `src/components/staff/components/SkillExpirationSettingsPanel.tsx` built on the shared `src/components/module/ModuleEditPanel.tsx` (handles load/save/loading/error/toast and admin gating) — reuse this rather than hand-rolling fetch/save logic, matching `ParentTeacherInterviewModuleSettingsPanel.tsx`
-- [ ] T031 [US3] Implement the 4 recipient/template fields in that panel: `skillExpirationNotificationEmails` (semicolon-separated textarea), `individualNotificationEmailSubject`/`individualNotificationEmailBody`, `bulkNotificationEmailSubject`/`bulkNotificationEmailBody` (FR-024); the timing fields (US4/US5) and skill-filter field (US6) are added in their own phases below, into this same panel
-- [ ] T032 [US3] Add client-side validation: each semicolon-separated email individually validated; required-field checks per `contracts/API-Settings.md` validation table
-- [ ] T033 [US3] Manual verification: settings save calls `PUT /syn/mggsModule/15` and a reload restores the saved values (FR-010, SC-003)
+- [x] T029 [US3] Modify `src/pages/Staff/StaffListAdminPage.tsx`: pass `extraTabs={[{key: 'settings', title: 'Settings', component: <SkillExpirationSettingsPanel />}]}` to `AdminPageTabs`, following the exact pattern in `src/pages/ParentTeacherInterview/ParentTeacherInterviewAdminPage.tsx`
+- [x] T030 [US3] Create `src/components/staff/components/SkillExpirationSettingsPanel.tsx` built on the shared `src/components/module/ModuleEditPanel.tsx` (handles load/save/loading/error/toast and admin gating) — reuse this rather than hand-rolling fetch/save logic, matching `ParentTeacherInterviewModuleSettingsPanel.tsx`
+- [x] T031 [US3] Implement the 4 recipient/template fields in that panel: `skillExpirationNotificationEmails` (semicolon-separated textarea), `individualNotificationEmailSubject`/`individualNotificationEmailBody`, `bulkNotificationEmailSubject`/`bulkNotificationEmailBody` (FR-024). All 8 fields (including US4/US5's timing fields and US6's skill-filter field, T036/T041/T044 below) were built together in this same pass, since splitting one cohesive settings form across 4 separate edits of the same file added no real value
+- [x] T032 [US3] Add client-side validation: each semicolon-separated email individually validated; required-field checks per `contracts/API-Settings.md` validation table. Validation is shown inline (via `FormErrorDisplay`) but does not hard-block Save, matching the existing convention in `ParentTeacherInterviewModuleSettingsPanel.tsx` (there is no built-in "block save until valid" hook in the shared `ModuleEditPanel`)
+- [ ] T033 [US3] Manual verification: settings save calls `PUT /syn/mggsModule/15` and a reload restores the saved values (FR-010, SC-003) — not yet performed (no running app/browser in this session)
 
-**Checkpoint**: US1–US3 independently functional; Settings tab exists with its 4 recipient/template fields (8 fields total complete once US4–US6 land).
+**Checkpoint**: US1–US3 independently functional; Settings tab exists with all 8 fields (recipient/template fields plus the US4/US5/US6 fields folded in early — see those phases below for their remaining backend-only tasks).
 
 ---
 
@@ -134,7 +134,7 @@
 
 ### Implementation for User Story 4
 
-- [ ] T036 [US4] Add `initialNotificationDays` numeric field (1–365) to `SkillExpirationSettingsPanel.tsx`
+- [x] T036 [US4] Add `initialNotificationDays` numeric field (1–365) to `SkillExpirationSettingsPanel.tsx` — done as part of T031 (US3)
 - [ ] T037 [US4] (mggs-api repo) Create `src/workers/ExpiringSkillsWorker.ts` skeleton: `run()` loads module settings (`uMGGSModules.settings.skillExpiration`), queries all Active staff + their skills (unfiltered by skill code for now — US6 wires the filter), computes the initial-notification branch of `isNotifyDay()` (`contracts/ExpiringSkillsWorker.md` Phase 2b), and logs (INFO) which staff/skills would be notified today. Actual email sending is deferred to US7 — this story only needs to prove the worker can correctly identify who's due
 - [ ] T038 [US4] (mggs-api repo) Register `ExpiringSkillsWorker` in `src/queue/CronJobsQueue.ts`'s processJob map, keyed by `MESSAGE_TYPE_SKILL_EXPIRATION_NOTIFICATION`
 - [ ] T039 [US4] (mggs-api repo) Add a nightly `cron.schedule('59 23 * * *', ...)` trigger inside `loadCronJobs()` in `src/worker.ts`, calling `CronJobsQueue.addJobWithoutDuplicate({}, MESSAGE_TYPE_SKILL_EXPIRATION_NOTIFICATION, AuthHelper.getDefaultSystemUserId(), CronJobsQueue)`, matching the existing 11pm job pattern
@@ -155,7 +155,7 @@
 
 ### Implementation for User Story 5
 
-- [ ] T041 [US5] Add `followUpNotificationDays` numeric field (0–30) to `SkillExpirationSettingsPanel.tsx`
+- [x] T041 [US5] Add `followUpNotificationDays` numeric field (0–30) to `SkillExpirationSettingsPanel.tsx` — done as part of T031 (US3)
 - [ ] T042 [US5] (mggs-api repo) Complete `isNotifyDay()` in `ExpiringSkillsWorker.ts` with the full follow-up branch from `contracts/ExpiringSkillsWorker.md` Phase 2b
 
 **Checkpoint**: Worker's day-interval math (initial + follow-up) is complete.
@@ -174,7 +174,7 @@
 
 ### Implementation for User Story 6
 
-- [ ] T044 [US6] Add `monitoredSkillCodes` multi-select field to `SkillExpirationSettingsPanel.tsx`, populated from `SynLuSkillService.getAll()` (already used in `StaffListPanel.tsx`), supporting multi-select and clear-all
+- [x] T044 [US6] Add `monitoredSkillCodes` multi-select field to `SkillExpirationSettingsPanel.tsx` — done as part of T031 (US3), via the existing `SynLuSkillSelector` component (`isMulti`) rather than calling `SynLuSkillService.getAll()` directly
 - [ ] T045 [US6] (mggs-api repo) Wire the `monitoredSkillCodes` filter into `ExpiringSkillsWorker.ts`'s `CommunitySkill.findAll()` query (`SkillCode: { [Op.in]: settings.monitoredSkillCodes }`), short-circuiting with an INFO log when the list is empty
 
 **Checkpoint**: US1–US6 all independently functional; all 8 Settings fields exist; worker correctly determines who's due for notification today, filtered to monitored skills.
