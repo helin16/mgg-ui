@@ -1,8 +1,9 @@
 import React from 'react';
 import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import SkillExpirationSettingsPanel from '../../../components/staff/components/SkillExpirationSettingsPanel';
+import MggsModuleService from '../../../services/Module/MggsModuleService';
+import Toaster, {TOAST_TYPE_SUCCESS} from '../../../services/Toaster';
 import {MGGS_MODULE_ID_STAFF_LIST} from '../../../types/modules/iModuleUser';
-import {ROLE_ID_ADMIN} from '../../../types/modules/iRole';
 
 const fakeModule = {
   settings: {
@@ -19,30 +20,9 @@ const fakeModule = {
   },
 } as any;
 
-let latestSubmitData: any = {};
-let latestProps: any = null;
-
-jest.mock('../../../components/module/ModuleEditPanel', () => ({
-  __esModule: true,
-  default: ({getChildren, getSubmitData, module, ...props}: any) => {
-    latestProps = {...props, getChildren, getSubmitData, module};
-    latestSubmitData = getSubmitData();
-    return (
-      <div data-testid={'ModuleEditPanelTestId'}>
-        {getChildren(module || fakeModule)}
-        <button
-          type={'button'}
-          onClick={() => {
-            latestSubmitData = getSubmitData();
-          }}
-        >
-          Capture Submit Data
-        </button>
-      </div>
-    );
-  },
-}));
-
+jest.mock('../../../components/module/ModuleAccessWrapper');
+jest.mock('../../../services/Module/MggsModuleService');
+jest.mock('../../../services/Toaster');
 jest.mock('../../../components/Community/SynLuSkillSelector');
 jest.mock('../../../components/Email/EmailTemplateBuilder');
 jest.mock('../../../components/staff/components/SkillExpirationLogsPanel', () => ({
@@ -50,30 +30,27 @@ jest.mock('../../../components/staff/components/SkillExpirationLogsPanel', () =>
   default: () => <div data-testid={'SkillExpirationLogsPanelTestId'} />,
 }));
 
+const mockedModuleService = MggsModuleService as jest.Mocked<typeof MggsModuleService>;
+const mockedToaster = Toaster as jest.Mocked<typeof Toaster>;
+
 describe('SkillExpirationSettingsPanel', () => {
   beforeEach(() => {
-    latestSubmitData = {};
-    latestProps = null;
+    jest.clearAllMocks();
+    mockedModuleService.getModule.mockResolvedValue(fakeModule);
+    mockedModuleService.updateModule.mockResolvedValue(fakeModule);
   });
 
-  test('renders the module settings editor through ModuleEditPanel', () => {
+  test('loads the module settings on mount', async () => {
     render(<SkillExpirationSettingsPanel />);
 
-    expect(screen.getByTestId('ModuleEditPanelTestId')).toBeInTheDocument();
-    expect(latestProps).toEqual(
-      expect.objectContaining({
-        moduleId: MGGS_MODULE_ID_STAFF_LIST,
-        roleId: ROLE_ID_ADMIN,
-        getChildren: expect.any(Function),
-        getSubmitData: expect.any(Function),
-      })
-    );
+    await waitFor(() => expect(mockedModuleService.getModule).toHaveBeenCalledWith(MGGS_MODULE_ID_STAFF_LIST));
+    expect(await screen.findByLabelText('Initial notification (days before expiration)')).toHaveValue(14);
   });
 
-  test('pre-fills fields from existing settings', () => {
+  test('pre-fills fields from existing settings', async () => {
     render(<SkillExpirationSettingsPanel />);
 
-    expect(screen.getByLabelText('Initial notification (days before expiration)')).toHaveValue(14);
+    expect(await screen.findByLabelText('Initial notification (days before expiration)')).toHaveValue(14);
     expect(screen.getByLabelText('Follow-up notifications (days between reminders)')).toHaveValue(7);
     expect(screen.getByLabelText('Nominated emails for the bulk summary')).toHaveValue(
       'admin@school.com;hoy@school.com'
@@ -82,123 +59,188 @@ describe('SkillExpirationSettingsPanel', () => {
     expect(screen.getByLabelText('Bulk notification email subject')).toHaveValue('Existing bulk subject');
   });
 
-  test('saves updated timing, emails, and template fields as a single skillExpiration object', async () => {
+  test('saves the day-count fields on blur, merged with the rest of the current form', async () => {
     render(<SkillExpirationSettingsPanel />);
+    const input = await screen.findByLabelText('Initial notification (days before expiration)');
 
-    fireEvent.change(screen.getByLabelText('Initial notification (days before expiration)'), {
-      target: {value: '21'},
-    });
-    fireEvent.change(screen.getByLabelText('Follow-up notifications (days between reminders)'), {
-      target: {value: '3'},
-    });
-    fireEvent.change(screen.getByLabelText('Individual notification email subject'), {
-      target: {value: 'Updated individual subject'},
-    });
-    fireEvent.click(screen.getByRole('button', {name: 'Capture Submit Data'}));
+    fireEvent.change(input, {target: {value: '21'}});
+    fireEvent.blur(input);
 
     await waitFor(() =>
-      expect(latestSubmitData).toEqual(
+      expect(mockedModuleService.updateModule).toHaveBeenCalledWith(
+        MGGS_MODULE_ID_STAFF_LIST,
         expect.objectContaining({
-          skillExpiration: expect.objectContaining({
-            initialNotificationDays: 21,
-            followUpNotificationDays: 3,
-            individualNotificationEmailSubject: 'Updated individual subject',
-            monitoredSkillCodes: ['CPR', 'FirstAid'],
+          settings: expect.objectContaining({
+            skillExpiration: expect.objectContaining({
+              initialNotificationDays: 21,
+              followUpNotificationDays: 7,
+              monitoredSkillCodes: ['CPR', 'FirstAid'],
+            }),
+          }),
+        })
+      )
+    );
+    expect(mockedToaster.showToast).toHaveBeenCalledWith('Settings saved.', TOAST_TYPE_SUCCESS);
+  });
+
+  test('does not save while the value is invalid, and saves once corrected on blur', async () => {
+    render(<SkillExpirationSettingsPanel />);
+    const emailsInput = await screen.findByLabelText('Nominated emails for the bulk summary');
+
+    fireEvent.change(emailsInput, {target: {value: 'not-an-email'}});
+    fireEvent.blur(emailsInput);
+
+    expect(await screen.findByText(/Invalid email address\(es\): not-an-email/)).toBeInTheDocument();
+    expect(mockedModuleService.updateModule).not.toHaveBeenCalled();
+
+    fireEvent.change(emailsInput, {target: {value: 'valid@school.com'}});
+    fireEvent.blur(emailsInput);
+
+    await waitFor(() =>
+      expect(mockedModuleService.updateModule).toHaveBeenCalledWith(
+        MGGS_MODULE_ID_STAFF_LIST,
+        expect.objectContaining({
+          settings: expect.objectContaining({
+            skillExpiration: expect.objectContaining({skillExpirationNotificationEmails: 'valid@school.com'}),
           }),
         })
       )
     );
   });
 
-  test('shows a validation error for an invalid nominated email and still reflects it in submit data', async () => {
+  test('updates monitoredSkillCodes from the skill selector immediately (no blur needed)', async () => {
     render(<SkillExpirationSettingsPanel />);
-
-    fireEvent.change(screen.getByLabelText('Nominated emails for the bulk summary'), {
-      target: {value: 'not-an-email;admin@school.com'},
-    });
-
-    expect(await screen.findByText(/Invalid email address\(es\): not-an-email/)).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', {name: 'Capture Submit Data'}));
-    await waitFor(() =>
-      expect(latestSubmitData.skillExpiration.skillExpirationNotificationEmails).toBe(
-        'not-an-email;admin@school.com'
-      )
-    );
-  });
-
-  test('updates monitoredSkillCodes from the skill selector', async () => {
-    render(<SkillExpirationSettingsPanel />);
+    await screen.findByLabelText('Initial notification (days before expiration)');
 
     // The mocked selector simulates a selection event with a single option (value: 'CPR'),
     // matching how a real multi-select onChange reports its full next selection.
     fireEvent.click(screen.getByRole('button', {name: 'Select Skill'}));
-    fireEvent.click(screen.getByRole('button', {name: 'Capture Submit Data'}));
 
-    await waitFor(() => expect(latestSubmitData.skillExpiration.monitoredSkillCodes).toEqual(['CPR']));
+    await waitFor(() =>
+      expect(mockedModuleService.updateModule).toHaveBeenCalledWith(
+        MGGS_MODULE_ID_STAFF_LIST,
+        expect.objectContaining({
+          settings: expect.objectContaining({
+            skillExpiration: expect.objectContaining({monitoredSkillCodes: ['CPR']}),
+          }),
+        })
+      )
+    );
   });
 
-  test('defaults both notification switches to on when unset', () => {
+  test('renders the notification toggles as plain checkboxes, defaulting to on', async () => {
     render(<SkillExpirationSettingsPanel />);
 
-    expect(screen.getByLabelText('Initial notification')).toBeChecked();
-    expect(screen.getByLabelText('Follow-up notifications')).toBeChecked();
-    expect(screen.getByLabelText('Initial notification (days before expiration)')).toBeEnabled();
-    expect(screen.getByLabelText('Follow-up notifications (days between reminders)')).toBeEnabled();
+    const initialCheckbox = await screen.findByLabelText('Initial notification');
+    const followUpCheckbox = screen.getByLabelText('Follow-up notifications');
+    expect(initialCheckbox).toHaveAttribute('type', 'checkbox');
+    expect(followUpCheckbox).toHaveAttribute('type', 'checkbox');
+    expect(initialCheckbox).toBeChecked();
+    expect(followUpCheckbox).toBeChecked();
   });
 
-  test('turning the initial notification switch off disables its day input and clears its validation error', async () => {
+  test('turning the initial notification checkbox off disables its day input, clears its error, and saves immediately', async () => {
     render(<SkillExpirationSettingsPanel />);
+    const input = await screen.findByLabelText('Initial notification (days before expiration)');
 
-    fireEvent.change(screen.getByLabelText('Initial notification (days before expiration)'), {
-      target: {value: '0'},
-    });
+    fireEvent.change(input, {target: {value: '0'}});
+    fireEvent.blur(input);
     expect(await screen.findByText('Enter at least 1 day.')).toBeInTheDocument();
+    mockedModuleService.updateModule.mockClear();
 
     fireEvent.click(screen.getByLabelText('Initial notification'));
 
     expect(screen.getByLabelText('Initial notification (days before expiration)')).toBeDisabled();
     expect(screen.queryByText('Enter at least 1 day.')).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', {name: 'Capture Submit Data'}));
-    await waitFor(() => expect(latestSubmitData.skillExpiration.initialNotificationEnabled).toBe(false));
+    await waitFor(() =>
+      expect(mockedModuleService.updateModule).toHaveBeenCalledWith(
+        MGGS_MODULE_ID_STAFF_LIST,
+        expect.objectContaining({
+          settings: expect.objectContaining({
+            skillExpiration: expect.objectContaining({initialNotificationEnabled: false}),
+          }),
+        })
+      )
+    );
   });
 
-  test('turning the follow-up notification switch off is reflected in submit data', async () => {
+  test('turning the follow-up notification checkbox off saves immediately', async () => {
     render(<SkillExpirationSettingsPanel />);
+    await screen.findByLabelText('Initial notification (days before expiration)');
 
     fireEvent.click(screen.getByLabelText('Follow-up notifications'));
 
     expect(screen.getByLabelText('Follow-up notifications (days between reminders)')).toBeDisabled();
-
-    fireEvent.click(screen.getByRole('button', {name: 'Capture Submit Data'}));
-    await waitFor(() => expect(latestSubmitData.skillExpiration.followUpNotificationEnabled).toBe(false));
+    await waitFor(() =>
+      expect(mockedModuleService.updateModule).toHaveBeenCalledWith(
+        MGGS_MODULE_ID_STAFF_LIST,
+        expect.objectContaining({
+          settings: expect.objectContaining({
+            skillExpiration: expect.objectContaining({followUpNotificationEnabled: false}),
+          }),
+        })
+      )
+    );
   });
 
-  test('updates the individual and bulk email bodies via EmailTemplateBuilder', async () => {
+  test('updates the individual and bulk email bodies via EmailTemplateBuilder immediately', async () => {
     render(<SkillExpirationSettingsPanel />);
+    await screen.findByLabelText('Initial notification (days before expiration)');
 
     const [individualBuilder, bulkBuilder] = screen.getAllByRole('button', {name: 'Trigger Design Update'});
     fireEvent.click(individualBuilder);
-    fireEvent.click(bulkBuilder);
-    fireEvent.click(screen.getByRole('button', {name: 'Capture Submit Data'}));
 
-    await waitFor(() => {
-      expect(latestSubmitData.skillExpiration.individualNotificationEmailBody).toEqual({
-        design: {fake: 'design'},
-        html: '<p>fake html</p>',
-      });
-      expect(latestSubmitData.skillExpiration.bulkNotificationEmailBody).toEqual({
-        design: {fake: 'design'},
-        html: '<p>fake html</p>',
-      });
-    });
+    await waitFor(() =>
+      expect(mockedModuleService.updateModule).toHaveBeenLastCalledWith(
+        MGGS_MODULE_ID_STAFF_LIST,
+        expect.objectContaining({
+          settings: expect.objectContaining({
+            skillExpiration: expect.objectContaining({
+              individualNotificationEmailBody: {design: {fake: 'design'}, html: '<p>fake html</p>'},
+            }),
+          }),
+        })
+      )
+    );
+
+    fireEvent.click(bulkBuilder);
+
+    await waitFor(() =>
+      expect(mockedModuleService.updateModule).toHaveBeenLastCalledWith(
+        MGGS_MODULE_ID_STAFF_LIST,
+        expect.objectContaining({
+          settings: expect.objectContaining({
+            skillExpiration: expect.objectContaining({
+              bulkNotificationEmailBody: {design: {fake: 'design'}, html: '<p>fake html</p>'},
+            }),
+          }),
+        })
+      )
+    );
   });
 
-  test('renders a Logs tab', () => {
+  test('renders a Logs tab', async () => {
     render(<SkillExpirationSettingsPanel />);
 
-    expect(screen.getByRole('tab', {name: 'Logs'})).toBeInTheDocument();
+    expect(await screen.findByRole('tab', {name: 'Logs'})).toBeInTheDocument();
     expect(screen.getByTestId('SkillExpirationLogsPanelTestId')).toBeInTheDocument();
+  });
+
+  test('does not render an Update/Save button - changes save as they are made', async () => {
+    render(<SkillExpirationSettingsPanel />);
+    await screen.findByLabelText('Initial notification (days before expiration)');
+
+    expect(screen.queryByRole('button', {name: 'Update'})).not.toBeInTheDocument();
+  });
+
+  test('shows an API error toast if saving fails', async () => {
+    mockedModuleService.updateModule.mockRejectedValueOnce(new Error('save failed'));
+    render(<SkillExpirationSettingsPanel />);
+    const input = await screen.findByLabelText('Initial notification (days before expiration)');
+
+    fireEvent.change(input, {target: {value: '21'}});
+    fireEvent.blur(input);
+
+    await waitFor(() => expect(mockedToaster.showApiError).toHaveBeenCalled());
   });
 });
