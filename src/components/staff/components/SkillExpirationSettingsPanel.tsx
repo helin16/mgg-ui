@@ -184,7 +184,6 @@ const EditPanel = ({module, isSaving, onUpdate}: iEditPanel) => {
                   onChange={event => updateLocal({followUpNotificationDays: event.target.value})}
                   onBlur={() => commit()}
                 />
-                <small>Set to 0 to send only the initial notification.</small>
                 <FormErrorDisplay errorsMap={errMap} fieldName={'followUpNotificationDays'} />
               </div>
             </div>
