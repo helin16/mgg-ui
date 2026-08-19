@@ -246,7 +246,7 @@ function isNotifyDay(
         '{staffName}': staff.StaffNameExternal,
         '{skillCode}': skills[0].SkillCode,  // First skill for subject
         '{expirationDate}': skills[0].ExpiryDate,
-        '{occpEmail}': staff.occpEmail
+        '{staffOccupEmail}': staff.StaffOccupEmail
       };
       
       Object.entries(substitutions).forEach(([placeholder, value]) => {
@@ -256,7 +256,7 @@ function isNotifyDay(
       });
       
       return SMTPConnector.send({
-        to: staff.occpEmail,
+        to: staff.StaffOccupEmail,
         subject,
         html: body,
         text: this.htmlToPlainText(body)

@@ -83,7 +83,7 @@ const updateSkillExpiryByStaffAndCode = async (req: Request, res: Response) => {
   });
 
   if (!existing) {
-    // Upsert semantics: create new record via spiCommunitySkills (see Open Decision below)
+    // Upsert semantics: create new record via spiCommunitySkills (see Decision below)
     return await insertNewSkillRecord(req, res, staffID, skillCode, ExpiryDate);
   }
 

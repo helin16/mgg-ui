@@ -341,11 +341,11 @@ sendBulkNotification(expiredStaffSummary, recipients, templates, settings): Prom
 
 **Individual Notification Email**:
 ```
-To: {staff.occpEmail}
+To: {staff.StaffOccupEmail}
 Subject: {individualNotificationEmailSubject} (HTML-escaped variables)
 Body: {individualNotificationEmailBody} (HTML-escaped variables)
 
-Variables: {staffName}, {skillCode}, {expirationDate}, {occpEmail}
+Variables: {staffName}, {skillCode}, {expirationDate}, {staffOccupEmail}
 ```
 
 **Bulk Notification Email**:

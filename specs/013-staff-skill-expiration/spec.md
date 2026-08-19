@@ -121,11 +121,11 @@ An administrator and individual staff members receive notifications at the corre
 
 **Why this priority**: Depends on Skills configuration and notification timing; coordination between individual and bulk recipients is important; supports accessibility and role-based communication.
 
-**Independent Test**: Staff receive notifications at their occpEmail; supervisors receive bulk summaries; email filtering/delivery can be verified in logs.
+**Independent Test**: Staff receive notifications at their StaffOccupEmail; supervisors receive bulk summaries; email filtering/delivery can be verified in logs.
 
 **Acceptance Scenarios**:
 
-1. **Given** a skill is expiring for multiple staff, **When** notification time is triggered, **Then** each individual staff member receives an email at their occpEmail address
+1. **Given** a skill is expiring for multiple staff, **When** notification time is triggered, **Then** each individual staff member receives an email at their StaffOccupEmail address
 2. **Given** notification is sent, **When** the email arrives, **Then** it contains that staff member's expiring skill details (e.g., skill code, current expiration date)
 3. **Given** multiple staff have expiring skills in the same notification cycle, **When** an administrator email is configured in settings, **Then** they receive one summary email with all expiring staff listed as rows and skills as columns
 4. **Given** multiple nominated emails are configured (separated by ";"), **When** notification is sent, **Then** all nominated addresses receive the bulk summary email
@@ -142,7 +142,7 @@ An administrator and individual staff members receive notifications at the corre
 - **What if a nominated email address is invalid or bounces?** (Clarified: Error logged; no retry attempted; delivery is lossy. Admin should validate email addresses on save via UI validation)
 - What happens if a staff member is deleted while awaiting a notification? (Assumption: notification is skipped gracefully; no error)
 - What happens if the system time changes (e.g., DST transition)? (Assumption: notifications scheduled at 11:59 PM are not missed; use server time, not client time)
-- Can a staff member's own occpEmail be included in the nominated emails list? (Assumption: yes, no de-duplication; email system handles any redundancy)
+- Can a staff member's own StaffOccupEmail be included in the nominated emails list? (Assumption: yes, no de-duplication; email system handles any redundancy)
 
 ## Requirements
 
@@ -172,7 +172,7 @@ An administrator and individual staff members receive notifications at the corre
 
 **FR-010**: All settings values MUST be persisted in the module's settings column and retrieve on page load, so configuration survives page refreshes and user sessions
 
-**FR-011**: The notification system MUST send individual notifications to staff at their occpEmail address when a skill expiration is triggered
+**FR-011**: The notification system MUST send individual notifications to staff at their StaffOccupEmail address when a skill expiration is triggered
 
 **FR-012**: The notification system MUST send a bulk summary email to all nominated email addresses (separated by ";") listing all staff with expiring skills, with skills represented as columns and staff as rows
 
@@ -202,7 +202,7 @@ An administrator and individual staff members receive notifications at the corre
 
 **FR-024**: The Settings tab MUST include configurable email template fields for individual notification email subject, individual notification email body, bulk notification email subject, and bulk notification email body
 
-**FR-025**: All email templates MUST support variable substitution with placeholders like `{staffName}`, `{skillCode}`, `{expirationDate}`, `{occpEmail}` for individual notifications and `{expiringStaffTable}` for bulk notifications
+**FR-025**: All email templates MUST support variable substitution with placeholders like `{staffName}`, `{skillCode}`, `{expirationDate}`, `{staffOccupEmail}` for individual notifications and `{expiringStaffTable}` for bulk notifications
 
 **FR-026**: When notification email sending fails (invalid recipient, SMTP error, API timeout), the error MUST be logged at WARN level with full context (recipient, skill, staff ID, error details) and the notification cycle MUST continue for other recipients; no automatic retry is attempted
 
@@ -216,7 +216,7 @@ An administrator and individual staff members receive notifications at the corre
 
 ### Key Entities
 
-- **Staff**: Core entity with `staffId`, `occpEmail`, `status` (Active/Inactive), and associated skills/expiration dates
+- **Staff**: Core entity with `staffId`, `StaffOccupEmail`, `status` (Active/Inactive), and associated skills/expiration dates
 - **Skill**: Entity with `skillCode`, `skillName`, `expirationDate` (per staff member)
 - **Module Settings**: Configuration stored against the module, including:
   - `initialNotificationDays` (integer) — days before expiration for first notification
@@ -273,7 +273,7 @@ CSV export includes all currently selected/visible columns from the staff list t
 Follow-up notifications continue daily at 11:59 PM indefinitely after the initial notification, even after the skill expiration date passes, until the skill expiration date is updated (which triggers a cycle reset).
 
 **Q4 - Email Template Configuration**: ✅ IDENTIFIED AS NEW REQUIREMENT  
-Users need to configure email subject and body templates for both individual staff notifications and bulk administrator notifications, with support for variable substitution (e.g., `{staffName}`, `{skillCode}`, `{expirationDate}`, `{occpEmail}`).
+Users need to configure email subject and body templates for both individual staff notifications and bulk administrator notifications, with support for variable substitution (e.g., `{staffName}`, `{skillCode}`, `{expirationDate}`, `{staffOccupEmail}`).
 
 ### Session 2026-08-19
 
@@ -290,7 +290,7 @@ Users need to configure email subject and body templates for both individual sta
 1. **Bulk Selection & Update**: Admin can select 2+ staff, bulk update a skill expiration date in <3 seconds, all selected staff reflect the change
 2. **CSV Export with Highlighting**: Exported CSV visually marks expired skills; admin can identify status within 5 seconds
 3. **Settings Configuration**: All notification settings fields (timing, skills, emails, templates) are present, saveable, and persistent
-4. **Individual Notifications**: Staff with expiring monitored skills receive emails at occpEmail within 1 hour of trigger
+4. **Individual Notifications**: Staff with expiring monitored skills receive emails at StaffOccupEmail within 1 hour of trigger
 5. **Bulk Administrator Notifications**: Admin emails receive summary of all expiring staff (rows) × skills (columns) within 1 hour of trigger
 6. **Active Staff Only**: Inactive staff do not receive notifications; status change triggers notification eligibility update
 7. **Notification Cycle Reset**: Manual or bulk update of expiration date recalculates next notification based on initial interval

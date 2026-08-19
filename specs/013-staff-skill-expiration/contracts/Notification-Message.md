@@ -96,7 +96,7 @@ function isAlreadyNotified(
 
 ## Email Format: Individual Notification
 
-**To**: `{staff.occpEmail}`  
+**To**: `{staff.StaffOccupEmail}`  
 **Subject**: `{settings.individualNotificationEmailSubject}` (HTML-escaped)  
 **Body**: `{settings.individualNotificationEmailBody}` (HTML-escaped)
 
@@ -106,7 +106,7 @@ const substitutions = {
   '{staffName}': staff.StaffNameExternal,
   '{skillCode}': skill.SkillCode,
   '{expirationDate}': skill.ExpiryDate.toISOString().split('T')[0],  // YYYY-MM-DD
-  '{occpEmail}': staff.occpEmail
+  '{staffOccupEmail}': staff.StaffOccupEmail
 };
 
 // Apply substitutions with HTML escaping for HTML emails

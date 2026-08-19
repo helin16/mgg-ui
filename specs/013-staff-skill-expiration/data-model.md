@@ -181,7 +181,7 @@ MESSAGE_TYPE_STUDENT_ABSENCE_SUMMARY_RUN
 **For Feature 013**:
 - Query: CommunitySkills with ExpiryDate approaching/past
 - Filter: Active staff only
-- Recipients: Individual staff (occpEmail) + bulk admin list
+- Recipients: Individual staff (StaffOccupEmail) + bulk admin list
 - Template: From module settings (subject + body)
 
 ---
@@ -253,16 +253,8 @@ PUT /syn/mggsModule/15
 **Status**: Read-only (no PUT/POST)
 
 **For Feature 013**:
-- **GAP**: Need to add PUT endpoint for bulk skill expiry date update
-- **Solution**: Add new controller method:
-  ```typescript
-  PUT /syn/communitySkill/bulk
-  {
-    "staffIds": [123, 456, 789],
-    "skillCode": "CPR",
-    "expiryDate": "2027-08-19"
-  }
-  ```
+- **GAP**: Need to add PUT endpoint for skill expiry date update, called once per staff member from the frontend (see Section 7 below)
+- **Solution**: Add new controller method: `PUT /syn/communitySkill/:staffID/:skillCode`, `{ "ExpiryDate": "2027-08-19" }`
   **Scope**: Requires backend API changes (new endpoint)
 
 ---
@@ -447,11 +439,11 @@ const handleSave = () => {
 };
 
 // Bulk Update (from Staff List)
-const handleBulkUpdate = (selectedSkillSeqs: number[], expiryDate: string) => {
-  // UI handles looping; backend uses single resource endpoint
-  return Promise.all(
-    selectedSkillSeqs.map(seq =>
-      axios.put(`/syn/communitySkill/${seq}`, { ExpiryDate: expiryDate })
+const handleBulkUpdate = (selectedStaffIds: number[], skillCode: string, expiryDate: string) => {
+  // UI handles looping; backend uses single resource endpoint, keyed by staffID/skillCode
+  return Promise.allSettled(
+    selectedStaffIds.map(staffId =>
+      axios.put(`/syn/communitySkill/${staffId}/${skillCode}`, { ExpiryDate: expiryDate })
     )
   );
 };
@@ -523,8 +515,8 @@ const handleBulkUpdate = (selectedSkillSeqs: number[], expiryDate: string) => {
    - ✅ CSV highlighting applies only to Skill expiry cells, not other date columns
    - ✅ Bulk update and Settings save are admin-gated via `AuthService.isModuleRole(moduleId, ROLE_ID_ADMIN)`
 
-2. **Open decision requiring final confirmation before coding**:
-   - Bulk update on a staff member with no existing skill record: auto-create (recommended, upsert semantics) vs. skip/error — see `contracts/API-BulkUpdate.md` "Open Decision"
+2. **Confirmed** (see `contracts/API-BulkUpdate.md` "Decision"):
+   - Bulk update on a staff member with no existing skill record: auto-create via `spiCommunitySkills` (upsert semantics)
 
 3. **Implementation Order**:
    1. Add bulk-update controller method in mggs-api (`spuCommunitySkills`/`spiCommunitySkills` via raw EXEC) — see `contracts/API-BulkUpdate.md`
