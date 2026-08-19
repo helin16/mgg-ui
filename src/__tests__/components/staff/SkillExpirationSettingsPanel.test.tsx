@@ -44,6 +44,11 @@ jest.mock('../../../components/module/ModuleEditPanel', () => ({
 }));
 
 jest.mock('../../../components/Community/SynLuSkillSelector');
+jest.mock('../../../components/Email/EmailTemplateBuilder');
+jest.mock('../../../components/staff/components/SkillExpirationLogsPanel', () => ({
+  __esModule: true,
+  default: () => <div data-testid={'SkillExpirationLogsPanelTestId'} />,
+}));
 
 describe('SkillExpirationSettingsPanel', () => {
   beforeEach(() => {
@@ -131,5 +136,69 @@ describe('SkillExpirationSettingsPanel', () => {
     fireEvent.click(screen.getByRole('button', {name: 'Capture Submit Data'}));
 
     await waitFor(() => expect(latestSubmitData.skillExpiration.monitoredSkillCodes).toEqual(['CPR']));
+  });
+
+  test('defaults both notification switches to on when unset', () => {
+    render(<SkillExpirationSettingsPanel />);
+
+    expect(screen.getByLabelText('Initial notification')).toBeChecked();
+    expect(screen.getByLabelText('Follow-up notifications')).toBeChecked();
+    expect(screen.getByLabelText('Initial notification (days before expiration)')).toBeEnabled();
+    expect(screen.getByLabelText('Follow-up notifications (days between reminders)')).toBeEnabled();
+  });
+
+  test('turning the initial notification switch off disables its day input and clears its validation error', async () => {
+    render(<SkillExpirationSettingsPanel />);
+
+    fireEvent.change(screen.getByLabelText('Initial notification (days before expiration)'), {
+      target: {value: '0'},
+    });
+    expect(await screen.findByText('Enter at least 1 day.')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByLabelText('Initial notification'));
+
+    expect(screen.getByLabelText('Initial notification (days before expiration)')).toBeDisabled();
+    expect(screen.queryByText('Enter at least 1 day.')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', {name: 'Capture Submit Data'}));
+    await waitFor(() => expect(latestSubmitData.skillExpiration.initialNotificationEnabled).toBe(false));
+  });
+
+  test('turning the follow-up notification switch off is reflected in submit data', async () => {
+    render(<SkillExpirationSettingsPanel />);
+
+    fireEvent.click(screen.getByLabelText('Follow-up notifications'));
+
+    expect(screen.getByLabelText('Follow-up notifications (days between reminders)')).toBeDisabled();
+
+    fireEvent.click(screen.getByRole('button', {name: 'Capture Submit Data'}));
+    await waitFor(() => expect(latestSubmitData.skillExpiration.followUpNotificationEnabled).toBe(false));
+  });
+
+  test('updates the individual and bulk email bodies via EmailTemplateBuilder', async () => {
+    render(<SkillExpirationSettingsPanel />);
+
+    const [individualBuilder, bulkBuilder] = screen.getAllByRole('button', {name: 'Trigger Design Update'});
+    fireEvent.click(individualBuilder);
+    fireEvent.click(bulkBuilder);
+    fireEvent.click(screen.getByRole('button', {name: 'Capture Submit Data'}));
+
+    await waitFor(() => {
+      expect(latestSubmitData.skillExpiration.individualNotificationEmailBody).toEqual({
+        design: {fake: 'design'},
+        html: '<p>fake html</p>',
+      });
+      expect(latestSubmitData.skillExpiration.bulkNotificationEmailBody).toEqual({
+        design: {fake: 'design'},
+        html: '<p>fake html</p>',
+      });
+    });
+  });
+
+  test('renders a Logs tab', () => {
+    render(<SkillExpirationSettingsPanel />);
+
+    expect(screen.getByRole('tab', {name: 'Logs'})).toBeInTheDocument();
+    expect(screen.getByTestId('SkillExpirationLogsPanelTestId')).toBeInTheDocument();
   });
 });

@@ -1,16 +1,25 @@
 import {useState} from 'react';
-import {Form} from 'react-bootstrap';
+import {Form, Tab, Tabs} from 'react-bootstrap';
 import ModuleEditPanel from '../../module/ModuleEditPanel';
 import SectionDiv from '../../common/SectionDiv';
 import FormErrorDisplay, {iErrorMap} from '../../form/FormErrorDisplay';
 import iModule from '../../../types/modules/iModule';
-import iSkillExpirationSettings from '../../../types/modules/iSkillExpirationSettings';
+import iSkillExpirationSettings, {iSkillExpirationEmailTemplateBody} from '../../../types/modules/iSkillExpirationSettings';
 import {MGGS_MODULE_ID_STAFF_LIST} from '../../../types/modules/iModuleUser';
 import {ROLE_ID_ADMIN} from '../../../types/modules/iRole';
 import SynLuSkillSelector from '../../Community/SynLuSkillSelector';
 import {iAutoCompleteSingle} from '../../common/AutoComplete';
+import EmailTemplateBuilder from '../../Email/EmailTemplateBuilder';
+import SkillExpirationLogsPanel from './SkillExpirationLogsPanel';
 
 const MODULE_SETTINGS_KEY = 'skillExpiration';
+
+const TAB_TIMING = 'timing';
+const TAB_SKILLS = 'skills';
+const TAB_RECIPIENTS = 'recipients';
+const TAB_INDIVIDUAL_EMAIL = 'individualEmail';
+const TAB_BULK_EMAIL = 'bulkEmail';
+const TAB_LOGS = 'logs';
 
 const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -21,41 +30,66 @@ const getInvalidEmails = (value: string) => {
     .filter(email => email !== '' && !isValidEmail(email));
 };
 
+const getEmailTemplateBody = (value: any): iSkillExpirationEmailTemplateBody => {
+  if (value && typeof value === 'object') {
+    return {design: value.design, html: `${value.html || ''}`};
+  }
+  return {html: `${value || ''}`};
+};
+
 type iEditPanel = {
   module: iModule;
   onUpdate: (data: {[MODULE_SETTINGS_KEY]: iSkillExpirationSettings}) => void;
 };
 
+type iSkillExpirationFormState = {
+  initialNotificationEnabled: boolean;
+  initialNotificationDays: string;
+  followUpNotificationEnabled: boolean;
+  followUpNotificationDays: string;
+  monitoredSkillCodes: string[];
+  skillExpirationNotificationEmails: string;
+  individualNotificationEmailSubject: string;
+  individualNotificationEmailBody: iSkillExpirationEmailTemplateBody;
+  bulkNotificationEmailSubject: string;
+  bulkNotificationEmailBody: iSkillExpirationEmailTemplateBody;
+};
+
 const EditPanel = ({module, onUpdate}: iEditPanel) => {
   const existing: Partial<iSkillExpirationSettings> = module.settings?.[MODULE_SETTINGS_KEY] || {};
-  const [initialNotificationDays, setInitialNotificationDays] = useState(`${existing.initialNotificationDays ?? ''}`);
-  const [followUpNotificationDays, setFollowUpNotificationDays] = useState(`${existing.followUpNotificationDays ?? ''}`);
-  const [monitoredSkillCodes, setMonitoredSkillCodes] = useState<string[]>(existing.monitoredSkillCodes || []);
-  const [skillExpirationNotificationEmails, setSkillExpirationNotificationEmails] = useState(existing.skillExpirationNotificationEmails || '');
-  const [individualNotificationEmailSubject, setIndividualNotificationEmailSubject] = useState(existing.individualNotificationEmailSubject || '');
-  const [individualNotificationEmailBody, setIndividualNotificationEmailBody] = useState(existing.individualNotificationEmailBody || '');
-  const [bulkNotificationEmailSubject, setBulkNotificationEmailSubject] = useState(existing.bulkNotificationEmailSubject || '');
-  const [bulkNotificationEmailBody, setBulkNotificationEmailBody] = useState(existing.bulkNotificationEmailBody || '');
+  const [selectedTab, setSelectedTab] = useState(TAB_TIMING);
+  const [form, setForm] = useState<iSkillExpirationFormState>({
+    initialNotificationEnabled: existing.initialNotificationEnabled !== false,
+    initialNotificationDays: `${existing.initialNotificationDays ?? ''}`,
+    followUpNotificationEnabled: existing.followUpNotificationEnabled !== false,
+    followUpNotificationDays: `${existing.followUpNotificationDays ?? ''}`,
+    monitoredSkillCodes: existing.monitoredSkillCodes || [],
+    skillExpirationNotificationEmails: existing.skillExpirationNotificationEmails || '',
+    individualNotificationEmailSubject: existing.individualNotificationEmailSubject || '',
+    individualNotificationEmailBody: getEmailTemplateBody(existing.individualNotificationEmailBody),
+    bulkNotificationEmailSubject: existing.bulkNotificationEmailSubject || '',
+    bulkNotificationEmailBody: getEmailTemplateBody(existing.bulkNotificationEmailBody),
+  });
   const [errMap, setErrMap] = useState<iErrorMap>({});
 
-  const handleUpdate = (
-    nextInitialNotificationDays = initialNotificationDays,
-    nextFollowUpNotificationDays = followUpNotificationDays,
-    nextMonitoredSkillCodes = monitoredSkillCodes,
-    nextSkillExpirationNotificationEmails = skillExpirationNotificationEmails,
-    nextIndividualNotificationEmailSubject = individualNotificationEmailSubject,
-    nextIndividualNotificationEmailBody = individualNotificationEmailBody,
-    nextBulkNotificationEmailSubject = bulkNotificationEmailSubject,
-    nextBulkNotificationEmailBody = bulkNotificationEmailBody
-  ) => {
+  const handleUpdate = (overrides: Partial<iSkillExpirationFormState> = {}) => {
+    const next = {...form, ...overrides};
+    setForm(next);
+
     const errors: iErrorMap = {};
-    if (`${nextInitialNotificationDays}`.trim() === '' || Number(nextInitialNotificationDays) < 1) {
+    if (
+      next.initialNotificationEnabled &&
+      (`${next.initialNotificationDays}`.trim() === '' || Number(next.initialNotificationDays) < 1)
+    ) {
       errors.initialNotificationDays = 'Enter at least 1 day.';
     }
-    if (`${nextFollowUpNotificationDays}`.trim() === '' || Number(nextFollowUpNotificationDays) < 0) {
+    if (
+      next.followUpNotificationEnabled &&
+      (`${next.followUpNotificationDays}`.trim() === '' || Number(next.followUpNotificationDays) < 0)
+    ) {
       errors.followUpNotificationDays = 'Enter 0 or more days.';
     }
-    const invalidEmails = getInvalidEmails(nextSkillExpirationNotificationEmails);
+    const invalidEmails = getInvalidEmails(next.skillExpirationNotificationEmails);
     if (invalidEmails.length > 0) {
       errors.skillExpirationNotificationEmails = `Invalid email address(es): ${invalidEmails.join(', ')}`;
     }
@@ -63,189 +97,152 @@ const EditPanel = ({module, onUpdate}: iEditPanel) => {
 
     onUpdate({
       [MODULE_SETTINGS_KEY]: {
-        initialNotificationDays: Number(nextInitialNotificationDays) || 0,
-        followUpNotificationDays: Number(nextFollowUpNotificationDays) || 0,
-        monitoredSkillCodes: nextMonitoredSkillCodes,
-        skillExpirationNotificationEmails: nextSkillExpirationNotificationEmails,
-        individualNotificationEmailSubject: nextIndividualNotificationEmailSubject,
-        individualNotificationEmailBody: nextIndividualNotificationEmailBody,
-        bulkNotificationEmailSubject: nextBulkNotificationEmailSubject,
-        bulkNotificationEmailBody: nextBulkNotificationEmailBody,
+        initialNotificationEnabled: next.initialNotificationEnabled,
+        initialNotificationDays: Number(next.initialNotificationDays) || 0,
+        followUpNotificationEnabled: next.followUpNotificationEnabled,
+        followUpNotificationDays: Number(next.followUpNotificationDays) || 0,
+        monitoredSkillCodes: next.monitoredSkillCodes,
+        skillExpirationNotificationEmails: next.skillExpirationNotificationEmails,
+        individualNotificationEmailSubject: next.individualNotificationEmailSubject,
+        individualNotificationEmailBody: next.individualNotificationEmailBody,
+        bulkNotificationEmailSubject: next.bulkNotificationEmailSubject,
+        bulkNotificationEmailBody: next.bulkNotificationEmailBody,
       },
     });
   };
 
   return (
-    <SectionDiv>
-      <SectionDiv className={'margin-bottom'}>
-        <h5>Notification Timing</h5>
-        <div className={'row g-3'}>
-          <div className={'col-lg-4'}>
-            <Form.Label>Initial notification (days before expiration)</Form.Label>
-            <Form.Control
-              aria-label={'Initial notification (days before expiration)'}
-              type={'number'}
-              min={1}
-              isInvalid={'initialNotificationDays' in errMap}
-              value={initialNotificationDays}
-              onChange={event => {
-                const nextValue = event.target.value;
-                setInitialNotificationDays(nextValue);
-                handleUpdate(nextValue);
-              }}
-            />
-            <FormErrorDisplay errorsMap={errMap} fieldName={'initialNotificationDays'} />
+    <Tabs variant={'pills'} activeKey={selectedTab} className={'mb-3'} onSelect={k => setSelectedTab(k || TAB_TIMING)}>
+      <Tab eventKey={TAB_TIMING} title={'Notification Timing'}>
+        <SectionDiv>
+          <div className={'row g-3'}>
+            <div className={'col-lg-6'}>
+              <Form.Check
+                id={'initial-notification-enabled'}
+                type={'switch'}
+                label={'Initial notification'}
+                checked={form.initialNotificationEnabled}
+                onChange={event => handleUpdate({initialNotificationEnabled: event.target.checked})}
+              />
+              <Form.Label>Days before expiration</Form.Label>
+              <Form.Control
+                aria-label={'Initial notification (days before expiration)'}
+                type={'number'}
+                min={1}
+                disabled={!form.initialNotificationEnabled}
+                isInvalid={'initialNotificationDays' in errMap}
+                value={form.initialNotificationDays}
+                onChange={event => handleUpdate({initialNotificationDays: event.target.value})}
+              />
+              <FormErrorDisplay errorsMap={errMap} fieldName={'initialNotificationDays'} />
+            </div>
+            <div className={'col-lg-6'}>
+              <Form.Check
+                id={'follow-up-notification-enabled'}
+                type={'switch'}
+                label={'Follow-up notifications'}
+                checked={form.followUpNotificationEnabled}
+                onChange={event => handleUpdate({followUpNotificationEnabled: event.target.checked})}
+              />
+              <Form.Label>Days between reminders</Form.Label>
+              <Form.Control
+                aria-label={'Follow-up notifications (days between reminders)'}
+                type={'number'}
+                min={0}
+                disabled={!form.followUpNotificationEnabled}
+                isInvalid={'followUpNotificationDays' in errMap}
+                value={form.followUpNotificationDays}
+                onChange={event => handleUpdate({followUpNotificationDays: event.target.value})}
+              />
+              <small>Set to 0 to send only the initial notification.</small>
+              <FormErrorDisplay errorsMap={errMap} fieldName={'followUpNotificationDays'} />
+            </div>
           </div>
-          <div className={'col-lg-4'}>
-            <Form.Label>Follow-up notifications (days between reminders)</Form.Label>
-            <Form.Control
-              aria-label={'Follow-up notifications (days between reminders)'}
-              type={'number'}
-              min={0}
-              isInvalid={'followUpNotificationDays' in errMap}
-              value={followUpNotificationDays}
-              onChange={event => {
-                const nextValue = event.target.value;
-                setFollowUpNotificationDays(nextValue);
-                handleUpdate(initialNotificationDays, nextValue);
-              }}
-            />
-            <small>Set to 0 to send only the initial notification.</small>
-            <FormErrorDisplay errorsMap={errMap} fieldName={'followUpNotificationDays'} />
-          </div>
-        </div>
-      </SectionDiv>
+        </SectionDiv>
+      </Tab>
 
-      <SectionDiv className={'margin-bottom'}>
-        <h5>Skill Filter</h5>
-        <Form.Label>Skill codes to monitor for expiration notifications</Form.Label>
-        <SynLuSkillSelector
-          isMulti
-          allowClear
-          values={monitoredSkillCodes}
-          onSelect={option => {
-            const options = (Array.isArray(option) ? option : option ? [option] : []) as iAutoCompleteSingle[];
-            const nextValue = options.map(opt => `${opt.value}`);
-            setMonitoredSkillCodes(nextValue);
-            handleUpdate(initialNotificationDays, followUpNotificationDays, nextValue);
-          }}
-        />
-      </SectionDiv>
+      <Tab eventKey={TAB_SKILLS} title={'Skill Filter'}>
+        <SectionDiv>
+          <Form.Label>Skill codes to monitor for expiration notifications</Form.Label>
+          <SynLuSkillSelector
+            isMulti
+            allowClear
+            values={form.monitoredSkillCodes}
+            onSelect={option => {
+              const options = (Array.isArray(option) ? option : option ? [option] : []) as iAutoCompleteSingle[];
+              handleUpdate({monitoredSkillCodes: options.map(opt => `${opt.value}`)});
+            }}
+          />
+        </SectionDiv>
+      </Tab>
 
-      <SectionDiv className={'margin-bottom'}>
-        <h5>Recipients</h5>
-        <Form.Label>Nominated emails for the bulk summary (separated by ";")</Form.Label>
-        <Form.Control
-          aria-label={'Nominated emails for the bulk summary'}
-          as={'textarea'}
-          rows={2}
-          isInvalid={'skillExpirationNotificationEmails' in errMap}
-          value={skillExpirationNotificationEmails}
-          onChange={event => {
-            const nextValue = event.target.value;
-            setSkillExpirationNotificationEmails(nextValue);
-            handleUpdate(initialNotificationDays, followUpNotificationDays, monitoredSkillCodes, nextValue);
-          }}
-        />
-        <FormErrorDisplay errorsMap={errMap} fieldName={'skillExpirationNotificationEmails'} />
-      </SectionDiv>
+      <Tab eventKey={TAB_RECIPIENTS} title={'Recipients'}>
+        <SectionDiv>
+          <Form.Label>Nominated emails for the bulk summary (separated by ";")</Form.Label>
+          <Form.Control
+            aria-label={'Nominated emails for the bulk summary'}
+            as={'textarea'}
+            rows={2}
+            isInvalid={'skillExpirationNotificationEmails' in errMap}
+            value={form.skillExpirationNotificationEmails}
+            onChange={event => handleUpdate({skillExpirationNotificationEmails: event.target.value})}
+          />
+          <FormErrorDisplay errorsMap={errMap} fieldName={'skillExpirationNotificationEmails'} />
+        </SectionDiv>
+      </Tab>
 
-      <SectionDiv className={'margin-bottom'}>
-        <h5>Individual Notification Email</h5>
-        <div className={'row g-3'}>
-          <div className={'col-lg-12'}>
-            <Form.Label>Subject</Form.Label>
-            <Form.Control
-              aria-label={'Individual notification email subject'}
-              value={individualNotificationEmailSubject}
-              onChange={event => {
-                const nextValue = event.target.value;
-                setIndividualNotificationEmailSubject(nextValue);
-                handleUpdate(
-                  initialNotificationDays,
-                  followUpNotificationDays,
-                  monitoredSkillCodes,
-                  skillExpirationNotificationEmails,
-                  nextValue
-                );
-              }}
-            />
-          </div>
-          <div className={'col-lg-12'}>
-            <Form.Label>Body</Form.Label>
-            <Form.Control
-              aria-label={'Individual notification email body'}
-              as={'textarea'}
-              rows={4}
-              value={individualNotificationEmailBody}
-              onChange={event => {
-                const nextValue = event.target.value;
-                setIndividualNotificationEmailBody(nextValue);
-                handleUpdate(
-                  initialNotificationDays,
-                  followUpNotificationDays,
-                  monitoredSkillCodes,
-                  skillExpirationNotificationEmails,
-                  individualNotificationEmailSubject,
-                  nextValue
-                );
-              }}
-            />
-            <small>Available variables: {'{staffName}'}, {'{skillCode}'}, {'{expirationDate}'}, {'{staffOccupEmail}'}</small>
-          </div>
-        </div>
-      </SectionDiv>
+      <Tab eventKey={TAB_INDIVIDUAL_EMAIL} title={'Individual Notification Email'}>
+        <SectionDiv>
+          <Form.Label>Subject</Form.Label>
+          <Form.Control
+            aria-label={'Individual notification email subject'}
+            value={form.individualNotificationEmailSubject}
+            onChange={event => handleUpdate({individualNotificationEmailSubject: event.target.value})}
+          />
+          <Form.Label className={'space-top'}>Body</Form.Label>
+          <small>
+            Available variables: {'{staffName}'}, {'{skillCode}'}, {'{expirationDate}'}, {'{staffOccupEmail}'}
+          </small>
+          <EmailTemplateBuilder
+            designData={form.individualNotificationEmailBody.design || {}}
+            editorRef={() => null}
+            onUpdated={editor => {
+              editor.exportHtml(data => {
+                const {design, html} = data;
+                handleUpdate({individualNotificationEmailBody: {design, html}});
+              });
+            }}
+          />
+        </SectionDiv>
+      </Tab>
 
-      <SectionDiv>
-        <h5>Bulk Notification Email</h5>
-        <div className={'row g-3'}>
-          <div className={'col-lg-12'}>
-            <Form.Label>Subject</Form.Label>
-            <Form.Control
-              aria-label={'Bulk notification email subject'}
-              value={bulkNotificationEmailSubject}
-              onChange={event => {
-                const nextValue = event.target.value;
-                setBulkNotificationEmailSubject(nextValue);
-                handleUpdate(
-                  initialNotificationDays,
-                  followUpNotificationDays,
-                  monitoredSkillCodes,
-                  skillExpirationNotificationEmails,
-                  individualNotificationEmailSubject,
-                  individualNotificationEmailBody,
-                  nextValue
-                );
-              }}
-            />
-          </div>
-          <div className={'col-lg-12'}>
-            <Form.Label>Body</Form.Label>
-            <Form.Control
-              aria-label={'Bulk notification email body'}
-              as={'textarea'}
-              rows={4}
-              value={bulkNotificationEmailBody}
-              onChange={event => {
-                const nextValue = event.target.value;
-                setBulkNotificationEmailBody(nextValue);
-                handleUpdate(
-                  initialNotificationDays,
-                  followUpNotificationDays,
-                  monitoredSkillCodes,
-                  skillExpirationNotificationEmails,
-                  individualNotificationEmailSubject,
-                  individualNotificationEmailBody,
-                  bulkNotificationEmailSubject,
-                  nextValue
-                );
-              }}
-            />
-            <small>Available variable: {'{expiringStaffTable}'}</small>
-          </div>
-        </div>
-      </SectionDiv>
-    </SectionDiv>
+      <Tab eventKey={TAB_BULK_EMAIL} title={'Bulk Notification Email'}>
+        <SectionDiv>
+          <Form.Label>Subject</Form.Label>
+          <Form.Control
+            aria-label={'Bulk notification email subject'}
+            value={form.bulkNotificationEmailSubject}
+            onChange={event => handleUpdate({bulkNotificationEmailSubject: event.target.value})}
+          />
+          <Form.Label className={'space-top'}>Body</Form.Label>
+          <small>Available variable: {'{expiringStaffTable}'}</small>
+          <EmailTemplateBuilder
+            designData={form.bulkNotificationEmailBody.design || {}}
+            editorRef={() => null}
+            onUpdated={editor => {
+              editor.exportHtml(data => {
+                const {design, html} = data;
+                handleUpdate({bulkNotificationEmailBody: {design, html}});
+              });
+            }}
+          />
+        </SectionDiv>
+      </Tab>
+
+      <Tab eventKey={TAB_LOGS} title={'Logs'}>
+        <SkillExpirationLogsPanel />
+      </Tab>
+    </Tabs>
   );
 };
 
