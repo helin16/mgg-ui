@@ -1,10 +1,12 @@
 import {useEffect, useState} from 'react';
 import {Form, Spinner, Tab, Tabs} from 'react-bootstrap';
+import * as Icons from 'react-bootstrap-icons';
 import ModuleAccessWrapper from '../../module/ModuleAccessWrapper';
 import MggsModuleService from '../../../services/Module/MggsModuleService';
 import Toaster, {TOAST_TYPE_SUCCESS} from '../../../services/Toaster';
 import SectionDiv from '../../common/SectionDiv';
 import {FlexContainer} from '../../../styles';
+import ExplanationPanel from '../../ExplanationPanel';
 import FormErrorDisplay, {iErrorMap} from '../../form/FormErrorDisplay';
 import iModule from '../../../types/modules/iModule';
 import iSkillExpirationSettings, {iSkillExpirationEmailTemplateBody} from '../../../types/modules/iSkillExpirationSettings';
@@ -18,9 +20,12 @@ const MODULE_SETTINGS_KEY = 'skillExpiration';
 
 const TAB_TIMING = 'timing';
 const TAB_SKILLS = 'skills';
-const TAB_RECIPIENTS = 'recipients';
 const TAB_INDIVIDUAL_EMAIL = 'individualEmail';
 const TAB_BULK_EMAIL = 'bulkEmail';
+
+const TabInfo = ({text}: {text: any}) => (
+  <ExplanationPanel variant={'info'} icon={<Icons.InfoCircleFill />} text={text} className={'mb-3'} />
+);
 
 const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -143,6 +148,12 @@ const EditPanel = ({module, isSaving, onUpdate}: iEditPanel) => {
       >
         <Tab eventKey={TAB_TIMING} title={'Notification Timing'}>
           <SectionDiv>
+            <TabInfo
+              text={
+                'Controls when notifications go out: how many days before a skill expires the first ' +
+                '(initial) notification is sent, and whether/how often follow-up reminders repeat after that.'
+              }
+            />
             <div className={'row g-3'}>
               <div className={'col-lg-6'}>
                 <Form.Check
@@ -192,6 +203,12 @@ const EditPanel = ({module, isSaving, onUpdate}: iEditPanel) => {
 
         <Tab eventKey={TAB_SKILLS} title={'Skill Filter'}>
           <SectionDiv>
+            <TabInfo
+              text={
+                'Only staff with an expiring skill in this list will trigger a notification. Skills not ' +
+                'selected here are ignored entirely by the nightly check.'
+              }
+            />
             <Form.Label>Skill codes to monitor for expiration notifications</Form.Label>
             <SynLuSkillSelector
               isMulti
@@ -205,24 +222,14 @@ const EditPanel = ({module, isSaving, onUpdate}: iEditPanel) => {
           </SectionDiv>
         </Tab>
 
-        <Tab eventKey={TAB_RECIPIENTS} title={'Recipients'}>
-          <SectionDiv>
-            <Form.Label>Nominated emails for the bulk summary (separated by ";")</Form.Label>
-            <Form.Control
-              aria-label={'Nominated emails for the bulk summary'}
-              as={'textarea'}
-              rows={2}
-              isInvalid={'skillExpirationNotificationEmails' in errMap}
-              value={form.skillExpirationNotificationEmails}
-              onChange={event => updateLocal({skillExpirationNotificationEmails: event.target.value})}
-              onBlur={() => commit()}
-            />
-            <FormErrorDisplay errorsMap={errMap} fieldName={'skillExpirationNotificationEmails'} />
-          </SectionDiv>
-        </Tab>
-
         <Tab eventKey={TAB_INDIVIDUAL_EMAIL} title={'Individual Notification Email'}>
           <SectionDiv>
+            <TabInfo
+              text={
+                'Sent to each staff member individually, at their own occupation email address, when one ' +
+                'of their monitored skills is due for a notification.'
+              }
+            />
             <Form.Label>Subject</Form.Label>
             <Form.Control
               aria-label={'Individual notification email subject'}
@@ -249,7 +256,25 @@ const EditPanel = ({module, isSaving, onUpdate}: iEditPanel) => {
 
         <Tab eventKey={TAB_BULK_EMAIL} title={'Bulk Notification Email'}>
           <SectionDiv>
-            <Form.Label>Subject</Form.Label>
+            <TabInfo
+              text={
+                'Sent to the back-office recipients nominated below - a single daily summary listing every ' +
+                'staff member with an expiring skill, rather than one email per staff member.'
+              }
+            />
+            <Form.Label>Recipients</Form.Label>
+            <Form.Control
+              aria-label={'Nominated emails for the bulk summary'}
+              as={'textarea'}
+              rows={2}
+              placeholder={'Email addresses separated by ";"'}
+              isInvalid={'skillExpirationNotificationEmails' in errMap}
+              value={form.skillExpirationNotificationEmails}
+              onChange={event => updateLocal({skillExpirationNotificationEmails: event.target.value})}
+              onBlur={() => commit()}
+            />
+            <FormErrorDisplay errorsMap={errMap} fieldName={'skillExpirationNotificationEmails'} />
+            <Form.Label className={'space-top'}>Subject</Form.Label>
             <Form.Control
               aria-label={'Bulk notification email subject'}
               value={form.bulkNotificationEmailSubject}

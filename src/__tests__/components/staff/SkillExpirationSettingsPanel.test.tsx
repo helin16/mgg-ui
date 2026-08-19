@@ -239,4 +239,25 @@ describe('SkillExpirationSettingsPanel', () => {
 
     await waitFor(() => expect(mockedToaster.showApiError).toHaveBeenCalled());
   });
+
+  test('has no standalone Recipients tab - recipients live inside Bulk Notification Email', async () => {
+    render(<SkillExpirationSettingsPanel />);
+    await screen.findByLabelText('Initial notification (days before expiration)');
+
+    expect(screen.queryByRole('tab', {name: 'Recipients'})).not.toBeInTheDocument();
+    expect(screen.getByRole('tab', {name: 'Bulk Notification Email'})).toBeInTheDocument();
+    expect(screen.getByLabelText('Nominated emails for the bulk summary')).toHaveValue(
+      'admin@school.com;hoy@school.com'
+    );
+  });
+
+  test('shows an info alert explaining the purpose of each sub-tab', async () => {
+    render(<SkillExpirationSettingsPanel />);
+    await screen.findByLabelText('Initial notification (days before expiration)');
+
+    expect(screen.getByText(/how many days before a skill expires the first/)).toBeInTheDocument();
+    expect(screen.getByText(/only staff with an expiring skill in this list/i)).toBeInTheDocument();
+    expect(screen.getByText(/sent to each staff member individually/i)).toBeInTheDocument();
+    expect(screen.getByText(/sent to the back-office recipients nominated below/i)).toBeInTheDocument();
+  });
 });
