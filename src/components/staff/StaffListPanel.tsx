@@ -39,6 +39,11 @@ import { STORAGE_COLUMN_KEY_STAFF_LIST } from "../../services/LocalStorageServic
 import iSynLuSkill from "../../types/Synergetic/Lookup/iSynLuSkill";
 import StaffListTable from "./components/StaffListTable";
 import CSVExportFromHtmlTableBtn from "../form/CSVExportFromHtmlTableBtn";
+import BulkUpdateModal from "./components/BulkUpdateModal";
+import AuthService from "../../services/AuthService";
+import { MGGS_MODULE_ID_STAFF_LIST } from "../../types/modules/iModuleUser";
+import { ROLE_ID_ADMIN } from "../../types/modules/iRole";
+import { Button } from "react-bootstrap";
 
 const Wrapper = styled.div`
   .staff-list-table {
@@ -70,7 +75,31 @@ const StaffListPanel = ({ showSearchPanel = true }: iStaffListPanel) => {
   const [searchCriteria, setSearchCriteria] = useState<
     iStaffListSearchCriteria
   >({});
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [selectedStaffIds, setSelectedStaffIds] = useState<number[]>([]);
+  const [isBulkUpdateModalOpen, setIsBulkUpdateModalOpen] = useState(false);
+  const [refreshToken, setRefreshToken] = useState(0);
   const staffListTableHtmlId = `sl-${moment().unix()}-${Math.random()}`;
+
+  useEffect(() => {
+    let isCanceled = false;
+    AuthService.isModuleRole(MGGS_MODULE_ID_STAFF_LIST, ROLE_ID_ADMIN)
+      .then(canAccess => {
+        if (isCanceled) {
+          return;
+        }
+        setIsAdmin(canAccess === true);
+      })
+      .catch(() => {
+        if (isCanceled) {
+          return;
+        }
+        setIsAdmin(false);
+      });
+    return () => {
+      isCanceled = true;
+    };
+  }, []);
 
   const doSearch = async (criteria: iStaffListSearchCriteria) => {
     const { ActiveFlag, SearchTxt, DepartmentCodes, CategoryCodes } = criteria;
@@ -191,6 +220,10 @@ const StaffListPanel = ({ showSearchPanel = true }: iStaffListPanel) => {
   };
 
   useEffect(() => {
+    setSelectedStaffIds([]);
+  }, [searchCriteria]);
+
+  useEffect(() => {
     if (Object.keys(searchCriteria).length <= 0) {
       return;
     }
@@ -290,7 +323,7 @@ const StaffListPanel = ({ showSearchPanel = true }: iStaffListPanel) => {
     };
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchCriteria]);
+  }, [searchCriteria, refreshToken]);
 
   const getContent = () => {
     if (isLoading) {
@@ -305,6 +338,15 @@ const StaffListPanel = ({ showSearchPanel = true }: iStaffListPanel) => {
         <FlexContainer className={"justify-content-between"}>
           <h5>{staffList?.length || 0} Staff</h5>
           <FlexContainer className={"with-gap"}>
+            {isAdmin === true && selectedStaffIds.length > 0 ? (
+              <Button
+                size={"sm"}
+                variant={"link"}
+                onClick={() => setIsBulkUpdateModalOpen(true)}
+              >
+                Bulk Update
+              </Button>
+            ) : null}
             <CSVExportFromHtmlTableBtn
               size={'sm'}
               variant={'link'}
@@ -332,6 +374,19 @@ const StaffListPanel = ({ showSearchPanel = true }: iStaffListPanel) => {
           skillMap={skillsMap}
           staffMap={staffMap}
           positionStaffIdMap={positionStaffIdMap}
+          showSelection={isAdmin}
+          selectedStaffIds={selectedStaffIds}
+          onSelectionChange={setSelectedStaffIds}
+        />
+        <BulkUpdateModal
+          selectedStaffIds={selectedStaffIds}
+          isShowing={isBulkUpdateModalOpen}
+          handleClose={() => setIsBulkUpdateModalOpen(false)}
+          onSuccess={() => {
+            setIsBulkUpdateModalOpen(false);
+            setSelectedStaffIds([]);
+            setRefreshToken(token => token + 1);
+          }}
         />
       </>
     );

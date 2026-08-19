@@ -55,14 +55,14 @@
 
 ### Verification for User Story 1
 
-- [ ] T008 [P] [US1] Add Jest coverage for the cell-highlighting logic (expired / current / empty skill-expiry values, plus a control non-skill date column that must NOT be marked) in `src/__tests__/components/form/CSVExportFromHtmlTableBtn.test.tsx`
-- [ ] T009 [US1] Cypress E2E: export CSV from the Staff List, verify only Skill-expiry cells for past dates are highlighted, in `cypress/e2e/StaffListSkillExpiration.cy.ts` (new)
+- [x] T008 [P] [US1] Add Jest coverage for the cell-highlighting logic (expired / current / empty skill-expiry values, plus a control non-skill date column that must NOT be marked) in `src/__tests__/components/form/CSVExportFromHtmlTableBtn.test.tsx`
+- [ ] T009 [US1] Cypress E2E: export CSV from the Staff List, verify only Skill-expiry cells for past dates are highlighted, in `cypress/e2e/StaffListSkillExpiration.cy.ts` (new) — not yet performed
 
 ### Implementation for User Story 1
 
-- [ ] T010 [US1] Extend `src/components/form/CSVExportFromHtmlTableBtn.tsx`: after `XLSX.utils.table_to_sheet(data)`, iterate the generated worksheet and apply `cell.fill`/`cell.font` styling to cells in the Skill-expiry column group whose date is before today. Note: `table_to_sheet` does not carry over Bootstrap CSS classes (e.g. the existing `bg-danger` class already used on-screen in `StaffListTable.tsx`'s `getSkillExpiryDateColumns`) — only inline styles — so "is this cell expired" must be re-derived from the cell's date value, not read off the DOM class
-- [ ] T011 [US1] Add a prop to `CSVExportFromHtmlTableBtn` (or a small companion helper) so `StaffListPanel.tsx`/`StaffListTable.tsx` can tell it which columns belong to `COLUMN_GROUP_SKILL_EXPIRY_DATE` (from `src/components/staff/components/StaffListHelper.tsx`), since the button currently only receives `tableHtmlId`/`fileName` and has no column-semantics of its own
-- [ ] T012 [US1] Manual verification: export with a mix of expired/current/empty skill-expiry dates and confirm only Skill-expiry cells are marked (FR-001, SC-001)
+- [x] T010 [US1] Extend `src/components/form/CSVExportFromHtmlTableBtn.tsx`: after `XLSX.utils.table_to_sheet(data)`, iterate the live DOM table and apply `cell.s = {fill, font}` styling to worksheet cells whose corresponding `<td>` contains a `.skill-expiry-date.bg-danger` element. `table_to_sheet` doesn't carry over Bootstrap CSS classes into the sheet itself (only inline styles), but the on-screen `bg-danger` class from `StaffListTable.tsx`'s `getSkillExpiryDateColumns` is still readable from the live DOM at export time, so it's reused directly rather than re-deriving expiry from the date text a second time
+- [x] T011 [US1] ~~Add a prop~~ — done differently: `CSVExportFromHtmlTableBtn` detects expired Skill-expiry cells directly from the live DOM via the existing `.skill-expiry-date.bg-danger` marker classes already applied on-screen by `StaffListTable.tsx`'s `getSkillExpiryDateColumns`, so no new prop or column-semantics plumbing was needed between `StaffListPanel.tsx`/`StaffListTable.tsx` and the button
+- [ ] T012 [US1] Manual verification: export with a mix of expired/current/empty skill-expiry dates and confirm only Skill-expiry cells are marked (FR-001, SC-001) — not yet performed (no running app/browser in this session)
 
 **Checkpoint**: User Story 1 fully functional and testable independently.
 
@@ -76,22 +76,22 @@
 
 ### Verification for User Story 2
 
-- [ ] T013 [P] [US2] Jest tests for the new `SynCommunitySkillService` update method(s) (mock axios, verify request URL/body shape) in `src/__tests__/services/Synergetic/Community/SynCommunitySkillService.test.ts`
-- [ ] T014 [P] [US2] Jest tests for `BulkUpdateModal` (submit disabled until skill + date chosen, loading state, partial-failure messaging) in `src/__tests__/components/staff/BulkUpdateModal.test.tsx`
-- [ ] T015 [US2] Cypress E2E: select 3 staff → "Bulk Update" → choose skill + date → Submit → verify modal closes, list refreshes, checkboxes clear, in `cypress/e2e/StaffListSkillExpiration.cy.ts`
-- [ ] T016 [US2] Cypress E2E: a non-admin module user does not see the checkbox column / "Bulk Update" button (access-control check)
-- [ ] T019 [P] [US2] (mggs-api repo) Jest tests for the new controller method: mock the DB query layer, assert `spuCommunitySkills` is called with all preserved fields on update, and `spiCommunitySkills` is called on auto-create when no record exists
+- [x] T013 [P] [US2] Jest tests for the new `SynCommunitySkillService` update method(s) (mock axios, verify request URL/body shape) in `src/__tests__/services/Synergetic/Community/SynCommunitySkillService.test.ts`
+- [x] T014 [P] [US2] Jest tests for `BulkUpdateModal` (submit disabled until skill + date chosen, loading state, partial-failure messaging) in `src/__tests__/components/staff/BulkUpdateModal.test.tsx`
+- [ ] T015 [US2] Cypress E2E: select 3 staff → "Bulk Update" → choose skill + date → Submit → verify modal closes, list refreshes, checkboxes clear, in `cypress/e2e/StaffListSkillExpiration.cy.ts` — not yet performed (no running app/backend in this session)
+- [ ] T016 [US2] Cypress E2E: a non-admin module user does not see the checkbox column / "Bulk Update" button (access-control check) — not yet performed
+- [x] T019 [P] [US2] (mggs-api repo) Jest tests for the new controller method: mock the DB query layer, assert `spuCommunitySkills` is called with all preserved fields on update, and `spiCommunitySkills` is called on auto-create when no record exists
 
 ### Implementation for User Story 2
 
-- [ ] T017 [US2] (mggs-api repo) Add route + `updateSkillExpiryByStaffAndCode` controller method for `PUT /syn/communitySkill/:staffID/:skillCode` in `src/controllers/Synergetic/Community/SynCommunitySkillController.ts`, per `contracts/API-BulkUpdate.md`: look up the existing record by `(ID=staffID, SkillCode=skillCode)`; if found, call `spuCommunitySkills` via raw EXEC with the existing field values plus the new `ExpiryDate`; if not found, auto-create via `spiCommunitySkills` (confirmed decision — see contract)
-- [ ] T018 [US2] (mggs-api repo) Add a backend admin-role check before executing the write, mirroring `SynMggsModuleController`'s settings-PUT validation
-- [ ] T020 [US2] Add `updateSkillExpiryDate(staffId, skillCode, expiryDate)` to `src/services/Synergetic/Community/SynCommunitySkillService.ts`, calling `PUT /syn/communitySkill/:staffId/:skillCode` — extends the existing service (which currently only has `getAll`) rather than introducing a new parallel service file
-- [ ] T021 [US2] Add `bulkUpdateSkillExpiryDate(staffIds, skillCode, expiryDate)` to the same service using `Promise.allSettled` over `updateSkillExpiryDate`, returning settled results so the UI can report partial failures
-- [ ] T022 [US2] Create `src/components/staff/components/BulkUpdateModal.tsx`: skill dropdown populated via `SynLuSkillService.getAll()` (already used in `StaffListPanel.tsx`), date picker, Submit/Cancel buttons, loading state; gated by `AuthService.isModuleRole(MGGS_MODULE_ID_STAFF_LIST, ROLE_ID_ADMIN)`
-- [ ] T023 [US2] Modify `src/components/staff/components/StaffListTable.tsx` to add a checkbox column immediately before the `StaffID` column (sticky-left like the existing `StaffID` column), with header select-all and per-row checkboxes
-- [ ] T024 [US2] Modify `src/components/staff/StaffListPanel.tsx`: add `selectedStaffIds` state; show a "Bulk Update" button before the Export button when `selectedStaffIds.length > 0` and the admin-role check passes (FR-003); open `BulkUpdateModal`; on success clear selection, refresh the staff list, and show a success toast; on partial failure, show which staff failed
-- [ ] T025 [US2] Wire loading/success/error toast states for the whole bulk-update flow via the shared `Toaster` service (constitution III — explicit async UX states)
+- [x] T017 [US2] (mggs-api repo) Add route + `updateSkillExpiryByStaffAndCode` controller method for `PUT /syn/communitySkill/:staffID/:skillCode` in `src/controllers/Synergetic/Community/SynCommunitySkillController.ts`, per `contracts/API-BulkUpdate.md`: look up the existing record by `(ID=staffID, SkillCode=skillCode)`; if found, call `spuCommunitySkills` via raw EXEC with the existing field values plus the new `ExpiryDate`; if not found, auto-create via `spiCommunitySkills` (confirmed decision — see contract). Implemented via a new `src/helper/StaffSkill/StaffSkillHelper.ts` helper module.
+- [x] T018 [US2] (mggs-api repo) Add a backend admin-role check before executing the write, mirroring `SynMggsModuleController`'s settings-PUT validation — done via `ModuleHelper.validateModuleAdmin(MGGS_MODULE_ID_STAFF_LIST)`
+- [x] T020 [US2] Add `updateSkillExpiryDate(staffId, skillCode, expiryDate)` to `src/services/Synergetic/Community/SynCommunitySkillService.ts`, calling `PUT /syn/communitySkill/:staffId/:skillCode` — extends the existing service (which currently only has `getAll`) rather than introducing a new parallel service file
+- [x] T021 [US2] Add `bulkUpdateSkillExpiryDate(staffIds, skillCode, expiryDate)` to the same service using `Promise.allSettled` over `updateSkillExpiryDate`, returning settled results so the UI can report partial failures
+- [x] T022 [US2] Create `src/components/staff/components/BulkUpdateModal.tsx`: skill dropdown populated via the existing `SynLuSkillSelector` component (reused as-is rather than calling `SynLuSkillService.getAll()` directly), date picker, Submit/Cancel buttons, loading state; gating is done by the caller (`StaffListPanel.tsx` only opens the modal when `AuthService.isModuleRole(MGGS_MODULE_ID_STAFF_LIST, ROLE_ID_ADMIN)` resolves true)
+- [x] T023 [US2] Modify `src/components/staff/components/StaffListTable.tsx` to add a checkbox column immediately before the `StaffID` column (sticky-left like the existing `StaffID` column), with header select-all and per-row checkboxes
+- [x] T024 [US2] Modify `src/components/staff/StaffListPanel.tsx`: add `selectedStaffIds` state; show a "Bulk Update" button before the Export button when `selectedStaffIds.length > 0` and the admin-role check passes (FR-003); open `BulkUpdateModal`; on success clear selection, refresh the staff list, and show a success toast; on partial failure, show which staff failed
+- [x] T025 [US2] Wire loading/success/error toast states for the whole bulk-update flow via the shared `Toaster` service (constitution III — explicit async UX states)
 
 **Checkpoint**: User Stories 1 AND 2 both work independently.
 

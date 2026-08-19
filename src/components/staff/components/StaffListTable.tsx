@@ -33,6 +33,9 @@ type iStaffListTable = iGetListColumns & {
   className?: string;
   selectedColumns: iTableColumn<iVStaff>[];
   staffList: iVStaff[];
+  showSelection?: boolean;
+  selectedStaffIds?: number[];
+  onSelectionChange?: (staffIds: number[]) => void;
 };
 const StaffListTable = ({
   tableHtmlId,
@@ -43,6 +46,9 @@ const StaffListTable = ({
   staffJobPosMap,
   positionStaffIdMap,
   staffMap,
+  showSelection = false,
+  selectedStaffIds = [],
+  onSelectionChange,
 }: iStaffListTable) => {
   const [columns, setColumns] = useState<any[]>([]);
   const [hasJPColumns, setHasJPColumns] = useState(false);
@@ -219,20 +225,67 @@ const StaffListTable = ({
     };
   };
 
+  const getSelectionColumn = () => {
+    if (showSelection !== true) {
+      return null;
+    }
+    const allStaffIds = staffList.map(staff => staff.StaffID);
+    const allSelected = allStaffIds.length > 0 && allStaffIds.every(staffId => selectedStaffIds.includes(staffId));
+    return {
+      id: "selection",
+      sticky: "left",
+      width: 40,
+      Header: () => (
+        <input
+          type={"checkbox"}
+          aria-label={"Select all staff"}
+          checked={allSelected}
+          onChange={event => onSelectionChange?.(event.target.checked ? allStaffIds : [])}
+        />
+      ),
+      getCellProps: (cell: any) => {
+        if (!cell.row.original.noOfMergingRows && cell.row.original.noOfMergingRows <= 0) {
+          return {};
+        }
+        return {
+          rowSpan: cell.row.original.noOfMergingRows
+        };
+      },
+      Cell: (cell: any) => {
+        const staffId = cell.cell.row.original.StaffID;
+        return (
+          <input
+            type={"checkbox"}
+            aria-label={`Select staff ${staffId}`}
+            checked={selectedStaffIds.includes(staffId)}
+            onChange={event => {
+              const next = event.target.checked
+                ? [...selectedStaffIds, staffId]
+                : selectedStaffIds.filter(id => id !== staffId);
+              onSelectionChange?.(next);
+            }}
+          />
+        );
+      }
+    };
+  };
+
   useEffect(() => {
+    const selectionColumn = getSelectionColumn();
     const staffDetailsColumns = selectedColumns.map(column => getStaffColumns(column)).filter(col => col !== null);
     const jpColumns = selectedColumns.map(column => getJobPositionColumns(column)).filter(col => col !== null);
     const skillExpiryDateColumns = selectedColumns.map(column => getSkillExpiryDateColumns(column)).filter(col => col !== null);
     setHasJPColumns(jpColumns.length > 0);
     setColumns(
       [
+        ...(selectionColumn ? [selectionColumn] : []),
         ...staffDetailsColumns,
         ...jpColumns,
         ...skillExpiryDateColumns
       ]
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedColumns]);
+  }, [selectedColumns, showSelection, selectedStaffIds, staffList]);
   if (columns.length <= 0) {
     return null;
   }
