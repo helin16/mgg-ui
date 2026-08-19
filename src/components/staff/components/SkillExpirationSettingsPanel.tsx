@@ -13,7 +13,6 @@ import {ROLE_ID_ADMIN} from '../../../types/modules/iRole';
 import SynLuSkillSelector from '../../Community/SynLuSkillSelector';
 import {iAutoCompleteSingle} from '../../common/AutoComplete';
 import EmailTemplateBuilder from '../../Email/EmailTemplateBuilder';
-import SkillExpirationLogsPanel from './SkillExpirationLogsPanel';
 
 const MODULE_SETTINGS_KEY = 'skillExpiration';
 
@@ -22,7 +21,6 @@ const TAB_SKILLS = 'skills';
 const TAB_RECIPIENTS = 'recipients';
 const TAB_INDIVIDUAL_EMAIL = 'individualEmail';
 const TAB_BULK_EMAIL = 'bulkEmail';
-const TAB_LOGS = 'logs';
 
 const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -272,10 +270,6 @@ const EditPanel = ({module, isSaving, onUpdate}: iEditPanel) => {
               }}
             />
           </SectionDiv>
-        </Tab>
-
-        <Tab eventKey={TAB_LOGS} title={'Logs'}>
-          <SkillExpirationLogsPanel />
         </Tab>
       </Tabs>
     </SectionDiv>

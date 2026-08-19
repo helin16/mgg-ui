@@ -25,10 +25,6 @@ jest.mock('../../../services/Module/MggsModuleService');
 jest.mock('../../../services/Toaster');
 jest.mock('../../../components/Community/SynLuSkillSelector');
 jest.mock('../../../components/Email/EmailTemplateBuilder');
-jest.mock('../../../components/staff/components/SkillExpirationLogsPanel', () => ({
-  __esModule: true,
-  default: () => <div data-testid={'SkillExpirationLogsPanelTestId'} />,
-}));
 
 const mockedModuleService = MggsModuleService as jest.Mocked<typeof MggsModuleService>;
 const mockedToaster = Toaster as jest.Mocked<typeof Toaster>;
@@ -219,11 +215,11 @@ describe('SkillExpirationSettingsPanel', () => {
     );
   });
 
-  test('renders a Logs tab', async () => {
+  test('does not render a Logs pill sub-tab - Logs is now a top-level tab alongside Settings', async () => {
     render(<SkillExpirationSettingsPanel />);
+    await screen.findByLabelText('Initial notification (days before expiration)');
 
-    expect(await screen.findByRole('tab', {name: 'Logs'})).toBeInTheDocument();
-    expect(screen.getByTestId('SkillExpirationLogsPanelTestId')).toBeInTheDocument();
+    expect(screen.queryByRole('tab', {name: 'Logs'})).not.toBeInTheDocument();
   });
 
   test('does not render an Update/Save button - changes save as they are made', async () => {

@@ -2,6 +2,7 @@ import AdminPage from "../../layouts/AdminPage";
 import AdminPageTabs from '../../layouts/AdminPageTabs';
 import {MGGS_MODULE_ID_STAFF_LIST} from '../../types/modules/iModuleUser';
 import SkillExpirationSettingsPanel from '../../components/staff/components/SkillExpirationSettingsPanel';
+import SkillExpirationLogsPanel from '../../components/staff/components/SkillExpirationLogsPanel';
 
 type iStaffListAdminPage = {
   onNavBack: () => void;
@@ -16,6 +17,11 @@ const StaffListAdminPage = ({ onNavBack }: iStaffListAdminPage) => {
             key: 'settings',
             title: 'Settings',
             component: <SkillExpirationSettingsPanel />,
+          },
+          {
+            key: 'logs',
+            title: 'Logs',
+            component: <SkillExpirationLogsPanel />,
           },
         ]}
       />

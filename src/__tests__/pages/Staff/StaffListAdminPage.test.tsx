@@ -20,4 +20,12 @@ describe('StaffListAdminPage', () => {
     expect(mockComponentTestHelper.get(AdminPageTabsKey).length).toBeGreaterThan(0);
     expect(container).not.toBeEmptyDOMElement();
   });
+
+  test('passes Settings and Logs as separate top-level extraTabs (Logs is not nested under Settings)', () => {
+    render(<StaffListAdminPage onNavBack={jest.fn()} />);
+
+    const [props] = mockComponentTestHelper.get(AdminPageTabsKey);
+    const tabKeys = props.extraTabs.map((tab: any) => tab.key);
+    expect(tabKeys).toEqual(['settings', 'logs']);
+  });
 });
