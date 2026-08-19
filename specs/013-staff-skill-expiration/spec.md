@@ -162,11 +162,11 @@ An administrator and individual staff members receive notifications at the corre
 
 **FR-005**: When "Submit" is clicked in the bulk update modal, the system MUST update the selected skill's expiration date for all selected staff to the chosen date, then close the modal and clear all checkboxes
 
-**FR-006**: The Staff List - Admin interface MUST include a "Settings" tab that provides access to notification configuration
+**FR-006**: The Staff List - Admin interface MUST include a "Settings" tab that provides access to notification configuration, organized as pill-style sub-tabs (Notification Timing, Skill Filter, Recipients, Individual Notification Email, Bulk Notification Email, Logs)
 
-**FR-007**: The Settings tab MUST include a numeric input field for "Initial notification interval in days" (how many days before expiration the first notification is sent)
+**FR-007**: The Settings tab MUST include an on/off switch for "Initial notification", plus a numeric input field for "Initial notification interval in days" (how many days before expiration the first notification is sent) that is only required/enforced while the switch is on; turning the switch off disables the initial notification (and, since it anchors the whole cycle, the follow-up notifications too) without requiring a numeric workaround
 
-**FR-008**: The Settings tab MUST include a numeric input field for "Follow-up notification frequency in days" (interval between follow-up notifications sent daily at 11:59 PM, continuing until the skill expiration date is updated)
+**FR-008**: The Settings tab MUST include an on/off switch for "Follow-up notifications", plus a numeric input field for "Follow-up notification frequency in days" (interval between follow-up notifications sent daily at 11:59 PM, continuing until the skill expiration date is updated); turning the switch off behaves the same as setting the interval to 0 (initial notification only, no repeats)
 
 **FR-009**: The Settings tab MUST include a multi-select dropdown for "Skill codes to monitor for expiration notifications", allowing users to select/deselect any combination of skills and clear all selections
 
@@ -200,7 +200,7 @@ An administrator and individual staff members receive notifications at the corre
 
 **FR-023**: Email sending infrastructure MUST support individual staff notifications and bulk administrator notifications with configurable recipient lists
 
-**FR-024**: The Settings tab MUST include configurable email template fields for individual notification email subject, individual notification email body, bulk notification email subject, and bulk notification email body
+**FR-024**: The Settings tab MUST include configurable email template fields for individual notification email subject, individual notification email body, bulk notification email subject, and bulk notification email body. Subject fields are plain text; body fields are authored via the existing `EmailTemplateBuilder` (Unlayer drag-and-drop editor, already used for donation receipt emails), which produces a `{design, html}` pair — `design` is reloaded into the builder for further editing, `html` is what's actually substituted and sent
 
 **FR-025**: All email templates MUST support variable substitution with placeholders like `{staffName}`, `{skillCode}`, `{expirationDate}`, `{staffOccupEmail}` for individual notifications and `{expiringStaffTable}` for bulk notifications
 
@@ -212,22 +212,24 @@ An administrator and individual staff members receive notifications at the corre
 
 **FR-029**: When multiple skills are expiring for the same staff on the same notification trigger date, all expiring skills for that staff MUST be batched into a single email (listing all expiring skills in that one message), not multiple separate emails
 
-**FR-030**: Notification activity MUST be logged to application logs at INFO level (successful sends, recipient addresses, skill details) and WARN level (send failures, validation errors); no persistent notification log database table is required; logs rotate per standard application log retention policy
+**FR-030**: Notification activity MUST be logged to application logs (successful sends, recipient addresses, skill details, send failures) and MUST also be visible to admins via a "Logs" tab on the Settings page; no *new* persistent notification log table/migration is required — the Logs tab is a filtered, reshaped view over the existing generic Message queue table (scoped to this feature's own message type), the same approach already used by Student Absence's daily-summary Logs tab. Application logs still rotate per standard retention policy
 
 ### Key Entities
 
 - **Staff**: Core entity with `staffId`, `StaffOccupEmail`, `status` (Active/Inactive), and associated skills/expiration dates
 - **Skill**: Entity with `skillCode`, `skillName`, `expirationDate` (per staff member)
 - **Module Settings**: Configuration stored against the module, including:
-  - `initialNotificationDays` (integer) — days before expiration for first notification
+  - `initialNotificationEnabled` (boolean) — whether the initial notification (and, by extension, the whole notification cycle) is active
+  - `initialNotificationDays` (integer) — days before expiration for first notification; only enforced while `initialNotificationEnabled` is true
+  - `followUpNotificationEnabled` (boolean) — whether follow-up notifications repeat after the initial one; off behaves like `followUpNotificationDays = 0`
   - `followUpNotificationDays` (integer) — days between follow-up notifications sent daily at 11:59 PM
   - `monitoredSkillCodes` (array of skill codes) — which skills trigger notifications
   - `skillExpirationNotificationEmails` (string with ";" separator) — nominated admin/supervisor emails receiving bulk summary
   - `individualNotificationEmailSubject` (string template) — email subject for individual staff notifications
-  - `individualNotificationEmailBody` (string template) — email body for individual staff notifications  
+  - `individualNotificationEmailBody` (`{design, html}` object, authored via EmailTemplateBuilder) — email body for individual staff notifications
   - `bulkNotificationEmailSubject` (string template) — email subject for bulk admin/supervisor notifications
-  - `bulkNotificationEmailBody` (string template) — email body for bulk admin/supervisor notifications
-- **Notification Log**: (Optional) track sent notifications to prevent duplicates and support audit trail
+  - `bulkNotificationEmailBody` (`{design, html}` object, authored via EmailTemplateBuilder) — email body for bulk admin/supervisor notifications
+- **Notification Log**: Not a new entity/table — the "Logs" tab is a reshaped read view over the existing generic Message queue, filtered to this feature's own message type, tracking status/recipient/subject/staff per sent notification
 
 ## Success Criteria
 

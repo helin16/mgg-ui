@@ -308,3 +308,49 @@ Because US2, US4–US7 touch both `mgg-ui` and `mggs-api`, land the backend endp
 - Commit after each task or logical group
 - Stop at any checkpoint to validate a story independently
 - The bulk-update auto-create decision, and the `occpEmail` → `StaffOccupEmail` field-name correction (verified against `src/types/Synergetic/iVStaff.ts`), were both resolved during planning — see `contracts/API-BulkUpdate.md` and the corrected spec/contract docs
+
+---
+
+## Addendum: Settings UI Redesign & Logs Tab (post-implementation user request)
+
+Requested after US3–US7 were already built and demoed against a running app; not part of the original task
+breakdown above, so tracked here rather than renumbering T001–T060. FR-006/007/008/024/030 and the "Module
+Settings" Key Entity in `spec.md` were updated to match. All items below are done and tested.
+
+- [x] On/off switches for Initial and Follow-up notifications (`initialNotificationEnabled`/
+  `followUpNotificationEnabled`), replacing the previous "0 means disabled" convention that forced a
+  confusing "Enter at least 1 day" validation error even when an admin wanted the notification off entirely.
+  Frontend: `SkillExpirationSettingsPanel.tsx`. Backend: `ExpiringSkillsWorker.ts` (`initialNotificationEnabled
+  === false` short-circuits the whole run; `followUpNotificationEnabled === false` behaves like
+  `followUpNotificationDays <= 0`).
+- [x] Split the single Settings form into pill-style sub-tabs (`<Tabs variant="pills">`), matching the
+  existing `OnlineDonationModuleSettingsPanel.tsx` pattern: Notification Timing, Skill Filter, Recipients,
+  Individual Notification Email, Bulk Notification Email, Logs.
+- [x] Both email bodies now authored via the existing `EmailTemplateBuilder` (Unlayer) component instead of
+  plain textareas, storing `{design, html}` (matching `OnlineDonationModuleSettingsPanel`'s donation-receipt
+  email body pattern). `iSkillExpirationSettings` (both repos) updated accordingly; backend substitution now
+  reads `.html`. Backward compatible: a plain-string body (the pre-redesign shape) is still accepted and
+  wrapped as `{html: value}`.
+- [x] New "Logs" tab (`SkillExpirationLogsPanel.tsx` + `StaffSkillExpirationService.getLogs()`), listing sent
+  notification emails (type, status, recipient, staff, skills, subject, created date), paginated — mirrors
+  `StudentAbsenceDailySummaryLogsPanel.tsx`'s UI exactly.
+- [x] (mggs-api repo) New dedicated `MESSAGE_TYPE_SKILL_EXPIRATION_EMAIL` message type (rather than reusing
+  the generic `MESSAGE_TYPE_SMTP_EMAIL`), registered in `CronJobsQueue` → `SMTPConnector.send()`, so the Logs
+  view can filter to exactly this feature's emails without picking up unrelated SMTP traffic app-wide
+  (mirrors how `MESSAGE_TYPE_STUDENT_ABSENCE_AUTO`/`MANUAL` already work). `EmailHelper.addAMailJob()` gained
+  optional `type`/`meta` params (backward compatible; existing callers unaffected) so `ExpiringSkillsWorker`
+  can tag each queued email with `{notificationType, staffId, staffName, skillCodes}` /
+  `{notificationType, staffIds}` for the Logs view to read back.
+- [x] (mggs-api repo) New `StaffSkillExpirationLogsController` (`GET /staffSkillExpiration/logs`, admin-gated
+  via `ModuleHelper.validateModuleAdmin`), a filtered/reshaped projection over the existing generic `Messages`
+  table (no new DB table or migration) — the same approach `StudentAbsenceDailySummaryController`'s `/logs`
+  route already uses over `MESSAGE_TYPE_STUDENT_ABSENCE_AUTO`/`MANUAL`.
+- [x] Tests: `ExpiringSkillsWorker.test.ts` (+4: both switches, `{design,html}` body, message
+  type/meta), `CronJobsQueue.test.ts` (+1 processJob case, updated exhaustive type list),
+  `StaffSkillExpirationLogsController.test.ts` (new, 8 tests), `SkillExpirationSettingsPanel.test.tsx` (+5:
+  switches, EmailTemplateBuilder, Logs tab presence), `SkillExpirationLogsPanel.test.tsx` (new, 2 tests),
+  `StaffSkillExpirationService.test.ts` (new, 1 test). Full suites in both repos re-run clean (same
+  pre-existing unrelated failures as before: 4 in `SynergeticUserPermissions` (mgg-ui), 15 environment/
+  connector-config suites (mggs-api) — both confirmed unrelated in the earlier task log).
+- [ ] Not done: Cypress E2E for the redesigned Settings UI, and manual verification against a live SMTP/email
+  target — same "needs a live environment" gap as the rest of this feature's Cypress/manual tasks above.
