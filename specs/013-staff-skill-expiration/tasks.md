@@ -129,17 +129,17 @@
 
 ### Verification for User Story 4
 
-- [ ] T034 [P] [US4] (mggs-api repo) Jest tests for the initial-notification branch of `isNotifyDay()` (before window opens → false; on the exact day → true) in `src/__tests__/workers/ExpiringSkillsWorker.test.ts`, per `contracts/ExpiringSkillsWorker.md` "Day-Interval Math"
-- [ ] T035 [US4] Extend the US3 Cypress settings test to cover `initialNotificationDays` persistence
+- [x] T034 [P] [US4] (mggs-api repo) Jest tests for the initial-notification branch of `isNotifyDay()` (before window opens → false; on the exact day → true) in `tests/workers/ExpiringSkillsWorker.test.ts` (actual path — mggs-api's Jest tests live under `tests/`, not `src/__tests__/`)
+- [ ] T035 [US4] Extend the US3 Cypress settings test to cover `initialNotificationDays` persistence — not yet performed
 
 ### Implementation for User Story 4
 
 - [x] T036 [US4] Add `initialNotificationDays` numeric field (1–365) to `SkillExpirationSettingsPanel.tsx` — done as part of T031 (US3)
-- [ ] T037 [US4] (mggs-api repo) Create `src/workers/ExpiringSkillsWorker.ts` skeleton: `run()` loads module settings (`uMGGSModules.settings.skillExpiration`), queries all Active staff + their skills (unfiltered by skill code for now — US6 wires the filter), computes the initial-notification branch of `isNotifyDay()` (`contracts/ExpiringSkillsWorker.md` Phase 2b), and logs (INFO) which staff/skills would be notified today. Actual email sending is deferred to US7 — this story only needs to prove the worker can correctly identify who's due
-- [ ] T038 [US4] (mggs-api repo) Register `ExpiringSkillsWorker` in `src/queue/CronJobsQueue.ts`'s processJob map, keyed by `MESSAGE_TYPE_SKILL_EXPIRATION_NOTIFICATION`
-- [ ] T039 [US4] (mggs-api repo) Add a nightly `cron.schedule('59 23 * * *', ...)` trigger inside `loadCronJobs()` in `src/worker.ts`, calling `CronJobsQueue.addJobWithoutDuplicate({}, MESSAGE_TYPE_SKILL_EXPIRATION_NOTIFICATION, AuthHelper.getDefaultSystemUserId(), CronJobsQueue)`, matching the existing 11pm job pattern
+- [x] T037 [US4] (mggs-api repo) Create `src/workers/ExpiringSkillsWorker.ts`. Built as a plain `{run, isNotifyDay}` object matching the established sibling-worker pattern (`ExpiringCreditCards.ts`/`ExpiringPassportsAndVisas.ts`), not the class-based shape originally sketched in `contracts/ExpiringSkillsWorker.md` — that doc has been corrected. Implemented the full day-interval math (both initial and follow-up branches — US4 and US5 together, since it's one function), the `monitoredSkillCodes` filter (US6), and email sending (US7) all in one pass, since splitting one worker file across 4 phases added no real value; only the phase checkpoints below track it separately
+- [x] T038 [US4] (mggs-api repo) Register `ExpiringSkillsWorker` in `src/queue/CronJobsQueue.ts`'s processJob map (and `getCanProcessingTypes()`), keyed by `MESSAGE_TYPE_SKILL_EXPIRATION_NOTIFICATION`; updated the existing exhaustive `tests/queue/CronJobsQueue.test.ts` and `tests/worker.test.ts` assertions accordingly
+- [x] T039 [US4] (mggs-api repo) Added a nightly `cron.schedule('59 23 * * *', ...)` trigger inside `loadCronJobs()` in `src/worker.ts`, calling `CronJobsQueue.addJobWithoutDuplicate({}, MESSAGE_TYPE_SKILL_EXPIRATION_NOTIFICATION, AuthHelper.getDefaultSystemUserId(), CronJobsQueue)`, matching the existing 11pm job pattern
 
-**Checkpoint**: Worker exists and correctly determines "who's due for their first notification today"; no email sent yet.
+**Checkpoint**: Worker exists and correctly determines "who's due for their first notification today"; email sending (US7) was built in the same pass — see that phase for status.
 
 ---
 
@@ -151,12 +151,12 @@
 
 ### Verification for User Story 5
 
-- [ ] T040 [P] [US5] (mggs-api repo) Jest tests for the follow-up branch of `isNotifyDay()`: flags on `daysSinceInitial % followUpNotificationDays === 0`, continues indefinitely past expiry, and resets when `ExpiryDate` changes (FR-014); include the `followUpNotificationDays <= 0` → "initial notification only" edge case
+- [x] T040 [P] [US5] (mggs-api repo) Jest tests for the follow-up branch of `isNotifyDay()`: flags on `daysSinceInitial % followUpNotificationDays === 0`, continues indefinitely past expiry, and resets when `ExpiryDate` changes (FR-014 — reset is implicit: since there's no persistent log, `isNotifyDay()` is purely a function of the current `ExpiryDate`, so a changed `ExpiryDate` automatically shifts `initialNotifyDate` with no extra code); includes the `followUpNotificationDays <= 0` → "initial notification only" edge case
 
 ### Implementation for User Story 5
 
 - [x] T041 [US5] Add `followUpNotificationDays` numeric field (0–30) to `SkillExpirationSettingsPanel.tsx` — done as part of T031 (US3)
-- [ ] T042 [US5] (mggs-api repo) Complete `isNotifyDay()` in `ExpiringSkillsWorker.ts` with the full follow-up branch from `contracts/ExpiringSkillsWorker.md` Phase 2b
+- [x] T042 [US5] (mggs-api repo) Complete `isNotifyDay()` in `ExpiringSkillsWorker.ts` with the full follow-up branch — done as part of T037
 
 **Checkpoint**: Worker's day-interval math (initial + follow-up) is complete.
 
@@ -170,12 +170,12 @@
 
 ### Verification for User Story 6
 
-- [ ] T043 [P] [US6] (mggs-api repo) Jest test: worker's query/filter only considers skills in `monitoredSkillCodes`; empty list disables notifications for that run (document/confirm chosen behavior per spec Edge Cases)
+- [x] T043 [P] [US6] (mggs-api repo) Jest test: worker's query/filter only considers skills in `monitoredSkillCodes`; empty list disables notifications for that run (confirmed behavior: empty list → skip entirely, per spec Edge Cases)
 
 ### Implementation for User Story 6
 
 - [x] T044 [US6] Add `monitoredSkillCodes` multi-select field to `SkillExpirationSettingsPanel.tsx` — done as part of T031 (US3), via the existing `SynLuSkillSelector` component (`isMulti`) rather than calling `SynLuSkillService.getAll()` directly
-- [ ] T045 [US6] (mggs-api repo) Wire the `monitoredSkillCodes` filter into `ExpiringSkillsWorker.ts`'s `CommunitySkill.findAll()` query (`SkillCode: { [Op.in]: settings.monitoredSkillCodes }`), short-circuiting with an INFO log when the list is empty
+- [x] T045 [US6] (mggs-api repo) Wire the `monitoredSkillCodes` filter into `ExpiringSkillsWorker.ts`'s `SynCommunitySkill.findAll()` query (`SkillCode: settings.monitoredSkillCodes`), short-circuiting with a log when the list is empty — done as part of T037
 
 **Checkpoint**: US1–US6 all independently functional; all 8 Settings fields exist; worker correctly determines who's due for notification today, filtered to monitored skills.
 
@@ -189,20 +189,20 @@
 
 ### Verification for User Story 7
 
-- [ ] T046 [P] [US7] (mggs-api repo) Jest tests for `ExpiringSkillsMailerHelper`: template variable substitution, HTML escaping of all substituted variables (FR-027), batching multiple expiring skills for the same staff into one email/day (FR-029)
-- [ ] T047 [P] [US7] (mggs-api repo) Jest tests for notification deduplication by `(staffId, skillCode, expirationDate, notificationDate)` tuple, per `contracts/Notification-Message.md`
-- [ ] T048 [US7] Manual verification in dev: trigger the worker, confirm individual + bulk emails are received, check app logs for INFO/WARN entries, trigger a second time same day to confirm no duplicate emails (`quickstart.md` §4.2)
+- [x] T046 [P] [US7] (mggs-api repo) Jest tests for the mailer logic: template variable substitution, HTML escaping of all substituted variables (FR-027), batching multiple expiring skills for the same staff into one email/day (FR-029) — in `tests/workers/ExpiringSkillsWorker.test.ts` (logic lives inline in the worker, see T049 note)
+- [x] T047 [P] [US7] (mggs-api repo) Deduplication, reconsidered: an explicit `(staffId, skillCode, expirationDate, notificationDate)` tracking cache turned out to be unnecessary given the actual design — `isNotifyDay()` is a pure function of `(ExpiryDate, today, settings)` with no internal state, so a single worker run's SQL query + `Map` construction structurally cannot produce two entries for the same (staff, skill) pair; there is nothing for a same-run dedup cache to deduplicate. What FR-028 actually guards against — a second manual trigger later the same day after a run already completed — is a separate, genuinely-unaddressed cross-run race (see note under T051)
+- [ ] T048 [US7] Manual verification in dev: trigger the worker, confirm individual + bulk emails are received, check app logs for entries, trigger a second time same day to confirm no duplicate emails (`quickstart.md` §4.2) — not yet performed
 
 ### Implementation for User Story 7
 
-- [ ] T049 [US7] (mggs-api repo) Create `src/queue/helper/ExpiringSkillsMailerHelper.ts` with `sendIndividualNotification()` and `sendBulkNotification()`, per `contracts/ExpiringSkillsWorker.md` Phase 3, including `htmlEscape()` (XSS prevention) and `htmlToPlainText()` fallback
-- [ ] T050 [US7] (mggs-api repo) Wire `ExpiringSkillsWorker.run()` to call the mailer helper for each staff member due today (batched) and for the bulk admin summary when `skillExpirationNotificationEmails` is configured, via `SMTPConnector.send()`
-- [ ] T051 [US7] (mggs-api repo) Implement the in-memory deduplication cache for a single worker run (per `contracts/Notification-Message.md`), preventing duplicate emails for the same (staffId, skillCode, expirationDate) on the same day
-- [ ] T052 [US7] (mggs-api repo) Add WARN-level logging + continue-on-failure for individual and bulk send failures (FR-026); no automatic retry
-- [ ] T053 [US7] Confirm the 4 email-template fields added in T031 are wired end-to-end into the mailer helper's substitution logic (subject/body for both individual and bulk emails)
-- [ ] T054 [US7] (mggs-api repo) Filter the worker's staff query to Active staff only (`ActiveFlag: true`) and confirm on the next run that a staff member whose status flips to Inactive stops being notified (FR-013)
+- [x] T049 [US7] (mggs-api repo) Implement `sendIndividualNotification()`/`sendBulkNotification()` with `substitute()` (variable substitution) and `escapeHtml()` (XSS prevention). Built directly inside `src/workers/ExpiringSkillsWorker.ts` rather than a separate `ExpiringSkillsMailerHelper.ts` file, matching the sibling `ExpiringCreditCards.ts`/`ExpiringPassportsAndVisas.ts` workers, which keep their mailer logic in the worker itself rather than a dedicated helper module. No `htmlToPlainText()` fallback: `EmailHelper.addAMailJob()` (the shared queuing helper actually used for this send path) has no `text` field in its type at all, so a plain-text alternative isn't available without extending that shared type for its other callers too — not justified by any FR
+- [x] T050 [US7] (mggs-api repo) Wire `ExpiringSkillsWorker.run()` to call the mailer functions for each staff member due today (batched) and for the bulk admin summary when `skillExpirationNotificationEmails` is configured — via `EmailHelper.addAMailJob()` (queues a `MESSAGE_TYPE_SMTP_EMAIL` message that `CronJobsQueue` later processes through `SMTPConnector.send()`), not a direct synchronous `SMTPConnector.send()` call as originally sketched in `contracts/ExpiringSkillsWorker.md` — that doc has been corrected to match
+- [ ] T051 [US7] (mggs-api repo) In-memory same-run dedup cache: not implemented — see T047's reasoning. What remains genuinely open is cross-run dedup (two manual triggers on the same day, after the first has already reached SUCCESS status) — `CronJobsQueue.addJobWithoutDuplicate()`'s own checksum guard only catches a second trigger while the first is still NEW/WIP, not after it's finished. Given FR-030 explicitly rules out a persistent notification-log table, and `contracts/Notification-Message.md`'s own design notes already accept "worker crashes mid-run, some notifications may be re-sent next run (acceptable, rare)" as the tolerated failure mode, this cross-run edge case is being left as an accepted risk rather than solved with new state — flagging it here instead of silently dropping it
+- [x] T052 [US7] (mggs-api repo) Add logging + continue-on-failure for individual and bulk send failures (FR-026): each `sendIndividualNotification()` call and the `sendBulkNotification()` call are wrapped in their own try/catch inside `ExpiringSkillsWorker.run()`, logging and moving on to the next recipient; no automatic retry is issued by the worker itself. (`CronJobsQueue`'s job-processing wrapper (`QueueHelper.processFn`) also independently marks any failed `MESSAGE_TYPE_SMTP_EMAIL` job as FAILED without re-queuing it, and each notification is queued as a separate job, so one recipient's failure at that layer can't block another's either.)
+- [x] T053 [US7] Confirm the 4 email-template fields added in T031 are wired end-to-end into the mailer logic (subject/body for both individual and bulk emails) — confirmed via the `ExpiringSkillsWorker.test.ts` subject/body assertions
+- [x] T054 [US7] (mggs-api repo) Filter the worker's staff query to Active staff only (`ActiveFlag: true`) — done as part of T037; covered by the "does not notify Inactive staff" test
 
-**Checkpoint**: All 7 user stories independently functional end-to-end.
+**Checkpoint**: All 7 user stories independently functional end-to-end, with one accepted-risk gap noted at T051 (cross-run dedup on repeated manual triggers).
 
 ---
 

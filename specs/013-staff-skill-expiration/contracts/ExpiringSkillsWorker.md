@@ -5,6 +5,37 @@
 **Queue**: CronJobsQueue (Bull Queue, Redis-backed)  
 **Trigger**: Nightly cron job at 11:59 PM, registered in `src/worker.ts` (confirmed pattern below)
 
+## Implementation Note (as built)
+
+This feature is now implemented; the sections below are the original Phase-2 design and are kept for
+historical context, but a few details turned out to be wrong once actually built against the codebase's
+real conventions (verified by reading `ExpiringCreditCards.ts`/`ExpiringPassportsAndVisas.ts` directly,
+which this planning pass hadn't done):
+
+- **Worker shape**: a plain `{run, isNotifyDay}` object, not the `class ExpiringSkillsWorker { static ... }`
+  sketched below — every sibling worker in this codebase (`ExpiringCreditCards`, `ExpiringPassportsAndVisas`,
+  `StudentAbsenceWorker`) uses a plain exported object, and `run()` doesn't return a
+  `{notificationsSent, emailsSent, failures}` struct; it resolves `void` and logs as it goes, matching those
+  siblings.
+- **Logging**: via `Logger.log(msg, prefix)` from `src/workers/Loger.ts` (a thin `console.log` wrapper with
+  no level distinction), not `LoggerService.getLogger(...).info/warn/error(...)` — no such `LoggerService`
+  exists in this codebase.
+- **Mailer**: no separate `ExpiringSkillsMailerHelper.ts` file — `sendIndividualNotification`/
+  `sendBulkNotification`/`substitute`/`escapeHtml` are local functions inside `ExpiringSkillsWorker.ts`
+  itself, again matching how the sibling workers keep their mailer logic inline rather than in a helper
+  module.
+- **Actual send path**: `EmailHelper.addAMailJob({to, subject, html, userId})` (in `src/helper/EmailHelper.ts`)
+  rather than a direct `SMTPConnector.send(...)` call. `addAMailJob` queues a `MESSAGE_TYPE_SMTP_EMAIL`
+  message; `CronJobsQueue`'s own processor later calls `SMTPConnector.send(message.request)` on it. This
+  also means there's no `text` (plain-text) fallback — `addAMailJob`'s type doesn't support one.
+- **Deduplication**: no in-memory `Map`-based tracking cache was built. `isNotifyDay()` is a pure function
+  of `(ExpiryDate, today, settings)`, so within a single run the SQL query plus a `Map` keyed by staff ID
+  structurally cannot produce two entries for the same (staff, skill) pair — there was nothing left for a
+  same-run cache to deduplicate. See `tasks.md` T047/T051 for the one genuinely-open edge case this doesn't
+  cover (a second manual trigger the same day after the first run already reached SUCCESS).
+
+The query scope, cron registration, and day-interval math below are accurate as designed and as built.
+
 ## Confirmed Cron Registration
 
 `src/worker.ts` already registers several nightly jobs via `node-cron` with a shared `defaultCronSettings` (uses `AppHelper.getDefaultTimeZone()`, so server-timezone DST is handled consistently with existing jobs):

@@ -26,7 +26,18 @@ interface iSkillExpirationNotificationRequest {
 
 ## Deduplication Algorithm
 
-**Tracking Strategy**:
+**As built**: the explicit tracking map described below was not implemented. `isNotifyDay()` (see
+`contracts/ExpiringSkillsWorker.md`) is a pure function of `(ExpiryDate, today, settings)`, so within one
+worker run the SQL query plus a `Map` keyed by staff ID structurally cannot produce two entries for the
+same (staff, skill) pair — there's nothing for a same-run cache to deduplicate. The request/message shape
+below (`moduleId`/`runTimestamp`) also doesn't match what's actually sent: `worker.ts` calls
+`CronJobsQueue.addJobWithoutDuplicate({}, MESSAGE_TYPE_SKILL_EXPIRATION_NOTIFICATION, ...)` with an empty
+`{}` request, same as every other cron-triggered message type in this codebase. The one gap this doesn't
+cover — a second manual trigger the same day after the first run already reached SUCCESS status — is
+tracked as an accepted risk in `tasks.md` (T047/T051), consistent with this doc's own original note below
+that a re-send after a crash is "acceptable, rare."
+
+**Tracking Strategy (original design, not built)**:
 - In-memory map: `Map<string, iNotificationRecord>`
 - Key format: `{staffId}:{skillCode}:{expirationDateISO}:{notificationDateISO}`
 - Purpose: Prevent duplicate emails for same staff/skill/date on same day
