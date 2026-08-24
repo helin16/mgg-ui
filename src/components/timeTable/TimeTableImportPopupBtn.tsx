@@ -46,10 +46,12 @@ type iTimeTableImportPopupBtn = {
 export const TIME_TABLE_TYPE_TIME_TABLER = 'TIMETABLER'
 export const TIME_TABLE_TYPE_YARD_DUTY = 'TIMETABLERYD';
 export const TIME_TABLE_TYPE_YARD_EXTRA = 'TIMETABLEREXT';
+export const TIME_TABLE_TYPE_YARD_DUTY_EXTRA = 'TIMETABLERYDEXT';
 const typeTableTypes = [
   TIME_TABLE_TYPE_TIME_TABLER,
   TIME_TABLE_TYPE_YARD_DUTY,
   TIME_TABLE_TYPE_YARD_EXTRA,
+  TIME_TABLE_TYPE_YARD_DUTY_EXTRA,
 ]
 const TimeTableImportPopupBtn = ({className, btnPros}: iTimeTableImportPopupBtn) => {
   const [isCheckingPermission, setIsCheckingPermission] = useState(false);
