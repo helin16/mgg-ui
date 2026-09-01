@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 import {
   MGGS_MODULE_ID_HOY_CHAT_EMAIL
@@ -21,12 +21,6 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
   const [contactReasons, setContactReasons] = useState<string[]>(
     module.settings?.contactReasons || []
   );
-  const [notificationCC, setNotificationCC] = useState(
-    module.settings?.notification?.cc || ""
-  );
-  const [notificationReplyTo, setNotificationReplyTo] = useState(
-    module.settings?.notification?.replyTo || ""
-  );
   const [notificationSubject, setNotificationSubject] = useState(
     module.settings?.notification?.subject || ""
   );
@@ -37,30 +31,40 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
     module.settings?.notification?.html || ''
   );
 
-  const handleUpdate = (emailBody?: any) => {
+  useEffect(() => {
+    setContactReasons(module.settings?.contactReasons || []);
+    setNotificationSubject(module.settings?.notification?.subject || "");
+    setNotificationEmailBodyDesign(module.settings?.notification?.bodyDesign || {});
+    setNotificationEmailBodyHTML(module.settings?.notification?.html || "");
+  }, [module]);
+
+  useEffect(() => {
+    const notification = {...(module?.settings?.notification || {})};
+    delete notification.replyTo;
+    delete notification.cc;
     onUpdate({
       ...(module?.settings || {}),
       contactReasons: (contactReasons || []).map(reason  => `${reason}`.trim()).filter(reason => reason !== ''),
       notification: {
-        ...(module?.settings?.notification || {}),
-        cc: notificationCC,
-        replyTo: notificationReplyTo,
+        ...notification,
         subject: notificationSubject,
-        bodyDesign: emailBody?.design || notificationEmailBodyDesign,
-        html: emailBody?.html || notificationEmailBodyHTML,
+        bodyDesign: notificationEmailBodyDesign,
+        html: notificationEmailBodyHTML,
       }
     });
-  };
+  }, [contactReasons, module, notificationEmailBodyDesign,
+    notificationEmailBodyHTML, notificationSubject, onUpdate]);
 
   return (
     <Wrapper>
       <SectionDiv>
-        <h6>{(contactReasons || []).length} Contact Reason(s) <small className={"text-muted"}>
+        <Form.Label htmlFor="hoy-contact-reasons"><b>{(contactReasons || []).length} Contact Reason(s)</b> <small className={"text-muted"}>
           <i>
             - Reasons for the student to select from. One reason per line.
           </i>
-        </small></h6>
+        </small></Form.Label>
         <FormControl
+          id="hoy-contact-reasons"
           as={"textarea"}
           rows={4}
           onChange={e => {
@@ -70,45 +74,8 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
         />
       </SectionDiv>
       <SectionDiv>
-        <h6>
-          Reply To{" "}
-          <small className={"text-muted"}>
-            <i>
-              {" "}
-              - ONLY one email allowed, The 'Reply To' email address. This is
-              what the user will see after she/he click on reply upon receiving
-              the email.
-            </i>
-          </small>
-        </h6>
-        <Form.Control
-          placeholder={`The 'Reply To' email address`}
-          value={notificationReplyTo}
-          onChange={event => {
-            setNotificationReplyTo(event.target.value);
-          }}
-          onBlur={() => handleUpdate()}
-        />
-      </SectionDiv>
-
-      <SectionDiv>
-        <h6>
-          Copy to{" "}
-          <small className={"text-muted"}>
-            <i>
-              {" "}
-              - All provided emails will receive a copy after submission (email
-              addresses separated by <b>,</b>):
-            </i>
-          </small>
-        </h6>
-        <Form.Control
-          placeholder="Email address separated by ,"
-          value={notificationCC}
-          onChange={event => {
-            setNotificationCC(event.target.value);
-          }}
-          onBlur={() => handleUpdate()}
+        <ExplanationPanel
+          text={<>The student is automatically copied on every HOY Chat email. The student's email is also the sole Reply-To address.</>}
         />
       </SectionDiv>
 
@@ -153,14 +120,14 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
             </>
           }
         />
-        <Form.Label>Subject</Form.Label>
+        <Form.Label htmlFor="hoy-notification-subject">Subject</Form.Label>
         <Form.Control
+          id="hoy-notification-subject"
           placeholder="The Subject of the email"
           value={notificationSubject}
           onChange={event => {
             setNotificationSubject(event.target.value);
           }}
-          onBlur={() => handleUpdate()}
         />
 
         <SectionDiv>
@@ -170,10 +137,8 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
             onUpdated={editor => {
               editor.exportHtml(data => {
                 const { design, html } = data;
-                const newEmailBody = { design, html };
                 setNotificationEmailBodyDesign(design);
                 setNotificationEmailBodyHTML(html);
-                handleUpdate(newEmailBody);
               });
             }}
           />
@@ -184,12 +149,15 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
 };
 const HOYChatModuleSettings = () => {
   const [settings, setSettings] = useState({});
+  const handleSettingsUpdate = useCallback((newSettings: any) => {
+    setSettings(newSettings);
+  }, []);
 
   const getContent = (module: iModule) => {
     return (
       <EditPanel
         module={module}
-        onUpdate={(newSettings: any) => setSettings(newSettings)}
+        onUpdate={handleSettingsUpdate}
       />
     );
   };
