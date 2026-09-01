@@ -5,6 +5,13 @@
 **Status**: Draft  
 **Input**: User description: "Ensure Schoolbox Class Results charts render reliably on the first normal page load without requiring a hard refresh, while preserving both Schoolbox charts and the custom application's charts and preventing the custom script from conflicting with Schoolbox's chart runtime."
 
+## Clarifications
+
+### Session 2026-09-02
+
+- Q: Which browsers must pass the cached and uncached Class Results acceptance tests? → A: Current Chrome, Edge, Safari, and Firefox.
+- Q: Where must a future chart-runtime failure be observable? → A: Browser developer console only.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - View Class Results on First Load (Priority: P1)
@@ -72,19 +79,19 @@ As a Schoolbox user, I can continue using non-chart functionality on pages where
 - **FR-005**: The expected result MUST remain consistent whether relevant browser resources are cached or uncached.
 - **FR-006**: The compatibility behaviour MUST cover every Schoolbox page on which the shared custom script loads, including pages without a custom application mount point.
 - **FR-007**: Schoolbox chart types already supported on affected pages, including the statistical chart shown in Class Results, MUST continue to initialize successfully.
-- **FR-008**: A chart failure MUST remain observable through existing diagnostic reporting so support staff can distinguish a Schoolbox chart problem from unrelated page errors.
+- **FR-008**: A chart failure MUST remain observable in the browser developer console so support staff can distinguish a Schoolbox chart problem from unrelated page errors; no centralized error-reporting change is required.
 - **FR-009**: The affected surface is the authenticated Schoolbox class grades route and other authenticated Schoolbox pages receiving the shared custom script; existing Schoolbox access controls MUST remain unchanged.
 - **FR-010**: No service-layer or shared data-type contract changes are required because the feature changes client-side runtime compatibility and does not add or alter data exchange.
 - **FR-011**: No new user-visible loading, empty, validation, success, or error state is required; existing page states MUST remain unchanged and the chart MUST appear within the existing Class Results content area.
 - **FR-012**: The feature MUST introduce no new environment variables, persisted storage, embedded third-party content, uploads, payments, or sensitive-data handling.
-- **FR-013**: Verification MUST include repeated normal-load tests under both cached and uncached conditions and regression checks for both Schoolbox and custom application charts.
+- **FR-013**: Verification MUST include repeated normal-load tests under both cached and uncached conditions in the current versions of Chrome, Edge, Safari, and Firefox, plus regression checks for both Schoolbox and custom application charts.
 - **FR-014**: Verification MUST confirm that no chart-runtime conflict is reported during successful Class Results initialization.
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: The Class Results chart appears successfully on the first normal load in 100% of at least 20 consecutive cached and 20 consecutive uncached test runs on the affected route.
+- **SC-001**: In each of the current versions of Chrome, Edge, Safari, and Firefox, the Class Results chart appears successfully on the first normal load in 100% of at least 20 consecutive cached and 20 consecutive uncached test runs on the affected route.
 - **SC-002**: In all acceptance tests, users can view Class Results with one page load and one tab selection, with zero hard refreshes or cache-clearing steps.
 - **SC-003**: All currently supported custom application chart surfaces pass regression testing with their expected data, labels, and interactions intact.
 - **SC-004**: Representative Schoolbox chart and non-chart pages show zero new visible regressions attributable to the compatibility change.
