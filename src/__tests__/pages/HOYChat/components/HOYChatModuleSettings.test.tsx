@@ -50,8 +50,10 @@ describe('HOYChatModuleSettings', () => {
 
   test('shows accurate addressing guidance and no Reply To control', () => {
     render(<HOYChatModuleSettings />);
-    expect(screen.getByText(/student is automatically copied/i)).toBeInTheDocument();
-    expect(screen.getByText(/student.*reply-to/i)).toBeInTheDocument();
+    expect(
+      screen.getByText("Replies to every HOY Chat email go to the submitting student's email address.")
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/copied|automatically copied|\bcc\b/i)).not.toBeInTheDocument();
     expect(screen.queryByRole('textbox', {name: /reply to/i})).not.toBeInTheDocument();
     expect(screen.queryByRole('textbox', {name: /copy to/i})).not.toBeInTheDocument();
     expect(screen.getByRole('textbox', {name: /contact reason/i})).toBeInTheDocument();
@@ -109,6 +111,7 @@ describe('HOYChatModuleSettings', () => {
       }),
     }));
     expect(mockLatestSubmitData.notification).not.toHaveProperty('replyTo');
+    expect(mockLatestSubmitData.notification).not.toHaveProperty('cc');
   });
 
   test('retains edits across a failed-save rerender and refreshes after a successful reload', async () => {

@@ -75,7 +75,7 @@ const EditPanel = ({ module, onUpdate }: iEditPanel) => {
       </SectionDiv>
       <SectionDiv>
         <ExplanationPanel
-          text={<>The student is automatically copied on every HOY Chat email. The student's email is also the sole Reply-To address.</>}
+          text={<>Replies to every HOY Chat email go to the submitting student's email address.</>}
         />
       </SectionDiv>
 
