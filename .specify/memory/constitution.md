@@ -1,23 +1,31 @@
 <!--
 Sync Impact Report
-Version change: template -> 1.0.0
+Version change: 1.1.0 -> 1.2.0
 Modified principles:
-- Template Principle 1 -> I. Module-Gated Delivery
-- Template Principle 2 -> II. Typed Service Boundaries
-- Template Principle 3 -> III. Explicit Async UX States
-- Template Principle 4 -> IV. School Data and Configuration Safety
-- Template Principle 5 -> V. Risk-Based Verification
+- None renamed or redefined
 Added sections:
-- Engineering Constraints
-- Delivery Workflow
+- None (new mandatory rules added to existing "Engineering Constraints" and
+  "Delivery Workflow" sections across v1.1.0 and v1.2.0)
+Materially expanded guidance:
+- v1.1.0 - Engineering Constraints: mandatory Node runtime rule requiring every
+  project command to run on the Node version required by package.json
+  (engines.node), selected via nvm.
+- v1.1.0 - Delivery Workflow: matching pre-command Node alignment requirement,
+  with verification evidence tied to that version.
+- v1.2.0 - Delivery Workflow: mandatory /code-review pass after every
+  /speckit-implement (or equivalent implementation pass), with blocking findings
+  resolved or explicitly deferred before the work is considered complete.
 Removed sections:
 - None
 Templates requiring updates:
-- ✅ updated: .specify/templates/plan-template.md
-- ✅ updated: .specify/templates/spec-template.md
-- ✅ updated: .specify/templates/tasks-template.md
+- ✅ reviewed: .specify/templates/plan-template.md (Constitution Check already
+  covers a Node-version gate; no change required)
+- ✅ reviewed: .specify/templates/spec-template.md (no change required)
+- ✅ reviewed: .specify/templates/tasks-template.md (no change required)
 - ⚠ pending: .specify/templates/commands/*.md (directory missing in this repo)
-- ✅ updated: README.md
+- ⚠ pending: .specify/extensions.yml (optional: wire an after_implement hook to
+  prompt /code-review; not required for the governance rule to apply)
+- ✅ reviewed: README.md (no change required)
 Follow-up TODOs:
 - None
 -->
@@ -90,6 +98,11 @@ Implementation constraints:
   state that must survive route transitions.
 - Preserve Sentry initialization, toast notifications, and existing operational support
   paths for production-visible errors.
+- Run every project command (dependency install, `yarn start`, `yarn build`, `yarn test`,
+  Cypress, lint, and the Spec Kit scripts) on the Node version required by `package.json`
+  (`engines.node`), selected with `nvm` before the command runs. Contributors and agents
+  MUST NOT rely on a globally active, system, or newer Node version, and MUST NOT change
+  `engines.node` to match an already-active runtime instead of switching with `nvm`.
 
 ## Delivery Workflow
 
@@ -101,6 +114,15 @@ Implementation and review expectations:
 
 - Plans MUST pass the Constitution Check before research ends and again before coding
   begins.
+- Before running any install, build, test, lint, or dev command, contributors MUST align
+  the active Node version with `package.json` (`engines.node`) using `nvm`. Verification
+  evidence (test runs, builds) MUST be produced on that Node version, and the version used
+  SHOULD be recorded in the task or review notes.
+- After every `/speckit-implement` run (or any equivalent implementation pass that produces
+  code changes), a `/code-review` pass over the resulting diff MUST run before the work is
+  considered complete. Blocking findings MUST be fixed, or explicitly deferred with a
+  recorded rationale, before merge. The review outcome is part of the verification evidence
+  required by Principle V.
 - Reviews MUST confirm service-layer reuse, access-control coverage, async-state handling,
   and verification evidence.
 - Refactors that move shared patterns MUST include migration notes for affected modules.
@@ -129,4 +151,4 @@ Compliance policy:
 - Exceptions are time-boxed decisions owned by maintainers and MUST be tracked in the
   relevant plan or PR notes until removed.
 
-**Version**: 1.0.0 | **Ratified**: 2026-04-22 | **Last Amended**: 2026-04-22
+**Version**: 1.2.0 | **Ratified**: 2026-04-22 | **Last Amended**: 2026-09-02
