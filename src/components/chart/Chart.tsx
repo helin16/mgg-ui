@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import * as Highcharts from 'highcharts';
+import Highcharts from './HighchartsRuntime';
 import HighchartsReact from 'highcharts-react-official';
 
 const Wrapper = styled.div`

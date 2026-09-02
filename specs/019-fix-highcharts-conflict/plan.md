@@ -1,7 +1,7 @@
 # Implementation Plan: Reliable Schoolbox Class Results Charts
 
 **Branch**: `019-fix-highcharts-conflict` | **Date**: 2026-09-02 | **Spec**: [spec.md](spec.md)
-**Input**: Feature specification from `/specs/014-fix-highcharts-conflict/spec.md`
+**Input**: Feature specification from `/specs/019-fix-highcharts-conflict/spec.md`
 
 ## Summary
 
@@ -38,7 +38,7 @@ The completed design retains all five passes. It adds only a local chart-runtime
 ### Documentation (this feature)
 
 ```text
-specs/014-fix-highcharts-conflict/
+specs/019-fix-highcharts-conflict/
 ├── spec.md
 ├── plan.md
 ├── research.md

@@ -4,7 +4,7 @@ description: "Task list for Reliable Schoolbox Class Results Charts"
 
 # Tasks: Reliable Schoolbox Class Results Charts
 
-**Input**: Design documents from `/specs/014-fix-highcharts-conflict/`
+**Input**: Design documents from `/specs/019-fix-highcharts-conflict/`
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/runtime-coexistence.md, quickstart.md
 
 **Branch**: `019-fix-highcharts-conflict`
@@ -29,10 +29,11 @@ Phases 4–5 (US2, US3) are verification-only against that same code.
 
 **Purpose**: Confirm the change surface before writing code.
 
-- [ ] T000 Resolve the feature-dir naming mismatch **before any implementation**: the branch is `019-fix-highcharts-conflict` but the artifacts live in `specs/014-fix-highcharts-conflict/`, which already broke `.specify/scripts/bash/setup-tasks.sh` (`resolve_template_content: command not found` / could not resolve feature dir). Either `git mv specs/014-fix-highcharts-conflict specs/019-fix-highcharts-conflict` and update the `Branch`/path lines in `spec.md`, `plan.md`, `tasks.md`, or rename the branch to `014-fix-highcharts-conflict`. Re-run `check-prerequisites.sh --json --require-tasks` and confirm `FEATURE_DIR` resolves. (blocks T004; supersedes old T016)
-- [ ] T001 Confirm the single direct Highcharts import boundary: `src/components/chart/Chart.tsx` (`import * as Highcharts from 'highcharts'`) is the only direct importer, and the four consumers are `src/pages/studentReport/components/StudentParticipation/components/CoCurricularByTypeChartWithTable.tsx`, `src/pages/studentReport/components/StudentParticipation/components/LeadershipAndAwardByTypChartWithTable.tsx`, `src/pages/studentReport/components/WellBeingGraphs/components/WellBeingAbsenceByClassChart.tsx`, `src/pages/studentReport/components/WellBeingGraphs/components/WellBeingAbsenceByReasonChart.tsx`
-- [ ] T002 Confirm no service/type contract change is needed: nothing under `src/services/` or `src/types/` imports `highcharts` (per plan.md FR-010)
+- [X] T000 Resolved the feature-dir naming mismatch: `git mv specs/014-fix-highcharts-conflict specs/019-fix-highcharts-conflict`, updated path refs in `plan.md`/`tasks.md` and `.specify/feature.json` to `019`. `check-prerequisites.sh --json --require-tasks` now resolves `FEATURE_DIR` to `.../specs/019-fix-highcharts-conflict`. (Note: `setup-tasks.sh` still fails on an unrelated `resolve_template_content: command not found` bug in that script's own template-override resolver — not a naming issue.)
+- [X] T001 Confirm the single direct Highcharts import boundary: `src/components/chart/Chart.tsx` (`import * as Highcharts from 'highcharts'`) is the only direct importer, and the four consumers are `src/pages/studentReport/components/StudentParticipation/components/CoCurricularByTypeChartWithTable.tsx`, `src/pages/studentReport/components/StudentParticipation/components/LeadershipAndAwardByTypChartWithTable.tsx`, `src/pages/studentReport/components/WellBeingGraphs/components/WellBeingAbsenceByClassChart.tsx`, `src/pages/studentReport/components/WellBeingGraphs/components/WellBeingAbsenceByReasonChart.tsx`
+- [X] T002 Confirm no service/type contract change is needed: nothing under `src/services/` or `src/types/` imports `highcharts` (per plan.md FR-010)
 - [ ] T003 [P] Confirm verification prerequisites from `quickstart.md`: affected Schoolbox grades URL, shared custom script enabled, and access to current Chrome, Edge, Safari, Firefox for the cached/uncached matrix; no new env var, storage, or access-control change (FR-012). **Edge is not installed on the current dev machine (research.md)** — install current Microsoft Edge now, or record a constitution-tracked, time-boxed exception in `plan.md` Complexity Tracking if Edge coverage (FR-013) is being deferred. Do not silently skip Edge in T010.
+  - _Status: confirmed by code inspection — no `REACT_APP_*` var added, no storage/localStorage, no route or access-control change (see T002). Human still owes: authenticated Schoolbox grades URL for the matrix, and the Edge install / documented exception._
 
 ---
 
@@ -58,15 +59,15 @@ uncached conditions.
 
 ### Implementation for User Story 1
 
-- [ ] T004 [US1] Create `src/components/chart/HighchartsRuntime.ts`: read `window.jQuery?.fn`; record whether `highcharts` is an own property and capture its full property descriptor via `Object.getOwnPropertyDescriptor`; inside `try`, synchronously `require`/import the app's Highcharts module and keep the private export; inside `finally`, `Object.defineProperty` to restore the captured descriptor, or `delete` the property if it was originally absent; if no jQuery/`fn` exists, load Highcharts with no restoration work. Do NOT assign `window.Highcharts`, do NOT import `highcharts-more`, do NOT load Schoolbox modules. Export the private instance as default. (contracts/runtime-coexistence.md, data-model.md)
-- [ ] T005 [US1] Modify `src/components/chart/Chart.tsx`: replace `import * as Highcharts from 'highcharts'` with the isolated instance from `./HighchartsRuntime`, and pass it to `<HighchartsReact highcharts={...} />` unchanged. No other change to props or `Wrapper`.
+- [X] T004 [US1] Create `src/components/chart/HighchartsRuntime.ts`: read `window.jQuery?.fn`; record whether `highcharts` is an own property and capture its full property descriptor via `Object.getOwnPropertyDescriptor`; inside `try`, synchronously `require`/import the app's Highcharts module and keep the private export; inside `finally`, `Object.defineProperty` to restore the captured descriptor, or `delete` the property if it was originally absent; if no jQuery/`fn` exists, load Highcharts with no restoration work. Do NOT assign `window.Highcharts`, do NOT import `highcharts-more`, do NOT load Schoolbox modules. Export the private instance as default. (contracts/runtime-coexistence.md, data-model.md)
+- [X] T005 [US1] Modify `src/components/chart/Chart.tsx`: replace `import * as Highcharts from 'highcharts'` with the isolated instance from `./HighchartsRuntime`, and pass it to `<HighchartsReact highcharts={...} />` unchanged. No other change to props or `Wrapper`.
 
 ### Verification for User Story 1 ⚠️
 
-- [ ] T006 [P] [US1] Create `src/__tests__/components/chart/HighchartsRuntime.test.ts` asserting the host-ownership invariants: (a) a pre-existing `jQuery.fn.highcharts` with a non-default descriptor keeps exact descriptor flags and function identity after load; (b) a `jQuery.fn` with no `highcharts` property still has none after load; (c) with no `window.jQuery`, load returns the private Highcharts export and creates no jQuery object; (d) when module init throws, `finally` still restores/removes the host property **and the error is re-thrown, not swallowed** — the adapter must not catch-and-hide init failures, so a real chart-runtime failure stays visible in the browser console (FR-008); (e) the default export is identity-equal to the app's own `highcharts` module export (`require('highcharts')`), i.e. the isolated private instance is what consumers receive (FR-004). (quickstart.md "Automated assertions")
-- [ ] T007 [P] [US1] Update `src/__tests__/components/chart/Chart.test.tsx` to assert the wrapper renders and passes the isolated private instance (not a global) to `highcharts-react-official`.
-- [ ] T008 [US1] Run `yarn test --watchAll=false --runInBand src/__tests__/components/chart/HighchartsRuntime.test.ts src/__tests__/components/chart/Chart.test.tsx src/__tests__/AppLoader/MggAppLoader.test.ts` — all green (AppLoader unchanged but must stay green per plan.md).
-- [ ] T009 [US1] Run the full suite `yarn test --watchAll=false --runInBand` and `yarn build` (production + AppLoader bundles) — both succeed.
+- [X] T006 [P] [US1] Create `src/__tests__/components/chart/HighchartsRuntime.test.ts` asserting the host-ownership invariants: (a) a pre-existing `jQuery.fn.highcharts` with a non-default descriptor keeps exact descriptor flags and function identity after load; (b) a `jQuery.fn` with no `highcharts` property still has none after load; (c) with no `window.jQuery`, load returns the private Highcharts export and creates no jQuery object; (d) when module init throws, `finally` still restores/removes the host property **and the error is re-thrown, not swallowed** — the adapter must not catch-and-hide init failures, so a real chart-runtime failure stays visible in the browser console (FR-008); (e) the default export is identity-equal to the app's own `highcharts` module export (`require('highcharts')`), i.e. the isolated private instance is what consumers receive (FR-004). (quickstart.md "Automated assertions")
+- [X] T007 [P] [US1] Update `src/__tests__/components/chart/Chart.test.tsx` to assert the wrapper renders and passes the isolated private instance (not a global) to `highcharts-react-official`.
+- [X] T008 [US1] Run `yarn test --watchAll=false --runInBand src/__tests__/components/chart/HighchartsRuntime.test.ts src/__tests__/components/chart/Chart.test.tsx src/__tests__/AppLoader/MggAppLoader.test.ts` — all green (AppLoader unchanged but must stay green per plan.md).
+- [X] T009 [US1] Run the full suite `yarn test --watchAll=false --runInBand` and `yarn build` (production + AppLoader bundles) — both succeed.
 - [ ] T010 [US1] Execute the `quickstart.md` authenticated browser matrix for Class Results: 20 cached + 20 uncached normal loads in each of current Chrome, Edge, Safari, Firefox (40/40 pass each); on every run confirm the boxplot is visible/interactive on first load, the console has no Highcharts #17, missing-boxplot, or custom-runtime constructor error, and no new spinner / empty / error UI appears around the chart and its layout is unchanged (FR-011). Also do one negative check per browser: force a chart-init failure (e.g. temporarily break the boxplot data) and confirm the failure still surfaces in the dev console (FR-008). Record browser versions, pass totals, and console results as evidence.
 
 **Checkpoint**: Class Results renders reliably on first load across the required browser/cache matrix — MVP complete.
@@ -83,7 +84,7 @@ renders with existing data and stays interactive.
 
 ### Verification for User Story 2 ⚠️
 
-- [ ] T011 [P] [US2] In `src/__tests__/components/chart/Chart.test.tsx`, assert `Chart` renders `HighchartsReact` with `highcharts` set to the exact object exported by `./HighchartsRuntime` (reference equality, not just truthy) and with all incoming `props` forwarded unchanged — locking in that the four consumers keep receiving the isolated private instance with identical options (FR-004). (T006(e) covers the runtime identity; this covers the wrapper wiring.)
+- [X] T011 [P] [US2] In `src/__tests__/components/chart/Chart.test.tsx`, assert `Chart` renders `HighchartsReact` with `highcharts` set to the exact object exported by `./HighchartsRuntime` (reference equality, not just truthy) and with all incoming `props` forwarded unchanged — locking in that the four consumers keep receiving the isolated private instance with identical options (FR-004). (T006(e) covers the runtime identity; this covers the wrapper wiring.)
 - [ ] T012 [US2] Manual smoke per `quickstart.md` "Regression Smoke Tests": in each required browser, render each of the four consumers and confirm data/labels/interactions — Co-curricular activities by type, Leadership and awards by type, Wellbeing absences by class, Wellbeing absences by reason.
 
 **Checkpoint**: Custom charts unregressed alongside a working Class Results fix.
@@ -108,9 +109,9 @@ Schoolbox chart page; confirm normal content and interactions with no new chart 
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T014 [P] Update `specs/014-fix-highcharts-conflict/quickstart.md` "Evidence to Record" section with the actual commit/build id, browser versions, and cached/uncached pass totals from T010/T012/T013.
-- [ ] T015 Add a short code comment in `HighchartsRuntime.ts` pointing to `contracts/runtime-coexistence.md` so a future Schoolbox/Highcharts upgrade knows why the snapshot/restore exists.
-- [ ] T016 Verify the T000 naming fix stuck: after implementation, `check-prerequisites.sh --json --require-tasks` and `setup-tasks.sh --json` both resolve the feature dir with no error, and `spec.md` / `plan.md` / `tasks.md` path references match the actual folder.
+- [ ] T014 [P] Update `specs/019-fix-highcharts-conflict/quickstart.md` "Evidence to Record" section with the actual commit/build id, browser versions, and cached/uncached pass totals from T010/T012/T013.
+- [X] T015 Add a short code comment in `HighchartsRuntime.ts` pointing to `contracts/runtime-coexistence.md` so a future Schoolbox/Highcharts upgrade knows why the snapshot/restore exists.
+- [X] T016 Verify the T000 naming fix stuck: after implementation, `check-prerequisites.sh --json --require-tasks` and `setup-tasks.sh --json` both resolve the feature dir with no error, and `spec.md` / `plan.md` / `tasks.md` path references match the actual folder.
 
 ---
 
