@@ -32,9 +32,9 @@ Cypress under `cypress/`.
 
 **Purpose**: Confirm the change surface before editing.
 
-- [ ] T001 Confirm the affected surfaces per plan.md: `src/pages/BudgetTracker/components/admin/BTUserAdminPanel.tsx` (US1) and `src/pages/BudgetTracker/BTGLDetailsPage.tsx` (US2), both already inside the Budget Tracker `ModuleAccessWrapper`; no new route, `moduleId`, or SchoolBox entry point.
-- [ ] T002 Confirm no service/type changes are needed: `UserService.getUsers/createUser/deleteUser`, `AuthService.canAccessModule`, `BTLockDownService.getAll`, `ROLE_ID_NORMAL`/`ROLE_ID_ADMIN` in `src/types/modules/iRole.ts`, and `MGGS_MODULE_ID_BUDGET_TRACKER` in `src/types/modules/iModuleUser.ts` all already exist and are used elsewhere.
-- [ ] T003 [P] Confirm environment: run all commands on `mgg-ui` `package.json` `engines.node` (>=20) via `nvm use 20`; no new env var, storage, upload, embed, token, or `dangerouslySetInnerHTML` is introduced (constitution school-data safety).
+- [X] T001 Confirm the affected surfaces per plan.md: `src/pages/BudgetTracker/components/admin/BTUserAdminPanel.tsx` (US1) and `src/pages/BudgetTracker/BTGLDetailsPage.tsx` (US2), both already inside the Budget Tracker `ModuleAccessWrapper`; no new route, `moduleId`, or SchoolBox entry point.
+- [X] T002 Confirm no service/type changes are needed: `UserService.getUsers/createUser/deleteUser`, `AuthService.canAccessModule`, `BTLockDownService.getAll`, `ROLE_ID_NORMAL`/`ROLE_ID_ADMIN` in `src/types/modules/iRole.ts`, and `MGGS_MODULE_ID_BUDGET_TRACKER` in `src/types/modules/iModuleUser.ts` all already exist and are used elsewhere.
+- [X] T003 [P] Confirm environment: run all commands on `mgg-ui` `package.json` `engines.node` (>=20) via `nvm use 20`; no new env var, storage, upload, embed, token, or `dangerouslySetInnerHTML` is introduced (constitution school-data safety).
 
 ---
 
@@ -43,7 +43,7 @@ Cypress under `cypress/`.
 **Purpose**: Nothing blocks both stories - they touch disjoint files and share only
 already-existing services/types. This phase only records that fact.
 
-- [ ] T004 Verify US1 and US2 are independent: `BTUserAdminPanel.tsx` and `BTGLDetailsPage.tsx` do not import each other; the reused `ModuleUserList` and `AuthService.canAccessModule` are already shipped and unit-covered elsewhere. No foundational code task required.
+- [X] T004 Verify US1 and US2 are independent: `BTUserAdminPanel.tsx` and `BTGLDetailsPage.tsx` do not import each other; the reused `ModuleUserList` and `AuthService.canAccessModule` are already shipped and unit-covered elsewhere. No foundational code task required.
 
 **Checkpoint**: Both user stories can proceed in parallel.
 
@@ -61,11 +61,11 @@ Admin Users list is untouched throughout. (spec SC-001)
 
 ### Implementation for User Story 1
 
-- [ ] T005 [US1] In `src/pages/BudgetTracker/components/admin/BTUserAdminPanel.tsx`: import `ROLE_ID_NORMAL` from `../../../../types/modules/iRole`, and below the existing Admin Users `panel-wrapper` add a second `panel-wrapper` block with an `<h6>Exception Users:</h6>` heading, an `<ExplanationPanel text={'Exception users can add budget items even when the budget year is locked down'} />`, and `<ModuleUserList moduleId={MGGS_MODULE_ID_BUDGET_TRACKER} roleId={ROLE_ID_NORMAL} showCreatingPanel showDeletingBtn />` (same pattern as `src/pages/studentAbsences/StudentAbsenceAdminPage.tsx`).
+- [X] T005 [US1] In `src/pages/BudgetTracker/components/admin/BTUserAdminPanel.tsx`: import `ROLE_ID_NORMAL` from `../../../../types/modules/iRole`, and below the existing Admin Users `panel-wrapper` add a second `panel-wrapper` block with an `<h6>Exception Users:</h6>` heading, an `<ExplanationPanel text={'Exception users can add budget items even when the budget year is locked down'} />`, and `<ModuleUserList moduleId={MGGS_MODULE_ID_BUDGET_TRACKER} roleId={ROLE_ID_NORMAL} showCreatingPanel showDeletingBtn />` (same pattern as `src/pages/studentAbsences/StudentAbsenceAdminPage.tsx`).
 
 ### Verification for User Story 1 ⚠️
 
-- [ ] T006 [P] [US1] Update `src/__tests__/pages/BudgetTracker/components/admin/BTUserAdminPanel.test.tsx`: render `BTUserAdminPanel` with the existing `ModuleUserList` manual mock (`src/components/module/__mocks__/ModuleUserList.tsx`) mocked via `jest.mock('../../../../../components/module/ModuleUserList')`; assert the "Admin Users:" and "Exception Users:" headings both render and that `ModuleUserList` is rendered twice with `roleId` props `ROLE_ID_ADMIN` and `ROLE_ID_NORMAL` respectively.
+- [X] T006 [P] [US1] Update `src/__tests__/pages/BudgetTracker/components/admin/BTUserAdminPanel.test.tsx`: render `BTUserAdminPanel` with the existing `ModuleUserList` manual mock (`src/components/module/__mocks__/ModuleUserList.tsx`) mocked via `jest.mock('../../../../../components/module/ModuleUserList')`; assert the "Admin Users:" and "Exception Users:" headings both render and that `ModuleUserList` is rendered twice with `roleId` props `ROLE_ID_ADMIN` and `ROLE_ID_NORMAL` respectively.
 - [ ] T007 [US1] Execute the manual validation in `specs/020-bt-lockdown-exception-users/quickstart.md` section A (add / reload / remove; Admin Users list unaffected; cannot add or delete self) and record date + tester + result in the PR description. (SC-001)
 
 **Checkpoint**: Exception Users list is fully functional and independently testable (MVP).
@@ -84,14 +84,14 @@ actions. Unlocked years unchanged for all. (spec SC-002..SC-005)
 
 ### Implementation for User Story 2
 
-- [ ] T008 [US2] In `src/pages/BudgetTracker/BTGLDetailsPage.tsx`: add an exported pure helper `export const canShowCreateOptions = ({ isDisabled, isExempt }: { isDisabled: boolean; isExempt: boolean }): boolean => !isDisabled || isExempt;` (mirrors `canShowDeleteForSelectedItems` in `BTGLDetailsPanel.tsx`).
-- [ ] T009 [US2] In `src/pages/BudgetTracker/BTGLDetailsPage.tsx`: add `const [isExempt, setIsExempt] = useState(false)` and `const [isCheckingExempt, setIsCheckingExempt] = useState(true)`. In the existing lockdown `useEffect` (keyed on `gl.GLCode`, `showingYear`), also call `AuthService.canAccessModule(MGGS_MODULE_ID_BUDGET_TRACKER)`; set `isExempt` to `resp[ROLE_ID_ADMIN]?.canAccess === true || resp[ROLE_ID_NORMAL]?.canAccess === true`; on error set `isExempt` to `false` and call `Toaster.showApiError(err)`; clear `isCheckingExempt` in `finally`. Guard the `isCanceled` flag as the existing code does. Import `AuthService` from `../../services/AuthService` and `ROLE_ID_ADMIN`, `ROLE_ID_NORMAL` from `../../types/modules/iRole` and `MGGS_MODULE_ID_BUDGET_TRACKER` from `../../types/modules/iModuleUser`.
-- [ ] T010 [US2] In `src/pages/BudgetTracker/BTGLDetailsPage.tsx` `getOptionsPanel()`: replace `if (isDisabled) { return null; }` with: while `isLoading || isCheckingExempt` return `null` (no flash); then `if (!canShowCreateOptions({ isDisabled, isExempt })) { return null; }`. Leave `isReadOnly={isDisabled}` passed to `BTGLDetailsPanel` unchanged (locked-year item list stays read-only for everyone per FR-008).
+- [X] T008 [US2] In `src/pages/BudgetTracker/BTGLDetailsPage.tsx`: add an exported pure helper `export const canShowCreateOptions = ({ isDisabled, isExempt }: { isDisabled: boolean; isExempt: boolean }): boolean => !isDisabled || isExempt;` (mirrors `canShowDeleteForSelectedItems` in `BTGLDetailsPanel.tsx`).
+- [X] T009 [US2] In `src/pages/BudgetTracker/BTGLDetailsPage.tsx`: add `const [isExempt, setIsExempt] = useState(false)` and `const [isCheckingExempt, setIsCheckingExempt] = useState(true)`. In the existing lockdown `useEffect` (keyed on `gl.GLCode`, `showingYear`), also call `AuthService.canAccessModule(MGGS_MODULE_ID_BUDGET_TRACKER)`; set `isExempt` to `resp[ROLE_ID_ADMIN]?.canAccess === true || resp[ROLE_ID_NORMAL]?.canAccess === true`; on error set `isExempt` to `false` and call `Toaster.showApiError(err)`; clear `isCheckingExempt` in `finally`. Guard the `isCanceled` flag as the existing code does. Import `AuthService` from `../../services/AuthService` and `ROLE_ID_ADMIN`, `ROLE_ID_NORMAL` from `../../types/modules/iRole` and `MGGS_MODULE_ID_BUDGET_TRACKER` from `../../types/modules/iModuleUser`.
+- [X] T010 [US2] In `src/pages/BudgetTracker/BTGLDetailsPage.tsx` `getOptionsPanel()`: replace `if (isDisabled) { return null; }` with: while `isLoading || isCheckingExempt` return `null` (no flash); then `if (!canShowCreateOptions({ isDisabled, isExempt })) { return null; }`. Leave `isReadOnly={isDisabled}` passed to `BTGLDetailsPanel` unchanged (locked-year item list stays read-only for everyone per FR-008).
 
 ### Verification for User Story 2 ⚠️
 
-- [ ] T011 [P] [US2] Add a unit test for `canShowCreateOptions` covering the four states from `data-model.md` (unlocked → true; locked+exempt → true; locked+not-exempt → false; unlocked+not-exempt → true) - either a new `src/__tests__/pages/BudgetTracker/BTGLDetailsPage.helper.test.ts` or a `describe` block added to the existing page test file.
-- [ ] T012 [US2] Update `src/__tests__/pages/BudgetTracker/BTGLDetailsPage.test.tsx`: add an inline `jest.mock('../../../services/AuthService', () => ({ __esModule: true, default: { canAccessModule: jest.fn().mockResolvedValue({}) } }))` (factory style, matching `BTItemEditPanel.test.tsx`) so the new call is stubbed; confirm the existing "renders options with new item and bulk create item buttons" assertion still passes (initial `isDisabled=false`).
+- [X] T011 [P] [US2] Add a unit test for `canShowCreateOptions` covering the four states from `data-model.md` (unlocked → true; locked+exempt → true; locked+not-exempt → false; unlocked+not-exempt → true) - either a new `src/__tests__/pages/BudgetTracker/BTGLDetailsPage.helper.test.ts` or a `describe` block added to the existing page test file.
+- [X] T012 [US2] Update `src/__tests__/pages/BudgetTracker/BTGLDetailsPage.test.tsx`: add an inline `jest.mock('../../../services/AuthService', () => ({ __esModule: true, default: { canAccessModule: jest.fn().mockResolvedValue({}) } }))` (factory style, matching `BTItemEditPanel.test.tsx`) so the new call is stubbed; confirm the existing "renders options with new item and bulk create item buttons" assertion still passes (initial `isDisabled=false`).
 - [ ] T013 [US2] Add a Cypress spec under `cypress/e2e/` for the locked-year matrix, OR perform and document the manual validation in `specs/020-bt-lockdown-exception-users/quickstart.md` section B across Admin / Exception / neither, plus the unlocked-year regression (SC-004) and the `canAccess` failure case (SC-005). Record the result in the PR description.
 
 **Checkpoint**: Both user stories independently functional; locked-year behaviour unchanged
@@ -102,7 +102,7 @@ for non-exempt users and for all unlocked years.
 ## Phase 5: Polish & Cross-Cutting Concerns
 
 - [ ] T014 [P] (Optional) In `src/components/module/ModuleUserList.tsx`: add an optional, defaulted prop (e.g. `removeSubjectLabel?: string` defaulting to `'admin rights'`) used in the delete-confirm description text, and pass `removeSubjectLabel={'exception access'}` from the Exception Users `ModuleUserList` in `BTUserAdminPanel.tsx`. Must not change behaviour for the 4+ existing call sites. Skip if the team accepts the current generic wording.
-- [ ] T015 Run `nvm use 20 && yarn test` (full suite) and `nvm use 20 && npx tsc -p tsconfig.json --noEmit`; fix any regressions in the touched areas.
+- [X] T015 Run `nvm use 20 && yarn test` (full suite) and `nvm use 20 && npx tsc -p tsconfig.json --noEmit`; fix any regressions in the touched areas.
 - [ ] T016 Run the full `specs/020-bt-lockdown-exception-users/quickstart.md` validation once end to end and paste the filled-in result table into the PR.
 - [ ] T017 Run `/code-review` over the diff and resolve or explicitly defer blocking findings (constitution v1.2.0).
 

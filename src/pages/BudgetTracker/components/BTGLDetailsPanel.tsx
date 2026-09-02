@@ -778,6 +778,7 @@ const BTGLDetailsPanel = ({
           {getOperationBtns()}
           <BTItemsTable
             items={items}
+            readyOnly={isReadOnly}
             selectedItems={selectedItems}
             onItemSelected={isModuleAdmin !== true ? undefined : (items: iBTItem[], selected: boolean) => {
               const newItems =

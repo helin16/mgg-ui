@@ -47,6 +47,8 @@ type iModuleUser = {
     documentClassificationCodes?: string[];
     reportCodes?: string[];
     excludedUserIds?: number[];
+    // Budget Tracker Exception User expiry (feature 021): a bare YYYY-MM-DD calendar date.
+    expiryDate?: string;
     [key: string]: any;
   } | null;
 };
