@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {useSelector} from 'react-redux';
 import {RootState} from '../../redux/makeReduxStore';
 import AuthService from '../../services/AuthService';
+import MggsModuleService from '../../services/Module/MggsModuleService';
 import {Spinner} from 'react-bootstrap';
 import Page401 from '../Page401';
 import Toaster from '../../services/Toaster';
@@ -16,14 +17,25 @@ type iModuleAccessWrapper = {
 }
 const ModuleAccessWrapper = ({moduleId, roleId, silentMode = false, accessDenyPanel, children, btns}: iModuleAccessWrapper) => {
   const {user} = useSelector((state: RootState) => state.auth);
+  // Feature 023: resolved once at boot (App.tsx). Read from Redux, never re-inspect window.
+  const isImpersonating = useSelector((state: RootState) => state.app.isImpersonating) === true;
   const [canAccess, setCanAccess] = useState<boolean | null>(null);
+  const [blockImpersonated, setBlockImpersonated] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     let isCanceled = false;
-    AuthService.canAccessModule(moduleId)
-      .then(resp => {
+    Promise.all([
+      AuthService.canAccessModule(moduleId),
+      MggsModuleService.getModule(moduleId).catch(err => {
+        // Fail open on the impersonation gate if the module record can't be read.
+        Toaster.showApiError(err);
+        return null;
+      }),
+    ])
+      .then(([resp, module]) => {
         if (isCanceled) return;
+        setBlockImpersonated(module?.blockImpersonatedUser === true);
         // @ts-ignore
         const canAccessRoles = Object.keys(resp).filter((roleId: number) => resp[roleId].canAccess === true).reduce((map, roleId) => {
           return {
@@ -52,8 +64,20 @@ const ModuleAccessWrapper = ({moduleId, roleId, silentMode = false, accessDenyPa
     }
   }, [user, moduleId, roleId]);
 
-  if (isLoading || canAccess === null) {
+  if (isLoading || canAccess === null || blockImpersonated === null) {
     return <Spinner animation={'border'} />
+  }
+
+  if (blockImpersonated && isImpersonating) {
+    if (silentMode) {
+      return null;
+    }
+
+    if (accessDenyPanel) {
+      return accessDenyPanel;
+    }
+
+    return <Page401 description={<h4>This module is unavailable while you are logged in as another user. Return to your own account to continue.</h4>} btns={btns} />
   }
 
   if (!canAccess) {

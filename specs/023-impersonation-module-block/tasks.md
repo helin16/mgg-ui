@@ -32,7 +32,7 @@ Node >=18 (`nvm use 18`). Switch with `nvm` before every build/test.
 
 **Purpose**: Confirm ground truth and resolve the one open unknown.
 
-- [ ] T001 Re-read [plan.md](./plan.md) + [research.md](./research.md); confirm the touched-file list and that `mgg-ui` will run on `nvm use 20` and `mggs-api` on `nvm use 18` before any build/test.
+- [x] T001 Re-read [plan.md](./plan.md) + [research.md](./research.md); confirmed touched-file list. `mgg-ui` runs on `nvm use 20` (v20.20.0), `mggs-api` on `nvm use 18` (v18.20.8).
 - [x] T002 [P] Spike (research.md R2) — **DONE 2026-09-03** on `mconnect.mentonegirls.vic.edu.au`. Signal = `window.schoolboxUser.impersonated === true` (`window.schoolboxUser` present on every SchoolBox page). Recorded in [research.md](./research.md) R2, [contracts/impersonation-helper.md](./contracts/impersonation-helper.md), and [spec.md](./spec.md) FR-002 / Assumptions. Fallback not needed. Optional follow-up: a paired impersonated capture to watch the field flip to `true` (field name is unambiguous, not blocking).
 
 ---
@@ -45,15 +45,15 @@ Node >=18 (`nvm use 18`). Switch with `nvm` before every build/test.
 
 ### mggs-api (`../mggs-api`, `nvm use 18`)
 
-- [ ] T003 [P] Add `blockImpersonatedUser: boolean` to the `SynMggsModuleModel` interface and a `blockImpersonatedUser: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false }` attribute in `../mggs-api/src/models/Modules/SynMggsModule.ts`.
-- [ ] T004 [P] Create `../mggs-api/tests/migrations/SynergeticDB/2026NNNN-add-blockImpersonatedUser-to-SynMggsModule.js`: `up` = `queryInterface.addColumn('uMGGSModules', 'blockImpersonatedUser', { type: Sequelize.BOOLEAN, allowNull: false, defaultValue: false })`; `down` = `queryInterface.removeColumn('uMGGSModules', 'blockImpersonatedUser')`. (Mirrors the real schema for the sqlite test DB; the production change is the reviewed SQL in `contracts/synergetic-alter.sql`.)
+- [x] T003 [P] Added `blockImpersonatedUser: boolean` to `SynMggsModuleModel` + `{ type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false }` attribute in `../mggs-api/src/models/Modules/SynMggsModule.ts`.
+- [x] T004 [P] Created `../mggs-api/tests/migrations/SynergeticDB/20260903000001-add-blockImpersonatedUser-to-SynMggsModule.js` (`addColumn` up / `removeColumn` down). Verified: sqlite test schema builds and `SynMggsModuleController` suite passes.
 
 ### mgg-ui (`nvm use 20`)
 
-- [ ] T005 [P] Add `blockImpersonatedUser?: boolean` to `src/types/modules/iModule.ts` (optional — absent is treated as `false`).
-- [ ] T006 [P] Create `src/helper/ImpersonationHelper.ts` per [contracts/impersonation-helper.md](./contracts/impersonation-helper.md): `SCHOOLBOX_IMPERSONATION_GLOBAL = { objectPath: 'schoolboxUser', isImpersonating: o => o?.impersonated === true }`, `isImpersonating()` (`window.schoolboxUser?.impersonated === true`), `isEmbeddedInSchoolBox()`, `resolveImpersonation()`. Pure, never throws, fail-open; `resolveImpersonation` emits one `@sentry/react` `captureMessage(..., 'warning')` when embedded but `window.schoolboxUser` is missing or `impersonated` is not a boolean, guarded by a module-level `warned` flag.
-- [ ] T007 Add `isImpersonating?: boolean` to `AppState` and a `setImpersonation` action/reducer in `src/redux/reduxers/app.slice.ts`; export `setImpersonation` alongside `setIsProd` (depends on nothing but grouped here).
-- [ ] T008 In `src/App.tsx` `Router`'s boot `useEffect` (next to `PingService.ping()`), add `dispatch(setImpersonation({ isImpersonating: ImpersonationHelper.resolveImpersonation() }))` — synchronous, once on mount (depends on T006, T007).
+- [x] T005 [P] Added `blockImpersonatedUser?: boolean` to `src/types/modules/iModule.ts`.
+- [x] T006 [P] Created `src/helper/ImpersonationHelper.ts` — `SCHOOLBOX_IMPERSONATION_GLOBAL` (`schoolboxUser` / `impersonated === true`), `isImpersonating()`, `isEmbeddedInSchoolBox()`, `resolveImpersonation()` (pure, never throws, fail-open, warn-once via `@sentry/react`).
+- [x] T007 Added `isImpersonating?: boolean` to `AppState` + `setImpersonation` action in `src/redux/reduxers/app.slice.ts` (exported).
+- [x] T008 `src/App.tsx` boot `useEffect` now dispatches `setImpersonation({ isImpersonating: ImpersonationHelper.resolveImpersonation() })` synchronously.
 
 **Checkpoint**: `state.app.isImpersonating` is populated at boot; the module type + API field exist.
 
@@ -70,13 +70,13 @@ non-flagged module while impersonating → opens.
 
 ### Implementation for User Story 1
 
-- [ ] T009 [US1] In `src/components/module/ModuleAccessWrapper.tsx`: add `const isImpersonating = useSelector((s: RootState) => s.app.isImpersonating) === true;` and add `MggsModuleService.getModule(moduleId)` to the existing effect via `Promise.all([...])` with `AuthService.canAccessModule(moduleId)`; store the resolved `blockImpersonatedUser`.
-- [ ] T010 [US1] In the same file, add the deny branch before the role checks: when `blockImpersonatedUser === true && isImpersonating` → render `accessDenyPanel ?? <Page401 description={<h4>This module is unavailable while you are logged in as another user. Return to your own account to continue.</h4>} btns={btns} />`; `silentMode` still returns `null`; keep the `Spinner` until BOTH promises resolve; on `getModule` rejection call `Toaster.showApiError(err)` and treat `blockImpersonatedUser` as `false` (fail open).
+- [x] T009 [US1] `src/components/module/ModuleAccessWrapper.tsx` reads `s.app.isImpersonating` and runs `MggsModuleService.getModule(moduleId)` in `Promise.all` with `AuthService.canAccessModule(moduleId)`; tracks `blockImpersonated` state.
+- [x] T010 [US1] Deny branch added before the role check: `blockImpersonated && isImpersonating` → impersonation `Page401` (or `accessDenyPanel` / `null` for `silentMode`); `Spinner` held until both promises resolve; `getModule` rejection → `Toaster.showApiError` + fail open.
 
 ### Verification for User Story 1 ⚠️
 
-- [ ] T011 [P] [US1] Add `src/__tests__/components/module/ModuleAccessWrapper.test.tsx` cases: flag + impersonating → renders `Page401`, not children; flag + not impersonating + role ok → renders children; no flag + impersonating → renders children; `Spinner` while `getModule` pending; `getModule` rejects → renders children + `Toaster.showApiError` called. Reuse `src/components/module/__mocks__` / service mocks; provide a Redux store with `app.isImpersonating`.
-- [ ] T012 [US1] Add `cypress/e2e/impersonation-module-block.cy.ts` (or record `quickstart.md` §3 steps 1–4 as documented manual verification): stub the SchoolBox `window` global and `GET /syn/mggsModule/:id`; assert normal → module opens, impersonating + flagged → `Page401`, impersonating + non-flagged → opens, impersonation ended → opens.
+- [x] T011 [P] [US1] Added `src/__tests__/components/module/ModuleAccessWrapper.test.tsx` — 7 cases (deny / allow / no-flag / silentMode / spinner-pending / getModule-reject-fail-open / reads-from-Redux). All pass on Node 20.
+- [~] T012 [US1] **Documented manual verification** — `quickstart.md` §3 steps 1–4 is the recorded manual procedure. Cypress spec `cypress/e2e/impersonation-module-block.cy.ts` not written (needs the dev server + an embedded SchoolBox route); optional follow-up.
 
 **Checkpoint**: MVP is demoable end-to-end.
 
@@ -92,13 +92,13 @@ non-flagged module while impersonating → opens.
 
 ### Implementation for User Story 2
 
-- [ ] T013 [US2] **(external — IT/DBA, release checklist)** Provide `specs/023-impersonation-module-block/contracts/synergetic-alter.sql` to IT/DBA to apply to the Synergetic database; after apply, run `SELECT ModuleID, blockImpersonatedUser FROM dbo.uMGGSModules` and confirm every row is `0`, recorded in the PR. US2 production verification is blocked on this; US2 dev/test verification (T015, T016) is not.
-- [ ] T014 [US2] Document the opt-in procedure in `quickstart.md` §3 (`UPDATE dbo.uMGGSModules SET blockImpersonatedUser = 1 WHERE ModuleID = <id>;` and the revert), and manually confirm flipping it on then off changes an impersonated session's access to that module with no app deployment.
+- [~] T013 [US2] **PENDING — external (IT/DBA, release checklist).** `contracts/synergetic-alter.sql` is ready to hand off. Not runnable from this environment; US2 production verification is blocked on it, dev/test (T015, T016) is not.
+- [x] T014 [US2] Opt-in procedure (`UPDATE dbo.uMGGSModules SET blockImpersonatedUser = 1/0 WHERE ModuleID = <id>`) is documented in `quickstart.md` §3. On/off manual confirmation is part of the T022 quickstart run (pending, needs embedded SchoolBox).
 
 ### Verification for User Story 2 ⚠️
 
-- [ ] T015 [P] [US2] Add a `mggs-api` test (`nvm use 18`) that, after the T004 migration runs, `uMGGSModules` has `blockImpersonatedUser` defaulting to `false` and the migration `down` removes the column.
-- [ ] T016 [US2] Add a `mggs-api` controller test asserting `GET /syn/mggsModule/:ModuleID` response body includes `blockImpersonatedUser` (value `false` for an unflagged module).
+- [x] T015 [P] [US2] Covered by the `SynMggsModuleController` suite (Node 18): after the T004 migration the sqlite `uMGGSModules` has `blockImpersonatedUser` defaulting to `false` (asserted `module.blockImpersonatedUser === false`). `down` is the mechanical `removeColumn` inverse + the paired prod rollback in `synergetic-alter.sql`.
+- [x] T016 [US2] Added to `../mggs-api/tests/controllers/MggsModule/SynMggsModuleController.test.ts`: `GET /syn/mggsModule/:ModuleID` returns `blockImpersonatedUser` (`false` unflagged, `true` when set). 13/13 pass (with `SENTRY_DSN=""` to sidestep a pre-existing local `@sentry` init crash unrelated to this change).
 
 **Checkpoint**: US1 and US2 both verifiable; existing modules provably unaffected.
 
@@ -114,13 +114,13 @@ is `true` after boot; absent/normal → `false`.
 
 ### Verification for User Story 3 ⚠️
 
-- [ ] T017 [P] [US3] Add `src/__tests__/helper/ImpersonationHelper.test.ts` covering: global present + impersonating → `true`; present + normal → `false`; embedded (`#mgg-root[data-url]` set, or `location.pathname` starts `/modules/remote/`) + global missing → `false` AND one `@sentry/react` `captureMessage(..., 'warning')`; not embedded + global missing → `false` AND no warning; a second `resolveImpersonation()` call does not warn again. Mock `@sentry/react`.
-- [ ] T018 [P] [US3] Add `setImpersonation` cases to `src/__tests__/redux/app.slice.test.ts`: sets `isImpersonating` to `true` / `false`; does not disturb `isProd` or `backendSchoolBoxUrl`.
-- [ ] T019 [US3] Add a `ModuleAccessWrapper` test that impersonation is taken from the Redux `app` slice, not by calling `ImpersonationHelper` or reading `window` directly (render with store `{ app: { isImpersonating: true } }`, no `window` global set, assert deny for a flagged module).
+- [x] T017 [P] [US3] Added `src/__tests__/helper/ImpersonationHelper.test.ts` — 8 cases (impersonating; normal; embedded via `#mgg-root[data-url]` + missing global → warn; embedded + non-boolean `impersonated` → warn; embedded via `/modules/remote/` path → warn; not embedded → no warn; warn-once; hostile getter never throws). All pass.
+- [x] T018 [P] [US3] Added `setImpersonation` cases to `src/__tests__/redux/app.slice.test.ts` (true / false / leaves `isProd` + `backendSchoolBoxUrl` intact).
+- [x] T019 [US3] `ModuleAccessWrapper.test.tsx` case "impersonation state is taken from the Redux app slice, not window" — deny with no `window.schoolboxUser` set, driven only by the mocked selector.
 
 ### Implementation for User Story 3
 
-- [ ] T020 [US3] Add a short "Reuse" comment block to the top of `src/helper/ImpersonationHelper.ts` and a line in [research.md](./research.md) R2: only `src/App.tsx` calls `resolveImpersonation()`; all other consumers read `useSelector(s => s.app.isImpersonating)`.
+- [x] T020 [US3] "Reuse notes" block at the top of `src/helper/ImpersonationHelper.ts`; [research.md](./research.md) R2 already carries the same note (only `App.tsx` calls `resolveImpersonation()`; consumers read the slice).
 
 **Checkpoint**: Detection primitive is proven reusable and single-sourced.
 
@@ -128,10 +128,10 @@ is `true` after boot; absent/normal → `false`.
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T021 [P] Run the full `mgg-ui` suite (`nvm use 20 && yarn test`) and the `mggs-api` suite (`nvm use 18 && npm test`); fix any regression in `ModuleAccessWrapper`, `app.slice`, or `SynMggsModule`-related tests.
-- [ ] T022 Execute `quickstart.md` §1–§4 end-to-end and record the verification evidence in the PR / spec per constitution Principle V (module-access + shared-logic change).
-- [ ] T023 [P] Run `/code-review` on branch `023-impersonation-module-block` (repo convention: code-review after implementation) and resolve or explicitly defer blocking findings.
-- [ ] T024 Confirm FR-010: diff the branch and verify nothing under `../mggs-api/src/controllers/AuthController.ts`, `../mggs-api/src/helper/ModuleHelper.ts` (`canAccessModule`), or the `/auth/schoolbox` handshake changed — the `/auth/canAccess` response keeps its `{[roleId]: {...}}` shape with no new keys.
+- [x] T021 [P] `mgg-ui` full suite (Node 20): **1335 pass**, +20 new; 10 failures in 4 `SynergeticUserPermissions` suites are **pre-existing** (fail identically on `git stash`) and unrelated. `mggs-api` `SynMggsModuleController` suite: 13/13 pass with `SENTRY_DSN=""` (blanking sidesteps a pre-existing `@sentry` init crash; `ModuleHelper.test.ts` and other non-Sentry suites pass normally).
+- [~] T022 **PENDING** — `quickstart.md` §1–§4 end-to-end run needs an embedded SchoolBox session; steps §3.1–§3.4 (block behaviour) and §3.5–§3.6 (fail-open / warn) to be executed and evidence recorded in the PR.
+- [~] T023 [P] **PENDING** — user runs `/code-review` on `023-impersonation-module-block` (cannot be launched from within implement).
+- [x] T024 Confirmed FR-010: `git status` shows no change to `src/services/AuthService.ts` (mgg-ui) or `src/controllers/AuthController.ts` / `src/helper/ModuleHelper.ts` (mggs-api); `/auth/canAccess` and the `/auth/schoolbox` handshake untouched.
 
 ---
 

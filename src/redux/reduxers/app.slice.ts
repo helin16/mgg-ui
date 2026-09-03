@@ -3,6 +3,9 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 export type AppState = {
   isProd?: boolean;
   backendSchoolBoxUrl?: string;
+  // Feature 023: whether the current SchoolBox session is impersonating another user.
+  // Resolved once at app boot by ImpersonationHelper; read from here by all consumers.
+  isImpersonating?: boolean;
 };
 /**
  * Initial State
@@ -22,6 +25,13 @@ const actions = {
     isProd: action.payload.isProd,
     backendSchoolBoxUrl: action.payload.backendSchoolBoxUrl,
   }),
+  setImpersonation: (
+    state: AppState = initialState,
+    action: PayloadAction<{ isImpersonating: boolean }>,
+  ) => ({
+    ...state,
+    isImpersonating: action.payload.isImpersonating,
+  }),
 };
 /**
  * Slice
@@ -34,7 +44,7 @@ const AppSlice = createSlice({
 /**
  * action
  */
-export const { setIsProd } = AppSlice.actions;
+export const { setIsProd, setImpersonation } = AppSlice.actions;
 /**
  * reducer
  */

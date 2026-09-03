@@ -7,8 +7,9 @@ import store, {RootState} from './redux/makeReduxStore';
 import AppWrapper from './AppWrapper';
 import './App.css';
 import AssetPickupPage from './pages/assets/AssetPickupPage';
-import {setIsProd} from './redux/reduxers/app.slice';
+import {setImpersonation, setIsProd} from './redux/reduxers/app.slice';
 import PingService from './services/PingService';
+import ImpersonationHelper from './helper/ImpersonationHelper';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -29,6 +30,8 @@ const Router = () => {
   const {isProd} = useSelector((state: RootState) => state.app);
   const dispatch = useDispatch();
   useEffect(() => {
+    // Resolve the SchoolBox impersonation flag once at boot (synchronous, reads window).
+    dispatch(setImpersonation({isImpersonating: ImpersonationHelper.resolveImpersonation()}));
     PingService.ping()
       .then(res => {
         dispatch(setIsProd({isProd: res.isProd === true, backendSchoolBoxUrl: res.schoolBoxUrl }));

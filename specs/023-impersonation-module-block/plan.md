@@ -137,7 +137,7 @@ cypress/e2e/
 src/models/Modules/
 └── SynMggsModule.ts                     # EDIT - add blockImpersonatedUser to interface + define()
 tests/migrations/SynergeticDB/
-└── 2026NNNN-add-blockImpersonatedUser-to-SynMggsModule.js   # NEW - addColumn/removeColumn for sqlite test schema
+└── 20260903000001-add-blockImpersonatedUser-to-SynMggsModule.js   # NEW - addColumn/removeColumn for sqlite test schema
 specs/023-impersonation-module-block/contracts/
 └── synergetic-alter.sql                 # NEW - reviewed ALTER TABLE for IT/DBA (lives in mgg-ui specs dir for traceability)
 tests/**/SynMggsModule*                  # EDIT/NEW - assert column present & defaults false; controller returns it
