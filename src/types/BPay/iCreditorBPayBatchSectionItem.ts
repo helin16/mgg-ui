@@ -4,8 +4,6 @@ type iCreditorBPayBatchSectionItem = iBaseType & {
   Id?: string;
   sectionId: number;
   creditorId: number;
-  payerBankBSB?: string;
-  payerBankAcc?: string;
   reference1?: string;
   reference2?: string;
   reference3?: string;

@@ -1,5 +1,6 @@
 import {
   appendItemToBatch,
+  buildCreateSectionItemPayload,
   buildLodgementReferencesFromCreditorName,
   findExistingSectionForCreditor,
   getBatchItemCount,
@@ -36,6 +37,37 @@ describe('CreditorBPayPanelHelper', () => {
     };
     expect(getAutoSelectedBPayInfo([record])).toEqual(record);
     expect(getAutoSelectedBPayInfo([record, {...record, Seq: 2}])).toBeNull();
+  });
+
+  test('buildCreateSectionItemPayload carries BPAY info but never the creditor bank account', () => {
+    const creditor = {
+      CreditorID: 42,
+      CreditorNameExternal: 'South East Water Limited',
+      CreditorBankBSB: '083-004',
+      CreditorBankAccount: '441610971',
+    };
+    const info = {
+      Seq: 1,
+      CreditorID: 42,
+      BPayBillerCode: '24208',
+      BPayReference: '100228241700006',
+      Notes: 'water bill',
+      IsActive: true,
+    };
+    // @ts-ignore - partial fixtures, matching the rest of this file
+    const payload = buildCreateSectionItemPayload({id: 'section-ref'}, creditor, info, 216.3);
+
+    expect(payload).toMatchObject({
+      creditorId: 42,
+      amount: 216.3,
+      billerCode: '24208',
+      reference: '100228241700006',
+      reference1: '100228241700006',
+    });
+    // Payer bank details are resolved from Finance module settings on the API
+    // side; the creditor's own bank account must not leak into the payload.
+    expect(payload).not.toHaveProperty('payerBankBSB');
+    expect(payload).not.toHaveProperty('payerBankAcc');
   });
 
   test('findExistingSectionForCreditor matches by creditorId', () => {

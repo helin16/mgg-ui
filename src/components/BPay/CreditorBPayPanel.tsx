@@ -197,8 +197,6 @@ const CreditorBPayPanel = () => {
       creditorName: payload.creditorName,
       description: payload.description,
       comments: payload.comments,
-      payerBankBSB: payload.payerBankBSB,
-      payerBankAcc: payload.payerBankAcc,
       dueDate: payload.dueDate,
     };
   };
@@ -448,8 +446,6 @@ const CreditorBPayPanel = () => {
           creditorId: Number(draftItem.creditorId),
           billerCode: draftItem.billerCode || null,
           referenceNum: draftItem.reference || draftItem.reference1 || null,
-          payerBankBSB: draftItem.payerBankBSB || null,
-          payerBankAcc: draftItem.payerBankAcc || null,
           amount: Number(draftItem.amount || draftItem.amt || 0),
           comments: draftItem.comments || draftItem.description || null,
         })),

@@ -236,8 +236,8 @@ export const buildCreateSectionItemPayload = (
     creditorName: creditor.CreditorNameExternal,
     description: comments || null,
     comments: comments || null,
-    payerBankBSB: creditor.CreditorBankBSB,
-    payerBankAcc: creditor.CreditorBankAccount,
+    // Payer bank details come from Finance module settings on the API side, not
+    // the creditor record — see mggs-api CreditorBPayBatchController.
     dueDate: null,
   };
 };
