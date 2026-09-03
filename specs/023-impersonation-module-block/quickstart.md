@@ -24,9 +24,15 @@ Expected: migration test shows `uMGGSModules.blockImpersonatedUser` present, def
 `false`, `down` removes it; controller test shows `GET /syn/mggsModule/:ModuleID` returns
 `blockImpersonatedUser`.
 
-Production: hand `contracts/synergetic-alter.sql` to IT/DBA to apply to the Synergetic DB.
-Confirm afterwards: `SELECT ModuleID, blockImpersonatedUser FROM dbo.uMGGSModules;` → every
-row `0`.
+Production — **release order matters** (expand pattern):
+1. IT/DBA runs `contracts/synergetic-alter.sql` on the Synergetic DB **first**.
+   Confirm: `SELECT ModuleID, blockImpersonatedUser FROM dbo.uMGGSModules;` → every row `0`.
+2. **Then** deploy `mggs-api` (the model now SELECTs the column on every
+   `GET /syn/mggsModule/:id`; deploying before step 1 breaks every page that reads module
+   metadata).
+3. **Then** deploy `mgg-ui`.
+An older `mggs-api` build simply ignores the new column, so step 1 is safe to run ahead of
+the deploy window.
 
 ## 2. UI — unit tests
 

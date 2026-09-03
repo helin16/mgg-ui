@@ -70,12 +70,12 @@ non-flagged module while impersonating → opens.
 
 ### Implementation for User Story 1
 
-- [x] T009 [US1] `src/components/module/ModuleAccessWrapper.tsx` reads `s.app.isImpersonating` and runs `MggsModuleService.getModule(moduleId)` in `Promise.all` with `AuthService.canAccessModule(moduleId)`; tracks `blockImpersonated` state.
-- [x] T010 [US1] Deny branch added before the role check: `blockImpersonated && isImpersonating` → impersonation `Page401` (or `accessDenyPanel` / `null` for `silentMode`); `Spinner` held until both promises resolve; `getModule` rejection → `Toaster.showApiError` + fail open.
+- [x] T009 [US1] `src/components/module/ModuleAccessWrapper.tsx` reads `s.app?.isImpersonating`. **getModule is only called when impersonating** (code-review fix: normal sessions keep their single request / unchanged first paint and never depend on the module-metadata endpoint). Resolution is stored as one `decision` object tagged with `{moduleId, roleId}`.
+- [x] T010 [US1] Deny branch before the role check: `decision.blockImpersonated && isImpersonating` → impersonation `Page401` (or `accessDenyPanel` / `null` for `silentMode`); `Spinner` while not `ready`; `getModule` rejection → `Toaster.showApiError` + fail open. A `decision` computed for a different `moduleId`/`roleId` counts as not-ready (code-review fix: no stale allow/deny on a reused instance; no setState-in-effect loop).
 
 ### Verification for User Story 1 ⚠️
 
-- [x] T011 [P] [US1] Added `src/__tests__/components/module/ModuleAccessWrapper.test.tsx` — 7 cases (deny / allow / no-flag / silentMode / spinner-pending / getModule-reject-fail-open / reads-from-Redux). All pass on Node 20.
+- [x] T011 [P] [US1] Added `src/__tests__/components/module/ModuleAccessWrapper.test.tsx` — 9 cases: deny / allow / no-flag / silentMode / spinner-pending / getModule-reject-fail-open / reads-from-Redux / **no module fetch when not impersonating** / **re-shows Spinner (no stale decision) on moduleId change**. All pass on Node 20.
 - [~] T012 [US1] **Documented manual verification** — `quickstart.md` §3 steps 1–4 is the recorded manual procedure. Cypress spec `cypress/e2e/impersonation-module-block.cy.ts` not written (needs the dev server + an embedded SchoolBox route); optional follow-up.
 
 **Checkpoint**: MVP is demoable end-to-end.
@@ -92,7 +92,7 @@ non-flagged module while impersonating → opens.
 
 ### Implementation for User Story 2
 
-- [~] T013 [US2] **PENDING — external (IT/DBA, release checklist).** `contracts/synergetic-alter.sql` is ready to hand off. Not runnable from this environment; US2 production verification is blocked on it, dev/test (T015, T016) is not.
+- [~] T013 [US2] **PENDING — external (IT/DBA), and a HARD RELEASE-ORDER GATE.** `contracts/synergetic-alter.sql` must be applied to the Synergetic DB **before** the `mggs-api` build with the model change is deployed — the model SELECTs `blockImpersonatedUser` on every `GET /syn/mggsModule/:id`, so deploying first breaks every page that reads module metadata (PTI, HOY Chat, Student Absences, Online Donation, Synergetic User Permissions, …). Order: SQL → mggs-api → mgg-ui. US2 production verification is blocked on this; dev/test (T015, T016) is not.
 - [x] T014 [US2] Opt-in procedure (`UPDATE dbo.uMGGSModules SET blockImpersonatedUser = 1/0 WHERE ModuleID = <id>`) is documented in `quickstart.md` §3. On/off manual confirmation is part of the T022 quickstart run (pending, needs embedded SchoolBox).
 
 ### Verification for User Story 2 ⚠️

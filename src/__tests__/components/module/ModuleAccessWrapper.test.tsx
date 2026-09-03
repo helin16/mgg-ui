@@ -60,7 +60,7 @@ describe('ModuleAccessWrapper - impersonation block', () => {
     expect(screen.queryByTestId('module-screen')).not.toBeInTheDocument();
   });
 
-  test('blockImpersonatedUser + NOT impersonating + role ok -> module screen', async () => {
+  test('blockImpersonatedUser + NOT impersonating + role ok -> module screen, no module fetch', async () => {
     mockedGetModule.mockResolvedValue({blockImpersonatedUser: true} as any);
     setState(false);
 
@@ -68,6 +68,18 @@ describe('ModuleAccessWrapper - impersonation block', () => {
 
     expect(await screen.findByTestId('module-screen')).toBeInTheDocument();
     expect(screen.queryByTestId(Page401TestId)).not.toBeInTheDocument();
+    // Not impersonating -> the module record is never fetched (no extra request on the hot path).
+    expect(mockedGetModule).not.toHaveBeenCalled();
+  });
+
+  test('impersonating -> the module record IS fetched', async () => {
+    mockedGetModule.mockResolvedValue({blockImpersonatedUser: false} as any);
+    setState(true);
+
+    renderWrapper();
+
+    expect(await screen.findByTestId('module-screen')).toBeInTheDocument();
+    expect(mockedGetModule).toHaveBeenCalledWith(MODULE_ID);
   });
 
   test('no flag + impersonating + role ok -> module screen (impersonation has no effect)', async () => {
@@ -112,6 +124,24 @@ describe('ModuleAccessWrapper - impersonation block', () => {
 
     expect(await screen.findByTestId('module-screen')).toBeInTheDocument();
     expect(mockedShowApiError).toHaveBeenCalled();
+  });
+
+  test('re-shows the Spinner (no stale decision) when moduleId changes on a reused instance', async () => {
+    mockedGetModule.mockResolvedValue({blockImpersonatedUser: false} as any);
+    setState(true);
+
+    const {rerender} = render(
+      <ModuleAccessWrapper moduleId={MODULE_ID}>{CHILD}</ModuleAccessWrapper>
+    );
+    expect(await screen.findByTestId('module-screen')).toBeInTheDocument();
+
+    // Navigate to a different, blocked module at the same tree position.
+    mockedGetModule.mockResolvedValue({blockImpersonatedUser: true} as any);
+    rerender(<ModuleAccessWrapper moduleId={99}>{CHILD}</ModuleAccessWrapper>);
+
+    // Must not briefly keep rendering the previous (allowed) module's content.
+    await waitFor(() => expect(screen.queryByTestId('module-screen')).not.toBeInTheDocument());
+    expect(await screen.findByTestId(Page401TestId)).toBeInTheDocument();
   });
 
   test('impersonation state is taken from the Redux app slice, not window', async () => {

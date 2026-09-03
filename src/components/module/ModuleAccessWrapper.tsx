@@ -15,60 +15,64 @@ type iModuleAccessWrapper = {
   children: React.ReactElement | null;
   btns?: any;
 }
+
+type iDecision = {
+  moduleId: number;
+  roleId?: number;
+  canAccess: boolean;
+  blockImpersonated: boolean;
+}
+
 const ModuleAccessWrapper = ({moduleId, roleId, silentMode = false, accessDenyPanel, children, btns}: iModuleAccessWrapper) => {
   const {user} = useSelector((state: RootState) => state.auth);
   // Feature 023: resolved once at boot (App.tsx). Read from Redux, never re-inspect window.
-  const isImpersonating = useSelector((state: RootState) => state.app.isImpersonating) === true;
-  const [canAccess, setCanAccess] = useState<boolean | null>(null);
-  const [blockImpersonated, setBlockImpersonated] = useState<boolean | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const isImpersonating = useSelector((state: RootState) => state.app?.isImpersonating) === true;
+  const [decision, setDecision] = useState<iDecision | null>(null);
 
   useEffect(() => {
     let isCanceled = false;
-    Promise.all([
-      AuthService.canAccessModule(moduleId),
-      MggsModuleService.getModule(moduleId).catch(err => {
-        // Fail open on the impersonation gate if the module record can't be read.
-        Toaster.showApiError(err);
-        return null;
-      }),
-    ])
-      .then(([resp, module]) => {
+
+    // Only the impersonation gate needs the module record. For a normal (non-impersonated)
+    // session - essentially always - skip the extra request so first paint is unchanged and
+    // module screens never depend on the module-metadata endpoint's availability.
+    const blockImpersonatedPromise: Promise<boolean> = isImpersonating
+      ? MggsModuleService.getModule(moduleId)
+          .then(module => module?.blockImpersonatedUser === true)
+          .catch(err => {
+            // Fail open on the impersonation gate if the module record can't be read.
+            Toaster.showApiError(err);
+            return false;
+          })
+      : Promise.resolve(false);
+
+    Promise.all([AuthService.canAccessModule(moduleId), blockImpersonatedPromise])
+      .then(([resp, blockImpersonated]) => {
         if (isCanceled) return;
-        setBlockImpersonated(module?.blockImpersonatedUser === true);
         // @ts-ignore
-        const canAccessRoles = Object.keys(resp).filter((roleId: number) => resp[roleId].canAccess === true).reduce((map, roleId) => {
-          return {
-            ...map,
-            // @ts-ignore
-            [roleId]: resp[roleId],
-          }
-        }, {});
-        if (roleId) {
-          setCanAccess(Object.keys(canAccessRoles).filter(rId => `${rId}` === `${roleId}`).length > 0);
-        } else {
-          setCanAccess(Object.keys(canAccessRoles).length > 0);
-        }
+        const canAccessRoleIds = Object.keys(resp).filter((rId: number) => resp[rId].canAccess === true);
+        const canAccess = roleId
+          ? canAccessRoleIds.some(rId => `${rId}` === `${roleId}`)
+          : canAccessRoleIds.length > 0;
+        setDecision({moduleId, roleId, canAccess, blockImpersonated});
       })
       .catch(err => {
         if (isCanceled) return;
         Toaster.showApiError(err);
-      })
-      .finally(() => {
-        if (isCanceled) return;
-        setIsLoading(false);
-      })
+      });
 
     return () => {
       isCanceled = true;
     }
-  }, [user, moduleId, roleId]);
+  }, [user, moduleId, roleId, isImpersonating]);
 
-  if (isLoading || canAccess === null || blockImpersonated === null) {
+  // A decision computed for a different module/role (a reused instance mid-refetch) counts
+  // as "still loading" so a stale allow/deny is never shown for the new module.
+  const ready = decision !== null && decision.moduleId === moduleId && decision.roleId === roleId;
+  if (!ready) {
     return <Spinner animation={'border'} />
   }
 
-  if (blockImpersonated && isImpersonating) {
+  if (decision.blockImpersonated && isImpersonating) {
     if (silentMode) {
       return null;
     }
@@ -80,7 +84,7 @@ const ModuleAccessWrapper = ({moduleId, roleId, silentMode = false, accessDenyPa
     return <Page401 description={<h4>This module is unavailable while you are logged in as another user. Return to your own account to continue.</h4>} btns={btns} />
   }
 
-  if (!canAccess) {
+  if (!decision.canAccess) {
     if (silentMode) {
       return null;
     }
