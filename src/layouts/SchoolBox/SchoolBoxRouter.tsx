@@ -3,6 +3,7 @@ import StudentReport from "../../pages/studentReport/StudentReport";
 import ModuleAccessWrapper from "../../components/module/ModuleAccessWrapper";
 import {
   MGGS_MODULE_ID_ADMISSIONS,
+  MGGS_MODULE_ID_BUDGET_TRACKER,
   MGGS_MODULE_ID_CAMPUS_DISPLAY,
   MGGS_MODULE_ID_CLIPBOARD,
   MGGS_MODULE_ID_ENROLLMENTS,
@@ -77,7 +78,11 @@ const SchoolBoxRouter = ({
   switch (path) {
     case SchoolBoxUrls.BudgetTracker: {
       removeSchoolBoxIframe();
-      return <BudgetTrackerPage />;
+      return (
+        <ModuleAccessWrapper moduleId={MGGS_MODULE_ID_BUDGET_TRACKER}>
+          <BudgetTrackerPage />
+        </ModuleAccessWrapper>
+      );
     }
     case SchoolBoxUrls.ParentDirectory: {
       removeSchoolBoxIframe();

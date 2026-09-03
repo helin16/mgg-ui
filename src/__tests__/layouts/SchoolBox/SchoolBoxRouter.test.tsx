@@ -9,6 +9,7 @@ import {CustomScriptUrlGenPageKey, CustomScriptUrlGenPageTestId} from '../../../
 import {HOYChatManagePageKey, HOYChatManagePageTestId} from '../../../pages/HOYChat/__mocks__/HOYChatManagePage';
 import {PowerBIReportViewingPageKey, PowerBIReportViewingPageTestId} from '../../../pages/PowerBI/__mocks__/PowerBIReportViewingPage';
 import {FinancePageKey, FinancePageTestId} from '../../../pages/Finance/__mocks__/FinancePage';
+import {BudgetTrackerPageKey, BudgetTrackerPageTestId} from '../../../pages/BudgetTracker/__mocks__/BudgetTrackerPage';
 import {ClipboardPageKey, ClipboardPageTestId} from '../../../pages/Clipboard/__mocks__/ClipboardPage';
 import {ParentTeacherInterviewPageKey, ParentTeacherInterviewPageTestId} from '../../../pages/ParentTeacherInterview/__mocks__/ParentTeacherInterviewPage';
 import {
@@ -18,6 +19,7 @@ import {
 import {StudentSubjectListKey, StudentSubjectListTestId} from '../../../components/timeTable/__mocks__/StudentSubjectList';
 import SchoolBoxUrls from '../../../layouts/SchoolBox/SchoolBoxUrls';
 import {
+  MGGS_MODULE_ID_BUDGET_TRACKER,
   MGGS_MODULE_ID_CLIPBOARD,
   MGGS_MODULE_ID_FINANCE,
   MGGS_MODULE_ID_HOY_CHAT_EMAIL,
@@ -107,6 +109,20 @@ describe('SchoolBoxRouter', () => {
       moduleId: MGGS_MODULE_ID_FINANCE,
     });
     expect(ComponentTestHelper.get(FinancePageKey).length).toBeGreaterThan(0);
+    expect(document.getElementById('remote')).toBeNull();
+  });
+
+  test('wraps the budget tracker page with module access', () => {
+    appendIframe();
+
+    renderRouter(SchoolBoxUrls.BudgetTracker);
+
+    expect(screen.getByTestId(ModuleAccessWrapperTestId)).toBeInTheDocument();
+    expect(screen.getByTestId(BudgetTrackerPageTestId)).toBeInTheDocument();
+    expect(ComponentTestHelper.get(ModuleAccessWrapperKey)[0]).toMatchObject({
+      moduleId: MGGS_MODULE_ID_BUDGET_TRACKER,
+    });
+    expect(ComponentTestHelper.get(BudgetTrackerPageKey).length).toBeGreaterThan(0);
     expect(document.getElementById('remote')).toBeNull();
   });
 

@@ -77,10 +77,9 @@ const ModuleAccessWrapper = ({moduleId, roleId, silentMode = false, accessDenyPa
       return null;
     }
 
-    if (accessDenyPanel) {
-      return accessDenyPanel;
-    }
-
+    // Deliberately ignore accessDenyPanel here: some callers pass real module content as
+    // their deny panel (e.g. MyClassListPage shows the class list to teachers), which would
+    // defeat the impersonation block. The impersonation gate always shows its own Page401.
     return <Page401 description={<h4>This module is unavailable while you are logged in as another user. Return to your own account to continue.</h4>} btns={btns} />
   }
 

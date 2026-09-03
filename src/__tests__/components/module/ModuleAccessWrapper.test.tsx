@@ -91,6 +91,21 @@ describe('ModuleAccessWrapper - impersonation block', () => {
     expect(await screen.findByTestId('module-screen')).toBeInTheDocument();
   });
 
+  test('impersonation deny ignores a content-bearing accessDenyPanel -> still Page401', async () => {
+    // A caller (e.g. MyClassListPage) passes real module content as its deny panel for the
+    // role check. The impersonation gate must not honour it.
+    mockedGetModule.mockResolvedValue({blockImpersonatedUser: true} as any);
+    setState(true);
+
+    renderWrapper({
+      accessDenyPanel: <div data-testid="caller-deny-content">class list</div>,
+    });
+
+    expect(await screen.findByTestId(Page401TestId)).toBeInTheDocument();
+    expect(screen.queryByTestId('caller-deny-content')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('module-screen')).not.toBeInTheDocument();
+  });
+
   test('impersonation deny honours silentMode -> renders nothing', async () => {
     mockedGetModule.mockResolvedValue({blockImpersonatedUser: true} as any);
     setState(true);
