@@ -4,20 +4,21 @@
 
 ```ts
 // Single source of truth for the SchoolBox host-page signal.
-// Confirmed by spike (research.md R2); change here only on SchoolBox upgrade.
+// Confirmed by spike 2026-09-03 (research.md R2); change here only on SchoolBox upgrade.
 export const SCHOOLBOX_IMPERSONATION_GLOBAL = {
-  // dotted path from window, e.g. "Schoolbox.user"
-  objectPath: '<TBD from spike>',
-  // truthiness rule on that object, e.g. o => o?.impersonating === true
-  isImpersonating: (o: any): boolean => false, // placeholder until spike
+  objectPath: 'schoolboxUser',                       // dotted path from window
+  isImpersonating: (o: any): boolean => o?.impersonated === true,
 };
 ```
 
 | Export | Signature | Behaviour |
 |---|---|---|
-| `isImpersonating` | `() => boolean` | Reads `window` via `SCHOOLBOX_IMPERSONATION_GLOBAL`. Pure, never throws (wrap access in try/catch, return `false` on any error). |
+| `isImpersonating` | `() => boolean` | `window.schoolboxUser?.impersonated === true`, via `SCHOOLBOX_IMPERSONATION_GLOBAL`. Pure, wrapped in try/catch, returns `false` on any error. |
 | `isEmbeddedInSchoolBox` | `() => boolean` | `true` iff `#mgg-root[data-url]` is non-empty **or** `location.pathname` starts with `/modules/remote/`. |
-| `resolveImpersonation` | `() => boolean` | `isImpersonating()` → `true`. Else if `isEmbeddedInSchoolBox()` and the configured global object is missing or lacks the expected field → emit **one** Sentry warning (`captureMessage(..., 'warning')`), return `false`. Else return `false` silently. Idempotent warning (module-level `let warned = false`). |
+| `resolveImpersonation` | `() => boolean` | `isImpersonating()` → `true`. Else if `isEmbeddedInSchoolBox()` **and** (`window.schoolboxUser` missing **or** `typeof window.schoolboxUser.impersonated !== 'boolean'`) → emit **one** Sentry warning (`captureMessage('[impersonation] window.schoolboxUser not usable while embedded', 'warning')`), return `false`. Else return `false` silently. Idempotent warning (module-level `let warned = false`). |
+
+> `window.schoolboxUser` also carries `communityLogin` (parent/community portal login) —
+> that is **not** impersonation; only `impersonated` is read.
 
 Rules:
 - No network calls. No throws. No PII in the Sentry message.

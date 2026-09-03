@@ -49,17 +49,17 @@ Pick a low-risk module to flag (e.g. a reporting module). In the Synergetic DB:
 | # | Steps | Expected |
 |---|---|---|
 | 1 | As staff (not impersonating), open the flagged module via SchoolBox | Module opens normally |
-| 2 | SchoolBox → "log in as" a student/parent → open the flagged module | `Page401` panel: "unavailable while you are logged in as another user"; module screen never renders |
+| 2 | SchoolBox → "log in as" a student/parent → open the flagged module (`window.schoolboxUser.impersonated === true`) | `Page401` panel: "unavailable while you are logged in as another user"; module screen never renders |
 | 3 | While impersonating, open a **non**-flagged module | Opens normally (no impersonation effect) |
 | 4 | End impersonation ("return to your account"), reopen the flagged module | Opens normally |
-| 5 | Load the app **standalone** (not embedded) — global absent | Flagged module opens (fail open); **no** Sentry warning |
-| 6 | Embedded, but temporarily point `SCHOOLBOX_IMPERSONATION_GLOBAL.objectPath` at a missing global | Flagged module opens (fail open); **one** Sentry warning "SchoolBox host-page global not found while embedded" |
+| 5 | Load the app **standalone** (not embedded) — `window.schoolboxUser` absent | Flagged module opens (fail open); **no** Sentry warning |
+| 6 | Embedded, but with `window.schoolboxUser` deleted / `impersonated` non-boolean | Flagged module opens (fail open); **one** Sentry warning `[impersonation] window.schoolboxUser not usable while embedded` |
 
 Revert the flag afterwards:
 `UPDATE dbo.uMGGSModules SET blockImpersonatedUser = 0 WHERE ModuleID = <id>;`
 
 A Cypress spec (`cypress/e2e/impersonation-module-block.cy.ts`) can automate #1–#4 by
-stubbing `window` (the impersonation global) and the `GET /syn/mggsModule/:id` response;
+stubbing `window.schoolboxUser` and the `GET /syn/mggsModule/:id` response;
 #5–#6 are covered by the Jest helper test. If Cypress automation of the SchoolBox host is
 impractical, record steps #1–#6 above as the documented manual verification.
 

@@ -55,9 +55,10 @@ guard change, one API model field + migration mirror + DBA script
 
 **Resolved unknowns** (see [research.md](./research.md)):
 
-- Exact SchoolBox impersonation global — **NEEDS CONFIRMATION via spike**; isolated behind
-  `SCHOOLBOX_IMPERSONATION_GLOBAL` constant so confirming it is a one-line change, and the
-  helper ships fail-open until then.
+- Exact SchoolBox impersonation global — **resolved by spike T002 (2026-09-03)**:
+  `window.schoolboxUser.impersonated === true`, present on every SchoolBox page. Held in
+  `SCHOOLBOX_IMPERSONATION_GLOBAL`; DOM/cookie fallback not needed. Still fail-open if the
+  global is ever absent (SchoolBox rename).
 - How the `uMGGSModules` column is applied — migration-mirror file + reviewed DBA
   `ALTER TABLE`; not a root `migrations/` file (those target the app DB, not Synergetic).
 

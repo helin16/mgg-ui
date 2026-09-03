@@ -19,41 +19,56 @@ SchoolBox defines on its page.
 
 ## R2. What global identifies an impersonated SchoolBox session
 
-**Decision**: Resolve impersonation from a single configurable global path, stored as a
-constant `SCHOOLBOX_IMPERSONATION_GLOBAL` in `src/helper/ImpersonationHelper.ts`. The
-concrete global name/field is **confirmed by a short spike** against a live impersonated
-SchoolBox session before or during implementation. Until confirmed, the helper resolves
-`false` (fail open, per FR-011) so delivery is not blocked.
+**Decision** (spike done 2026-09-03 against `mconnect.mentonegirls.vic.edu.au`): SchoolBox
+exposes **`window.schoolboxUser`** on every page — an object with:
 
-**Rationale**: The spec (clarification 2026-09-03) fixed the mechanism as "a JavaScript
-global exposed on the SchoolBox host page (a user/context object with an impersonation /
-real-user field)", but the exact identifier is SchoolBox-version specific and not visible
-from this codebase. Isolating it in one constant makes both the spike outcome and any
-future SchoolBox upgrade a one-line change (Edge Cases in spec).
+```jsonc
+{ "id": 5467, "externalId": "<synId>", "title", "firstname", "preferredName",
+  "givenName", "lastname", "fullName", "name", "email", "year",
+  "role": { "id", "type", "name", "student", "staff", "parent", "guest" },
+  "impersonated": false,      // ← the signal
+  "communityLogin": false }   // parent/community portal login — NOT impersonation, ignore
+```
 
-**Spike checklist** (run while logged in as staff, then "log in as" a student/parent):
-1. In dev tools console on a SchoolBox page, inspect candidate globals:
-   `window.Schoolbox`, `window.SB`, `window.user`, `window.currentUser`,
-   `window.__INITIAL_STATE__`, any `window.*` object with a `user` / `impersonat*` /
-   `realUser` / `loginAs` / `su` field.
-2. Compare the object shape **with** vs **without** impersonation active to find the field
-   that flips (e.g. `impersonating: true`, or `realUserId !== userId`).
-3. Record the exact path (e.g. `Schoolbox.user.impersonating`) and truthiness rule.
-4. If **no** global carries it, fall back to a DOM check for SchoolBox's
-   "return to your account" control (e.g. `a[href*="unimpersonate"]`,
-   `a[href*="/impersonate/stop"]`, an element with a known class) and record that selector
-   in the same constant instead. Update the spec's Assumption if the mechanism changes
-   from "global" to "DOM element".
+The signal is `window.schoolboxUser.impersonated === true`. Held in one constant
+`SCHOOLBOX_IMPERSONATION_GLOBAL` in `src/helper/ImpersonationHelper.ts` so a future
+SchoolBox rename is a one-line fix.
 
-**Helper contract** (regardless of spike result):
-- `isImpersonating(): boolean` — pure, reads `window`, never throws.
+```ts
+export const SCHOOLBOX_IMPERSONATION_GLOBAL = {
+  objectPath: 'schoolboxUser',                       // dotted path from window
+  isImpersonating: (o: any) => o?.impersonated === true,
+};
+```
+
+- "Malformed / missing" (FR-011a warn path): `window.schoolboxUser` absent, or present but
+  `typeof schoolboxUser.impersonated !== 'boolean'`.
+- The DOM/cookie fallback previously sketched here is **not needed** — the global exists
+  and is stable. (Baseline capture showed `impersonated: false` while logged in as self; a
+  paired impersonated capture to see it flip to `true` is a nice-to-have, not a blocker —
+  the field name is unambiguous.)
+
+**Rationale**: Matches the spec clarification (2026-09-03) — "a JavaScript global … with an
+impersonation / real-user field". `window.schoolboxUser` is that object; `impersonated` is
+that field. Present on plain pages too, so whenever the MGG app is injected into a
+SchoolBox document the global is there.
+
+**Helper contract**:
+- `isImpersonating(): boolean` — `window.schoolboxUser?.impersonated === true`; pure, reads
+  `window`, wrapped in try/catch, never throws.
 - `isEmbeddedInSchoolBox(): boolean` — true when
   `document.getElementById('mgg-root')?.getAttribute('data-url')` is non-empty **or**
   `window.location.pathname.startsWith('/modules/remote/')`.
 - `resolveImpersonation(): boolean` — if `isImpersonating()` → `true`; else if
-  `isEmbeddedInSchoolBox()` **and** the global object exists but lacks the expected field
-  (or the whole global is missing) → `Sentry.captureMessage('impersonation global not
-  found', 'warning')` once, then `false`; else `false` silently.
+  `isEmbeddedInSchoolBox()` **and** (`window.schoolboxUser` missing **or**
+  `typeof window.schoolboxUser.impersonated !== 'boolean'`) →
+  `Sentry.captureMessage('[impersonation] window.schoolboxUser not usable while embedded',
+  'warning')` once (module-level `warned` flag), then `false`; else `false` silently.
+
+**Note** (unrelated console output seen during the spike): `main.js?v=26.1.10` logs
+`"Either no session, or does not match parent."` on the plain homepage. This is a
+SchoolBox-side embed/session check, not our code, and does not affect reading
+`window.schoolboxUser`. Worth a glance if embed behaviour looks off during implementation.
 
 **Alternatives considered**:
 - Add an `impersonatedBy` field to the `/auth/schoolbox` handshake — rejected by spec

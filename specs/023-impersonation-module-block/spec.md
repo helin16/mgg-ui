@@ -137,8 +137,9 @@ absent or set to a normal value, confirm the flag is `false`.
 - **FR-001**: The UI MUST provide a single shared helper that reports whether the current
   session is a SchoolBox impersonated session ("logged in as" another user).
 - **FR-002**: The helper MUST determine impersonation by reading a JavaScript global
-  exposed on the embedded SchoolBox host page (a SchoolBox user/context object carrying an
-  impersonation / real-user field). It MUST NOT require a change to the `/auth/schoolbox`
+  exposed on the embedded SchoolBox host page — confirmed to be `window.schoolboxUser`,
+  whose boolean `impersonated` field is `true` during an impersonated session. The exact
+  path lives in one constant. It MUST NOT require a change to the `/auth/schoolbox`
   authentication handshake or any new backend authentication field.
 - **FR-002a**: The helper MUST be run once during app boot (alongside the existing
   app-bootstrap wiring), and its boolean result MUST be stored in the Redux `app` slice.
@@ -147,9 +148,13 @@ absent or set to a normal value, confirm the flag is `false`.
 - **FR-003**: The module records (`MggModules` / the `uMGGSModules` table) MUST gain a
   boolean attribute `blockImpersonatedUser` that defaults to `false` for every existing
   and new module.
-- **FR-003a**: The API project (`../mggs-api`) MUST include a reversible database
-  migration that adds the `blockImpersonatedUser` column with a default of `false` and
-  backfills existing rows to `false`, plus a matching `down` step that removes it.
+- **FR-003a**: The `blockImpersonatedUser` column MUST be delivered as a reversible schema
+  change in two parts: (a) a `tests/migrations/SynergeticDB/` mirror migration (`up` adds
+  the column default `false`; `down` removes it) so automated tests exercise it, and (b) a
+  reviewed forward + rollback SQL script (`contracts/synergetic-alter.sql`) for IT/DBA to
+  apply to the production Synergetic database - `uMGGSModules` is externally managed and is
+  not created by an in-repo migration. Existing rows backfill to `false` via the column
+  default.
 - **FR-003b**: The API project MUST expose `blockImpersonatedUser` on its module model
   and on the module payload returned by the endpoint the UI already uses to read a module,
   so no new endpoint is introduced.
@@ -240,12 +245,15 @@ absent or set to a normal value, confirm the flag is `false`.
   session's ability to open it is unchanged - zero regressions across existing modules.
 - **SC-004**: A school can enable or disable the protection for a module and see the new
   behaviour take effect on the next module open, with no application deployment.
-- **SC-005**: The impersonation determination adds no user-perceptible delay to opening a
-  module (no additional network round-trip; resolved once at boot and read synchronously
-  from Redux).
-- **SC-006**: After the API migration, every pre-existing module record reports
-  `blockImpersonatedUser = false`, and the migration's rollback removes the column with no
-  residual data loss elsewhere.
+- **SC-005**: The impersonation *determination* adds no network round-trip - it is
+  resolved once at app boot and read synchronously from the Redux `app` slice. The access
+  gate additionally reads the target module's `blockImpersonatedUser` through the existing
+  module read endpoint, issued **in parallel** with the access-role check it already makes,
+  so it adds no measurable delay to opening a module.
+- **SC-006**: After the schema change is applied (test mirror in CI; production
+  `ALTER TABLE` by IT/DBA), every pre-existing module record reports
+  `blockImpersonatedUser = false`, and the paired rollback removes the column with no other
+  data affected.
 
 ## Assumptions
 
@@ -258,14 +266,18 @@ absent or set to a normal value, confirm the flag is `false`.
   UI through the existing module service/type layer; the work spans the API project
   (migration + model + read payload) and the UI project (shared type + boot-time
   impersonation helper + Redux `app` slice flag + module-access gate).
-- The module table lives in the Synergetic-side database that the API project reads; the
-  migration must be applied through whatever migration path the API project already uses
-  for that database. If that database is externally managed and cannot take an app-run
-  migration, the plan must flag it and agree an alternative with IT before implementation.
-- SchoolBox's impersonation feature exposes a readable JavaScript global on the host page
-  (a user/context object with an impersonation / real-user field) while impersonation is
-  active; this is the detection signal. The exact global name and field path is confirmed
-  during planning/implementation and captured in one constant.
+- The module table (`uMGGSModules`) lives in the externally-managed Synergetic-side
+  database and is not created by an in-repo migration (plan.md R5). The column is therefore
+  delivered as a `tests/migrations/SynergeticDB/` mirror plus a hand-applied
+  `contracts/synergetic-alter.sql`. Applying that SQL in production is an IT/DBA action and
+  a release-checklist item, not gated by CI; the production half of SC-006 is confirmed by
+  IT after apply (`SELECT ModuleID, blockImpersonatedUser FROM dbo.uMGGSModules`).
+- SchoolBox exposes `window.schoolboxUser` on every page (confirmed by spike 2026-09-03,
+  tasks T002) — a user object carrying a boolean `impersonated` field plus `id`,
+  `externalId` (Synergetic id), `role`, and `communityLogin`. `impersonated === true` is
+  the detection signal, held in one constant. The DOM/cookie fallback in research.md R2 is
+  not needed. `communityLogin` (parent/community portal) is a separate concept and is not
+  read.
 - Impersonation is a legitimate support tool, so the default (`false`) must leave every
   existing module fully usable while impersonating; only explicitly flagged modules are
   affected.

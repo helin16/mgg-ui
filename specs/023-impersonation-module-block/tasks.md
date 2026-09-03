@@ -33,7 +33,7 @@ Node >=18 (`nvm use 18`). Switch with `nvm` before every build/test.
 **Purpose**: Confirm ground truth and resolve the one open unknown.
 
 - [ ] T001 Re-read [plan.md](./plan.md) + [research.md](./research.md); confirm the touched-file list and that `mgg-ui` will run on `nvm use 20` and `mggs-api` on `nvm use 18` before any build/test.
-- [ ] T002 [P] Spike (research.md R2): on a live SchoolBox page, log in as staff then "log in as" a student/parent, diff candidate `window.*` objects, and record the exact impersonation global path + truthiness predicate for `src/helper/ImpersonationHelper.ts`. If no global carries it, record the DOM-selector fallback instead and update the "detection signal" Assumption in [spec.md](./spec.md).
+- [x] T002 [P] Spike (research.md R2) — **DONE 2026-09-03** on `mconnect.mentonegirls.vic.edu.au`. Signal = `window.schoolboxUser.impersonated === true` (`window.schoolboxUser` present on every SchoolBox page). Recorded in [research.md](./research.md) R2, [contracts/impersonation-helper.md](./contracts/impersonation-helper.md), and [spec.md](./spec.md) FR-002 / Assumptions. Fallback not needed. Optional follow-up: a paired impersonated capture to watch the field flip to `true` (field name is unambiguous, not blocking).
 
 ---
 
@@ -51,7 +51,7 @@ Node >=18 (`nvm use 18`). Switch with `nvm` before every build/test.
 ### mgg-ui (`nvm use 20`)
 
 - [ ] T005 [P] Add `blockImpersonatedUser?: boolean` to `src/types/modules/iModule.ts` (optional — absent is treated as `false`).
-- [ ] T006 [P] Create `src/helper/ImpersonationHelper.ts` per [contracts/impersonation-helper.md](./contracts/impersonation-helper.md): `SCHOOLBOX_IMPERSONATION_GLOBAL` constant (value from T002), `isImpersonating()`, `isEmbeddedInSchoolBox()`, `resolveImpersonation()`. Pure, never throws, fail-open; `resolveImpersonation` emits one `@sentry/react` `captureMessage(..., 'warning')` when embedded but the global is missing/malformed, guarded by a module-level `warned` flag.
+- [ ] T006 [P] Create `src/helper/ImpersonationHelper.ts` per [contracts/impersonation-helper.md](./contracts/impersonation-helper.md): `SCHOOLBOX_IMPERSONATION_GLOBAL = { objectPath: 'schoolboxUser', isImpersonating: o => o?.impersonated === true }`, `isImpersonating()` (`window.schoolboxUser?.impersonated === true`), `isEmbeddedInSchoolBox()`, `resolveImpersonation()`. Pure, never throws, fail-open; `resolveImpersonation` emits one `@sentry/react` `captureMessage(..., 'warning')` when embedded but `window.schoolboxUser` is missing or `impersonated` is not a boolean, guarded by a module-level `warned` flag.
 - [ ] T007 Add `isImpersonating?: boolean` to `AppState` and a `setImpersonation` action/reducer in `src/redux/reduxers/app.slice.ts`; export `setImpersonation` alongside `setIsProd` (depends on nothing but grouped here).
 - [ ] T008 In `src/App.tsx` `Router`'s boot `useEffect` (next to `PingService.ping()`), add `dispatch(setImpersonation({ isImpersonating: ImpersonationHelper.resolveImpersonation() }))` — synchronous, once on mount (depends on T006, T007).
 
@@ -92,7 +92,7 @@ non-flagged module while impersonating → opens.
 
 ### Implementation for User Story 2
 
-- [ ] T013 [P] [US2] Hand `specs/023-impersonation-module-block/contracts/synergetic-alter.sql` to IT/DBA to apply to the Synergetic database; after apply, run `SELECT ModuleID, blockImpersonatedUser FROM dbo.uMGGSModules` and confirm every row is `0`. Record the result in the PR verification notes.
+- [ ] T013 [US2] **(external — IT/DBA, release checklist)** Provide `specs/023-impersonation-module-block/contracts/synergetic-alter.sql` to IT/DBA to apply to the Synergetic database; after apply, run `SELECT ModuleID, blockImpersonatedUser FROM dbo.uMGGSModules` and confirm every row is `0`, recorded in the PR. US2 production verification is blocked on this; US2 dev/test verification (T015, T016) is not.
 - [ ] T014 [US2] Document the opt-in procedure in `quickstart.md` §3 (`UPDATE dbo.uMGGSModules SET blockImpersonatedUser = 1 WHERE ModuleID = <id>;` and the revert), and manually confirm flipping it on then off changes an impersonated session's access to that module with no app deployment.
 
 ### Verification for User Story 2 ⚠️
@@ -131,6 +131,7 @@ is `true` after boot; absent/normal → `false`.
 - [ ] T021 [P] Run the full `mgg-ui` suite (`nvm use 20 && yarn test`) and the `mggs-api` suite (`nvm use 18 && npm test`); fix any regression in `ModuleAccessWrapper`, `app.slice`, or `SynMggsModule`-related tests.
 - [ ] T022 Execute `quickstart.md` §1–§4 end-to-end and record the verification evidence in the PR / spec per constitution Principle V (module-access + shared-logic change).
 - [ ] T023 [P] Run `/code-review` on branch `023-impersonation-module-block` (repo convention: code-review after implementation) and resolve or explicitly defer blocking findings.
+- [ ] T024 Confirm FR-010: diff the branch and verify nothing under `../mggs-api/src/controllers/AuthController.ts`, `../mggs-api/src/helper/ModuleHelper.ts` (`canAccessModule`), or the `/auth/schoolbox` handshake changed — the `/auth/canAccess` response keeps its `{[roleId]: {...}}` shape with no new keys.
 
 ---
 
@@ -151,6 +152,8 @@ is `true` after boot; absent/normal → `false`.
 
 - Models/types before services before UI wiring before tests/e2e.
 - T009 before T010 (same file, sequential). T007 + T006 before T008.
+- **T006 depended on T002** — resolved: `window.schoolboxUser.impersonated`. T006 can be
+  written directly against that constant now.
 
 ### Parallel opportunities
 
@@ -159,7 +162,7 @@ is `true` after boot; absent/normal → `false`.
 - **Phase 3**: T011 ∥ T012 after T009–T010.
 - **Phase 4**: T013 ∥ T015; T016 after T005/T004.
 - **Phase 5**: T017 ∥ T018; T019 after them.
-- **Phase 6**: T021 ∥ T023.
+- **Phase 6**: T021 ∥ T023; T024 after the implementation tasks land.
 
 ---
 
